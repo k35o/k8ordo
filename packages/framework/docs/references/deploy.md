@@ -505,6 +505,153 @@ case-sensitively, as the route table matches; then `404.html` under a `404`,
 when the build wrote one. `vercel()` writes them once the last page is
 written, whichever side of `framework()` it sits.
 
+### Routes of your own
+
+Under `mode: 'static'`, `vercel()` also takes routes of the application's
+own, in the language Vercel's Build Output API reads — `src`, a regular
+expression for the pathname, with `dest`, `status`, `headers`, `continue`,
+`check`, `caseSensitive` and `has` — and writes them into
+`.vercel/output/config.json` as given, in two places among its own:
+
+```text
+...beforeFiles
+{ handle: 'filesystem' }        the files
+...the shells' rewrites
+...beforeNotFound
+404.html under a 404            when the build wrote one
+{ handle: 'hit' }
+assets/ sent immutable
+```
+
+`beforeFiles` is tried before any file, so it is where headers for every
+answer go, and a redirect or a rewrite that has to win over a file that is
+there. `beforeNotFound` is tried once neither a file nor a shell answered,
+so a catch-all of yours there never hides a shell: it is where a URL the
+build wrote nothing for is proxied to another origin, or answered with a 404
+of another body.
+
+```ts
+// vite.config.ts
+import { vercel } from '@k8ordo/framework/vercel';
+import { framework } from '@k8ordo/framework/vite';
+import { defineConfig } from 'vite';
+
+const acceptsMarkdown = [
+  { type: 'header', key: 'accept', value: '.*text/markdown.*' },
+] as const;
+
+export default defineConfig({
+  plugins: [
+    framework({ mode: 'static' }),
+    vercel({
+      beforeFiles: [
+        {
+          src: '^/.*$',
+          headers: { 'X-Content-Type-Options': 'nosniff' },
+          continue: true,
+        },
+        {
+          src: '^/((?:[^/]+/)*[^/]+)/$',
+          status: 308,
+          headers: { Location: '/$1' },
+        },
+        {
+          src: '^/posts/([a-z0-9-]+)$',
+          has: acceptsMarkdown,
+          dest: '/posts/$1/article.md',
+          check: true,
+          caseSensitive: true,
+        },
+        {
+          src: '^/feed$',
+          headers: { 'Vercel-CDN-Cache-Control': 'max-age=3600' },
+          continue: true,
+          caseSensitive: true,
+        },
+      ],
+      beforeNotFound: [
+        {
+          src: '^/feed$',
+          dest: 'https://api.example.com/feed',
+          caseSensitive: true,
+        },
+        {
+          src: '^/.*$',
+          has: acceptsMarkdown,
+          dest: '/not-found.md',
+          status: 404,
+        },
+      ],
+    }),
+  ],
+});
+```
+
+- A route that only adds headers says `continue: true`, and comes before
+  the route that answers: an answering route ends the matching. What
+  `beforeFiles` adds this way is on every answer the routes lead to — a
+  file, a redirect, `404.html`, a `dest` with a `status`, an answer proxied
+  from another origin.
+- The redirect takes the trailing slash off and keeps the query:
+  `/about/?x=1` goes to `/about?x=1`, which Vercel answers from
+  `about/index.html` as it is. Its pattern takes no empty segment, so it
+  never answers with `Location: //evil.test`, which a browser reads as
+  another origin. Vercel itself answers `//evil.test/` before any route, with
+  a 308 to `/evil.test/` that carries none of your headers.
+- `check: true` looks for `dest` among the files. When none is there, the
+  matching goes on with `dest` as the pathname: `beforeNotFound` sees
+  `/posts/nope/article.md`, not `/posts/nope`. Here a `route.ts` at
+  `routes/posts/[slug]/article.md/` wrote each post's markdown beside its
+  page, and a client asking for markdown is answered with it. Have `paths`
+  give the pages and their markdown from one list of posts, so no post is
+  written without the other.
+- `has` matches the header's text against `value`, a regular expression,
+  and negotiates nothing: `.*text/markdown.*` takes
+  `Accept: text/markdown, text/html;q=0.9`, and not a browser's
+  `text/html,application/xhtml+xml,*/*;q=0.8`, though `*/*` would take
+  markdown.
+- A proxy is two routes: its headers ahead of the files, and the `dest` that
+  answers after them. The `dest` is asked with the request's query:
+  `/feed?page=2` fetches `https://api.example.com/feed?page=2`.
+- `dest` with `status` answers with that file under that status, as the
+  build's own `404.html` route does.
+
+What to keep in mind:
+
+- **`src` matches the whole pathname**, never just its start, and never the
+  query: `^/posts/` does not match `/posts/first`, and `^/posts/.+$` does.
+- **Only Vercel applies them.** `vite dev`, `vite preview` and `serve`
+  answer as if they were not there — no header, no redirect, nothing decided
+  by `Accept` — since an imitation of Vercel's routing that differed from it
+  would pass locally and fail once deployed. A URL only a route of yours
+  answers is a 404 there.
+- **No `Cache-Control` in a route every path takes.** It reaches every file
+  too, those under `assets/` among them, which `vercel()` marks `immutable`
+  in the `hit` phase, after yours. Give a `Cache-Control` a `src` that names
+  the paths it is for.
+- **Vercel matches `src` regardless of case** unless the route says
+  `caseSensitive: true`, while the routes `vercel()` writes itself are
+  case-sensitive, as the route table is. A route without it answers
+  `/POSTS/first` as well.
+- **`has` names a header in lowercase**, as Vercel compares it. `vercel()`
+  refuses another spelling when it is called:
+
+  ```text
+  vercel() route ^/posts/([a-z0-9-]+)$ has the header key "Accept" — write it lowercase ("accept"), as Vercel compares it
+  ```
+
+- **Nothing else is checked.** The routes are written as given — under a
+  `base` their `src` and `dest` carry it — and their patterns are Vercel's
+  (PCRE), which JavaScript's `RegExp` would misjudge, so a mistake shows once
+  deployed. Try a change on a preview deployment first.
+- **Static mode only.** Under `mode: 'server'` the request handler answers
+  every URL no file names, and a `guard.ts` or a `route.ts` decides what it
+  sends. The build refuses them there:
+
+  ```text
+  vercel() takes beforeFiles and beforeNotFound under mode: 'static' only — under mode: 'server' the handler answers every URL no file names
+  ```
+
 ## A tab opened before a deploy
 
 A tab keeps running the script it loaded, while every payload it fetches

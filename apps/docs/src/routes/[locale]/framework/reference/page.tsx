@@ -406,8 +406,20 @@ export default function FrameworkReferencePage() {
         from="@k8ordo/framework/vercel"
         id="vercel"
         name="vercel"
+        params={[
+          {
+            name: 'options.beforeFiles',
+            type: 'readonly VercelRoute[]',
+            description: t.vercelBeforeFiles,
+          },
+          {
+            name: 'options.beforeNotFound',
+            type: 'readonly VercelRoute[]',
+            description: t.vercelBeforeNotFound,
+          },
+        ]}
         returns={{ type: 'Plugin', description: t.vercelReturns }}
-        signature="vercel(): Plugin"
+        signature="vercel(options?: VercelOptions): Plugin"
         summary={t.vercelSummary}
       >
         <CodeBlock code={VERCEL} lang="ts" title="vite.config.ts" />

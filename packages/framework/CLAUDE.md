@@ -291,7 +291,17 @@ pnpm check         # check:write to auto-fix
   would serve it), no function, and the rewrites as routes after
   `handle: 'filesystem'` — the payload URL of a built non-page, the shells'
   documents (`…/index.html`, a trailing slash allowed) and payloads —
-  case-sensitive, then `404.html` under 404 when it was written.
+  case-sensitive, then `404.html` under 404 when it was written. The
+  application's own routes go around them as given: `beforeFiles` ahead of
+  `handle: 'filesystem'`, `beforeNotFound` between the shells' rewrites and
+  `404.html`, so a catch-all of the application's never hides a shell. Only
+  static mode takes them — `configResolved` refuses them under server mode,
+  where the handler answers every URL no file names — and the one thing
+  checked in them is a `has` header key, refused when `vercel()` is called
+  unless lowercase: their patterns are Vercel's (PCRE), which a check with
+  JavaScript's `RegExp` would misjudge. `vite dev`, `vite preview` and
+  `serve` never apply them; an imitation of Vercel's routing nothing here
+  can check against Vercel would be worse than none.
 - **`serve` and `vite preview` serve a static build as a static host.**
   One resolver, `resolveStatic` (`static-host.ts`), in Netlify's order: the
   file, a directory's `index.html`, the first `200` rule of the build's

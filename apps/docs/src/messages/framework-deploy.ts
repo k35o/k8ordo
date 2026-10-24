@@ -212,6 +212,106 @@ export const staticVercelWarn = message({
   en: 'A build on Vercel that writes shells without `vercel()` warns: nothing would serve them.',
 });
 
+export const vercelRoutesTitle = message({
+  ja: 'Vercelでのアプリのルート',
+  en: 'Routes of your own on Vercel',
+});
+
+export const vercelRoutesLead = message({
+  ja: 'staticモードの`vercel()`は、アプリのルートも受け取ります。VercelのBuild Output APIのルートを、`.vercel/output/config.json`の2か所に渡したまま書きます。使えるのは`src`と`dest`、`status`、`headers`、`continue`、`check`、`caseSensitive`、`has`です。`src`はパス名の正規表現です。',
+  en: 'Under static mode, `vercel()` also takes routes of the application’s own: routes of Vercel’s Build Output API (`src`, `dest`, `status`, `headers`, `continue`, `check`, `caseSensitive`, `has`), written as given in two places of `.vercel/output/config.json`. `src` is a regular expression for the pathname.',
+});
+
+export const vercelRoutesFilesCallout = message({
+  ja: '書き出したファイル',
+  en: 'The files the build wrote',
+});
+
+export const vercelRoutesRewritesCallout = message({
+  ja: 'シェルへの書き換え（`_redirects`と同じもの）',
+  en: 'The rewrites to the shells, the same as `_redirects`',
+});
+
+export const vercelRoutesNotFoundCallout = message({
+  ja: 'ビルドが`404.html`を書いたときだけ',
+  en: 'Only when the build wrote `404.html`',
+});
+
+export const vercelRoutesAssetsCallout = message({
+  ja: '`assets/`に`immutable`を付ける',
+  en: 'Adds `immutable` to `assets/`',
+});
+
+export const vercelRoutesPlaces = [
+  message({
+    ja: '`beforeFiles`：どのファイルよりも先に当てます。全ページのヘッダーや、あるファイルより先に当てたいリダイレクトと書き換えを置きます。',
+    en: '`beforeFiles`: tried before any file. For headers on every answer, and a redirect or a rewrite that has to win over a file that is there.',
+  }),
+  message({
+    ja: '`beforeNotFound`：ファイルにもシェルにも当たらなかったときに、`404.html`より先に当てます。ここに置いた全パスのルートがシェルを隠すことはありません。外のオリジンへの中継や、本文の違う404を置きます。',
+    en: '`beforeNotFound`: tried once neither a file nor a shell answered, before `404.html`, so a catch-all there never hides a shell. For a proxy to another origin, or a 404 of another body.',
+  }),
+] as const;
+
+export const vercelRoutesExample = [
+  message({
+    ja: 'ヘッダーを足すだけのルートは`continue: true`にし、答えるルートより前に置きます。答えるルートで照合が終わるためです。`beforeFiles`で足したヘッダーは、ルートを通ったどの応答にも付きます。ファイルとリダイレクト、`404.html`、`dest`と`status`の応答、外のオリジンから中継した応答です。',
+    en: 'A route that only adds headers says `continue: true`, and comes before the route that answers: an answering route ends the matching. What `beforeFiles` adds this way is on every answer the routes lead to: a file, a redirect, `404.html`, a `dest` with a `status`, an answer proxied from another origin.',
+  }),
+  message({
+    ja: 'リダイレクトは末尾のスラッシュを外し、クエリを引き継ぎます。`/about/?x=1`は`/about?x=1`へ送られ、Vercelは`/about`に`about/index.html`をそのまま返します。パターンは空の区間を許さないので、`Location: //evil.test`（ブラウザは別のオリジンと読みます）を返すことはありません。`//evil.test/`には、どのルートより先にVercel自身が`/evil.test/`への308を返します。この308にはアプリのヘッダーが付きません。',
+    en: 'The redirect takes the trailing slash off and keeps the query: `/about/?x=1` goes to `/about?x=1`, which Vercel answers from `about/index.html` as it is. Its pattern takes no empty segment, so it never answers with `Location: //evil.test`, which a browser reads as another origin. Vercel itself answers `//evil.test/` before any route, with a 308 to `/evil.test/` that carries none of your headers.',
+  }),
+  message({
+    ja: '`check: true`は`dest`をファイルの中から探します。無ければ、書き換えた後のパスで先へ進みます。`beforeNotFound`のルートが見るのは、`/posts/nope`でなく`/posts/nope/article.md`です。この例では`routes/posts/[slug]/article.md/`の`route.ts`が記事ごとのmarkdownを書き、markdownを求めるクライアントにはそれを返します。`paths`は、ページとmarkdownを記事の同じ一覧から返し、片方だけの記事を作らないようにします。',
+    en: '`check: true` looks for `dest` among the files. When none is there, the matching goes on with `dest` as the pathname: `beforeNotFound` sees `/posts/nope/article.md`, not `/posts/nope`. Here a `route.ts` at `routes/posts/[slug]/article.md/` wrote each post’s markdown, and a client asking for markdown is answered with it. Have `paths` give the pages and their markdown from one list of posts, so no post is written without the other.',
+  }),
+  message({
+    ja: '`has`は、ヘッダーの値を`value`の正規表現で照合するだけです。`.*text/markdown.*`は`Accept: text/markdown, text/html;q=0.9`に当たります。ブラウザの`text/html,application/xhtml+xml,*/*;q=0.8`は、`*/*`を含みますが当たりません。',
+    en: '`has` matches the header’s text against `value`, a regular expression, and negotiates nothing: `.*text/markdown.*` takes `Accept: text/markdown, text/html;q=0.9`, and not a browser’s `text/html,application/xhtml+xml,*/*;q=0.8`, though `*/*` would take markdown.',
+  }),
+  message({
+    ja: '中継は2つのルートに分けます。ヘッダーはファイルの前に、答える`dest`はファイルの後に置きます。`dest`にはリクエストのクエリが付くので、`/feed?page=2`は`https://api.example.com/feed?page=2`を取りに行きます。',
+    en: 'A proxy is two routes: its headers ahead of the files, and the `dest` that answers after them. The `dest` is asked with the request’s query: `/feed?page=2` fetches `https://api.example.com/feed?page=2`.',
+  }),
+  message({
+    ja: '`dest`と`status`を組むと、そのファイルをその状態で返します。ビルド自身の`404.html`と同じ形です。',
+    en: '`dest` with `status` answers with that file under that status, as the build’s own `404.html` route does.',
+  }),
+] as const;
+
+export const vercelRoutesLocal = message({
+  ja: 'これらのルートを当てるのはVercelだけです。`vite dev`と`vite preview`、`serve()`は、ヘッダーもリダイレクトも`Accept`での出し分けも無いものとして答えます。Vercelと違う真似は、手元で通って本番で違うので、真似をしません。',
+  en: 'Only Vercel applies these routes. `vite dev`, `vite preview` and `serve()` answer as if they were not there: no header, no redirect, nothing decided by `Accept`. An imitation of Vercel’s routing that differed from it would pass locally and fail once deployed, so there is none.',
+});
+
+export const vercelRoutesMind = [
+  message({
+    ja: 'Vercelは`src`をパス名の全体に当て、クエリは含めません。頭だけを書いた`^/posts/`は`/posts/first`に当たらないので、`^/posts/.+$`と書きます。',
+    en: 'Vercel matches `src` against the whole pathname, never just its start, and never the query: `^/posts/` does not match `/posts/first`, and `^/posts/.+$` does.',
+  }),
+  message({
+    ja: '全パスに当たるルートに`Cache-Control`を置きません。そのルートは、`vercel()`が後ろの`hit`のルートで`immutable`を付ける`assets/`の下も含め、すべてのファイルに当たります。`Cache-Control`は、向けたいパスを`src`に書いたルートに置きます。',
+    en: 'Put no `Cache-Control` in a route every path takes. It reaches every file too, those under `assets/` among them, which `vercel()` marks `immutable` in the `hit` phase, after yours. Give a `Cache-Control` a `src` that names the paths it is for.',
+  }),
+  message({
+    ja: 'Vercelは、`caseSensitive: true`の無いルートの`src`を大文字小文字を区別せずに照合します。`vercel()`自身が書くルートは、ルートの表と同じく区別します。',
+    en: 'Vercel matches `src` regardless of case unless the route says `caseSensitive: true`, while the routes `vercel()` writes itself are case-sensitive, as the route table is.',
+  }),
+  message({
+    ja: '`has`のヘッダーの`key`は小文字で書きます。ほかの書き方は`vercel()`を呼んだ時点でエラーになります。',
+    en: 'Write a `has` header’s `key` in lowercase. Another spelling is refused when `vercel()` is called.',
+  }),
+  message({
+    ja: 'ほかは検査しません。`base`の下でも渡したまま書くので、`src`と`dest`に`base`を含めます。パターンはVercelのもの（PCRE）で、間違いはデプロイして初めて分かるので、変更はプレビューのデプロイで先に確かめます。',
+    en: 'Nothing else is checked. The routes are written as given, so under a `base` their `src` and `dest` carry it, and their patterns are Vercel’s (PCRE): a mistake shows once deployed, so try a change on a preview deployment first.',
+  }),
+  message({
+    ja: 'serverモードでは受け取りません。ファイルの無いURLにはハンドラが答えるので、`guard.ts`や`route.ts`で返すものを決めます。渡すとビルドがエラーになります。',
+    en: 'Server mode takes none: the handler answers every URL no file names, and a `guard.ts` or a `route.ts` decides what it sends. The build refuses them there.',
+  }),
+] as const;
+
 export const otherHostsTitle = message({
   ja: 'ほかのホスティング',
   en: 'Other hosts',

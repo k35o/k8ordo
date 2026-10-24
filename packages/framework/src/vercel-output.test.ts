@@ -21,6 +21,7 @@ import {
 } from 'vite-plus/test';
 
 import { writeStaticVercelOutput, writeVercelOutput } from './vercel-output';
+import type { VercelOptions } from './vercel-output';
 
 type Entry = {
   readonly default: { readonly fetch: (request: Request) => Promise<Response> };
@@ -208,11 +209,11 @@ type Route = {
   readonly caseSensitive?: boolean;
 };
 
-/** 書き換えの経路のうち、最初に合うものの宛先 */
+/** ファイルの後の書き換えの経路のうち、最初に合うものの宛先 */
 const destOf = (routes: readonly Route[], pathname: string) =>
   routes
     .slice(
-      1,
+      routes.findIndex((route) => route.handle === 'filesystem') + 1,
       routes.findIndex((route) => route.handle === 'hit'),
     )
     .find((route) =>
@@ -234,17 +235,21 @@ describe('writeStaticVercelOutput', () => {
   const writeStatic = async (
     base: string,
     notFound: boolean,
+    routes?: VercelOptions,
   ): Promise<readonly Route[]> => {
-    await writeStaticVercelOutput({
-      root: built,
-      client: path.join(built, 'dist', 'client'),
-      base,
-      rewrites: REWRITES.map((rule) => ({
-        from: `${base.slice(0, -1)}${rule.from}`,
-        to: `${base.slice(0, -1)}${rule.to}`,
-      })),
-      notFound,
-    });
+    await writeStaticVercelOutput(
+      {
+        root: built,
+        client: path.join(built, 'dist', 'client'),
+        base,
+        rewrites: REWRITES.map((rule) => ({
+          from: `${base.slice(0, -1)}${rule.from}`,
+          to: `${base.slice(0, -1)}${rule.to}`,
+        })),
+        notFound,
+      },
+      routes,
+    );
     const config = JSON.parse(
       await readFile(
         path.join(built, '.vercel', 'output', 'config.json'),
@@ -357,6 +362,88 @@ describe('writeStaticVercelOutput', () => {
       headers: { 'cache-control': 'public, max-age=31536000, immutable' },
       continue: true,
     });
+  });
+
+  it('puts beforeFiles ahead of the files and beforeNotFound between the shells and 404.html, each as given and in order', async () => {
+    const accept = [
+      { type: 'header', key: 'accept', value: '.*text/markdown.*' },
+    ] as const;
+
+    const routes = await writeStatic('/', true, {
+      beforeFiles: [
+        {
+          src: '^/.*$',
+          headers: { 'X-Content-Type-Options': 'nosniff' },
+          continue: true,
+        },
+        {
+          src: '^/((?:[^/]+/)*[^/]+)/$',
+          status: 308,
+          headers: { Location: '/$1' },
+        },
+        {
+          src: '^/en/posts/([a-z0-9-]+)$',
+          has: accept,
+          dest: '/en/posts/$1/article.md',
+          check: true,
+          caseSensitive: true,
+        },
+      ],
+      beforeNotFound: [
+        { src: '^/.*$', headers: { Vary: 'Accept' }, continue: true },
+        { src: '^/.*$', has: accept, dest: '/not-found.md', status: 404 },
+      ],
+    });
+
+    expect(routes).toStrictEqual([
+      {
+        src: '^/.*$',
+        headers: { 'X-Content-Type-Options': 'nosniff' },
+        continue: true,
+      },
+      {
+        src: '^/((?:[^/]+/)*[^/]+)/$',
+        status: 308,
+        headers: { Location: '/$1' },
+      },
+      {
+        src: '^/en/posts/([a-z0-9-]+)$',
+        has: [{ type: 'header', key: 'accept', value: '.*text/markdown.*' }],
+        dest: '/en/posts/$1/article.md',
+        check: true,
+        caseSensitive: true,
+      },
+      { handle: 'filesystem' },
+      {
+        src: '^\\/en\\/posts\\/first\\/index\\.rsc$',
+        dest: '/en/posts/!fallback/index.html',
+        caseSensitive: true,
+      },
+      {
+        src: '^\\/en\\/posts\\/[^/]+/?$',
+        dest: '/en/posts/!fallback/index.html',
+        caseSensitive: true,
+      },
+      {
+        src: '^\\/en\\/posts\\/[^/]+\\/index\\.rsc$',
+        dest: '/en/posts/!fallback/index.rsc',
+        caseSensitive: true,
+      },
+      { src: '^/.*$', headers: { Vary: 'Accept' }, continue: true },
+      {
+        src: '^/.*$',
+        has: [{ type: 'header', key: 'accept', value: '.*text/markdown.*' }],
+        dest: '/not-found.md',
+        status: 404,
+      },
+      { src: '^/.*$', dest: '/404.html', status: 404 },
+      { handle: 'hit' },
+      {
+        src: '^\\/assets\\/',
+        headers: { 'cache-control': 'public, max-age=31536000, immutable' },
+        continue: true,
+      },
+    ]);
   });
 
   it('puts the client build, the rewrites and 404.html under the base', async () => {

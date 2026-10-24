@@ -7,6 +7,47 @@ import { withBase } from '@k8ordo/router';
 import type { Rewrite } from './rewrites';
 import type { StaticOutput } from './static';
 
+/**
+ * A route as Vercel's Build Output API (v3) reads it, written to
+ * `.vercel/output/config.json` as given — the fields an application needs.
+ */
+export type VercelRoute = {
+  /**
+   * A regular expression Vercel matches against the whole pathname, the
+   * query left out — `^/posts/` does not match `/posts/first`, `^/posts/.+$`
+   * does — regardless of case unless `caseSensitive`.
+   */
+  readonly src: string;
+  /** A path in the deployment, or a URL elsewhere. */
+  readonly dest?: string;
+  readonly status?: number;
+  readonly headers?: Readonly<Record<string, string>>;
+  /** Keep matching the routes after this one: a route that only adds headers. */
+  readonly continue?: boolean;
+  /**
+   * Look for `dest` among the files; when none is there, go on with `dest`
+   * as the pathname.
+   */
+  readonly check?: boolean;
+  readonly caseSensitive?: boolean;
+  readonly has?: ReadonlyArray<{
+    readonly type: 'header';
+    /** Lowercase, as Vercel compares it. */
+    readonly key: string;
+    readonly value?: string;
+  }>;
+};
+
+export type VercelOptions = {
+  /** Under `mode: 'static'`, routes tried before any file. */
+  readonly beforeFiles?: readonly VercelRoute[];
+  /**
+   * Under `mode: 'static'`, routes tried once neither a file nor a shell
+   * answered, before `404.html`.
+   */
+  readonly beforeNotFound?: readonly VercelRoute[];
+};
+
 /** Where the build writes the environments, all absolute. */
 export type BuildDirs = {
   readonly client: string;
@@ -72,15 +113,21 @@ const routeOf = (rule: Rewrite) => {
 };
 
 /**
- * Files first; only what names none is rewritten — a value the build did
- * not write to its shell, the payload URL of a built URL that is not a page
- * to HTML — and what nothing rewrote is the build's `404.html`.
+ * The application's `beforeFiles`, then the files; only what names none is
+ * rewritten — a value the build did not write to its shell, the payload URL
+ * of a built URL that is not a page to HTML — and what nothing rewrote goes
+ * through the application's `beforeNotFound` to the build's `404.html`.
  */
-const staticConfigFor = ({ base, rewrites, notFound }: StaticOutput) => ({
+const staticConfigFor = (
+  { base, rewrites, notFound }: StaticOutput,
+  { beforeFiles = [], beforeNotFound = [] }: VercelOptions,
+) => ({
   version: 3,
   routes: [
+    ...beforeFiles,
     { handle: 'filesystem' },
     ...rewrites.map((rule) => routeOf(rule)),
+    ...beforeNotFound,
     ...(notFound
       ? [{ src: '^/.*$', dest: withBase('/404.html', base), status: 404 }]
       : []),
@@ -161,11 +208,13 @@ export const writeVercelOutput = async (
 /**
  * A static build laid out as Vercel's Build Output API (v3) reads it: the
  * client build as static files at Vite's `base`, and the rewrites a host
- * applies once no file answered as routes — no function. `_redirects` stays
- * behind: Vercel never reads it, and would serve it as a file.
+ * applies once no file answered as routes, around them the application's
+ * own — no function. `_redirects` stays behind: Vercel never reads it, and
+ * would serve it as a file.
  */
 export const writeStaticVercelOutput = async (
   output: StaticOutput,
+  routes: VercelOptions = {},
 ): Promise<void> => {
   const dir = path.join(output.root, '.vercel', 'output');
   await rm(dir, { recursive: true, force: true });
@@ -174,5 +223,8 @@ export const writeStaticVercelOutput = async (
     recursive: true,
     filter: (source) => source !== redirects,
   });
-  await writeFile(path.join(dir, 'config.json'), json(staticConfigFor(output)));
+  await writeFile(
+    path.join(dir, 'config.json'),
+    json(staticConfigFor(output, routes)),
+  );
 };

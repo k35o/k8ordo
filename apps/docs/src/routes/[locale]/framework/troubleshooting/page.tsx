@@ -126,6 +126,18 @@ const SYMPTOMS: readonly Symptom[] = [
     fix: t.vercelRedirectsFix,
   },
   {
+    id: 'vercel-routes-server',
+    title: t.vercelRoutesServerTitle,
+    cause: t.vercelRoutesServerCause,
+    fix: t.vercelRoutesServerFix,
+  },
+  {
+    id: 'vercel-header-key',
+    title: t.vercelHeaderKeyTitle,
+    cause: t.vercelHeaderKeyCause,
+    fix: t.vercelHeaderKeyFix,
+  },
+  {
     id: 'shell-html',
     title: t.shellHtmlTitle,
     cause: t.shellHtmlCause,
