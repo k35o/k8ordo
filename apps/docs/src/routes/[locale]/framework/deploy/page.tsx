@@ -335,6 +335,9 @@ export default function FrameworkDeployPage() {
             <Rich>{t.staticVercelOutput()}</Rich>
           </p>
           <p>
+            <Rich>{t.staticVercelTypes()}</Rich>
+          </p>
+          <p>
             <Rich>{t.staticVercelWarn()}</Rich>
           </p>
         </DocSubsection>

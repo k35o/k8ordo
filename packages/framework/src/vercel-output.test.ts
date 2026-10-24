@@ -232,11 +232,18 @@ describe('writeStaticVercelOutput', () => {
     { from: '/en/posts/:p1/index.rsc', to: '/en/posts/!fallback/index.rsc' },
   ];
 
-  const writeStatic = async (
+  type Config = {
+    readonly version: number;
+    readonly routes: readonly Route[];
+    readonly overrides?: Readonly<Record<string, { contentType: string }>>;
+  };
+
+  const writeConfig = async (
     base: string,
     notFound: boolean,
     routes?: VercelOptions,
-  ): Promise<readonly Route[]> => {
+    types: ReadonlyMap<string, string> = new Map(),
+  ): Promise<Config> => {
     await writeStaticVercelOutput(
       {
         root: built,
@@ -247,6 +254,7 @@ describe('writeStaticVercelOutput', () => {
           to: `${base.slice(0, -1)}${rule.to}`,
         })),
         notFound,
+        types,
       },
       routes,
     );
@@ -255,10 +263,17 @@ describe('writeStaticVercelOutput', () => {
         path.join(built, '.vercel', 'output', 'config.json'),
         'utf8',
       ),
-    ) as { version: number; routes: readonly Route[] };
+    ) as Config;
     expect(config.version).toBe(3);
-    return config.routes;
+    return config;
   };
+
+  const writeStatic = async (
+    base: string,
+    notFound: boolean,
+    routes?: VercelOptions,
+  ): Promise<readonly Route[]> =>
+    (await writeConfig(base, notFound, routes)).routes;
 
   beforeEach(async () => {
     built = await mkdtemp(path.join(tmpdir(), 'k8ordo-vercel-static-'));
@@ -456,5 +471,49 @@ describe('writeStaticVercelOutput', () => {
       '/site/en/posts/!fallback/index.html',
     );
     expect(destOf(routes, '/en/posts/3')?.dest).toBe('/site/404.html');
+  });
+
+  it("serves a route.ts's file with the type its GET answered, keyed under the base", async () => {
+    const { overrides } = await writeConfig(
+      '/site/',
+      true,
+      {},
+      new Map([
+        ['feed', 'application/rss+xml;charset=utf-8'],
+        ['en/posts/a b/article.md', 'text/markdown; charset=utf-8'],
+      ]),
+    );
+
+    expect(overrides).toStrictEqual({
+      'site/feed': { contentType: 'application/rss+xml;charset=utf-8' },
+      'site/en/posts/a b/article.md': {
+        contentType: 'text/markdown; charset=utf-8',
+      },
+    });
+  });
+
+  it('writes the types in the order of the files, whichever order the build wrote them in', async () => {
+    const { overrides } = await writeConfig(
+      '/',
+      true,
+      {},
+      new Map([
+        ['posts.json', 'application/json'],
+        ['feed', 'application/rss+xml;charset=utf-8'],
+        ['en/feed', 'application/rss+xml;charset=utf-8'],
+      ]),
+    );
+
+    expect(Object.keys({ ...overrides })).toStrictEqual([
+      'en/feed',
+      'feed',
+      'posts.json',
+    ]);
+  });
+
+  it('leaves a file whose GET named no type to its extension', async () => {
+    const config = await writeConfig('/', true);
+
+    expect(config).not.toHaveProperty('overrides');
   });
 });

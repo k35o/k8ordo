@@ -505,6 +505,16 @@ case-sensitively, as the route table matches; then `404.html` under a `404`,
 when the build wrote one. `vercel()` writes them once the last page is
 written, whichever side of `framework()` it sits.
 
+**A file a `route.ts` wrote is served with the type its `GET` answered**,
+the `Content-Type` `vite dev` sends, written as that file's entry in the
+`overrides` of `config.json`: a feed at `blog/feed` is
+`application/rss+xml`, not the `application/octet-stream` of a file with no
+extension. The type is written even where the extension says the same, so
+no file is left to the type Vercel gives an extension; only a `GET` that
+named none — a body of bytes with no `Content-Type` — leaves its file to it.
+`vite preview` and `serve` still go by the extension
+([A route.ts under static mode](routing.md#under-static-mode)).
+
 ### Routes of your own
 
 Under `mode: 'static'`, `vercel()` also takes routes of the application's

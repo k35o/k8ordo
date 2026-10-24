@@ -213,7 +213,10 @@ pnpm check         # check:write to auto-fix
   matcher's order, which of them answers. Anything but a `200` stops the
   build, as do a route at `/` and a route with written pathnames below it (a
   file cannot also be a directory). It is not a page: no `index.rsc`, not in
-  the sitemap.
+  the sitemap. A file keeps no type, so the `Content-Type` its `GET`
+  answered is kept beside it — `StaticOutput.types`, by the file's path
+  inside the client build — for the one adapter that can name a file's
+  type; `serve`, `vite preview` and every other host go by the extension.
 - **A file never carries a nonce; the policy names hashes.** The handler
   signs the framework's inline scripts with a nonce per render and says it in
   `NONCE_HEADER`; `write` takes it off every page (`asFile`) whether or not
@@ -291,17 +294,21 @@ pnpm check         # check:write to auto-fix
   would serve it), no function, and the rewrites as routes after
   `handle: 'filesystem'` — the payload URL of a built non-page, the shells'
   documents (`…/index.html`, a trailing slash allowed) and payloads —
-  case-sensitive, then `404.html` under 404 when it was written. The
-  application's own routes go around them as given: `beforeFiles` ahead of
-  `handle: 'filesystem'`, `beforeNotFound` between the shells' rewrites and
-  `404.html`, so a catch-all of the application's never hides a shell. Only
-  static mode takes them — `configResolved` refuses them under server mode,
-  where the handler answers every URL no file names — and the one thing
-  checked in them is a `has` header key, refused when `vercel()` is called
-  unless lowercase: their patterns are Vercel's (PCRE), which a check with
-  JavaScript's `RegExp` would misjudge. `vite dev`, `vite preview` and
-  `serve` never apply them; an imitation of Vercel's routing nothing here
-  can check against Vercel would be worse than none.
+  case-sensitive, then `404.html` under 404 when it was written — and each
+  file a route.ts wrote under `overrides` with the type its `GET` answered,
+  even where the extension says the same, so no file is left to the types
+  Vercel gives extensions (sorted, since the files are written in
+  parallel). The application's own routes go around them as given:
+  `beforeFiles` ahead of `handle: 'filesystem'`, `beforeNotFound` between
+  the shells' rewrites and `404.html`, so a catch-all of the application's
+  never hides a shell. Only static mode takes them — `configResolved`
+  refuses them under server mode, where the handler answers every URL no
+  file names — and the one thing checked in them is a `has` header key,
+  refused when `vercel()` is called unless lowercase: their patterns are
+  Vercel's (PCRE), which a check with JavaScript's `RegExp` would misjudge.
+  `vite dev`, `vite preview` and `serve` never apply them; an imitation of
+  Vercel's routing nothing here can check against Vercel would be worse
+  than none.
 - **`serve` and `vite preview` serve a static build as a static host.**
   One resolver, `resolveStatic` (`static-host.ts`), in Netlify's order: the
   file, a directory's `index.html`, the first `200` rule of the build's

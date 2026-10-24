@@ -280,10 +280,14 @@ with params needs `paths`, as a page's does
 ([Parameters](params.md#routes-with-parameters)) — with a request whose
 origin is `site` when that option is given (an RSS feed's links are
 absolute), and writes what it answered as the file at that pathname:
-`dist/client/feed.xml`. A static host then serves it with the type its
-extension says. The `GET` has to answer `200`; anything else stops the build
-naming the pathname. A file answers nothing but `GET`, so a `route.ts`
-exporting another method is refused by name, in the build and in `vite dev`:
+`dist/client/feed.xml`. A file keeps no type of its own, so a static host
+serves it with the type its extension says — `vite preview` and `serve` too,
+which send a file with no extension as `application/octet-stream`. On
+Vercel, `vercel()` serves it with the `Content-Type` its `GET` answered, the
+type `vite dev` sends ([Deploying to Vercel](deploy.md#deploying-to-vercel)).
+The `GET` has to answer `200`; anything else stops the build naming the
+pathname. A file answers nothing but `GET`, so a `route.ts` exporting
+another method is refused by name, in the build and in `vite dev`:
 
 ```
 static build writes a route.ts as the file its GET answers, and a file cannot answer another method — these export one:
@@ -298,6 +302,11 @@ the build never sees. `export { GET } from '../../lib/feed'` names it.
 A `route.ts` at `/` cannot be a file (the host serves `/` from `index.html`),
 nor one with pages written below it, which would need a directory of the same
 name. What it writes is not a page, so `sitemap.xml` leaves it out.
+
+Name the type in the `Response`. A string body with none is sent as
+`text/plain;charset=UTF-8` — the `Response` sets it — so a `sitemap.xml`
+returned that way is plain text on Vercel and in `vite dev`, whatever its
+extension says. `vite dev` shows it before a deploy does.
 
 ## The generated files
 

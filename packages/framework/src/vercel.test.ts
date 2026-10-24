@@ -98,6 +98,7 @@ describe('vercel', () => {
       base: '/',
       rewrites: [],
       notFound: false,
+      types: new Map(),
     });
 
     const config = JSON.parse(

@@ -116,10 +116,13 @@ const routeOf = (rule: Rewrite) => {
  * The application's `beforeFiles`, then the files; only what names none is
  * rewritten — a value the build did not write to its shell, the payload URL
  * of a built URL that is not a page to HTML — and what nothing rewrote goes
- * through the application's `beforeNotFound` to the build's `404.html`.
+ * through the application's `beforeNotFound` to the build's `404.html`. A
+ * file a route.ts wrote is served with the type its `GET` answered, even
+ * where the extension says the same, so no file is left to the types Vercel
+ * gives an extension.
  */
 const staticConfigFor = (
-  { base, rewrites, notFound }: StaticOutput,
+  { base, rewrites, notFound, types }: StaticOutput,
   { beforeFiles = [], beforeNotFound = [] }: VercelOptions,
 ) => ({
   version: 3,
@@ -134,6 +137,19 @@ const staticConfigFor = (
     { handle: 'hit' },
     immutableAssets(base),
   ],
+  ...(types.size === 0
+    ? {}
+    : {
+        // ビルドはファイルを並べて書くので、書き終えた順は毎回違う
+        overrides: Object.fromEntries(
+          [...types]
+            .toSorted(([a], [b]) => (a < b ? -1 : 1))
+            .map(([file, contentType]) => [
+              withBase(`/${file}`, base).slice(1),
+              { contentType },
+            ]),
+        ),
+      }),
 });
 
 /**

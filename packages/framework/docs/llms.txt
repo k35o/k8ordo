@@ -180,8 +180,10 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   `.vercel/output/` (Build Output API v3) for `vercel build` /
   `vercel deploy --prebuilt` — the client build as static files at Vite's
   `base` (`assets/` immutable), and under server mode the request handler
-  as one streaming Node.js function; under static mode no function, and the
-  shells' rewrites as routes tried after the files, then `404.html`.
+  as one streaming Node.js function; under static mode no function, the
+  shells' rewrites as routes tried after the files, then `404.html`, and
+  each file a `route.ts` wrote served with the `Content-Type` its `GET`
+  answered (`overrides`) where other hosts go by its extension.
   Under static mode `vercel({ beforeFiles, beforeNotFound })` also takes
   routes of the application's own (`VercelRoute`: `src`, `dest`, `status`,
   `headers`, `continue`, `check`, `caseSensitive`, `has`), written as given

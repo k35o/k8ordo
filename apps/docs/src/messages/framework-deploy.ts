@@ -207,6 +207,11 @@ export const staticVercelOutput = message({
   en: 'Vercel does not read `_redirects`. Put `vercel()` beside `framework()`, and the build also writes `.vercel/output/`: the written files as static files, and the same rewrites as routes, with no function.',
 });
 
+export const staticVercelTypes = message({
+  ja: '`route.ts`が書いたファイルは、`GET`が返した`Content-Type`で配ります。`config.json`の`overrides`に、ファイルごとの型として書きます。拡張子の無い`blog/feed`も、`application/octet-stream`でなくフィードの型になります。拡張子と同じ型でも書くので、Vercelが拡張子に付ける型には頼りません。`vite preview`と`serve`は拡張子で決めます。',
+  en: 'A file a `route.ts` wrote is served with the `Content-Type` its `GET` returned, written per file in the `overrides` of `config.json`: a `blog/feed` without an extension gets the feed’s type rather than `application/octet-stream`. The type is written even when the extension says the same, so nothing rests on the type Vercel gives an extension. `vite preview` and `serve` go by the extension.',
+});
+
 export const staticVercelWarn = message({
   ja: 'Vercelの上で`vercel()`の無いビルドがシェルを書くと、ビルドが警告します。そのままでは、シェルを返すものが無いためです。',
   en: 'A build on Vercel that writes shells without `vercel()` warns: nothing would serve them.',
