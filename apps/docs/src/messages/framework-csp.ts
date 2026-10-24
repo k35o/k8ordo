@@ -80,6 +80,16 @@ export const refusedMeta = message({
   en: '`frame-ancestors`, `report-uri` and `sandbox` are errors too. A `<meta>` ignores them, so set them as headers at the host.',
 });
 
+export const refusedReportTo = message({
+  ja: '`report-to`もエラーになります。送り先の名前とURLの対応は、`Reporting-Endpoints`レスポンスヘッダーでしか決められないからです。違反のレポートを受け取るポリシーは、ホスティングのヘッダーで設定してください。',
+  en: '`report-to` is an error as well. The endpoint it names is defined only by a `Reporting-Endpoints` response header, so set a policy that reports as a header at the host.',
+});
+
+export const refusedHeaderScripts = message({
+  ja: "ヘッダーのポリシーには、ビルドがページごとに足すハッシュが入りません。スクリプトが実行されるのは、ヘッダーと`<meta>`のどちらのポリシーも許したときだけです。ヘッダーの`script-src`（無ければ`default-src`）と`script-src-elem`には、`'self'`と`'unsafe-inline'`を書きます。ハッシュかnonceと並べると、`'unsafe-inline'`は無視されます。`csp`からは`report-to`だけを外し、インラインスクリプトは`<meta>`のハッシュで制限します。",
+  en: "A header cannot carry the hashes the build adds page by page, and a script runs only when both the header’s policy and the `<meta>`’s allow it. Let the header’s `script-src` (`default-src` without it) and `script-src-elem` allow `'self'` and `'unsafe-inline'`. Beside a hash or a nonce, `'unsafe-inline'` is ignored. Keep `csp` without `report-to`, so the `<meta>` still restricts inline scripts by hash.",
+});
+
 export const refusedWhen = message({
   ja: 'エラーになるのは`framework()`を呼んだ時点です。エラー文は`the "csp" option cannot go into a page\'s <meta> as it is:`で始まり、問題を1行ずつ挙げます。',
   en: '`framework()` throws as soon as it is called, with an error that starts `the "csp" option cannot go into a page\'s <meta> as it is:` and lists one problem per line.',

@@ -90,6 +90,19 @@ pnpm check         # check:write to auto-fix
   a person what to install say `@k8ordo/framework`, never this package.
   `EngineHost.mode` (`'static' | 'server'`) is what differs between the two
   modes, and reaches the runtime as `import.meta.env.K8ORDO_MODE`.
+- **React's plugin comes with the engine, and only `reactCompiler` reaches
+  it.** `engine()` returns `@vitejs/plugin-react` beside the RSC plugin, so
+  an application never adds one and Fast Refresh is wired either way.
+  `EngineOptions.reactCompiler` turns on the plugin's `compiler` (React
+  Compiler in Rust, `oxc-transform-react`), and none of the plugin's own
+  options pass through: they are `@experimental`, typed `any` unless
+  `oxc-transform-react` is installed, and would bring Vite's types into the
+  `./server` declarations, which share `EngineOptions`'s chunk (`host.ts`).
+  The plugin compiles only the environments whose consumer is the client,
+  so Server Components and the HTML render of client components stay as
+  written; `examples/static-basic`'s `build.test.ts` reads that from a
+  build's source maps. `oxc-transform-react` is `@k8ordo/framework`'s
+  optional peer, not this package's.
 - **The browser holds no route table.** `runtime/app-router.tsx` claims every
   same-origin URL and learns from the answer; anything that is not a payload
   (`runtime/is-payload.ts`) becomes a document load, which is also the

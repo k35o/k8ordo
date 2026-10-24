@@ -52,7 +52,9 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 - [Design Guide](GUIDE.md): choosing a mode and what static mode refuses,
   setup (install, `vite.config.ts`, `tsconfig.json`, the root layout as the
   document), `vite dev` and `vite preview` against a static build, the
-  entries, and the plugin's options.
+  entries, and the plugin's options — `reactCompiler` among them, React
+  Compiler on the client components, which needs `oxc-transform-react`
+  installed.
 
 ## References
 
@@ -131,7 +133,7 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   `<head>`, with the hashes of the framework's own inline scripts on that
   page added to `script-src` (or `default-src` made into it) and
   `script-src-elem`; a policy with `'strict-dynamic'`, `frame-ancestors`,
-  `report-uri` or `sandbox` is refused. `FrameworkOptions` is
+  `report-uri`, `report-to` or `sandbox` is refused. `FrameworkOptions` is
   `StaticOptions | ServerOptions`. This entry loads Vite and is for
   `vite.config.ts` only.
 - `@k8ordo/framework/server` — server mode only; a static build refuses any

@@ -247,10 +247,22 @@ dev dependencies.
 
 ## The options
 
-`framework()` takes `mode`, which is required, and `routesDir`, the route
-directory (default `src/routes`). Three more describe files, so only
-`mode: 'static'` takes them — passing them with `mode: 'server'` is a type
-error:
+`framework()` takes `mode`, which is required, `routesDir`, the route
+directory (default `src/routes`), and `reactCompiler`, in either mode.
+
+`reactCompiler: true` compiles the client components with React Compiler —
+the Rust one, `oxc-transform-react`, through `@vitejs/plugin-react`'s
+`compiler` — in `vite dev` and in the build. Install it beside the framework
+as a dev dependency, in the range the package's README gives under Peer
+Dependencies. Without it, `vite dev` and `vite build` stop as soon as they
+read the config, with React's plugin's own error
+(`React Compiler requires the optional …`), which names
+`react({ compiler: true })`: the option the framework sets for you. Only
+what runs in the browser is compiled; Server Components, and the HTML a
+client component renders on the server, are left as written.
+
+Three more describe files, so only `mode: 'static'` takes them — passing
+them with `mode: 'server'` is a type error:
 
 - `paths` — the pathnames of routes with parameters, and where a
   `fallback.tsx`'s shell stands

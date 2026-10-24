@@ -79,6 +79,15 @@ pnpm check         # check:write to auto-fix
   own: a mode other than `'static'` would build no files, and a `csp` under
   `mode: 'server'` would be a policy nobody serves. `vite.test.ts` holds each
   case as both a `@ts-expect-error` and the error it throws.
+- **React's plugin is the framework's, and `reactCompiler` is all of it an
+  application sets.** The engine returns `@vitejs/plugin-react`, and
+  `reactCompiler: true`, in either mode, turns on its `compiler` (see the
+  engine's `CLAUDE.md`). That loads `oxc-transform-react` from the
+  application, so it is an optional peer here, in the range the plugin's
+  own optional peer asks; `vite.test.ts` fails when the two drift, as when
+  the plugin is bumped. Without it the plugin fails while Vite resolves the
+  config, with its own error, which names `react({ compiler: true })`; the
+  framework does not restate it, and the guide quotes it.
 - **The root re-exports the router by name.** `src/index.ts` lists what an
   application's code imports and never `export *`: the router also exports
   what only a hand-written table or the framework's own runtime uses.
@@ -227,10 +236,11 @@ pnpm check         # check:write to auto-fix
   content stays refused, and the application allows its own by hash in the
   policy (`colorSchemeScriptHash`). `nonce()` lives on `./server`, which
   static mode refuses, for the same reason. A policy the `<meta>` cannot
-  carry (`frame-ancestors`, `report-uri`, `sandbox`) or one with
-  `'strict-dynamic'` — under which the module script, allowed only by
-  `'self'`, never loads — is refused when the plugin is created
-  (`policyProblems`).
+  carry (`frame-ancestors`, `report-uri`, `sandbox`, which it ignores, and
+  `report-to`, whose endpoint only a `Reporting-Endpoints` response header
+  defines) or one with `'strict-dynamic'` — under which the module script,
+  allowed only by `'self'`, never loads — is refused when the plugin is
+  created (`policyProblems`).
 - **`site` is the only reason a sitemap exists.** Without the origin a
   sitemap would list relative URLs, which is not a sitemap; with it every
   page the build wrote is listed, redirects and the not-found excluded.

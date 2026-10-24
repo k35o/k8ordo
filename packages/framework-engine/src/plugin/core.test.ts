@@ -20,6 +20,7 @@ import type {
 } from 'vite';
 import { describe, expect, it } from 'vite-plus/test';
 
+import type { EngineOptions } from '../host';
 import { engine } from './core';
 
 const enginePlugin = (): Plugin | undefined =>
@@ -232,6 +233,28 @@ describe('the engine plugin', () => {
       expect(kept).toStrictEqual([]);
     },
   );
+});
+
+describe("the engine's React plugin", () => {
+  // engine() が返すプラグインの名前。React のプラグインは配列で入る
+  const pluginNames = (options: EngineOptions): string[] =>
+    engine(options, { mode: 'static', runtimeDir: '/runtime' })
+      .flat()
+      .flatMap((each) =>
+        typeof each === 'object' && each !== null && 'name' in each
+          ? [each.name]
+          : [],
+      );
+
+  it('compiles client components with React Compiler only when reactCompiler is true', () => {
+    expect(pluginNames({ reactCompiler: true })).toContain(
+      'vite:react-compiler',
+    );
+    expect(pluginNames({})).not.toContain('vite:react-compiler');
+    expect(pluginNames({ reactCompiler: false })).not.toContain(
+      'vite:react-compiler',
+    );
+  });
 });
 
 describe('the engine plugin under vite dev', () => {

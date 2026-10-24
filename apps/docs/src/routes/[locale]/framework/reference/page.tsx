@@ -154,6 +154,11 @@ export default function FrameworkReferencePage() {
             description: t.frameworkRoutesDir,
           },
           {
+            name: 'options.reactCompiler',
+            type: 'boolean',
+            description: t.frameworkReactCompiler,
+          },
+          {
             name: 'options.paths',
             type: '(patterns: readonly string[]) => readonly string[] | Promise<readonly string[]>',
             description: t.frameworkPaths,
