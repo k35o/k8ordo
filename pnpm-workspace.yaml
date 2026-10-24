@@ -124,8 +124,8 @@ minimumReleaseAgeExclude:
   - 'storybook-addon-determinism'
   - 'storybook-addon-vrt'
   - 'vite-plus-inspector'
-  # Renovate security update: next@16.3.8
-  - next@16.3.8
+  # Renovate security update: next@16.3.8 || 16.4.1
+  - next@16.3.8 || 16.4.1
   # better-css-modules 0.4.1 の security update が exact pin する版
   - postcss@8.5.31
   # Renovate security update: vitest@5.0.5 と、それを exact pin する vite-plus@1.3.0。
