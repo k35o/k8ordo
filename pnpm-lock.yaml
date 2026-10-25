@@ -249,8 +249,8 @@ catalogs:
       specifier: 2.3.0
       version: 2.3.0
     zod:
-      specifier: 4.6.5
-      version: 4.6.5
+      specifier: 4.6.6
+      version: 4.6.6
 
 overrides:
   '@oxc-project/types': 0.154.0
@@ -327,7 +327,7 @@ importers:
         version: link:../../packages/ui
       zod:
         specifier: 'catalog:'
-        version: 4.6.5
+        version: 4.6.6
     devDependencies:
       '@better-css-modules/cli':
         specifier: 'catalog:'
@@ -382,7 +382,7 @@ importers:
         version: 0.0.1
       zod:
         specifier: 'catalog:'
-        version: 4.6.5
+        version: 4.6.6
     devDependencies:
       '@k8ordo/framework':
         specifier: workspace:^
@@ -431,7 +431,7 @@ importers:
         version: 0.0.1
       zod:
         specifier: 'catalog:'
-        version: 4.6.5
+        version: 4.6.6
     devDependencies:
       '@k8ordo/framework':
         specifier: workspace:^
@@ -496,34 +496,34 @@ importers:
     dependencies:
       '@ai-sdk/react':
         specifier: 4.0.147
-        version: 4.0.147(react@19.3.1)(zod@4.6.5)
+        version: 4.0.147(react@19.3.1)(zod@4.6.6)
       '@json-render/core':
         specifier: 'catalog:'
-        version: 0.21.1(zod@4.6.5)
+        version: 0.21.1(zod@4.6.6)
       '@json-render/react':
         specifier: 'catalog:'
-        version: 0.21.1(react@19.3.1)(zod@4.6.5)
+        version: 0.21.1(react@19.3.1)(zod@4.6.6)
       '@k8ordo/ui':
         specifier: workspace:^
         version: link:../../packages/ui
       '@openuidev/lang-core':
         specifier: 'catalog:'
-        version: 1.0.1(zod@4.6.5)
+        version: 1.0.1(zod@4.6.6)
       '@openuidev/react-lang':
         specifier: 'catalog:'
-        version: 1.0.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(zod@4.6.5)
+        version: 1.0.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(zod@4.6.6)
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.3.3(@voidzero-dev/vite-plus-core@1.3.0(@arethetypeswrong/core@0.18.5)(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.25)(typescript@7.0.2))
       ai:
         specifier: 'catalog:'
-        version: 7.0.143(zod@4.6.5)
+        version: 7.0.143(zod@4.6.6)
       tailwindcss:
         specifier: 'catalog:'
         version: 4.3.3
       zod:
         specifier: 'catalog:'
-        version: 4.6.5
+        version: 4.6.6
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -563,10 +563,10 @@ importers:
     dependencies:
       '@json-render/core':
         specifier: 'catalog:'
-        version: 0.21.1(zod@4.6.5)
+        version: 0.21.1(zod@4.6.6)
       '@json-render/react':
         specifier: 'catalog:'
-        version: 0.21.1(react@19.3.1)(zod@4.6.5)
+        version: 0.21.1(react@19.3.1)(zod@4.6.6)
       '@k8ordo/ui':
         specifier: workspace:^
         version: link:../../packages/ui
@@ -581,7 +581,7 @@ importers:
         version: 19.3.1(react@19.3.1)
       zod:
         specifier: 'catalog:'
-        version: 4.6.5
+        version: 4.6.6
     devDependencies:
       '@tailwindcss/postcss':
         specifier: 'catalog:'
@@ -642,7 +642,7 @@ importers:
         version: 2.3.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(vitest@5.0.5)
       zod:
         specifier: 'catalog:'
-        version: 4.6.5
+        version: 4.6.6
 
   packages/form:
     devDependencies:
@@ -687,7 +687,7 @@ importers:
         version: 2.3.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(vitest@5.0.5)
       zod:
         specifier: 'catalog:'
-        version: 4.6.5
+        version: 4.6.6
 
   packages/framework:
     dependencies:
@@ -935,7 +935,7 @@ importers:
         version: 2.3.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(vitest@5.0.5)
       zod:
         specifier: 'catalog:'
-        version: 4.6.5
+        version: 4.6.6
 
   packages/ui:
     dependencies:
@@ -969,10 +969,10 @@ importers:
         version: 5.5.1(storybook@10.6.2(@types/react@19.3.0)(react@19.3.1)(vite-plus@1.3.0(@arethetypeswrong/core@0.18.5)(@types/node@24.19.2)(@vitest/browser-playwright@5.0.5)(@vitest/coverage-v8@5.0.5)(@vitest/ui@5.0.5)(esbuild@0.28.2)(jiti@2.7.0)(playwright@1.63.0)(publint@0.3.25)(typescript@7.0.2)))
       '@json-render/core':
         specifier: 'catalog:'
-        version: 0.21.1(zod@4.6.5)
+        version: 0.21.1(zod@4.6.6)
       '@json-render/react':
         specifier: 'catalog:'
-        version: 0.21.1(react@19.3.1)(zod@4.6.5)
+        version: 0.21.1(react@19.3.1)(zod@4.6.6)
       '@k8ordo/form':
         specifier: workspace:^
         version: link:../form
@@ -981,10 +981,10 @@ importers:
         version: link:../i18n
       '@openuidev/lang-core':
         specifier: 'catalog:'
-        version: 1.0.1(zod@4.6.5)
+        version: 1.0.1(zod@4.6.6)
       '@openuidev/react-lang':
         specifier: 'catalog:'
-        version: 1.0.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(zod@4.6.5)
+        version: 1.0.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(zod@4.6.6)
       '@storybook/addon-a11y':
         specifier: 10.6.2
         version: 10.6.2(storybook@10.6.2(@types/react@19.3.0)(react@19.3.1)(vite-plus@1.3.0(@arethetypeswrong/core@0.18.5)(@types/node@24.19.2)(@vitest/browser-playwright@5.0.5)(@vitest/coverage-v8@5.0.5)(@vitest/ui@5.0.5)(esbuild@0.28.2)(jiti@2.7.0)(playwright@1.63.0)(publint@0.3.25)(typescript@7.0.2)))
@@ -1020,7 +1020,7 @@ importers:
         version: 5.0.5(vitest@5.0.5)
       ai:
         specifier: 'catalog:'
-        version: 7.0.143(zod@4.6.5)
+        version: 7.0.143(zod@4.6.6)
       postcss:
         specifier: 'catalog:'
         version: 8.5.30
@@ -1065,7 +1065,7 @@ importers:
         version: 2.3.0(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(vitest@5.0.5)
       zod:
         specifier: 'catalog:'
-        version: 4.6.5
+        version: 4.6.6
 
 packages:
 
@@ -5175,8 +5175,8 @@ packages:
     resolution: {integrity: sha512-XrBh9ZiQK5mJVRxZBAvD6LwRyAYrK3MFtH3+onyuxFL5hFD44EC3QOmIC1FjTj6H2MMwq46/NAI+NZxLZPZgxg==}
     engines: {node: '>=14.18.0'}
 
-  zod@4.6.5:
-    resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
+  zod@4.6.6:
+    resolution: {integrity: sha512-4UmzQUF5fxvfcYHlbjBmejU+w+hbDnWFx4aS8kBx7nPBHcO2SqPbpAG8snbdg+Xse4pRefR98hgjFgIMCI/UhA==}
 
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
@@ -5185,40 +5185,40 @@ snapshots:
 
   '@adobe/css-tools@4.5.0': {}
 
-  '@ai-sdk/gateway@4.0.116(zod@4.6.5)':
+  '@ai-sdk/gateway@4.0.116(zod@4.6.6)':
     dependencies:
       '@ai-sdk/provider': 4.0.29
-      '@ai-sdk/provider-utils': 5.0.62(zod@4.6.5)
+      '@ai-sdk/provider-utils': 5.0.62(zod@4.6.6)
       '@vercel/oidc': 3.2.0
-      zod: 4.6.5
+      zod: 4.6.6
 
-  '@ai-sdk/mcp@2.0.78(zod@4.6.5)':
+  '@ai-sdk/mcp@2.0.78(zod@4.6.6)':
     dependencies:
       '@ai-sdk/provider': 4.0.29
-      '@ai-sdk/provider-utils': 5.0.62(zod@4.6.5)
+      '@ai-sdk/provider-utils': 5.0.62(zod@4.6.6)
       cross-spawn: 7.0.6
       pkce-challenge: 5.0.1
-      zod: 4.6.5
+      zod: 4.6.6
 
-  '@ai-sdk/provider-utils@5.0.62(zod@4.6.5)':
+  '@ai-sdk/provider-utils@5.0.62(zod@4.6.6)':
     dependencies:
       '@ai-sdk/provider': 4.0.29
       '@standard-schema/spec': 1.1.0
       '@workflow/serde': 4.1.0
       eventsource-parser: 3.1.1
       undici: 7.30.1
-      zod: 4.6.5
+      zod: 4.6.6
 
   '@ai-sdk/provider@4.0.29':
     dependencies:
       json-schema: 0.4.0
 
-  '@ai-sdk/react@4.0.147(react@19.3.1)(zod@4.6.5)':
+  '@ai-sdk/react@4.0.147(react@19.3.1)(zod@4.6.6)':
     dependencies:
-      '@ai-sdk/mcp': 2.0.78(zod@4.6.5)
+      '@ai-sdk/mcp': 2.0.78(zod@4.6.6)
       '@ai-sdk/provider': 4.0.29
-      '@ai-sdk/provider-utils': 5.0.62(zod@4.6.5)
-      ai: 7.0.143(zod@4.6.5)
+      '@ai-sdk/provider-utils': 5.0.62(zod@4.6.6)
+      ai: 7.0.143(zod@4.6.6)
       react: 19.3.1
       swr: 2.5.1(react@19.3.1)
       throttleit: 2.1.0
@@ -5696,13 +5696,13 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
 
-  '@json-render/core@0.21.1(zod@4.6.5)':
+  '@json-render/core@0.21.1(zod@4.6.6)':
     dependencies:
-      zod: 4.6.5
+      zod: 4.6.6
 
-  '@json-render/react@0.21.1(react@19.3.1)(zod@4.6.5)':
+  '@json-render/react@0.21.1(react@19.3.1)(zod@4.6.6)':
     dependencies:
-      '@json-render/core': 0.21.1(zod@4.6.5)
+      '@json-render/core': 0.21.1(zod@4.6.6)
       react: 19.3.1
     transitivePeerDependencies:
       - zod
@@ -5772,29 +5772,29 @@ snapshots:
   '@next/swc-win32-x64-msvc@16.4.2':
     optional: true
 
-  '@openuidev/devtools@0.3.0(@openuidev/observability@0.0.4)(@openuidev/react-lang@1.0.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(zod@4.6.5))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
+  '@openuidev/devtools@0.3.0(@openuidev/observability@0.0.4)(@openuidev/react-lang@1.0.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(zod@4.6.6))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)':
     dependencies:
       '@openuidev/observability': 0.0.4
       lucide-react: 0.575.0(react@19.3.1)
       react: 19.3.1
       react-dom: 19.3.1(react@19.3.1)
     optionalDependencies:
-      '@openuidev/react-lang': 1.0.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(zod@4.6.5)
+      '@openuidev/react-lang': 1.0.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(zod@4.6.6)
 
-  '@openuidev/lang-core@1.0.1(zod@4.6.5)':
+  '@openuidev/lang-core@1.0.1(zod@4.6.6)':
     dependencies:
       ci-info: 4.4.0
-      zod: 4.6.5
+      zod: 4.6.6
 
   '@openuidev/observability@0.0.4': {}
 
-  '@openuidev/react-lang@1.0.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(zod@4.6.5)':
+  '@openuidev/react-lang@1.0.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(zod@4.6.6)':
     dependencies:
-      '@openuidev/devtools': 0.3.0(@openuidev/observability@0.0.4)(@openuidev/react-lang@1.0.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(zod@4.6.5))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
-      '@openuidev/lang-core': 1.0.1(zod@4.6.5)
+      '@openuidev/devtools': 0.3.0(@openuidev/observability@0.0.4)(@openuidev/react-lang@1.0.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(zod@4.6.6))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@openuidev/lang-core': 1.0.1(zod@4.6.6)
       '@openuidev/observability': 0.0.4
       react: 19.3.1
-      zod: 4.6.5
+      zod: 4.6.6
     optionalDependencies:
       react-dom: 19.3.1(react@19.3.1)
 
@@ -6926,12 +6926,12 @@ snapshots:
 
   acorn@8.19.0: {}
 
-  ai@7.0.143(zod@4.6.5):
+  ai@7.0.143(zod@4.6.6):
     dependencies:
-      '@ai-sdk/gateway': 4.0.116(zod@4.6.5)
+      '@ai-sdk/gateway': 4.0.116(zod@4.6.6)
       '@ai-sdk/provider': 4.0.29
-      '@ai-sdk/provider-utils': 5.0.62(zod@4.6.5)
-      zod: 4.6.5
+      '@ai-sdk/provider-utils': 5.0.62(zod@4.6.6)
+      zod: 4.6.6
 
   ansi-escapes@7.3.0:
     dependencies:
@@ -8984,6 +8984,6 @@ snapshots:
       '@yuku-toolchain/types': 0.19.0
       yuku-core: 0.19.0
 
-  zod@4.6.5: {}
+  zod@4.6.6: {}
 
   zwitch@2.0.4: {}
