@@ -8,6 +8,10 @@
     - modern-wolves-yell
     - release-1-0-color-scheme
     - typescript-7-peer-floor
+"@k8ordo/color-scheme@1.1.0":
+  dir: packages/color-scheme
+  intents:
+    - zod-peer-floor
 "@k8ordo/form@0.1.1":
   dir: packages/form
   intents:
@@ -34,12 +38,24 @@
     - vast-geckos-love
     - young-shirts-flow
     - zod-4-5-iso-formats
+"@k8ordo/form@1.1.0":
+  dir: packages/form
+  intents:
+    - zod-peer-floor
 "@k8ordo/framework@1.0.0":
   dir: packages/framework
   intents:
     - framework-client-reference-hints
     - framework-i18n-register
     - release-1-0-framework
+"@k8ordo/framework@1.1.0":
+  dir: packages/framework
+  intents:
+    - framework-csp-report-to
+    - framework-react-compiler
+    - framework-vercel-content-types
+    - framework-vercel-immutable-assets
+    - framework-vercel-routes
 "@k8ordo/i18n@1.0.0":
   dir: packages/i18n
   intents:
@@ -110,6 +126,10 @@
     - state-storage-write-throws
     - state-url-array-booleans
     - typescript-7-peer-floor
+"@k8ordo/state@1.1.0":
+  dir: packages/state
+  intents:
+    - zod-peer-floor
 "@k8ordo/ui@2.0.0":
   dir: packages/ui
   intents:
@@ -200,6 +220,12 @@
     - wide-panes-split
     - wide-tools-shop
     - writing-mode-first-render
+"@k8ordo/ui@2.2.0":
+  dir: packages/ui
+  intents:
+    - openui-1
+    - tree-flat-items
+    - zod-peer-floor
 docs@0.0.11:
   dir: apps/docs
   intents:
