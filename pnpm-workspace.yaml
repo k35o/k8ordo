@@ -49,7 +49,7 @@ catalog:
   ai: 7.0.143
   # @k8ordo/framework の reactCompiler が使う、@vitejs/plugin-react の任意の peer。
   # 版は plugin-react の peer の範囲から選ぶので、plugin-react と揃えて手で上げる (renovate.json)
-  oxc-transform-react: 0.154.0
+  oxc-transform-react: 0.152.0
   # 1.64 は Firefox が iframe をまたぐフォーカスを壊すので飛ばす (renovate.json)
   playwright: 1.63.0
   postcss: 8.5.30
