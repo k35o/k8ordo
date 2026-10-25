@@ -41,7 +41,7 @@ it. Install one when you import the entry it belongs to.
 | `typescript`            | ≥7.0.0          | optional | the shipped type declarations                     |
 | `@types/react`          | ≥19.3.0         | optional | the shipped type declarations                     |
 | `@types/react-dom`      | ≥19.3.0         | optional | the shipped type declarations                     |
-| `zod`                   | ^4.4.3          | optional | generative-UI schemas                             |
+| `zod`                   | ^4.6.6          | optional | generative-UI schemas                             |
 | `@json-render/core`     | ≥0.21.0 <0.22.0 | optional | `@k8ordo/ui/json-render`                          |
 | `@json-render/react`    | ≥0.21.0 <0.22.0 | optional | `@k8ordo/ui/json-render`                          |
 | `@openuidev/lang-core`  | ^1.0.0          | optional | `@k8ordo/ui/openui`, `@k8ordo/ui/openui/prompt`   |
