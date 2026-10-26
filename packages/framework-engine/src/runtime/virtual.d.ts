@@ -3,7 +3,6 @@
 
 declare module 'virtual:k8ordo/routes' {
   import type { Routes } from '@k8ordo/router';
-  import type { ComponentType } from 'react';
 
   export const routes: Routes;
   /** Per pattern, where a `redirect.ts` sends the visitor. */
@@ -14,25 +13,40 @@ declare module 'virtual:k8ordo/routes' {
     >
   >;
   /**
-   * Per full pattern, the schemas along its stack — layouts first. Spelled
+   * A route file read when a request reaches it — a page, a not-found, a
+   * `route.ts`, a `fallback.tsx` — as its module: whatever it exports.
+   */
+  export type Leaf = Readonly<Record<string, unknown>>;
+  type Load = () => Promise<Leaf>;
+  /**
+   * Per page pattern, the schemas along its stack — layouts first, then the
+   * page's own, read off the module of the file that answers it. Spelled
    * out rather than imported from `./params`: a relative import inside an
    * ambient module declaration resolves loosely, and the handler wants the
    * real shape.
    */
-  export const paramSchemas: SchemaStacks;
+  export const paramSchemas: Readonly<
+    Record<string, ((leaf: Leaf) => Schemas) | undefined>
+  >;
   /**
    * Per catch-all pattern, the schemas of the layouts above its not-found —
    * run for what they write, never to refuse it.
    */
-  export const catchAllSchemas: SchemaStacks;
-  /** Per page pattern, what reads the search a page declared it reads. */
+  export const catchAllSchemas: Readonly<Record<string, Schemas | undefined>>;
+  /**
+   * Per page pattern, what reads the search a page declared it reads, made
+   * from the page's module.
+   */
   export const searchReaders: Readonly<
-    Record<string, ((input: URLSearchParams) => unknown) | undefined>
+    Record<
+      string,
+      ((leaf: Leaf) => (input: URLSearchParams) => unknown) | undefined
+    >
   >;
-  /** Per pattern, the `route.ts` module that answers it, whole. */
-  export const routeModules: Readonly<
-    Record<string, Readonly<Record<string, unknown>> | undefined>
-  >;
+  /** Per pattern, what reads the page or the not-found that answers it. */
+  export const pageModules: Readonly<Record<string, Load | undefined>>;
+  /** Per pattern, what reads the `route.ts` module that answers it. */
+  export const routeModules: Readonly<Record<string, Load | undefined>>;
   /**
    * Per pattern, the `guard.ts` default exports that run before it answers,
    * outer first; `/*` carries the root's.
@@ -51,39 +65,34 @@ declare module 'virtual:k8ordo/routes' {
 
   /**
    * Per page pattern with a `fallback.tsx`, under a build into files: what
-   * renders its shell, the params a shell may leave to the browser, and the
+   * reads its shell, the params a shell may leave to the browser, and the
    * schemas of the layouts above it. Empty under a running server.
    */
   export const fallbacks: Readonly<
     Record<
       string,
       | {
-          readonly component: ComponentType<never>;
+          readonly load: Load;
           readonly open: readonly string[];
-          readonly schemas: SchemaStacks[string];
+          readonly schemas: Schemas;
         }
       | undefined
     >
   >;
 
-  type SchemaStacks = Readonly<
-    Record<
-      string,
-      ReadonlyArray<{
-        readonly '~standard': {
-          readonly validate: (
-            value: unknown,
-          ) =>
+  type Schemas = ReadonlyArray<{
+    readonly '~standard': {
+      readonly validate: (
+        value: unknown,
+      ) =>
+        | { readonly value: unknown; readonly issues?: undefined }
+        | { readonly issues: readonly unknown[] }
+        | Promise<
             | { readonly value: unknown; readonly issues?: undefined }
             | { readonly issues: readonly unknown[] }
-            | Promise<
-                | { readonly value: unknown; readonly issues?: undefined }
-                | { readonly issues: readonly unknown[] }
-              >;
-        };
-      }>
-    >
-  >;
+          >;
+    };
+  }>;
 }
 
 type ImportMetaEnv = {

@@ -24,14 +24,17 @@ describe('the emitted table', () => {
     '(docs)/guide/page.tsx',
   ]);
 
-  it('imports every route file once, extensionless', () => {
+  it('imports the layouts with the table, extensionless', () => {
     expect(source).toContain("import layout from './routes/layout';");
-    expect(source).toContain("import page from './routes/page';");
-    expect(source).toContain(
-      "import products_id_page from './routes/products/[id]/page';",
-    );
     expect(source).toContain(
       "import docs_layout from './routes/(docs)/layout';",
+    );
+  });
+
+  it('reads each page when a request reaches it, extensionless', () => {
+    expect(source).toContain("const page = () => import('./routes/page');");
+    expect(source).toContain(
+      "const products_id_page = () => import('./routes/products/[id]/page');",
     );
   });
 
@@ -49,10 +52,11 @@ describe('the emitted table', () => {
     );
   });
 
-  it('gives a directory with only a page the component itself', () => {
+  it('gives a directory with only a page that page, as lazy() over what reads it', () => {
     expect(source).toContain(
-      "'/:id': products_id_page satisfies Page<'/products/:id'>,",
+      "'/:id': lazy(products_id_page) satisfies Page<'/products/:id'>,",
     );
+    expect(source).toContain("import { lazy } from 'react';");
   });
 
   it('gives a directory with children a branch', () => {
@@ -76,15 +80,19 @@ describe('the emitted table', () => {
 describe('naming', () => {
   it('keeps colliding paths apart', () => {
     const source = emit(['(a)/x/page.tsx', 'a/x/page.tsx']);
-    expect(source).toContain("import a_x_page from './routes/(a)/x/page';");
-    expect(source).toContain("import a_x_page_2 from './routes/a/x/page';");
+    expect(source).toContain(
+      "const a_x_page = () => import('./routes/(a)/x/page');",
+    );
+    expect(source).toContain(
+      "const a_x_page_2 = () => import('./routes/a/x/page');",
+    );
   });
 
   it('emits a flat record when the root has no layout', () => {
     const source = emit(['page.tsx', 'about/page.tsx']);
-    expect(source).toContain("  '/': page satisfies Page<'/'>,");
+    expect(source).toContain("  '/': lazy(page) satisfies Page<'/'>,");
     expect(source).toContain(
-      "  '/about': about_page satisfies Page<'/about'>,",
+      "  '/about': lazy(about_page) satisfies Page<'/about'>,",
     );
     expect(source).not.toContain('layout:');
     // Layout の別名は使うときだけ出す(未使用のローカル型になるため)
@@ -100,12 +108,12 @@ describe('what a route file is promised', () => {
       'products/[id]/page.tsx',
       'not-found.tsx',
     ]);
-    expect(source).toContain("page satisfies Page<'/'>");
-    expect(source).toContain("products_page satisfies Page<'/products'>");
+    expect(source).toContain("lazy(page) satisfies Page<'/'>");
+    expect(source).toContain("lazy(products_page) satisfies Page<'/products'>");
     expect(source).toContain(
-      "products_id_page satisfies Page<'/products/:id'>",
+      "lazy(products_id_page) satisfies Page<'/products/:id'>",
     );
-    expect(source).toContain("not_found satisfies Page<'/*'>");
+    expect(source).toContain("lazy(not_found) satisfies Page<'/*'>");
   });
 
   it('states a layout against the prefix every route below it shares', () => {
@@ -126,7 +134,7 @@ describe('what a route file is promised', () => {
       '(docs)/guide/page.tsx',
     ]);
     expect(source).toContain("docs_layout satisfies Layout<'/'>");
-    expect(source).toContain("docs_guide_page satisfies Page<'/guide'>");
+    expect(source).toContain("lazy(docs_guide_page) satisfies Page<'/guide'>");
   });
 });
 
@@ -204,9 +212,9 @@ describe('the emitted register', () => {
 
   it('types links by the params schemas the route files declared', () => {
     const source = emitRegisterModule({ routesModule: './routes.gen' });
-    expect(source).toContain('params: ParsedParamsMap<typeof paramSchemas>;');
+    expect(source).toContain('params: ParsedParamsMap<ParamSchemas>;');
     expect(source).toContain(
-      "import type { paramSchemas, routes, searchReaders } from './routes.gen';",
+      "import type { ParamSchemas, routes, SearchReads } from './routes.gen';",
     );
   });
 });
@@ -231,59 +239,64 @@ describe('params schemas', () => {
     withParams,
   });
 
+  const map = (name: string): string => {
+    const start = source.indexOf(`export const ${name} = {`);
+    return source.slice(start, source.indexOf('} as const;', start));
+  };
+
   it('is emitted from a table the grammar accepted', () => {
     expect(parseRouteTree(files).problems).toStrictEqual([]);
   });
 
-  it('imports the schema beside the component of a file that declares one', () => {
+  it('imports a layout’s schema beside the layout, and reads a page’s off the page', () => {
     expect(source).toContain(
       "import locale_layout, { paramsSchema as locale_layout_params } from './routes/[locale]/layout';",
     );
     expect(source).toContain(
-      "import locale_products_id_page, { paramsSchema as locale_products_id_page_params } from './routes/[locale]/products/[id]/page';",
+      "const locale_products_id_page = () => import('./routes/[locale]/products/[id]/page');",
     );
-    expect(source).toContain(
-      "import locale_page from './routes/[locale]/page';",
-    );
+    expect(source).not.toContain('locale_products_id_page_params');
   });
 
   it('checks each schema against the pattern its file sits under', () => {
     expect(source).toContain(
-      "locale_layout_params satisfies ParamsSchemaFor<'/:locale'>,",
+      "Checked<typeof locale_layout_params, ParamsSchemaFor<'/:locale'>>,",
     );
     expect(source).toContain(
-      "locale_products_id_page_params satisfies ParamsSchemaFor<'/:locale/products/:id'>,",
+      "Checked<Loaded<typeof locale_products_id_page>['paramsSchema'], ParamsSchemaFor<'/:locale/products/:id'>>,",
     );
   });
 
-  it('lists, per page, the schemas along its stack — layouts first', () => {
+  it('lists, per page, the schemas along its stack — layouts first, then its own off the page', () => {
     expect(source).toContain(
-      "'/:locale/products/:id': [locale_layout_params, locale_products_id_page_params],",
+      "'/:locale/products/:id': (page: Loaded<typeof locale_products_id_page>) => [locale_layout_params, page.paramsSchema] as const,",
     );
     // 自分はスキーマを持たないが、上のレイアウトのものは受ける
-    expect(source).toContain("'/:locale': [locale_layout_params],");
-    expect(source).toContain("'/:locale/about': [locale_layout_params],");
+    expect(source).toContain(
+      "'/:locale': () => [locale_layout_params] as const,",
+    );
+    expect(source).toContain(
+      "'/:locale/about': () => [locale_layout_params] as const,",
+    );
     // ルートのページは何の下にもない
-    expect(source).not.toContain("'/': [");
+    expect(map('paramSchemas')).not.toContain("'/':");
   });
 
   it('types a page by the schemas that run before it, and leaves the rest alone', () => {
     expect(source).toContain(
-      "locale_products_id_page satisfies Page<'/:locale/products/:id', (typeof paramSchemas)['/:locale/products/:id']>",
+      "lazy(locale_products_id_page) satisfies Page<'/:locale/products/:id', ParamSchemas['/:locale/products/:id']>",
     );
-    expect(source).toContain("page satisfies Page<'/'>");
+    expect(source).toContain("lazy(page) satisfies Page<'/'>");
     // catch-all の params はスキーマが拒んでも答えるので、型も文字列のまま
-    expect(source).toContain("not_found satisfies Page<'/*'>");
-    expect(source).toContain("locale_not_found satisfies Page<'/:locale/*'>");
+    expect(source).toContain("lazy(not_found) satisfies Page<'/*'>");
+    expect(source).toContain(
+      "lazy(locale_not_found) satisfies Page<'/:locale/*'>",
+    );
     // レイアウトは文字列のまま受ける
     expect(source).toContain("locale_layout satisfies Layout<'/:locale'>");
   });
 
   it('lists, per catch-all, the schemas of the layouts above its not-found — apart from the pages, which they type', () => {
-    const map = (name: string): string => {
-      const start = source.indexOf(`export const ${name} = {`);
-      return source.slice(start, source.indexOf('} as const;', start));
-    };
     // ルートの not-found の上にはスキーマが無いので、載るのは 1 つだけ
     expect(map('catchAllSchemas')).toBe(
       "export const catchAllSchemas = {\n  '/:locale/*': [locale_layout_params],\n",
@@ -397,7 +410,7 @@ describe('error.tsx in the emitted table', () => {
 
   it('makes a directory with a page and an error a branch of its own', () => {
     expect(source).toMatch(
-      /'\/shop': \{\n\s+error: shop_error satisfies ErrorComponent,\n\s+children: \{\n\s+'\/': shop_page satisfies Page<'\/shop'>,/u,
+      /'\/shop': \{\n\s+error: shop_error satisfies ErrorComponent,\n\s+children: \{\n\s+'\/': lazy\(shop_page\) satisfies Page<'\/shop'>,/u,
     );
   });
 
@@ -532,12 +545,9 @@ describe('route.ts in the emitted table', () => {
     },
   );
 
-  it('imports a route.ts whole, since it answers by its exports', () => {
+  it('reads a route.ts whole when a request reaches it, since it answers by its exports', () => {
     expect(source).toContain(
-      "import * as feed_xml_route from './routes/feed.xml/route';",
-    );
-    expect(source).toContain(
-      'const api_id_route_params = api_id_route.paramsSchema;',
+      "const feed_xml_route = () => import('./routes/feed.xml/route');",
     );
   });
 
@@ -557,12 +567,14 @@ describe('route.ts in the emitted table', () => {
 
   it('checks each module against its pattern, typed by the schemas along it', () => {
     expect(source).toContain(
-      "feed_xml_route satisfies RouteModule<'/feed.xml'>,",
+      "Checked<Loaded<typeof feed_xml_route>, RouteModule<'/feed.xml'>>,",
     );
     expect(source).toContain(
-      "api_id_route satisfies RouteModule<'/api/:id', (typeof paramSchemas)['/api/:id']>,",
+      "Checked<Loaded<typeof api_id_route>, RouteModule<'/api/:id', ParamSchemas['/api/:id']>>,",
     );
-    expect(source).toContain("'/api/:id': [api_id_route_params],");
+    expect(source).toContain(
+      "'/api/:id': (route: Loaded<typeof api_id_route>) => [route.paramsSchema] as const,",
+    );
   });
 
   it('emits an empty map, and no route types, when nothing answers from a route.ts', () => {
@@ -582,7 +594,7 @@ describe('loading.tsx in the emitted table', () => {
       'products/page.tsx',
     ]);
     expect(source).toMatch(
-      /'\/products': \{\n\s+loading: products_loading satisfies ComponentType,\n\s+children: \{\n\s+'\/': products_page satisfies Page<'\/products'>,/u,
+      /'\/products': \{\n\s+loading: products_loading satisfies ComponentType,\n\s+children: \{\n\s+'\/': lazy\(products_page\) satisfies Page<'\/products'>,/u,
     );
   });
 
@@ -605,35 +617,26 @@ describe('a page that exports search', () => {
     },
   );
 
-  it('imports the schema beside the page, and reads it through @k8ordo/state', () => {
+  it('lists, per page, what reads its search, made from the page through @k8ordo/state', () => {
     expect(source).toContain("import { urlReader } from '@k8ordo/state';");
-    expect(source).toContain(
-      "import products_page, { search as products_page_search } from './routes/products/page';",
-    );
-    expect(source).toContain(
-      "import products_id_page, { paramsSchema as products_id_page_params, search as products_id_page_search } from './routes/products/[id]/page';",
-    );
-  });
-
-  it('lists, per page, what reads its search', () => {
     const start = source.indexOf('export const searchReaders = {');
     expect(source.slice(start, source.indexOf('} as const;', start))).toBe(
-      "export const searchReaders = {\n  '/products': urlReader(products_page_search),\n  '/products/:id': urlReader(products_id_page_search),\n",
+      "export const searchReaders = {\n  '/products': (page: Loaded<typeof products_page>) => urlReader(page.search),\n  '/products/:id': (page: Loaded<typeof products_id_page>) => urlReader(page.search),\n",
     );
   });
 
   it('types the page by what it reads', () => {
     expect(source).toContain(
-      "products_page satisfies Page<'/products', [], { search: ReturnType<(typeof searchReaders)['/products']> }>",
+      "lazy(products_page) satisfies Page<'/products', [], { search: SearchReads['/products'] }>",
     );
     expect(source).toContain(
-      "products_id_page satisfies Page<'/products/:id', (typeof paramSchemas)['/products/:id'], { search: ReturnType<(typeof searchReaders)['/products/:id']> }>",
+      "lazy(products_id_page) satisfies Page<'/products/:id', ParamSchemas['/products/:id'], { search: SearchReads['/products/:id'] }>",
     );
   });
 
   it('leaves every other page, and the state import, alone', () => {
     const plain = emit(['page.tsx']);
-    expect(plain).toContain("page satisfies Page<'/'>");
+    expect(plain).toContain("lazy(page) satisfies Page<'/'>");
     expect(plain).toContain('export const searchReaders = {\n} as const;');
     expect(plain).not.toContain("from '@k8ordo/state'");
   });
@@ -665,18 +668,21 @@ describe('fallback.tsx in the emitted table', () => {
   it('lists, under a build into files, the shell per pattern with its open params and the layouts’ schemas', () => {
     const source = emitIn('static');
     expect(source).toContain(
-      "import locale_posts_id_fallback from './routes/[locale]/posts/[id]/fallback';",
+      "const locale_posts_id_fallback = () => import('./routes/[locale]/posts/[id]/fallback');",
     );
     expect(source).toContain(
       [
         'export const fallbacks = {',
         "  '/:locale/posts/:id': {",
-        '    component: locale_posts_id_fallback satisfies ComponentType,',
+        '    load: locale_posts_id_fallback,',
         "    open: ['id'],",
         '    schemas: [layout_params, locale_layout_params],',
         '  },',
         '} as const;',
       ].join('\n'),
+    );
+    expect(source).toContain(
+      "Checked<Loaded<typeof locale_posts_id_fallback>['default'], ComponentType>,",
     );
   });
 
@@ -694,5 +700,56 @@ describe('fallback.tsx in the emitted table', () => {
       { importPrefix: './routes', mode: 'static', withParams },
     );
     expect(tableOf(emitIn('static'))).toBe(tableOf(without));
+  });
+});
+
+describe('what the table reads only when a request reaches it', () => {
+  const source = emitRoutesModule(
+    parseRouteTree([
+      'layout.tsx',
+      'error.tsx',
+      'guard.ts',
+      'page.tsx',
+      'not-found.tsx',
+      'products/loading.tsx',
+      'products/page.tsx',
+      'feed.xml/route.ts',
+      'old/redirect.ts',
+      'posts/[id]/page.tsx',
+      'posts/[id]/fallback.tsx',
+    ]).tree,
+    { importPrefix: './routes', mode: 'static' },
+  );
+  const filesOf = (pattern: RegExp): string[] =>
+    [...source.matchAll(pattern)].map(([, file]) => file ?? '').toSorted();
+
+  it('imports the frame of every page, and what answers before anything renders, with the table', () => {
+    expect(filesOf(/^import \w+ from '\.\/routes\/(.+)';$/gmu)).toStrictEqual([
+      'error',
+      'guard',
+      'layout',
+      'old/redirect',
+      'products/loading',
+    ]);
+  });
+
+  it('reads a page, a not-found, a route.ts and a fallback.tsx only when a request reaches it', () => {
+    expect(
+      filesOf(/^const \w+ = \(\) => import\('\.\/routes\/(.+)'\);$/gmu),
+    ).toStrictEqual([
+      'feed.xml/route',
+      'not-found',
+      'page',
+      'posts/[id]/fallback',
+      'posts/[id]/page',
+      'products/page',
+    ]);
+  });
+
+  it('lists, per pattern, what reads the page or the not-found that answers it', () => {
+    const start = source.indexOf('export const pageModules = {');
+    expect(source.slice(start, source.indexOf('} as const;', start))).toBe(
+      "export const pageModules = {\n  '/': page,\n  '/products': products_page,\n  '/posts/:id': posts_id_page,\n  '/*': not_found,\n",
+    );
   });
 });

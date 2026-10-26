@@ -234,7 +234,7 @@ describe('generate, for a page with a fallback.tsx', () => {
   it('writes its shell into the table under a build into files', async () => {
     const source = await generatedTableIn('static');
     expect(source).toContain(
-      "import posts_id_fallback from '../src/routes/posts/[id]/fallback';",
+      "const posts_id_fallback = () => import('../src/routes/posts/[id]/fallback');",
     );
     expect(source).toContain("  '/posts/:id': {");
   });

@@ -1,5 +1,5 @@
 import { fallbackShapes, slotOf } from '../grammar/tree';
-import type { Problem, RouteDir } from '../grammar/tree';
+import type { Problem, RouteDir, Slot } from '../grammar/tree';
 import { FRAMEWORK } from '../host';
 import type { Mode } from '../host';
 import { ROUTE_METHODS } from '../runtime/route';
@@ -387,8 +387,6 @@ const beliefs = (
 
 const schemaName = (componentName: string): string => `${componentName}_params`;
 
-const searchName = (componentName: string): string => `${componentName}_search`;
-
 type Guards = {
   /** Per pattern, the `guard.ts` files that run before it answers, outer first. */
   readonly stacks: ReadonlyMap<string, readonly string[]>;
@@ -430,77 +428,57 @@ const guardsOf = (tree: RouteDir): Guards => {
   return { stacks, own };
 };
 
+/**
+ * The slots a request reaches one file at a time: the page or the not-found
+ * that answers it, a route.ts, a page's shell. The table reads each of them
+ * when a request reaches it — imported with the table, it would be in the
+ * handler's own chunk, and what it renders in the browser and the CSS it
+ * imports would be in what every page loads. A layout, an error and a
+ * loading are the frame of every page below them, and a guard and a redirect
+ * answer before anything renders, so those are imported with the table.
+ */
+const LATE: ReadonlySet<Slot> = new Set([
+  'page',
+  'notFound',
+  'route',
+  'fallback',
+]);
+
+const isLate = (file: string): boolean => {
+  const slot = slotOf(file);
+  return slot !== null && LATE.has(slot);
+};
+
 export const emitRoutesModule = (
   tree: RouteDir,
   options: EmitOptions,
 ): string => {
   const namer = createNamer();
+  // A page or a not-found stands in the table as `lazy()` over what reads it:
+  // the table is checked against its props as it would be against the
+  // component, and the handler renders the component it read in its place.
+  const valueOf = (file: string): string =>
+    isLate(file) ? `lazy(${namer.take(file)})` : namer.take(file);
   // A route.ts or a redirect.ts is not a component: its place in the table
   // is held by one that renders nothing, and the module itself goes to
   // `routeModules` or `redirects`.
   const table = buildTable(tree, (file) =>
     slotOf(file) === 'route' || slotOf(file) === 'redirect'
       ? ANSWERED
-      : namer.take(file),
+      : valueOf(file),
   );
   const routeFiles = declaredRouteFiles(tree).map((route) => ({
     pattern: route.pattern,
-    file: route.file,
     name: namer.take(route.file),
+  }));
+  const redirects = declaredRedirects(tree).map((redirect) => ({
+    pattern: redirect.pattern,
+    name: namer.take(redirect.file),
   }));
   // A shell exists only in a build into files; a running server renders
   // every value with its page, so nothing of a fallback.tsx is compiled in.
   const shells = options.mode === 'static' ? fallbackShapes(tree) : [];
   for (const shape of shells) namer.take(shape.file);
-  const withParams = options.withParams ?? new Set<string>();
-  const withSearch = options.withSearch ?? new Set<string>();
-
-  const byFile = beliefs(tree, withParams);
-  const asserted = new Map<string, string>();
-  // Per page pattern, the schema identifiers along its stack — what the
-  // handler runs before the page renders, and what its params are typed by.
-  const stacks = new Map<string, readonly string[]>();
-  // Per catch-all pattern, the layouts' above its not-found. Kept apart from
-  // `stacks`: the router types a page's params, and links to it, by those.
-  const catchAllStacks = new Map<string, readonly string[]>();
-  for (const [file, name] of namer.names) {
-    const belief = byFile.get(file);
-    if (belief === undefined) continue;
-    const schemas = belief.schemas.map((f) => schemaName(namer.take(f)));
-    if (belief.kind === 'layout') {
-      asserted.set(name, `Layout<'${belief.pattern}'>`);
-    } else if (belief.kind === 'error') {
-      asserted.set(name, 'ErrorComponent');
-    } else if (belief.kind === 'loading' || belief.kind === 'fallback') {
-      // A fallback.tsx renders with no props at all: it stands in for every
-      // value, so it is handed none.
-      asserted.set(name, 'ComponentType');
-    } else if (belief.kind === 'notFound') {
-      asserted.set(name, `Page<'${belief.pattern}'>`);
-      if (schemas.length > 0) catchAllStacks.set(belief.pattern, schemas);
-    } else if (belief.kind === 'route') {
-      // Not in the table, so nothing to state there; its schemas still run
-      // before it answers, and type its params.
-      if (schemas.length > 0) stacks.set(belief.pattern, schemas);
-    } else {
-      if (schemas.length > 0) stacks.set(belief.pattern, schemas);
-      const typedBy =
-        schemas.length === 0
-          ? '[]'
-          : `(typeof paramSchemas)['${belief.pattern}']`;
-      asserted.set(
-        name,
-        withSearch.has(file)
-          ? `Page<'${belief.pattern}', ${typedBy}, { search: ReturnType<(typeof searchReaders)['${belief.pattern}']> }>`
-          : schemas.length === 0
-            ? `Page<'${belief.pattern}'>`
-            : `Page<'${belief.pattern}', ${typedBy}>`,
-      );
-    }
-  }
-  const body = Object.entries(table).map(
-    ([key, node]) => `${pad(1)}'${key}': ${renderNode(node, 1, asserted)},`,
-  );
   const guarded = guardsOf(tree);
   const guardStacks = new Map(
     [...guarded.stacks].map(([pattern, files]) => [
@@ -513,52 +491,75 @@ export const emitRoutesModule = (
       `${pad(1)}${namer.take(file)} satisfies Guard<'${pattern}'>,`,
   );
   const hasGuards = guardChecks.length > 0;
+  const withParams = options.withParams ?? new Set<string>();
+  const withSearch = options.withSearch ?? new Set<string>();
+
+  const byFile = beliefs(tree, withParams);
+  const asserted = new Map<string, string>();
+  // Per page pattern (and route.ts), what the handler runs before it
+  // answers: the schemas of the layouts above it that declared one, then its
+  // own — an export of the file the walk reached, which is why each is a
+  // function of that file's module.
+  const stacks = new Map<string, string>();
+  // Per catch-all pattern, the layouts' above its not-found. Kept apart from
+  // `stacks`: the router types a page's params, and links to it, by those.
+  const catchAllStacks = new Map<string, readonly string[]>();
+  // Per page pattern that exports `search`, what reads it, made from the
+  // page's module.
+  const searchReaders = new Map<string, string>();
+  for (const [file, name] of namer.names) {
+    const belief = byFile.get(file);
+    if (belief === undefined) continue;
+    const value = valueOf(file);
+    const layouts = belief.schemas
+      .filter((schema) => schema !== file)
+      .map((schema) => schemaName(namer.take(schema)));
+    if (belief.kind === 'layout') {
+      asserted.set(value, `Layout<'${belief.pattern}'>`);
+    } else if (belief.kind === 'error') {
+      asserted.set(value, 'ErrorComponent');
+    } else if (belief.kind === 'loading') {
+      asserted.set(value, 'ComponentType');
+    } else if (belief.kind === 'notFound') {
+      asserted.set(value, `Page<'${belief.pattern}'>`);
+      if (layouts.length > 0) catchAllStacks.set(belief.pattern, layouts);
+    } else if (belief.kind === 'page' || belief.kind === 'route') {
+      const { pattern } = belief;
+      if (withParams.has(file)) {
+        const module = belief.kind === 'page' ? 'page' : 'route';
+        stacks.set(
+          pattern,
+          `(${module}: Loaded<typeof ${name}>) => [${[...layouts, `${module}.paramsSchema`].join(', ')}] as const`,
+        );
+      } else if (layouts.length > 0) {
+        stacks.set(pattern, `() => [${layouts.join(', ')}] as const`);
+      }
+      if (belief.kind === 'route') continue;
+      if (withSearch.has(file)) {
+        searchReaders.set(
+          pattern,
+          `(page: Loaded<typeof ${name}>) => urlReader(page.search)`,
+        );
+      }
+      const typedBy = stacks.has(pattern) ? `ParamSchemas['${pattern}']` : '[]';
+      asserted.set(
+        value,
+        withSearch.has(file)
+          ? `Page<'${pattern}', ${typedBy}, { search: SearchReads['${pattern}'] }>`
+          : stacks.has(pattern)
+            ? `Page<'${pattern}', ${typedBy}>`
+            : `Page<'${pattern}'>`,
+      );
+    }
+  }
+  const body = Object.entries(table).map(
+    ([key, node]) => `${pad(1)}'${key}': ${renderNode(node, 1, asserted)},`,
+  );
   const hasLayout = [...asserted.values()].some((type) =>
     type.startsWith('Layout<'),
   );
-  const importLines = [...namer.names].map(([file, name]) => {
-    const specifier = `'${options.importPrefix}/${file.replace(/\.[jt]sx?$/u, '')}'`;
-    if (slotOf(file) === 'route')
-      return `import * as ${name} from ${specifier};`;
-    const named = [
-      ...(withParams.has(file) ? [`paramsSchema as ${schemaName(name)}`] : []),
-      ...(withSearch.has(file) ? [`search as ${searchName(name)}`] : []),
-    ];
-    return named.length === 0
-      ? `import ${name} from ${specifier};`
-      : `import ${name}, { ${named.join(', ')} } from ${specifier};`;
-  });
-  // Per page pattern, what reads the search a page declared it reads.
-  const searchReaders = [...namer.names]
-    .filter(([file]) => withSearch.has(file))
-    .map(
-      ([file, name]) =>
-        `${pad(1)}'${(byFile.get(file) as Belief).pattern}': urlReader(${searchName(name)}),`,
-    );
-  // A route.ts is imported whole, so its schema is read off the module.
-  const routeSchemaLines = routeFiles
-    .filter(({ file }) => withParams.has(file))
-    .map(({ name }) => `const ${schemaName(name)} = ${name}.paramsSchema;`);
-  const routeChecks = routeFiles.map(({ pattern, name }) =>
-    stacks.has(pattern)
-      ? `${pad(1)}${name} satisfies RouteModule<'${pattern}', (typeof paramSchemas)['${pattern}']>,`
-      : `${pad(1)}${name} satisfies RouteModule<'${pattern}'>,`,
-  );
-  const hasRoutes = routeFiles.length > 0;
-  const hasError = [...asserted.values()].includes('ErrorComponent');
-  const hasSchemas = withParams.size > 0;
-  // Under a running server a page also receives the request; a build into
-  // files has no request to hand over, so the field is absent — a page that
-  // reads it fails to type-check under mode: 'static' rather than at run time.
-  const withRequest = options.mode === 'server';
-  const requestLine = withRequest ? ['  request: RouteRequest;'] : [];
-  const redirects = declaredRedirects(tree).map((redirect) => ({
-    pattern: redirect.pattern,
-    name: namer.take(redirect.file),
-  }));
-  const redirectImports = redirects.map(
-    ({ name }) =>
-      `import ${name} from '${options.importPrefix}/${namerFile(namer, name).replace(/\.[jt]sx?$/u, '')}';`,
+  const hasLazy = [...namer.names.keys()].some(
+    (file) => slotOf(file) === 'page' || slotOf(file) === 'notFound',
   );
   // Each schema is checked against the pattern its file sits under, loosely:
   // on a pattern with params it must name at least one of them; a key the
@@ -567,16 +568,60 @@ export const emitRoutesModule = (
     .filter(([file]) => withParams.has(file))
     .map(([file, name]) => {
       const belief = byFile.get(file) as Belief;
-      return `${pad(1)}${schemaName(name)} satisfies ParamsSchemaFor<'${belief.pattern}'>,`;
+      const schema = isLate(file)
+        ? `Loaded<typeof ${name}>['paramsSchema']`
+        : `typeof ${schemaName(name)}`;
+      return `${pad(1)}Checked<${schema}, ParamsSchemaFor<'${belief.pattern}'>>,`;
     });
+  const routeChecks = routeFiles.map(({ pattern, name }) =>
+    stacks.has(pattern)
+      ? `${pad(1)}Checked<Loaded<typeof ${name}>, RouteModule<'${pattern}', ParamSchemas['${pattern}']>>,`
+      : `${pad(1)}Checked<Loaded<typeof ${name}>, RouteModule<'${pattern}'>>,`,
+  );
+  // A fallback.tsx renders with no props at all: it stands in for every
+  // value, so it is handed none.
+  const fallbackChecks = shells.map(
+    ({ file }) =>
+      `${pad(1)}Checked<Loaded<typeof ${namer.take(file)}>['default'], ComponentType>,`,
+  );
+  const hasChecks =
+    schemaChecks.length + routeChecks.length + fallbackChecks.length > 0;
+  const readsLate =
+    routeFiles.length > 0 ||
+    shells.length > 0 ||
+    searchReaders.size > 0 ||
+    [...namer.names.keys()].some(
+      (file) => withParams.has(file) && isLate(file),
+    );
+  const hasRoutes = routeFiles.length > 0;
+  const hasError = [...asserted.values()].includes('ErrorComponent');
+  // Under a running server a page also receives the request; a build into
+  // files has no request to hand over, so the field is absent — a page that
+  // reads it fails to type-check under mode: 'static' rather than at run time.
+  const withRequest = options.mode === 'server';
+  const requestLine = withRequest ? ['  request: RouteRequest;'] : [];
+  const specifier = (file: string): string =>
+    `'${options.importPrefix}/${file.replace(/\.[jt]sx?$/u, '')}'`;
+  const importLines = [...namer.names]
+    .filter(([file]) => !isLate(file))
+    .map(([file, name]) =>
+      withParams.has(file)
+        ? `import ${name}, { paramsSchema as ${schemaName(name)} } from ${specifier(file)};`
+        : `import ${name} from ${specifier(file)};`,
+    );
+  const loaderLines = [...namer.names]
+    .filter(([file]) => isLate(file))
+    .map(([file, name]) => `const ${name} = () => import(${specifier(file)});`);
   const toMap = (map: ReadonlyMap<string, readonly string[]>): string[] =>
     [...map].map(
       ([pattern, schemas]) => `${pad(1)}'${pattern}': [${schemas.join(', ')}],`,
     );
+  const toFunctions = (map: ReadonlyMap<string, string>): string[] =>
+    [...map].map(([pattern, made]) => `${pad(1)}'${pattern}': ${made},`);
   const typeImports = [
     ...(hasError ? ['ErrorComponent'] : []),
     ...(hasLayout || hasGuards ? ['ParamsOf'] : []),
-    ...(hasSchemas ? ['ParamsSchemaFor'] : []),
+    ...(schemaChecks.length > 0 ? ['ParamsSchemaFor'] : []),
     'ParsedParams',
   ];
 
@@ -584,20 +629,27 @@ export const emitRoutesModule = (
     bannerFrom('routes/'),
     '',
     `import { defineRoutes } from '${GENERATED_FROM}';`,
-    ...(searchReaders.length > 0
+    ...(searchReaders.size > 0
       ? [`import { urlReader } from '@k8ordo/state';`]
       : []),
     `import type { ${typeImports.join(', ')} } from '${GENERATED_FROM}';`,
+    ...(hasLazy ? [`import { lazy } from 'react';`] : []),
     `import type { ComponentType${hasLayout ? ', ReactNode' : ''} } from 'react';`,
     '',
-    ...importLines,
-    ...redirectImports,
-    '',
-    ...(routeSchemaLines.length > 0 ? [...routeSchemaLines, ''] : []),
+    ...(importLines.length > 0 ? [...importLines, ''] : []),
     ...(withRequest
       ? [
           '// What a page may read of the request, under a running server only.',
           `import type { RouteRequest } from '${ROUTE_REQUEST_FROM}';`,
+          '',
+        ]
+      : []),
+    ...(loaderLines.length > 0
+      ? [
+          '// The files a request reaches one at a time, read when it does: what',
+          '// each renders in the browser, and the CSS it imports, goes only to the',
+          '// pages that render it.',
+          ...loaderLines,
           '',
         ]
       : []),
@@ -634,15 +686,29 @@ export const emitRoutesModule = (
           'type Redirect = string | { readonly to: string; readonly permanent?: boolean };',
         ]
       : []),
+    ...(readsLate
+      ? [
+          '',
+          '// A file read when a request reaches it, as the module it is read as.',
+          'type Loaded<L extends () => Promise<unknown>> = Awaited<ReturnType<L>>;',
+        ]
+      : []),
+    ...(hasChecks
+      ? [
+          '',
+          '// `satisfies`, for an export the table holds no value of: compiles only',
+          '// when T is assignable to U.',
+          'type Checked<T extends U, U> = T;',
+        ]
+      : []),
     '',
-    ...(hasSchemas
+    ...(schemaChecks.length > 0
       ? [
           '// The `paramsSchema` exports the route files declared, each checked against',
           '// the pattern its file sits under.',
-          'const schemas = [',
+          'export type SchemaChecks = [',
           ...schemaChecks,
-          '] as const;',
-          'void schemas;',
+          '];',
           '',
         ]
       : []),
@@ -665,11 +731,17 @@ export const emitRoutesModule = (
         ]
       : []),
     '// Per page pattern, the schemas that run before it renders — every',
-    '// layout above it that declared one, then its own. The handler reads',
-    '// this; a schema that refuses makes the pattern not answer the pathname.',
+    '// layout above it that declared one, then its own, read off the file the',
+    '// handler read for it. The handler runs them; a schema that refuses makes',
+    '// the pattern not answer the pathname.',
     'export const paramSchemas = {',
-    ...toMap(stacks),
+    ...toFunctions(stacks),
     '} as const;',
+    '',
+    "// The same stacks, as the router types a page's params and links to it.",
+    'export type ParamSchemas = {',
+    '  readonly [P in keyof typeof paramSchemas]: (typeof paramSchemas)[P] extends (...args: never) => infer S ? S : never;',
+    '};',
     '',
     '// Per catch-all pattern, the schemas of the layouts above its not-found.',
     '// The handler runs them for what they write to the render (the locale a',
@@ -695,10 +767,9 @@ export const emitRoutesModule = (
           '',
           '// The route.ts modules, each checked against the pattern its directory',
           '// puts it under.',
-          'const routeChecks = [',
+          'export type RouteChecks = [',
           ...routeChecks,
-          '] as const;',
-          'void routeChecks;',
+          '];',
           '',
         ]
       : []),
@@ -712,13 +783,33 @@ export const emitRoutesModule = (
         ]
       : []),
     '// Per page pattern that exports `search`, what reads it out of the URL —',
-    "// @k8ordo/state's reading of a url schema. The page receives what it read,",
-    '// and a client navigation that changes the search loads it again.',
+    "// @k8ordo/state's reading of a url schema, made from the page's module.",
+    '// The page receives what it read, and a client navigation that changes',
+    '// the search loads it again.',
     'export const searchReaders = {',
-    ...searchReaders,
+    ...toFunctions(searchReaders),
     '} as const;',
     '',
-    '// Per pattern, the route.ts that answers it, by the methods it exports.',
+    '// What each of those pages receives as `search`.',
+    'export type SearchReads = {',
+    '  readonly [P in keyof typeof searchReaders]: (typeof searchReaders)[P] extends (...args: never) => (...args: never) => infer R ? R : never;',
+    '};',
+    '',
+    '// Per pattern, what reads the page or the not-found that answers it. The',
+    '// handler renders what it read in the place `lazy()` holds below.',
+    'export const pageModules = {',
+    ...[...namer.names]
+      .filter(
+        ([file]) => slotOf(file) === 'page' || slotOf(file) === 'notFound',
+      )
+      .map(
+        ([file, name]) =>
+          `${pad(1)}'${(byFile.get(file) as Belief).pattern}': ${name},`,
+      ),
+    '} as const;',
+    '',
+    '// Per pattern, what reads the route.ts that answers it, by the methods it',
+    '// exports.',
     'export const routeModules = {',
     ...routeFiles.map(({ pattern, name }) => `${pad(1)}'${pattern}': ${name},`),
     '} as const;',
@@ -740,13 +831,13 @@ export const emitRoutesModule = (
     '',
     ...(options.mode === 'static'
       ? [
-          '// Per page pattern with a fallback.tsx: what renders its shell for a value',
+          '// Per page pattern with a fallback.tsx: what reads its shell for a value',
           '// the build did not write, the params a shell may leave to the browser, and',
           '// the schemas of the layouts above it, which run over the params it fills.',
           'export const fallbacks = {',
           ...shells.flatMap(({ pattern, file, open }) => [
             `${pad(1)}'${pattern}': {`,
-            `${pad(2)}component: ${believed(namer.take(file), asserted)},`,
+            `${pad(2)}load: ${namer.take(file)},`,
             `${pad(2)}open: [${open.map((param) => `'${param}'`).join(', ')}],`,
             `${pad(2)}schemas: [${(byFile.get(file) as Belief).schemas
               .map((layout) => schemaName(namer.take(layout)))
@@ -754,6 +845,15 @@ export const emitRoutesModule = (
             `${pad(1)}},`,
           ]),
           '} as const;',
+          ...(fallbackChecks.length > 0
+            ? [
+                '',
+                '// The fallback.tsx files, each checked as a component handed nothing.',
+                'export type FallbackChecks = [',
+                ...fallbackChecks,
+                '];',
+              ]
+            : []),
         ]
       : [
           '// A running server renders every value with its page: no shells.',
@@ -765,14 +865,6 @@ export const emitRoutesModule = (
     '});',
     '',
   ].join('\n');
-};
-
-const namerFile = (
-  namer: { names: Map<string, string> },
-  name: string,
-): string => {
-  for (const [file, taken] of namer.names) if (taken === name) return file;
-  throw new Error(`no file was named ${name}`);
 };
 
 export type RegisterOptions = {
@@ -825,19 +917,15 @@ export const emitRegisterModule = (options: RegisterOptions): string => {
     ...(localesModule === null
       ? []
       : [`import type { locales } from '${localesModule}';`]),
-    `import type { paramSchemas, routes, searchReaders } from '${options.routesModule}';`,
+    `import type { ParamSchemas, routes, SearchReads } from '${options.routesModule}';`,
     '',
     `declare module '${GENERATED_FROM}' {`,
     '  interface Register {',
     '    routes: typeof routes;',
     '    // A link takes a param as the page receives it — typed by its schema.',
-    '    params: ParsedParamsMap<typeof paramSchemas>;',
+    '    params: ParsedParamsMap<ParamSchemas>;',
     '    // A page that exports `search` receives what it reads.',
-    '    search: {',
-    '      readonly [P in keyof typeof searchReaders]: ReturnType<',
-    '        (typeof searchReaders)[P]',
-    '      >;',
-    '    };',
+    '    search: SearchReads;',
     ...(withRequest
       ? [
           '    // A route file receives the request: this is a running server.',
