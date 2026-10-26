@@ -65,6 +65,9 @@ export const buildFixture = async (
       },
     },
     plugins: [engine({ routesDir: 'routes' }, { mode, runtimeDir })],
+    // テストの下（NODE_ENV=test）では React の開発版を束ねるので、ブラウザの
+    // 入口のチャンクは本番の出力よりずっと大きい。大きさの警告は数えない
+    build: { chunkSizeWarningLimit: Number.POSITIVE_INFINITY },
     // 生成された表は @k8ordo/framework/generated から読むが、このパッケージは
     // それに同梱される側なので依存に持てない。その入口は router の再 export
     // だけなので、router を直接読ませる。search を読むページの表が import

@@ -15,6 +15,7 @@ import {
 } from 'react';
 import type { ReactNode, RefObject } from 'react';
 
+import { whenClientReady } from './client-ready';
 import { ShowNotFound } from './fallback-boundary';
 import { isPayload } from './is-payload';
 import type { Payload } from './payload';
@@ -57,8 +58,34 @@ export const setDocumentClient = (client: string): void => {
 const canRender = (payload: Payload): boolean =>
   payload.client === documentClient;
 
-/** What a Server Action's answer does to the document, once it is read. */
-export const answerAction = async (payload: Payload): Promise<unknown> => {
+/**
+ * How a payload is waited for before its tree is applied: until the client
+ * components it renders have loaded — one still loading suspends where it
+ * renders, and a `<Suspense>` the page just brought shows its fallback in a
+ * page already on screen — and what the page sends once its data is in,
+ * except under a `<Suspense>`, whose fallback stands in for it as a
+ * transition leaves it.
+ */
+const WHEN_APPLIED = { inSuspense: 'leave' } as const;
+
+/**
+ * How many trees navigations have applied — the router's, and `vite dev`'s
+ * reload of the page on screen. A Server Action's answer is not counted:
+ * answers to actions called in a row apply one after another.
+ */
+let navigations = 0;
+
+/** Taken before a Server Action is sent, and handed to `answerAction`. */
+export const navigationsApplied = (): number => navigations;
+
+/**
+ * What a Server Action's answer does to the document, once it is read.
+ * `sent` is `navigationsApplied()` as the action was sent.
+ */
+export const answerAction = async (
+  payload: Payload,
+  sent: number,
+): Promise<unknown> => {
   mounted?.forgetPrefetched();
   // An action that redirected has no page to apply: the visitor is going
   // somewhere else, and the router takes them there.
@@ -68,8 +95,13 @@ export const answerAction = async (payload: Payload): Promise<unknown> => {
   }
   if (!canRender(payload)) return reloadInstead();
   // The action's answer arrives with the page it re-rendered, so the screen
-  // is up to date by the time the caller has its value.
-  mounted?.apply(payload);
+  // is up to date by the time the caller has its value — once the client
+  // components it renders have loaded, as for a navigation.
+  await whenClientReady([payload.tree, payload.notFound], WHEN_APPLIED);
+  // A navigation applied another page while the action ran or its answer
+  // loaded: the answer is the page the visitor left, and would put it back
+  // under the URL they are at. The caller still gets its value.
+  if (navigations === sent) mounted?.apply(payload);
   return payload.returnValue;
 };
 
@@ -109,8 +141,9 @@ const streams = new WeakMap<Payload, Stream>();
 
 /**
  * A page's payload, or `null` when what came back is not one — a file the
- * host serves, or a URL nothing answers. Reading it imports the client
- * components it names, so a prefetch has those in hand too.
+ * host serves, or a URL nothing answers. It resolves once the client
+ * components the page renders have loaded, so a prefetch has those in hand
+ * too.
  */
 const fetchPage = async (
   payloadPath: string,
@@ -127,6 +160,7 @@ const fetchPage = async (
   const payload = await readPayload(
     response.body as ReadableStream<Uint8Array>,
   );
+  await whenClientReady([payload.tree, payload.notFound], WHEN_APPLIED);
   streams.set(payload, {
     cancel: () => {
       request.abort();
@@ -324,6 +358,7 @@ export function AppRouter({
       if (payload === null || location.href !== url) return;
       if (!canRender(payload)) return reloadInstead();
       markNavigated();
+      navigations += 1;
       const next = hold(streaming.current, payload);
       searchApplied.current = payload.search;
       startTransition(() => {
@@ -399,6 +434,7 @@ export function AppRouter({
     },
     apply: (next) => {
       markNavigated();
+      navigations += 1;
       searchApplied.current = next.search;
       setLatest(hold(streaming.current, next));
     },

@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
-import type { Server } from 'node:http';
+import type { IncomingMessage, Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import path from 'node:path';
 import { Readable } from 'node:stream';
@@ -41,17 +41,41 @@ const handler = (pathname: string): Promise<Response> => {
   return built.handler(new Request(`${origin}${pathname}`));
 };
 
+const requestOf = async (
+  incoming: IncomingMessage,
+  url: URL,
+): Promise<Request> => {
+  const headers = new Headers();
+  for (const [name, value] of Object.entries(incoming.headers)) {
+    for (const each of [value ?? []].flat()) headers.append(name, each);
+  }
+  const method = incoming.method ?? 'GET';
+  return new Request(url, {
+    method,
+    headers,
+    body:
+      method === 'GET' || method === 'HEAD'
+        ? null
+        : new Uint8Array(
+            Buffer.concat((await Array.fromAsync(incoming)) as Buffer[]),
+          ),
+  });
+};
+
 // ページがデータを待ってから答え、その中身が後から流れてくるのは、
 // 組み上がったアプリを流したままのサーバーでしか起きない
 beforeAll(async () => {
-  const { out } = (built = await buildFixture('streaming'));
+  const { handler: handle, out } = (built = await buildFixture('streaming'));
 
   // ハッシュ付きの資産はファイルから、それ以外はハンドラが答える。
-  // @k8ordo/framework/serve と同じく、答えは流れてきたとおりに送り、
-  // 訪問者が去れば読むのをやめる
-  const answer = async (url: URL): Promise<Response> => {
-    if (!url.pathname.startsWith('/assets/'))
-      return handler(url.pathname + url.search);
+  // @k8ordo/framework/serve と同じく、ハンドラにはメソッドとヘッダーと
+  // 本文も渡し（Server Action は POST で届く）、答えは流れてきたとおりに
+  // 送り、訪問者が去れば読むのをやめる
+  const answer = async (incoming: IncomingMessage): Promise<Response> => {
+    const url = new URL(incoming.url ?? '/', origin);
+    if (!url.pathname.startsWith('/assets/')) {
+      return handle(await requestOf(incoming, url));
+    }
     try {
       const body = await readFile(path.join(out, 'client', url.pathname));
       return new Response(body, {
@@ -63,7 +87,7 @@ beforeAll(async () => {
   };
   server = createServer((incoming, outgoing) => {
     void (async () => {
-      const response = await answer(new URL(incoming.url ?? '/', origin));
+      const response = await answer(incoming);
       outgoing.writeHead(response.status, Object.fromEntries(response.headers));
       if (response.body === null) {
         outgoing.end();
@@ -181,9 +205,9 @@ const watch = (
 const stayed = (page: Page): Promise<boolean> =>
   page.evaluate(() => 'stayed' in window);
 
-// 遅いページのペイロードは、ページの木の外側が先に届き、木が当てられたあとも
-// ページの本体を待って流れ続ける。start がそれを頼んでから、その途中まで待つ。
-// クリックはリンクに乗った時点で先読みを始めるので、待ち受けは先に置く
+// 遅いページのペイロードは、ページの木の外側が先に届き、ページの本体を待って
+// 流れ続ける。start がそれを頼んでから、その途中まで待つ。クリックはリンクに
+// 乗った時点で先読みを始めるので、待ち受けは先に置く
 const startLoading = async (
   page: Page,
   payload: string,
@@ -222,7 +246,8 @@ describe.each(browserTypes)(
       expect(await stayed(page)).toBe(true);
       expect(seen.documents).toStrictEqual([]);
       expect(seen.errors).toStrictEqual([]);
-      // 追い越された読み込みは、次のページが画面に出たら取り消される
+      // 追い越された読み込みは取り消される。本体は Suspense の外なので、
+      // 木は本体が届くまで当てられず、遷移が追い越された時点で取り消される
       await vi.waitFor(() => {
         expect(seen.cancelled).toContain('/slow/index.rsc');
       });
@@ -284,6 +309,82 @@ describe.each(browserTypes)(
   },
 );
 
+// アクションの答えはページを描き直したもので、tally の本体は 1000ms 待つ。
+// 答えが届き終えるのを待ち、当てられたなら画面に出るまで待つ
+const answersOf = (page: Page): Array<Promise<unknown>> => {
+  const answers: Array<Promise<unknown>> = [];
+  page.on('response', (response) => {
+    if (response.request().method() === 'POST') {
+      answers.push(response.finished());
+    }
+  });
+  return answers;
+};
+
+const allApplied = async (
+  answers: Array<Promise<unknown>>,
+  count: number,
+): Promise<void> => {
+  await vi.waitFor(() => {
+    expect(answers).toHaveLength(count);
+  });
+  await Promise.all(answers);
+  await wait(500);
+};
+
+describe.each(browserTypes)(
+  'a Server Action’s answer on a page that awaits its data with no loading.tsx, in $name',
+  ({ type }) => {
+    beforeAll(async () => {
+      browser = await type.launch();
+    });
+
+    afterAll(async () => {
+      await browser.close();
+    });
+
+    it('is not applied over the page a navigation went on to while it loaded', async () => {
+      const page = await openHydrated('/tally');
+      const seen = watch(page);
+      const answers = answersOf(page);
+
+      await page.getByRole('button', { name: 'bump' }).click();
+      await page.getByRole('link', { name: 'home' }).click();
+      await page.getByRole('heading', { name: 'home' }).waitFor();
+      await allApplied(answers, 1);
+
+      expect(await page.getByRole('heading').textContent()).toBe('home');
+      expect(await page.title()).toBe('home');
+      expect(new URL(page.url()).pathname).toBe('/');
+      expect(await stayed(page)).toBe(true);
+      expect(seen.documents).toStrictEqual([]);
+      expect(seen.errors).toStrictEqual([]);
+      await page.close();
+    }, 30_000);
+
+    it('leaves the answer to the last of two actions called in a row on screen', async () => {
+      const page = await openHydrated('/tally');
+      const seen = watch(page);
+      const answers = answersOf(page);
+      const before = Number(
+        (await page.getByRole('heading').textContent())?.replace('tally ', ''),
+      );
+
+      const bump = page.getByRole('button', { name: 'bump' });
+      await bump.click();
+      await bump.click();
+      await allApplied(answers, 2);
+
+      const after = `tally ${String(before + 2)}`;
+      expect(await page.getByRole('heading').textContent()).toBe(after);
+      expect(await page.title()).toBe(after);
+      expect(seen.documents).toStrictEqual([]);
+      expect(seen.errors).toStrictEqual([]);
+      await page.close();
+    }, 30_000);
+  },
+);
+
 describe.each(browserTypes)(
   'a page that awaits its data under a loading.tsx, in $name',
   ({ type }) => {
@@ -294,6 +395,29 @@ describe.each(browserTypes)(
     afterAll(async () => {
       await browser.close();
     });
+
+    // 画面に出ている loading.tsx の下へ移ると、本体を待つ間も木は当てられ、
+    // 前のページが残る。その間に追い越されても、当てた木の読み込みは本体の
+    // 中で中断されず、次の木が画面に出てから取り消される
+    it('keeps its request once its tree is applied, and is left in place when a click overtakes the navigation into it', async () => {
+      const page = await openHydrated('/shelf');
+      const seen = watch(page);
+
+      await startLoading(page, '/shelf/tardy/index.rsc', () =>
+        page.getByRole('link', { name: 'tardy' }).click(),
+      );
+      await page.getByRole('link', { name: 'home' }).click();
+
+      await page.getByRole('heading', { name: 'home' }).waitFor();
+      expect(new URL(page.url()).pathname).toBe('/');
+      expect(await stayed(page)).toBe(true);
+      expect(seen.documents).toStrictEqual([]);
+      expect(seen.errors).toStrictEqual([]);
+      await vi.waitFor(() => {
+        expect(seen.cancelled).toContain('/shelf/tardy/index.rsc');
+      });
+      await page.close();
+    }, 30_000);
 
     it('is in the document for a visitor without JavaScript, not its loading.tsx', async () => {
       const context = await browser.newContext({ javaScriptEnabled: false });
