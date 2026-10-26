@@ -98,16 +98,30 @@ as it checks every route file's.
 
 ## How a page is sent
 
+**Each page loads its own.** `page.tsx`, `not-found.tsx`, `route.ts` and
+`fallback.tsx` are imported when a request reaches them, so the client
+components each renders and the CSS each imports — its Server Components'
+CSS Modules included — go only to the pages that render it. What a
+`layout.tsx`, `error.tsx` or `loading.tsx` imports, every page below it
+loads: import CSS every page needs in the root layout. A route file imported
+from anywhere else — a layout importing an export of a page — is in every
+page again, and the build warns, naming it.
+
 **Under `mode: 'server'` an async page answers, then streams.** The document
 waits for the page's own component — its data — before anything is sent,
 because the page may still say `notFound()`
 ([Errors](errors.md#a-page-that-is-not-there)); what the page puts under a
 `<Suspense>` follows in the same response as it arrives. The browser hydrates
-when the last of it is in place, not before: a boundary still on its way
-cannot be hydrated, and a context that changes as the page hydrates — a
-colour scheme read from the browser — would make React render it again
-beside the copy still streaming in. Until then the page is what it is
-without JavaScript: links load documents and forms post.
+when the last of it is in place and the client components it renders have
+loaded, not before: a boundary still on its way cannot be hydrated, and a
+context that changes as the page hydrates — a colour scheme read from the
+browser — would make React render it again beside the copy still streaming
+in, or put a boundary's fallback in place of a component still loading.
+Until then the page is what it is without JavaScript: links load documents
+and forms post. A client navigation likewise keeps the page on screen until
+the next one's client components have loaded; what the next page puts under
+a `<Suspense>` of its own — a `loading.tsx` is one — shows its fallback until
+it arrives.
 
 **Under `mode: 'static'` a file is written whole.** The build waits for every
 `<Suspense>` boundary on the page and writes each in place, so a file never
@@ -318,12 +332,14 @@ source, so it is yours to read:
 // .k8ordo/routes.gen.ts
 import { defineRoutes } from '@k8ordo/framework/generated';
 import type { ParamsOf, ParsedParams } from '@k8ordo/framework/generated';
+import { lazy } from 'react';
 import type { ComponentType, ReactNode } from 'react';
 
 import layout from '../src/routes/layout';
-import page from '../src/routes/page';
-import products_id_page from '../src/routes/products/[id]/page';
-import products_page from '../src/routes/products/page';
+
+const page = () => import('../src/routes/page');
+const products_page = () => import('../src/routes/products/page');
+const products_id_page = () => import('../src/routes/products/[id]/page');
 
 type Page<P extends string, S extends readonly unknown[] = []> = ComponentType<{
   params: ParsedParams<P, S>;
@@ -339,6 +355,12 @@ export const paramSchemas = {} as const;
 
 export const searchReaders = {} as const;
 
+export const pageModules = {
+  '/': page,
+  '/products': products_page,
+  '/products/:id': products_id_page,
+} as const;
+
 export const routeModules = {} as const;
 
 export const guards = {} as const;
@@ -351,11 +373,11 @@ export const routes = defineRoutes({
   '/': {
     layout: layout satisfies Layout<'/'>,
     children: {
-      '/': page satisfies Page<'/'>,
+      '/': lazy(page) satisfies Page<'/'>,
       '/products': {
         children: {
-          '/': products_page satisfies Page<'/products'>,
-          '/:id': products_id_page satisfies Page<'/products/:id'>,
+          '/': lazy(products_page) satisfies Page<'/products'>,
+          '/:id': lazy(products_id_page) satisfies Page<'/products/:id'>,
         },
       },
     },
@@ -365,20 +387,24 @@ export const routes = defineRoutes({
 
 Each `satisfies` checks a route file's props against the pattern its directory
 puts it under — a type check, so `tsc` reports a mismatch and `vite build`,
-which does not type-check, passes. Under `mode: 'server'` the `Page` and
+which does not type-check, passes. A page and a not-found stand in `routes`
+as `lazy()` over what imports them: `pageModules` lists, per pattern, what
+imports the page or the not-found that answers it, and the handler renders
+what it imported in that place. Under `mode: 'server'` the `Page` and
 `Layout` types also carry `request`, typed by `RouteRequest` from
 `@k8ordo/framework/server`. `redirects` is where each `redirect.ts`
 sends the visitor once the walk of `routes` reaches its pattern,
 `paramSchemas` holds, per page pattern, the schemas it runs when the walk
-reaches that pattern, before the page renders, `routeModules` the `route.ts`
-that answers a pattern (the place of each, and of each `redirect.ts`, in
-`routes` is held by a component that renders nothing), `guards` the
-`guard.ts` files that run before a pattern answers, outer first,
+reaches that pattern, before the page renders — a page's own read off the
+page once the walk has imported it — `routeModules` what imports the
+`route.ts` that answers a pattern (the place of each, and of each
+`redirect.ts`, in `routes` is held by a component that renders nothing),
+`guards` the `guard.ts` files that run before a pattern answers, outer first,
 `searchReaders` what reads the search for a page that exports `search`, and
-`fallbacks`, under `mode: 'static'`, the `fallback.tsx` beside a page and the
-parameters its shell may leave to the browser (under `mode: 'server'` it is
-always empty, and no `fallback.tsx` is imported); all six are empty here
-because no route file declares any.
+`fallbacks`, under `mode: 'static'`, what imports the `fallback.tsx` beside a
+page and the parameters its shell may leave to the browser (under
+`mode: 'server'` it is always empty, and no `fallback.tsx` is imported); all
+six are empty here because no route file declares any.
 
 `.k8ordo/register.gen.ts` registers that table with the framework — and with
 `@k8ordo/state` when the application depends on it — so typed paths work

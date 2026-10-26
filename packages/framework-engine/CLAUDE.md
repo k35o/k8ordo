@@ -126,8 +126,8 @@ pnpm check         # check:write to auto-fix
   origin and under the base, no `download`, no other `target`, not the page on
   screen, no `data-k8ordo-prefetch="false"` on it or the nearest element
   carrying the attribute — and reads that page's payload the way a navigation
-  would (`fetchPage`, the parse included, so the client components it names
-  are imported too). `createPrefetchCache` hands each load to the next
+  would (`fetchPage`, which waits for the client components it names, so
+  those are loaded too). `createPrefetchCache` hands each load to the next
   navigation of that page within `PREFETCH_LIFETIME` (30 s from the start) and
   forgets it; a failed load is forgotten at once, and a Server Action's answer
   forgets everything. A load forgotten untaken is aborted, and a taken one is
@@ -136,16 +136,53 @@ pnpm check         # check:write to auto-fix
   Keep it single-use: a page taken from the cache twice would show a
   server-mode page as it was when first hovered. No Speculation Rules —
   Chromium only.
-- **A tree once applied keeps its request.** A payload resolves once its top
-  arrives; a page that awaits its data arrives later, inside a tree already
-  applied. Cancelled then, the request throws its abort inside that page,
-  where `Recover` takes it for a failure and loads the document. So the
-  signal a payload was fetched under — a navigation's, or a prefetch's —
-  cancels it only until its tree is applied (`hold` unties it), and
-  `AppRouter` cancels it once the tree is neither the one asked for nor the
-  one on screen. The router's "a superseded navigation's fetch is cancelled"
-  still holds, one render later. `runtime/streaming.test.ts` overtakes such a
-  navigation with a click, with Back and with a search.
+- **A Server Action's answer is not applied once a navigation has been.**
+  The answer is the page the action was posted from, re-rendered, and it
+  waits for its client components and what the page awaits outside a
+  `<Suspense>`; applied after a navigation it would put the page left
+  behind under the URL gone to. `answerAction` compares how many trees
+  navigations (and `vite dev`'s reload) have applied with the count taken
+  as the action was sent, and only hands back the value when they differ.
+  Answers do not count, so actions called in a row apply in turn.
+  `runtime/streaming.test.ts` holds both.
+- **A tree once applied keeps its request.** A payload is applied before a
+  page under a `<Suspense>` (its `loading.tsx`) has sent what it awaits, and
+  that arrives later, inside a tree already applied — kept off the screen
+  while the boundary is already showing a page. Cancelled then, the request
+  throws its abort inside that page, where `Recover` takes it for a failure
+  and loads the document. So the signal a payload was fetched under — a
+  navigation's, or a prefetch's — cancels it only until its tree is applied
+  (`hold` unties it), and `AppRouter` cancels it once the tree is neither the
+  one asked for nor the one on screen. The router's "a superseded
+  navigation's fetch is cancelled" still holds, one render later.
+  `runtime/streaming.test.ts` overtakes such a navigation with a click, and
+  overtakes one into a page awaiting its data outside any `<Suspense>`, which
+  is not applied before it arrives, with a click, with Back and with a
+  search.
+- **A tree is rendered once the client components it names have loaded.**
+  The Flight client hands a client component over as a lazy element type
+  and starts importing it as the payload is read; a render that meets one
+  still loading suspends there, and the nearest `<Suspense>` shows its
+  fallback — over the server's HTML on a first render (at once under
+  `createRoot`, and in a hydrated page as soon as a context above a
+  dehydrated boundary changes), and as a new page's `<Suspense>` in a
+  navigation. `whenClientReady` (`runtime/client-ready.ts`) walks a
+  payload's trees — element types and props, arrays, plain objects, rows on
+  their way — and settles once every lazy type has loaded and every row
+  has arrived, except, for `inSuspense: 'leave'`, a row still on its way
+  inside a `<Suspense>`, whose fallback stands in for it as a transition
+  leaves it. The first document waits for everything (`'wait'`); `fetchPage`
+  (navigations, prefetches, `vite dev`'s reload) and `answerAction` wait with
+  `'leave'` before the tree is applied. It reads React's shared shapes only
+  (an element's `$$typeof`, `type` and `props`, a lazy's `$$typeof`,
+  `_payload` and `_init`, which throws a thenable while it waits): a React
+  that changed them would end the wait at once and bring the flicker back,
+  which `runtime/chunks.test.ts` sees in every engine.
+- **The browser entry has no top-level await.** A chunk of client components
+  imports what it shares with the entry from the entry's chunk, and so waits
+  for the entry to finish evaluating; an entry awaiting those components in
+  its evaluation would never finish. `entry.browser.tsx` does its waiting in
+  `start()`, called and not awaited.
 - **The `rsc` and `ssr` entries are `.js` ES modules in either mode.** They
   are pinned to `[name].js`, and `buildApp` writes `package.json`
   (`type: module`) in the directory the two outputs share, refusing one
@@ -207,16 +244,21 @@ pnpm check         # check:write to auto-fix
   soon as a context above it changes, and the server's copy of what it
   hoisted (a `<title>`) stays behind. The cost is the page responding later
   than its shell paints, and a background tab hydrating when it is shown.
+  It then waits for the client components the page renders (see above).
 - **A `paramsSchema` export is found by parsing, run before render.**
   `generate/write.ts` reads each page/layout and asks Vite's parser
   (`parseSync`, oxc) for the module's exports — an import would evaluate
   the page before anything is compiled, and a regex over the text mistook a
   code sample for the export and missed a destructured one; `emit.ts`
-  imports it beside the component, checks it with `satisfies
-  ParamsSchemaFor<pattern>`, lists per page pattern the schemas along its
-  stack in `paramSchemas`, and types the page by them. `runtime/params.ts`
-  runs them synchronously inside `routes.match`'s `accept`, so a refused
-  value is a pattern that did not match and the catch-all answers under 404.
+  imports a layout's beside the layout, checks each against
+  `ParamsSchemaFor<pattern>` (`Checked` in `SchemaChecks`, since a page's is
+  a type off the module it reads), lists per page pattern the schemas along
+  its stack in `paramSchemas` — a function of the page's module, which reads
+  the page's own off it — and types the page by them (`ParamSchemas`). The
+  handler's `find` asks `routes.match` for every pattern that fits, and for
+  each in turn reads the page (or `route.ts`) and runs the stack through
+  `runtime/params.ts`, synchronously, so a refused value is a pattern that
+  did not match and the catch-all answers under 404.
   A catch-all is never refused: the schemas of the layouts above its
   not-found (`catchAllSchemas`, apart from `paramSchemas` because the router
   types pages and links by those) run through `parseCatchAllParams` for what
@@ -232,8 +274,9 @@ pnpm check         # check:write to auto-fix
 - **Only a page that declared it reads the search.** A page exporting
   `search` (a `@k8ordo/state` url schema) is found by parsing, like
   `paramsSchema`; the generated table reads it through state's
-  `urlReader` in `searchReaders`, types the page's `search` by what that
-  returns, and the generated `Register` carries it for `PageProps` — which is
+  `urlReader` in `searchReaders`, made from the page's module (the handler
+  keeps one per module), types the page's `search` by what that returns
+  (`SearchReads`), and the generated `Register` carries it for `PageProps` — which is
   why the generator refuses the export in an application that does not
   depend on `@k8ordo/state`. The handler hands the leaf what it read from
   the request's own search (a payload is asked for with the page's search on
@@ -289,7 +332,7 @@ pnpm check         # check:write to auto-fix
   conflicts with a `page.tsx` or a `redirect.ts` there and counts as a
   declared URL. The generated table puts a component that renders nothing
   (`answered`) in its place — so it matches in declaration order, literals
-  before params, with the pages — and lists the module, imported whole, in
+  before params, with the pages — and lists what imports the module whole in
   `routeModules`. The handler, having matched, answers it from there
   (`runtime/route.ts`): a payload request gets a plain `404` (a route has no
   payload), a method it does not export a `405` with `Allow`, `HEAD` falls
@@ -350,6 +393,9 @@ pnpm check         # check:write to auto-fix
   so a Server Component importing an action warns
   `INEFFECTIVE_DYNAMIC_IMPORT` on every build. The rsc environment's `onLog`
   drops that warning when the plugin's module is the only dynamic importer.
+  The table's own `import()` of a route file that something else imports
+  statically warns the same way, and that one is kept: the file is back in
+  every page.
 - **The framework signs its own inline scripts, and decides no policy.**
   Every request's scope holds a fresh nonce (`withRequest`, 128 random bits);
   `renderHtml` hands it to React's SSR (`nonce`: the bootstrap module and
@@ -393,7 +439,7 @@ pnpm check         # check:write to auto-fix
   sends `GET`.
 - **A `fallback.tsx` is a shell, and only a build into files has one.**
   Under `'static'` the generated table lists `fallbacks`, per page pattern
-  with one: the component, the params a shell may leave to the browser
+  with one: what reads the component, the params a shell may leave to the browser
   (`open`, those no layout above it receives — `fallbackShapes`, the one
   walk the grammar, the emitter and the framework's `paths.ts` all read),
   and the layouts' schemas. Under `'server'` it is `{}` and nothing of a
@@ -431,11 +477,36 @@ pnpm check         # check:write to auto-fix
   `@k8ordo/framework`'s static mode. `decodePathname` is likewise the one
   decoding both modes use before a pathname may name a file.
 - **A route file's props are checked in the generated table.** `routes.gen.ts`
-  emits `satisfies Page<'/products/:id'>` / `satisfies Layout<'/:locale'>`
-  per file, so a mistyped param name is a type error without any route file
-  importing a helper — the layout's pattern is the prefix every route below
-  it shares. `tsc` reports it in the generated file; `vite build` does not
-  type-check, so the build itself still passes.
+  emits `lazy(products_id_page) satisfies Page<'/products/:id'>` /
+  `locale_layout satisfies Layout<'/:locale'>` per file, so a mistyped param
+  name is a type error without any route file importing a helper — the
+  layout's pattern is the prefix every route below it shares. What the table
+  holds no value of (a page's `paramsSchema`, a `route.ts`, a
+  `fallback.tsx`) is checked as a type, `Checked<T, U>`. `tsc` reports it in
+  the generated file; `vite build` does not type-check, so the build itself
+  still passes.
+- **The table reads a page when a request reaches it, and imports the frame.**
+  `page.tsx`, `not-found.tsx`, `route.ts` and `fallback.tsx` are
+  `() => import()` in `routes.gen.ts` (`isLate` in `emit.ts`); a page and a
+  not-found stand in the table as `lazy()` over it, and `pageModules`,
+  `routeModules` and `fallbacks` list it per pattern. Imported with the
+  table, a route file is in the RSC entry's chunk, and the RSC plugin
+  groups client components, and attaches a server component's CSS, by the
+  RSC chunk a module is in — so every page loaded every page's. Read late,
+  each page's are its own. A `layout.tsx`, `error.tsx` and `loading.tsx`
+  (the frame of every page below them) and a `guard.ts` and `redirect.ts`
+  (answered before anything renders) are imported. The handler renders the
+  module it read — the page through `watchPage`, a not-found in its stack's
+  leaf (`withNotFound`), a shell's fallback.tsx — and never leaves the
+  `lazy()` to the render, so a module that throws as it is read fails the
+  request: a `500` under a server, and under static mode, where the handler
+  logs what throws whole (its stack names the file) and answers it with
+  `renderFailed`, a build that stops naming the URL
+  (`runtime/page-throws.test.ts`). Top-level `await import()` in the table
+  would spare the handler all this and deadlock: a page's chunk imports the
+  RSC entry's chunk, which would be waiting for the page. `chunks.test.ts`
+  holds that each page's HTML and payload load only its own client
+  components and CSS.
 
 ## Layout
 
@@ -454,6 +525,7 @@ src/
   runtime/is-payload.ts      whether an answer is a payload or a document load
   runtime/prefetch.ts        which link to fetch ahead, and how long a fetched page stays usable
   runtime/revealed.ts        when every streamed boundary is on screen
+  runtime/client-ready.ts    when the client components a payload's trees name have loaded
   runtime/recover.tsx        a failed client render falls back to a document load
   runtime/reload.ts          location.reload, the one seam a test can watch
   runtime/params.ts          runs the paramsSchema exports along a matched stack, and above a not-found
@@ -494,10 +566,19 @@ fixtures/
                              schema refuses a value, which
                              runtime/fallback.test.ts builds in both modes
   streaming/routes/          pages that await their data, with and without a
-                             loading.tsx, which runtime/streaming.test.ts streams
-                             to each engine; state.ts stands in for @k8ordo/state
+                             loading.tsx (and one under a loading.tsx already
+                             on screen, and one calling a Server Action), which
+                             runtime/streaming.test.ts streams to each engine;
+                             state.ts stands in for @k8ordo/state
   client-css/routes/         a layout rendering a client component that imports
                              CSS, whose HTML runtime/client-css.test.ts reads
+  chunks/routes/             two pages and a not-found, each with a client
+                             component and a CSS Module of its own, under a
+                             provider that renders again as it hydrates, which
+                             runtime/chunks.test.ts builds and opens in each
+                             engine with the components' chunks held back
+  page-throws/routes/        a page whose module throws as it is read, which
+                             runtime/page-throws.test.ts builds in both modes
 ```
 
 ## Conventions

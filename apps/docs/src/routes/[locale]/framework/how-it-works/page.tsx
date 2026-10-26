@@ -63,6 +63,12 @@ export default function FrameworkHowItWorksPage() {
         <p>
           <Rich>{t.payloadEmbed()}</Rich>
         </p>
+        <p>
+          <Rich>{t.payloadSplit()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.payloadReady()}</Rich>
+        </p>
       </DocSection>
 
       <DocSection id="static-refuses" title={t.staticTitle}>

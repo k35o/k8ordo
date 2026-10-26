@@ -187,16 +187,18 @@ export async function GET({ request }: RouteContext<'/feed.xml'>) {
 
 const GENERATED = `import { defineRoutes } from '@k8ordo/framework/generated';
 // …
+const page = () => import('../src/routes/page');
+// …
 
 export const routes = defineRoutes({
   '/': {
     layout: layout satisfies Layout<'/'>,
     children: {
-      '/': page satisfies Page<'/'>,
+      '/': lazy(page) satisfies Page<'/'>,
       '/products': {
         children: {
-          '/': products_page satisfies Page<'/products'>,
-          '/:id': products_id_page satisfies Page<'/products/:id'>,
+          '/': lazy(products_page) satisfies Page<'/products'>,
+          '/:id': lazy(products_id_page) satisfies Page<'/products/:id'>,
         },
       },
     },
