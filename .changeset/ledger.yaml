@@ -56,6 +56,11 @@
     - framework-vercel-content-types
     - framework-vercel-immutable-assets
     - framework-vercel-routes
+"@k8ordo/framework@1.2.0":
+  dir: packages/framework
+  intents:
+    - framework-generate
+    - framework-route-chunks
 "@k8ordo/i18n@1.0.0":
   dir: packages/i18n
   intents:
