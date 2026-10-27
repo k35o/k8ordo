@@ -2,11 +2,14 @@ import {
   createFromReadableStream,
   getClientEntryUrl,
 } from '@vitejs/plugin-rsc/ssr';
+import { use } from 'react';
+import type { ReactNode } from 'react';
 import { renderToReadableStream } from 'react-dom/server.edge';
 import { injectRSCPayload } from 'rsc-html-stream/server';
 
 import { AppRouter } from './app-router';
 import { noticeCancel } from './cancel';
+import { whenClientReady } from './client-ready';
 import { PageShownContext } from './page-shown';
 import type { Payload } from './payload';
 
@@ -33,26 +36,59 @@ export async function renderHtml(
   nonce: string,
   // Whether the payload holds the page, followed by `PageShown`.
   showsPage: boolean,
+  // Whether the payload carries a `formState`: a form was posted without
+  // JavaScript, and `useActionState` finds its result in the HTML it comes
+  // back to.
+  carriesFormState: boolean,
 ): Promise<ReadableStream> {
-  const [forHtml, forHydration] = rscStream.tee();
-  const payload = await createFromReadableStream<Payload>(forHtml, { nonce });
+  const [forRender, forHydration] = rscStream.tee();
+  let forHtml = forRender;
+  let formState: unknown;
+  if (carriesFormState) {
+    // Fizz は formState を描き始めるときに受け取るので、描画の中では読めない。
+    // RSC の環境の値をそのまま渡すと、結果の中の client コンポーネントが
+    // 参照のプロキシのままで、SSR で描けない。このときだけ別の枝を先に読む
+    const [forState, rest] = forRender.tee();
+    forHtml = rest;
+    ({ formState } = await createFromReadableStream<Payload>(forState, {
+      nonce,
+    }));
+  }
+  let payload: Promise<Payload> | undefined;
+  let ready: Promise<void> | undefined;
+  // 描く前に読むと、client 参照の preinit と preloadModule が Fizz の要求の外で
+  // 出て捨てられる。描画の中で読み始めれば、その続きが要求の
+  // AsyncLocalStorage を引き継ぐ。読んだ木を描く前に歩くのは、props で渡す
+  // だけで描かない要素の参照を、モジュールを読み終えたあとのページでも誰かが
+  // 読むようにするため。ブラウザの最初の mount はその JS も待つ。server では
+  // 届いていない行を待たない。歩きには client コンポーネントが描く Suspense が
+  // 見えないので、待つと殻がその中身を待ってしまう。届いたときに続きで歩く
+  function Root(): ReactNode {
+    payload ??= createFromReadableStream<Payload>(forHtml, { nonce });
+    const { notFound, pathname, search, tree } = use(payload);
+    ready ??= whenClientReady([tree, notFound], {
+      rows: import.meta.env.K8ORDO_MODE === 'static' ? 'wait' : 'follow',
+    });
+    use(ready);
+    return (
+      <AppRouter
+        notFound={notFound}
+        pathname={pathname}
+        search={search}
+        tree={tree}
+      />
+    );
+  }
   const shown = Promise.withResolvers<undefined>();
   let readerLeft = false;
   const htmlStream = await renderToReadableStream(
     <PageShownContext value={() => shown.resolve(undefined)}>
-      <AppRouter
-        notFound={payload.notFound}
-        pathname={payload.pathname}
-        search={payload.search}
-        tree={payload.tree}
-      />
+      <Root />
     </PageShownContext>,
     {
       bootstrapModules: [clientEntry],
       nonce,
-      // Present only when a form was posted without JavaScript: it is how
-      // `useActionState` finds its result in the HTML it comes back to.
-      formState: payload.formState as SsrOptions['formState'],
+      formState: formState as SsrOptions['formState'],
       // React outlines a large boundary even once it is complete — a hidden
       // copy plus a script that moves it in, so a stream can paint what came
       // before it. Without JavaScript nothing moves it in, and with it the

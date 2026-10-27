@@ -652,7 +652,12 @@ const respond = async (request: Request): Promise<Response> => {
     let body: ArrayBuffer;
     try {
       const html = await enter(() =>
-        ssr.renderHtml(rendered.stream, signingNonce(), showsPage),
+        ssr.renderHtml(
+          rendered.stream,
+          signingNonce(),
+          showsPage,
+          action.formState !== undefined,
+        ),
       );
       body = await new Response(html).arrayBuffer();
     } catch (error) {
@@ -676,7 +681,12 @@ const respond = async (request: Request): Promise<Response> => {
     });
   }
   const html = await enter(() =>
-    ssr.renderHtml(rendered.stream, signingNonce(), showsPage),
+    ssr.renderHtml(
+      rendered.stream,
+      signingNonce(),
+      showsPage,
+      action.formState !== undefined,
+    ),
   );
   return new Response(html, {
     status,

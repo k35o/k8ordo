@@ -49,11 +49,13 @@ const whenSettled = (thenable: PromiseLike<unknown>): Promise<void> =>
 
 export type ClientReadyOptions = {
   /**
-   * What to do with a row still on its way inside a `<Suspense>`: `'wait'`
-   * for it, or `'leave'` it to that boundary's fallback, as a transition
-   * leaves it — a page streaming what it put under a boundary of its own.
+   * What to do with a row still on its way: `'wait'` for it; `'leave'` one
+   * inside a `<Suspense>` to that boundary's fallback, as a transition
+   * leaves it — a page streaming what it put under a boundary of its own —
+   * and wait for the rest; or `'follow'` every one — settle without it, and
+   * walk it once it arrives, as an HTML render streaming it does.
    */
-  readonly inSuspense: 'wait' | 'leave';
+  readonly rows: 'wait' | 'leave' | 'follow';
 };
 
 /**
@@ -68,13 +70,15 @@ export type ClientReadyOptions = {
  * holding elements), arrays and plain objects, each once, since a payload
  * shares and nests them. A row still on its way (a lazy node: what a page
  * sends once its data is in) is waited for and walked too, except as
- * `inSuspense` says. What fails — a row the server could not render, a
- * module that would not load — ends the wait there, for the render to meet
- * where an error boundary takes it.
+ * `rows` says. A row followed is still walked once it arrives, the promise
+ * already settled, and a client component it names is read once it has
+ * loaded, as one waited for is. What fails — a row the server could not
+ * render, a module that would not load — ends the wait there, for the
+ * render to meet where an error boundary takes it.
  */
 export const whenClientReady = async (
   trees: readonly unknown[],
-  { inSuspense }: ClientReadyOptions,
+  { rows }: ClientReadyOptions,
 ): Promise<void> => {
   const seen = new WeakSet<object>();
   let waiting: Array<{
@@ -82,17 +86,32 @@ export const whenClientReady = async (
     readonly again: () => void;
   }> = [];
 
+  // What one round finds once its rows arrive is waited for together in
+  // the next, rather than one by one.
+  const settle = async (): Promise<void> => {
+    while (waiting.length > 0) {
+      const round = waiting;
+      waiting = [];
+      await Promise.all(round.map(({ until }) => whenSettled(until)));
+      for (const { again } of round) again();
+    }
+  };
+
   const read = (lazy: Lazy, inside: boolean, isType: boolean): void => {
     let value: unknown;
     try {
       value = lazy._init(lazy._payload);
     } catch (thrown) {
-      if (isThenable(thrown) && (isType || !inside || inSuspense === 'wait')) {
-        waiting.push({
-          until: thrown,
-          again: () => {
-            read(lazy, inside, isType);
-          },
+      if (!isThenable(thrown)) return;
+      const again = (): void => {
+        read(lazy, inside, isType);
+      };
+      if (isType || rows === 'wait' || (rows === 'leave' && !inside)) {
+        waiting.push({ until: thrown, again });
+      } else if (rows === 'follow') {
+        void whenSettled(thrown).then(() => {
+          again();
+          return settle();
         });
       }
       return;
@@ -127,12 +146,5 @@ export const whenClientReady = async (
   };
 
   for (const tree of trees) visit(tree, false);
-  // What one round finds once its rows arrive is waited for together in
-  // the next, rather than one by one.
-  while (waiting.length > 0) {
-    const round = waiting;
-    waiting = [];
-    await Promise.all(round.map(({ until }) => whenSettled(until)));
-    for (const { again } of round) again();
-  }
+  await settle();
 };

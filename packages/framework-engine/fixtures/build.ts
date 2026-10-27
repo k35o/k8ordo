@@ -3,7 +3,8 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { createBuilder, createLogger } from 'vite';
+import { createBuilder, createLogger, createServer } from 'vite';
+import type { PluginOption } from 'vite';
 
 import type { Mode } from '../src/host';
 import { engine } from '../src/plugin/core';
@@ -23,18 +24,11 @@ export type BuiltFixture = {
 };
 
 /**
- * Builds the application under `fixtures/<name>/` as the mode builds one —
- * `'server'` unless told — and imports the handler it wrote. The runtime is
- * this package's source, not `dist`, so a fix to the runtime is what gets
- * tried. A static build goes to `dist-static/`, so a test file building the
- * same fixture in the other mode runs beside it.
+ * A directory holding the runtime's three entries, as `@k8ordo/framework`
+ * lays out its own: this package's source, not `dist`, so a fix to the
+ * runtime is what gets tried.
  */
-export const buildFixture = async (
-  name: string,
-  { mode = 'server' }: { readonly mode?: Mode } = {},
-): Promise<BuiltFixture> => {
-  const root = fileURLToPath(new URL(`./${name}/`, import.meta.url));
-  const out = path.join(root, mode === 'static' ? 'dist-static' : 'dist');
+const linkRuntime = async (): Promise<string> => {
   const runtimeDir = await mkdtemp(path.join(tmpdir(), 'k8ordo-runtime-'));
   // 再エクスポートするだけの .mjs では、このパッケージの sideEffects: false
   // によって、何も export しない entry.browser が丸ごと落とされる。リンクなら
@@ -47,6 +41,31 @@ export const buildFixture = async (
       ),
     ),
   );
+  return runtimeDir;
+};
+
+// 生成された表は @k8ordo/framework/generated から読むが、このパッケージは
+// それに同梱される側なので依存に持てない。その入口は router の再 export
+// だけなので、router を直接読ませる。search を読むページの表が import
+// する @k8ordo/state も依存に無いので、フィクスチャの読み方に差し替える
+const alias = {
+  '@k8ordo/framework/generated': '@k8ordo/router',
+  '@k8ordo/state': fileURLToPath(new URL('./state.ts', import.meta.url)),
+};
+
+/**
+ * Builds the application under `fixtures/<name>/` as the mode builds one —
+ * `'server'` unless told — and imports the handler it wrote. A static build
+ * goes to `dist-static/`, so a test file building the same fixture in the
+ * other mode runs beside it.
+ */
+export const buildFixture = async (
+  name: string,
+  { mode = 'server' }: { readonly mode?: Mode } = {},
+): Promise<BuiltFixture> => {
+  const root = fileURLToPath(new URL(`./${name}/`, import.meta.url));
+  const out = path.join(root, mode === 'static' ? 'dist-static' : 'dist');
+  const runtimeDir = await linkRuntime();
 
   const warnings: string[] = [];
   const logger = createLogger('error');
@@ -68,16 +87,7 @@ export const buildFixture = async (
     // テストの下（NODE_ENV=test）では React の開発版を束ねるので、ブラウザの
     // 入口のチャンクは本番の出力よりずっと大きい。大きさの警告は数えない
     build: { chunkSizeWarningLimit: Number.POSITIVE_INFINITY },
-    // 生成された表は @k8ordo/framework/generated から読むが、このパッケージは
-    // それに同梱される側なので依存に持てない。その入口は router の再 export
-    // だけなので、router を直接読ませる。search を読むページの表が import
-    // する @k8ordo/state も依存に無いので、フィクスチャの読み方に差し替える
-    resolve: {
-      alias: {
-        '@k8ordo/framework/generated': '@k8ordo/router',
-        '@k8ordo/state': fileURLToPath(new URL('./state.ts', import.meta.url)),
-      },
-    },
+    resolve: { alias },
     environments: {
       rsc: { build: { outDir: path.join(out, 'rsc') } },
       ssr: { build: { outDir: path.join(out, 'ssr') } },
@@ -106,6 +116,51 @@ export const buildFixture = async (
       await Promise.allSettled(answers);
       await rm(runtimeDir, { recursive: true, force: true });
       await rm(out, { recursive: true, force: true });
+    },
+  };
+};
+
+export type ServedFixture = {
+  /** Where the dev server listens, with no trailing slash. */
+  readonly origin: string;
+  /** Stops the dev server. */
+  readonly close: () => Promise<void>;
+};
+
+/**
+ * Serves the application under `fixtures/<name>/` with `vite dev`, as the
+ * mode serves one, with `plugins` beside the engine's. Like a build, it
+ * writes the fixture's `.k8ordo/` in the mode's terms, so a fixture is never
+ * served while it is built in the other mode.
+ */
+export const serveFixture = async (
+  name: string,
+  {
+    mode,
+    plugins = [],
+  }: { readonly mode: Mode; readonly plugins?: readonly PluginOption[] },
+): Promise<ServedFixture> => {
+  const root = fileURLToPath(new URL(`./${name}/`, import.meta.url));
+  const runtimeDir = await linkRuntime();
+  const server = await createServer({
+    root,
+    configFile: false,
+    logLevel: 'error',
+    plugins: [
+      engine({ routesDir: 'routes' }, { mode, runtimeDir }),
+      ...plugins,
+    ],
+    resolve: { alias },
+    server: { port: 0 },
+  });
+  await server.listen();
+  const [url] = server.resolvedUrls?.local ?? [];
+  if (url === undefined) throw new Error('the dev server is not listening');
+  return {
+    origin: url.replace(/\/$/u, ''),
+    close: async () => {
+      await server.close();
+      await rm(runtimeDir, { recursive: true, force: true });
     },
   };
 };

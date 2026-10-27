@@ -66,7 +66,7 @@ const canRender = (payload: Payload): boolean =>
  * except under a `<Suspense>`, whose fallback stands in for it as a
  * transition leaves it.
  */
-const WHEN_APPLIED = { inSuspense: 'leave' } as const;
+const WHEN_APPLIED = { rows: 'leave' } as const;
 
 /**
  * How many trees navigations have applied — the router's, and `vite dev`'s

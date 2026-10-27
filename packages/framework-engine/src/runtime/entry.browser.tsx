@@ -39,9 +39,7 @@ const start = async (): Promise<void> => {
   // shows its fallback in place of the server's HTML — at once in HTML
   // rendered afresh (a 404.html, a shell), and in a hydrated page as soon as
   // a context above the boundary changes.
-  await whenClientReady([payload.tree, payload.notFound], {
-    inSuspense: 'wait',
-  });
+  await whenClientReady([payload.tree, payload.notFound], { rows: 'wait' });
 
   // Present only when a form was posted without JavaScript. Hydration has to
   // be told, or React discards the result the page came back with and the

@@ -156,6 +156,63 @@ describe('a reader that leaves mid-stream', () => {
   });
 });
 
+/**
+ * What a document has sent once `text` arrives, and for how long it goes on
+ * streaming after that.
+ */
+const sentUntil = async (
+  pathname: string,
+  text: string,
+): Promise<{ readonly sent: string; readonly streamedOn: number }> => {
+  const response = await handler(pathname);
+  const reader = (response.body as ReadableStream<Uint8Array>).getReader();
+  const decoder = new TextDecoder();
+  let sent = '';
+  let done = false;
+  while (!done && !sent.includes(text)) {
+    const read = await reader.read();
+    sent += decoder.decode(read.value, { stream: true });
+    ({ done } = read);
+  }
+  const at = performance.now();
+  while (!done) ({ done } = await reader.read());
+  return { sent, streamedOn: performance.now() - at };
+};
+
+describe('the shell of a document', () => {
+  // ページが待つ部分は 1 秒かかる。殻がそれを待てば、殻のあとにはほとんど
+  // 流れない
+  it.each([
+    [
+      'a client component renders the <Suspense> above it',
+      '/client-boundary',
+      'waiting in a client boundary',
+      'arrived in a client boundary',
+    ],
+    [
+      'it is under an error.tsx and no loading.tsx',
+      '/caught',
+      '<nav>',
+      'arrived under an error.tsx',
+    ],
+    [
+      'it is only passed in a prop that is never rendered',
+      '/held',
+      'holding',
+      'arrived in a prop',
+    ],
+  ])(
+    'is sent before what the page waits for, when %s',
+    async (_, pathname, shown, late) => {
+      const { sent, streamedOn } = await sentUntil(pathname, shown);
+
+      expect(sent).toContain(shown);
+      expect(sent).not.toContain(late);
+      expect(streamedOn).toBeGreaterThan(500);
+    },
+  );
+});
+
 // hydrate する前のリンクは JS なしの文書の読み込みになり、クライアント遷移の
 // 主張をすり抜ける。ブラウザでしか描かれない印が出たら、JS が握っている
 const openHydrated = async (pathname: string): Promise<Page> => {
