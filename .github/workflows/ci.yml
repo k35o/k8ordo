@@ -27,19 +27,13 @@ jobs:
     name: Tests (${{ matrix.browser }}${{ matrix.shard && format(' {0}', matrix.shard) || '' }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # ランナーで playwright install --with-deps すると、OS のライブラリを毎回
-    # apt で取り直す。apt の mirror が遅いと取るだけで 10 分を使い切るので、
-    # ブラウザもライブラリも入ったイメージで走らせる。npm の playwright と
-    # 同じ版でないと、ブラウザが見つからない。
-    # Firefox は HOME の持ち主でない root では起動せず、Chromium は docker の
-    # 既定の 64 MB の /dev/shm では足りない。
-    # コンテナの /etc/hosts は localhost を ::1 にも向け、Node は localhost への
-    # 待ち受けに ::1、接続に 127.0.0.1 を選んでつながらない。ランナーの
-    # /etc/hosts と同じく 127.0.0.1 に寄せる。
+    # --with-deps の apt は mirror が遅いと 10 分を使い切るので、OS の
+    # ライブラリまで入ったイメージで走らせる。
     container:
       image: mcr.microsoft.com/playwright:v1.63.0-resolute
       options: --user 1001 --ipc=host
       env:
+        # /etc/hosts が localhost を ::1 にも向け、listen と fetch で食い違う
         NODE_OPTIONS: --dns-result-order=ipv4first
     strategy:
       fail-fast: false
@@ -169,7 +163,6 @@ jobs:
     name: Examples (${{ matrix.browser }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    # tests と同じ理由で、ブラウザの入ったイメージで走らせる。
     container:
       image: mcr.microsoft.com/playwright:v1.63.0-resolute
       options: --user 1001 --ipc=host

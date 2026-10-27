@@ -13,7 +13,7 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "CI の Tests と Examples は mcr.microsoft.com/playwright のイメージに入ったブラウザで走り、npm の playwright は自分と同じ版のブラウザしか探さない。イメージのタグを npm の playwright として数え、同じ 7 日待ち・同じ PR で上げる。docker として数えると、MCR からは公開日時が取れず minimumReleaseAge に止められ、イメージだけがいつまでも上がらない",
+      "description": "イメージのタグを npm の playwright と同じ PR で上げる。docker として数えると、MCR には公開日時が無く minimumReleaseAge に止められる",
       "managerFilePatterns": ["/^\\.github/workflows/ci\\.yml$/"],
       "matchStrings": [
         "mcr\\.microsoft\\.com/playwright:v(?<currentValue>\\d+\\.\\d+\\.\\d+)-"
@@ -76,7 +76,7 @@
       "automerge": false
     },
     {
-      "description": "mcr.microsoft.com/playwright のタグは customManagers が npm の playwright として上げる。github-actions の manager にも docker として拾わせると、digest の固定と版上げが別の PR で走り、タグだけが npm の playwright とずれる",
+      "description": "customManagers が上げるので、docker としては拾わない",
       "matchManagers": ["github-actions"],
       "matchDepNames": ["mcr.microsoft.com/playwright"],
       "enabled": false
