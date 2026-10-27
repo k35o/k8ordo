@@ -27,6 +27,14 @@ jobs:
     name: Tests (${{ matrix.browser }}${{ matrix.shard && format(' {0}', matrix.shard) || '' }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    # --with-deps の apt は mirror が遅いと 10 分を使い切るので、OS の
+    # ライブラリまで入ったイメージで走らせる。
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-resolute
+      options: --user 1001 --ipc=host
+      env:
+        # /etc/hosts が localhost を ::1 にも向け、listen と fetch で食い違う
+        NODE_OPTIONS: --dns-result-order=ipv4first
     strategy:
       fail-fast: false
       matrix:
@@ -48,17 +56,6 @@ jobs:
 
       - name: Install
         uses: ./.github/composite-actions/install
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ matrix.browser }}-${{ hashFiles('pnpm-lock.yaml') }}
-
-      # キャッシュに入るのはブラウザ本体だけで、OS のライブラリは毎回入れる。
-      # Firefox と WebKit にはランナーに無いライブラリが要る。
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
 
       # 最初の失敗で打ち切ると、走っていた他のパッケージも止まり、そのエンジンで
       # どこが落ちるのかが 1 つずつしか見えない。全部回してから落とす。
@@ -166,6 +163,11 @@ jobs:
     name: Examples (${{ matrix.browser }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-resolute
+      options: --user 1001 --ipc=host
+      env:
+        NODE_OPTIONS: --dns-result-order=ipv4first
     strategy:
       fail-fast: false
       matrix:
@@ -180,15 +182,6 @@ jobs:
 
       - name: Install
         uses: ./.github/composite-actions/install
-
-      - name: Cache Playwright browsers
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ matrix.browser }}-${{ hashFiles('pnpm-lock.yaml') }}
-
-      - name: Install Playwright browsers
-        run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
 
       # ビルドが通るだけでは「生成 UI のデモが実は何も描画しない」
       # 「フレームワークが 1 枚も書き出していない」を検出できないため、
