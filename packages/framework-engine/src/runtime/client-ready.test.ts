@@ -26,6 +26,35 @@ const later = (
   };
 };
 
+/**
+ * A lazy like `later`'s, counting the reads that found it arrived: a read of
+ * a client component once it has loaded is what has the RSC plugin write
+ * its links into the HTML.
+ */
+const counted = (
+  value: unknown,
+): { lazy: never; arrive: () => void; reads: () => number } => {
+  const { lazy: inner, arrive } = later(value);
+  const { _payload, _init } = inner as {
+    _payload: unknown;
+    _init: (payload: unknown) => unknown;
+  };
+  let reads = 0;
+  return {
+    lazy: {
+      $$typeof: Symbol.for('react.lazy'),
+      _payload,
+      _init: (payload: unknown): unknown => {
+        const read = _init(payload);
+        reads += 1;
+        return read;
+      },
+    } as never,
+    arrive,
+    reads: () => reads,
+  };
+};
+
 const Nothing = (): null => null;
 
 // マイクロタスクを流し切ってから、終わったかを見る
@@ -40,8 +69,9 @@ const hasSettled = async (promise: Promise<void>): Promise<boolean> => {
   return settled;
 };
 
-const LEAVE = { inSuspense: 'leave' } as const;
-const WAIT = { inSuspense: 'wait' } as const;
+const LEAVE = { rows: 'leave' } as const;
+const WAIT = { rows: 'wait' } as const;
+const FOLLOW = { rows: 'follow' } as const;
 
 describe('whenClientReady', () => {
   describe('正常系', () => {
@@ -108,7 +138,7 @@ describe('whenClientReady', () => {
     });
   });
 
-  describe("with inSuspense: 'leave'", () => {
+  describe("with rows: 'leave'", () => {
     it('leaves a row still on its way inside a Suspense boundary to its fallback', async () => {
       const row = later(createElement('p'));
       const ready = whenClientReady(
@@ -165,7 +195,7 @@ describe('whenClientReady', () => {
     });
   });
 
-  describe("with inSuspense: 'wait'", () => {
+  describe("with rows: 'wait'", () => {
     it('waits for a row inside a Suspense boundary too', async () => {
       const row = later(createElement('p'));
       const ready = whenClientReady(
@@ -177,6 +207,50 @@ describe('whenClientReady', () => {
       row.arrive();
 
       expect(await hasSettled(ready)).toBe(true);
+    });
+  });
+
+  describe("with rows: 'follow'", () => {
+    it('settles without a row still on its way, outside every Suspense boundary too', async () => {
+      const row = later(createElement('p'));
+      const ready = whenClientReady(
+        [createElement('main', null, row.lazy)],
+        FOLLOW,
+      );
+
+      expect(await hasSettled(ready)).toBe(true);
+    });
+
+    it('still waits for a client component named in what has arrived', async () => {
+      const component = later(Nothing);
+      const ready = whenClientReady(
+        [createElement('main', null, createElement(component.lazy))],
+        FOLLOW,
+      );
+      expect(await hasSettled(ready)).toBe(false);
+
+      component.arrive();
+
+      expect(await hasSettled(ready)).toBe(true);
+    });
+
+    it('reads a client component a row names once the row has arrived and the component has loaded', async () => {
+      const component = counted(Nothing);
+      const row = later(
+        createElement('section', null, createElement(component.lazy)),
+      );
+      const ready = whenClientReady(
+        [createElement('main', null, row.lazy)],
+        FOLLOW,
+      );
+      await hasSettled(ready);
+
+      row.arrive();
+      await hasSettled(ready);
+      component.arrive();
+      await hasSettled(ready);
+
+      expect(component.reads()).toBe(1);
     });
   });
 

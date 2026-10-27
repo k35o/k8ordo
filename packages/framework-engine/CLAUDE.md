@@ -176,9 +176,9 @@ pnpm check         # check:write to auto-fix
   navigation. `whenClientReady` (`runtime/client-ready.ts`) walks a
   payload's trees — element types and props, arrays, plain objects, rows on
   their way — and settles once every lazy type has loaded and every row
-  has arrived, except, for `inSuspense: 'leave'`, a row still on its way
-  inside a `<Suspense>`, whose fallback stands in for it as a transition
-  leaves it. The first document waits for everything (`'wait'`); `fetchPage`
+  has arrived, except, for `rows: 'leave'`, a row still on its way inside a
+  `<Suspense>`, whose fallback stands in for it as a transition leaves it.
+  The first document waits for everything (`'wait'`); `fetchPage`
   (navigations, prefetches, `vite dev`'s reload) and `answerAction` wait with
   `'leave'` before the tree is applied. It reads React's shared shapes only
   (an element's `$$typeof`, `type` and `props`, a lazy's `$$typeof`,
@@ -222,6 +222,54 @@ pnpm check         # check:write to auto-fix
   depended on the order the bundle evaluated the two; an application whose
   SSR entry evaluated `app-router.tsx` last shipped HTML with no client
   stylesheet at all. `runtime/client-css.test.ts` builds such an application.
+- **The HTML render reads the payload, and walks it before rendering.**
+  `renderHtml` starts `createFromReadableStream` in the component it renders
+  (`Root`), never before `renderToReadableStream`, and renders `AppRouter`
+  once `whenClientReady` has walked the trees it read. A client reference's
+  `preinit` (its CSS, a stylesheet with a precedence) and `modulepreload`
+  (its JS) reach the HTML only from inside React's SSR request: synchronously
+  as it renders, or through the `AsyncLocalStorage` it runs its work in (the
+  RSC plugin sets `globalThis.AsyncLocalStorage` in the `ssr` environment,
+  which the edge build of `react-dom/server` reads as it loads). The plugin
+  calls the two when a reference's module first loads in the process (in a
+  build only) and when the Flight client reads one of its exports once it
+  has loaded. Read before the render, a reference whose module loaded as the
+  payload was read — the first page in the process to name it, a not-found
+  or a module a Server Component imported alike — left no `<link>`. Read
+  inside it but not walked, an element only passed in a prop and never
+  rendered is read by nothing on any page after that first one, while the
+  browser's first render waits for its script all the same. Static mode
+  walks with `rows: 'wait'`, every row before the tree renders. A server
+  walks with `'follow'`: it waits only for the client components named in
+  what has arrived, and walks a row still on its way once it arrives, in a
+  continuation that inherits the request and runs before React renders
+  what waited for the row, so its links come first — a stylesheet as a
+  preload, React adding none once the shell is out. Waiting for such a row
+  held the shell back: the walk sees the payload, not what renders it, so a
+  `<Suspense>` a client component renders (a page's own, or the one an
+  `error.tsx` puts above it) and an element only passed in a prop look like
+  rows outside every boundary. A row that arrives once React has finished
+  leaves no link; the browser loads it from the payload. Awaiting the walk
+  (`use(ready)`) matters under `vite dev`, where a reference's links come
+  only from a read after its module has loaded, which the walk makes once
+  its wait ends. In a static file's head, the client references'
+  stylesheets come before those the tree links, every one having been
+  walked first; a server orders what arrives after the walk by its arrival,
+  and a client navigation appends what it loads to the head, so no order
+  between the two is kept. `formState` is read apart: React takes it as the
+  render starts, and the RSC environment's value holds client components as
+  references the SSR cannot render, so when the payload carries one
+  (`carriesFormState`, a form posted without JavaScript) another branch of
+  the stream is read for it first. `runtime/ssr-deps.test.ts` builds pages
+  naming client components each of those ways and renders each twice, cold
+  and loaded — in production, since a test build tags every reference per
+  render and loads it afresh, which hides the loss — and serves them under
+  `vite dev` with one component's transform slowed, which fails without
+  `use(ready)`; `runtime/streaming.test.ts` holds that a server sends the
+  shell before what a page waits for under a client component's
+  `<Suspense>`, under an `error.tsx`, and in a prop never rendered;
+  `runtime/form-state.test.ts` posts a form whose action returns a client
+  component.
 - **Only HTML rendered for the browser's pathname is hydrated.**
   `runtime/mount.ts` compares the payload's `pathname` with `location`
   (normalized as `usePathname` normalizes) and renders anything else afresh
@@ -562,7 +610,8 @@ fixtures/
   build.ts                   builds an application below as the mode does —
                              'server' unless told, a static one into
                              dist-static/ — from this package's source, and
-                             imports the handler it wrote
+                             imports the handler it wrote; or serves it with
+                             vite dev
   bare-not-found/routes/     an application with no not-found.tsx, which
                              runtime/not-found.test.ts opens in each engine
   redirect-beside-literal/routes/  a [slug]/redirect.ts beside about/page.tsx,
@@ -574,9 +623,12 @@ fixtures/
                              runtime/fallback.test.ts builds in both modes
   streaming/routes/          pages that await their data, with and without a
                              loading.tsx (and one under a loading.tsx already
-                             on screen, and one calling a Server Action), which
-                             runtime/streaming.test.ts streams to each engine;
-                             state.ts stands in for @k8ordo/state
+                             on screen, one calling a Server Action, and ones
+                             awaiting it under a client component's
+                             <Suspense>, under an error.tsx, and in a prop
+                             never rendered), which runtime/streaming.test.ts
+                             streams to each engine; state.ts stands in for
+                             @k8ordo/state
   client-css/routes/         a layout rendering a client component that imports
                              CSS, whose HTML runtime/client-css.test.ts reads
   chunks/routes/             two pages and a not-found, each with a client
@@ -586,6 +638,17 @@ fixtures/
                              engine with the components' chunks held back
   page-throws/routes/        a page whose module throws as it is read, which
                              runtime/page-throws.test.ts builds in both modes
+  ssr-deps/routes/           pages naming client components with a CSS Module
+                             of their own — rendered by a page, a not-found, a
+                             module a Server Component imports, a boundary
+                             that resolves after the shell, or only passed in
+                             a prop, in the shell or in such a boundary — and
+                             a page with a CSS Module beside one, which
+                             runtime/ssr-deps.test.ts builds in both modes
+                             and serves under vite dev
+  form-state/routes/         a form whose Server Action returns a client
+                             component, which runtime/form-state.test.ts
+                             posts without JavaScript
 ```
 
 ## Conventions
