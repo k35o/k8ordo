@@ -10,6 +10,18 @@
     "enabled": true,
     "managerFilePatterns": ["/^mise\\.toml$/"]
   },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "CI の Tests と Examples は mcr.microsoft.com/playwright のイメージに入ったブラウザで走り、npm の playwright は自分と同じ版のブラウザしか探さない。イメージのタグを npm の playwright として数え、同じ 7 日待ち・同じ PR で上げる。docker として数えると、MCR からは公開日時が取れず minimumReleaseAge に止められ、イメージだけがいつまでも上がらない",
+      "managerFilePatterns": ["/^\\.github/workflows/ci\\.yml$/"],
+      "matchStrings": [
+        "mcr\\.microsoft\\.com/playwright:v(?<currentValue>\\d+\\.\\d+\\.\\d+)-"
+      ],
+      "depNameTemplate": "playwright",
+      "datasourceTemplate": "npm"
+    }
+  ],
   "prConcurrentLimit": 10,
   "ignorePaths": ["**/node_modules/**"],
   "packageRules": [
@@ -62,6 +74,12 @@
       "matchPackageNames": ["oxc-transform-react", "@vitejs/plugin-react"],
       "groupName": "React Compiler peer dependencies",
       "automerge": false
+    },
+    {
+      "description": "mcr.microsoft.com/playwright のタグは customManagers が npm の playwright として上げる。github-actions の manager にも docker として拾わせると、digest の固定と版上げが別の PR で走り、タグだけが npm の playwright とずれる",
+      "matchManagers": ["github-actions"],
+      "matchDepNames": ["mcr.microsoft.com/playwright"],
+      "enabled": false
     },
     {
       "description": "Playwright 1.64 の Firefox (r1553〜r1560) は子フレームの文書にもフォーカスのエミュレーションを広げ、iframe から親へフォーカスが移らない (microsoft/playwright#43280)。フォーカスを持った iframe を外すと、次の iframe での最初の focus() も届かない。vitest はテストファイルごとに iframe を作り直すので ui の Firefox のテストが落ちる。r1562 で元に戻されたので、1.64 だけを飛ばして次の minor を待つ",
