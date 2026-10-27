@@ -33,9 +33,14 @@ jobs:
     # 同じ版でないと、ブラウザが見つからない。
     # Firefox は HOME の持ち主でない root では起動せず、Chromium は docker の
     # 既定の 64 MB の /dev/shm では足りない。
+    # コンテナの /etc/hosts は localhost を ::1 にも向け、Node は localhost への
+    # 待ち受けに ::1、接続に 127.0.0.1 を選んでつながらない。ランナーの
+    # /etc/hosts と同じく 127.0.0.1 に寄せる。
     container:
       image: mcr.microsoft.com/playwright:v1.63.0-resolute
       options: --user 1001 --ipc=host
+      env:
+        NODE_OPTIONS: --dns-result-order=ipv4first
     strategy:
       fail-fast: false
       matrix:
@@ -168,6 +173,8 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.63.0-resolute
       options: --user 1001 --ipc=host
+      env:
+        NODE_OPTIONS: --dns-result-order=ipv4first
     strategy:
       fail-fast: false
       matrix:
