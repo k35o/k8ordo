@@ -20,6 +20,9 @@ jobs:
     name: VRT
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-resolute
+      options: --user 1001 --ipc=host
     steps:
       - name: Checkout branch
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -31,23 +34,11 @@ jobs:
       - name: Install
         uses: ./.github/composite-actions/install
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-chromium-${{ hashFiles('pnpm-lock.yaml') }}
-
-      - name: Install Playwright browsers
-        # --with-deps installs the OS font packages (incl. CJK: fonts-ipafont-gothic /
-        # fonts-wqy-zenhei) so Japanese text renders instead of tofu (□) boxes.
-        run: pnpm exec playwright install --with-deps chromium
-
       # headless shell の総称 monospace は、はじめ fontconfig の monospace
-      # （DejaVu Sans Mono）を指すが、画面より背の高いストーリーを撮ると
+      # （WenQuanYi Zen Hei Mono）を指すが、画面より背の高いストーリーを撮ると
       # （captureBeyondViewport）ブラウザ側の既定の Courier New（Liberation
-      # Mono）に書き戻される。Liberation Mono に無い Kbd の ⌘ や ⇧ は、背の高い
-      # ストーリーより前に撮られたかどうかで字形が変わっていたので、Courier New
-      # も DejaVu Sans Mono に解決させて書き戻しの前後をそろえる。
+      # Mono）に書き戻され、Liberation Mono に無い字の字形が撮る順で変わる。
+      # Courier New も同じ書体に解決させて書き戻しの前後をそろえる。
       - name: Resolve Courier New to the default monospace font
         run: |
           mkdir -p ~/.config/fontconfig
@@ -57,7 +48,7 @@ jobs:
           <fontconfig>
             <alias binding="strong">
               <family>Courier New</family>
-              <prefer><family>DejaVu Sans Mono</family></prefer>
+              <prefer><family>WenQuanYi Zen Hei Mono</family></prefer>
             </alias>
           </fontconfig>
           EOF
@@ -76,19 +67,44 @@ jobs:
           retention-days: 30
 
       # PR: mainの最新ベースラインを取得する（無ければ比較をスキップ）
-      - name: Download baseline from main
+      - name: Find baseline from main
         if: github.event_name == 'pull_request'
         id: baseline
-        env:
-          GH_TOKEN: ${{ github.token }}
-          REPO: ${{ github.repository }}
-        run: |
-          run_id=$(gh api "repos/$REPO/actions/workflows/vrt.yml/runs?branch=main&status=success&per_page=1" --jq '.workflow_runs[0].id // empty')
-          if [ -n "$run_id" ] && gh run download "$run_id" --name vrt-baseline --dir packages/ui/.vrt/expected --repo "$REPO"; then
-            echo "found=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "found=false" >> "$GITHUB_OUTPUT"
-          fi
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const { data } = await github.rest.actions.listWorkflowRuns({
+              owner,
+              repo,
+              workflow_id: 'vrt.yml',
+              branch: 'main',
+              status: 'success',
+              per_page: 1,
+            });
+            const run = data.workflow_runs[0];
+            if (run === undefined) return;
+            const {
+              data: { artifacts },
+            } = await github.rest.actions.listWorkflowRunArtifacts({
+              owner,
+              repo,
+              run_id: run.id,
+              name: 'vrt-baseline',
+            });
+            if (artifacts.some((artifact) => !artifact.expired)) {
+              core.setOutput('found', 'true');
+              core.setOutput('run-id', String(run.id));
+            }
+
+      - name: Download baseline from main
+        if: steps.baseline.outputs.found == 'true'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: vrt-baseline
+          path: packages/ui/.vrt/expected
+          run-id: ${{ steps.baseline.outputs.run-id }}
+          github-token: ${{ github.token }}
 
       - name: Compare against baseline
         if: github.event_name == 'pull_request' && steps.baseline.outputs.found == 'true'
@@ -131,6 +147,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           REPORT_URL: ${{ steps.pages.outputs.url }}
+        shell: bash
         run: |
           args=()
           if [ -n "$REPORT_URL" ]; then args+=(--report-url "$REPORT_URL"); fi

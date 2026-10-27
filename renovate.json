@@ -14,7 +14,7 @@
     {
       "customType": "regex",
       "description": "イメージのタグを npm の playwright と同じ PR で上げる。docker として数えると、MCR には公開日時が無く minimumReleaseAge に止められる",
-      "managerFilePatterns": ["/^\\.github/workflows/ci\\.yml$/"],
+      "managerFilePatterns": ["/^\\.github/workflows/(ci|vrt)\\.yml$/"],
       "matchStrings": [
         "mcr\\.microsoft\\.com/playwright:v(?<currentValue>\\d+\\.\\d+\\.\\d+)-"
       ],
