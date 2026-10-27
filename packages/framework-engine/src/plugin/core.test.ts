@@ -2,6 +2,7 @@ import {
   glob,
   mkdir,
   mkdtemp,
+  readdir,
   readFile,
   rm,
   stat,
@@ -22,6 +23,7 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import type { EngineOptions } from '../host';
 import { engine } from './core';
+import type { EngineApi } from './core';
 
 const enginePlugin = (): Plugin | undefined =>
   engine({}, { mode: 'static', runtimeDir: '/runtime' })
@@ -42,15 +44,14 @@ const resolveWith = (base: string): void => {
   hook?.({ base, root: '/app' } as ResolvedConfig);
 };
 
-type Watching = {
-  /** Tells the plugin that `file` changed, as vite dev does. */
-  readonly changed: (file: string) => Promise<void>;
+type Resolved = {
+  readonly plugin: Plugin | undefined;
   /** What the plugin has warned so far. */
   readonly warnings: readonly string[];
 };
 
-// vite dev と同じく、root を解いたプラグインにファイルの変更を知らせる
-const watching = (root: string): Watching => {
+// Vite が root を解いたあとのエンジンのプラグイン。警告は出さずに数えておく
+const resolvedAt = (root: string): Resolved => {
   const plugin = enginePlugin();
   const warnings: string[] = [];
   const configResolved = plugin?.configResolved as
@@ -66,6 +67,19 @@ const watching = (root: string): Watching => {
       },
     },
   } as unknown as ResolvedConfig);
+  return { plugin, warnings };
+};
+
+type Watching = {
+  /** Tells the plugin that `file` changed, as vite dev does. */
+  readonly changed: (file: string) => Promise<void>;
+  /** What the plugin has warned so far. */
+  readonly warnings: readonly string[];
+};
+
+// vite dev と同じく、root を解いたプラグインにファイルの変更を知らせる
+const watching = (root: string): Watching => {
+  const { plugin, warnings } = resolvedAt(root);
   const watchChange = plugin?.watchChange as
     | ((file: string) => Promise<void>)
     | undefined;
@@ -75,6 +89,17 @@ const watching = (root: string): Watching => {
     },
     warnings,
   };
+};
+
+// src/routes/ に files だけを置いたアプリ
+const appWithRoutes = async (files: readonly string[]): Promise<string> => {
+  const root = await mkdtemp(path.join(tmpdir(), 'k8ordo-api-'));
+  for (const file of files) {
+    const at = path.join(root, 'src/routes', file);
+    await mkdir(path.dirname(at), { recursive: true });
+    await writeFile(at, 'export default function Route() { return null; }\n');
+  }
+  return root;
 };
 
 // routes/ にページが 1 枚あり、@k8ordo/i18n に依存していて root から解決できるアプリ
@@ -254,6 +279,54 @@ describe("the engine's React plugin", () => {
     expect(pluginNames({ reactCompiler: false })).not.toContain(
       'vite:react-compiler',
     );
+  });
+});
+
+describe("the engine plugin's api", () => {
+  // k8ordo generate は、Vite が解いた設定の中のこのプラグインの api を呼ぶ
+  const apiAt = (root: string): EngineApi =>
+    resolvedAt(root).plugin?.api as EngineApi;
+
+  it('writes .k8ordo/ as a build does when it begins, and nothing else', async () => {
+    const root = await appWithRoutes(['layout.tsx', 'page.tsx']);
+    try {
+      await apiAt(root).generate();
+      expect((await readdir(root)).toSorted()).toStrictEqual([
+        '.k8ordo',
+        'src',
+      ]);
+      expect(
+        (await readdir(path.join(root, '.k8ordo'))).toSorted(),
+      ).toStrictEqual(['.gitignore', 'register.gen.ts', 'routes.gen.ts']);
+      expect(
+        await readFile(path.join(root, '.k8ordo/routes.gen.ts'), 'utf8'),
+      ).toContain("'../src/routes/page'");
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a routes/ that is not a valid pathname space, naming every problem and writing nothing', async () => {
+    const root = await appWithRoutes([
+      'page.tsx',
+      'button.tsx',
+      'about/helpers.ts',
+    ]);
+    try {
+      const refused = apiAt(root).generate();
+      await expect(refused).rejects.toThrow(
+        /^routes\/ is not a valid pathname space:\n/u,
+      );
+      await expect(refused).rejects.toThrow(
+        /\n {2}routes\/button\.tsx: routes\/ holds only /u,
+      );
+      await expect(refused).rejects.toThrow(
+        /\n {2}routes\/about\/helpers\.ts: routes\/ holds only /u,
+      );
+      await expect(stat(path.join(root, '.k8ordo'))).rejects.toThrow(/ENOENT/u);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
   });
 });
 

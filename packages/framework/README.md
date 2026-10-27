@@ -91,8 +91,9 @@ export default async function ProductPage({
 ```
 
 ```bash
-vite dev     # renders per request, with Fast Refresh
-vite build   # static: dist/client/ is the site
+vite dev         # renders per request, with Fast Refresh
+vite build       # static: dist/client/ is the site
+k8ordo generate  # only .k8ordo/, the route table and its types, for tsc in CI
 ```
 
 Under `mode: 'server'` the build is a `dist/` that runs on its own — every

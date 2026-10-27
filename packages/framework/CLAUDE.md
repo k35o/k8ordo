@@ -105,6 +105,24 @@ pnpm check         # check:write to auto-fix
   `locales` that `src/i18n.ts` exports) by those packages' own names, when
   the application has them: they are the application's dependencies, not
   this package's, and the application would otherwise write both by hand.
+- **`k8ordo generate` is the build's first step and nothing after it.** The
+  package's one `bin` (`src/cli.ts`) resolves the Vite config in the working
+  directory as `vite build` does (`resolveConfig`, `'build'`,
+  `'production'`), finds the engine's plugin by name and calls its
+  `api.generate()` — the same function its `buildStart` awaits — because
+  `routesDir` and the mode exist only in the application's `framework()`
+  call, and reading them again from flags would be a second place for them
+  to disagree. No environment is built, so `paths` and the data a page
+  reads are never touched: a CI job with no database writes `.k8ordo/` for
+  `tsc`. A config without `framework()` and a `routes/` with the problems
+  the build names under `routes/ is not a valid pathname space:` both exit
+  with `1`, the second with the build's message and nothing written. What
+  `mode: 'static'` refuses on top of those — `k8ordo:static-refuses`
+  (`guard.ts`, a `route.ts` answering more than `GET`, a page reading
+  `search`, `export *`), Server Actions, whatever `paths` returns — it does
+  not check, so its success is not the build's. `cli.test.ts` runs the
+  built `dist/cli.mjs` in temporary applications with this package linked
+  into their `node_modules`.
 - **Entries by where the code runs.** `./vite` is the plugin and loads Vite,
   which a deployed application does not have installed. `./server`
   (`src/server.ts`) is what code inside the handler imports — `redirect`,
@@ -373,6 +391,8 @@ src/
                     the handler; a static build as a static host)
   vercel-output.ts  the build as Vercel's Build Output API directory, either mode
   vercel.ts         ./vercel: the plugin that writes it
+  cli.ts            bin k8ordo: `k8ordo generate`, .k8ordo/ from the resolved
+                    config through the engine plugin's api, building nothing
 ```
 
 ## Conventions

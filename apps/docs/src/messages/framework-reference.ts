@@ -40,6 +40,10 @@ export const entriesList = [
     ja: '`@k8ordo/framework/generated`：生成される`.k8ordo/`のファイルだけがimportする型と関数です。手で書くコードからはimportしません。',
     en: '`@k8ordo/framework/generated`: what the generated `.k8ordo/` files import. Code written by hand does not import it.',
   }),
+  message({
+    ja: '`k8ordo generate`：パッケージのコマンドです。アプリのディレクトリで実行すると、Viteの設定から`.k8ordo/`を書き、ビルドはしません。',
+    en: '`k8ordo generate`: the package’s command. Run in the application’s directory, it writes `.k8ordo/` from the Vite config and builds nothing.',
+  }),
 ] as const;
 
 export const frameworkSummary = message({

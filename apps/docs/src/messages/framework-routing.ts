@@ -455,8 +455,8 @@ export const generatedTitle = message({
 });
 
 export const generatedWhen = message({
-  ja: 'フレームワークは、`routes/`から作ったルート表と型を`.k8ordo/`に書き出します。書くのは`vite dev`の起動時と`vite build`の開始時です。開発中は、`routes/`の下のファイルか`src/i18n.ts`が変わるたびに書き直します。',
-  en: 'The framework writes a route table and its types, made from `routes/`, into `.k8ordo/`. It writes when `vite dev` starts and when `vite build` begins, and during development whenever a file under `routes/` or `src/i18n.ts` changes.',
+  ja: 'フレームワークは、`routes/`から作ったルート表と型を`.k8ordo/`に書き出します。書くのは`vite dev`の起動時と`vite build`の開始時、それに`k8ordo generate`を実行したときです。開発中は、`routes/`の下のファイルか`src/i18n.ts`が変わるたびに書き直します。',
+  en: 'The framework writes a route table and its types, made from `routes/`, into `.k8ordo/`. It writes when `vite dev` starts, when `vite build` begins and when `k8ordo generate` runs, and during development whenever a file under `routes/` or `src/i18n.ts` changes.',
 });
 
 export const generatedFiles = [
@@ -480,8 +480,8 @@ export const generatedRead = message({
 });
 
 export const generatedTsc = message({
-  ja: '`vite build`は型を検査しないので、`satisfies`の結果は`tsc`で確かめます。cloneした直後は、`tsc`の前に一度`vite dev`か`vite build`を実行します。',
-  en: '`vite build` does not type-check, so run `tsc` to see the `satisfies` checks. In a fresh clone, run `vite dev` or `vite build` once before `tsc`.',
+  ja: '`vite build`は型を検査しないので、`satisfies`の結果は`tsc`で確かめます。cloneした直後やCIでは、`tsc`の前に`k8ordo generate`を実行します。`k8ordo generate`は、アプリのディレクトリのViteの設定を`vite build`と同じように読み、`.k8ordo/`を書くだけでビルドしません。`paths`も呼ばず、ページが読むデータにも触れないので、DBやsecretsの無いCIのジョブでも動きます。`routes/`の書き方や組み合わせに問題があれば（ビルドが`routes/ is not a valid pathname space:`に続けて挙げるもの）、同じエラーで失敗し、何も書きません。staticモードのビルドが断るもの（`guard.ts`、`GET`以外のメソッドをexportする`route.ts`、`search`を読むページ、`export *`、Server Action、`paths`が返す値）は見ないので、成功してもビルドが通るとは限りません。',
+  en: '`vite build` does not type-check, so run `tsc` to see the `satisfies` checks. In a fresh clone or in CI, run `k8ordo generate` before `tsc`. It reads the Vite config in the application’s directory as `vite build` does, writes `.k8ordo/`, and builds nothing. It never calls `paths` and touches no data a page reads, so it runs in a CI job with no database or secrets. When `routes/` has a problem the build lists under `routes/ is not a valid pathname space:`, it fails with the same error and writes nothing. What a static mode build refuses on top of that — a `guard.ts`, a `route.ts` answering more than `GET`, a page reading `search`, an `export *`, a Server Action, whatever `paths` returns — it does not check, so its success does not mean the build will succeed.',
 });
 
 export const titlesTitle = message({

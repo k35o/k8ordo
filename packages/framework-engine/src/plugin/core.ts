@@ -18,6 +18,19 @@ export type EngineHost = {
   readonly runtimeDir: string;
 };
 
+/**
+ * The engine plugin's `api`, read once Vite has resolved the application's
+ * config: the routes directory and the mode are in its `framework()` call
+ * and nowhere else, so `k8ordo generate` asks the plugin it configured.
+ */
+export type EngineApi = {
+  /**
+   * Writes `.k8ordo/` as a build does when it begins, and nothing else.
+   * Rejects naming every problem `routes/` has, having written nothing.
+   */
+  readonly generate: () => Promise<void>;
+};
+
 const VIRTUAL_ROUTES = 'virtual:k8ordo/routes';
 
 /**
@@ -102,6 +115,22 @@ export const engine = (
     path.join(host.runtimeDir, `${name}.mjs`);
   const routesModule = (): string => path.join(outDir, 'routes.gen.ts');
   const generateOptions = () => ({ root, routesDir, outDir, mode: host.mode });
+
+  const api: EngineApi = {
+    async generate() {
+      const { problems, warnings } = await generate(generateOptions());
+      // ビルドでは環境ごとに呼ばれるので、同じ警告を 1 度だけ出す
+      for (const warning of warnings) logger.warnOnce(`k8ordo: ${warning}`);
+      // 文法は全部集めて返してくるのだから、最初の 1 件で止めずに全部見せる
+      if (problems.length > 0) {
+        throw new Error(
+          `routes/ is not a valid pathname space:\n${problems
+            .map((problem) => `  routes/${problem.path}: ${problem.message}`)
+            .join('\n')}`,
+        );
+      }
+    },
+  };
 
   const plugin: Plugin = {
     name: 'k8ordo:engine',
@@ -241,19 +270,10 @@ export const engine = (
       },
     },
 
+    api,
+
     async buildStart() {
-      const { problems, warnings } = await generate(generateOptions());
-      // 環境ごとに呼ばれるので、同じ警告を 1 度だけ出す
-      for (const warning of warnings) logger.warnOnce(`k8ordo: ${warning}`);
-      // this.error は投げるので、1 件ずつ渡すと最初の 1 件しか出ない。文法は
-      // 全部集めて返してくるのだから、全部見せる。
-      if (problems.length > 0) {
-        this.error(
-          `routes/ is not a valid pathname space:\n${problems
-            .map((problem) => `  routes/${problem.path}: ${problem.message}`)
-            .join('\n')}`,
-        );
-      }
+      await api.generate();
     },
 
     configureServer(server) {

@@ -452,12 +452,26 @@ Neither file names `@k8ordo/router`: they import from
 `@k8ordo/framework/generated`, so the application's code, generated or not,
 reads only the framework.
 
-`vite build` and `vite dev` write both files as they start, and nothing else
-does, so a fresh clone — a CI checkout among them — has neither until one of
-them runs. Run the build before `tsc`:
+`vite build` and `vite dev` write both files as they start, so a fresh
+clone — a CI checkout among them — has neither until something writes them.
+`k8ordo generate`, the package's command, writes them and stops there: it
+reads the Vite config in the working directory as `vite build` does, so the
+`mode` and `routesDir` given to `framework()` are the ones it uses, then
+builds nothing and renders no page — `paths` is never called, and nothing a
+page reads is touched. A `routes/` with the problems of
+[What the build refuses](#what-the-build-refuses) fails it as it fails the
+build, with `routes/ is not a valid pathname space:` and every problem
+named, and nothing is written. What `mode: 'static'` refuses on top of
+those — a `guard.ts`, a `route.ts` answering more than `GET`, a page
+reading `search`, an `export *`, a Server Action, whatever `paths`
+returns — it does not check, so its success is not the build's. Run it
+before `tsc`; it is also how a CI job without the data a build reads — the
+database behind `paths`, say — has the types:
 
-```bash
-vite build && tsc --noEmit
+```yaml
+# .github/workflows/ci.yml, in the application's directory
+- run: pnpm exec k8ordo generate
+- run: pnpm exec tsc --noEmit
 ```
 
 Without the files, `tsc` checks against no table: `href` takes any string,

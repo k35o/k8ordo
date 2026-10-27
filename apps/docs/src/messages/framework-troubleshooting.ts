@@ -521,8 +521,8 @@ export const freshCause = message({
 });
 
 export const freshFix = message({
-  ja: '`tsc`の前に`vite dev`か`vite build`を一度実行して、`.k8ordo/`を生成します。',
-  en: 'Run `vite dev` or `vite build` once before `tsc`, so `.k8ordo/` is generated.',
+  ja: '`tsc`の前に`k8ordo generate`を実行して、`.k8ordo/`を生成します。ビルドはしないので、CIでも`tsc`の前に置けます。',
+  en: 'Run `k8ordo generate` before `tsc`, so `.k8ordo/` is generated. It builds nothing, so it goes before `tsc` in CI as well.',
 });
 
 export const localesUnexportedTitle = message({
