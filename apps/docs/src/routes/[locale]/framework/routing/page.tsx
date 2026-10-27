@@ -203,6 +203,9 @@ export const routes = defineRoutes({
   },
 });`;
 
+const GENERATE_CI = `- run: pnpm exec k8ordo generate
+- run: pnpm exec tsc --noEmit`;
+
 const TITLE = `import type { PageProps } from '@k8ordo/framework';
 
 export default function ProductPage({
@@ -526,6 +529,11 @@ export default function FrameworkRoutingPage() {
         <p>
           <Rich>{t.generatedTsc()}</Rich>
         </p>
+        <CodeBlock
+          code={GENERATE_CI}
+          lang="yaml"
+          title=".github/workflows/ci.yml"
+        />
       </DocSection>
 
       <DocSection id="titles" title={t.titlesTitle}>
