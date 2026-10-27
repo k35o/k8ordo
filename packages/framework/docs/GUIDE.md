@@ -141,8 +141,9 @@ a glob, `.k8ordo/**/*.ts` (an entry naming only the dot-directory leaves its
 files out), and `href()`'s paths and a page's `params` are typed, and with
 that export every message's locales. The generated files import without file
 extensions, so they resolve under `moduleResolution: "bundler"`, as Vite
-does. A fresh clone has no `.k8ordo/` until `vite build` or `vite dev`
-writes it, so CI runs the build before `tsc`
+does. A fresh clone has no `.k8ordo/` until `vite dev` or `vite build`
+writes it, or `k8ordo generate`, which writes it and builds nothing — what
+CI runs before `tsc`
 ([The generated files](references/routing.md#the-generated-files)).
 
 ```tsx
@@ -239,6 +240,10 @@ The package is split by where the code runs.
   `beforeFiles` and `beforeNotFound`.
 - `@k8ordo/framework/generated` — what the generated `.k8ordo/` files
   import. Not for code written by hand.
+- `k8ordo generate` — the package's command, run in the application's
+  directory: writes `.k8ordo/` from its Vite config and builds nothing, for
+  `tsc` where a build cannot run
+  ([The generated files](references/routing.md#the-generated-files)).
 
 `/server` needs nothing from Node but `AsyncLocalStorage`, so it goes
 wherever the handler goes, and `/serve` is apart from it for that reason.

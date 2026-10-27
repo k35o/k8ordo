@@ -12,6 +12,7 @@ export default defineConfig({
       'src/serve.ts',
       'src/vercel.ts',
       'src/generated.ts',
+      'src/cli.ts',
     ],
     format: 'esm',
     dts: true,

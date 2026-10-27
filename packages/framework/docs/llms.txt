@@ -63,7 +63,8 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   each mode, `loading.tsx`, `route.ts` (methods and `405` under server
   mode, a file under static mode), the generated `.k8ordo/` files (the
   route table, and the `Register`s: the table's, and `@k8ordo/i18n`'s when
-  `src/i18n.ts` exports `locales` by name), titles,
+  `src/i18n.ts` exports `locales` by name) and `k8ordo generate`, which
+  writes them before `tsc` without a build, titles,
   and fetching the next page ahead (`data-k8ordo-prefetch`).
 - [Parameters](references/params.md): `paramsSchema` — a refused value is a
   pathname the pattern does not answer — and, under static mode, the `paths`
@@ -194,3 +195,14 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   `^/posts/`).
 - `@k8ordo/framework/generated` — what the generated `.k8ordo/` files
   import (`defineRoutes`, `Register`, …). Not for code written by hand.
+- `k8ordo generate` — the package's one command (its `bin`), run in the
+  application's directory: resolves the Vite config there as `vite build`
+  does and writes `.k8ordo/` as the build does when it begins, then stops —
+  no environment built, no page rendered, `paths` never called — so CI
+  runs it before `tsc` without the data a build reads. A `routes/` with
+  the problems the build names under
+  `routes/ is not a valid pathname space:` fails it the same way (exit
+  code 1), with nothing written. What `mode: 'static'` refuses on top of
+  those — a `guard.ts`, a `route.ts` answering more than `GET`, a page
+  reading `search`, an `export *`, a Server Action, whatever `paths`
+  returns — it does not check, so its success is not the build's.

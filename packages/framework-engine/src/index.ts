@@ -27,6 +27,7 @@ export {
 } from './generate/write';
 export { ROUTE_METHODS } from './runtime/route';
 export { engine } from './plugin/core';
+export type { EngineApi } from './plugin/core';
 export { sharedDir } from './plugin/shared-dir';
 export type { EngineOptions } from './host';
 export {

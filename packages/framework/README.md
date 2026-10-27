@@ -35,7 +35,7 @@ dependencies in either mode: the build bundles what the application runs.
 
 | Package               | Version  | Required | Needed for                                 |
 | --------------------- | -------- | -------- | ------------------------------------------ |
-| `@k8ordo/router`      | ^1.1.0   | yes      | routing, re-exported by the framework      |
+| `@k8ordo/router`      | ^1.2.0   | yes      | routing, re-exported by the framework      |
 | `react`               | ≥19.3.0  | yes      | rendering                                  |
 | `react-dom`           | ≥19.3.0  | yes      | rendering                                  |
 | `vite`                | ≥8.0.0   | yes      | the build (`framework()` is a Vite plugin) |
@@ -91,8 +91,9 @@ export default async function ProductPage({
 ```
 
 ```bash
-vite dev     # renders per request, with Fast Refresh
-vite build   # static: dist/client/ is the site
+vite dev         # renders per request, with Fast Refresh
+vite build       # static: dist/client/ is the site
+k8ordo generate  # only .k8ordo/, the route table and its types, for tsc in CI
 ```
 
 Under `mode: 'server'` the build is a `dist/` that runs on its own — every

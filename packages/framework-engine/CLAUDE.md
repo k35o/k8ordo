@@ -42,6 +42,13 @@ pnpm check         # check:write to auto-fix
   source, real components when a test hands the result to the router's own
   `defineRoutes`. That is why the integration test can prove the emitted table
   matches correctly without evaluating generated text.
+- **One generation, three callers.** `buildStart`, `watchChange` and the
+  plugin's `api.generate()` (`EngineApi`) all run `generate()` from
+  `generate/write.ts` with the options `configResolved` read. `buildStart`
+  awaits the api itself, so a build and `@k8ordo/framework`'s
+  `k8ordo generate`, which resolves the config and calls the api without
+  building, write the same files and refuse a broken `routes/` with the
+  same message, every problem in it.
 - **The generated table is ordinary source.** It uses the router's public API
   — through `@k8ordo/framework/generated`, so the generated files never name
   the router — and would be identical to what someone wrote by hand from the
