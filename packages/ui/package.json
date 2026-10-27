@@ -104,7 +104,7 @@
   },
   "dependencies": {
     "clsx": "2.1.1",
-    "lucide-react": "1.59.0",
+    "lucide-react": "1.60.0",
     "server-only": "catalog:",
     "shiki": "4.5.0"
   },
@@ -140,7 +140,7 @@
     "storybook-addon-determinism": "0.2.1",
     "storybook-addon-mock-date": "3.2.1",
     "storybook-addon-vrt": "0.4.0",
-    "streamdown": "2.7.0",
+    "streamdown": "2.7.1",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vite-plus": "catalog:",
