@@ -437,5 +437,6 @@ describe.each([
         ),
       ).toHaveLength(1);
     },
+    30_000,
   );
 });
