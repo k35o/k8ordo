@@ -61,6 +61,10 @@
   intents:
     - framework-generate
     - framework-route-chunks
+"@k8ordo/framework@1.2.1":
+  dir: packages/framework
+  intents:
+    - framework-ssr-client-deps
 "@k8ordo/i18n@1.0.0":
   dir: packages/i18n
   intents:
