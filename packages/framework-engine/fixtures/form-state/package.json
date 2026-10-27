@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "description": "A form whose Server Action returns a client component, which runtime/form-state.test.ts posts without JavaScript.",
+  "type": "module"
+}

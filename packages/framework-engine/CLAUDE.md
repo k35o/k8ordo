@@ -586,6 +586,9 @@ fixtures/
                              engine with the components' chunks held back
   page-throws/routes/        a page whose module throws as it is read, which
                              runtime/page-throws.test.ts builds in both modes
+  form-state/routes/         a form whose Server Action returns a client
+                             component, which runtime/form-state.test.ts
+                             posts without JavaScript
 ```
 
 ## Conventions
