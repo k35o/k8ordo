@@ -13,17 +13,19 @@ import {
   loadServerAction,
   renderToReadableStream,
 } from '@vitejs/plugin-rsc/rsc/server';
-import type { ComponentType, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import {
   catchAllSchemas,
   fallbacks,
   guards,
+  pageModules,
   paramSchemas,
   redirects,
   routeModules,
   routes,
   searchReaders,
 } from 'virtual:k8ordo/routes';
+import type { Leaf } from 'virtual:k8ordo/routes';
 
 import type { Mode } from '../host';
 import { noticeCancel } from './cancel';
@@ -87,9 +89,119 @@ export const mode: Mode =
 type Shell = {
   /** The pattern whose fallback.tsx renders it. */
   readonly pattern: string;
-  readonly component: ComponentType<never>;
+  /** Reads the fallback.tsx. */
+  readonly load: () => Promise<Leaf>;
   /** The params the shell fills; the rest are left to the browser. */
   readonly known: Readonly<Record<string, string>>;
+};
+
+/** What answers a pathname, as the walk through the table found it. */
+type Found = {
+  readonly match: Match | null;
+  readonly parsed: ParsedParams;
+  /**
+   * The page or the route.ts that answers, read as the walk reached it.
+   * None for a catch-all — its not-found is read when it renders — a shell,
+   * or a redirect.
+   */
+  readonly leaf?: Leaf;
+  readonly shell?: Shell;
+};
+
+const NO_PARAMS: ParsedParams = { params: {}, enter: (fn) => fn() };
+
+/**
+ * The pattern that answers a pathname. A param a schema refuses is a
+ * pathname the pattern does not answer, so the walk goes on to whatever the
+ * table declares next — the catch-all in the end. A catch-all answers
+ * whatever its params hold: a 404 is already what a refused param means. The
+ * layouts' schemas above it still run, for what they write — `/en/missing`
+ * renders in the locale its URL names. What answers runs inside
+ * `parsed.enter`, so it sees what the schemas of the pattern that answered
+ * wrote to the async context, and nothing a refused pattern's did.
+ *
+ * A page's schema is an export of the page, and the table reads a page only
+ * when a request reaches it; `routes.match` decides synchronously, so it is
+ * asked for every pattern that fits, and the walk reads each file before
+ * running the schemas along its stack, in the table's order.
+ */
+const find = async (pathname: string): Promise<Found> => {
+  const fits: Match[] = [];
+  routes.match(pathname, (fit) => {
+    fits.push(fit);
+    return false;
+  });
+  for (const fit of fits) {
+    if (fit.pattern.endsWith('/*')) {
+      return {
+        match: fit,
+        parsed: parseCatchAllParams(
+          catchAllSchemas[fit.pattern] ?? [],
+          fit.params,
+        ),
+      };
+    }
+    // A shell pathname (`/ja/posts/!fallback`) of a pattern with a
+    // fallback.tsx: the page's own schema never runs — there is no value —
+    // and the layouts' run over the params the shell fills, for what they
+    // write; one refusing is this pattern not answering, as for a page.
+    const fallback = fallbacks[fit.pattern];
+    const known =
+      fallback === undefined ? null : shellParams(fit.params, fallback.open);
+    if (fallback !== undefined && known !== null) {
+      const accepted = parseParams(fallback.schemas, known);
+      if (accepted === null) continue;
+      return {
+        match: fit,
+        parsed: accepted,
+        shell: { pattern: fit.pattern, load: fallback.load, known },
+      };
+    }
+    const leaf = await (
+      routeModules[fit.pattern] ?? pageModules[fit.pattern]
+    )?.();
+    const accepted = parseParams(
+      leaf === undefined ? [] : (paramSchemas[fit.pattern]?.(leaf) ?? []),
+      fit.params,
+    );
+    if (accepted === null) continue;
+    return { match: fit, parsed: accepted, leaf };
+  }
+  return { match: null, parsed: NO_PARAMS };
+};
+
+/** What a route file renders: its default export. */
+const componentOf = (leaf: Leaf): RouteComponent =>
+  leaf.default as RouteComponent;
+
+/**
+ * A catch-all's match with its not-found in the leaf's place, read now. The
+ * table holds `lazy()` there, which the render would read by itself; read
+ * here, a not-found that fails to load fails the request, as a page does,
+ * rather than a response already under way.
+ */
+const withNotFound = async (match: Match): Promise<Match> => {
+  const leaf = await pageModules[match.pattern]?.();
+  return leaf === undefined
+    ? match
+    : { ...match, stack: [...match.stack.slice(0, -1), componentOf(leaf)] };
+};
+
+/**
+ * Per page module, what reads its search: `urlReader` builds the codec each
+ * time it is called, and a page's is the same for every request.
+ */
+const searchReads = new WeakMap<Leaf, (input: URLSearchParams) => unknown>();
+
+const searchReaderOf = (
+  pattern: string,
+  leaf: Leaf,
+): ((input: URLSearchParams) => unknown) | undefined => {
+  const make = searchReaders[pattern];
+  if (make === undefined) return undefined;
+  const made = searchReads.get(leaf) ?? make(leaf);
+  searchReads.set(leaf, made);
+  return made;
 };
 
 /**
@@ -216,11 +328,28 @@ const renderFailed = (error: unknown): Response =>
  */
 export default function handler(request: Request): Promise<Response> {
   // What answers the request may add to the response — a guard's headers —
-  // and what it adds goes on whatever the answer turns out to be.
+  // and what it adds goes on whatever the answer turns out to be. Under a
+  // build into files, what throws while answering is a file that cannot be
+  // written — a route file read as the request reached it whose module
+  // threw, say — so the build stops naming the URL, as for a page that
+  // failed to render, and the error is logged whole, as a failed render's
+  // is, for the file and line its stack names. A running server's `serve`
+  // answers it with a 500.
   return withRequest(request, async () =>
     answer(
       await (import.meta.env.K8ORDO_MODE === 'static'
-        ? writingFile(() => respond(request))
+        ? writingFile(() =>
+            respond(request).catch((error: unknown) => {
+              // pathname は引数として渡す。第 1 引数はフォーマット文字列
+              // なので、`%s` を含む URL では error が食われて消える
+              console.error(
+                'k8ordo: answering %s failed',
+                new URL(request.url).pathname,
+                error,
+              );
+              return renderFailed(error);
+            }),
+          )
         : respond(request)),
     ),
   );
@@ -238,49 +367,7 @@ const respond = async (request: Request): Promise<Response> => {
   }
   const wantsPayload = isPayloadPath(own);
   const pathname = wantsPayload ? pagePathFor(own) : own;
-  // A param a schema refuses is a pathname the pattern does not answer, so
-  // the walk goes on to whatever the table declares next — the catch-all in
-  // the end. A catch-all answers whatever its params hold: a 404 is already
-  // what a refused param means. The layouts' schemas above it still run, for
-  // what they write — `/en/missing` renders in the locale its URL names.
-  // The render starts inside `parsed.enter`, so it sees what the schemas of
-  // the pattern that answered wrote to the async context, and nothing a
-  // refused pattern's did.
-  let parsed: ParsedParams = { params: {}, enter: (fn) => fn() };
-  // 宣言の型のまま置く。コールバックの中でしか代入しないので、初期値で
-  // undefined に絞られると後ろで読めない
-  let shell = undefined as Shell | undefined;
-  const match = routes.match(pathname, (found) => {
-    if (found.pattern.endsWith('/*')) {
-      parsed = parseCatchAllParams(
-        catchAllSchemas[found.pattern] ?? [],
-        found.params,
-      );
-      return true;
-    }
-    // A shell pathname (`/ja/posts/!fallback`) of a pattern with a
-    // fallback.tsx: the page's own schema never runs — there is no value —
-    // and the layouts' run over the params the shell fills, for what they
-    // write; one refusing is this pattern not answering, as for a page.
-    const fallback = fallbacks[found.pattern];
-    const known =
-      fallback === undefined ? null : shellParams(found.params, fallback.open);
-    if (fallback !== undefined && known !== null) {
-      const accepted = parseParams(fallback.schemas, known);
-      if (accepted === null) return false;
-      parsed = accepted;
-      shell = { pattern: found.pattern, component: fallback.component, known };
-      return true;
-    }
-    shell = undefined;
-    const accepted = parseParams(
-      paramSchemas[found.pattern] ?? [],
-      found.params,
-    );
-    if (accepted === null) return false;
-    parsed = accepted;
-    return true;
-  });
+  const { match, parsed, leaf, shell } = await find(pathname);
 
   // A redirect.ts holds its place in the table, so it answers only the URLs
   // the walk reached it for — a literal page beside a [slug]/redirect.ts keeps
@@ -306,7 +393,10 @@ const respond = async (request: Request): Promise<Response> => {
   // A route.ts answers by its own methods, from anywhere: no origin check,
   // since what posts to it — a webhook — is not a form on this site, and it
   // checks what it needs itself.
-  const module = match === null ? undefined : routeModules[match.pattern];
+  const module =
+    match === null || routeModules[match.pattern] === undefined
+      ? undefined
+      : leaf;
   if (match !== null && module !== undefined) {
     // A route has no payload. A client navigation that asks for one gets
     // something that is not, and loads the document instead — as it would
@@ -397,23 +487,23 @@ const respond = async (request: Request): Promise<Response> => {
   // the way @k8ordo/state reads a url schema; the payload says which search
   // it was rendered with, so the browser loads the page again when it moves.
   const readSearch =
-    match === null || missing || shell !== undefined
+    match === null || missing || leaf === undefined
       ? undefined
-      : searchReaders[match.pattern];
+      : searchReaderOf(match.pattern, leaf);
   const search = readSearch?.(url.searchParams);
 
   // What the table answers for a URL nothing matched here — the nearest
   // not-found.tsx — and the context its layouts' schemas leave.
-  const nearestNotFound = (): {
+  const nearestNotFound = async (): Promise<{
     readonly tree: ReactNode;
     readonly enter: ParsedParams['enter'];
-  } => {
+  }> => {
     const nearest = matchNotFound(pathname, shell !== undefined);
     return {
       tree:
         nearest.match === null
           ? renderNotFound(routes, pathname, routeRequest)
-          : renderMatch(nearest.match, {
+          : renderMatch(await withNotFound(nearest.match), {
               pathname,
               params: nearest.parsed.params,
               request: routeRequest,
@@ -443,16 +533,19 @@ const respond = async (request: Request): Promise<Response> => {
       isAction ? temporaryReferences : undefined,
     );
 
+  // What answers in the page's place: the page the walk read, or the
+  // shell's fallback.tsx.
+  const shown = shell === undefined ? leaf : await shell.load();
   // A page is watched, so what it says of itself can still decide the answer,
   // and followed by what tells the HTML render it has arrived. Followed in a
   // payload too, so a navigation's tree has the shape the document's had.
   const page =
-    match === null || missing || action.redirect !== undefined
+    match === null ||
+    missing ||
+    action.redirect !== undefined ||
+    shown === undefined
       ? null
-      : watchPage(
-          shell?.component ?? (match.stack.at(-1) as RouteComponent),
-          <PageShown />,
-        );
+      : watchPage(componentOf(shown), <PageShown />);
   // Whether the answer is the page, followed: the HTML render waits for it.
   let showsPage = page?.followed === true;
   let status = missing ? 404 : 200;
@@ -464,9 +557,14 @@ const respond = async (request: Request): Promise<Response> => {
       ? match === null
         ? renderNotFound(routes, pathname, routeRequest)
         : renderMatch(
-            // A shell's layouts receive the params it fills, and nothing
-            // for the ones it leaves to the browser.
-            shell === undefined ? match : { ...match, params: shell.known },
+            // A catch-all renders its not-found, read. A shell's layouts
+            // receive the params it fills, and nothing for the ones it
+            // leaves to the browser.
+            missing
+              ? await withNotFound(match)
+              : shell === undefined
+                ? match
+                : { ...match, params: shell.known },
             {
               pathname,
               params: parsed.params,
@@ -483,7 +581,7 @@ const respond = async (request: Request): Promise<Response> => {
     // its layouts' schemas left: its client code finds out only in the
     // browser that the value has nothing behind it, and a file cannot be
     // asked for another answer then.
-    shell === undefined ? undefined : nearestNotFound().tree,
+    shell === undefined ? undefined : (await nearestNotFound()).tree,
   );
 
   // A document's status leaves before its body, so it waits for the page to
@@ -506,7 +604,7 @@ const respond = async (request: Request): Promise<Response> => {
       // The page's own answer: what the table answers for a URL nothing
       // matched here — the nearest not-found.tsx, in the context its
       // layouts' schemas leave.
-      const nearest = nearestNotFound();
+      const nearest = await nearestNotFound();
       status = 404;
       showsPage = false;
       ({ enter } = nearest);
@@ -598,7 +696,7 @@ const matchNotFound = (
   pathname: string,
   forShell: boolean,
 ): { match: Match | null; parsed: ParsedParams } => {
-  let parsed: ParsedParams = { params: {}, enter: (fn) => fn() };
+  let parsed = NO_PARAMS;
   const page = normalizePathname(pathname);
   const match = routes.match(
     `${page === '/' ? '' : page}/${NOT_FOUND_SEGMENT}`,

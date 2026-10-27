@@ -465,6 +465,21 @@ export const sameSiteFix = message({
   en: "Leave a `sameSite: 'none'` cookie `secure`, and serve over HTTPS.",
 });
 
+export const pageCssTitle = message({
+  ja: 'ページでimportしたCSSが、ほかのページに当たらない',
+  en: 'CSS a page imports does not reach other pages',
+});
+
+export const pageCssCause = message({
+  ja: '`page.tsx`・`not-found.tsx`・`route.ts`・`fallback.tsx`がimportしたCSSや、importしたときに動くコードは、そのファイルを描くページを開くまで読まれません。ほかのページがimportしたCSSに頼っていたページは、同じタブでそのページを開いたあとにしか当たりません。importしたときに動くコードは、サーバーではそのプロセスでそのページへの最初のリクエストが来たあとに効き、staticモードではそのページのプリレンダーがほかより先に走ったかどうかで書き出すHTMLが変わることがあります。',
+  en: 'The CSS a `page.tsx`, `not-found.tsx`, `route.ts` or `fallback.tsx` imports, and the code that runs as it is imported, are not loaded until a page that renders that file is opened. A page relying on CSS another page imports gets it only once that page has been opened in the same tab. Code that runs as it is imported takes effect on a server once that page has had its first request in that process, and under static mode the HTML written for a page may change with whether that page was prerendered before it.',
+});
+
+export const pageCssFix = message({
+  ja: 'すべてのページに要るCSSやコードは、ルートの`layout.tsx`でimportします。',
+  en: 'Import the CSS and code every page needs in the root `layout.tsx`.',
+});
+
 export const hydrationTitle = message({
   ja: '本番でだけ出るハイドレーションのエラー',
   en: 'Hydration errors only in production',

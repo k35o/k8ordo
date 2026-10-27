@@ -60,7 +60,8 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 
 - [Routing](references/routing.md): the `routes/` grammar and every refusal
   the build names, where a `fallback.tsx` may sit, how a page is sent in
-  each mode, `loading.tsx`, `route.ts` (methods and `405` under server
+  each mode (each page loads only its own client components and CSS, and
+  the browser renders once they have loaded), `loading.tsx`, `route.ts` (methods and `405` under server
   mode, a file under static mode), the generated `.k8ordo/` files (the
   route table, and the `Register`s: the table's, and `@k8ordo/i18n`'s when
   `src/i18n.ts` exports `locales` by name), titles,

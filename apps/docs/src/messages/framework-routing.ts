@@ -461,8 +461,8 @@ export const generatedWhen = message({
 
 export const generatedFiles = [
   message({
-    ja: '`routes.gen.ts`：ルート表です。それぞれのルートのファイルを、そのディレクトリのパターンに対して`satisfies`で検査します。',
-    en: '`routes.gen.ts`: the route table itself. It checks each route file against its directory’s pattern with `satisfies`.',
+    ja: '`routes.gen.ts`：ルート表です。それぞれのルートのファイルを、そのディレクトリのパターンに対して`satisfies`で検査します。`page.tsx`・`not-found.tsx`・`route.ts`・`fallback.tsx`は、リクエストが届いたときに`import()`で読みます。表には、ページと`not-found.tsx`を`lazy()`で置きます。',
+    en: '`routes.gen.ts`: the route table itself. It checks each route file against its directory’s pattern with `satisfies`. `page.tsx`, `not-found.tsx`, `route.ts` and `fallback.tsx` are read with `import()` when a request reaches them, and a page or a `not-found.tsx` stands in the table as `lazy()`.',
   }),
   message({
     ja: '`register.gen.ts`：ルート表をフレームワークに登録します。これで`href()`や`useMatch()`のパターンに型が付きます。serverモードでは、`PageProps`と`LayoutProps`に`request`も足します。アプリが`@k8ordo/state`に依存していれば、そちらにも登録します。アプリが`@k8ordo/i18n`に依存し、`src/i18n.ts`が`locales`をexportしていれば、`@k8ordo/i18n`の`Register`も書きます。',

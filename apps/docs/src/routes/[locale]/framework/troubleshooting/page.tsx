@@ -181,6 +181,12 @@ const SYMPTOMS: readonly Symptom[] = [
     fix: t.sameSiteFix,
   },
   {
+    id: 'page-css',
+    title: t.pageCssTitle,
+    cause: t.pageCssCause,
+    fix: t.pageCssFix,
+  },
+  {
     id: 'hydration',
     title: t.hydrationTitle,
     cause: t.hydrationCause,

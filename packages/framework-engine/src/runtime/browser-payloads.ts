@@ -6,7 +6,11 @@ import {
   setServerCallback,
 } from '@vitejs/plugin-rsc/browser';
 
-import { answerAction, setPayloadReader } from './app-router';
+import {
+  answerAction,
+  navigationsApplied,
+  setPayloadReader,
+} from './app-router';
 import { ACTION_ID_HEADER } from './payload';
 import type { Payload } from './payload';
 
@@ -18,6 +22,7 @@ import type { Payload } from './payload';
 export const connectAppRouter = (): void => {
   setPayloadReader((stream) => createFromReadableStream<Payload>(stream));
   setServerCallback(async (id: string, args: unknown[]) => {
+    const sent = navigationsApplied();
     const temporaryReferences = createTemporaryReferenceSet();
     const payload = await createFromFetch<Payload>(
       fetch(location.href, {
@@ -27,6 +32,6 @@ export const connectAppRouter = (): void => {
       }),
       { temporaryReferences },
     );
-    return answerAction(payload);
+    return answerAction(payload, sent);
   });
 };
