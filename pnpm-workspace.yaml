@@ -46,13 +46,13 @@ catalog:
   '@vitest/utils': 5.0.5
   # @k8ordo/ui/ai-sdk の peer。example が使う @ai-sdk/react は ai を exact で
   # 持つので、上げるときは同じ ai を持つ @ai-sdk/react と揃えて 1 コピーに保つ。
-  ai: 7.0.143
+  ai: 7.0.146
   # @k8ordo/framework の reactCompiler が使う、@vitejs/plugin-react の任意の peer。
   # 版は plugin-react の peer の範囲から選ぶので、plugin-react と揃えて手で上げる (renovate.json)
   oxc-transform-react: 0.152.0
   # 1.64 は Firefox が iframe をまたぐフォーカスを壊すので飛ばす (renovate.json)
   playwright: 1.63.0
-  postcss: 8.5.30
+  postcss: 8.5.31
   publint: 0.3.25
   react: 19.3.1
   react-dom: 19.3.1
@@ -78,7 +78,7 @@ minimumReleaseAge: 10080
 # tsc が "Excessive stack depth" を起こして typecheck が落ちる。単一バージョンに
 # 強制して型グラフのコピーを 1 つに保つ (types のみのパッケージでランタイム影響なし)。
 overrides:
-  '@oxc-project/types': 0.154.0
+  '@oxc-project/types': 0.155.0
 
   # vitest は vite-plus が exact pin (1.0.0 は 5.0.1) で連れてくる依存で、
   # `vp test` が起動するのは常に vite-plus 側の 1 本。catalog の vitest が
