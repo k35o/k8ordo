@@ -147,6 +147,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
           REPORT_URL: ${{ steps.pages.outputs.url }}
+        shell: bash
         run: |
           args=()
           if [ -n "$REPORT_URL" ]; then args+=(--report-url "$REPORT_URL"); fi
