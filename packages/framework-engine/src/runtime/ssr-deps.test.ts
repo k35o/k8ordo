@@ -242,7 +242,15 @@ const usingBuild = (
 describe('the HTML of a file', () => {
   const { answer, twice, manifest, out } = usingBuild('static');
 
-  it.each(['/', '/nowhere', '/lazy', '/streamed', '/held', '/held-late'])(
+  it.each([
+    '/',
+    '/nowhere',
+    '/lazy',
+    '/streamed',
+    '/held',
+    '/held-late',
+    '/held-value',
+  ])(
     'links in the head everything the client components %s names need, whether they had loaded or not',
     async (pathname) => {
       for (const html of await twice(pathname)) {
@@ -323,7 +331,7 @@ describe('the HTML of a file', () => {
 describe('the HTML of a streamed document', () => {
   const { answer, twice, manifest } = usingBuild('server');
 
-  it.each(['/', '/nowhere', '/lazy', '/held'])(
+  it.each(['/', '/nowhere', '/lazy', '/held', '/held-value'])(
     'links in the head everything the client components %s names need, whether they had loaded or not',
     async (pathname) => {
       for (const html of await twice(pathname)) {

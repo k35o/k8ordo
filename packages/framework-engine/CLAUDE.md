@@ -642,8 +642,9 @@ fixtures/
                              of their own — rendered by a page, a not-found, a
                              module a Server Component imports, a boundary
                              that resolves after the shell, or only passed in
-                             a prop, in the shell or in such a boundary — and
-                             a page with a CSS Module beside one, which
+                             a prop, in the shell or in such a boundary, or as
+                             a value — and a page with a CSS Module beside
+                             one, which
                              runtime/ssr-deps.test.ts builds in both modes
                              and serves under vite dev
   form-state/routes/         a form whose Server Action returns a client

@@ -1,5 +1,5 @@
 {
   "private": true,
-  "description": "Client components only one page names — rendered by a page, a not-found, a module a Server Component imports, a boundary that resolves after the shell, or only passed in a prop, in the shell or in such a boundary — and a page with a stylesheet of its own beside a client component, which runtime/ssr-deps.test.ts builds in both modes and serves under vite dev.",
+  "description": "Client components only one page names — rendered by a page, a not-found, a module a Server Component imports, a boundary that resolves after the shell, or only passed in a prop, in the shell or in such a boundary, or as a value — and a page with a stylesheet of its own beside a client component, which runtime/ssr-deps.test.ts builds in both modes and serves under vite dev.",
   "type": "module"
 }
