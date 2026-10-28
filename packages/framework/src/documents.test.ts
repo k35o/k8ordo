@@ -301,6 +301,16 @@ describe('unlinkedDeps', () => {
     expect(unlinkedDeps(html, [BUTTON])).toStrictEqual([BUTTON]);
   });
 
+  it('reads on after a script whose end tag is written as `</SCRIPT >`', () => {
+    const html = documentOf(
+      `<script>document.write('<link rel="stylesheet" href="/assets/button-C2.css">')</SCRIPT ><link rel="modulepreload" href="/assets/button-B1.js"/>`,
+    );
+
+    expect(unlinkedDeps(html, [BUTTON])).toStrictEqual([
+      { id: 'button', name: 'Button', js: [], css: ['/assets/button-C2.css'] },
+    ]);
+  });
+
   it('reads a URL as the browser does, its query’s `&` written as `&amp;`', () => {
     const html = documentOf(
       '<link rel="stylesheet" href="https://cdn.example.test/button-C2.css?v=1&amp;w=2"/><link rel="modulepreload" href="https://cdn.example.test/button-B1.js?v=1&amp;w=2"/>',

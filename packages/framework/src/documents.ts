@@ -186,6 +186,49 @@ export const asFile = (
   return `${unsigned.slice(0, at)}${meta}${unsigned.slice(at)}`;
 };
 
+/**
+ * What ends a tag's name in HTML: `</script` followed by anything else is
+ * still the script's text.
+ */
+const ENDS_TAG_NAME = new Set(['\t', '\n', '\f', '\r', ' ', '/', '>']);
+
+/** Where the next `<script` or `</script` tag starts, in any case. */
+const tagAt = (html: string, tag: string, from: number): number => {
+  for (
+    let at = html.indexOf('<', from);
+    at !== -1;
+    at = html.indexOf('<', at + 1)
+  ) {
+    if (
+      html.slice(at, at + tag.length).toLowerCase() === tag &&
+      ENDS_TAG_NAME.has(html.charAt(at + tag.length))
+    ) {
+      return at;
+    }
+  }
+  return -1;
+};
+
+/**
+ * The HTML outside its script elements, in the order it is written — what a
+ * layout wrote into the page, not the payload the page hydrates from. Scanned
+ * rather than stripped with a pattern: an end tag may be `</SCRIPT >`, and a
+ * pattern that misses one swallows the page up to the next script's.
+ */
+export const writtenOutsideScripts = (html: string): string[] => {
+  const written: string[] = [];
+  for (let from = 0; ;) {
+    const open = tagAt(html, '<script', from);
+    written.push(open === -1 ? html.slice(from) : html.slice(from, open));
+    if (open === -1) return written;
+    const close = tagAt(html, '</script', open + 1);
+    if (close === -1) return written;
+    const end = html.indexOf('>', close);
+    if (end === -1) return written;
+    from = end + 1;
+  }
+};
+
 // React が属性の値に書く実体参照
 const REFERENCE = /&(?:amp|lt|gt|quot|#x27);/gu;
 const REFERENCED = new Map([
@@ -214,7 +257,7 @@ export const unlinkedDeps = (
   html: string,
   named: readonly ClientDeps[],
 ): ClientDeps[] => {
-  const outside = html.replaceAll(SCRIPT, '');
+  const outside = writtenOutsideScripts(html).join('');
   const end = outside.indexOf('</head>');
   const head = end === -1 ? outside : outside.slice(0, end);
   const stylesheets = new Set<string>();
