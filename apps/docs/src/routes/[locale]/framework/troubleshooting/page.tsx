@@ -82,6 +82,12 @@ const SYMPTOMS: readonly Symptom[] = [
     cause: t.renderCause,
     fix: t.renderFix,
   },
+  {
+    id: 'links',
+    title: t.linksTitle,
+    cause: t.linksCause,
+    fix: t.linksFix,
+  },
   { id: 'dev', title: t.devTitle, cause: t.devCause, fix: t.devFix },
   {
     id: 'status',
