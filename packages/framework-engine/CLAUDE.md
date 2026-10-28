@@ -247,10 +247,12 @@ pnpm check         # check:write to auto-fix
   could be walked, and are not. So an element only such a container holds
   is linked only where its module first loads in the process — in a build,
   on the first page to name it, every later one failing the build's check
-  (below) — and one in a promise a not-found's prop holds that settles
-  after the not-found's HTML is rendered, nowhere: unlike a page's, a
-  not-found's payload is not read to its end before its HTML. A server
-  walks with `'follow'`: it waits only for the client components named in
+  (below), and under a server in the first request to name it, which
+  `apps/docs` lists as not guaranteed — and one in a promise a not-found's
+  prop holds that settles after the not-found's HTML is rendered, nowhere:
+  unlike a page's, a not-found's payload is not read to its end before its
+  HTML. A server walks with `'follow'`: it waits only for the client
+  components named in
   what has arrived, and walks a row still on its way once it arrives, in a
   continuation that inherits the request and runs before React renders
   what waited for the row, so its links come first — a stylesheet as a
@@ -273,8 +275,10 @@ pnpm check         # check:write to auto-fix
   the stream is read for it first. `runtime/ssr-deps.test.ts` builds pages
   naming client components each of those ways and renders each twice, cold
   and loaded — in production, since a test build tags every reference per
-  render and loads it afresh, which hides the loss — and serves them under
-  `vite dev` with one component's transform slowed, which fails without
+  render and loads it afresh, which hides the loss — holding a server's
+  links of the ones only a prop's container holds to where they first
+  load, and serves them under `vite dev` with one component's transform
+  slowed, which fails without
   `use(ready)`; `runtime/streaming.test.ts` holds that a server sends the
   shell before what a page waits for under a client component's
   `<Suspense>`, under an `error.tsx`, and in a prop never rendered;

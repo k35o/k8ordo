@@ -296,6 +296,22 @@ const usingBuild = (
   };
 };
 
+/** The client components only passed in a prop's containers on /contained. */
+const CONTAINED = [
+  'InMap',
+  'InSet',
+  'InPromise',
+  'InIterator',
+  'InAsyncIterable',
+  'InStream',
+];
+
+/** The stylesheets the components /contained holds in containers need. */
+const containedSheets = (manifest: Manifest, html: string): string[] =>
+  namedIn(html)
+    .filter(({ name }) => CONTAINED.includes(name))
+    .flatMap(({ id }) => manifest.clientReferenceDeps[id]?.css ?? []);
+
 describe('the HTML of a file', () => {
   const { answer, twice, manifest, out } = usingBuild('static');
 
@@ -458,6 +474,22 @@ describe('the HTML of a streamed document', () => {
       }
     },
   );
+
+  // server は props の入れ物の中を歩かないので、その中にしかない部品は、
+  // プロセスで初めてそのモジュールを読む要求の HTML にしか link されない。
+  // docs の「保証しないこと」に書いた範囲
+  it('links, on /contained, what only a prop’s containers hold where its process first loads it, and nowhere after', async () => {
+    const [cold, loaded] = await twice('/contained');
+    const sheets = containedSheets(manifest(), loaded.html);
+    const linkedIn = ({ html }: Rendered): string[] => {
+      const links = linked(html, 'stylesheet', 'preload');
+      return sheets.filter((href) => links.has(href));
+    };
+
+    expect(sheets).toHaveLength(CONTAINED.length);
+    expect(linkedIn(cold).length).toBeGreaterThan(0);
+    expect(linkedIn(loaded)).toStrictEqual([]);
+  });
 
   it('says nothing of its client components with the HTML', async () => {
     for (const { said } of await twice('/')) {
