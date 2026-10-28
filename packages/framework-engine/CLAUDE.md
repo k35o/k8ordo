@@ -239,21 +239,29 @@ pnpm check         # check:write to auto-fix
   inside it but not walked, an element only passed in a prop and never
   rendered is read by nothing on any page after that first one, while the
   browser's first render waits for its script all the same. Static mode
-  walks with `rows: 'wait'`, every row before the tree renders. The walk
-  does not open a Map, a Set, a promise, an iterator, an async iterable or
-  a stream a prop holds. An iterator, sync or async, is handed over to run
-  once and a stream to one reader, so walking either would spend it before
-  the component sees it; a Map, a Set, a promise and an async iterable
-  could be walked, and are not. So an element only such a container holds
-  is linked only where its module first loads in the process — in a build,
-  on the first page to name it, every later one failing the build's check
-  (below), and under a server in the first request to name it, which
-  `apps/docs` lists as not guaranteed — and one in a promise a not-found's
-  prop holds that settles after the not-found's HTML is rendered, nowhere:
-  unlike a page's, a not-found's payload is not read to its end before its
-  HTML. A server walks with `'follow'`: it waits only for the client
-  components named in
-  what has arrived, and walks a row still on its way once it arrives, in a
+  walks with `rows: 'wait'`, every row before the tree renders, and does not
+  leave the links to the walk: the RSC render hands the RSC plugin's
+  `onClientReference` (`renderToReadableStream`'s third argument, which its
+  README marks experimental) a callback that keeps, per reference (its id
+  and export name), the export's name and the manifest's `deps`; the handler
+  reads the payload to its end — a not-found's too, whose rows the HTML
+  render would not wait for — before the HTML render starts, and hands it
+  what was kept; and `Root` asks React for each one's files before it reads
+  the payload (`linkClientDeps`), as the plugin asks: the client entry's
+  scripts at the default priority — which ones, only the plugin's manifest
+  module says, read under the type the plugin exports for it — the rest
+  low, the stylesheets under its precedence. React writes a file as first
+  asked for, so the head is the same whichever modules had loaded. The
+  walk does not open a Map, a Set, a promise, an iterator, an async
+  iterable or a stream a prop holds. An iterator, sync or async, is handed
+  over to run once and a stream to one reader, so walking either would
+  spend it before the component sees it; a Map, a Set, a promise and an
+  async iterable could be walked, and are not. So a server, which links
+  only what the walk and the render read, links an element only such a
+  container holds where its module first loads in the process (`apps/docs`
+  lists it as not guaranteed). A server walks with `'follow'`: it waits
+  only for the client components named in what has arrived, and walks a
+  row still on its way once it arrives, in a
   continuation that inherits the request and runs before React renders
   what waited for the row, so its links come first — a stylesheet as a
   preload, React adding none once the shell is out. Waiting for such a row
@@ -266,29 +274,35 @@ pnpm check         # check:write to auto-fix
   only from a read after its module has loaded, which the walk makes once
   its wait ends. In a static file's head, the client references'
   stylesheets come before those the tree links, every one having been
-  walked first; a server orders what arrives after the walk by its arrival,
-  and a client navigation appends what it loads to the head, so no order
-  between the two is kept. `formState` is read apart: React takes it as the
-  render starts, and the RSC environment's value holds client components as
-  references the SSR cannot render, so when the payload carries one
-  (`carriesFormState`, a form posted without JavaScript) another branch of
-  the stream is read for it first. `runtime/ssr-deps.test.ts` builds pages
-  naming client components each of those ways and renders each twice, cold
-  and loaded — in production, since a test build tags every reference per
-  render and loads it afresh, which hides the loss — holding a server's
-  links of the ones only a prop's container holds to where they first
-  load, and serves them under `vite dev` with one component's transform
-  slowed, which fails without
-  `use(ready)`; `runtime/streaming.test.ts` holds that a server sends the
-  shell before what a page waits for under a client component's
-  `<Suspense>`, under an `error.tsx`, and in a prop never rendered;
-  `runtime/form-state.test.ts` posts a form whose action returns a client
-  component.
+  asked for first; a server orders what arrives after the walk by its
+  arrival, and a client navigation appends what it loads to the head, so no
+  order between the two is kept. Nor among the client references' own: a
+  static head has them in the order the RSC render named them, which a
+  Server Component waiting for data can change from one build to the next,
+  a server in the order it read them, and a navigation in the order it
+  loads them; an override between two goes by specificity or `@layer`.
+  `formState` is read apart: React takes it as the render starts, and the
+  RSC environment's value holds client components as references the SSR
+  cannot render, so when the payload carries one (`carriesFormState`, a
+  form posted without JavaScript) another branch of the stream is read for
+  it first. `runtime/ssr-deps.test.ts` builds pages naming client
+  components each of those ways — and, in static mode, in each of those
+  containers, and in a not-found's promise that settles late — with React
+  in a chunk of its own, so the client entry loads more than itself, and
+  renders each twice, cold and loaded — in production, since a test build
+  tags every reference per render and loads it afresh, which hides the
+  loss — holding the static heads of the last two the same both times, a
+  static head's links the same as a server's, where the plugin alone asks,
+  on the pages a render reads whole, and a server's links of the contained
+  ones only where they first load; and it serves them under `vite dev`
+  with one component's transform slowed, which fails without `use(ready)`;
+  `runtime/streaming.test.ts` holds that a server sends the shell before
+  what a page waits for under a client component's `<Suspense>`, under an
+  `error.tsx`, and in a prop never rendered; `runtime/form-state.test.ts`
+  posts a form whose action returns a client component.
 - **A static page's HTML says which client components its payload named.**
-  What the RSC render serializes, the RSC plugin's `onClientReference`
-  (`renderToReadableStream`'s third argument, which its README marks
-  experimental) hands a callback reference by reference; the HTML answer
-  says it in `CLIENT_DEPS_HEADER`, and the framework's build checks the
+  What the RSC render kept for the HTML render to link (above), the HTML
+  answer says in `CLIENT_DEPS_HEADER`, and the framework's build checks the
   HTML links every file (`packages/framework/CLAUDE.md`): exactly one entry
   per reference — the id the manifest keys its module with, its export's
   name and that reference's `deps`, so two default exports are two entries

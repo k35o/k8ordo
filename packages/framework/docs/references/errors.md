@@ -79,23 +79,13 @@ This is a bug in @k8ordo/framework, not in this application: report it at https:
   /assets/not-found-xxQ43iW3.js — 1 page (404.html), for NotFound
 ```
 
-The framework has React write those links as it renders the page, so a
-file the error names is a bug in k8ordo or in the React that wrote the
-HTML. Report it with the error as printed. One such bug is known in this
-version. An element a prop only holds in a `Map`, a `Set`, a promise, an
-iterator, an async iterable or a `ReadableStream`, and that nothing
-renders, is linked only on the page whose render first loads its module,
-and the build stops on every other page that names it — which pages, the
-order the build renders them in decides, so adding or removing an
-unrelated page can move the failure. An element in a promise a
-`not-found.tsx` hands a prop is not linked at all when the promise settles
-after `404.html` has been rendered. Until that is fixed, hand such an
-element over in an array or a plain object, which the framework looks
-into, or render it; in a `not-found.tsx`, await the value and render the
-element rather than passing the promise. If the build started stopping
-right after an upgrade, go back to the previous version of what you
-upgraded — `@k8ordo/framework`, or `react` and `react-dom`, which decide
-where the links are written — until it is fixed.
+The framework has React write every one of those links as it renders the
+page, whatever its components hold or render, so a file the error names is
+a bug in k8ordo or in the React that wrote the HTML, not something the
+application got wrong or can fix. Report it with the error as printed. If
+the build started stopping right after an upgrade, go back to the previous
+version of what you upgraded — `@k8ordo/framework`, or `react` and
+`react-dom`, which decide where the links are written — until it is fixed.
 The check does not cover the stylesheets of what a client component
 imports dynamically (`React.lazy`, `import()`), nor a Server Component's
 stylesheets, and it runs only in a static build: `vite dev` and server

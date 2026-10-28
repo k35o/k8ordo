@@ -282,22 +282,21 @@ pnpm check         # check:write to auto-fix
   location), and a component that needs it by its export's name. Each
   component's files include what the client entry loads, so a failure
   across a site would otherwise repeat those files for every page and
-  component, past what a report can carry. What this catches is the engine
-  or React losing a link — today also an element only a prop's container
-  holds, which the engine links only where its module first loads, and one
-  a not-found receives late (`packages/framework-engine/CLAUDE.md`). Nothing
-  turns it off: what it names is a bug to fix in this package or React, and
-  a false failure is as much a bug to report. Not checked: server mode,
-  which renders per request, and `vite dev`, whose manifest names no files;
-  the CSS of a chunk a client component imports dynamically
-  (`React.lazy`), which is not among a reference's `deps`; a Server
-  Component's CSS; a reference the manifest does not list, which the RSC
-  plugin gives no files. `src/documents.test.ts` holds the reading and the
-  message, its count of two default exports and its length when every page
-  fails included, `src/static.test.ts` the error, and
-  `examples/static-basic`'s `build.test.ts` builds with the RSC plugin's
-  `preinit` and `preloadModule` in the SSR emptied, and sees every page,
-  `404.html` and both shells counted.
+  component, past what a report can carry. The engine links every file it
+  says (`packages/framework-engine/CLAUDE.md`), so what this catches is the
+  engine or React losing one, not a shape of the application. Nothing turns
+  it off: no application can fix what it names, and a false failure is as
+  much a bug to report. Not checked: server mode, which renders per
+  request, and `vite dev`, whose manifest names no files; the CSS of a
+  chunk a client component imports dynamically (`React.lazy`), which is not
+  among a reference's `deps`; a Server Component's CSS; a reference the
+  manifest does not list, which the RSC plugin gives no files.
+  `src/documents.test.ts` holds the reading and the message, its count of
+  two default exports and its length when every page fails included,
+  `src/static.test.ts` the error, and
+  `examples/static-basic`'s `build.test.ts` builds with the SSR's `preinit`
+  and `preloadModule` emptied, the RSC plugin's and the engine's, and sees
+  every page, `404.html` and both shells counted.
 - **`site` is the only reason a sitemap exists.** Without the origin a
   sitemap would list relative URLs, which is not a sitemap; with it every
   page the build wrote is listed, redirects and the not-found excluded.

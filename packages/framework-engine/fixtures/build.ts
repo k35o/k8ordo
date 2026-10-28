@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { createBuilder, createLogger, createServer } from 'vite';
-import type { PluginOption } from 'vite';
+import type { PluginOption, Rolldown } from 'vite';
 
 import type { Mode } from '../src/host';
 import { engine } from '../src/plugin/core';
@@ -57,11 +57,18 @@ const alias = {
  * Builds the application under `fixtures/<name>/` as the mode builds one —
  * `'server'` unless told — and imports the handler it wrote. A static build
  * goes to `dist-static/`, so a test file building the same fixture in the
- * other mode runs beside it.
+ * other mode runs beside it. `clientChunks` splits the browser's build as
+ * an application's `codeSplitting` would.
  */
 export const buildFixture = async (
   name: string,
-  { mode = 'server' }: { readonly mode?: Mode } = {},
+  {
+    mode = 'server',
+    clientChunks,
+  }: {
+    readonly mode?: Mode;
+    readonly clientChunks?: Rolldown.CodeSplittingOptions;
+  } = {},
 ): Promise<BuiltFixture> => {
   const root = fileURLToPath(new URL(`./${name}/`, import.meta.url));
   const out = path.join(root, mode === 'static' ? 'dist-static' : 'dist');
@@ -91,7 +98,14 @@ export const buildFixture = async (
     environments: {
       rsc: { build: { outDir: path.join(out, 'rsc') } },
       ssr: { build: { outDir: path.join(out, 'ssr') } },
-      client: { build: { outDir: path.join(out, 'client') } },
+      client: {
+        build: {
+          outDir: path.join(out, 'client'),
+          ...(clientChunks === undefined
+            ? {}
+            : { rolldownOptions: { output: { codeSplitting: clientChunks } } }),
+        },
+      },
     },
   });
   await builder.buildApp();

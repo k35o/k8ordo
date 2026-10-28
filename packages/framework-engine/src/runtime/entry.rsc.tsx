@@ -651,14 +651,21 @@ const respond = async (request: Request): Promise<Response> => {
     // error shows only once a visitor's browser has rendered it. Under a
     // running server the same page streams and the browser shows error.tsx;
     // at build time it is a build that stops, naming the page.
+    // The payload is read to its end first — a not-found's too, whose rows
+    // the HTML render does not wait for — so the render is handed every
+    // client component it names.
+    const [forHtml, forNamed] = rendered.stream.tee();
+    await drain(forNamed);
+    const named = [...rendered.named.values()];
     let body: ArrayBuffer;
     try {
       const html = await enter(() =>
         ssr.renderHtml(
-          rendered.stream,
+          forHtml,
           signingNonce(),
           showsPage,
           action.formState !== undefined,
+          named,
         ),
       );
       body = await new Response(html).arrayBuffer();
@@ -689,6 +696,7 @@ const respond = async (request: Request): Promise<Response> => {
       signingNonce(),
       showsPage,
       action.formState !== undefined,
+      [],
     ),
   );
   return new Response(html, {

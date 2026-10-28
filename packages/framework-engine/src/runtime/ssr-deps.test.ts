@@ -4,7 +4,7 @@ import { pathToFileURL } from 'node:url';
 
 import { chromium, firefox, webkit } from 'playwright';
 import type { Browser, Page } from 'playwright';
-import type { Plugin } from 'vite';
+import type { Plugin, Rolldown } from 'vite';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
 
 import { buildFixture, serveFixture } from '../../fixtures/build';
@@ -25,6 +25,8 @@ const browserTypes = [chromium, firefox, webkit]
 type Deps = { readonly js: readonly string[]; readonly css: readonly string[] };
 
 type Manifest = {
+  readonly clientEntryUrl: string;
+  readonly clientEntryDeps?: Deps;
   readonly clientReferenceDeps: Readonly<Record<string, Deps>>;
 };
 
@@ -111,6 +113,12 @@ const linked = (part: string, ...rels: readonly string[]): Set<string> =>
 
 const headOf = (html: string): string =>
   html.slice(0, Math.max(0, html.indexOf('</head>')));
+
+/** The `<link>`s the head holds, as written but for the render's nonce. */
+const linksInHead = (html: string): string[] =>
+  [...headOf(html).matchAll(/<link\b[^>]*>/gu)].map(([link]) =>
+    link.replace(/ nonce="[^"]*"/u, ''),
+  );
 
 /**
  * The deps of the payload's client references the head neither links as a
@@ -231,12 +239,23 @@ const renderedIn = async (response: Response): Promise<Rendered> => {
   };
 };
 
+// React を入口とは別のチャンクにする。入口が自分の 1 ファイルしか読まないと、
+// 入口の読むファイルかどうかで分かれる頼み方が、どの head にも現れない
+const REACT_APART: Rolldown.CodeSplittingOptions = {
+  groups: [
+    {
+      name: 'react',
+      test: /\/node_modules\/(?:react|react-dom|scheduler)\//u,
+    },
+  ],
+};
+
 /**
- * The fixture built under `mode`. `twice` renders a page twice by the same
- * handler the first time it is asked for it, and hands both renders back
- * from then on: the first with the modules of the client components only
- * that page names cold, the second with them loaded, whichever test asks
- * first and whatever runs.
+ * The fixture built under `mode`, React in a chunk of its own. `twice`
+ * renders a page twice by the same handler the first time it is asked for
+ * it, and hands both renders back from then on: the first with the modules
+ * of the client components only that page names cold, the second with them
+ * loaded, whichever test asks first and whatever runs.
  */
 const usingBuild = (
   mode: Mode,
@@ -255,7 +274,10 @@ const usingBuild = (
     // プロセスで先に読んだ部品の抜けが現れないので、本番と同じビルドで確かめる
     vi.stubEnv('NODE_ENV', 'production');
     try {
-      built = await buildFixture('ssr-deps', { mode });
+      built = await buildFixture('ssr-deps', {
+        mode,
+        clientChunks: REACT_APART,
+      });
     } finally {
       vi.unstubAllEnvs();
     }
@@ -296,6 +318,27 @@ const usingBuild = (
   };
 };
 
+// どちらの SSR も、client 参照を読む関数を同じ globalThis に置き、あとから
+// 読み込んだほうがそれを取る。static の describe を先に置き、server の
+// describe は static の描画をこの順で済んだものとして読む
+const asFiles = usingBuild('static');
+const asDocuments = usingBuild('server');
+
+/** The modules the client entry loads besides itself. */
+const entryChunks = (manifest: Manifest): string[] =>
+  (manifest.clientEntryDeps?.js ?? []).filter(
+    (href) => href !== manifest.clientEntryUrl,
+  );
+
+/** What the head preloads as a module at the default priority. */
+const preloadedAtDefault = (html: string): Set<string> =>
+  linked(
+    linksInHead(html)
+      .filter((link) => !link.includes('fetchPriority'))
+      .join(''),
+    'modulepreload',
+  );
+
 /** The client components only passed in a prop's containers on /contained. */
 const CONTAINED = [
   'InMap',
@@ -306,6 +349,15 @@ const CONTAINED = [
   'InStream',
 ];
 
+/** The stylesheets of each client component the payload names, by name. */
+const sheetsByName = (manifest: Manifest, html: string): Map<string, string> =>
+  new Map(
+    namedIn(html).map(({ id, name }) => [
+      name,
+      JSON.stringify(manifest.clientReferenceDeps[id]?.css ?? []),
+    ]),
+  );
+
 /** The stylesheets the components /contained holds in containers need. */
 const containedSheets = (manifest: Manifest, html: string): string[] =>
   namedIn(html)
@@ -313,8 +365,13 @@ const containedSheets = (manifest: Manifest, html: string): string[] =>
     .flatMap(({ id }) => manifest.clientReferenceDeps[id]?.css ?? []);
 
 describe('the HTML of a file', () => {
-  const { answer, twice, manifest, out } = usingBuild('static');
+  const { answer, twice, manifest, out } = asFiles;
 
+  // /contained は props の Map・Set・Promise・iterator・async iterable・
+  // stream に入れただけの要素を、/promised/x の not-found は HTML の描画の
+  // あとで解ける Promise の中の要素を名指す。どちらもモジュールを読み終えた
+  // 2 度目の描画では、HTML の描画が読むことはない。/promised/x は描くたびに
+  // 1 秒待ち、最初に頼んだ試験が 2 回分を待つので、時間切れを延ばす
   it.each([
     '/',
     '/nowhere',
@@ -323,6 +380,8 @@ describe('the HTML of a file', () => {
     '/held',
     '/held-late',
     '/held-value',
+    '/contained',
+    '/promised/x',
   ])(
     'links in the head everything the client components %s names need, whether they had loaded or not',
     async (pathname) => {
@@ -334,13 +393,23 @@ describe('the HTML of a file', () => {
         expect(unlinkedInHead(manifest(), html)).toStrictEqual([]);
       }
     },
+    30_000,
   );
 
-  // /contained は props の Map・Set・Promise・iterator・async iterable・
-  // stream に入れただけの要素を、/promised/x の not-found は HTML の描画の
-  // あとで解ける Promise の中の要素を名指す。/defaults は、別々のファイルの
-  // 2 つの部品を、どちらも default という export 名で名指す。/promised/x は
-  // 描くたびに 1 秒待ち、最初に頼んだ試験が 2 回分を待つので、時間切れを延ばす
+  it.each(['/contained', '/promised/x'])(
+    'writes the same links in the head of %s whether its client components had loaded or not',
+    async (pathname) => {
+      const [cold, loaded] = (await twice(pathname)).map(({ html }) =>
+        linksInHead(html),
+      );
+
+      expect(loaded).toStrictEqual(cold);
+    },
+    30_000,
+  );
+
+  // /defaults は、別々のファイルの 2 つの部品を、どちらも default という
+  // export 名で名指す
   it.each([
     '/',
     '/nowhere',
@@ -382,6 +451,28 @@ describe('the HTML of a file', () => {
     expect(new Set(sheets.map((each) => each.includes(held)))).toStrictEqual(
       new Set([false, true]),
     );
+  });
+
+  // /contained の部品が同じ CSS を持てば、上の試験はどれか 1 つの入れ物の分
+  // しか見ていない
+  it('names, on /contained, a stylesheet of its own for the component in each container', async () => {
+    const [{ html }] = await twice('/contained');
+    const sheets = sheetsByName(manifest(), html);
+    const contained = CONTAINED.map((name) => sheets.get(name));
+
+    expect(contained).not.toContain(undefined);
+    expect(new Set(contained).size).toBe(CONTAINED.length);
+  });
+
+  // 入口が自分のほかに読むファイルが無いと、入口のものとほかのものとで
+  // 分かれる頼み方を、下の server との比べが見ていない
+  it('preloads, on /, what the client entry loads besides itself at the default priority', async () => {
+    const [{ html }] = await twice('/');
+    const preloaded = preloadedAtDefault(html);
+    const chunks = entryChunks(manifest());
+
+    expect(chunks.length).toBeGreaterThan(0);
+    expect(chunks.filter((href) => !preloaded.has(href))).toStrictEqual([]);
   });
 
   // static は描く前にすべてを歩くので、client コンポーネントの CSS の組が先に
@@ -434,7 +525,7 @@ describe('the HTML of a file', () => {
 });
 
 describe('the HTML of a streamed document', () => {
-  const { answer, twice, manifest } = usingBuild('server');
+  const { answer, twice, manifest } = asDocuments;
 
   it.each(['/', '/nowhere', '/lazy', '/held', '/held-value'])(
     'links in the head everything the client components %s names need, whether they had loaded or not',
@@ -471,6 +562,23 @@ describe('the HTML of a streamed document', () => {
         expect(
           [...css, ...js].filter((href) => !before.has(href)),
         ).toStrictEqual([]);
+      }
+    },
+  );
+
+  // static は RSC プラグインの頼み方を写して自分で頼む。server では
+  // プラグインだけが頼むので、それを正解にする。並びは mode で違う。static の
+  // 描画は上の describe が済ませたもの
+  it.each(['/', '/held', '/styled'])(
+    'links in the head of %s what its client components need as the file does, whether they had loaded or not',
+    async (pathname) => {
+      const files = await asFiles.twice(pathname);
+      const documents = await twice(pathname);
+
+      for (const { html } of [...files, ...documents]) {
+        expect(linksInHead(html).toSorted()).toStrictEqual(
+          linksInHead(files[0].html).toSorted(),
+        );
       }
     },
   );
