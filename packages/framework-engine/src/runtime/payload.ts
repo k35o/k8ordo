@@ -79,3 +79,34 @@ export const NONCE_HEADER = 'x-k8ordo-nonce';
  * one the build asked for, and the build compares instead of guessing.
  */
 export const SHELL_HEADER = 'x-k8ordo-shell';
+
+/**
+ * A client component a payload names — the id the build's manifest keys its
+ * module with, and its export's name: two exports are two components — and
+ * the stylesheets and scripts the manifest says it needs.
+ */
+export type ClientDeps = {
+  readonly id: string;
+  readonly name: string;
+  readonly js: readonly string[];
+  readonly css: readonly string[];
+};
+
+/**
+ * Said by the handler under mode: 'static' alone, on a page's HTML: every
+ * client component the payload it rendered names (`clientDepsHeader`) — what
+ * the HTML render was handed to link — which the build checks the HTML
+ * links.
+ */
+export const CLIENT_DEPS_HEADER = 'x-k8ordo-client-deps';
+
+/**
+ * The value of `CLIENT_DEPS_HEADER`. Encoded, because a header's value is
+ * bytes, and a chunk is named after a module, whose name need not be ASCII.
+ */
+export const clientDepsHeader = (named: Iterable<ClientDeps>): string =>
+  encodeURIComponent(JSON.stringify([...named]));
+
+/** What `clientDepsHeader` said. */
+export const readClientDeps = (value: string): ClientDeps[] =>
+  JSON.parse(decodeURIComponent(value)) as ClientDeps[];

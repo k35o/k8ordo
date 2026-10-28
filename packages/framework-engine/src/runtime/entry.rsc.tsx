@@ -38,12 +38,14 @@ import type { ParsedParams } from './params';
 import { FALLBACK_SEGMENT, NOT_FOUND_SEGMENT } from './pathname';
 import {
   ACTION_ID_HEADER,
+  CLIENT_DEPS_HEADER,
+  clientDepsHeader,
   NOT_FOUND_DIGEST,
   NONCE_HEADER,
   NOT_FOUND_HEADER,
   SHELL_HEADER,
 } from './payload';
-import type { Payload } from './payload';
+import type { ClientDeps, Payload } from './payload';
 import { isPayloadPath, pagePathFor } from './payload-path';
 import { isRedirect } from './redirect';
 import { resolveRedirects } from './redirect-file';
@@ -675,6 +677,7 @@ const respond = async (request: Request): Promise<Response> => {
       headers: {
         'content-type': HTML_TYPE,
         [NONCE_HEADER]: signingNonce(),
+        [CLIENT_DEPS_HEADER]: clientDepsHeader(rendered.named.values()),
         ...saidByPage,
         ...shellSaid,
       },
@@ -729,6 +732,11 @@ const matchNotFound = (
 
 type Rendered = {
   readonly stream: ReadableStream<Uint8Array>;
+  /**
+   * Under mode: 'static', the client components it has named so far, by
+   * reference.
+   */
+  readonly named: ReadonlyMap<string, ClientDeps>;
   /** What threw while rendering — notFound() aside, which is an answer. */
   readonly failures: readonly unknown[];
   /** Whether a component said notFound() yet. */
@@ -746,33 +754,49 @@ const renderPayload = (
   temporaryReferences: TemporaryReferences,
 ): Rendered => {
   const failures: unknown[] = [];
+  const named = new Map<string, ClientDeps>();
   let said = false;
   const { promise: saidNotFound, resolve } = Promise.withResolvers<undefined>();
   const controller = new AbortController();
   const flight = enter(() =>
-    renderToReadableStream(payload, {
-      temporaryReferences,
-      signal: controller.signal,
-      // Without this a component that throws simply truncates the stream, and
-      // the browser reports a closed connection instead of the actual error.
-      onError: (error: unknown) => {
-        // notFound() is an answer, not a failure. What reaches the browser
-        // is its digest, which is how PageBoundary knows it.
-        if (isNotFound(error)) {
-          said = true;
-          resolve(undefined);
-          return NOT_FOUND_DIGEST;
-        }
-        // 捨てた描画を止めると、その理由がここに届く。読み手が去って止めた
-        // ときも同じ。どちらも失敗ではない
-        if (controller.signal.aborted) return undefined;
-        failures.push(error);
-        // pathname は引数として渡す。第 1 引数はフォーマット文字列なので、
-        // `%s` を含む URL を投げられると error が食われて消える
-        console.error('k8ordo: rendering %s failed', payload.pathname, error);
-        return undefined;
+    renderToReadableStream(
+      payload,
+      {
+        temporaryReferences,
+        signal: controller.signal,
+        // Without this a component that throws simply truncates the stream, and
+        // the browser reports a closed connection instead of the actual error.
+        onError: (error: unknown) => {
+          // notFound() is an answer, not a failure. What reaches the browser
+          // is its digest, which is how PageBoundary knows it.
+          if (isNotFound(error)) {
+            said = true;
+            resolve(undefined);
+            return NOT_FOUND_DIGEST;
+          }
+          // 捨てた描画を止めると、その理由がここに届く。読み手が去って止めた
+          // ときも同じ。どちらも失敗ではない
+          if (controller.signal.aborted) return undefined;
+          failures.push(error);
+          // pathname は引数として渡す。第 1 引数はフォーマット文字列なので、
+          // `%s` を含む URL を投げられると error が食われて消える
+          console.error('k8ordo: rendering %s failed', payload.pathname, error);
+          return undefined;
+        },
       },
-    }),
+      import.meta.env.K8ORDO_MODE === 'static'
+        ? {
+            onClientReference: ({ id, name, deps }) => {
+              named.set(`${id}#${name}`, {
+                id,
+                name,
+                js: deps.js,
+                css: deps.css,
+              });
+            },
+          }
+        : undefined,
+    ),
   );
   // A reader that gives up stops the render first, so what it was still
   // rendering is not reported as failed.
@@ -781,6 +805,7 @@ const renderPayload = (
   });
   return {
     stream,
+    named,
     failures,
     notFound: () => said,
     saidNotFound,

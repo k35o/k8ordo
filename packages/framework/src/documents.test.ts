@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { asFile, policyProblems, redirectPage, sitemap } from './documents';
+import {
+  asFile,
+  policyProblems,
+  redirectPage,
+  sitemap,
+  unlinkedDeps,
+  unlinkedMessage,
+} from './documents';
 
 describe('sitemap', () => {
   it('escapes every character XML reserves, so a pathname cannot break the document', () => {
@@ -219,5 +226,300 @@ describe('policyProblems', () => {
     expect(policyProblems({ 'Script-Src': [] })).toStrictEqual([
       '"Script-Src" is not a directive name',
     ]);
+  });
+});
+
+const BUTTON = {
+  id: 'button',
+  name: 'Button',
+  js: ['/assets/button-B1.js'],
+  css: ['/assets/button-C2.css'],
+};
+
+// React が書く形の文書
+const documentOf = (head: string, body = ''): string =>
+  `<!DOCTYPE html><html><head><meta charset="utf-8"/>${head}</head><body>${body}</body></html>`;
+
+describe('unlinkedDeps', () => {
+  it('takes a stylesheet linked in <head>, and a script preloaded there or loaded by a <script>', () => {
+    const html = documentOf(
+      '<link rel="stylesheet" href="/assets/button-C2.css" data-precedence="vite-rsc/client-reference"/><link rel="modulepreload" href="/assets/button-B1.js"/>',
+      '<script type="module" src="/assets/index-D3.js" async=""></script>',
+    );
+
+    expect(
+      unlinkedDeps(html, [
+        BUTTON,
+        { id: 'root', name: 'Root', js: ['/assets/index-D3.js'], css: [] },
+      ]),
+    ).toStrictEqual([]);
+  });
+
+  it('names, of each component missing something, only what it misses', () => {
+    const html = documentOf(
+      '<link rel="modulepreload" href="/assets/button-B1.js"/><link rel="modulepreload" href="/assets/icon-E4.js"/>',
+    );
+
+    expect(
+      unlinkedDeps(html, [
+        BUTTON,
+        { id: 'icon', name: 'Icon', js: ['/assets/icon-E4.js'], css: [] },
+        { id: 'card', name: 'Card', js: ['/assets/card-F5.js'], css: [] },
+      ]),
+    ).toStrictEqual([
+      { id: 'button', name: 'Button', js: [], css: ['/assets/button-C2.css'] },
+      { id: 'card', name: 'Card', js: ['/assets/card-F5.js'], css: [] },
+    ]);
+  });
+
+  it('does not take a stylesheet that is only preloaded, which applies once a script says so', () => {
+    const html = documentOf(
+      '<link rel="preload" href="/assets/button-C2.css" as="style"/><link rel="modulepreload" href="/assets/button-B1.js"/>',
+    );
+
+    expect(unlinkedDeps(html, [BUTTON])).toStrictEqual([
+      { id: 'button', name: 'Button', js: [], css: ['/assets/button-C2.css'] },
+    ]);
+  });
+
+  it('does not take a <link> in <body>, which the page reaches only once it has started', () => {
+    const html = documentOf(
+      '<link rel="stylesheet" href="/assets/button-C2.css"/>',
+      '<link rel="modulepreload" href="/assets/button-B1.js"/>',
+    );
+
+    expect(unlinkedDeps(html, [BUTTON])).toStrictEqual([
+      { id: 'button', name: 'Button', js: ['/assets/button-B1.js'], css: [] },
+    ]);
+  });
+
+  it('does not take a <link> written in a script’s text', () => {
+    const html = documentOf(
+      `<script>document.write('<link rel="stylesheet" href="/assets/button-C2.css"><link rel="modulepreload" href="/assets/button-B1.js">')</script>`,
+    );
+
+    expect(unlinkedDeps(html, [BUTTON])).toStrictEqual([BUTTON]);
+  });
+
+  it('reads a URL as the browser does, its query’s `&` written as `&amp;`', () => {
+    const html = documentOf(
+      '<link rel="stylesheet" href="https://cdn.example.test/button-C2.css?v=1&amp;w=2"/><link rel="modulepreload" href="https://cdn.example.test/button-B1.js?v=1&amp;w=2"/>',
+      '<script type="module" src="https://cdn.example.test/index-D3.js?v=1&amp;w=2" async=""></script>',
+    );
+
+    expect(
+      unlinkedDeps(html, [
+        {
+          id: 'button',
+          name: 'Button',
+          js: ['https://cdn.example.test/button-B1.js?v=1&w=2'],
+          css: ['https://cdn.example.test/button-C2.css?v=1&w=2'],
+        },
+        {
+          id: 'root',
+          name: 'Root',
+          js: ['https://cdn.example.test/index-D3.js?v=1&w=2'],
+          css: [],
+        },
+      ]),
+    ).toStrictEqual([]);
+  });
+
+  it('reads a document with no </head> as its head', () => {
+    const html =
+      '<link rel="stylesheet" href="/assets/button-C2.css"/><p>body</p><link rel="modulepreload" href="/assets/button-B1.js"/>';
+
+    expect(unlinkedDeps(html, [BUTTON])).toStrictEqual([]);
+  });
+});
+
+describe('unlinkedMessage', () => {
+  const REPORT = 'This is a bug: report it with this message';
+
+  it('names each file once, the pages that miss it and a component that needs it, the files most pages miss first', () => {
+    expect(
+      unlinkedMessage(
+        new Map([
+          [
+            '/',
+            [
+              {
+                id: 'button',
+                name: 'Button',
+                js: ['/assets/entry-A1.js', '/assets/button-B2.js'],
+                css: [],
+              },
+            ],
+          ],
+          [
+            '/about',
+            [
+              {
+                id: 'card',
+                name: 'Card',
+                js: ['/assets/entry-A1.js'],
+                css: ['/assets/card-C3.css'],
+              },
+            ],
+          ],
+          [
+            '/blog',
+            [
+              {
+                id: 'button',
+                name: 'Button',
+                js: ['/assets/entry-A1.js'],
+                css: [],
+              },
+            ],
+          ],
+          [
+            '404.html',
+            [
+              {
+                id: 'card',
+                name: 'Card',
+                js: ['/assets/entry-A1.js'],
+                css: [],
+              },
+            ],
+          ],
+        ]),
+        REPORT,
+      ),
+    ).toBe(
+      [
+        'static build wrote HTML that does not link everything the client components its payload names need: 4 HTML files miss 3 files of 2 components',
+        REPORT,
+        '  /assets/entry-A1.js — 4 pages (/, /about, /blog, …), for Button and 1 more',
+        '  /assets/button-B2.js — 1 page (/), for Button',
+        '  /assets/card-C3.css — 1 page (/about), for Card',
+      ].join('\n'),
+    );
+  });
+
+  it('names the pages whose handler did not say what their payload names', () => {
+    expect(
+      unlinkedMessage(
+        new Map([
+          ['/', null],
+          [
+            '/about',
+            [{ id: 'card', name: 'Card', js: ['/assets/card-B2.js'], css: [] }],
+          ],
+        ]),
+        REPORT,
+      ),
+    ).toBe(
+      [
+        'static build wrote HTML that does not link everything the client components its payload names need: 1 HTML file misses 1 file of 1 component, and the handler did not say what the payload of 1 HTML file names',
+        REPORT,
+        '  1 page (/) — the handler did not say what its payload names',
+        '  /assets/card-B2.js — 1 page (/about), for Card',
+      ].join('\n'),
+    );
+  });
+
+  it('counts two default exports as two components', () => {
+    expect(
+      unlinkedMessage(
+        new Map([
+          [
+            '/',
+            [
+              {
+                id: 'first',
+                name: 'default',
+                js: ['/assets/entry-A1.js'],
+                css: [],
+              },
+              {
+                id: 'second',
+                name: 'default',
+                js: ['/assets/entry-A1.js'],
+                css: [],
+              },
+            ],
+          ],
+        ]),
+        REPORT,
+      ),
+    ).toBe(
+      [
+        'static build wrote HTML that does not link everything the client components its payload names need: 1 HTML file misses 1 file of 2 components',
+        REPORT,
+        '  /assets/entry-A1.js — 1 page (/), for default and 1 more',
+      ].join('\n'),
+    );
+  });
+
+  it('counts exports of the same name from two modules as two components', () => {
+    expect(
+      unlinkedMessage(
+        new Map([
+          [
+            '/',
+            [
+              {
+                id: 'menu',
+                name: 'Item',
+                js: ['/assets/entry-A1.js'],
+                css: [],
+              },
+            ],
+          ],
+          [
+            '/about',
+            [
+              {
+                id: 'list',
+                name: 'Item',
+                js: ['/assets/entry-A1.js'],
+                css: [],
+              },
+            ],
+          ],
+        ]),
+        REPORT,
+      ),
+    ).toBe(
+      [
+        'static build wrote HTML that does not link everything the client components its payload names need: 2 HTML files miss 1 file of 2 components',
+        REPORT,
+        '  /assets/entry-A1.js — 2 pages (/, /about), for Item and 1 more',
+      ].join('\n'),
+    );
+  });
+
+  // 落ちるのがサイト全体なら、すべてのページのすべての部品が、client entry の
+  // 読むファイルを同じように欠く
+  it('stays short enough to paste into a report when every page misses what every component needs', () => {
+    const message = unlinkedMessage(
+      new Map(
+        Array.from({ length: 400 }, (_, post) => [
+          `/posts/${String(post)}`,
+          Array.from({ length: 60 }, (__, component) => ({
+            id: `component-${String(component)}`,
+            name: `Component${String(component)}`,
+            js: [
+              '/assets/entry-A1.js',
+              '/assets/react-B2.js',
+              `/assets/component-${String(component)}.js`,
+            ],
+            css: [`/assets/component-${String(component)}.css`],
+          })),
+        ]),
+      ),
+      REPORT,
+    );
+    const lines = message.split('\n');
+
+    expect(lines.slice(0, 2)).toStrictEqual([
+      'static build wrote HTML that does not link everything the client components its payload names need: 400 HTML files miss 122 files of 60 components',
+      REPORT,
+    ]);
+    expect(lines.at(-1)).toBe('  … and 102 more files');
+    expect(lines).toHaveLength(23);
+    expect(message.length).toBeLessThan(4000);
   });
 });

@@ -1,9 +1,11 @@
 import { mkdir, readdir, writeFile, readFile } from 'node:fs/promises';
 import type { ServerResponse } from 'node:http';
+import { createRequire } from 'node:module';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import {
+  CLIENT_DEPS_HEADER,
   decodePathname,
   exportsOf,
   FALLBACK_SEGMENT,
@@ -16,6 +18,7 @@ import {
   NOT_FOUND_HEADER,
   parseRouteTree,
   payloadPathFor,
+  readClientDeps,
   readExports,
   REEXPORTS_ALL,
   ROUTE_METHODS,
@@ -25,6 +28,7 @@ import {
   slotOf,
 } from '@k8ordo/framework-engine';
 import type {
+  ClientDeps,
   EngineOptions,
   FallbackShape,
   RouteDir,
@@ -33,7 +37,14 @@ import { normalizePathname, withBase, withoutBase } from '@k8ordo/router';
 import { contentType } from 'mime-types';
 import type { Connect, Logger, Plugin, ResolvedConfig } from 'vite';
 
-import { asFile, policyProblems, redirectPage, sitemap } from './documents';
+import {
+  asFile,
+  policyProblems,
+  redirectPage,
+  sitemap,
+  unlinkedDeps,
+  unlinkedMessage,
+} from './documents';
 import type { ContentSecurityPolicy } from './documents';
 import {
   answeredByRoute,
@@ -794,6 +805,14 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         const redirected = new Set<string>();
         // A route.ts whose GET did not answer with something to write.
         const unanswered: string[] = [];
+        // What a page's HTML does not link of the client components its
+        // payload names, by page.
+        const unlinkedPages = new Map<string, Written['unlinked']>();
+        const unlinks = (page: string, missing: Written['unlinked']): void => {
+          if (missing === null || missing.length > 0) {
+            unlinkedPages.set(page, missing);
+          }
+        };
         // The type each route.ts's GET answered with, by the file it wrote.
         const types = new Map<string, string>();
         await inParallel(
@@ -822,13 +841,14 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
             const dir = path.join(clientDir, dirFor(pathname));
             return [
               async () => {
-                const { status, notFound } = await write(
+                const { status, notFound, unlinked } = await write(
                   path.join(dir, 'index.html'),
                   handler,
                   urlFor(pathname),
                   csp,
                   { notFoundIsPage: false },
                 );
+                unlinks(pathname, unlinked);
                 if (status === 404) {
                   (notFound ? disowned : refused).push(pathname);
                 }
@@ -855,13 +875,14 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         // would mean nothing in this mode.
         const unmatched = catchAllPath(tree);
         if (unmatched !== null) {
-          const { status } = await write(
+          const { status, unlinked } = await write(
             path.join(clientDir, '404.html'),
             handler,
             urlFor(unmatched),
             csp,
             { notFoundIsPage: true },
           );
+          unlinks('404.html', unlinked);
           if (status === 500) failed.push('404.html');
         }
 
@@ -886,6 +907,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
               { notFoundIsPage: false, shell: shell.pattern },
             );
             const named = `${shell.location} (${fallbacks.get(shell.pattern) ?? ''})`;
+            unlinks(shell.location, answered.unlinked);
             if (answered.status === 500) {
               failed.push(shell.location);
             } else if (answered.status === 404) {
@@ -918,6 +940,9 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
             ? [
                 `static build could not render ${failed.toSorted().join(', ')} — see the error above`,
               ]
+            : []),
+          ...(unlinkedPages.size > 0
+            ? [unlinkedMessage(unlinkedPages, bugReport())]
             : []),
           ...(unanswered.length > 0
             ? [
@@ -1084,6 +1109,24 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
 };
 
 /**
+ * Where a bug in the HTML is reported, and what the report names: this
+ * package, and the React that rendered the HTML — a peer, whichever version
+ * the application installed.
+ */
+const bugReport = (): string => {
+  const required = createRequire(import.meta.url);
+  const manifestOf = (name: string): Record<string, unknown> =>
+    required(`${name}/package.json`) as Record<string, unknown>;
+  const { bugs } = manifestOf('@k8ordo/framework') as {
+    readonly bugs: { readonly url: string };
+  };
+  const versions = ['@k8ordo/framework', 'react', 'react-dom'].map(
+    (name) => `${name} ${String(manifestOf(name).version)}`,
+  );
+  return `This is a bug in @k8ordo/framework, not in this application: report it at ${bugs.url} with this message (${versions.join(', ')})`;
+};
+
+/**
  * A render is a whole page: components, their data, and whatever the app's
  * own highlighting or markdown does. Starting every one of them at once ties
  * peak memory to the size of the site, which is the number that grows. A
@@ -1113,6 +1156,12 @@ type Written = {
   readonly notFound: boolean;
   /** The pattern whose shell the handler said it rendered, if any. */
   readonly shell: string | null;
+  /**
+   * What of the client components its payload names the HTML written does
+   * not link, by component; none for what was not written as HTML, and
+   * `null` for HTML whose handler did not say what its payload names.
+   */
+  readonly unlinked: readonly ClientDeps[] | null;
 };
 
 /**
@@ -1137,7 +1186,12 @@ const write = async (
   const response = await handler(new Request(url));
   const notFound = response.headers.has(NOT_FOUND_HEADER);
   const answered = response.headers.get(SHELL_HEADER);
-  const written = { status: response.status, notFound, shell: answered };
+  const written = {
+    status: response.status,
+    notFound,
+    shell: answered,
+    unlinked: [],
+  };
   // A page that failed to render is not a page, and neither is a 404 anywhere
   // but the not-found's own file: nothing is written, and the caller stops
   // the build with its name.
@@ -1161,10 +1215,15 @@ const write = async (
   const nonce = response.headers.get(NONCE_HEADER);
   if (nonce === null) {
     await writeFile(file, Buffer.from(await response.arrayBuffer()));
-  } else {
-    await writeFile(file, asFile(await response.text(), nonce, csp));
+    return written;
   }
-  return written;
+  const html = asFile(await response.text(), nonce, csp);
+  await writeFile(file, html);
+  const named = response.headers.get(CLIENT_DEPS_HEADER);
+  return {
+    ...written,
+    unlinked: named === null ? null : unlinkedDeps(html, readClientDeps(named)),
+  };
 };
 
 /**

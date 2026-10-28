@@ -65,6 +65,8 @@ let searchStderr = '';
 let requestStderr = '';
 // 渡されたパターンをそのまま paths に返す構成
 let pathsStderr = '';
+// SSR が client コンポーネントの CSS と JS を HTML に出さない構成
+let unlinkedStderr = '';
 // 本物のビルドが最後に言ったこと
 let builtLog = '';
 
@@ -105,6 +107,7 @@ beforeAll(() => {
   searchStderr = failingBuild('vite.broken-search.config.ts');
   requestStderr = failingBuild('vite.broken-request.config.ts');
   pathsStderr = failingBuild('vite.broken-paths.config.ts');
+  unlinkedStderr = failingBuild('vite.broken-links.config.ts');
   // 圧縮しないだけで、スクリプトの中身とハッシュの入った名前が変わる
   execFileSync('pnpm', ['exec', 'vp', 'build', '--minify', 'false'], BUILD);
   previous = mkdtempSync(path.join(tmpdir(), 'k8ordo-previous-'));
@@ -117,7 +120,7 @@ beforeAll(() => {
     ['exec', 'vp', 'build', '--config', 'vite.base.config.ts'],
     BUILD,
   );
-}, 480_000);
+}, 540_000);
 
 afterAll(() => {
   rmSync(previous, { recursive: true, force: true });
@@ -230,6 +233,21 @@ describe('the static build', () => {
   it('refuses guard.ts, naming every one and the mode that runs them', () => {
     expect(guardStderr).toContain(
       "static build cannot run guard.ts — a file has no request to guard, and these are guards:\n  src/routes-broken-guard/admin/guard.ts\n  src/routes-broken-guard/guard.ts\nthis application wants mode: 'server'",
+    );
+  });
+
+  // 差し替えが効かなくなる（SSR が react-dom をこの形で読まなくなる）と、
+  // ビルドが通って stderr が空になり、ここで落ちる。14 は 11 のページと
+  // 404.html と 2 つの殻で、payload を持つ HTML のすべて
+  it('stops, counting every page, 404.html and each shell, when the HTML does not link the scripts its client components need', () => {
+    expect(unlinkedStderr).toMatch(
+      /^Error: static build wrote HTML that does not link everything the client components its payload names need: 14 HTML files miss \d+ files of \d+ components\nThis is a bug in @k8ordo\/framework, not in this application: report it at https:\/\/github\.com\/k35o\/k8ordo\/issues with this message \(@k8ordo\/framework \S+, react \S+, react-dom \S+\)$/mu,
+    );
+    expect(unlinkedStderr).toMatch(
+      /^ {2}\/assets\/page-[\w-]+\.js — 1 page \(\/\), for Counter$/mu,
+    );
+    expect(unlinkedStderr).toMatch(
+      /^ {2}\/assets\/fallback-[\w-]+\.js — 2 pages \(\/en\/posts\/:id, \/ja\/posts\/:id\), for PostFromUrl$/mu,
     );
   });
 

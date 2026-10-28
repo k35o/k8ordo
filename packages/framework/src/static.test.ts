@@ -2,6 +2,8 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
+import { clientDepsHeader } from '@k8ordo/framework-engine';
+import type { ClientDeps } from '@k8ordo/framework-engine';
 import {
   afterEach,
   beforeEach,
@@ -275,7 +277,8 @@ type Answer = {
 
 /**
  * The handler a build would have compiled, written as the module the static
- * build imports: it answers each pathname as told, and anything else 404.
+ * build imports: it answers each pathname as told, and anything else as
+ * `'*'` is told, or 404.
  */
 const handlerAnswering = async (
   answers: Record<string, Answer>,
@@ -287,7 +290,7 @@ const handlerAnswering = async (
     `const answers = ${JSON.stringify(answers)};
 export default async function handler(request) {
   const { pathname } = new URL(request.url);
-  const answer = answers[pathname];
+  const answer = answers[pathname] ?? answers['*'];
   if (answer === undefined) return new Response('not found', { status: 404 });
   return new Response(answer.body ?? null, {
     status: answer.status ?? 200,
@@ -501,6 +504,174 @@ describe('the shells a build writes', () => {
     expect(said.warn).toStrictEqual([
       'k8ordo: the shell for /posts/:id has "!fallback" in its HTML — a layout wrote the shell\'s pathname into the page (a link, a canonical URL); derive what depends on the URL in a client component',
     ]);
+  });
+});
+
+const ICON = {
+  id: 'icon',
+  name: 'Icon',
+  js: ['/assets/icon-A1.js'],
+  css: [],
+};
+const CARD = {
+  id: 'card',
+  name: 'Card',
+  js: ['/assets/card-B2.js'],
+  css: ['/assets/card-C3.css'],
+};
+const MISSING = {
+  id: 'missing',
+  name: 'Missing',
+  js: ['/assets/not-found-D4.js'],
+  css: ['/assets/not-found-E5.css'],
+};
+
+/** A page's HTML as the handler answers it, saying what its payload names. */
+const htmlNaming = (
+  named: readonly ClientDeps[],
+  links: readonly string[],
+  extra: Answer = {},
+): Answer => ({
+  status: extra.status,
+  headers: {
+    'x-k8ordo-nonce': 'bm9uY2U=',
+    'x-k8ordo-client-deps': clientDepsHeader(named),
+    ...extra.headers,
+  },
+  body: `<!DOCTYPE html><html><head>${links.map((href) => (href.endsWith('.css') ? `<link rel="stylesheet" href="${href}"/>` : `<link rel="modulepreload" href="${href}"/>`)).join('')}</head><body></body></html>`,
+});
+
+const UNLINKED =
+  'static build wrote HTML that does not link everything the client components its payload names need: ';
+
+const BUG_REPORT =
+  /^This is a bug in @k8ordo\/framework, not in this application: report it at https:\/\/github\.com\/k35o\/k8ordo\/issues with this message \(@k8ordo\/framework \d+\.\d+\.\d+\S*, react \d+\.\d+\.\d+\S*, react-dom \d+\.\d+\.\d+\S*\)$/u;
+
+/**
+ * The lines of the error from the one saying what HTML does not link, the
+ * line asking for a report taken apart.
+ */
+const unlinkedIn = (
+  error: string,
+): { readonly said: string[]; readonly report: string } => {
+  const [said = '', report = '', ...rest] = error
+    .slice(error.indexOf(UNLINKED))
+    .split('\n');
+  return { said: [said, ...rest], report };
+};
+
+describe('the client components’ links a build checks', () => {
+  it('writes HTML that links everything its payload names, and goes on', async () => {
+    await routeFiles([...POSTS, 'not-found.tsx']);
+    await handlerAnswering(
+      site({
+        '/': htmlNaming([ICON], ['/assets/icon-A1.js']),
+        '/posts/!fallback': htmlNaming(
+          [CARD],
+          ['/assets/card-C3.css', '/assets/card-B2.js'],
+          { headers: SHELL_HEADER },
+        ),
+        '*': htmlNaming(
+          [MISSING],
+          ['/assets/not-found-E5.css', '/assets/not-found-D4.js'],
+          { status: 404 },
+        ),
+      }),
+    );
+
+    await hooks({ paths: () => ['/posts/1'] }).build();
+
+    expect(await clientFile('index.html')).toContain('icon-A1.js');
+    expect(await clientFile('404.html')).toContain('not-found-E5.css');
+  });
+
+  it('stops, once every page is written, naming each file a page, 404.html or shell does not link, with the pages and a component that need it, after where to report it', async () => {
+    await routeFiles([...POSTS, 'not-found.tsx']);
+    await handlerAnswering(
+      site({
+        '/': htmlNaming([ICON, CARD], ['/assets/card-C3.css']),
+        '/posts/!fallback': htmlNaming([CARD], ['/assets/card-B2.js'], {
+          headers: SHELL_HEADER,
+        }),
+        '*': htmlNaming([MISSING], [], { status: 404 }),
+      }),
+    );
+
+    const stopped = await hooks({ paths: () => ['/posts/1'] })
+      .build()
+      .then(() => '', String);
+
+    const { said, report } = unlinkedIn(stopped);
+
+    expect(said).toStrictEqual([
+      `${UNLINKED}3 HTML files miss 5 files of 3 components`,
+      '  /assets/card-B2.js — 1 page (/), for Card',
+      '  /assets/card-C3.css — 1 page (/posts/:id), for Card',
+      '  /assets/icon-A1.js — 1 page (/), for Icon',
+      '  /assets/not-found-D4.js — 1 page (404.html), for Missing',
+      '  /assets/not-found-E5.css — 1 page (404.html), for Missing',
+    ]);
+    expect(report).toMatch(BUG_REPORT);
+    expect(await clientFile('index.html')).toContain('card-C3.css');
+  });
+
+  it('stops on HTML whose handler did not say what its payload names', async () => {
+    await handlerAnswering({
+      '/': { headers: { 'x-k8ordo-nonce': 'bm9uY2U=' }, body: '<p>home</p>' },
+      '/index.rsc': { body: 'home payload' },
+    });
+
+    const { said, report } = unlinkedIn(
+      await hooks()
+        .build()
+        .then(() => '', String),
+    );
+
+    expect(said).toStrictEqual([
+      `${UNLINKED}the handler did not say what the payload of 1 HTML file names`,
+      '  1 page (/) — the handler did not say what its payload names',
+    ]);
+    expect(report).toMatch(BUG_REPORT);
+  });
+
+  it('names a page it could not render and one whose HTML misses something in the same error', async () => {
+    await routeFiles(POSTS);
+    await handlerAnswering(
+      site({
+        '/': { status: 500, body: 'home threw' },
+        '/posts/1': htmlNaming([ICON], []),
+      }),
+    );
+    vi.spyOn(console, 'error').mockImplementation(() => {
+      // 描けなかったことは throw の文言で確かめる
+    });
+
+    await expect(hooks({ paths: () => ['/posts/1'] }).build()).rejects.toThrow(
+      `static build could not render / — see the error above\n\n${UNLINKED}1 HTML file misses 1 file of 1 component\n`,
+    );
+  });
+
+  it('names a page by its pathname in the table, whatever the base', async () => {
+    await handlerAnswering({
+      '/site/': htmlNaming([ICON], []),
+      '/site/index.rsc': { body: 'home payload' },
+    });
+
+    await expect(hooks({}, '/site/').build()).rejects.toThrow(
+      '\n  /assets/icon-A1.js — 1 page (/), for Icon',
+    );
+  });
+
+  it('checks nothing it does not write as HTML: a payload, a route.ts’s file, a redirect', async () => {
+    await routeFiles(['feed/route.ts', 'old/redirect.ts']);
+    await handlerAnswering({
+      '/': htmlNaming([ICON], ['/assets/icon-A1.js']),
+      '/index.rsc': { body: 'home payload' },
+      '/feed': { body: '<rss/>' },
+      '/old': { status: 308, headers: { location: '/' } },
+    });
+
+    await expect(hooks().build()).resolves.toBeUndefined();
   });
 });
 

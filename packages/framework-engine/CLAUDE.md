@@ -239,7 +239,17 @@ pnpm check         # check:write to auto-fix
   inside it but not walked, an element only passed in a prop and never
   rendered is read by nothing on any page after that first one, while the
   browser's first render waits for its script all the same. Static mode
-  walks with `rows: 'wait'`, every row before the tree renders. A server
+  walks with `rows: 'wait'`, every row before the tree renders. The walk
+  does not open a Map, a Set, a promise, an iterator, an async iterable or
+  a stream a prop holds. An iterator, sync or async, is handed over to run
+  once and a stream to one reader, so walking either would spend it before
+  the component sees it; a Map, a Set, a promise and an async iterable
+  could be walked, and are not. So an element only such a container holds
+  is linked only where its module first loads in the process — in a build,
+  on the first page to name it, every later one failing the build's check
+  (below) — and one in a promise a not-found's prop holds that settles
+  after the not-found's HTML is rendered, nowhere: unlike a page's, a
+  not-found's payload is not read to its end before its HTML. A server
   walks with `'follow'`: it waits only for the client components named in
   what has arrived, and walks a row still on its way once it arrives, in a
   continuation that inherits the request and runs before React renders
@@ -270,6 +280,27 @@ pnpm check         # check:write to auto-fix
   `<Suspense>`, under an `error.tsx`, and in a prop never rendered;
   `runtime/form-state.test.ts` posts a form whose action returns a client
   component.
+- **A static page's HTML says which client components its payload named.**
+  What the RSC render serializes, the RSC plugin's `onClientReference`
+  (`renderToReadableStream`'s third argument, which its README marks
+  experimental) hands a callback reference by reference; the HTML answer
+  says it in `CLIENT_DEPS_HEADER`, and the framework's build checks the
+  HTML links every file (`packages/framework/CLAUDE.md`): exactly one entry
+  per reference — the id the manifest keys its module with, its export's
+  name and that reference's `deps`, so two default exports are two entries
+  named `default`. The last render's only — a page that said `notFound()`
+  is rendered again — and only on HTML: a payload and a server say
+  nothing. It is made once the body is read: the HTML carries the payload
+  whole, so every reference has been named by then. The value is
+  URI-encoded JSON: a header is bytes, and a chunk two client components
+  share is named after a module whose name need not be ASCII.
+  `runtime/ssr-deps.test.ts` holds that the header says, cold and loaded,
+  one entry for each reference the Flight rows written into the HTML name,
+  with its id, name and files in the manifest — two default exports, a
+  component passed as a value, ones in a prop's containers, and one in a
+  row a not-found receives late, included — and that a server says
+  nothing; `runtime/payload.test.ts` carries a name that is not ASCII
+  through a header.
 - **Only HTML rendered for the browser's pathname is hydrated.**
   `runtime/mount.ts` compares the payload's `pathname` with `location`
   (normalized as `usePathname` normalizes) and renders anything else afresh
@@ -575,7 +606,7 @@ src/
   runtime/entry.{rsc,ssr,browser}.tsx  the three environments
   runtime/app-router.tsx     the client half: navigation + payloads, and whether this document can render one
   runtime/browser-payloads.ts  the browser's Flight client, wired into app-router: payloads read, Server Actions called
-  runtime/payload.ts         what a page is on the wire (tree, pathname, client, action result)
+  runtime/payload.ts         what a page is on the wire (tree, pathname, client, action result), and the headers a static build reads
   runtime/payload-path.ts    where a payload lives: /x → /x/index.rsc
   runtime/is-payload.ts      whether an answer is a payload or a document load
   runtime/prefetch.ts        which link to fetch ahead, and how long a fetched page stays usable
@@ -642,9 +673,13 @@ fixtures/
                              of their own — rendered by a page, a not-found, a
                              module a Server Component imports, a boundary
                              that resolves after the shell, or only passed in
-                             a prop, in the shell or in such a boundary, or as
-                             a value — and a page with a CSS Module beside
-                             one, which
+                             a prop, in the shell or in such a boundary, as a
+                             value, in a Map, Set, promise, iterator, async
+                             iterable or stream — each of those in a chunk of
+                             its own — or in a promise a not-found's prop
+                             holds that settles after the HTML would be
+                             rendered — two default exports, and
+                             a page with a CSS Module beside one, which
                              runtime/ssr-deps.test.ts builds in both modes
                              and serves under vite dev
   form-state/routes/         a form whose Server Action returns a client

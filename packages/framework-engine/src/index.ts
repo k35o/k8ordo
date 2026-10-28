@@ -14,10 +14,14 @@ export {
   NOT_FOUND_SEGMENT,
 } from './runtime/pathname';
 export {
+  CLIENT_DEPS_HEADER,
+  clientDepsHeader,
   NONCE_HEADER,
   NOT_FOUND_HEADER,
+  readClientDeps,
   SHELL_HEADER,
 } from './runtime/payload';
+export type { ClientDeps } from './runtime/payload';
 export {
   exportsOf,
   pagesReadingSearch,

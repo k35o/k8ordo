@@ -10,6 +10,8 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
 import { buildFixture, serveFixture } from '../../fixtures/build';
 import type { BuiltFixture, ServedFixture } from '../../fixtures/build';
 import type { Mode } from '../host';
+import { CLIENT_DEPS_HEADER, readClientDeps } from './payload';
+import type { ClientDeps } from './payload';
 
 // CI はエンジンごとにジョブを分けて並べるので、TEST_BROWSER で 1 つに絞れる
 const browserTypes = [chromium, firefox, webkit]
@@ -26,7 +28,12 @@ type Manifest = {
   readonly clientReferenceDeps: Readonly<Record<string, Deps>>;
 };
 
-/** The payload the HTML carries, by row. */
+/**
+ * The payload the HTML carries, by row — read only as far as a fixture's
+ * payload needs: a chunk holding `<!--` or `</script`, which the HTML spells
+ * otherwise, and a row given by its length rather than ended by a line break
+ * would be misread, so no fixture writes either.
+ */
 const rowsIn = (html: string): Map<string, string> => {
   const flight = [
     ...html.matchAll(/__FLIGHT_DATA\|\|=\[\]\)\.push\(("(?:[^"\\]|\\.)*")\)/gu),
@@ -44,21 +51,42 @@ const rowsIn = (html: string): Map<string, string> => {
 
 /**
  * The client references the payload written into the HTML names (its `I`
- * rows), by the id the build's manifest keys them with. The payload may
- * write an id as a row of its own and name that row instead.
+ * rows): the id the build's manifest keys them with, and the export's name.
+ * The payload may write an id as a row of its own and name that row instead.
  */
-const referencesIn = (html: string): string[] => {
+const namedIn = (
+  html: string,
+): Array<{ readonly id: string; readonly name: string }> => {
   const rows = rowsIn(html);
-  const ids = [...rows.values()]
+  return [...rows.values()]
     .filter((value) => value.startsWith('I['))
     .map((value) => {
-      const [named] = JSON.parse(value.slice(1)) as [string];
-      return named.startsWith('$')
-        ? (JSON.parse(rows.get(named.slice(1)) ?? '""') as string)
-        : named;
+      const [id, , name] = JSON.parse(value.slice(1)) as [
+        string,
+        unknown,
+        string,
+      ];
+      return {
+        id: id.startsWith('$')
+          ? (JSON.parse(rows.get(id.slice(1)) ?? '""') as string)
+          : id,
+        name,
+      };
     });
-  return [...new Set(ids)];
 };
+
+const referencesIn = (html: string): string[] => [
+  ...new Set(namedIn(html).map(({ id }) => id)),
+];
+
+/** Each client reference the payload names, with its files in the manifest. */
+const namedWithDeps = (manifest: Manifest, html: string): ClientDeps[] =>
+  namedIn(html).map(({ id, name }) => ({
+    id,
+    name,
+    js: manifest.clientReferenceDeps[id]?.js ?? [],
+    css: manifest.clientReferenceDeps[id]?.css ?? [],
+  }));
 
 /** What the payload's client references need, stylesheets and scripts. */
 const needed = (manifest: Manifest, html: string): Deps => {
@@ -175,6 +203,35 @@ const readUntil = async (response: Response, text: string): Promise<string> => {
 };
 
 /**
+ * Client components, each as one entry of its module, name and files, in an
+ * order of their own: two equal only if they say the same components, each
+ * with its own files, as many times. None said is none.
+ */
+const entriesOf = (named: readonly ClientDeps[] | null): string[] =>
+  (named ?? [])
+    .map(({ id, name, js, css }) =>
+      JSON.stringify({ id, name, js: js.toSorted(), css: css.toSorted() }),
+    )
+    .toSorted();
+
+/** A page's HTML, and what the handler said of its client components. */
+type Rendered = {
+  readonly html: string;
+  readonly said: readonly ClientDeps[] | null;
+};
+
+/** A page rendered with its client components' modules cold, then loaded. */
+type Twice = readonly [cold: Rendered, loaded: Rendered];
+
+const renderedIn = async (response: Response): Promise<Rendered> => {
+  const said = response.headers.get(CLIENT_DEPS_HEADER);
+  return {
+    html: await response.text(),
+    said: said === null ? null : readClientDeps(said),
+  };
+};
+
+/**
  * The fixture built under `mode`. `twice` renders a page twice by the same
  * handler the first time it is asked for it, and hands both renders back
  * from then on: the first with the modules of the client components only
@@ -185,13 +242,13 @@ const usingBuild = (
   mode: Mode,
 ): {
   readonly answer: (pathname: string) => Promise<Response>;
-  readonly twice: (pathname: string) => Promise<readonly string[]>;
+  readonly twice: (pathname: string) => Promise<Twice>;
   readonly manifest: () => Manifest;
   readonly out: () => string;
 } => {
   let built: BuiltFixture | undefined;
   let manifest: Manifest | undefined;
-  const rendered = new Map<string, Promise<readonly string[]>>();
+  const rendered = new Map<string, Promise<Twice>>();
   beforeAll(async () => {
     // vitest が置く NODE_ENV=test のビルドでは、RSC プラグインが参照の id に
     // 描画ごとの印を付け、SSR は描くたびに参照のモジュールを読み直す。その
@@ -220,9 +277,9 @@ const usingBuild = (
     twice: (pathname) => {
       let both = rendered.get(pathname);
       if (both === undefined) {
-        both = (async () => [
-          await (await answer(pathname)).text(),
-          await (await answer(pathname)).text(),
+        both = (async (): Promise<Twice> => [
+          await renderedIn(await answer(pathname)),
+          await renderedIn(await answer(pathname)),
         ])();
         rendered.set(pathname, both);
       }
@@ -253,7 +310,7 @@ describe('the HTML of a file', () => {
   ])(
     'links in the head everything the client components %s names need, whether they had loaded or not',
     async (pathname) => {
-      for (const html of await twice(pathname)) {
+      for (const { html } of await twice(pathname)) {
         const { css, js } = needed(manifest(), html);
 
         expect(css.length).toBeGreaterThan(0);
@@ -261,6 +318,38 @@ describe('the HTML of a file', () => {
         expect(unlinkedInHead(manifest(), html)).toStrictEqual([]);
       }
     },
+  );
+
+  // /contained は props の Map・Set・Promise・iterator・async iterable・
+  // stream に入れただけの要素を、/promised/x の not-found は HTML の描画の
+  // あとで解ける Promise の中の要素を名指す。/defaults は、別々のファイルの
+  // 2 つの部品を、どちらも default という export 名で名指す。/promised/x は
+  // 描くたびに 1 秒待ち、最初に頼んだ試験が 2 回分を待つので、時間切れを延ばす
+  it.each([
+    '/',
+    '/nowhere',
+    '/lazy',
+    '/streamed',
+    '/held',
+    '/held-late',
+    '/held-value',
+    '/contained',
+    '/promised/x',
+    '/defaults',
+  ])(
+    'says, with the HTML of %s, every client component its payload names and what each needs, whether they had loaded or not',
+    async (pathname) => {
+      for (const { html, said } of await twice(pathname)) {
+        const { css, js } = needed(manifest(), html);
+
+        expect(css.length).toBeGreaterThan(0);
+        expect(js.length).toBeGreaterThan(0);
+        expect(entriesOf(said)).toStrictEqual(
+          entriesOf(namedWithDeps(manifest(), html)),
+        );
+      }
+    },
+    30_000,
   );
 
   // /held が描く Holder の CSS が、渡すだけの部品のものと同じなら、上の試験は
@@ -283,7 +372,7 @@ describe('the HTML of a file', () => {
   // 並ぶ。server ではデータを待つ部分が後に並ぶことがあり、遷移で初めて読む
   // CSS は head の末尾に足されるので、上書きは詳細度か @layer で決めてもらう
   it('links, on /styled, the client components’ stylesheets before the page’s own', async () => {
-    for (const html of await twice('/styled')) {
+    for (const { html } of await twice('/styled')) {
       expect(stylesheetsInHead(manifest(), html)).toStrictEqual([
         'client',
         'page',
@@ -305,7 +394,7 @@ describe('the HTML of a file', () => {
       });
 
       it('styles the not-found before any script runs', async () => {
-        for (const html of await twice('/nowhere')) {
+        for (const { html } of await twice('/nowhere')) {
           const context = await browser.newContext({
             javaScriptEnabled: false,
           });
@@ -334,7 +423,7 @@ describe('the HTML of a streamed document', () => {
   it.each(['/', '/nowhere', '/lazy', '/held', '/held-value'])(
     'links in the head everything the client components %s names need, whether they had loaded or not',
     async (pathname) => {
-      for (const html of await twice(pathname)) {
+      for (const { html } of await twice(pathname)) {
         const { css, js } = needed(manifest(), html);
 
         expect(css.length).toBeGreaterThan(0);
@@ -352,7 +441,7 @@ describe('the HTML of a streamed document', () => {
   ])(
     'preloads, before the boundary, what a boundary of %s streamed after the shell names',
     async (pathname, content) => {
-      for (const html of await twice(pathname)) {
+      for (const { html } of await twice(pathname)) {
         const before = linked(
           html.slice(0, html.indexOf(content)),
           'stylesheet',
@@ -369,6 +458,12 @@ describe('the HTML of a streamed document', () => {
       }
     },
   );
+
+  it('says nothing of its client components with the HTML', async () => {
+    for (const { said } of await twice('/')) {
+      expect(said).toBeNull();
+    }
+  });
 
   it('sends the shell before a boundary of the page completes', async () => {
     const shells = [
