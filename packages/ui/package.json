@@ -113,7 +113,7 @@
     "@better-css-modules/cli": "catalog:",
     "@better-css-modules/core": "catalog:",
     "@better-css-modules/vite": "catalog:",
-    "@chromatic-com/storybook": "5.5.1",
+    "@chromatic-com/storybook": "5.6.0",
     "@json-render/core": "catalog:",
     "@json-render/react": "catalog:",
     "@k8ordo/form": "workspace:^",
