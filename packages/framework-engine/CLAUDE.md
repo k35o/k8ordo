@@ -280,7 +280,8 @@ pnpm check         # check:write to auto-fix
   static head has them in the order the RSC render named them, which a
   Server Component waiting for data can change from one build to the next,
   a server in the order it read them, and a navigation in the order it
-  loads them; an override between two goes by specificity or `@layer`.
+  loads them; an override between two goes by specificity, since a layer's
+  place is set by the first file to name it, which no order here keeps.
   `formState` is read apart: React takes it as the render starts, and the
   RSC environment's value holds client components as references the SSR
   cannot render, so when the payload carries one (`carriesFormState`, a
