@@ -185,6 +185,16 @@ export const guaranteeHydration = message({
   en: 'The server render and the hydration render always show the same values.',
 });
 
+export const guaranteeTree = message({
+  ja: '`@k8ordo/router`と`@k8ordo/framework`の下では、ページの状態は、それを描くページのURLの値を読みます。次のページの読み込み中に画面に残るページは、離れる前の値のままです。次のページは最初の描画から、自分のURLの値で描かれます。',
+  en: 'Under `@k8ordo/router` and `@k8ordo/framework`, a page state reads the URL of the page it renders in. While the next page loads, the page still on screen keeps the values it was left with, and the next page renders with its own URL’s from its first render.',
+});
+
+export const guaranteeLeftWrite = message({
+  ja: '次のページの読み込み中に、離れていくページで呼んだ`update()`は何も書きません。`finished`はすぐに解決します。',
+  en: 'An `update()` called from the page being left while the next page loads writes nothing, and its `finished` settles at once.',
+});
+
 export const nonGuaranteesTitle = message({
   ja: '保証しないこと',
   en: 'Not guaranteed',
@@ -228,4 +238,9 @@ export const nonMemory = message({
 export const nonWrite = message({
   ja: 'Web StorageとCookieへの書き込みは、容量の上限や4KBを超えるCookieで拒まれることがあります。そのときも描画した値は残り、`update()`のハンドルがrejectします。',
   en: 'A write to Web Storage or a cookie can be refused, by a full quota or a cookie over 4 KB. The rendered value stays, and the `update()` handle rejects.',
+});
+
+export const nonTree = message({
+  ja: 'どのページを描いているかを知らせないルーターの下では、ページの状態はURLに従います。`@k8ordo/router`の`useInterceptedNavigation`で作った自前のホストもこれに当たります。',
+  en: 'Under a router that does not say which page a component renders in, a page state follows the URL. A host of your own built on `@k8ordo/router`’s `useInterceptedNavigation` is one.',
 });
