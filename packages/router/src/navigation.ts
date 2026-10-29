@@ -65,15 +65,18 @@ export type NavigationHandler<T> = {
    * load — the page showing reads the search, and the search moved. Without
    * one, such a navigation is a state change: nothing loads. With one, it
    * loads and applies like a page change, but as a state change otherwise:
-   * no scroll, no focus reset, no transition types.
+   * no focus reset and no transition types, and the viewport stays where it
+   * is — except going back or forward, where the browser restores the
+   * position that entry was left at once the page loaded again is on screen.
    */
   refresh?: (url: URL) => boolean;
 };
 
 /**
  * Where the viewport goes once the new page is on screen. A traversal is the
- * browser's to restore, so it carries no instruction; a fragment scrolls to
- * its target; anything else starts at the top, the way a document load does.
+ * browser's to restore, so it carries no instruction — the browser restores
+ * it once the handler settles; a fragment scrolls to its target; anything
+ * else starts at the top, the way a document load does.
  */
 export type ScrollPlan = { kind: 'top' } | { kind: 'fragment'; id: string };
 
@@ -182,7 +185,10 @@ export const NavigationGeneration = createContext(-1);
  * is what makes `navigation.navigate().finished` mean "the page is showing".
  * A navigation that keeps the pathname on screen — `@k8ordo/state`'s
  * `update()` — is intercepted with no handler, so its `finished` settles as
- * soon as the navigation commits.
+ * soon as the navigation commits. Going back or forward between two entries
+ * of that page is the exception: it settles with the render the entry change
+ * starts in the background, so the browser restores the position onto what
+ * that entry renders.
  *
  * The new tree renders at the lane `useDeferredValue` gives it, not in a
  * transition. While any async action is pending, React holds every
@@ -222,6 +228,15 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
   // Moves in the background render that puts the host's deferred value on
   // screen, and not in the urgent one that `apply` starts.
   const onScreen = useDeferredValue(applied);
+  // A traversal between two entries of the page on screen applies no tree,
+  // but the page renders the entry it arrived at, and what it renders through
+  // `useDeferredValue` lands one commit after the urgent one. Restored before
+  // that commit, the position would land on the previous entry's layout, and
+  // scroll anchoring would move it as the content grew or shrank. Deferred
+  // here as well, it moves in the commit that puts the page's own deferred
+  // values on screen.
+  const [traversed, setTraversed] = useState(-1);
+  const traversedOnScreen = useDeferredValue(traversed);
 
   // The pathname whose tree is on screen — not `location.pathname`. Under
   // interception the URL commits before the tree arrives, so while a page is
@@ -231,6 +246,10 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
   const shown = useRef<string | null>(null);
   // The navigation `usePendingPathname` names: the last one to start.
   const latest = useRef(-1);
+  // The entry whose page is on screen while a page change loads — the URL's
+  // entry otherwise. Going back to it is calling the change off, not going
+  // back to a place the visitor left.
+  const onScreenEntry = useRef<string | null>(null);
 
   useEffect(() => {
     shown.current = normalizePathname(location.pathname);
@@ -239,14 +258,48 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       const url = new URL(event.destination.url);
       const pathname = normalizePathname(url.pathname);
       // Same place — only the search or the entry state moved. Nothing to
-      // remount, and no scroll or focus to disturb; nothing to load either,
-      // unless the page showing reads what moved.
+      // remount, and no focus to disturb; nothing to load either, unless the
+      // page showing reads what moved. Only going back or forward moves the
+      // viewport: the browser restores where that entry was left.
       const inPlace = pathname === shown.current;
+      const traverse = event.navigationType === 'traverse';
       if (inPlace && !refresh(url)) {
-        event.intercept({ scroll: 'manual', focusReset: 'manual' });
+        const calledOff =
+          event.destination.key ===
+          (onScreenEntry.current ?? navigation.currentEntry?.key);
+        onScreenEntry.current = null;
+        if (!traverse || calledOff) {
+          event.intercept({ scroll: 'manual', focusReset: 'manual' });
+          return;
+        }
+        // 表に置くのも描き直しを頼むのも、handler でなくここで。currententrychange
+        // より前なので、ページが同じタスクで出す更新と同じ描画にまとまり、遅らせた
+        // 描画の lane も 1 本を分け合う。handler の走る時機はエンジンで違う
+        const id = count.current++;
+        const { promise, resolve, reject } = Promise.withResolvers<undefined>();
+        // handler が走る前に中止されると、誰も待たない reject になる
+        promise.catch(() => undefined);
+        pending.current.set(id, {
+          resolve: () => {
+            resolve(undefined);
+          },
+          scroll: null,
+          types: [],
+        });
+        event.signal.addEventListener(
+          'abort',
+          () => {
+            pending.current.delete(id);
+            reject(event.signal.reason as Error);
+          },
+          { once: true },
+        );
+        setTraversed(id);
+        event.intercept({ focusReset: 'manual', handler: () => promise });
         return;
       }
       if (!claim(url)) return;
+      onScreenEntry.current ??= navigation.currentEntry?.key ?? null;
 
       const id = count.current++;
       latest.current = id;
@@ -267,8 +320,9 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         // which is exactly when this hook scrolls itself. Doing it here keeps
         // the two from disagreeing, and keeps the behaviour where a browser
         // has not implemented the platform's half. A traversal keeps the
-        // default: restoring a position is the browser's, not ours.
-        scroll: scroll === null && !inPlace ? 'after-transition' : 'manual',
+        // default: restoring a position is the browser's, not ours — a load
+        // in place included, which comes back to where that entry was left.
+        scroll: traverse ? 'after-transition' : 'manual',
         handler: async () => {
           // 失敗も中止も、名指していた遷移が終わったということ。新しい遷移が
           // 始まっていれば、それがもう自分の行き先を名指している
@@ -326,14 +380,21 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
   // in the tree: React holds the new snapshot until the platform's pending
   // navigation has finished, and runs passive effects only after the
   // animation — a passive resolver would be waiting on itself.
-  useLayoutEffect(() => {
-    const entry = pending.current.get(onScreen);
+  const settle = useEffectEvent((id: number) => {
+    const entry = pending.current.get(id);
     if (entry === undefined) return;
-    pending.current.delete(onScreen);
+    pending.current.delete(id);
+    onScreenEntry.current = null;
     if (entry.scroll !== null) applyScroll(entry.scroll);
-    if (latest.current === onScreen) setPendingPathname(null);
+    if (latest.current === id) setPendingPathname(null);
     entry.resolve();
+  });
+  useLayoutEffect(() => {
+    settle(onScreen);
   }, [onScreen]);
+  useLayoutEffect(() => {
+    settle(traversedOnScreen);
+  }, [traversedOnScreen]);
 
   // The types a `<ViewTransition>` animates by cannot ride the update itself:
   // said inside `startTransition` together with it, they would bring back the
