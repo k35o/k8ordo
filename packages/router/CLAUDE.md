@@ -107,7 +107,9 @@ pnpm check         # check:write to auto-fix
   deferred render grows or shrinks the page. So from the `navigate` event
   until that traversal settles — or is aborted — the router holds
   anchoring off (`overflow-anchor: none` on the root element, counted
-  across traversals, the previous inline value put back), for a traversal
+  across traversals, the previous inline value put back once a layout has
+  been computed with it off — anchoring acts as a layout is computed, and
+  the settling commit's comes after its layout effects), for a traversal
   in place and one that loads again; the other engines restore only after
   the handler settles, where the anchoring held off changes nothing. A
   traversal back to the page on screen, which keeps the position, is

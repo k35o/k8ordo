@@ -167,7 +167,12 @@ const holdAnchoring = (): (() => void) => {
     if (released) return;
     released = true;
     anchoringHeld -= 1;
-    if (anchoringHeld === 0) style.overflowAnchor = anchoringBefore;
+    if (anchoringHeld > 0) return;
+    // アンカリングは配置を計算するときに効く。描画のコミットの layout effect
+    // で戻すと、そのあとの配置の計算で縮んだ分をずらすので、止めたまま配置を
+    // 計算させてから戻す
+    document.documentElement.getBoundingClientRect();
+    style.overflowAnchor = anchoringBefore;
   };
 };
 
