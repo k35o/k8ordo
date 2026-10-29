@@ -83,46 +83,60 @@ pnpm check         # check:write to auto-fix
   router does not export — so the name is a promise between them, changed
   in all three in one release. `router.browser.test.tsx` holds that a tree
   being left names its own pathname until the next one is on screen.
-- **A new page starts where a document load would.** The commit effect that
-  resolves `finished` also places the viewport: top for push/replace, the
-  fragment's element when the URL names one, nothing for a traversal (the
-  browser restores). `scroll: 'manual'` is passed for exactly the cases this
-  hook scrolls itself, so the platform and the hook never both act. A
-  traversal keeps the default whether it changes the page, loads one in
-  place, or only moves the search or the entry state: then nothing is
-  applied, but the page renders the entry it arrived at, through
-  `useDeferredValue` one commit after the urgent one, and restored before
-  that commit the position would land on the previous entry's layout. So
-  that traversal is intercepted with a handler that settles in the commit
-  of `traversed`, deferred beside the page's own values. Both the
-  `pending` entry and `setTraversed` are made in the `navigate` listener,
-  not in the handler: it runs before `currententrychange`, so the page's
-  own update (Sync or Default, as `@k8ordo/state`'s url field gives it)
-  and the router's render together and share one deferred lane, whatever
-  the engine's order of handler and `currententrychange`, and the handler
-  returns the promise made there (Firefox may call it twice). Firefox
-  restores a traversal's position as it commits, at `popstate`, waiting
-  for no handler and reading no `scroll` option: within a page that lands
-  on the previous entry's layout, and scroll anchoring then moves it as the
-  deferred render grows or shrinks the page. So from the `navigate` event
-  until that traversal settles — or is aborted — the router holds
-  anchoring off (`overflow-anchor: none` on the root element, counted
-  across traversals, the previous inline value put back once a layout has
-  been computed with it off — anchoring acts as a layout is computed, and
-  the settling commit's comes after its layout effects), for a traversal
-  in place and one that loads again; the other engines restore only after
-  the handler settles, where the anchoring held off changes nothing. A
-  traversal back to the page on screen, which keeps the position, is
-  restored by Firefox all the same, `scroll: 'manual'` or not, before the
-  task that dispatched `popstate` ends; so the router puts the position the
+- **A new page starts where a document load would; back and forward go
+  where the entry was left.** The commit effect that resolves `finished`
+  also places the viewport: top for push/replace, the fragment's element
+  when the URL names one, and for a traversal the position the router
+  recorded when that entry was left (`leftAt`), put there with
+  `behavior: 'instant'`. Every intercept with a handler passes
+  `scroll: 'manual'`, so the platform and the hook never both act. A
+  traversal is never left to the browser: Chromium commits an intercepted
+  traversal before its handler runs, makes the destination's history item
+  the current one, and writes every change of the root's scroll offset
+  into it — a layout clamping the previous page's offset to what the new
+  page can scroll included — then restores that value. A page that forces
+  layout in its commit (a component measuring itself, `getComputedStyle`
+  inside a size container) came back at its bottom. The `navigate`
+  listener records `scrollX` / `scrollY` for the entry being left before
+  anything else — `onScreenEntry` while a page change loads, because the
+  URL's entry is not on screen yet and a second navigation leaves the page
+  that is — keyed by the entry's `key`, pruned to `navigation.entries()`,
+  and mirrored into `sessionStorage`: a reload keeps the earlier entries in
+  the same document, so going back to them is still intercepted, and an
+  in-memory record would be gone. An entry with no record (a page change
+  called off before it arrived) starts like a new page. The visitor
+  scrolling the old page during the load does not stop the restore — what
+  they moved was the page being left.
+  A traversal has a handler whether it changes the page, loads one in
+  place, or only moves the search or the entry state: in the last case
+  nothing is applied, but the page renders the entry it arrived at,
+  through `useDeferredValue` one commit after the urgent one, and placed
+  before that commit the position would land on the previous entry's
+  layout. So that traversal is intercepted with a handler that settles in
+  the commit of `traversed`, deferred beside the page's own values. Both
+  the `pending` entry and `setTraversed` are made in the `navigate`
+  listener, not in the handler: it runs before `currententrychange`, so
+  the page's own update (Sync or Default, as `@k8ordo/state`'s url field
+  gives it) and the router's render together and share one deferred lane,
+  whatever the engine's order of handler and `currententrychange`, and
+  the handler returns the promise made there (Firefox may call it twice).
+  Firefox restores a traversal's position as it commits, at `popstate`,
+  waiting for no handler and reading no `scroll` option; the commit effect
+  places the recorded position after that, so it does not matter — except
+  for a traversal back to the page on screen, which keeps the position and
+  has no commit effect: Firefox restores it all the same before the task
+  that dispatched `popstate` ends, so the router puts the position the
   visitor had back in the next task (`keepPosition`, a `setTimeout` — a
   frame callback never runs in a hidden tab), unless another navigation
   moved the entry on. The other engines leave it, so there it is already
   where it was.
   `traversal.test.ts` holds that `finished` sees the entry's own render and
-  the position comes back onto it, for a traversal in place and one that
-  loads again, and that a traversal back to the page on screen keeps where
-  the visitor scrolled it.
+  the position comes back onto it, for a page change, a traversal in place
+  and one that loads again — each also from further down a longer page,
+  onto pages that measure themselves — after a reload, past an entry still
+  loading, and when the visitor scrolls during the load; that an entry
+  called off starts at the top; and that a traversal back to the page on
+  screen keeps where the visitor scrolled it.
 - **`useMatch` reads the platform, never the table.** It is `matchPath` over
   `usePathname`, which is why it works under the framework where `useRoute`
   cannot; `/*` on a table pattern is the one extension of the grammar it

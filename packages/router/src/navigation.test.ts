@@ -38,24 +38,47 @@ describe('isOurs', () => {
 
 describe('scrollPlanFor', () => {
   it('starts a new page at the top, the way a document load does', () => {
-    expect(scrollPlanFor('push', '')).toStrictEqual({ kind: 'top' });
-    expect(scrollPlanFor('replace', '')).toStrictEqual({ kind: 'top' });
+    expect(scrollPlanFor('push', '', undefined)).toStrictEqual({ kind: 'top' });
+    expect(scrollPlanFor('replace', '', undefined)).toStrictEqual({
+      kind: 'top',
+    });
   });
 
   it('scrolls to the fragment when the URL names one', () => {
-    expect(scrollPlanFor('push', '#install')).toStrictEqual({
+    expect(scrollPlanFor('push', '#install', undefined)).toStrictEqual({
       kind: 'fragment',
       id: 'install',
     });
-    expect(scrollPlanFor('push', '#%E5%B0%8E%E5%85%A5')).toStrictEqual({
+    expect(
+      scrollPlanFor('push', '#%E5%B0%8E%E5%85%A5', undefined),
+    ).toStrictEqual({
       kind: 'fragment',
       id: '導入',
     });
   });
 
-  it('leaves a traversal to the browser, which restores the position', () => {
-    expect(scrollPlanFor('traverse', '')).toBeNull();
-    expect(scrollPlanFor('traverse', '#x')).toBeNull();
+  it('goes back or forward to where the visitor left that entry, fragment or not', () => {
+    const leftAt = { left: 0, top: 1200 };
+    expect(scrollPlanFor('traverse', '', leftAt)).toStrictEqual({
+      kind: 'position',
+      left: 0,
+      top: 1200,
+    });
+    expect(scrollPlanFor('traverse', '#x', leftAt)).toStrictEqual({
+      kind: 'position',
+      left: 0,
+      top: 1200,
+    });
+  });
+
+  it('starts an entry no page was ever left from as a new page', () => {
+    expect(scrollPlanFor('traverse', '', undefined)).toStrictEqual({
+      kind: 'top',
+    });
+    expect(scrollPlanFor('traverse', '#x', undefined)).toStrictEqual({
+      kind: 'fragment',
+      id: 'x',
+    });
   });
 });
 

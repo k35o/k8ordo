@@ -1,4 +1,4 @@
-import { useDeferredValue, useState } from 'react';
+import { useDeferredValue, useLayoutEffect, useRef, useState } from 'react';
 import type { FC } from 'react';
 import { createRoot } from 'react-dom/client';
 
@@ -46,11 +46,19 @@ const Host: FC = () => {
     shown.searchParams.get('q') === 'few'
       ? ITEMS.filter((i) => i % 3 === 0)
       : ITEMS;
+  // 描くたびに一覧の高さを測り、画面に出す commit の中で layout を強制する
+  const list = useRef<HTMLUListElement>(null);
+  useLayoutEffect(() => {
+    const element = list.current;
+    if (element !== null) {
+      element.dataset.height = String(element.getBoundingClientRect().height);
+    }
+  });
   return (
     <>
       <h1>{shown.pathname.slice(1)}</h1>
       <p data-testid="count">{items.length}</p>
-      <ul style={{ margin: 0, padding: 0 }}>
+      <ul ref={list} style={{ margin: 0, padding: 0 }}>
         {items.map((i) => (
           <li key={i} style={{ height: '100px', listStyle: 'none' }}>
             {i}

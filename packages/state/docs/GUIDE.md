@@ -264,8 +264,8 @@ was given, a navigation that moves the search loads that page again: a GET
 form, a link, or a url `update()`. That load is a state change otherwise — no
 scroll, no focus reset, nothing remounts — and `update().finished` settles
 once the page is on screen with the new search. Going back or forward to
-another search of the page loads it again too, and then the browser restores
-the position that entry was left at. The router's usual shortcut,
+another search of the page loads it again too, and once it is on screen the
+viewport returns to where that entry was left. The router's usual shortcut,
 a same-pathname navigation that loads nothing, still holds for every page
 that did not declare `search`, and for a search that did not move.
 

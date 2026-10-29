@@ -53,6 +53,9 @@ const navigateTo = (page: Page, url: string): Promise<void> =>
     await navigation.navigate(to).finished;
   }, url);
 
+/** What `fixtures/traversal/host.tsx` puts on `globalThis` to hold its loads. */
+type Controls = { hold: boolean; release: () => void };
+
 const traverse = (page: Page, direction: 'back' | 'forward'): Promise<void> =>
   page.evaluate(async (to) => {
     await navigation[to]().finished;
@@ -118,6 +121,69 @@ describe.each(browserTypes)(
       await page.close();
     }, 30_000);
 
+    // short は描く commit の中で layout を強制する。Chromium は、traverse の
+    // URL を確定させてから位置が変わるたびに、それを行き先の entry の保存した
+    // 位置に書き込む。前のページの位置が short で下げられる量を超えていると、
+    // layout が位置を short の下端に切り詰め、その値が書き込まれる
+    it('restores the position a page was left at when the visitor goes back to it from further down a longer page', async () => {
+      const page = await open('/short');
+      await page.evaluate(() => {
+        window.scrollTo(0, 300);
+      });
+      const left = await scrollY(page);
+      await navigateTo(page, '/tall');
+      await page.evaluate(() => {
+        window.scrollTo(0, 3000);
+      });
+
+      await traverse(page, 'back');
+
+      await page.getByRole('heading', { name: 'short' }).waitFor();
+      await expect.poll(() => scrollY(page)).toBe(left);
+      await page.close();
+    }, 30_000);
+
+    // 読み直しても、それより前に作った entry へは同じ文書のまま戻る
+    it('restores the position a page was left at when the visitor goes back to it after reloading the next one', async () => {
+      const page = await open('/short');
+      await page.evaluate(() => {
+        window.scrollTo(0, 300);
+      });
+      const left = await scrollY(page);
+      await navigateTo(page, '/tall');
+      await page.evaluate(() => {
+        window.scrollTo(0, 3000);
+      });
+      await page.reload();
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
+
+      await traverse(page, 'back');
+
+      await page.getByRole('heading', { name: 'short' }).waitFor();
+      await expect.poll(() => scrollY(page)).toBe(left);
+      await page.close();
+    }, 30_000);
+
+    it('restores the position a page was left at when the visitor goes forward to it from further down a longer page', async () => {
+      const page = await open('/tall');
+      await navigateTo(page, '/short');
+      await page.evaluate(() => {
+        window.scrollTo(0, 300);
+      });
+      const left = await scrollY(page);
+      await traverse(page, 'back');
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
+      await page.evaluate(() => {
+        window.scrollTo(0, 3000);
+      });
+
+      await traverse(page, 'forward');
+
+      await page.getByRole('heading', { name: 'short' }).waitFor();
+      await expect.poll(() => scrollY(page)).toBe(left);
+      await page.close();
+    }, 30_000);
+
     // 一覧は絞り込みを useDeferredValue で遅らせて描く。急ぎの描画のあとで
     // 位置を戻すと、まだ前の entry の一覧の高さの上に戻り、絞った描画で
     // スクロールアンカリングがずらす
@@ -172,6 +238,24 @@ describe.each(browserTypes)(
       await page.close();
     }, 30_000);
 
+    it('restores the position an entry of the same page was left at when the visitor goes back to it from further down a longer entry', async () => {
+      const page = await open('/list?q=few');
+      await expect.poll(() => listCount(page)).toBe('30');
+      await page.evaluate(() => {
+        window.scrollTo(0, 300);
+      });
+      const left = await scrollY(page);
+      await navigateTo(page, '/list');
+      await expect.poll(() => listCount(page)).toBe('90');
+      await page.evaluate(() => {
+        window.scrollTo(0, 6000);
+      });
+
+      expect(await countWhenSettled(page, 'back')).toBe('30');
+      await expect.poll(() => scrollY(page)).toBe(left);
+      await page.close();
+    }, 30_000);
+
     it('settles a push within the same page as soon as it commits, without waiting for what the page renders behind it', async () => {
       const page = await open('/list?q=few');
       await expect.poll(() => listCount(page)).toBe('30');
@@ -197,6 +281,24 @@ describe.each(browserTypes)(
       await expect.poll(() => listCount(page)).toBe('90');
       await page.evaluate(() => {
         window.scrollTo(0, 300);
+      });
+
+      expect(await countWhenSettled(page, 'back')).toBe('30');
+      await expect.poll(() => scrollY(page)).toBe(left);
+      await page.close();
+    }, 30_000);
+
+    it('restores the position an entry was left at when the visitor goes back to it from further down a longer entry and the page reads what moved', async () => {
+      const page = await open('/host.html?reload&q=few');
+      await expect.poll(() => listCount(page)).toBe('30');
+      await page.evaluate(() => {
+        window.scrollTo(0, 300);
+      });
+      const left = await scrollY(page);
+      await navigateTo(page, '/host.html?reload');
+      await expect.poll(() => listCount(page)).toBe('90');
+      await page.evaluate(() => {
+        window.scrollTo(0, 6000);
       });
 
       expect(await countWhenSettled(page, 'back')).toBe('30');
@@ -238,6 +340,128 @@ describe.each(browserTypes)(
 
       expect(new URL(page.url()).pathname).toBe('/host.html');
       expect(await scrollY(page)).toBe(kept);
+      await page.close();
+    }, 30_000);
+
+    // 読み込みのあいだに動かせるのは画面に残る前のページで、行き先の座標ではない
+    it('restores the position a page was left at when the visitor goes back to it, even if they scroll the page still on screen while it loads', async () => {
+      const page = await open('/host.html');
+      await page.evaluate(() => {
+        window.scrollTo(0, 1500);
+      });
+      const left = await scrollY(page);
+      await navigateTo(page, '/p1');
+      await page.evaluate(() => {
+        window.scrollTo(0, 300);
+      });
+      await page.evaluate(async () => {
+        (globalThis as unknown as { controls: Controls }).controls.hold = true;
+        const back = navigation.back();
+        back.finished?.catch(() => undefined);
+        await back.committed;
+      });
+      await page.mouse.move(200, 200);
+      await page.mouse.wheel(0, 400);
+      await expect.poll(() => scrollY(page)).toBeGreaterThan(300);
+
+      await page.evaluate(() => {
+        const { controls } = globalThis as unknown as { controls: Controls };
+        controls.hold = false;
+        controls.release();
+      });
+
+      await page.getByRole('heading', { name: 'host.html' }).waitFor();
+      await expect.poll(() => scrollY(page)).toBe(left);
+      await page.close();
+    }, 30_000);
+
+    it('starts a page the visitor called off while it loaded at the top when they go forward to it', async () => {
+      const page = await open('/host.html');
+      await page.evaluate(() => {
+        window.scrollTo(0, 1500);
+        (globalThis as unknown as { controls: Controls }).controls.hold = true;
+        navigation.navigate('/elsewhere').finished?.catch(() => undefined);
+      });
+      await page.waitForURL(`${origin}/elsewhere`);
+      await page.evaluate(async () => {
+        const back = navigation.back();
+        back.finished?.catch(() => undefined);
+        await back.committed;
+        const { controls } = globalThis as unknown as { controls: Controls };
+        controls.hold = false;
+        controls.release();
+      });
+
+      await traverse(page, 'forward');
+
+      await page.getByRole('heading', { name: 'elsewhere' }).waitFor();
+      await expect.poll(() => scrollY(page)).toBe(0);
+      await page.close();
+    }, 30_000);
+
+    // 読み込みのあいだ、URL はもう行き先の entry を指し、画面には前のページが
+    // 残る。そこで離れるのは画面のページで、位置もそのページのもの
+    it('restores the position a page was left at when the visitor goes back past it while it loads, and then forward to it', async () => {
+      const page = await open('/host.html');
+      await navigateTo(page, '/p1');
+      await page.evaluate(() => {
+        window.scrollTo(0, 1000);
+      });
+      const left = await scrollY(page);
+      await navigateTo(page, '/p2');
+      await page.evaluate(() => {
+        window.scrollTo(0, 300);
+      });
+      await page.evaluate(async () => {
+        const { controls } = globalThis as unknown as { controls: Controls };
+        controls.hold = true;
+        const first = navigation.back();
+        first.finished?.catch(() => undefined);
+        await first.committed;
+        // WebKit は、取りかけの遷移を中断させた戻るの finished まで reject する
+        const second = navigation.back();
+        second.finished?.catch(() => undefined);
+        await second.committed;
+        controls.hold = false;
+        controls.release();
+      });
+      await page.getByRole('heading', { name: 'host.html' }).waitFor();
+
+      await traverse(page, 'forward');
+
+      await page.getByRole('heading', { name: 'p1' }).waitFor();
+      await expect.poll(() => scrollY(page)).toBe(left);
+      await page.close();
+    }, 30_000);
+
+    it('restores the position a page was left at when the visitor follows a link while going back to another, and then comes back', async () => {
+      const page = await open('/host.html');
+      await page.evaluate(() => {
+        window.scrollTo(0, 1500);
+      });
+      const left = await scrollY(page);
+      await navigateTo(page, '/p1');
+      await page.evaluate(() => {
+        window.scrollTo(0, 700);
+      });
+      await page.evaluate(async () => {
+        const { controls } = globalThis as unknown as { controls: Controls };
+        controls.hold = true;
+        const back = navigation.back();
+        back.finished?.catch(() => undefined);
+        await back.committed;
+        const link = navigation.navigate('/p3');
+        link.finished?.catch(() => undefined);
+        await link.committed;
+        controls.hold = false;
+        controls.release();
+      });
+      await page.getByRole('heading', { name: 'p3' }).waitFor();
+
+      await traverse(page, 'back');
+
+      await page.getByRole('heading', { name: 'host.html' }).waitFor();
+      await expect.poll(() => scrollY(page)).toBe(left);
       await page.close();
     }, 30_000);
   },
