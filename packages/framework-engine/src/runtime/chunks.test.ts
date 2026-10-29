@@ -45,6 +45,8 @@ let browser: Browser;
 let origin = '';
 /** Per built asset, by the path the HTML names it with, the pages it is of. */
 const pagesOf = new Map<string, readonly PageName[]>();
+/** Per built stylesheet, whose it is: a server component's or a client one's. */
+const sideOf = new Map<string, 'server' | 'client'>();
 
 const wait = (ms: number): Promise<void> =>
   new Promise((resolve) => {
@@ -61,6 +63,14 @@ beforeAll(async () => {
       `/assets/${file}`,
       PAGES.filter((page) => marksOf(page).some((mark) => text.includes(mark))),
     );
+    for (const side of ['server', 'client'] as const) {
+      const marked = PAGES.some((page) =>
+        text.includes(`mark-${page}-${side}`),
+      );
+      if (file.endsWith('.css') && marked) {
+        sideOf.set(`/assets/${file}`, side);
+      }
+    }
   }
 
   // ハッシュ付きの資産はファイルから、それ以外はハンドラが答える。
@@ -196,6 +206,18 @@ const reloaded = async (page: Page): Promise<boolean> =>
 const settled = (page: Page): Promise<void> =>
   page.waitForLoadState('networkidle');
 
+/** Whose each stylesheet in `<head>` is, in the order they come. */
+const sidesInHead = async (page: Page): Promise<string[]> =>
+  (
+    await page.evaluate(() =>
+      [
+        ...document.head.querySelectorAll<HTMLLinkElement>(
+          'link[rel="stylesheet"]',
+        ),
+      ].map((link) => new URL(link.href).pathname),
+    )
+  ).flatMap((asset) => sideOf.get(asset) ?? []);
+
 describe.each(browserTypes)('pages loading their own, in $name', ({ type }) => {
   beforeAll(async () => {
     browser = await type.launch();
@@ -272,6 +294,25 @@ describe.each(browserTypes)('pages loading their own, in $name', ({ type }) => {
         );
     expect(await mark('h1')).toBe('mark-b-server');
     expect(await mark('[data-mark-b]')).toBe('mark-b-client');
+    await page.close();
+  }, 30_000);
+
+  // React は Server Component の CSS を同じ組の最後の後ろに、Vite は遷移で
+  // 初めて読む client コンポーネントの CSS を head の末尾に足す
+  it('keeps every Server Component’s stylesheet before every client component’s, opened as a document and after a client navigation', async () => {
+    const page = await open('/a');
+    await settled(page);
+    const opened = await sidesInHead(page);
+
+    await page.getByRole('link', { name: 'to b' }).click();
+    await page.getByText('MARK_B_CLIENT').waitFor();
+    await settled(page);
+
+    expect({ opened, navigated: await sidesInHead(page) }).toStrictEqual({
+      opened: ['server', 'client'],
+      navigated: ['server', 'server', 'client', 'client'],
+    });
+    expect(await reloaded(page)).toBe(false);
     await page.close();
   }, 30_000);
 
