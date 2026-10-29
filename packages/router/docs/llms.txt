@@ -17,7 +17,8 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   wildcards, route groups, declaration order), mounting `<Router>` and
   `<Outlet>`, links without a `<Link>` component, `useMatch` for active
   sections, `Register` for checked patterns, what navigation guarantees
-  (`finished` after commit, scroll to top or fragment on a new page), how
+  (`finished` after commit, scroll to top or fragment on a new page, and
+  back to where an entry was left on back and forward), how
   a `<ViewTransition>` animates page changes by the router's transition
   types, and how the framework reuses the navigation half (an application on
   `@k8ordo/framework` imports that half from `@k8ordo/framework`, which
@@ -95,8 +96,8 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   `apply` set through `useDeferredValue`; its optional `refresh(url)` says
   whether a same-pathname navigation still has to load (the page showing reads
   the search), which then loads in place — no focus reset or transition
-  types, and no scroll but going back or forward, where the browser restores
-  the position once the page loaded again is on screen.
+  types, and no scroll but going back or forward, which returns to where
+  that entry was left once the page loaded again is on screen.
   Exported types, by group — the table: `Routes` (`{ kind, record, match }`),
   `RoutesRecord`, `RouteNode`, `RouteComponent`, `Match`, `ErrorComponent`,
   `ErrorProps`; patterns: `PatternOf`, `NavigablePatternOf`, `NavigablePath`,

@@ -420,9 +420,9 @@ replace leaves scroll alone too — this is why a search update never scrolls
 the page back to the top — and is intercepted with no handler, so its
 `finished` — `@k8ordo/state`'s `update().finished` included — settles as
 soon as the navigation commits, with no render to wait for. Going back or
-forward between two entries of the page is the exception: the browser
-restores the position that entry was left at, once the page has rendered
-the entry — what it renders through `useDeferredValue` included — so a
+forward between two entries of the page is the exception: the viewport
+returns to where that entry was left, once the page has rendered the
+entry — what it renders through `useDeferredValue` included — so a
 filtered list comes back to where it was read, and that `finished` waits for
 the render. The comparison is against the
 page showing, not against the address bar — interception commits the URL
@@ -453,8 +453,22 @@ page state under it follows the URL.
 
 **A new page starts at the top.** Once the new tree is on screen, the
 viewport goes where a document load would have put it: the top, or the
-element a `#fragment` names. Back and forward are left to the browser, which
-restores the position it saved — between two entries of the same page too.
+element a `#fragment` names.
+
+**Back and forward return to where the entry was left.** The viewport goes
+back to where the visitor left that entry — between two entries of the same
+page too, and to an entry from before a reload, which still belongs to the
+same document. The router puts it there itself, at once (a root
+`scroll-behavior: smooth` does not animate it), rather than leaving it to the
+browser: Chromium restores a position that the new page's layout clamped
+while the navigation was in flight, so a page that measures itself as it
+renders would come back at its bottom. Scrolling the page still on screen
+while the next one loads does not change where the next one lands — what
+moved was the page being left. An entry that was never on screen — a page
+change called off while it loaded — starts at the top, or at its fragment,
+as a new page does. Only the document's scroll position comes back: an
+element scrolled inside the page and the pinch-zoom scale do not.
+
 Any other state change never moves the viewport — same pathname, same
 place — so a filter update does not scroll the reader back to the top.
 
@@ -568,7 +582,7 @@ navigation that keeps the pathname on screen still has to load — the page
 showing reads what moved. Without it such a navigation is a state change and
 loads nothing; with it, it loads and applies like a page change but as a
 state change otherwise: no focus reset and no transition types, and no
-scroll but going back or forward, where the browser restores the position
+scroll but going back or forward, which returns to where that entry was left
 once the page loaded again is on screen. The framework's runtime answers it
 for a page that exports `search`.
 
