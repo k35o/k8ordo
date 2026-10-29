@@ -150,9 +150,9 @@ It receives that slot, parsed as `listState.parseUrl` parses it, as `search`
 component's `useAppState` as `initialUrl`, so the first render agrees with
 the URL. Because the page is rendered for the search it was given, a
 navigation that moves the search loads it again, in place: no scroll, no
-focus reset, nothing remounted — but for going back or forward, where the
-browser restores the position that entry was left at once the page loaded
-again is on screen. The generated table reads it through
+focus reset, nothing remounted — but for going back or forward, which
+returns to the position that entry was left at once the page loaded again
+is on screen. The generated table reads it through
 `@k8ordo/state`, so the application depends on that. A layout never
 receives it.
 
