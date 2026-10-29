@@ -1,5 +1,10 @@
-import { useDeferredValue, useSyncExternalStore } from 'react';
-import type { FC } from 'react';
+import {
+  useDeferredValue,
+  useLayoutEffect,
+  useRef,
+  useSyncExternalStore,
+} from 'react';
+import type { FC, ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { defineRoutes } from '../../src/define-routes';
@@ -12,6 +17,29 @@ const TallPage: FC = () => (
   <div style={{ height: '5000px' }}>
     <h1>tall</h1>
   </div>
+);
+
+// 描くたびに自分の高さを layout effect で測る部品。@k8ordo/ui の Tabs の
+// useWritingMode のように、ページを画面に出す commit の中で layout を強制する
+const Measured: FC<{ children: ReactNode }> = ({ children }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const element = ref.current;
+    if (element !== null) {
+      element.dataset.height = String(element.getBoundingClientRect().height);
+    }
+  });
+  return <div ref={ref}>{children}</div>;
+};
+
+// 前のページより背の低いページ。前のページの位置がこのページで下げられる量を
+// 超えたまま layout が走ると、位置はこのページの下端に切り詰められる
+const ShortPage: FC = () => (
+  <Measured>
+    <div style={{ height: '2000px' }}>
+      <h1>short</h1>
+    </div>
+  </Measured>
 );
 
 // @k8ordo/state の url の欄と同じく、検索を currententrychange で読む外部の
@@ -36,13 +64,15 @@ const ListPage: FC = () => {
       <h1>list</h1>
       <input aria-label="q" readOnly value={q} />
       <p data-testid="count">{items.length}</p>
-      <ul style={{ margin: 0, padding: 0 }}>
-        {items.map((i) => (
-          <li key={i} style={{ height: '100px', listStyle: 'none' }}>
-            {i}
-          </li>
-        ))}
-      </ul>
+      <Measured>
+        <ul style={{ margin: 0, padding: 0 }}>
+          {items.map((i) => (
+            <li key={i} style={{ height: '100px', listStyle: 'none' }}>
+              {i}
+            </li>
+          ))}
+        </ul>
+      </Measured>
     </>
   );
 };
@@ -50,6 +80,7 @@ const ListPage: FC = () => {
 const routes = defineRoutes({
   '/about': AboutPage,
   '/tall': TallPage,
+  '/short': ShortPage,
   '/list': ListPage,
 });
 

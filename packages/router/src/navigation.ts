@@ -66,25 +66,34 @@ export type NavigationHandler<T> = {
    * one, such a navigation is a state change: nothing loads. With one, it
    * loads and applies like a page change, but as a state change otherwise:
    * no focus reset and no transition types, and the viewport stays where it
-   * is — except going back or forward, where the browser restores the
-   * position that entry was left at once the page loaded again is on screen.
+   * is — except going back or forward, where it goes back to where that entry
+   * was left once the page loaded again is on screen.
    */
   refresh?: (url: URL) => boolean;
 };
 
+export type Position = { readonly left: number; readonly top: number };
+
 /**
- * Where the viewport goes once the new page is on screen. A traversal is the
- * browser's to restore, so it carries no instruction — the browser restores
- * it once the handler settles; a fragment scrolls to its target; anything
- * else starts at the top, the way a document load does.
+ * Where the viewport goes once the new page is on screen. Going back or
+ * forward, it is where the visitor left that entry; otherwise a fragment
+ * scrolls to its target, and anything else starts at the top, the way a
+ * document load does — as does a traversal to an entry no page was ever
+ * left from, one called off while it loaded.
  */
-export type ScrollPlan = { kind: 'top' } | { kind: 'fragment'; id: string };
+export type ScrollPlan =
+  | { kind: 'top' }
+  | { kind: 'fragment'; id: string }
+  | ({ kind: 'position' } & Position);
 
 export const scrollPlanFor = (
   navigationType: NavigationType,
   hash: string,
-): ScrollPlan | null => {
-  if (navigationType === 'traverse') return null;
+  leftAt: Position | undefined,
+): ScrollPlan => {
+  if (navigationType === 'traverse' && leftAt !== undefined) {
+    return { kind: 'position', ...leftAt };
+  }
   if (hash.length > 1) {
     let id = hash.slice(1);
     try {
@@ -110,6 +119,11 @@ export const transitionTypesFor = (
 ): readonly string[] => ['navigation', `navigation-${navigationType}`];
 
 const applyScroll = (plan: ScrollPlan): void => {
+  if (plan.kind === 'position') {
+    // ブラウザの戻しと同じく、ルートの scroll-behavior によらず一度に置く
+    window.scrollTo({ left: plan.left, top: plan.top, behavior: 'instant' });
+    return;
+  }
   if (plan.kind === 'fragment') {
     // fragment は id か、古い綴りの <a name> のどちらかを指す
     const selector = `#${CSS.escape(plan.id)}, [name=${JSON.stringify(plan.id)}]`;
@@ -128,22 +142,50 @@ type Pending = {
   resolve: () => void;
   scroll: ScrollPlan | null;
   types: readonly string[];
-  /** Lets scroll anchoring act again, for a traversal within a page. */
-  release?: () => void;
 };
 
-// Firefox は intercept した traverse でも handler を待たず、scroll の指定も
-// 見ずに、popstate の時点で保存した位置へ戻す。同じページでは前の entry の
-// 描画の上に戻り、遅らせた描画で中身が伸び縮みするとスクロールアンカリングが
-// ずらす。その entry の描画が出るまでアンカリングを止めれば、戻した位置が残る。
-// ほかのエンジンは handler が解けてから戻すので、止めても変わらない
-let anchoringHeld = 0;
-let anchoringBefore = '';
+// 戻る・進むの位置はブラウザに戻させず、離れたときの位置を覚えて自分で置く。
+// Chromium は intercept した traverse の URL を handler より先に確定させ、
+// handler が解けるまでに位置が変わると、それを行き先の entry の保存した位置に
+// 書いてから戻す。新しいページの描画で layout が走ると、前のページの位置が
+// 新しいページで下げられる量に切り詰められ、その下端に戻ってしまう
+const leftAt = new Map<string, Position>();
 
-// 同じ理由で、読み込み中に画面のページの entry へ戻るときも、Firefox は
-// manual を見ずに保存した位置へ戻す。戻すのは popstate を出したのと同じタスク
-// の中なので、次のタスクで訪問者がいた位置に置き直す。requestAnimationFrame
-// は隠れたタブで走らない
+// 読み直しのあとも、それより前に作った entry へは同じ文書のまま戻る。entry の
+// key は読み直しをまたいで変わらないので、タブの sessionStorage にも写す
+const LEFT_AT_KEY = '@k8ordo/router:left-at';
+
+const readLeftAt = (): void => {
+  try {
+    const saved = sessionStorage.getItem(LEFT_AT_KEY);
+    if (saved === null) return;
+    for (const [key, position] of JSON.parse(saved) as Array<
+      [string, Position]
+    >) {
+      leftAt.set(key, position);
+    }
+  } catch {
+    // 読めなければ、覚えていないのと同じ
+  }
+};
+
+const rememberLeftAt = (entry: string): void => {
+  leftAt.set(entry, { left: window.scrollX, top: window.scrollY });
+  const live = new Set(navigation.entries().map(({ key }) => key));
+  for (const key of leftAt.keys()) {
+    if (!live.has(key)) leftAt.delete(key);
+  }
+  try {
+    sessionStorage.setItem(LEFT_AT_KEY, JSON.stringify([...leftAt]));
+  } catch {
+    // 書けなくても、この文書のあいだは覚えている
+  }
+};
+
+// Firefox は intercept した traverse でも scroll の指定を見ず、popstate を
+// 出したのと同じタスクの中で保存した位置へ戻す。読み込み中に画面のページの
+// entry へ戻る（取り消す）ときは位置を動かさないので、次のタスクで訪問者が
+// いた位置に置き直す。requestAnimationFrame は隠れたタブで走らない
 const keepPosition = (entry: string): void => {
   const left = window.scrollX;
   const top = window.scrollY;
@@ -153,27 +195,6 @@ const keepPosition = (entry: string): void => {
       window.scrollTo({ left, top });
     }
   }, 0);
-};
-
-const holdAnchoring = (): (() => void) => {
-  const { style } = document.documentElement;
-  if (anchoringHeld === 0) {
-    anchoringBefore = style.overflowAnchor;
-    style.overflowAnchor = 'none';
-  }
-  anchoringHeld += 1;
-  let released = false;
-  return () => {
-    if (released) return;
-    released = true;
-    anchoringHeld -= 1;
-    if (anchoringHeld > 0) return;
-    // アンカリングは配置を計算するときに効く。描画のコミットの layout effect
-    // で戻すと、そのあとの配置の計算で縮んだ分をずらすので、止めたまま配置を
-    // 計算させてから戻す
-    document.documentElement.getBoundingClientRect();
-    style.overflowAnchor = anchoringBefore;
-  };
 };
 
 /**
@@ -233,8 +254,8 @@ export const NavigationGeneration = createContext(-1);
  * `update()` — is intercepted with no handler, so its `finished` settles as
  * soon as the navigation commits. Going back or forward between two entries
  * of that page is the exception: it settles with the render the entry change
- * starts in the background, so the browser restores the position onto what
- * that entry renders.
+ * starts in the background, and the position that entry was left at comes
+ * back onto what it renders.
  *
  * The new tree renders at the lane `useDeferredValue` gives it, not in a
  * transition. While any async action is pending, React holds every
@@ -294,19 +315,25 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
   const latest = useRef(-1);
   // The entry whose page is on screen while a page change loads — the URL's
   // entry otherwise. Going back to it is calling the change off, not going
-  // back to a place the visitor left.
+  // back to a place the visitor left; and it is the entry a navigation in the
+  // meantime leaves, at the position the visitor has it scrolled to.
   const onScreenEntry = useRef<string | null>(null);
 
   useEffect(() => {
     shown.current = normalizePathname(location.pathname);
+    readLeftAt();
     const onNavigate = (event: NavigateEvent): void => {
+      // ページの読み込み中に離れるのは、URL の entry でなく画面に残るページの
+      // entry。URL の entry はまだ画面に出ていない
+      const leaving = onScreenEntry.current ?? navigation.currentEntry?.key;
+      if (leaving !== undefined) rememberLeftAt(leaving);
       if (!isOurs(event)) return;
       const url = new URL(event.destination.url);
       const pathname = normalizePathname(url.pathname);
       // Same place — only the search or the entry state moved. Nothing to
       // remount, and no focus to disturb; nothing to load either, unless the
       // page showing reads what moved. Only going back or forward moves the
-      // viewport: the browser restores where that entry was left.
+      // viewport, to where that entry was left.
       const inPlace = pathname === shown.current;
       const traverse = event.navigationType === 'traverse';
       if (inPlace && !refresh(url)) {
@@ -326,26 +353,31 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         const { promise, resolve, reject } = Promise.withResolvers<undefined>();
         // handler が走る前に中止されると、誰も待たない reject になる
         promise.catch(() => undefined);
-        const release = holdAnchoring();
         pending.current.set(id, {
           resolve: () => {
             resolve(undefined);
           },
-          scroll: null,
+          scroll: scrollPlanFor(
+            'traverse',
+            url.hash,
+            leftAt.get(event.destination.key),
+          ),
           types: [],
-          release,
         });
         event.signal.addEventListener(
           'abort',
           () => {
             pending.current.delete(id);
-            release();
             reject(event.signal.reason as Error);
           },
           { once: true },
         );
         setTraversed(id);
-        event.intercept({ focusReset: 'manual', handler: () => promise });
+        event.intercept({
+          scroll: 'manual',
+          focusReset: 'manual',
+          handler: () => promise,
+        });
         return;
       }
       if (!claim(url)) return;
@@ -359,15 +391,14 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       const settled = (): void => {
         if (latest.current === id) setPendingPathname(null);
       };
-      const scroll = inPlace
-        ? null
-        : scrollPlanFor(event.navigationType, url.hash);
-      // 読み直すページも同じページなので、戻る・進むでは Firefox が戻した位置を
-      // 読み直した描画が出るまで残す
-      const release = inPlace && traverse ? holdAnchoring() : undefined;
-      if (release !== undefined) {
-        event.signal.addEventListener('abort', release, { once: true });
-      }
+      const scroll =
+        inPlace && !traverse
+          ? null
+          : scrollPlanFor(
+              event.navigationType,
+              url.hash,
+              leftAt.get(event.destination.key),
+            );
       event.intercept({
         // A load in place moves neither the viewport nor focus.
         ...(inPlace ? { focusReset: 'manual' as const } : {}),
@@ -375,10 +406,9 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         // settles — but the handler settles only once the tree is on screen,
         // which is exactly when this hook scrolls itself. Doing it here keeps
         // the two from disagreeing, and keeps the behaviour where a browser
-        // has not implemented the platform's half. A traversal keeps the
-        // default: restoring a position is the browser's, not ours — a load
-        // in place included, which comes back to where that entry was left.
-        scroll: traverse ? 'after-transition' : 'manual',
+        // has not implemented the platform's half. A traversal included: the
+        // hook puts back where it saw that entry left — a load in place too.
+        scroll: 'manual',
         handler: async () => {
           // 失敗も中止も、名指していた遷移が終わったということ。新しい遷移が
           // 始まっていれば、それがもう自分の行き先を名指している
@@ -388,7 +418,6 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
             value = await load(url, event.signal);
           } catch (error) {
             settled();
-            release?.();
             throw error;
           }
           // A load that ignores the signal can come back after a second
@@ -403,7 +432,6 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
               // 同じページの読み直しはページの切り替えではない。
               // ViewTransition が切り替えとして動かさないよう、型を付けない
               types: inPlace ? [] : transitionTypesFor(event.navigationType),
-              ...(release === undefined ? {} : { release }),
             });
             event.signal.addEventListener(
               'abort',
@@ -443,7 +471,6 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
     if (entry === undefined) return;
     pending.current.delete(id);
     onScreenEntry.current = null;
-    entry.release?.();
     if (entry.scroll !== null) applyScroll(entry.scroll);
     if (latest.current === id) setPendingPathname(null);
     entry.resolve();
