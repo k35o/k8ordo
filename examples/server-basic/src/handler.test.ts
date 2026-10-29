@@ -542,19 +542,26 @@ describe('a Content-Security-Policy with a nonce', () => {
     ['a page whose content streams in', '/products'],
     ['the not-found page', '/nowhere'],
   ])(
-    'signs every script of %s with the nonce its guard named',
+    'signs every script and style of %s with the nonce its guard named',
     async (_what, pathname) => {
       const response = await handler(new Request(`${ORIGIN}${pathname}`));
       const nonce = nonceNamedBy(response);
       expect(nonce).toMatch(/^[A-Za-z0-9+/]{22}==$/u);
-      const scripts = [
-        ...(await response.text()).matchAll(/<script\b[^>]*>/giu),
-      ].map(([tag]) => tag);
-      // 起動のモジュール・ペイロード・color-scheme のインラインスクリプト
-      expect(scripts.length).toBeGreaterThanOrEqual(3);
-      expect(
-        scripts.filter((tag) => !tag.includes(` nonce="${String(nonce)}"`)),
-      ).toStrictEqual([]);
+      const html = await response.text();
+      const tags = (name: string): string[] =>
+        [...html.matchAll(new RegExp(`<${name}\\b[^>]*>`, 'giu'))].map(
+          ([tag]) => tag,
+        );
+      const unsigned = (all: readonly string[]): string[] =>
+        all.filter((tag) => !tag.includes(` nonce="${String(nonce)}"`));
+      // 起動のモジュール・ペイロード・color-scheme のインラインスクリプトと、
+      // head の CSS の並びを決める空の style
+      expect(tags('script').length).toBeGreaterThanOrEqual(3);
+      expect(tags('style').length).toBeGreaterThanOrEqual(1);
+      expect([
+        ...unsigned(tags('script')),
+        ...unsigned(tags('style')),
+      ]).toStrictEqual([]);
     },
   );
 

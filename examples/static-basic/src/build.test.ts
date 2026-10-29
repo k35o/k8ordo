@@ -383,12 +383,13 @@ describe('the static build', () => {
     '404.html',
     'en/posts/!fallback/index.html',
   ])(
-    'writes the application’s policy first in the <head> of %s, naming each inline script by hash',
+    'writes the application’s policy first in the <head> of %s, naming each inline script and the framework’s style by hash',
     (file) => {
       const html = read(file);
       const policy = policyFirstIn(html);
+      // style-src のハッシュは、head の CSS の並びを決める中身の無い style
       expect(policy).toMatch(
-        /^script-src 'self'( 'sha256-[A-Za-z0-9+/]{43}=')+; object-src 'none'; base-uri 'none'$/u,
+        /^script-src 'self'( 'sha256-[A-Za-z0-9+/]{43}=')+; style-src 'self' 'sha256-47DEQpj8HBSa\+\/TImW\+5JCeuQeRkm5NMpJWZG3hSuFU='; object-src 'none'; base-uri 'none'$/u,
       );
       const inline = inlineScriptsIn(html);
       // color-scheme と、書き込んだペイロード

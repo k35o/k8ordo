@@ -61,7 +61,9 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 - [Routing](references/routing.md): the `routes/` grammar and every refusal
   the build names, where a `fallback.tsx` may sit, how a page is sent in
   each mode (each page loads only its own client components and CSS, and
-  the browser renders once they have loaded), `loading.tsx`, `route.ts` (methods and `405` under server
+  the browser renders once they have loaded; Server Components' stylesheets
+  come before client components', and a stylesheet once loaded stays),
+  `loading.tsx`, `route.ts` (methods and `405` under server
   mode, a file under static mode), the generated `.k8ordo/` files (the
   route table, and the `Register`s: the table's, and `@k8ordo/i18n`'s when
   `src/i18n.ts` exports `locales` by name) and `k8ordo generate`, which
@@ -94,9 +96,9 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   `responseHeaders()`, `cookies()` and its defaults, and the read-only
   `request` a page receives.
 - [Content Security Policy](references/csp.md): `nonce()` in a header a
-  guard writes under server mode; the `csp` option and
-  `colorSchemeScriptHash()` under static mode, and `connect-src` for the
-  data a `fallback.tsx`'s shell fetches.
+  guard writes under server mode, in `style-src` too for the framework's
+  one `<style>`; the `csp` option and `colorSchemeScriptHash()` under static
+  mode, and `connect-src` for the data a `fallback.tsx`'s shell fetches.
 - [Running and deploying](references/deploy.md): a static build's
   `dist/client/` (HTML, `index.rsc` payloads, shells, `404.html`,
   `sitemap.xml`, `_redirects`), the rewrites that reach a shell on Netlify,

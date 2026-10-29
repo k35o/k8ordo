@@ -272,16 +272,29 @@ pnpm check         # check:write to auto-fix
   leaves no link; the browser loads it from the payload. Awaiting the walk
   (`use(ready)`) matters under `vite dev`, where a reference's links come
   only from a read after its module has loaded, which the walk makes once
-  its wait ends. In a static file's head, the client references'
-  stylesheets come before those the tree links, every one having been
-  asked for first; a server orders what arrives after the walk by its
-  arrival, and a client navigation appends what it loads to the head, so no
-  order between the two is kept. Nor among the client references' own: a
-  static head has them in the order the RSC render named them, which a
-  Server Component waiting for data can change from one build to the next,
-  a server in the order it read them, and a navigation in the order it
-  loads them; an override between two goes by specificity, since a layer's
-  place is set by the first file to name it, which no order here keeps.
+  its wait ends. Ahead of `Root`, the render writes one `<style>` of its
+  own, empty (`STYLESHEET_ORDER_HREF`), under the precedence the RSC
+  plugin links a Server Component's stylesheets with
+  (`SERVER_STYLESHEETS`), and that is what keeps every Server Component's
+  stylesheet — the root layout's first — before every client component's,
+  however the page was reached. React orders the precedences in `<head>` as
+  each is first asked for, and a static render asks for every client
+  reference's before it reads the payload, so without it a file's head
+  would have the client components' first; everywhere else they come last — a client navigation
+  (a prefetch included) appends what it loads to the head while React puts
+  a Server Component's new stylesheet after the last of its precedence, a
+  server's streamed part and `vite dev` add theirs at the end. Under a
+  server React signs the style with the answer's nonce
+  (`nonce: { script, style }`); under static mode it carries none, because
+  React then writes no `<style precedence>` that lacks the nonce, and an
+  application cannot sign one in a file — the framework's build names it by
+  hash instead (`packages/framework/CLAUDE.md`). No order is kept among
+  the client references' own: a static head has them in the order the RSC
+  render named them, which a Server Component waiting for data can change
+  from one build to the next, a server in the order it read them, and a
+  navigation in the order it loads them; an override between two goes by
+  specificity. Nor is a stylesheet ever taken out: once loaded, by a page
+  or a prefetch, it applies to every page after it in the tab.
   `formState` is read apart: React takes it as the render starts, and the
   RSC environment's value holds client components as references the SSR
   cannot render, so when the payload carries one (`carriesFormState`, a
@@ -295,7 +308,10 @@ pnpm check         # check:write to auto-fix
   loss — holding the static heads of the last two the same both times, a
   static head's links the same as a server's, where the plugin alone asks,
   on the pages a render reads whole, and a server's links of the contained
-  ones only where they first load; and it serves them under `vite dev`
+  ones only where they first load, and, on a page with both, the page's own
+  stylesheets before its client components' in either mode, the ordering
+  `<style>` unsigned in a file and signed by a server; and it serves them
+  under `vite dev`
   with one component's transform slowed, which fails without `use(ready)`;
   `runtime/streaming.test.ts` holds that a server sends the shell before
   what a page waits for under a client component's `<Suspense>`, under an
@@ -611,7 +627,8 @@ pnpm check         # check:write to auto-fix
   would spare the handler all this and deadlock: a page's chunk imports the
   RSC entry's chunk, which would be waiting for the page. `chunks.test.ts`
   holds that each page's HTML and payload load only its own client
-  components and CSS.
+  components and CSS, and that the Server Components' stylesheets stay
+  before the client components' across a navigation.
 
 ## Layout
 
