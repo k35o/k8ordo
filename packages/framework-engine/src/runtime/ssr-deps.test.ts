@@ -509,7 +509,7 @@ describe('the HTML of a file', () => {
 
     expect(style).toMatch(/><\/style>$/u);
     expect(nonceOf(style)).toBeUndefined();
-    expect(nonceOf(/<script\b[^>]*>/u.exec(html)?.[0])).toBeDefined();
+    expect(nonceOf(/<script\b[^>]*>/iu.exec(html)?.[0])).toBeDefined();
   });
 
   describe.each(browserTypes)(
@@ -635,7 +635,7 @@ describe('the HTML of a streamed document', () => {
 
   it('signs the style that orders the stylesheets with the nonce its scripts carry', async () => {
     for (const { html } of await twice('/styled')) {
-      const script = nonceOf(/<script\b[^>]*>/u.exec(html)?.[0]);
+      const script = nonceOf(/<script\b[^>]*>/iu.exec(html)?.[0]);
 
       expect(script).toBeDefined();
       expect(nonceOf(orderStyleIn(html))).toBe(script);
