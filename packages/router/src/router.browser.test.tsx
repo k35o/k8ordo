@@ -1,8 +1,9 @@
-import type { FC } from 'react';
+import type { Context, FC } from 'react';
 import {
   lazy,
   startTransition,
   Suspense,
+  use,
   useDeferredValue,
   useEffect,
   useState,
@@ -782,4 +783,54 @@ it('keeps the scroll position and names the load in progress while it loads agai
     .toHaveTextContent('?q=hats');
   expect(window.scrollY).toBe(reading);
   await expect.element(screen.getByTestId('pending')).toHaveTextContent('none');
+});
+
+// 木ごとの pathname の読み手。@k8ordo/state は同じ名前の context で、ページの
+// 状態を画面の木に結ぶ。名前は state と framework と共有の約束
+const TreeProbe: FC<{ id: string }> = ({ id }) => (
+  <span data-testid={id}>
+    {use(
+      (globalThis as Record<symbol, Context<string | null>>)[
+        Symbol.for('@k8ordo/router/tree-pathname')
+      ] as Context<string | null>,
+    )}
+  </span>
+);
+
+it('names the pathname each tree was applied for, the old one until the next tree is on screen', async () => {
+  let release!: () => void;
+  const chunk = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const Slow = lazy(async () => {
+    await chunk;
+    return { default: () => <TreeProbe id="next-tree" /> };
+  });
+  const suspending = defineRoutes({
+    '/': {
+      layout: Loading,
+      children: { '/': () => <TreeProbe id="first-tree" />, '/slow': Slow },
+    },
+  });
+  const screen = await render(<Router routes={suspending} />);
+  await navigateTo('/', { history: 'replace' }).finished;
+  await expect.element(screen.getByTestId('first-tree')).toHaveTextContent('/');
+
+  const slow = navigateTo('/slow/');
+  await slow.committed;
+  // 新しい木を描き始めて chunk で止まるまでの猶予
+  await new Promise((resolve) => {
+    setTimeout(resolve, 50);
+  });
+
+  expect(location.pathname).toBe('/slow/');
+  expect(
+    document.querySelector('[data-testid="first-tree"]')?.textContent,
+  ).toBe('/');
+  release();
+  await slow.finished;
+  // 末尾の / は同じページ。state が比べる URL の pathname と同じ綴りにする
+  expect(document.querySelector('[data-testid="next-tree"]')?.textContent).toBe(
+    '/slow',
+  );
 });
