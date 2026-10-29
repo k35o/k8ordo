@@ -486,13 +486,28 @@ export const pageCssTitle = message({
 });
 
 export const pageCssCause = message({
-  ja: '`page.tsx`・`not-found.tsx`・`route.ts`・`fallback.tsx`がimportしたCSSや、importしたときに動くコードは、そのファイルを描くページを開くまで読まれません。ほかのページがimportしたCSSに頼っていたページは、同じタブでそのページを開いたあとにしか当たりません。importしたときに動くコードは、サーバーではそのプロセスでそのページへの最初のリクエストが来たあとに効き、staticモードではそのページのプリレンダーがほかより先に走ったかどうかで書き出すHTMLが変わることがあります。',
-  en: 'The CSS a `page.tsx`, `not-found.tsx`, `route.ts` or `fallback.tsx` imports, and the code that runs as it is imported, are not loaded until a page that renders that file is opened. A page relying on CSS another page imports gets it only once that page has been opened in the same tab. Code that runs as it is imported takes effect on a server once that page has had its first request in that process, and under static mode the HTML written for a page may change with whether that page was prerendered before it.',
+  ja: '`page.tsx`・`not-found.tsx`・`route.ts`・`fallback.tsx`がimportしたCSSや、importしたときに動くコードは、そのファイルを描くページを開くまで読まれません。ほかのページがimportしたCSSに頼っていたページは、同じタブでそのページを開いたあとにしか当たりません。Client ComponentがimportしたCSSは、そのページへのリンクを先読みしたときにも読まれます。importしたときに動くコードは、サーバーではそのプロセスでそのページへの最初のリクエストが来たあとに効き、staticモードではそのページのプリレンダーがほかより先に走ったかどうかで書き出すHTMLが変わることがあります。',
+  en: 'The CSS a `page.tsx`, `not-found.tsx`, `route.ts` or `fallback.tsx` imports, and the code that runs as it is imported, are not loaded until a page that renders that file is opened. A page relying on CSS another page imports gets it only once that page has been opened in the same tab. The CSS a Client Component imports is loaded as well when a link to that page is fetched ahead. Code that runs as it is imported takes effect on a server once that page has had its first request in that process, and under static mode the HTML written for a page may change with whether that page was prerendered before it.',
 });
 
 export const pageCssFix = message({
   ja: 'すべてのページに要るCSSやコードは、ルートの`layout.tsx`でimportします。',
   en: 'Import the CSS and code every page needs in the root `layout.tsx`.',
+});
+
+export const cssOrderTitle = message({
+  ja: 'ページの開き方で変わる見た目',
+  en: 'Styles that change with how a page is reached',
+});
+
+export const cssOrderCause = message({
+  ja: 'ページやClient ComponentがimportしたCSSが、自分の要素の外にも当たるセレクターを使っています。一度読んだCSSは外しません。そのページを開いたあとや、リンクを先読みしたあとは、移った先のページにも当たります。1つの要素に2つのClient ComponentのCSSを重ね、同じ詳細度で同じプロパティを書いたときも同じです。どちらが当たるかは`<head>`での順で決まり、その順は保証しません。',
+  en: 'CSS a page or a Client Component imports uses a selector that reaches past its own elements. CSS once loaded is never taken out, so once that page has been opened, or a link to it fetched ahead, the CSS applies to every page the tab moves to. The same goes for two Client Components’ CSS on one element, setting the same property with selectors of equal specificity. Which one applies goes by their order in `<head>`, and that order is not guaranteed.',
+});
+
+export const cssOrderFix = message({
+  ja: 'ページやClient ComponentがimportするCSSは、CSS Modulesのクラスのように自分の要素だけに当たるセレクターで書きます。すべてのページに当てるCSSは、ルートの`layout.tsx`でimportします。2つのClient ComponentのCSSで上書きするときは、詳細度を上げるか、ルートの`layout.tsx`がimportするCSSの先頭でカスケードレイヤーの順を宣言します。',
+  en: 'Write the CSS a page or a Client Component imports with selectors that reach only its own elements, such as a CSS Module’s classes. Import CSS every page needs in the root `layout.tsx`. Where one Client Component’s CSS overrides another’s, give it a higher specificity, or declare the order of cascade layers at the top of the CSS the root `layout.tsx` imports.',
 });
 
 export const hydrationTitle = message({

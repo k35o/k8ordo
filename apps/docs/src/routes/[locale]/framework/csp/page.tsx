@@ -83,6 +83,9 @@ export default function FrameworkCspPage() {
         <p>
           <Rich>{t.signedScripts()}</Rich>
         </p>
+        <p>
+          <Rich>{t.signedStyle()}</Rich>
+        </p>
       </DocSection>
 
       <DocSection id="static" title={t.staticTitle}>
@@ -110,6 +113,9 @@ export default function FrameworkCspPage() {
           </p>
           <p>
             <Rich>{t.optionNone()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.optionStyle()}</Rich>
           </p>
         </DocSubsection>
         <DocSubsection id="own" title={t.ownTitle}>
@@ -141,6 +147,9 @@ export default function FrameworkCspPage() {
           </p>
           <p>
             <Rich>{t.refusedHeaderScripts()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.refusedHeaderStyle()}</Rich>
           </p>
           <Pitfall>
             <p>
@@ -185,6 +194,12 @@ export default function FrameworkCspPage() {
           />
           <p>
             <Rich>{t.signProvider()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.signStyle()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.signStylePrecedence()}</Rich>
           </p>
           <p>
             <Rich>{t.signRender()}</Rich>

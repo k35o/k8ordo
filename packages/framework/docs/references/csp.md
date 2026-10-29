@@ -2,7 +2,10 @@
 
 The framework decides no policy. It signs the inline scripts it writes
 itself — the payload it puts into the HTML for hydration, and React's own —
-and the policy that names them is the application's to write. An inline
+and the one `<style>` it writes into `<head>`, empty, which keeps the
+Server Components' stylesheets before the client components'
+([How a page is sent](routing.md#how-a-page-is-sent)); the policy that names
+them is the application's to write. An inline
 script of the application's own, `@k8ordo/color-scheme`'s among them, is the
 application's to allow the same way.
 
@@ -53,6 +56,22 @@ under a policy without it every page load logs an error saying so. A
 production build never calls it, and `import.meta.env.DEV` keeps the source
 out of it.
 
+The framework's `<style>` carries the nonce too, so a policy that restricts
+styles names it in `style-src` as well. `vite dev` adds each stylesheet as a
+`<style>` of its own, which nothing signs, so allow `'unsafe-inline'` there
+instead — beside a nonce it would be ignored:
+
+```ts
+const styles = import.meta.env.DEV
+  ? "'self' 'unsafe-inline'"
+  : `'self' 'nonce-${nonce()}'`;
+```
+
+React, signing styles with the nonce, writes a `<style>` with `href` and
+`precedence` into the HTML only when it carries the same nonce: give one a
+Server Component renders `nonce={nonce()}`. One a client component renders
+cannot read it, and is left out of the HTML.
+
 ## Static mode: hashes in a `<meta>`
 
 Static mode only. A file cannot carry a nonce — everyone reads the same
@@ -84,6 +103,12 @@ export default defineConfig({
 });
 ```
 
+The framework's empty `<style>` is named by hash the same way, wherever a
+style element is decided — `style-src-elem`, `style-src`, or `style-src`
+made from `default-src` — unless the policy lets it in already with
+`'unsafe-inline'`: a hash beside that would turn `'unsafe-inline'` off for
+every `style` attribute as well.
+
 An inline script of the application's is allowed by its hash in that policy,
 as `colorSchemeScriptHash()` gives `@k8ordo/color-scheme`'s (pass it the
 `defaultPreference` the provider is given); any other inline script on the
@@ -100,7 +125,9 @@ a script element — `script-src` (`default-src` without it) and
 `script-src-elem` — allow `'self'` and `'unsafe-inline'` with no hash or
 nonce beside them (either turns `'unsafe-inline'` off), and keep `csp`,
 without `report-to`, for the `<meta>`, which allows inline scripts only by
-hash. Without `csp`, no policy is written. There is no `nonce()` for this
+hash. The `<style>`'s hash is the same on every page —
+`'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='`, an empty one's —
+so a header that restricts styles can name it. Without `csp`, no policy is written. There is no `nonce()` for this
 mode: what an application signed with it would land in the file, and make
 every build differ.
 
