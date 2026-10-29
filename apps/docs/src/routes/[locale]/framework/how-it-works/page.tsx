@@ -67,6 +67,12 @@ export default function FrameworkHowItWorksPage() {
           <Rich>{t.payloadSplit()}</Rich>
         </p>
         <p>
+          <Rich>{t.payloadShared()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.payloadSharedBuild()}</Rich>
+        </p>
+        <p>
           <Rich>{t.payloadReady()}</Rich>
         </p>
       </DocSection>

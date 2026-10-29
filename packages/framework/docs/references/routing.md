@@ -109,6 +109,18 @@ loads: import CSS every page needs in the root layout. A route file imported
 from anywhere else — a layout importing an export of a page — is in every
 page again, and the build warns, naming it.
 
+**What every page loads comes in at most two files.** The client entry's —
+React, the router and the framework's own code — and the frame's: the
+client components of every `layout.tsx`, `error.tsx` and `loading.tsx`, and
+the framework's own boundaries, with everything they import. A module a page
+shares with the entry or the frame is in that file, since every page loads
+it anyway; what pages share only among themselves stays in files of their
+own, loaded by the pages that render it. The framework sets the client
+build's `build.rolldownOptions.output.codeSplitting` to do this, so in the
+client environment an application's own `manualChunks` is ignored, and a
+`codeSplitting` group of its own takes a module from the entry or the frame
+only with a `priority` above `2`.
+
 **Under `mode: 'server'` an async page answers, then streams.** The document
 waits for the page's own component — its data — before anything is sent,
 because the page may still say `notFound()`

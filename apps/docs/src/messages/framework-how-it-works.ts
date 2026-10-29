@@ -50,6 +50,16 @@ export const payloadSplit = message({
   en: '`page.tsx`, `not-found.tsx`, `route.ts` and `fallback.tsx` are read when a request reaches them. The Client Components such a file renders and the CSS it imports, its Server Components’ CSS Modules included, are loaded when a page that renders it is opened. The Client Components are loaded as well when a link to such a page is fetched ahead. What a `layout.tsx`, `error.tsx` or `loading.tsx` imports, every page below it loads.',
 });
 
+export const payloadShared = message({
+  ja: 'どのページも読むものは、多くても2つのファイルにまとまります。1つは入口のファイルで、Reactとルーターとフレームワークが入ります。もう1つは枠のファイルで、`layout.tsx`と`error.tsx`と`loading.tsx`のClient Componentと、フレームワークの境界が入ります。ページがこの2つと分け合うモジュールも、どちらかに入ります。ページどうしだけが分け合うものは、別のファイルのままです。',
+  en: 'What every page loads comes in at most two files. One is the entry’s, with React, the router and the framework. The other is the frame’s, with the Client Components of every `layout.tsx`, `error.tsx` and `loading.tsx` and the framework’s own boundaries. A module a page shares with either goes into it. What pages share only among themselves stays in files of their own.',
+});
+
+export const payloadSharedBuild = message({
+  ja: 'そのために、フレームワークがクライアントのビルドの`codeSplitting`を決めます。アプリがクライアントの環境に書いた`manualChunks`は効きません。アプリの`codeSplitting`のgroupは、`priority`を`2`より大きくしたときだけ、この2つのファイルのモジュールを取れます。',
+  en: 'The framework sets the client build’s `codeSplitting` to do this. A `manualChunks` the application writes for the client environment has no effect, and a `codeSplitting` group of its own takes a module from those two files only with a `priority` above `2`.',
+});
+
 export const payloadReady = message({
   ja: '最初に開いたページは、描くクライアントコンポーネントを読み終えてからハイドレーションします。`404.html`のように描き直すページも同じで、サーバーのHTMLは1回で入れ替わります。遷移も、行き先のクライアントコンポーネントを読み終えてから画面を替えます。',
   en: 'The first page opened hydrates once the client components it renders have loaded. A page rendered afresh, as `404.html` is, waits the same way, and the server’s HTML is replaced in one go. A client navigation, too, changes the screen once the next page’s client components have loaded.',
