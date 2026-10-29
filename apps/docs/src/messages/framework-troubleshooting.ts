@@ -195,6 +195,21 @@ export const renderFix = message({
   en: 'The original error is logged above this message, beside the page’s URL. Start from there.',
 });
 
+export const linksTitle = message({
+  ja: '`static build wrote HTML that does not link …`',
+  en: '`static build wrote HTML that does not link …`',
+});
+
+export const linksCause = message({
+  ja: 'staticモードのビルドで、書き出したHTMLが、ペイロードが名指すClient ComponentのCSSかJSを`<head>`でlinkしていません。そのlinkは、フレームワークがページを描くときに、コンポーネントが何を持ち何を描くかによらずReactに書かせるもので、アプリケーションの側に原因はありません。エラー文は、抜けたファイルごとに、抜けたページの数と例、そのファイルが要るコンポーネントのexport名を挙げます。',
+  en: 'Under static mode, an HTML file the build wrote does not link in `<head>` a stylesheet or a script of a Client Component its payload names. The framework has React write those links as it renders the page, whatever its components hold or render, so nothing in the application causes it. The error lists each missing file once, with how many pages miss it, a few of them, and a component that needs it by its export’s name.',
+});
+
+export const linksFix = message({
+  ja: 'k8ordoの不具合です。エラー文の2行目が示すissuesに、エラー文をそのまま添えて報告してください。2行目には、報告に要る版も入っています。上げた直後に止まるようになったなら、直るまでは、上げたもの（`@k8ordo/framework`、または`react`と`react-dom`）を前の版に戻します。',
+  en: 'This is a bug in k8ordo. Report it, with the error as printed, at the issues its second line names; that line also holds the versions a report needs. If the build started stopping right after an upgrade, go back to the previous version of what you upgraded until it is fixed: `@k8ordo/framework`, or `react` and `react-dom`.',
+});
+
 export const devTitle = message({
   ja: '`vite dev`でだけ表示できるページ',
   en: 'Pages that render only in `vite dev`',

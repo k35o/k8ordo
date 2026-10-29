@@ -1,5 +1,7 @@
 import { createHash } from 'node:crypto';
 
+import type { ClientDeps } from '@k8ordo/framework-engine';
+
 const escapeMarkup = (value: string): string =>
   value
     .replaceAll('&', '&amp;')
@@ -182,4 +184,194 @@ export const asFile = (
   const at = head.index + head[0].length;
   const meta = `<meta http-equiv="Content-Security-Policy" content="${escapeMarkup(serialize(policy, [...hashes]))}">`;
   return `${unsigned.slice(0, at)}${meta}${unsigned.slice(at)}`;
+};
+
+/**
+ * What ends a tag's name in HTML: `</script` followed by anything else is
+ * still the script's text.
+ */
+const ENDS_TAG_NAME = new Set(['\t', '\n', '\f', '\r', ' ', '/', '>']);
+
+/** Where the next `<script` or `</script` tag starts, in any case. */
+const tagAt = (html: string, tag: string, from: number): number => {
+  for (
+    let at = html.indexOf('<', from);
+    at !== -1;
+    at = html.indexOf('<', at + 1)
+  ) {
+    if (
+      html.slice(at, at + tag.length).toLowerCase() === tag &&
+      ENDS_TAG_NAME.has(html.charAt(at + tag.length))
+    ) {
+      return at;
+    }
+  }
+  return -1;
+};
+
+/**
+ * The HTML outside its script elements, in the order it is written — what a
+ * layout wrote into the page, not the payload the page hydrates from. Scanned
+ * rather than stripped with a pattern: an end tag may be `</SCRIPT >`, and a
+ * pattern that misses one swallows the page up to the next script's.
+ */
+export const writtenOutsideScripts = (html: string): string[] => {
+  const written: string[] = [];
+  for (let from = 0; ;) {
+    const open = tagAt(html, '<script', from);
+    written.push(open === -1 ? html.slice(from) : html.slice(from, open));
+    if (open === -1) return written;
+    const close = tagAt(html, '</script', open + 1);
+    if (close === -1) return written;
+    const end = html.indexOf('>', close);
+    if (end === -1) return written;
+    from = end + 1;
+  }
+};
+
+// React が属性の値に書く実体参照
+const REFERENCE = /&(?:amp|lt|gt|quot|#x27);/gu;
+const REFERENCED = new Map([
+  ['&amp;', '&'],
+  ['&lt;', '<'],
+  ['&gt;', '>'],
+  ['&quot;', '"'],
+  ['&#x27;', "'"],
+]);
+
+const attributeOf = (tag: string, name: string): string | undefined =>
+  new RegExp(`\\s${name}="([^"]*)"`, 'u')
+    .exec(tag)?.[1]
+    ?.replaceAll(REFERENCE, (reference) => REFERENCED.get(reference) ?? '');
+
+/**
+ * What of the client components a page's payload names its HTML does not
+ * link: a stylesheet not linked as one in `<head>`, a script neither
+ * preloaded as a module there nor loaded by a `<script>` — by component,
+ * only those missing something. A `<link>` written into a script's text, or
+ * into `<body>`, links nothing before the page has run; React hoists every
+ * resource of a page it waited for into `<head>`. With no `</head>`, the
+ * whole document is its head.
+ */
+export const unlinkedDeps = (
+  html: string,
+  named: readonly ClientDeps[],
+): ClientDeps[] => {
+  const outside = writtenOutsideScripts(html).join('');
+  const end = outside.indexOf('</head>');
+  const head = end === -1 ? outside : outside.slice(0, end);
+  const stylesheets = new Set<string>();
+  const modules = new Set<string>();
+  for (const [tag] of head.matchAll(/<link\b[^>]*>/gu)) {
+    const href = attributeOf(tag, 'href');
+    if (href === undefined) continue;
+    const rel = attributeOf(tag, 'rel');
+    if (rel === 'stylesheet') stylesheets.add(href);
+    if (rel === 'modulepreload') modules.add(href);
+  }
+  for (const [, attributes = ''] of html.matchAll(SCRIPT)) {
+    const src = attributeOf(attributes, 'src');
+    if (src !== undefined) modules.add(src);
+  }
+  return named
+    .map((component) => ({
+      ...component,
+      js: component.js.filter((href) => !modules.has(href)),
+      css: component.css.filter((href) => !stylesheets.has(href)),
+    }))
+    .filter(({ js, css }) => js.length > 0 || css.length > 0);
+};
+
+const counting = (count: number, one: string, many: string): string =>
+  `${String(count)} ${count === 1 ? one : many}`;
+
+/** How many files the message names, before it counts the rest. */
+const LISTED = 20;
+/** How many pages a file's line names, before it counts the rest. */
+const EXAMPLES = 3;
+
+const pagesOf = (pages: Iterable<string>): string => {
+  const sorted = [...pages].toSorted();
+  const named = sorted.slice(0, EXAMPLES).join(', ');
+  return `${counting(sorted.length, 'page', 'pages')} (${sorted.length > EXAMPLES ? `${named}, …` : named})`;
+};
+
+/**
+ * The error a static build stops with when HTML it wrote does not link
+ * what the client components its payload names need: `unlinked` holds, by
+ * page (its pathname, `404.html`, a shell's location), what each component
+ * misses, or `null` when the handler did not say; `report` asks for the
+ * report. Each file is named once, with how many pages miss it, a few of
+ * them and a component that needs it, the files most pages miss first and
+ * only so many: a component's files include what the client entry loads,
+ * so a failure across the site would otherwise repeat the same files for
+ * every page and component, past what a report can carry.
+ */
+export const unlinkedMessage = (
+  unlinked: ReadonlyMap<string, readonly ClientDeps[] | null>,
+  report: string,
+): string => {
+  const unsaid: string[] = [];
+  // 部品は参照で数える。export 名だけでは、別々のモジュールの default が 1 つになる
+  const missed = new Map<
+    string,
+    {
+      readonly pages: Set<string>;
+      readonly components: Map<string, string>;
+    }
+  >();
+  for (const [page, components] of unlinked) {
+    if (components === null) {
+      unsaid.push(page);
+      continue;
+    }
+    for (const { id, name, js, css } of components) {
+      for (const file of [...css, ...js]) {
+        const by = missed.get(file) ?? {
+          pages: new Set(),
+          components: new Map(),
+        };
+        by.pages.add(page);
+        by.components.set(`${id}#${name}`, name);
+        missed.set(file, by);
+      }
+    }
+  }
+  const files = [...missed].toSorted(
+    ([a, { pages: x }], [b, { pages: y }]) =>
+      y.size - x.size || (a < b ? -1 : 1),
+  );
+  const components = new Set(
+    files.flatMap(([, { components: needing }]) => [...needing.keys()]),
+  );
+  const summary = [
+    ...(files.length > 0
+      ? [
+          `${counting(unlinked.size - unsaid.length, 'HTML file misses', 'HTML files miss')} ${counting(files.length, 'file', 'files')} of ${counting(components.size, 'component', 'components')}`,
+        ]
+      : []),
+    ...(unsaid.length > 0
+      ? [
+          `the handler did not say what the payload of ${counting(unsaid.length, 'HTML file', 'HTML files')} names`,
+        ]
+      : []),
+  ];
+  return [
+    `static build wrote HTML that does not link everything the client components its payload names need: ${summary.join(', and ')}`,
+    report,
+    ...(unsaid.length > 0
+      ? [
+          `  ${pagesOf(unsaid)} — the handler did not say what its payload names`,
+        ]
+      : []),
+    ...files.slice(0, LISTED).map(([file, { pages, components: needing }]) => {
+      const [first = '', ...others] = [...needing.values()].toSorted();
+      return `  ${file} — ${pagesOf(pages)}, for ${first}${others.length > 0 ? ` and ${String(others.length)} more` : ''}`;
+    }),
+    ...(files.length > LISTED
+      ? [
+          `  … and ${counting(files.length - LISTED, 'more file', 'more files')}`,
+        ]
+      : []),
+  ].join('\n');
 };

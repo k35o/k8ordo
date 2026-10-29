@@ -160,4 +160,8 @@ export const nonGuaranteesList = [
     ja: 'staticモードの`404.html`は、`not-found.tsx`を`[locale]`の下に置いても既定のロケールで書かれます。JavaScriptが動かない訪問者には、URLのロケールに関係なくその文言が出ます。',
     en: 'Under static mode, `404.html` is written in the default locale even when `not-found.tsx` sits under `[locale]`. A visitor without JavaScript sees that text whatever locale the URL names.',
   }),
+  message({
+    ja: 'serverモードでは、propsの`Map`・`Set`・Promise・イテレーター・非同期イテラブル・`ReadableStream`に入れただけで描かないクライアントコンポーネントのCSSとJSは、そのプロセスで最初にそのモジュールを読んだ要求のHTMLにしか書かれません。',
+    en: 'Under server mode, the CSS and JS of a client component that is only held in a prop’s `Map`, `Set`, promise, iterator, async iterable or `ReadableStream`, and never rendered, are written only into the HTML of the request that first loads its module in the process.',
+  }),
 ] as const;

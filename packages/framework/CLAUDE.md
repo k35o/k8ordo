@@ -259,6 +259,44 @@ pnpm check         # check:write to auto-fix
   defines) or one with `'strict-dynamic'` — under which the module script,
   allowed only by `'self'`, never loads — is refused when the plugin is
   created (`policyProblems`).
+- **A static build checks every HTML it writes against what its payload
+  named.** `write` reads the engine's `CLIENT_DEPS_HEADER` off each answer it
+  writes as HTML (one saying `NONCE_HEADER`: a page, `404.html`, a shell),
+  and `unlinkedDeps` compares it with the file as written: each client
+  component's stylesheets have to be a `<link rel="stylesheet">` in
+  `<head>`, its scripts a `<link rel="modulepreload">` there or a
+  `<script src>`. A `<link>` in a script's text or in `<body>` does not
+  count, nor does a stylesheet only preloaded; attribute values are read
+  back from React's entity references (a URL `renderBuiltUrl` gave a query
+  has its `&` written `&amp;`). A file missing one, or HTML whose answer did
+  not say (an engine that lost the header would otherwise turn the check
+  off for that page alone), stops the build once every file is written, in
+  the same error as the other kinds (`unlinkedMessage`): a line counting the
+  HTML files, the files they miss and the components that need them — by
+  reference, the header's id and export name, so two default exports are
+  two; one saying this is a bug in this package, where to report it, and
+  the versions of this package, `react` and `react-dom` (the React that
+  writes the links is the application's peer); then each file once, the
+  most missed first and at most 20, with how many pages miss it, a few of them
+  named as the other kinds name a page (its pathname, `404.html`, a shell's
+  location), and a component that needs it by its export's name. Each
+  component's files include what the client entry loads, so a failure
+  across a site would otherwise repeat those files for every page and
+  component, past what a report can carry. The engine links every file it
+  says (`packages/framework-engine/CLAUDE.md`), so what this catches is the
+  engine or React losing one, not a shape of the application. Nothing turns
+  it off: no application can fix what it names, and a false failure is as
+  much a bug to report. Not checked: server mode, which renders per
+  request, and `vite dev`, whose manifest names no files; the CSS of a
+  chunk a client component imports dynamically (`React.lazy`), which is not
+  among a reference's `deps`; a Server Component's CSS; a reference the
+  manifest does not list, which the RSC plugin gives no files.
+  `src/documents.test.ts` holds the reading and the message, its count of
+  two default exports and its length when every page fails included,
+  `src/static.test.ts` the error, and
+  `examples/static-basic`'s `build.test.ts` builds with the SSR's `preinit`
+  and `preloadModule` emptied, the RSC plugin's and the engine's, and sees
+  every page, `404.html` and both shells counted.
 - **`site` is the only reason a sitemap exists.** Without the origin a
   sitemap would list relative URLs, which is not a sitemap; with it every
   page the build wrote is listed, redirects and the not-found excluded.
@@ -379,7 +417,9 @@ src/
                     itself rather than taking from the handler, escaped as
                     markup; asFile / policyProblems — a page as a file: its
                     nonce off, its Content-Security-Policy <meta> with the
-                    framework's hashes
+                    framework's hashes; unlinkedDeps / unlinkedMessage —
+                    what of its client components a page's HTML does not
+                    link, and the error that names it
   server.ts         ./server: the engine's redirect, response API, nonce and types — no Vite, no Node
   static-file.ts    safeJoin — request pathname → path inside the build output (pure)
   encoding.ts       which content coding a request gets, what is worth compressing

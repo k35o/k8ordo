@@ -95,6 +95,19 @@ declare module 'virtual:k8ordo/routes' {
   }>;
 }
 
+/**
+ * The RSC plugin's own record of the client build, which it reads as it
+ * links a client reference. The module is the plugin's and undeclared; the
+ * shape is the type the plugin exports for it, so a field it renames fails
+ * the typecheck.
+ */
+declare module 'virtual:vite-rsc/assets-manifest' {
+  import type { ResolvedAssetsManifest } from '@vitejs/plugin-rsc/plugin';
+
+  const manifest: ResolvedAssetsManifest;
+  export default manifest;
+}
+
 type ImportMetaEnv = {
   /** The mode the application chose in `framework({ mode })`. */
   readonly K8ORDO_MODE: 'static' | 'server';

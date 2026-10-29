@@ -4,12 +4,14 @@ import { pathToFileURL } from 'node:url';
 
 import { chromium, firefox, webkit } from 'playwright';
 import type { Browser, Page } from 'playwright';
-import type { Plugin } from 'vite';
+import type { Plugin, Rolldown } from 'vite';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
 
 import { buildFixture, serveFixture } from '../../fixtures/build';
 import type { BuiltFixture, ServedFixture } from '../../fixtures/build';
 import type { Mode } from '../host';
+import { CLIENT_DEPS_HEADER, readClientDeps } from './payload';
+import type { ClientDeps } from './payload';
 
 // CI はエンジンごとにジョブを分けて並べるので、TEST_BROWSER で 1 つに絞れる
 const browserTypes = [chromium, firefox, webkit]
@@ -23,10 +25,17 @@ const browserTypes = [chromium, firefox, webkit]
 type Deps = { readonly js: readonly string[]; readonly css: readonly string[] };
 
 type Manifest = {
+  readonly clientEntryUrl: string;
+  readonly clientEntryDeps?: Deps;
   readonly clientReferenceDeps: Readonly<Record<string, Deps>>;
 };
 
-/** The payload the HTML carries, by row. */
+/**
+ * The payload the HTML carries, by row — read only as far as a fixture's
+ * payload needs: a chunk holding `<!--` or `</script`, which the HTML spells
+ * otherwise, and a row given by its length rather than ended by a line break
+ * would be misread, so no fixture writes either.
+ */
 const rowsIn = (html: string): Map<string, string> => {
   const flight = [
     ...html.matchAll(/__FLIGHT_DATA\|\|=\[\]\)\.push\(("(?:[^"\\]|\\.)*")\)/gu),
@@ -44,21 +53,42 @@ const rowsIn = (html: string): Map<string, string> => {
 
 /**
  * The client references the payload written into the HTML names (its `I`
- * rows), by the id the build's manifest keys them with. The payload may
- * write an id as a row of its own and name that row instead.
+ * rows): the id the build's manifest keys them with, and the export's name.
+ * The payload may write an id as a row of its own and name that row instead.
  */
-const referencesIn = (html: string): string[] => {
+const namedIn = (
+  html: string,
+): Array<{ readonly id: string; readonly name: string }> => {
   const rows = rowsIn(html);
-  const ids = [...rows.values()]
+  return [...rows.values()]
     .filter((value) => value.startsWith('I['))
     .map((value) => {
-      const [named] = JSON.parse(value.slice(1)) as [string];
-      return named.startsWith('$')
-        ? (JSON.parse(rows.get(named.slice(1)) ?? '""') as string)
-        : named;
+      const [id, , name] = JSON.parse(value.slice(1)) as [
+        string,
+        unknown,
+        string,
+      ];
+      return {
+        id: id.startsWith('$')
+          ? (JSON.parse(rows.get(id.slice(1)) ?? '""') as string)
+          : id,
+        name,
+      };
     });
-  return [...new Set(ids)];
 };
+
+const referencesIn = (html: string): string[] => [
+  ...new Set(namedIn(html).map(({ id }) => id)),
+];
+
+/** Each client reference the payload names, with its files in the manifest. */
+const namedWithDeps = (manifest: Manifest, html: string): ClientDeps[] =>
+  namedIn(html).map(({ id, name }) => ({
+    id,
+    name,
+    js: manifest.clientReferenceDeps[id]?.js ?? [],
+    css: manifest.clientReferenceDeps[id]?.css ?? [],
+  }));
 
 /** What the payload's client references need, stylesheets and scripts. */
 const needed = (manifest: Manifest, html: string): Deps => {
@@ -83,6 +113,12 @@ const linked = (part: string, ...rels: readonly string[]): Set<string> =>
 
 const headOf = (html: string): string =>
   html.slice(0, Math.max(0, html.indexOf('</head>')));
+
+/** The `<link>`s the head holds, as written but for the render's nonce. */
+const linksInHead = (html: string): string[] =>
+  [...headOf(html).matchAll(/<link\b[^>]*>/gu)].map(([link]) =>
+    link.replace(/ nonce="[^"]*"/u, ''),
+  );
 
 /**
  * The deps of the payload's client references the head neither links as a
@@ -175,30 +211,73 @@ const readUntil = async (response: Response, text: string): Promise<string> => {
 };
 
 /**
- * The fixture built under `mode`. `twice` renders a page twice by the same
- * handler the first time it is asked for it, and hands both renders back
- * from then on: the first with the modules of the client components only
- * that page names cold, the second with them loaded, whichever test asks
- * first and whatever runs.
+ * Client components, each as one entry of its module, name and files, in an
+ * order of their own: two equal only if they say the same components, each
+ * with its own files, as many times. None said is none.
+ */
+const entriesOf = (named: readonly ClientDeps[] | null): string[] =>
+  (named ?? [])
+    .map(({ id, name, js, css }) =>
+      JSON.stringify({ id, name, js: js.toSorted(), css: css.toSorted() }),
+    )
+    .toSorted();
+
+/** A page's HTML, and what the handler said of its client components. */
+type Rendered = {
+  readonly html: string;
+  readonly said: readonly ClientDeps[] | null;
+};
+
+/** A page rendered with its client components' modules cold, then loaded. */
+type Twice = readonly [cold: Rendered, loaded: Rendered];
+
+const renderedIn = async (response: Response): Promise<Rendered> => {
+  const said = response.headers.get(CLIENT_DEPS_HEADER);
+  return {
+    html: await response.text(),
+    said: said === null ? null : readClientDeps(said),
+  };
+};
+
+// React を入口とは別のチャンクにする。入口が自分の 1 ファイルしか読まないと、
+// 入口の読むファイルかどうかで分かれる頼み方が、どの head にも現れない
+const REACT_APART: Rolldown.CodeSplittingOptions = {
+  groups: [
+    {
+      name: 'react',
+      test: /\/node_modules\/(?:react|react-dom|scheduler)\//u,
+    },
+  ],
+};
+
+/**
+ * The fixture built under `mode`, React in a chunk of its own. `twice`
+ * renders a page twice by the same handler the first time it is asked for
+ * it, and hands both renders back from then on: the first with the modules
+ * of the client components only that page names cold, the second with them
+ * loaded, whichever test asks first and whatever runs.
  */
 const usingBuild = (
   mode: Mode,
 ): {
   readonly answer: (pathname: string) => Promise<Response>;
-  readonly twice: (pathname: string) => Promise<readonly string[]>;
+  readonly twice: (pathname: string) => Promise<Twice>;
   readonly manifest: () => Manifest;
   readonly out: () => string;
 } => {
   let built: BuiltFixture | undefined;
   let manifest: Manifest | undefined;
-  const rendered = new Map<string, Promise<readonly string[]>>();
+  const rendered = new Map<string, Promise<Twice>>();
   beforeAll(async () => {
     // vitest が置く NODE_ENV=test のビルドでは、RSC プラグインが参照の id に
     // 描画ごとの印を付け、SSR は描くたびに参照のモジュールを読み直す。その
     // プロセスで先に読んだ部品の抜けが現れないので、本番と同じビルドで確かめる
     vi.stubEnv('NODE_ENV', 'production');
     try {
-      built = await buildFixture('ssr-deps', { mode });
+      built = await buildFixture('ssr-deps', {
+        mode,
+        clientChunks: REACT_APART,
+      });
     } finally {
       vi.unstubAllEnvs();
     }
@@ -220,9 +299,9 @@ const usingBuild = (
     twice: (pathname) => {
       let both = rendered.get(pathname);
       if (both === undefined) {
-        both = (async () => [
-          await (await answer(pathname)).text(),
-          await (await answer(pathname)).text(),
+        both = (async (): Promise<Twice> => [
+          await renderedIn(await answer(pathname)),
+          await renderedIn(await answer(pathname)),
         ])();
         rendered.set(pathname, both);
       }
@@ -239,13 +318,74 @@ const usingBuild = (
   };
 };
 
-describe('the HTML of a file', () => {
-  const { answer, twice, manifest, out } = usingBuild('static');
+// どちらの SSR も、client 参照を読む関数を同じ globalThis に置き、あとから
+// 読み込んだほうがそれを取る。static の describe を先に置き、server の
+// describe は static の描画をこの順で済んだものとして読む
+const asFiles = usingBuild('static');
+const asDocuments = usingBuild('server');
 
-  it.each(['/', '/nowhere', '/lazy', '/streamed', '/held', '/held-late'])(
+/** The modules the client entry loads besides itself. */
+const entryChunks = (manifest: Manifest): string[] =>
+  (manifest.clientEntryDeps?.js ?? []).filter(
+    (href) => href !== manifest.clientEntryUrl,
+  );
+
+/** What the head preloads as a module at the default priority. */
+const preloadedAtDefault = (html: string): Set<string> =>
+  linked(
+    linksInHead(html)
+      .filter((link) => !link.includes('fetchPriority'))
+      .join(''),
+    'modulepreload',
+  );
+
+/** The client components only passed in a prop's containers on /contained. */
+const CONTAINED = [
+  'InMap',
+  'InSet',
+  'InPromise',
+  'InIterator',
+  'InAsyncIterable',
+  'InStream',
+];
+
+/** The stylesheets of each client component the payload names, by name. */
+const sheetsByName = (manifest: Manifest, html: string): Map<string, string> =>
+  new Map(
+    namedIn(html).map(({ id, name }) => [
+      name,
+      JSON.stringify(manifest.clientReferenceDeps[id]?.css ?? []),
+    ]),
+  );
+
+/** The stylesheets the components /contained holds in containers need. */
+const containedSheets = (manifest: Manifest, html: string): string[] =>
+  namedIn(html)
+    .filter(({ name }) => CONTAINED.includes(name))
+    .flatMap(({ id }) => manifest.clientReferenceDeps[id]?.css ?? []);
+
+describe('the HTML of a file', () => {
+  const { answer, twice, manifest, out } = asFiles;
+
+  // /contained は props の Map・Set・Promise・iterator・async iterable・
+  // stream に入れただけの要素を、/promised/x の not-found は HTML の描画の
+  // あとで解ける Promise の中の要素を名指す。どちらもモジュールを読み終えた
+  // 2 度目の描画では、HTML の描画が読むことはない。/promised/x は描くたびに
+  // 1 秒待ち、最初に頼んだ試験が 2 回分を待つので、時間切れを延ばす
+  it.each([
+    '/',
+    '/nowhere',
+    '/lazy',
+    '/streamed',
+    '/held',
+    '/held-late',
+    '/held-value',
+    '/contained',
+    '/promised/x',
+  ])(
     'links in the head everything the client components %s names need, whether they had loaded or not',
     async (pathname) => {
-      for (const html of await twice(pathname)) {
+      for (const { html } of await twice(pathname)) {
         const { css, js } = needed(manifest(), html);
 
         expect(css.length).toBeGreaterThan(0);
@@ -253,6 +393,48 @@ describe('the HTML of a file', () => {
         expect(unlinkedInHead(manifest(), html)).toStrictEqual([]);
       }
     },
+    30_000,
+  );
+
+  it.each(['/contained', '/promised/x'])(
+    'writes the same links in the head of %s whether its client components had loaded or not',
+    async (pathname) => {
+      const [cold, loaded] = (await twice(pathname)).map(({ html }) =>
+        linksInHead(html),
+      );
+
+      expect(loaded).toStrictEqual(cold);
+    },
+    30_000,
+  );
+
+  // /defaults は、別々のファイルの 2 つの部品を、どちらも default という
+  // export 名で名指す
+  it.each([
+    '/',
+    '/nowhere',
+    '/lazy',
+    '/streamed',
+    '/held',
+    '/held-late',
+    '/held-value',
+    '/contained',
+    '/promised/x',
+    '/defaults',
+  ])(
+    'says, with the HTML of %s, every client component its payload names and what each needs, whether they had loaded or not',
+    async (pathname) => {
+      for (const { html, said } of await twice(pathname)) {
+        const { css, js } = needed(manifest(), html);
+
+        expect(css.length).toBeGreaterThan(0);
+        expect(js.length).toBeGreaterThan(0);
+        expect(entriesOf(said)).toStrictEqual(
+          entriesOf(namedWithDeps(manifest(), html)),
+        );
+      }
+    },
+    30_000,
   );
 
   // /held が描く Holder の CSS が、渡すだけの部品のものと同じなら、上の試験は
@@ -271,11 +453,33 @@ describe('the HTML of a file', () => {
     );
   });
 
+  // /contained の部品が同じ CSS を持てば、上の試験はどれか 1 つの入れ物の分
+  // しか見ていない
+  it('names, on /contained, a stylesheet of its own for the component in each container', async () => {
+    const [{ html }] = await twice('/contained');
+    const sheets = sheetsByName(manifest(), html);
+    const contained = CONTAINED.map((name) => sheets.get(name));
+
+    expect(contained).not.toContain(undefined);
+    expect(new Set(contained).size).toBe(CONTAINED.length);
+  });
+
+  // 入口が自分のほかに読むファイルが無いと、入口のものとほかのものとで
+  // 分かれる頼み方を、下の server との比べが見ていない
+  it('preloads, on /, what the client entry loads besides itself at the default priority', async () => {
+    const [{ html }] = await twice('/');
+    const preloaded = preloadedAtDefault(html);
+    const chunks = entryChunks(manifest());
+
+    expect(chunks.length).toBeGreaterThan(0);
+    expect(chunks.filter((href) => !preloaded.has(href))).toStrictEqual([]);
+  });
+
   // static は描く前にすべてを歩くので、client コンポーネントの CSS の組が先に
   // 並ぶ。server ではデータを待つ部分が後に並ぶことがあり、遷移で初めて読む
   // CSS は head の末尾に足されるので、上書きは詳細度か @layer で決めてもらう
   it('links, on /styled, the client components’ stylesheets before the page’s own', async () => {
-    for (const html of await twice('/styled')) {
+    for (const { html } of await twice('/styled')) {
       expect(stylesheetsInHead(manifest(), html)).toStrictEqual([
         'client',
         'page',
@@ -297,7 +501,7 @@ describe('the HTML of a file', () => {
       });
 
       it('styles the not-found before any script runs', async () => {
-        for (const html of await twice('/nowhere')) {
+        for (const { html } of await twice('/nowhere')) {
           const context = await browser.newContext({
             javaScriptEnabled: false,
           });
@@ -321,12 +525,12 @@ describe('the HTML of a file', () => {
 });
 
 describe('the HTML of a streamed document', () => {
-  const { answer, twice, manifest } = usingBuild('server');
+  const { answer, twice, manifest } = asDocuments;
 
-  it.each(['/', '/nowhere', '/lazy', '/held'])(
+  it.each(['/', '/nowhere', '/lazy', '/held', '/held-value'])(
     'links in the head everything the client components %s names need, whether they had loaded or not',
     async (pathname) => {
-      for (const html of await twice(pathname)) {
+      for (const { html } of await twice(pathname)) {
         const { css, js } = needed(manifest(), html);
 
         expect(css.length).toBeGreaterThan(0);
@@ -344,7 +548,7 @@ describe('the HTML of a streamed document', () => {
   ])(
     'preloads, before the boundary, what a boundary of %s streamed after the shell names',
     async (pathname, content) => {
-      for (const html of await twice(pathname)) {
+      for (const { html } of await twice(pathname)) {
         const before = linked(
           html.slice(0, html.indexOf(content)),
           'stylesheet',
@@ -361,6 +565,45 @@ describe('the HTML of a streamed document', () => {
       }
     },
   );
+
+  // static は RSC プラグインの頼み方を写して自分で頼む。server では
+  // プラグインだけが頼むので、それを正解にする。並びは mode で違う。static の
+  // 描画は上の describe が済ませたもの
+  it.each(['/', '/held', '/styled'])(
+    'links in the head of %s what its client components need as the file does, whether they had loaded or not',
+    async (pathname) => {
+      const files = await asFiles.twice(pathname);
+      const documents = await twice(pathname);
+
+      for (const { html } of [...files, ...documents]) {
+        expect(linksInHead(html).toSorted()).toStrictEqual(
+          linksInHead(files[0].html).toSorted(),
+        );
+      }
+    },
+  );
+
+  // server は props の入れ物の中を歩かないので、その中にしかない部品は、
+  // プロセスで初めてそのモジュールを読む要求の HTML にしか link されない。
+  // docs の「保証しないこと」に書いた範囲
+  it('links, on /contained, what only a prop’s containers hold where its process first loads it, and nowhere after', async () => {
+    const [cold, loaded] = await twice('/contained');
+    const sheets = containedSheets(manifest(), loaded.html);
+    const linkedIn = ({ html }: Rendered): string[] => {
+      const links = linked(html, 'stylesheet', 'preload');
+      return sheets.filter((href) => links.has(href));
+    };
+
+    expect(sheets).toHaveLength(CONTAINED.length);
+    expect(linkedIn(cold).length).toBeGreaterThan(0);
+    expect(linkedIn(loaded)).toStrictEqual([]);
+  });
+
+  it('says nothing of its client components with the HTML', async () => {
+    for (const { said } of await twice('/')) {
+      expect(said).toBeNull();
+    }
+  });
 
   it('sends the shell before a boundary of the page completes', async () => {
     const shells = [

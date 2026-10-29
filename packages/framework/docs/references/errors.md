@@ -57,6 +57,40 @@ above it, and the file is written; with none, it stops the build the same
 way. `error.tsx` under this mode is for what fails in the browser: a client
 component, after hydration.
 
+The build also checks every HTML file it writes — each page, `404.html` and
+each shell — against the client components its payload names: each one's
+stylesheets have to be linked in `<head>` (`<link rel="stylesheet">`), and
+its scripts preloaded there (`<link rel="modulepreload">`) or loaded by a
+`<script>`. Without them, what the browser needs for those components is
+asked for only once the page's script runs: a component the page renders
+shows unstyled until then, and hydration waits a round trip longer. A file
+that misses one stops the build once every file is written. The error
+counts the HTML files, the files they miss and the components that need
+them, asks for a report, then names each missing file once, those most
+pages miss first and 20 at most: how many pages miss it, a few of them
+(`404.html` for the not-found, a shell by its location), and a component
+that needs it, by its export's name (`default` for a default export):
+
+```
+static build wrote HTML that does not link everything the client components its payload names need: 2 HTML files miss 3 files of 2 components
+This is a bug in @k8ordo/framework, not in this application: report it at https://github.com/k35o/k8ordo/issues with this message (@k8ordo/framework 1.2.2, react 19.3.1, react-dom 19.3.1)
+  /assets/Icon-MOWHoEeM.js — 1 page (/), for default
+  /assets/not-found-C2TfACgz.css — 1 page (404.html), for NotFound
+  /assets/not-found-xxQ43iW3.js — 1 page (404.html), for NotFound
+```
+
+The framework has React write every one of those links as it renders the
+page, whatever its components hold or render, so a file the error names is
+a bug in k8ordo or in the React that wrote the HTML, not something the
+application got wrong or can fix. Report it with the error as printed. If
+the build started stopping right after an upgrade, go back to the previous
+version of what you upgraded — `@k8ordo/framework`, or `react` and
+`react-dom`, which decide where the links are written — until it is fixed.
+The check does not cover the stylesheets of what a client component
+imports dynamically (`React.lazy`, `import()`), nor a Server Component's
+stylesheets, and it runs only in a static build: `vite dev` and server
+mode render per request.
+
 ## A page that is not there
 
 A params schema decides what a URL's params look like; whether the thing they
