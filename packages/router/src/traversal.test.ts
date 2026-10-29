@@ -359,10 +359,18 @@ describe.each(browserTypes)(
         const back = navigation.back();
         back.finished?.catch(() => undefined);
         await back.committed;
+        // Firefox は popstate を出したタスクの中で、画面に残る前のページを
+        // 行き先の保存した位置へ動かす。動かし終えてから測る
+        await new Promise((resolve) => {
+          setTimeout(resolve, 0);
+        });
       });
+      const before = await scrollY(page);
       await page.mouse.move(200, 200);
       await page.mouse.wheel(0, 400);
-      await expect.poll(() => scrollY(page)).toBeGreaterThan(300);
+      // ホイールのスクロールはアニメーションで進み、wheel() は届くのを待たない。
+      // 動かし終える前に読み込みを終えると、残りが戻した位置に足される
+      await expect.poll(() => scrollY(page)).toBe(before + 400);
 
       await page.evaluate(() => {
         const { controls } = globalThis as unknown as { controls: Controls };
