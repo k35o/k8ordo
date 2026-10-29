@@ -18,12 +18,26 @@ export type UpdateHandle = {
 
 export type Patch = StateValues | ((current: StateValues) => StateValues);
 
+/**
+ * `tree` is the pathname the tree a caller renders in was applied for, which
+ * an intercepting router provides (`tree-pathname.ts`) — only a page store
+ * reads it.
+ */
 export type Store = {
-  subscribe: (keys: readonly string[] | null, notify: () => void) => () => void;
-  getSnapshot: (sig: string, keys: readonly string[] | null) => StateValues;
+  subscribe: (
+    keys: readonly string[] | null,
+    notify: () => void,
+    tree?: string | null,
+  ) => () => void;
+  getSnapshot: (
+    sig: string,
+    keys: readonly string[] | null,
+    tree?: string | null,
+  ) => StateValues;
   update: (
     patch: Patch,
     options?: { history?: 'push' | 'replace' },
+    tree?: string | null,
   ) => UpdateHandle;
   dispose: () => void;
 };
@@ -76,8 +90,17 @@ export const createHandle = (): Handle => {
   };
 };
 
+/** A snapshot held still, with the picks already handed out for it. */
+export type Frozen = {
+  readonly values: StateValues;
+  readonly picks: Map<string, StateValues>;
+};
+
 export type StoreCore = {
   snapshot: () => StateValues;
+  freeze: () => Frozen;
+  /** Notifies every listener, whatever moved. */
+  touch: () => void;
   applyNext: (next: StateValues) => void;
   subscribe: Store['subscribe'];
   getSnapshot: Store['getSnapshot'];
@@ -103,6 +126,14 @@ export const createStoreCore = (
 
   return {
     snapshot: () => snapshot,
+    freeze: () => {
+      const held = new Map<string, StateValues>();
+      for (const [sig, pick] of picks) held.set(sig, pick.value);
+      return { values: snapshot, picks: held };
+    },
+    touch: () => {
+      for (const listener of listeners) listener.notify();
+    },
     applyNext: (next) => {
       const changed: string[] = [];
       const merged: StateValues = {};

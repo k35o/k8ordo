@@ -143,6 +143,19 @@ pnpm check         # check:write to auto-fix
   Keep it single-use: a page taken from the cache twice would show a
   server-mode page as it was when first hovered. No Speculation Rules —
   Chromium only.
+- **A tree carries the pathname it is the page of.** `Applied` holds it
+  beside the tree (normalized, in the URL's terms; `null` in the HTML
+  render), and `AppRouter` provides the deferred one under the router's
+  `TreePathname` context — reached by the name the router, `@k8ordo/state`
+  and `runtime/tree-pathname.ts` share, since the router does not export
+  it — for a page state to read the values of its own page while the URL
+  already names the next. Every road that applies a tree sets it: a
+  navigation with the URL it loaded, a Server Action's answer with the URL
+  it was posted to (`answerAction`'s `url`), `vite dev`'s reload with the
+  URL it fetched, and a shell's not-found with the shell's. Not
+  `Payload.pathname`, which is in the table's terms and, for a shell, the
+  shell's. `app-router.browser.test.tsx` holds the navigation and the
+  action.
 - **A Server Action's answer is not applied once a navigation has been.**
   The answer is the page the action was posted from, re-rendered, and it
   waits for its client components and what the page awaits outside a
@@ -641,6 +654,7 @@ src/
   plugin/server-actions.ts   which modules declared 'use server'
   runtime/entry.{rsc,ssr,browser}.tsx  the three environments
   runtime/app-router.tsx     the client half: navigation + payloads, and whether this document can render one
+  runtime/tree-pathname.ts   the router's TreePathname context, reached by its shared name
   runtime/browser-payloads.ts  the browser's Flight client, wired into app-router: payloads read, Server Actions called
   runtime/payload.ts         what a page is on the wire (tree, pathname, client, action result), and the headers a static build reads
   runtime/payload-path.ts    where a payload lives: /x → /x/index.rsc

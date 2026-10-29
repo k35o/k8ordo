@@ -116,6 +116,8 @@ export default function StateHowItWorksPage() {
             t.guaranteeCarry,
             t.guaranteeIdentity,
             t.guaranteeHydration,
+            t.guaranteeTree,
+            t.guaranteeLeftWrite,
           ].map((item) => (
             <li key={item()}>
               <Rich>{item()}</Rich>
@@ -139,7 +141,7 @@ export default function StateHowItWorksPage() {
             </LocaleAnchor>
             <Rich>{t.nonRouterNextjsAfter()}</Rich>
           </li>
-          {[t.nonMutation, t.nonMemory, t.nonWrite].map((item) => (
+          {[t.nonMutation, t.nonMemory, t.nonWrite, t.nonTree].map((item) => (
             <li key={item()}>
               <Rich>{item()}</Rich>
             </li>

@@ -23,15 +23,16 @@ export const connectAppRouter = (): void => {
   setPayloadReader((stream) => createFromReadableStream<Payload>(stream));
   setServerCallback(async (id: string, args: unknown[]) => {
     const sent = navigationsApplied();
+    const url = location.href;
     const temporaryReferences = createTemporaryReferenceSet();
     const payload = await createFromFetch<Payload>(
-      fetch(location.href, {
+      fetch(url, {
         method: 'POST',
         headers: { [ACTION_ID_HEADER]: id },
         body: await encodeReply(args, { temporaryReferences }),
       }),
       { temporaryReferences },
     );
-    return answerAction(payload, sent);
+    return answerAction(payload, sent, url);
   });
 };

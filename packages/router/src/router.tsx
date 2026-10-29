@@ -8,8 +8,10 @@ import { setBoundaryOutlet } from './define-routes';
 import type { Match, RouteComponent, Routes } from './define-routes';
 import { appPathname, PathnameProvider } from './location';
 import { NavigationGeneration, useInterceptedNavigation } from './navigation';
+import { normalizePathname } from './paths';
 import type { ParamsOf } from './paths';
 import type { RegisteredPattern } from './register';
+import { TreePathname } from './tree-pathname';
 
 type RouterValue = {
   routes: Routes;
@@ -58,6 +60,14 @@ const matchUrl = (routes: Routes, pathname: string): Match | null => {
   return own === null ? null : routes.match(own);
 };
 
+/** What `<Router>` applies: the match, with the pathname it is the tree of. */
+type Applied = { readonly match: Match | null; readonly pathname: string };
+
+const appliedFor = (routes: Routes, pathname: string): Applied => ({
+  match: matchUrl(routes, pathname),
+  pathname: normalizePathname(pathname),
+});
+
 /**
  * Mounts a route table on the Navigation API: every same-origin navigation
  * that the table claims is handled in the client, and the rest is left to the
@@ -69,17 +79,20 @@ const matchUrl = (routes: Routes, pathname: string): Match | null => {
  * mounts.
  */
 export function Router({ routes }: { routes: Routes }): ReactNode {
-  const [latest, setLatest] = useState<Match | null>(() =>
-    matchUrl(routes, location.pathname),
+  const [latest, setLatest] = useState<Applied>(() =>
+    appliedFor(routes, location.pathname),
   );
 
-  const { generation } = useInterceptedNavigation<Match>({
+  const { generation } = useInterceptedNavigation<Applied>({
     claim: (url) => matchUrl(routes, url.pathname) !== null,
-    load: (url) => matchUrl(routes, url.pathname) as Match,
+    load: (url) => appliedFor(routes, url.pathname),
     apply: setLatest,
   });
 
-  const match = useDeferredValue(latest);
+  // The pathname moves with the tree: a page state below reads the URL's
+  // values only once its own tree is the one on screen.
+  const current = useDeferredValue(latest);
+  const { match } = current;
   const value = useMemo(() => ({ routes, match }), [routes, match]);
   // The same element while the deferred match stands still, so the urgent
   // render a navigation starts with does not render the old page again.
@@ -91,7 +104,9 @@ export function Router({ routes }: { routes: Routes }): ReactNode {
   return (
     <PathnameProvider pathname={appPathname()}>
       <NavigationGeneration value={generation}>
-        <RouterContext value={value}>{stack}</RouterContext>
+        <TreePathname value={current.pathname}>
+          <RouterContext value={value}>{stack}</RouterContext>
+        </TreePathname>
       </NavigationGeneration>
     </PathnameProvider>
   );
