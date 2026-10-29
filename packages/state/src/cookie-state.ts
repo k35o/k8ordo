@@ -1,8 +1,14 @@
 import type { output } from 'zod/v4/core';
 
 import { createRowCodec } from './row/codec';
-import type { RowCodec, Versioning } from './row/codec';
+import type { Versioning } from './row/codec';
 import type { StateSchema } from './schema/object';
+import {
+  cookieInitialSnapshot,
+  cookieStoreOf,
+  parseCookieText,
+} from './store/cookie-store';
+import { setKind } from './store/kind';
 
 /**
  * App-scope state that lives in a cookie: device-persistent and shared across
@@ -41,28 +47,6 @@ const COOKIE_NAME_PREFIX = 'k8ordo-state.';
 
 const TOKEN = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/u;
 
-export const parseCookieText = (text: string | undefined): unknown => {
-  if (text === undefined) return undefined;
-  try {
-    return JSON.parse(text);
-  } catch {
-    // 壊れた JSON もほかの古いデータと同じく、既定値から始める
-    return undefined;
-  }
-};
-
-const codecs = new WeakMap<CookieState, RowCodec>();
-
-export const cookieCodecOf = (def: CookieState): RowCodec => {
-  const codec = codecs.get(def);
-  if (codec === undefined) {
-    throw new TypeError(
-      `"${def.key}" was not created by defineCookieState of this module instance`,
-    );
-  }
-  return codec;
-};
-
 export const defineCookieState = <Schema extends StateSchema>(
   key: string,
   schema: Schema,
@@ -88,6 +72,9 @@ export const defineCookieState = <Schema extends StateSchema>(
     cookieValue: (values) =>
       JSON.stringify(codec.row(codec.salvage(values ?? {}))),
   };
-  codecs.set(def, codec);
+  setKind(def, {
+    store: () => cookieStoreOf(def, codec),
+    initial: ({ initialCookie }) => cookieInitialSnapshot(codec, initialCookie),
+  });
   return def;
 };

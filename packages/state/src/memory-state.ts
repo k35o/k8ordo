@@ -1,4 +1,6 @@
 import type { StateValues } from './schema/object';
+import { setKind } from './store/kind';
+import { memoryInitialSnapshot, memoryStoreOf } from './store/memory-store';
 
 /**
  * A typed shared box that lives for the JS runtime and resets on reload.
@@ -16,4 +18,15 @@ export type MemoryState<Values extends StateValues = StateValues> = {
 export const defineMemoryState = <Values extends StateValues>(
   key: string,
   initial: Values,
-): MemoryState<Values> => ({ kind: 'memory', key, initial: { ...initial } });
+): MemoryState<Values> => {
+  const def: MemoryState<Values> = {
+    kind: 'memory',
+    key,
+    initial: { ...initial },
+  };
+  setKind(def, {
+    store: () => memoryStoreOf(def),
+    initial: () => memoryInitialSnapshot(def),
+  });
+  return def;
+};

@@ -1,4 +1,3 @@
-import { internalsOf } from '../page-state';
 import type { PageInternals, PageState } from '../page-state';
 import { isRecord, sameValue } from '../schema/object';
 import type { StateValues } from '../schema/object';
@@ -33,8 +32,7 @@ const readLive = (def: PageState, page: PageInternals): StateValues => {
   return live;
 };
 
-const createPageStore = (def: PageState): Store => {
-  const page = internalsOf(def);
+const createPageStore = (def: PageState, page: PageInternals): Store => {
   const core = createStoreCore(page.keys, readLive(def, page));
 
   let pending: StateValues | null = null;
@@ -175,8 +173,8 @@ const createPageStore = (def: PageState): Store => {
   };
 };
 
-export const pageStoreOf = (def: PageState): Store =>
-  getOrCreateStore('page', def.key, () => createPageStore(def));
+export const pageStoreOf = (def: PageState, page: PageInternals): Store =>
+  getOrCreateStore('page', def.key, () => createPageStore(def, page));
 
 /**
  * What SSR and the hydration render see: the RSC-parsed url when the caller
@@ -185,10 +183,9 @@ export const pageStoreOf = (def: PageState): Store =>
  * `navigation` or create a store.
  */
 export const pageInitialSnapshot = (
-  def: PageState,
+  page: PageInternals,
   initialUrl: Readonly<StateValues> | undefined,
 ): StateValues => {
-  const page = internalsOf(def);
   const base: StateValues = {};
   for (const codec of [page.url, page.entry]) {
     if (codec !== null) {
