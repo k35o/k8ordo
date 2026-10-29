@@ -128,6 +128,47 @@ type Pending = {
   resolve: () => void;
   scroll: ScrollPlan | null;
   types: readonly string[];
+  /** Lets scroll anchoring act again, for a traversal within a page. */
+  release?: () => void;
+};
+
+// Firefox は intercept した traverse でも handler を待たず、scroll の指定も
+// 見ずに、popstate の時点で保存した位置へ戻す。同じページでは前の entry の
+// 描画の上に戻り、遅らせた描画で中身が伸び縮みするとスクロールアンカリングが
+// ずらす。その entry の描画が出るまでアンカリングを止めれば、戻した位置が残る。
+// ほかのエンジンは handler が解けてから戻すので、止めても変わらない
+let anchoringHeld = 0;
+let anchoringBefore = '';
+
+// 同じ理由で、読み込み中に画面のページの entry へ戻るときも、Firefox は
+// manual を見ずに保存した位置へ戻す。戻すのは popstate を出したのと同じタスク
+// の中なので、次のタスクで訪問者がいた位置に置き直す。requestAnimationFrame
+// は隠れたタブで走らない
+const keepPosition = (entry: string): void => {
+  const left = window.scrollX;
+  const top = window.scrollY;
+  setTimeout(() => {
+    if (navigation.currentEntry?.key !== entry) return;
+    if (window.scrollX !== left || window.scrollY !== top) {
+      window.scrollTo({ left, top });
+    }
+  }, 0);
+};
+
+const holdAnchoring = (): (() => void) => {
+  const { style } = document.documentElement;
+  if (anchoringHeld === 0) {
+    anchoringBefore = style.overflowAnchor;
+    style.overflowAnchor = 'none';
+  }
+  anchoringHeld += 1;
+  let released = false;
+  return () => {
+    if (released) return;
+    released = true;
+    anchoringHeld -= 1;
+    if (anchoringHeld === 0) style.overflowAnchor = anchoringBefore;
+  };
 };
 
 /**
@@ -270,6 +311,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         onScreenEntry.current = null;
         if (!traverse || calledOff) {
           event.intercept({ scroll: 'manual', focusReset: 'manual' });
+          if (calledOff) keepPosition(event.destination.key);
           return;
         }
         // 表に置くのも描き直しを頼むのも、handler でなくここで。currententrychange
@@ -279,17 +321,20 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         const { promise, resolve, reject } = Promise.withResolvers<undefined>();
         // handler が走る前に中止されると、誰も待たない reject になる
         promise.catch(() => undefined);
+        const release = holdAnchoring();
         pending.current.set(id, {
           resolve: () => {
             resolve(undefined);
           },
           scroll: null,
           types: [],
+          release,
         });
         event.signal.addEventListener(
           'abort',
           () => {
             pending.current.delete(id);
+            release();
             reject(event.signal.reason as Error);
           },
           { once: true },
@@ -312,6 +357,12 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       const scroll = inPlace
         ? null
         : scrollPlanFor(event.navigationType, url.hash);
+      // 読み直すページも同じページなので、戻る・進むでは Firefox が戻した位置を
+      // 読み直した描画が出るまで残す
+      const release = inPlace && traverse ? holdAnchoring() : undefined;
+      if (release !== undefined) {
+        event.signal.addEventListener('abort', release, { once: true });
+      }
       event.intercept({
         // A load in place moves neither the viewport nor focus.
         ...(inPlace ? { focusReset: 'manual' as const } : {}),
@@ -332,6 +383,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
             value = await load(url, event.signal);
           } catch (error) {
             settled();
+            release?.();
             throw error;
           }
           // A load that ignores the signal can come back after a second
@@ -346,6 +398,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
               // 同じページの読み直しはページの切り替えではない。
               // ViewTransition が切り替えとして動かさないよう、型を付けない
               types: inPlace ? [] : transitionTypesFor(event.navigationType),
+              ...(release === undefined ? {} : { release }),
             });
             event.signal.addEventListener(
               'abort',
@@ -385,6 +438,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
     if (entry === undefined) return;
     pending.current.delete(id);
     onScreenEntry.current = null;
+    entry.release?.();
     if (entry.scroll !== null) applyScroll(entry.scroll);
     if (latest.current === id) setPendingPathname(null);
     entry.resolve();

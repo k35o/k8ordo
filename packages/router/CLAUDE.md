@@ -87,7 +87,23 @@ pnpm check         # check:write to auto-fix
   own update (Sync or Default, as `@k8ordo/state`'s url field gives it)
   and the router's render together and share one deferred lane, whatever
   the engine's order of handler and `currententrychange`, and the handler
-  returns the promise made there (Firefox may call it twice).
+  returns the promise made there (Firefox may call it twice). Firefox
+  restores a traversal's position as it commits, at `popstate`, waiting
+  for no handler and reading no `scroll` option: within a page that lands
+  on the previous entry's layout, and scroll anchoring then moves it as the
+  deferred render grows or shrinks the page. So from the `navigate` event
+  until that traversal settles — or is aborted — the router holds
+  anchoring off (`overflow-anchor: none` on the root element, counted
+  across traversals, the previous inline value put back), for a traversal
+  in place and one that loads again; the other engines restore only after
+  the handler settles, where the anchoring held off changes nothing. A
+  traversal back to the page on screen, which keeps the position, is
+  restored by Firefox all the same, `scroll: 'manual'` or not, before the
+  task that dispatched `popstate` ends; so the router puts the position the
+  visitor had back in the next task (`keepPosition`, a `setTimeout` — a
+  frame callback never runs in a hidden tab), unless another navigation
+  moved the entry on. The other engines leave it, so there it is already
+  where it was.
   `traversal.test.ts` holds that `finished` sees the entry's own render and
   the position comes back onto it, for a traversal in place and one that
   loads again, and that a traversal back to the page on screen keeps where
