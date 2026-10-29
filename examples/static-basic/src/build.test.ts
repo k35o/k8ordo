@@ -421,6 +421,22 @@ describe('the static build', () => {
     expect(html).toContain('second product');
   });
 
+  // 入口と、入口とページが分け合うモジュールは、どのページも読む。分けて
+  // おくと、どのページもそのファイルを入口と一緒に読む
+  it('has the client entry carry everything it imports statically, importing no file of its own', () => {
+    const entry =
+      /<script type="module" src="\/([^"]+)"/iu.exec(read('index.html'))?.[1] ??
+      '';
+    const imported = [
+      ...read(entry).matchAll(
+        /\bimport\s*(?:[^"'();]*?\bfrom\s*)?["'](\.\/[^"']+\.js)["']/gu,
+      ),
+    ].map(([, file]) => file);
+
+    expect(entry).toMatch(/^assets\/index-[\w-]+\.js$/u);
+    expect(imported).toStrictEqual([]);
+  });
+
   it('leaves no nonce in what it writes: a file everyone reads cannot keep one', () => {
     for (const file of ['index.html', 'index.rsc', '404.html']) {
       expect(read(file)).not.toContain('nonce');

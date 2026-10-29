@@ -2,8 +2,14 @@ import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import react from '@vitejs/plugin-react';
-import rsc from '@vitejs/plugin-rsc';
-import type { Logger, Plugin, PluginOption, ViteDevServer } from 'vite';
+import rsc, { getPluginApi } from '@vitejs/plugin-rsc';
+import type {
+  Logger,
+  Plugin,
+  PluginOption,
+  ResolvedConfig,
+  ViteDevServer,
+} from 'vite';
 
 import { LOCALES_MODULE } from '../generate/emit';
 import { generate } from '../generate/write';
@@ -95,6 +101,33 @@ const CLIENT_UNBUNDLED = [
 const FAMILY = /^@k8ordo\//u;
 
 /**
+ * The client-reference groups of the RSC entry's own chunk: the client
+ * components of every layout, error and loading file, which the table
+ * imports with the entry, and the framework's own boundaries. Every page
+ * renders some of them, so every page loads their chunk. Read off the RSC
+ * plugin's manager — experimental, as `server-actions.ts` says — once the
+ * client build has loaded the reference groups: the RSC build ran first and
+ * grouped its references by the RSC chunk they are in.
+ */
+const frameGroupsOf = (config: Pick<ResolvedConfig, 'plugins'>): string[] => {
+  const manager = getPluginApi(config)?.manager;
+  const entry = Object.values(manager?.bundles.rsc ?? {}).find(
+    (output) => output.type === 'chunk' && output.isEntry,
+  );
+  if (manager === undefined || entry?.type !== 'chunk') return [];
+  const inEntry = new Set(entry.moduleIds);
+  return [
+    ...new Set(
+      Object.entries(manager.clientReferenceMetaMap).flatMap(([id, meta]) =>
+        inEntry.has(id) && meta.groupChunkId !== undefined
+          ? [meta.groupChunkId]
+          : [],
+      ),
+    ),
+  ];
+};
+
+/**
  * The machinery both modes stand on: the route grammar compiled into a
  * table, the RSC pipeline configured, and the execution boundary enforced.
  * The framework's static and server modes add only what makes them
@@ -111,6 +144,9 @@ export const engine = (
   let logger: Logger;
   let devServer: ViteDevServer | undefined;
   let generating: Promise<void> = Promise.resolve();
+  // The frame's reference groups, which the client build's chunking reads.
+  // Filled at the client build's buildEnd, before it splits anything.
+  const frame = new Set<string>();
   const runtime = (name: string): string =>
     path.join(host.runtimeDir, `${name}.mjs`);
   const routesModule = (): string => path.join(outDir, 'routes.gen.ts');
@@ -198,7 +234,27 @@ export const engine = (
           client: {
             optimizeDeps: { include: CLIENT_DEPS, exclude: CLIENT_UNBUNDLED },
             build: {
-              rolldownOptions: { input: { index: runtime('entry.browser') } },
+              rolldownOptions: {
+                input: { index: runtime('entry.browser') },
+                output: {
+                  // Rolldown は、読み込む入口の組が違うモジュールを別のチャンクに
+                  // 切り出す。どのページも読む入口と枠が、ページと分け合うモジュール
+                  // をそのたびに小さなファイルに切り出し、どのページもそれを全部
+                  // 読んでいた。どのページも読むものは、その 2 つのチャンクに入れる。
+                  // 枠は自分の仮想モジュールだけを捕まえ、依存は Rolldown が木を
+                  // 揺すったあとのつながりで足す
+                  codeSplitting: {
+                    groups: [
+                      { name: 'index', tags: ['$initial'], priority: 2 },
+                      {
+                        name: 'frame',
+                        test: (id: string) => frame.has(id),
+                        priority: 1,
+                      },
+                    ],
+                  },
+                },
+              },
             },
           },
         },
@@ -274,6 +330,14 @@ export const engine = (
 
     async buildStart() {
       await api.generate();
+    },
+
+    buildEnd() {
+      if (this.environment.name !== 'client') return;
+      frame.clear();
+      for (const group of frameGroupsOf(this.environment.config)) {
+        frame.add(group);
+      }
     },
 
     configureServer(server) {

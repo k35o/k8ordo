@@ -104,7 +104,7 @@
     "oxc-transform-react": "^0.152.0",
     "react": ">=19.3.0",
     "react-dom": ">=19.3.0",
-    "vite": ">=8.0.0"
+    "vite": ">=8.1.0"
   },
   "peerDependenciesMeta": {
     "oxc-transform-react": {
