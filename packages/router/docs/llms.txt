@@ -94,8 +94,9 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   uses to render server-produced trees instead; its host renders what
   `apply` set through `useDeferredValue`; its optional `refresh(url)` says
   whether a same-pathname navigation still has to load (the page showing reads
-  the search), which then loads in place — no scroll, focus reset or
-  transition types.
+  the search), which then loads in place — no focus reset or transition
+  types, and no scroll but going back or forward, where the browser restores
+  the position once the page loaded again is on screen.
   Exported types, by group — the table: `Routes` (`{ kind, record, match }`),
   `RoutesRecord`, `RouteNode`, `RouteComponent`, `Match`, `ErrorComponent`,
   `ErrorProps`; patterns: `PatternOf`, `NavigablePatternOf`, `NavigablePath`,

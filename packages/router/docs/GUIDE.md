@@ -415,15 +415,22 @@ then, before the chunk is in.
 
 **A state change is not a page change.** When only the search or the entry
 state moved, the pathname is the one whose tree is on screen: the route tree
-is left alone, nothing remounts, and scroll and focus are not disturbed. This
-is why a search update never scrolls the page back to the top. Such a
-navigation is intercepted with no handler, so its `finished` —
-`@k8ordo/state`'s `update().finished` included — settles as soon as the
-navigation commits, with no render to wait for. The comparison is against the
+is left alone, nothing remounts, and focus is not disturbed. A push or a
+replace leaves scroll alone too — this is why a search update never scrolls
+the page back to the top — and is intercepted with no handler, so its
+`finished` — `@k8ordo/state`'s `update().finished` included — settles as
+soon as the navigation commits, with no render to wait for. Going back or
+forward between two entries of the page is the exception: the browser
+restores the position that entry was left at, once the page has rendered
+the entry — what it renders through `useDeferredValue` included — so a
+filtered list comes back to where it was read, and that `finished` waits for
+the render. The comparison is against the
 page showing, not against the address bar — interception commits the URL
 first, so a state update issued while another page is still loading is a page
 change: it lets that page finish arriving, and its `finished` waits for that
-render.
+render. Going back while another page is still loading, to the entry of the
+page still on screen, calls that page change off: the page stays where the
+visitor scrolled it.
 
 **Route changes render in the background.** The new tree renders at the
 priority `useDeferredValue` gives it, so the old page stays on screen and
@@ -439,14 +446,17 @@ tagged with `addTransitionType` — `navigation`, and one of `navigation-push`,
 **A new page starts at the top.** Once the new tree is on screen, the
 viewport goes where a document load would have put it: the top, or the
 element a `#fragment` names. Back and forward are left to the browser, which
-restores the position it saved. A state change never moves the viewport —
-same pathname, same place — so a filter update does not scroll the reader
-back to the top.
+restores the position it saved — between two entries of the same page too.
+Any other state change never moves the viewport — same pathname, same
+place — so a filter update does not scroll the reader back to the top.
 
 **Superseded navigations abort.** A second navigation aborts the first through
 the platform's own signal: the overtaken `finished` rejects with the abort
 reason, and its tree never reaches the screen even if its load had already
-come back. `load` receives that signal, so a payload fetch under the framework
+come back. Going back or forward within a page counts too: replaced by a
+navigation of its own before the page has rendered the entry — an effect
+that corrects the URL, say — its `finished` rejects, and the position is not
+restored. `load` receives that signal, so a payload fetch under the framework
 is cancelled outright. A `React.lazy` chunk cannot be — a dynamic import takes
 no signal — so in a client application it finishes in the background and is
 kept for the next visit, while the page it belonged to is never shown.
@@ -549,8 +559,10 @@ A fourth, optional member, `refresh: (url) => boolean`, says whether a
 navigation that keeps the pathname on screen still has to load — the page
 showing reads what moved. Without it such a navigation is a state change and
 loads nothing; with it, it loads and applies like a page change but as a
-state change otherwise: no scroll, no focus reset, no transition types. The
-framework's runtime answers it for a page that exports `search`.
+state change otherwise: no focus reset and no transition types, and no
+scroll but going back or forward, where the browser restores the position
+once the page loaded again is on screen. The framework's runtime answers it
+for a page that exports `search`.
 
 A host renders what `apply` set through `useDeferredValue`, in the same
 component that calls the hook. That is what renders the new page in the

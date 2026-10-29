@@ -74,6 +74,9 @@ export default function RouterHowItWorksPage() {
           <Rich>{t.stateInPlace()}</Rich>
         </p>
         <p>
+          <Rich>{t.stateTraverse()}</Rich>
+        </p>
+        <p>
           <Rich>{t.stateRefresh()}</Rich>
         </p>
         <p>
