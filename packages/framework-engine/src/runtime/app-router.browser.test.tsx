@@ -1,6 +1,6 @@
-import { notFound, usePathname } from '@k8ordo/router';
+import { normalizePathname, notFound, usePathname } from '@k8ordo/router';
 import { Component, Suspense, use, useLayoutEffect } from 'react';
-import type { ReactNode } from 'react';
+import type { Context, ReactNode } from 'react';
 import {
   afterEach,
   beforeEach,
@@ -64,8 +64,14 @@ vi.mock('@vitejs/plugin-rsc/browser', () => ({
       ? parsed
       : rsc.payloads.get(parsed.$payload)?.();
   },
-  createFromFetch: async (response: Promise<Response>): Promise<unknown> =>
-    JSON.parse(await (await response).text()),
+  createFromFetch: async (response: Promise<Response>): Promise<unknown> => {
+    const parsed = JSON.parse(await (await response).text()) as {
+      $payload?: string;
+    };
+    return parsed.$payload === undefined
+      ? parsed
+      : rsc.payloads.get(parsed.$payload)?.();
+  },
   createTemporaryReferenceSet: () => ({}),
   encodeReply: () => Promise.resolve(''),
   setServerCallback: (callback: ServerCallback) => {
@@ -1035,6 +1041,75 @@ describe('a shell', () => {
     await nextTask();
 
     expect(signalOf()?.aborted).toBe(false);
+  });
+});
+
+// @k8ordo/state はこの名前の context で、ページの状態を画面の木に結ぶ
+const treePathnameContext = (): Context<string | null> =>
+  (globalThis as Record<symbol, Context<string | null>>)[
+    Symbol.for('@k8ordo/router/tree-pathname')
+  ] as Context<string | null>;
+
+function TreeProbe({ id }: { id: string }): ReactNode {
+  return <span data-testid={id}>{use(treePathnameContext())}</span>;
+}
+
+const textOf = (id: string): string | null | undefined =>
+  document.querySelector(`[data-testid="${id}"]`)?.textContent;
+
+describe('the pathname a tree is applied for', () => {
+  const first = (): string => normalizePathname(new URL(home).pathname);
+
+  it('stays the one the tree on screen was applied for until the next tree is, while the URL names the next page', async () => {
+    // 当てた木が描き終わるまでのあいだも、画面には前の木が残る
+    const drawn = Promise.withResolvers<undefined>();
+    function Later(): ReactNode {
+      use(drawn.promise);
+      return <TreeProbe id="next" />;
+    }
+    rsc.payloads.set('next', () => ({
+      tree: <Later />,
+      pathname: '/next',
+      client: RUNNING,
+    }));
+    const next = held();
+    answerByPathname({ '/next/index.rsc': next.answer });
+    await render(<AppRouter pathname="/" tree={<TreeProbe id="first" />} />);
+    await vi.waitFor(() => {
+      expect(textOf('first')).toBe(first());
+    });
+
+    const going = navigation.navigate('/next');
+    await going.committed;
+    expect(location.pathname).toBe('/next');
+    expect(textOf('first')).toBe(first());
+    next.release(jsonResponse({ $payload: 'next' }));
+    await vi.waitFor(() => {
+      expect(rsc.decoding).toBe(1);
+    });
+    await nextTask();
+    expect(textOf('first')).toBe(first());
+
+    drawn.resolve(undefined);
+    await going.finished;
+    expect(textOf('next')).toBe('/next');
+  });
+
+  it('names the page a Server Action was posted to for the tree its answer applies', async () => {
+    rsc.payloads.set('answer', () => ({
+      tree: <TreeProbe id="answer" />,
+      pathname: '/',
+      client: RUNNING,
+      returnValue: 'saved',
+    }));
+    answerWith({ $payload: 'answer' } as unknown as Payload);
+    await render(<AppRouter pathname="/" tree={<TreeProbe id="first" />} />);
+
+    await expect(serverCallback()('action-id', [])).resolves.toBe('saved');
+
+    await vi.waitFor(() => {
+      expect(textOf('answer')).toBe(first());
+    });
   });
 });
 

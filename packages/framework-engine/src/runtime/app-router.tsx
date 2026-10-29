@@ -2,6 +2,7 @@
 
 import {
   NavigationGeneration,
+  normalizePathname,
   PathnameProvider,
   useInterceptedNavigation,
   withoutBase,
@@ -23,6 +24,7 @@ import { payloadPathFor } from './payload-path';
 import { createPrefetchCache, prefetchTargetOf } from './prefetch';
 import type { PrefetchCache } from './prefetch';
 import { markNavigated, Recover, reloadInstead } from './recover';
+import { TreePathname } from './tree-pathname';
 
 /**
  * Where a Server Action's answer lands. The callback has to be registered
@@ -32,7 +34,7 @@ import { markNavigated, Recover, reloadInstead } from './recover';
  * pages it fetched ahead, which the action may have changed.
  */
 let mounted: {
-  readonly apply: (payload: Payload) => void;
+  readonly apply: (payload: Payload, pathname: string) => void;
   readonly forgetPrefetched: () => void;
 } | null = null;
 
@@ -80,11 +82,13 @@ export const navigationsApplied = (): number => navigations;
 
 /**
  * What a Server Action's answer does to the document, once it is read.
- * `sent` is `navigationsApplied()` as the action was sent.
+ * `sent` is `navigationsApplied()` as the action was sent, and `url` where
+ * it was posted: the answer is that page.
  */
 export const answerAction = async (
   payload: Payload,
   sent: number,
+  url: string,
 ): Promise<unknown> => {
   mounted?.forgetPrefetched();
   // An action that redirected has no page to apply: the visitor is going
@@ -101,7 +105,9 @@ export const answerAction = async (
   // A navigation applied another page while the action ran or its answer
   // loaded: the answer is the page the visitor left, and would put it back
   // under the URL they are at. The caller still gets its value.
-  if (navigations === sent) mounted?.apply(payload);
+  if (navigations === sent) {
+    mounted?.apply(payload, normalizePathname(new URL(url).pathname));
+  }
   return payload.returnValue;
 };
 
@@ -193,7 +199,15 @@ type Applied = {
   readonly notFound: ReactNode | undefined;
   /** How many payloads this document had applied, this one included. */
   readonly order: number;
+  /**
+   * The pathname the tree is the page of, in the URL's terms and normalized
+   * (`TreePathname`); `null` in the HTML render, which has no URL.
+   */
+  readonly pathname: string | null;
 };
+
+/** A navigation's payload, with the pathname of the URL it was loaded for. */
+type Loaded = { readonly payload: Payload; readonly pathname: string };
 
 /** How many payloads this document has applied. It has one router. */
 let applies = 0;
@@ -202,7 +216,11 @@ let applies = 0;
  * Takes over the request of a payload whose tree is being applied, and
  * returns what applying it puts in state.
  */
-const hold = (streaming: Streaming[], payload: Payload): Applied => {
+const hold = (
+  streaming: Streaming[],
+  payload: Payload,
+  pathname: string,
+): Applied => {
   applies += 1;
   const stream = streams.get(payload);
   if (stream !== undefined) {
@@ -216,7 +234,12 @@ const hold = (streaming: Streaming[], payload: Payload): Applied => {
       order: applies,
     });
   }
-  return { tree: payload.tree, notFound: payload.notFound, order: applies };
+  return {
+    tree: payload.tree,
+    notFound: payload.notFound,
+    order: applies,
+    pathname,
+  };
 };
 
 /**
@@ -269,6 +292,11 @@ export function AppRouter({
     tree,
     notFound,
     order: 0,
+    // payload の pathname は表の語で、殻では殻の pathname なので使わない
+    pathname:
+      typeof location === 'undefined'
+        ? null
+        : normalizePathname(location.pathname),
   }));
   const current = useDeferredValue(latest);
   const prefetched = useRef<PrefetchCache<Payload | null>>(null);
@@ -308,9 +336,9 @@ export function AppRouter({
 
   useEffect(() => {
     mounted = {
-      apply: (payload) => {
+      apply: (payload, postedTo) => {
         searchApplied.current = payload.search;
-        const next = hold(streaming.current, payload);
+        const next = hold(streaming.current, payload, postedTo);
         startTransition(() => {
           setLatest(next);
         });
@@ -359,7 +387,11 @@ export function AppRouter({
       if (!canRender(payload)) return reloadInstead();
       markNavigated();
       navigations += 1;
-      const next = hold(streaming.current, payload);
+      const next = hold(
+        streaming.current,
+        payload,
+        normalizePathname(new URL(url).pathname),
+      );
       searchApplied.current = payload.search;
       startTransition(() => {
         setLatest(next);
@@ -394,7 +426,7 @@ export function AppRouter({
     };
   }, []);
 
-  const { generation } = useInterceptedNavigation<Payload>({
+  const { generation } = useInterceptedNavigation<Loaded>({
     // The browser holds no route table, so this cannot answer "is it mine?"
     // the way the client router does. It claims every same-origin URL under
     // Vite's `base` and finds out from the answer — which is why `load` has
@@ -413,7 +445,7 @@ export function AppRouter({
           if (signal.aborted) throw error;
           // The network, or a server that could not answer: the same rule
           // as a URL that is not a page — the document load shows the truth.
-          return await reloadInstead<Payload>();
+          return await reloadInstead<Loaded>();
         }
         // A second navigation may have taken over while this was in flight —
         // the body read, the client components it names imported — and
@@ -423,20 +455,20 @@ export function AppRouter({
         // the URL, so reloading asks the server for exactly what the browser
         // would have asked for had this never been claimed — its real status
         // included.
-        if (payload === null) return await reloadInstead<Payload>();
-        if (!canRender(payload)) return await reloadInstead<Payload>();
-        return payload;
+        if (payload === null) return await reloadInstead<Loaded>();
+        if (!canRender(payload)) return await reloadInstead<Loaded>();
+        return { payload, pathname: normalizePathname(url.pathname) };
       } finally {
         // The router applies what this returned right after it settles, so
         // the applied tree renders with the count back where it was.
         loading.current -= 1;
       }
     },
-    apply: (next) => {
+    apply: (loaded) => {
       markNavigated();
       navigations += 1;
-      searchApplied.current = next.search;
-      setLatest(hold(streaming.current, next));
+      searchApplied.current = loaded.payload.search;
+      setLatest(hold(streaming.current, loaded.payload, loaded.pathname));
     },
     // A page that reads the search is rendered for the one it was given, so
     // a navigation that moves it loads the page again; a page that does not
@@ -456,7 +488,7 @@ export function AppRouter({
     if (loading.current > 0) return false;
     setLatest((previous) =>
       previous === shown
-        ? { tree: shown.notFound, notFound: undefined, order: shown.order }
+        ? { ...shown, tree: shown.notFound, notFound: undefined }
         : previous,
     );
     return true;
@@ -468,11 +500,13 @@ export function AppRouter({
   return (
     <PathnameProvider pathname={pathname}>
       <NavigationGeneration value={generation}>
-        <Recover>
-          <ShowNotFound value={current.notFound === undefined ? null : show}>
-            {current.tree}
-          </ShowNotFound>
-        </Recover>
+        <TreePathname value={current.pathname}>
+          <Recover>
+            <ShowNotFound value={current.notFound === undefined ? null : show}>
+              {current.tree}
+            </ShowNotFound>
+          </Recover>
+        </TreePathname>
       </NavigationGeneration>
     </PathnameProvider>
   );
