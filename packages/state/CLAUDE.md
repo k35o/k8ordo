@@ -64,6 +64,27 @@ pnpm check         # check:write to auto-fix
   reading it would flash the echo back. The last write to settle re-reads (a
   refused one only if a change was skipped meanwhile, so a refusal otherwise
   keeps the echo, as local does).
+- **A page state reads the URL of the tree it renders in.** An intercepting
+  router commits the URL before the next tree arrives, and the tree being
+  left stays on screen meanwhile; one `useSyncExternalStore` snapshot cannot
+  answer both. `<Router>` and `@k8ordo/framework`'s runtime provide, per
+  tree, the pathname it was applied for (`tree-pathname.ts`: a context
+  reached through `Symbol.for('@k8ordo/router/tree-pathname')` on
+  `globalThis`, since the router is a peer this package never loads; the
+  name is a promise between the three, changed in one release), and
+  `useAppState` hands it to a page store. When the URL's pathname moves,
+  the store freezes the snapshot (and the picks handed out) for the
+  pathname left, if anything there subscribes, and answers a tree whose
+  pathname is not the URL's from it. The URL coming back to that pathname
+  drops it and notifies every subscriber: the URL's values may equal the
+  next page's, and `applyNext` would tell no one. One no subscriber reads
+  is dropped at the next move, not as the last one leaves, because a
+  component subscribing again passes through none. An `update()` from a
+  tree being left writes nothing and settles: what it shows is no longer
+  the URL's, and the write would load the next page again with values that
+  never showed. Where no router provides a tree, the context is `null` and
+  everything follows the URL. `use-app-state.browser.test.tsx` holds each
+  of these; `examples/static-basic` holds them under the framework.
 - **Shared ground stays shared.** A page store rewrites only its own URL
   params and only its own namespace in the entry-state object — the rest of
   both travels untouched with every write it makes.
