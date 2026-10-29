@@ -70,6 +70,19 @@ pnpm check         # check:write to auto-fix
   back or forward is the exception, below — unless it goes back to the
   entry whose page is on screen while a page change loads
   (`onScreenEntry`): that calls the change off, and keeps the position.
+- **A tree knows the pathname it was applied for.** `<Router>` applies the
+  match together with the pathname it was loaded for, so the deferred value
+  that puts a tree on screen moves both in one commit, and provides that
+  pathname (normalized, in the URL's terms) under `TreePathname`
+  (`tree-pathname.ts`). The context is not exported: `@k8ordo/state` reads
+  it to keep a page state's values with the tree on screen while the URL
+  already names the next page, and `@k8ordo/framework`'s runtime provides
+  it as `<Router>` does. All three reach it through
+  `Symbol.for('@k8ordo/router/tree-pathname')` on `globalThis` — state
+  never loads the router, and the framework cannot import a module the
+  router does not export — so the name is a promise between them, changed
+  in all three in one release. `router.browser.test.tsx` holds that a tree
+  being left names its own pathname until the next one is on screen.
 - **A new page starts where a document load would.** The commit effect that
   resolves `finished` also places the viewport: top for push/replace, the
   fragment's element when the URL names one, nothing for a traversal (the
@@ -187,6 +200,7 @@ src/
   match.ts          matchPath / useMatch ("which section am I in", without the table)
   boundary.tsx      RouteErrorBoundary (the boundary that renders the table's error)
   router.tsx        Router / Outlet / useRoute / useParams
+  tree-pathname.ts  TreePathname, the pathname each tree was applied for (not exported)
   not-found.ts      notFound / isNotFound (the framework answers it; branded, not a class)
   traversal.test.ts serves fixtures/traversal with Vite and opens it top-level
 fixtures/

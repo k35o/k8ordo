@@ -443,6 +443,14 @@ tagged with `addTransitionType` — `navigation`, and one of `navigation-push`,
 `navigation-replace`, `navigation-traverse` — which is what a
 `<ViewTransition>` reads to animate a page change and nothing else (below).
 
+**The page being left keeps its own values.** `<Router>` tells
+`@k8ordo/state`, per tree, the pathname it was applied for, so a page state
+in the page still on screen keeps the values its URL had as it was left,
+while the URL already names the next page; the next page renders with its
+own from its first render. `usePathname()` follows the URL all the same. A
+host of your own built on `useInterceptedNavigation` tells nothing, and a
+page state under it follows the URL.
+
 **A new page starts at the top.** Once the new tree is on screen, the
 viewport goes where a document load would have put it: the top, or the
 element a `#fragment` names. Back and forward are left to the browser, which

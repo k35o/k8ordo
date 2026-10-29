@@ -6,13 +6,18 @@ export const introduction = message({
 });
 
 export const signedTitle = message({
-  ja: 'フレームワークのスクリプト',
-  en: 'The framework’s scripts',
+  ja: 'フレームワークが書くもの',
+  en: 'What the framework writes',
 });
 
 export const signedScripts = message({
   ja: 'フレームワークはポリシーを決めません。フレームワークがHTMLに書くインラインスクリプトを、ハッシュかnonceで許可できるようにするだけです。対象は、ハイドレーションのためにHTMLへ埋め込むペイロードと、Reactのスクリプトです。',
   en: 'The framework sets no policy; the application writes it. The framework only makes the inline scripts it writes into the HTML allowable by hash or nonce: the payload embedded for hydration, and React’s own script.',
+});
+
+export const signedStyle = message({
+  ja: 'フレームワークは`<head>`に中身の無い`<style>`も1つ書きます。Server ComponentのCSSを、Client ComponentのCSSより前に並べるためのものです。この`<style>`も、ハッシュかnonceで許可できます。',
+  en: 'The framework also writes one empty `<style>` into `<head>`, which keeps the Server Components’ CSS before the Client Components’. It is allowable by hash or nonce as well.',
 });
 
 export const staticTitle = message({
@@ -43,6 +48,11 @@ export const optionHash = message({
 export const optionNone = message({
   ja: '`default-src`だけを書いたときは、そこから`script-src`を作って足します。`script-src-elem`を書いたときは、そちらにも足します。どれも書いていなければスクリプトは制限されないので、ハッシュは足しません。',
   en: 'When only `default-src` is given, `script-src` is made from it first. When `script-src-elem` is given, the hashes go there too. With none of them, scripts are not restricted, and no hash is added.',
+});
+
+export const optionStyle = message({
+  ja: "ビルドは`<style>`のハッシュも足します。足す先は`style-src-elem`か`style-src`で、どちらも無ければ`default-src`から`style-src`を作ります。ポリシーが`'unsafe-inline'`で許しているときは足しません。ハッシュと並べると`'unsafe-inline'`が無視され、`style`属性も止まるからです。",
+  en: "The build adds the `<style>`’s hash too, to `style-src-elem` or `style-src`, making `style-src` from `default-src` when neither is given. Where the policy lets it in with `'unsafe-inline'`, no hash is added: beside a hash, `'unsafe-inline'` is ignored, and `style` attributes stop working too.",
 });
 
 export const ownTitle = message({
@@ -88,6 +98,11 @@ export const refusedReportTo = message({
 export const refusedHeaderScripts = message({
   ja: "ヘッダーのポリシーには、ビルドがページごとに足すハッシュが入りません。スクリプトが実行されるのは、ヘッダーと`<meta>`のどちらのポリシーも許したときだけです。ヘッダーの`script-src`（無ければ`default-src`）と`script-src-elem`には、`'self'`と`'unsafe-inline'`を書きます。ハッシュかnonceと並べると、`'unsafe-inline'`は無視されます。`csp`からは`report-to`だけを外し、インラインスクリプトは`<meta>`のハッシュで制限します。",
   en: "A header cannot carry the hashes the build adds page by page, and a script runs only when both the header’s policy and the `<meta>`’s allow it. Let the header’s `script-src` (`default-src` without it) and `script-src-elem` allow `'self'` and `'unsafe-inline'`. Beside a hash or a nonce, `'unsafe-inline'` is ignored. Keep `csp` without `report-to`, so the `<meta>` still restricts inline scripts by hash.",
+});
+
+export const refusedHeaderStyle = message({
+  ja: "`<style>`のハッシュは、どのページでも`'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='`です。スタイルを制限するヘッダーのポリシーにも書けます。",
+  en: "The `<style>`’s hash is `'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='` on every page, so a header that restricts styles can name it.",
 });
 
 export const refusedWhen = message({
@@ -138,6 +153,16 @@ export const signTitle = message({
 export const signProvider = message({
   ja: 'アプリ自身のインラインスクリプトには、同じnonceを付けます。`@k8ordo/color-scheme`なら、ルートレイアウトで`ColorSchemeProvider`に`nonce={nonce()}`を渡します。',
   en: 'The application’s own inline scripts carry the same nonce. For `@k8ordo/color-scheme`, pass `nonce={nonce()}` to `ColorSchemeProvider` in the root layout.',
+});
+
+export const signStyle = message({
+  ja: "フレームワークの`<style>`にも同じnonceが付きます。スタイルを制限するポリシーでは、`style-src`にもnonceを書きます。`vite dev`はCSSを署名の無い`<style>`で足すので、`vite dev`のときは`'unsafe-inline'`を書きます。",
+  en: "The framework’s `<style>` carries the same nonce. A policy that restricts styles names the nonce in `style-src` too. `vite dev` adds CSS as `<style>` elements nothing signs, so under `vite dev` allow `'unsafe-inline'` instead.",
+});
+
+export const signStylePrecedence = message({
+  ja: '`href`と`precedence`を持つ`<style>`は、同じnonceが付いたものだけがHTMLに書かれます。Server Componentで描くものには`nonce={nonce()}`を渡します。Client Componentはnonceを読めないので、そこで描くものはHTMLに書かれません。',
+  en: 'Of the `<style>` elements with `href` and `precedence`, only those carrying the same nonce are written into the HTML. Give one a Server Component renders `nonce={nonce()}`. A Client Component cannot read the nonce, so one it renders is not written into the HTML.',
 });
 
 export const signRender = message({

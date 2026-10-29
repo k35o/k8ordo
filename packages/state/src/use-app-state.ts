@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo, useSyncExternalStore } from 'react';
+import { use, useCallback, useMemo, useSyncExternalStore } from 'react';
 import type { output } from 'zod/v4/core';
 
 import type { CookieState } from './cookie-state';
@@ -18,6 +18,7 @@ import {
   sessionStoreOf,
   storageInitialSnapshot,
 } from './store/storage-store';
+import { TreePathname } from './tree-pathname';
 
 export type AnyState =
   | PageState
@@ -133,13 +134,16 @@ export function useAppState(
     [sig],
   );
 
+  // A page state reads the URL of the tree it renders in, not the address
+  // bar's, which moves on before the next tree is on screen.
+  const tree = def.kind === 'page' ? use(TreePathname) : null;
   const subscribe = useCallback(
-    (notify: () => void) => storeOf(def).subscribe(keys, notify),
-    [def, keys],
+    (notify: () => void) => storeOf(def).subscribe(keys, notify, tree),
+    [def, keys, tree],
   );
   const getSnapshot = useCallback(
-    () => storeOf(def).getSnapshot(sig, keys),
-    [def, sig, keys],
+    () => storeOf(def).getSnapshot(sig, keys, tree),
+    [def, sig, keys, tree],
   );
   const initialUrl = options?.initialUrl;
   const initialCookie = options?.initialCookie;
@@ -161,8 +165,8 @@ export function useAppState(
   const state = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const update = useCallback(
     (patch: Patch, updateOptions?: UpdateOptions) =>
-      storeOf(def).update(patch, updateOptions),
-    [def],
+      storeOf(def).update(patch, updateOptions, tree),
+    [def, tree],
   );
   return [state, update];
 }

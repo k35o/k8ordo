@@ -73,6 +73,20 @@ export const NOT_FOUND_HEADER = 'x-k8ordo-not-found';
 export const NONCE_HEADER = 'x-k8ordo-nonce';
 
 /**
+ * The `href` of the one `<style>` the HTML render writes itself, empty, under
+ * the precedence the RSC plugin links a Server Component's stylesheets with.
+ * React orders the precedences in `<head>` as each is first asked for, and
+ * puts a stylesheet loaded later after the last of its own; asked for first,
+ * this keeps the Server Components' stylesheets before the client
+ * components'. Under mode: 'static' it carries no nonce, and the build names
+ * it by hash where the policy decides a style element.
+ */
+export const STYLESHEET_ORDER_HREF = 'k8ordo-stylesheet-order';
+
+/** The precedence the RSC plugin links a Server Component's stylesheet with. */
+export const SERVER_STYLESHEETS = 'vite-rsc/importer-resources';
+
+/**
  * Said by the handler under mode: 'static' alone, on a shell's HTML and
  * payload: the pattern whose fallback.tsx rendered it. The table walks in its
  * own order, so a shell pathname can be answered by another pattern than the

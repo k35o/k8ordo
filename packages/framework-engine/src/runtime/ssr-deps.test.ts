@@ -10,7 +10,11 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
 import { buildFixture, serveFixture } from '../../fixtures/build';
 import type { BuiltFixture, ServedFixture } from '../../fixtures/build';
 import type { Mode } from '../host';
-import { CLIENT_DEPS_HEADER, readClientDeps } from './payload';
+import {
+  CLIENT_DEPS_HEADER,
+  readClientDeps,
+  STYLESHEET_ORDER_HREF,
+} from './payload';
 import type { ClientDeps } from './payload';
 
 // CI はエンジンごとにジョブを分けて並べるので、TEST_BROWSER で 1 つに絞れる
@@ -148,6 +152,17 @@ const stylesheetsInHead = (
     client.has(href) ? 'client' : 'page',
   );
 };
+
+/** The `<style>` the HTML render writes to order the stylesheets. */
+const orderStyleIn = (html: string): string | undefined =>
+  new RegExp(
+    `<style\\b[^>]*\\sdata-href="${STYLESHEET_ORDER_HREF}"[^>]*>(?:</style>)?`,
+    'u',
+  ).exec(headOf(html))?.[0];
+
+/** The nonce a tag carries, if any. */
+const nonceOf = (tag: string | undefined): string | undefined =>
+  / nonce="([^"]+)"/u.exec(tag ?? '')?.[1];
 
 /** The stylesheets of each client reference the payload names, by reference. */
 const sheetsByReference = (
@@ -475,16 +490,26 @@ describe('the HTML of a file', () => {
     expect(chunks.filter((href) => !preloaded.has(href))).toStrictEqual([]);
   });
 
-  // static は描く前にすべてを歩くので、client コンポーネントの CSS の組が先に
-  // 並ぶ。server ではデータを待つ部分が後に並ぶことがあり、遷移で初めて読む
-  // CSS は head の末尾に足されるので、上書きは詳細度か @layer で決めてもらう
-  it('links, on /styled, the client components’ stylesheets before the page’s own', async () => {
+  // static は描く前にすべての client 参照を頼むので、何もしなければ client
+  // コンポーネントの CSS の組が先に並ぶ。遷移で読むものと同じく後ろに並べる
+  it('links, on /styled, the page’s own stylesheets before the client components’', async () => {
     for (const { html } of await twice('/styled')) {
       expect(stylesheetsInHead(manifest(), html)).toStrictEqual([
-        'client',
         'page',
+        'client',
       ]);
     }
+  });
+
+  // React は style の nonce を渡されると、nonce の無いアプリの
+  // <style precedence> を書かなくなる。ビルドはこの style をハッシュで名指す
+  it('writes the style that orders the stylesheets empty and unsigned, while its scripts are signed', async () => {
+    const [{ html }] = await twice('/styled');
+    const style = orderStyleIn(html);
+
+    expect(style).toMatch(/><\/style>$/u);
+    expect(nonceOf(style)).toBeUndefined();
+    expect(nonceOf(/<script\b[^>]*>/iu.exec(html)?.[0])).toBeDefined();
   });
 
   describe.each(browserTypes)(
@@ -597,6 +622,24 @@ describe('the HTML of a streamed document', () => {
     expect(sheets).toHaveLength(CONTAINED.length);
     expect(linkedIn(cold).length).toBeGreaterThan(0);
     expect(linkedIn(loaded)).toStrictEqual([]);
+  });
+
+  it('links, on /styled, the page’s own stylesheets before the client components’', async () => {
+    for (const { html } of await twice('/styled')) {
+      expect(stylesheetsInHead(manifest(), html)).toStrictEqual([
+        'page',
+        'client',
+      ]);
+    }
+  });
+
+  it('signs the style that orders the stylesheets with the nonce its scripts carry', async () => {
+    for (const { html } of await twice('/styled')) {
+      const script = nonceOf(/<script\b[^>]*>/iu.exec(html)?.[0]);
+
+      expect(script).toBeDefined();
+      expect(nonceOf(orderStyleIn(html))).toBe(script);
+    }
   });
 
   it('says nothing of its client components with the HTML', async () => {

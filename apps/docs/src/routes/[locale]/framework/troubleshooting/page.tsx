@@ -193,6 +193,12 @@ const SYMPTOMS: readonly Symptom[] = [
     fix: t.pageCssFix,
   },
   {
+    id: 'css-order',
+    title: t.cssOrderTitle,
+    cause: t.cssOrderCause,
+    fix: t.cssOrderFix,
+  },
+  {
     id: 'hydration',
     title: t.hydrationTitle,
     cause: t.hydrationCause,

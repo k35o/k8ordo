@@ -13,6 +13,7 @@ import { AppRouter } from './app-router';
 import { noticeCancel } from './cancel';
 import { whenClientReady } from './client-ready';
 import { PageShownContext } from './page-shown';
+import { SERVER_STYLESHEETS, STYLESHEET_ORDER_HREF } from './payload';
 import type { ClientDeps, Payload } from './payload';
 
 type SsrOptions = NonNullable<Parameters<typeof renderToReadableStream>[1]>;
@@ -124,13 +125,28 @@ export async function renderHtml(
   }
   const shown = Promise.withResolvers<undefined>();
   let readerLeft = false;
+  // React は style の nonce を渡されると、同じ nonce を持たない
+  // <style precedence> を書かない。アプリは static では nonce を持てないので、
+  // static では渡さず、ビルドがハッシュで名指す
+  const styleNonce =
+    import.meta.env.K8ORDO_MODE === 'static' ? undefined : nonce;
   const htmlStream = await renderToReadableStream(
     <PageShownContext value={() => shown.resolve(undefined)}>
+      {/* React は precedence の組を最初に頼まれた順に並べ、static は描く前に
+          client 参照の CSS を頼む。遷移で読む client の CSS は head の末尾に、
+          Server Component の CSS は同じ組の最後の後ろに入るので、その組を
+          ここで先に頼めば、どの開き方でも Server Component の CSS が先になる */}
+      <style
+        href={STYLESHEET_ORDER_HREF}
+        precedence={SERVER_STYLESHEETS}
+        nonce={styleNonce}
+      />
       <Root />
     </PageShownContext>,
     {
       bootstrapModules: [clientEntry],
-      nonce,
+      nonce:
+        styleNonce === undefined ? nonce : { script: nonce, style: styleNonce },
       formState: formState as SsrOptions['formState'],
       // React outlines a large boundary even once it is complete — a hidden
       // copy plus a script that moves it in, so a stream can paint what came

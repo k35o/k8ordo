@@ -1,3 +1,4 @@
+import { STYLESHEET_ORDER_HREF } from '@k8ordo/framework-engine';
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
@@ -152,6 +153,51 @@ describe('asFile', () => {
     const html = page(`<script nonce="${NONCE}">signed()</script>`);
     expect(policyOf(asFile(html, NONCE, { 'img-src': ["'self'"] }))).toBe(
       'img-src &apos;self&apos;',
+    );
+  });
+
+  // エンジンの SSR が head に書く、Server Component の CSS を先に並べる style
+  const ordered = `<!DOCTYPE html><html><head><link rel="stylesheet" href="/assets/page.css" data-precedence="vite-rsc/importer-resources"><style data-precedence="vite-rsc/importer-resources" data-href="${STYLESHEET_ORDER_HREF}"></style><title>t</title></head><body></body></html>`;
+  const EMPTY =
+    '&apos;sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=&apos;';
+
+  it.each([
+    [{ 'style-src': ["'self'"] }, `style-src &apos;self&apos; ${EMPTY}`],
+    [
+      { 'default-src': ["'self'"] },
+      `default-src &apos;self&apos;; style-src &apos;self&apos; ${EMPTY}`,
+    ],
+    [
+      { 'style-src': ["'self'"], 'style-src-elem': ["'self'"] },
+      `style-src &apos;self&apos;; style-src-elem &apos;self&apos; ${EMPTY}`,
+    ],
+    [
+      { 'style-src': ["'self'", "'unsafe-inline'", "'sha256-abc='"] },
+      `style-src &apos;self&apos; &apos;unsafe-inline&apos; &apos;sha256-abc=&apos; ${EMPTY}`,
+    ],
+  ])(
+    'names the framework’s empty style by hash where %o decides a style element and would refuse it',
+    (policy, expected) => {
+      expect(policyOf(asFile(ordered, NONCE, policy))).toBe(expected);
+    },
+  );
+
+  it.each([
+    [
+      { 'style-src': ["'self'", "'unsafe-inline'"] },
+      'style-src &apos;self&apos; &apos;unsafe-inline&apos;',
+    ],
+    [{ 'img-src': ["'self'"] }, 'img-src &apos;self&apos;'],
+  ])(
+    'adds no hash where %o lets the style in already, a hash beside an unsafe-inline turning it off',
+    (policy, expected) => {
+      expect(policyOf(asFile(ordered, NONCE, policy))).toBe(expected);
+    },
+  );
+
+  it('adds no style hash to a page without the framework’s style', () => {
+    expect(policyOf(asFile(page(''), NONCE, { 'style-src': ["'self'"] }))).toBe(
+      'style-src &apos;self&apos;',
     );
   });
 

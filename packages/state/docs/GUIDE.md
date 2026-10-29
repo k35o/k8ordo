@@ -557,6 +557,17 @@ and `finished` waits for it to be on screen. On a router that does not intercept
 forms for url changes there, which is this package's preferred grain anyway.
 There is deliberately no history-API fallback.
 
+A page state reads the URL of the page it renders in. Under
+`@k8ordo/router` the URL commits before the next page arrives, and the page
+being left stays on screen until it does: that page keeps the values its
+URL had as it was left, and the next page renders with its own URL's from
+its first render. A move that keeps the pathname is followed at once, and so
+is the URL coming back to the page on screen. An `update()` called from the
+page being left writes nothing — what it shows is no longer the URL's — and
+its `finished` resolves at once. Under a router that does not say which page
+a component renders in (Next.js, or a host of your own built on
+`useInterceptedNavigation`), a page state follows the URL.
+
 Keystrokes do not belong in the URL. Let the DOM or local React state hold
 the draft and call `update()` at commit points — submit, blur, pagination —
 the same division `@k8ordo/form` draws.

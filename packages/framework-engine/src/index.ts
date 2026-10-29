@@ -20,6 +20,7 @@ export {
   NOT_FOUND_HEADER,
   readClientDeps,
   SHELL_HEADER,
+  STYLESHEET_ORDER_HREF,
 } from './runtime/payload';
 export type { ClientDeps } from './runtime/payload';
 export {

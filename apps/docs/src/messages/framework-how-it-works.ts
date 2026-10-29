@@ -46,8 +46,8 @@ export const payloadEmbed = message({
 });
 
 export const payloadSplit = message({
-  ja: '`page.tsx`・`not-found.tsx`・`route.ts`・`fallback.tsx`は、リクエストがそのファイルに届いたときに読みます。そのファイルが描くクライアントコンポーネントと、importしたCSS（Server ComponentのCSS Modulesも）は、そのファイルを描くページだけが読みます。`layout.tsx`・`error.tsx`・`loading.tsx`がimportしたものは、その下のどのページも読みます。',
-  en: '`page.tsx`, `not-found.tsx`, `route.ts` and `fallback.tsx` are read when a request reaches them. The client components such a file renders and the CSS it imports, its Server Components’ CSS Modules included, go only to the pages that render it. What a `layout.tsx`, `error.tsx` or `loading.tsx` imports, every page below it loads.',
+  ja: '`page.tsx`・`not-found.tsx`・`route.ts`・`fallback.tsx`は、リクエストがそのファイルに届いたときに読みます。そのファイルが描くClient Componentと、importしたCSS（Server ComponentのCSS Modulesも）は、そのファイルを描くページを開いたときに読みます。Client Componentは、そのページへのリンクを先読みしたときにも読みます。`layout.tsx`・`error.tsx`・`loading.tsx`がimportしたものは、その下のどのページも読みます。',
+  en: '`page.tsx`, `not-found.tsx`, `route.ts` and `fallback.tsx` are read when a request reaches them. The Client Components such a file renders and the CSS it imports, its Server Components’ CSS Modules included, are loaded when a page that renders it is opened. The Client Components are loaded as well when a link to such a page is fetched ahead. What a `layout.tsx`, `error.tsx` or `loading.tsx` imports, every page below it loads.',
 });
 
 export const payloadReady = message({
@@ -128,6 +128,10 @@ export const guaranteesList = [
     ja: '描画に設定するロケールは、そのURLから`paramsSchema`が受け付けたものだけです。拒まれたパターンで受け付けたロケールも、同じビルドで先に描画したページのロケールも引き継ぎません。',
     en: 'The only locale a render is given is the one `paramsSchema` accepted from its URL. A locale accepted for a pattern that was then refused does not carry over, and neither does the locale of a page the same build rendered earlier.',
   }),
+  message({
+    ja: '`<head>`では、Server ComponentのCSSがClient ComponentのCSSより前に並び、その先頭はルートレイアウトのCSSです。文書として開いたときも、クライアント側の遷移で移ったときも、serverモードでシェルのあとに流れる部分でも同じです。',
+    en: 'In `<head>`, the Server Components’ CSS comes before the Client Components’ CSS, the root layout’s first. That holds for a page loaded as a document, one reached by a client navigation, and what streams after the shell under server mode.',
+  }),
 ] as const;
 
 export const nonGuaranteesTitle = message({
@@ -163,5 +167,13 @@ export const nonGuaranteesList = [
   message({
     ja: 'serverモードでは、propsの`Map`・`Set`・Promise・イテレーター・非同期イテラブル・`ReadableStream`に入れただけで描かないクライアントコンポーネントのCSSとJSは、そのプロセスで最初にそのモジュールを読んだ要求のHTMLにしか書かれません。',
     en: 'Under server mode, the CSS and JS of a client component that is only held in a prop’s `Map`, `Set`, promise, iterator, async iterable or `ReadableStream`, and never rendered, are written only into the HTML of the request that first loads its module in the process.',
+  }),
+  message({
+    ja: 'Client ComponentのCSS同士の順は保証しません。staticモードのファイルはRSCの描画が名指した順に、クライアント側の遷移は読み終えた順に並べます。',
+    en: 'The order among the Client Components’ CSS is not guaranteed. A static file lists it in the order the RSC render named it, and a client navigation adds each as it loads.',
+  }),
+  message({
+    ja: '一度読んだCSSは外しません。前のページで読んだCSSも、リンクの先読みで読んだClient ComponentのCSSも、そのタブで移った先のページに当たります。',
+    en: 'CSS once loaded is never taken out. What an earlier page loaded, and the Client Components’ CSS a link fetched ahead loaded, apply to every page the tab moves to.',
   }),
 ] as const;

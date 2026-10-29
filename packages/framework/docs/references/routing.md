@@ -101,7 +101,9 @@ as it checks every route file's.
 **Each page loads its own.** `page.tsx`, `not-found.tsx`, `route.ts` and
 `fallback.tsx` are imported when a request reaches them, so the client
 components each renders and the CSS each imports — its Server Components'
-CSS Modules included — go only to the pages that render it. What a
+CSS Modules included — are loaded only once a page renders it, or, for a
+client component, once a link to such a page is fetched ahead
+([Fetching the next page ahead](#fetching-the-next-page-ahead)). What a
 `layout.tsx`, `error.tsx` or `loading.tsx` imports, every page below it
 loads: import CSS every page needs in the root layout. A route file imported
 from anywhere else — a layout importing an export of a page — is in every
@@ -126,6 +128,28 @@ it arrives.
 **Under `mode: 'static'` a file is written whole.** The build waits for every
 `<Suspense>` boundary on the page and writes each in place, so a file never
 carries a hole for a script to fill after hydration has started.
+
+**A Server Component's stylesheet comes before a client component's.** In
+`<head>`, every stylesheet Server Components import — the root layout's
+first — comes before every one client components import, however the page
+was reached: loaded as a document, by a client navigation, or streamed after
+the shell under `mode: 'server'`. Where two rules of equal specificity set
+the same property on one element, the client component's wins. To have a
+Server Component's win, give it a higher specificity, or put the two in
+cascade layers and declare their order at the top of the CSS the root layout
+imports, the first file in `<head>` to name them:
+
+```css
+/* src/styles/globals.css */
+@layer base, components, overrides;
+```
+
+No order is kept among client components' stylesheets: a file lists them in
+the order the render named them, and a client navigation adds each as it
+loads. Nor is one taken out: a stylesheet a page loaded, or a link fetched
+ahead, applies to every page after it in the tab. Keep the selectors of the
+CSS a page or a client component imports to its own elements — a CSS
+Module's classes — and import what every page needs in the root layout.
 
 ## What the build refuses
 
@@ -509,7 +533,10 @@ The client runtime listens on the whole document for a pointer moving onto a
 link, a link taking focus, and a press starting on one — `pointerover`,
 `focusin` and `pointerdown` — and fetches that page's payload there and then,
 so a click often finds the page already in hand. Nothing needs wiring: any
-`<a>` counts, the ones a component library renders included.
+`<a>` counts, the ones a component library renders included. The fetch
+loads the client components that page renders, as a navigation would, and
+with them their stylesheets, which apply to the page on screen from then on
+([How a page is sent](#how-a-page-is-sent)).
 
 Only a link a click would load in place is fetched: the same origin and below
 Vite's `base`, no `download`, no `target` other than `_self`, and not the

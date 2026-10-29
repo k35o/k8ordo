@@ -383,12 +383,13 @@ describe('the static build', () => {
     '404.html',
     'en/posts/!fallback/index.html',
   ])(
-    'writes the application’s policy first in the <head> of %s, naming each inline script by hash',
+    'writes the application’s policy first in the <head> of %s, naming each inline script and the framework’s style by hash',
     (file) => {
       const html = read(file);
       const policy = policyFirstIn(html);
+      // style-src のハッシュは、head の CSS の並びを決める中身の無い style
       expect(policy).toMatch(
-        /^script-src 'self'( 'sha256-[A-Za-z0-9+/]{43}=')+; object-src 'none'; base-uri 'none'$/u,
+        /^script-src 'self'( 'sha256-[A-Za-z0-9+/]{43}=')+; style-src 'self' 'sha256-47DEQpj8HBSa\+\/TImW\+5JCeuQeRkm5NMpJWZG3hSuFU='; object-src 'none'; base-uri 'none'$/u,
       );
       const inline = inlineScriptsIn(html);
       // color-scheme と、書き込んだペイロード
@@ -966,6 +967,79 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
       .toStrictEqual(['first product']);
     expect(new URL(page.url()).search).toBe('?q=first');
     expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
+    await page.close();
+  });
+
+  // ルーターは URL を先に確定させ、次のページが届くまで前のページを画面に
+  // 残す。そのあいだの一覧は、離れる前の URL の値で描く
+  const holdProduct = async (page: Page): Promise<() => void> => {
+    const { promise, resolve } = Promise.withResolvers<undefined>();
+    await page.route('**/products/2/index.rsc*', async (route) => {
+      await promise;
+      await route.continue();
+    });
+    return () => {
+      resolve(undefined);
+    };
+  };
+  const itemsOf = (page: Page): Promise<string[]> =>
+    page.getByTestId('list').getByRole('listitem').allTextContents();
+
+  it('keeps the filtered list on screen while the next page loads, and comes back to it filtered', async () => {
+    const page = await browser.newPage();
+    const release = await holdProduct(page);
+    await page.goto(`${origin}/products?q=second`);
+    await expect
+      .poll(() => itemsOf(page), { timeout: 10_000 })
+      .toStrictEqual(['second product']);
+
+    await page.getByRole('link', { name: 'second product' }).click();
+    await page.waitForURL(`${origin}/products/2`);
+    expect({
+      items: await itemsOf(page),
+      filter: await page.getByLabel('filter').inputValue(),
+    }).toStrictEqual({ items: ['second product'], filter: 'second' });
+
+    release();
+    await page.getByTestId('product-id').waitFor();
+    // 戻るときは、一覧が DOM に入った最初の時点から絞ってある。DOM が
+    // 替わるたびに一覧の件数を数え、全件（2 件）が一度も現れないことを見る
+    await page.evaluate(() => {
+      const seen: number[] = [];
+      Object.assign(window, { seen });
+      new MutationObserver(() => {
+        seen.push(document.querySelectorAll('[data-testid="list"] li').length);
+      }).observe(document, { subtree: true, childList: true });
+    });
+    await page.goBack();
+    await expect.poll(() => itemsOf(page)).toStrictEqual(['second product']);
+    expect(
+      await page.evaluate(() =>
+        (window as unknown as { seen: number[] }).seen.filter((n) => n > 1),
+      ),
+    ).toStrictEqual([]);
+    await page.close();
+  });
+
+  it('shows the whole list again when a link to it is followed while the next page loads', async () => {
+    const page = await browser.newPage();
+    const release = await holdProduct(page);
+    await page.goto(`${origin}/products?q=second`);
+    await expect
+      .poll(() => itemsOf(page), { timeout: 10_000 })
+      .toStrictEqual(['second product']);
+    await page.getByRole('link', { name: 'second product' }).click();
+    await page.waitForURL(`${origin}/products/2`);
+
+    // 一覧の上に残っているナビの products は、q の無い同じ一覧へのリンク
+    await page.getByRole('link', { name: 'products', exact: true }).click();
+
+    await page.waitForURL(`${origin}/products`);
+    await expect
+      .poll(() => itemsOf(page))
+      .toStrictEqual(['first product', 'second product']);
+    expect(await page.getByLabel('filter').inputValue()).toBe('');
+    release();
     await page.close();
   });
 

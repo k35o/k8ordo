@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 
+import { STYLESHEET_ORDER_HREF } from '@k8ordo/framework-engine';
 import type { ClientDeps } from '@k8ordo/framework-engine';
 
 const escapeMarkup = (value: string): string =>
@@ -86,6 +87,25 @@ const elementDirectivesOf = (
 };
 
 /**
+ * What decides a style element: `style-src-elem`, `style-src`, or
+ * `default-src` without either.
+ */
+const styleElementDirectiveOf = (
+  policy: ContentSecurityPolicy,
+): [string, readonly string[]] | null => {
+  for (const name of ['style-src-elem', 'style-src', 'default-src']) {
+    const sources = policy[name];
+    if (sources !== undefined) return [name, sources];
+  }
+  return null;
+};
+
+// ハッシュか nonce が 1 つでもあれば、ブラウザは 'unsafe-inline' を無視する
+const allowsInline = (sources: readonly string[]): boolean =>
+  sources.includes("'unsafe-inline'") &&
+  !sources.some((source) => /^'(?:nonce|sha256|sha384|sha512)-/u.test(source));
+
+/**
  * What would make a policy wrong to write into every page, named at once:
  * a directive that works only from a header, a source that is not one, and
  * `'strict-dynamic'`, under which the framework's module script — allowed by
@@ -121,6 +141,12 @@ export const policyProblems = (policy: ContentSecurityPolicy): string[] => {
 // 終わりは HTML の読み方どおり、大文字小文字を問わず `</script` の後に空白・`/`・`>`
 const SCRIPT = /<script\b([^>]*)>([\s\S]*?)<\/script[\s/>]/giu;
 
+// React が書く中身の無い style。中身はその後ろの </style> まで
+const ORDER_STYLE = new RegExp(
+  `<style\\b[^>]*\\sdata-href="${STYLESHEET_ORDER_HREF}"[^>]*>([^<]*)</style>`,
+  'u',
+);
+
 // ブラウザは改行を LF に揃えてからハッシュを取る
 const hashOf = (source: string): string =>
   `'sha256-${createHash('sha256')
@@ -133,11 +159,16 @@ const hashOf = (source: string): string =>
  * `script-src-elem` when given, which overrides the rest for elements, and
  * `script-src`, made from `default-src` when only that was given (hashes
  * there would also turn off `'unsafe-inline'` for styles). None of them
- * given, scripts are not restricted, and nothing is added.
+ * given, scripts are not restricted, and nothing is added. The style hash
+ * goes where a style element is decided, made into `style-src` from
+ * `default-src` likewise, and only where the policy would refuse the style:
+ * beside an `'unsafe-inline'` that allows it, a hash would turn it off for
+ * every style attribute too.
  */
 const serialize = (
   policy: ContentSecurityPolicy,
   hashes: readonly string[],
+  styleHash: string | null,
 ): string => {
   const directives = new Map(Object.entries(policy));
   if (hashes.length > 0) {
@@ -145,6 +176,14 @@ const serialize = (
       const into = name === 'default-src' ? 'script-src' : name;
       directives.set(into, [...sources, ...hashes]);
     }
+  }
+  const styles = styleElementDirectiveOf(policy);
+  if (styleHash !== null && styles !== null && !allowsInline(styles[1])) {
+    const [name, sources] = styles;
+    directives.set(name === 'default-src' ? 'style-src' : name, [
+      ...sources,
+      styleHash,
+    ]);
   }
   return [...directives]
     .map(([name, sources]) => [name, ...sources].join(' '))
@@ -156,9 +195,10 @@ const serialize = (
  * — the payload, React's — with a nonce, and a file cannot carry one:
  * everyone reads the same file, so the nonce is taken off. With a policy,
  * what it signed is named by hash instead, in a `<meta>` ahead of everything
- * the page loads; an inline script of the application's is the
- * application's to allow, by its hash in that policy, and one that reached
- * the page from content is refused.
+ * the page loads, and so is the framework's one `<style>`, which keeps the
+ * Server Components' stylesheets first; an inline script of the
+ * application's is the application's to allow, by its hash in that policy,
+ * and one that reached the page from content is refused.
  */
 export const asFile = (
   html: string,
@@ -181,8 +221,10 @@ export const asFile = (
       'the "csp" option needs a <head> to put its <meta> in, and this page has none',
     );
   }
+  const order = ORDER_STYLE.exec(unsigned);
+  const styleHash = order === null ? null : hashOf(order[1] ?? '');
   const at = head.index + head[0].length;
-  const meta = `<meta http-equiv="Content-Security-Policy" content="${escapeMarkup(serialize(policy, [...hashes]))}">`;
+  const meta = `<meta http-equiv="Content-Security-Policy" content="${escapeMarkup(serialize(policy, [...hashes], styleHash))}">`;
   return `${unsigned.slice(0, at)}${meta}${unsigned.slice(at)}`;
 };
 
