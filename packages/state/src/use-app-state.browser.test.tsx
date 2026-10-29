@@ -1,4 +1,4 @@
-import type { FC, ReactElement } from 'react';
+import type { Context, FC, ReactElement, ReactNode } from 'react';
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
@@ -1459,4 +1459,152 @@ it('a cookie a failing migrate cannot turn stays as it was', async () => {
   } finally {
     await cookieStore.delete(failing.cookieName);
   }
+});
+
+// 介入する router は URL を先に確定させ、次の木は後で当てる。ここでは router
+// が木ごとに配る pathname を、@k8ordo/router と同じ名前の context で自分で配り、
+// URL だけを別の pathname へ進める
+const TreePathname = (globalThis as Record<symbol, Context<string | null>>)[
+  Symbol.for('@k8ordo/router/tree-pathname')
+] as Context<string | null>;
+
+const InTree: FC<{ pathname: string; children: ReactNode }> = ({
+  pathname,
+  children,
+}) => <TreePathname value={pathname}>{children}</TreePathname>;
+
+/** The pathname as the router names a tree: a trailing slash is the same page. */
+const treeOf = (pathname: string): string =>
+  pathname.length > 1 ? pathname.replace(/\/+$/u, '') : pathname;
+
+const at = (pathname: string, q?: string): string => {
+  const url = new URL(home);
+  url.pathname = pathname;
+  if (q !== undefined) url.searchParams.set('q', q);
+  return url.href;
+};
+
+const QueryWriter: FC = () => {
+  const [{ q }, update] = useAppState(listState, ['q']);
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        lastHandle = update({ q: `${q}x` });
+      }}
+    >
+      type
+    </button>
+  );
+};
+
+// 読む鍵を替えると、部品は購読を外してから付け直す
+const QueryOfKeys: FC<{ every: boolean }> = ({ every }) => {
+  const [{ q }] = useAppState(listState, every ? ['q', 'page'] : ['q']);
+  return <p data-testid="q">{q}</p>;
+};
+
+it('keeps the values of the URL a tree was left from while the URL already names the next page', async () => {
+  const list = treeOf(location.pathname);
+  await navigation.navigate(at(list, 'shoes'), { history: 'replace' }).finished;
+  const screen = await render(
+    <InTree pathname={list}>
+      <QueryViewer />
+    </InTree>,
+  );
+  await expect.element(screen.getByTestId('q')).toHaveTextContent('shoes');
+
+  await navigation.navigate(at('/next')).finished;
+
+  expect(screen.getByTestId('q').element().textContent).toBe('shoes');
+  // 次の木は、URL が今名指すページの値を読む
+  await screen.rerender(
+    <InTree pathname="/next">
+      <QueryViewer />
+    </InTree>,
+  );
+  await expect.element(screen.getByTestId('q')).toHaveTextContent('');
+});
+
+it('follows a search change in the tree on screen at once, under a router that provides the tree', async () => {
+  const list = treeOf(location.pathname);
+  const screen = await render(
+    <InTree pathname={list}>
+      <QueryViewer />
+    </InTree>,
+  );
+
+  await navigation.navigate(at(list, 'boots')).finished;
+
+  await expect.element(screen.getByTestId('q')).toHaveTextContent('boots');
+});
+
+it('follows the URL wherever no router provides the tree', async () => {
+  const list = treeOf(location.pathname);
+  await navigation.navigate(at(list, 'shoes'), { history: 'replace' }).finished;
+  const screen = await render(<QueryViewer />);
+  await expect.element(screen.getByTestId('q')).toHaveTextContent('shoes');
+
+  await navigation.navigate(at('/next')).finished;
+
+  await expect.element(screen.getByTestId('q')).toHaveTextContent('');
+});
+
+it('comes back to the URL as soon as the URL returns to the tree on screen, even with the values it was left for', async () => {
+  const list = treeOf(location.pathname);
+  await navigation.navigate(at(list, 'shoes'), { history: 'replace' }).finished;
+  const screen = await render(
+    <InTree pathname={list}>
+      <QueryViewer />
+    </InTree>,
+  );
+  await expect.element(screen.getByTestId('q')).toHaveTextContent('shoes');
+  await navigation.navigate(at('/next')).finished;
+  expect(screen.getByTestId('q').element().textContent).toBe('shoes');
+
+  // 次のページが届く前に、q の無い同じ一覧へ戻る。行き先も q は無い
+  await navigation.navigate(at(list)).finished;
+
+  await expect.element(screen.getByTestId('q')).toHaveTextContent('');
+});
+
+it('drops a write from a tree being left: the URL and the next page stay as they were', async () => {
+  const list = treeOf(location.pathname);
+  await navigation.navigate(at(list, 'shoes'), { history: 'replace' }).finished;
+  const screen = await render(
+    <InTree pathname={list}>
+      <QueryViewer />
+      <QueryWriter />
+    </InTree>,
+  );
+  await expect.element(screen.getByTestId('q')).toHaveTextContent('shoes');
+  await navigation.navigate(at('/next')).finished;
+  const before = navigations;
+
+  await screen.getByRole('button', { name: 'type' }).click();
+  await lastHandle?.finished;
+
+  expect(location.href).toBe(at('/next'));
+  expect(navigations).toBe(before);
+  expect(screen.getByTestId('q').element().textContent).toBe('shoes');
+});
+
+it('keeps the values a tree was left with when a component in it subscribes again', async () => {
+  const list = treeOf(location.pathname);
+  await navigation.navigate(at(list, 'shoes'), { history: 'replace' }).finished;
+  const screen = await render(
+    <InTree pathname={list}>
+      <QueryOfKeys every={false} />
+    </InTree>,
+  );
+  await expect.element(screen.getByTestId('q')).toHaveTextContent('shoes');
+  await navigation.navigate(at('/next')).finished;
+
+  await screen.rerender(
+    <InTree pathname={list}>
+      <QueryOfKeys every />
+    </InTree>,
+  );
+
+  expect(screen.getByTestId('q').element().textContent).toBe('shoes');
 });

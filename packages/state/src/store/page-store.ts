@@ -2,7 +2,7 @@ import type { PageInternals, PageState } from '../page-state';
 import { isRecord, sameValue } from '../schema/object';
 import type { StateValues } from '../schema/object';
 import { createHandle, createStoreCore, resolvePatch } from './core';
-import type { Handle, Patch, Store, UpdateHandle } from './core';
+import type { Frozen, Handle, Patch, Store, UpdateHandle } from './core';
 import { getOrCreateStore } from './registry';
 
 export type UpdateOptions = {
@@ -32,19 +32,54 @@ const readLive = (def: PageState, page: PageInternals): StateValues => {
   return live;
 };
 
+/**
+ * The URL's pathname as the router compares a tree's: a trailing slash is
+ * not another page. `@k8ordo/router`'s `normalizePathname`, spelled again —
+ * the router is a peer this package only reads types from.
+ */
+const livePathname = (): string => {
+  const { pathname } = location;
+  let end = pathname.length;
+  while (end > 1 && pathname.charAt(end - 1) === '/') end -= 1;
+  return pathname.slice(0, end);
+};
+
 const createPageStore = (def: PageState, page: PageInternals): Store => {
   const core = createStoreCore(page.keys, readLive(def, page));
+
+  // An intercepting router commits the URL before the next tree arrives, and
+  // the tree on screen meanwhile reads the values the URL had as it was left:
+  // what the URL holds is the next page's. Kept per tree pathname, only for
+  // trees something reads from, and dropped when the URL comes back.
+  let at = livePathname();
+  const left = new Map<string, Frozen>();
+  const bound = new Map<string, number>();
 
   let pending: StateValues | null = null;
   let pendingPush = false;
   let handle: Handle | null = null;
 
   const sync = (): void => {
+    const pathname = livePathname();
+    let returned = false;
+    if (pathname !== at) {
+      if ((bound.get(at) ?? 0) > 0) left.set(at, core.freeze());
+      returned = left.delete(pathname);
+      at = pathname;
+      // 購読が外れた時点では捨てない。部品が購読を付け直すと 0 を通り、
+      // 画面に残る木が取っておいた値を失う
+      for (const tree of left.keys()) {
+        if (!bound.has(tree)) left.delete(tree);
+      }
+    }
     const live = readLive(def, page);
     // A concurrent platform event (another store's write landing, a
     // traversal) must not roll back a batch that has not flushed yet: the
     // pending patch stays on top of whatever became true.
     core.applyNext(pending === null ? live : { ...live, ...pending });
+    // 戻った木は取っておいた値を読んでいた。URL の値が行き先のものと同じなら
+    // applyNext は誰にも知らせないので、ここで読み直させる
+    if (returned) core.touch();
   };
   navigation.addEventListener('currententrychange', sync);
 
@@ -134,7 +169,20 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
     }
   };
 
-  const update = (patch: Patch, options?: UpdateOptions): UpdateHandle => {
+  const update = (
+    patch: Patch,
+    options?: UpdateOptions,
+    tree?: string | null,
+  ): UpdateHandle => {
+    // A tree being left shows the values it was left with, not the URL's:
+    // written, they would land on the next page's URL, which never showed
+    // them, and load it again. A batch that ends where it started settles
+    // the same way.
+    if (tree !== undefined && tree !== null && tree !== at) {
+      const dropped = createHandle();
+      dropped.settle();
+      return dropped.external;
+    }
     const resolved = resolvePatch(patch, core.snapshot(), page.keys, def.key);
     // The echo is synchronous AND canonical: the merged state goes through
     // the schema right here, by the same road a URL arrival takes, so the
@@ -162,12 +210,42 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
     return (handle as Handle).external;
   };
 
+  const subscribe: Store['subscribe'] = (keys, notify, tree) => {
+    const unsubscribe = core.subscribe(keys, notify);
+    if (tree === undefined || tree === null) return unsubscribe;
+    bound.set(tree, (bound.get(tree) ?? 0) + 1);
+    return () => {
+      unsubscribe();
+      const rest = (bound.get(tree) ?? 1) - 1;
+      if (rest > 0) bound.set(tree, rest);
+      else bound.delete(tree);
+    };
+  };
+
+  const getSnapshot: Store['getSnapshot'] = (sig, keys, tree) => {
+    const held =
+      tree === undefined || tree === null || tree === at
+        ? undefined
+        : left.get(tree);
+    if (held === undefined) return core.getSnapshot(sig, keys);
+    if (keys === null) return held.values;
+    let pick = held.picks.get(sig);
+    if (pick === undefined) {
+      pick = {};
+      for (const key of keys) pick[key] = held.values[key];
+      held.picks.set(sig, pick);
+    }
+    return pick;
+  };
+
   return {
-    subscribe: core.subscribe,
-    getSnapshot: core.getSnapshot,
+    subscribe,
+    getSnapshot,
     update,
     dispose: () => {
       navigation.removeEventListener('currententrychange', sync);
+      left.clear();
+      bound.clear();
       core.clear();
     },
   };

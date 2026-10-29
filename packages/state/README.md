@@ -40,7 +40,9 @@ pnpm add @k8ordo/state zod
 
 The schema ships to the browser here — the client parses and serializes with
 it — so reach for `zod/mini` unless the app already pays for classic `zod`.
-`@k8ordo/router` is a type-only peer: it is never loaded at runtime.
+`@k8ordo/router` is a type-only peer: it is never loaded at runtime. Under
+it, `@k8ordo/framework` included, a page state keeps the values of the page
+on screen while the next one loads.
 
 ## Quick Start
 
