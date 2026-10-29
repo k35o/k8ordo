@@ -175,8 +175,8 @@ export const searchSplit = message({
 });
 
 export const searchRender = message({
-  ja: 'サーバー側の描画には`url`の置き場所の既定値が使われ、ハイドレーションで実際のURLの値に変わります。クエリだけが変わってもページは変わらないので、再マウントもスクロールの移動も起きません。',
-  en: 'The server render shows the defaults of the `url` slot, and the real URL takes over on hydration. Changing only the query does not change the page: nothing remounts, and the scroll position stays.',
+  ja: 'サーバー側の描画には`url`の置き場所の既定値が使われ、ハイドレーションで実際のURLの値に変わります。クエリだけが変わってもページは変わらないので、再マウントもスクロールの移動も起きません。戻ると進むでは、そのエントリを離れたときの位置に戻ります。',
+  en: 'The server render shows the defaults of the `url` slot, and the real URL takes over on hydration. Changing only the query does not change the page: nothing remounts, and the scroll position stays. Back and forward return to where that entry was left.',
 });
 
 export const searchMode = message({

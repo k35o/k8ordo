@@ -113,7 +113,8 @@ const [{ q }, update] = useAppState(listState, ['q']);
 
 Changing the search does not change the page: the router leaves the route tree
 alone, nothing remounts, and the scroll position stays where the reader left
-it.
+it. Going back or forward to an entry with another search restores the
+position that entry was left at, as for any other entry.
 
 A page never sees the search: `useAppState` reads it in the browser, so a
 server render shows the url slot's defaults and the live URL takes over on
@@ -149,7 +150,9 @@ It receives that slot, parsed as `listState.parseUrl` parses it, as `search`
 component's `useAppState` as `initialUrl`, so the first render agrees with
 the URL. Because the page is rendered for the search it was given, a
 navigation that moves the search loads it again, in place: no scroll, no
-focus reset, nothing remounted. The generated table reads it through
+focus reset, nothing remounted — but for going back or forward, where the
+browser restores the position that entry was left at once the page loaded
+again is on screen. The generated table reads it through
 `@k8ordo/state`, so the application depends on that. A layout never
 receives it.
 

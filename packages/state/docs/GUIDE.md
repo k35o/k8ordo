@@ -263,7 +263,9 @@ rejected field salvaged — and, because the page is rendered for the search it
 was given, a navigation that moves the search loads that page again: a GET
 form, a link, or a url `update()`. That load is a state change otherwise — no
 scroll, no focus reset, nothing remounts — and `update().finished` settles
-once the page is on screen with the new search. The router's usual shortcut,
+once the page is on screen with the new search. Going back or forward to
+another search of the page loads it again too, and then the browser restores
+the position that entry was left at. The router's usual shortcut,
 a same-pathname navigation that loads nothing, still holds for every page
 that did not declare `search`, and for a search that did not move.
 
@@ -547,7 +549,8 @@ navigation that keeps the pathname is a state change and not a page change:
 the router intercepts it without a load, nothing remounts, and scroll and
 focus stay where they are. `finished` therefore resolves once that navigation
 settles, with no fetch or render behind it, since `update()` already rendered
-the new values — unless the page showing exports `search` in
+the new values. Back and forward to such an entry restore the position it
+was left at, once the page has rendered that entry's values — unless the page showing exports `search` in
 server mode and the search moved: then the page loads again, in place,
 and `finished` waits for it to be on screen. On a router that does not intercept the Navigation API
 (Next.js today), the same call is a full document load: use links and GET

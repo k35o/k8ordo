@@ -35,10 +35,12 @@ pnpm check         # check:write to auto-fix
   painted. Layout, not passive: with a `<ViewTransition>` in the tree React
   holds the new snapshot until the platform's pending navigation has
   finished and runs passive effects only after the animation, so a passive
-  resolver would wait on itself. A same-pathname navigation (`@k8ordo/state`'s
-  url `update()`) is intercepted without a handler, so its `finished`
-  settles as soon as the navigation commits, with no render behind it —
-  state's GUIDE promises that, so keep the shortcut handler-free.
+  resolver would wait on itself. A same-pathname push or replace
+  (`@k8ordo/state`'s url `update()`) is intercepted without a handler, so
+  its `finished` settles as soon as the navigation commits, with no render
+  behind it — state's GUIDE promises that, so keep the shortcut
+  handler-free (`traversal.test.ts` holds it). A same-pathname traversal is
+  the one with a handler, below.
 - **A page change never joins an async action.** `apply` is an urgent
   update and the host renders it through `useDeferredValue`; the hook's own
   `generation` is deferred beside it, so `finished` resolves in the deferred
@@ -60,11 +62,14 @@ pnpm check         # check:write to auto-fix
 - **A state change is not a page change.** Same pathname as the tree ON
   SCREEN ⇒ intercept with `scroll: 'manual'`, `focusReset: 'manual'`, no
   load, no apply — unless the host's `refresh(url)` says the page showing
-  reads what moved, when it loads and applies with the same manual scroll and
-  focus, no scroll plan and no transition types. Not `location.pathname`: interception commits the URL
+  reads what moved, when it loads and applies with the same manual focus,
+  no scroll plan and no transition types. Not `location.pathname`: interception commits the URL
   before the tree arrives, so comparing against the address bar makes a
   state update during a pending load abort that load and strand the old page
-  under the new URL (regression test in `router.browser.test.tsx`).
+  under the new URL (regression test in `router.browser.test.tsx`). Going
+  back or forward is the exception, below — unless it goes back to the
+  entry whose page is on screen while a page change loads
+  (`onScreenEntry`): that calls the change off, and keeps the position.
 - **A tree knows the pathname it was applied for.** `<Router>` applies the
   match together with the pathname it was loaded for, so the deferred value
   that puts a tree on screen moves both in one commit, and provides that
@@ -82,7 +87,42 @@ pnpm check         # check:write to auto-fix
   resolves `finished` also places the viewport: top for push/replace, the
   fragment's element when the URL names one, nothing for a traversal (the
   browser restores). `scroll: 'manual'` is passed for exactly the cases this
-  hook scrolls itself, so the platform and the hook never both act.
+  hook scrolls itself, so the platform and the hook never both act. A
+  traversal keeps the default whether it changes the page, loads one in
+  place, or only moves the search or the entry state: then nothing is
+  applied, but the page renders the entry it arrived at, through
+  `useDeferredValue` one commit after the urgent one, and restored before
+  that commit the position would land on the previous entry's layout. So
+  that traversal is intercepted with a handler that settles in the commit
+  of `traversed`, deferred beside the page's own values. Both the
+  `pending` entry and `setTraversed` are made in the `navigate` listener,
+  not in the handler: it runs before `currententrychange`, so the page's
+  own update (Sync or Default, as `@k8ordo/state`'s url field gives it)
+  and the router's render together and share one deferred lane, whatever
+  the engine's order of handler and `currententrychange`, and the handler
+  returns the promise made there (Firefox may call it twice). Firefox
+  restores a traversal's position as it commits, at `popstate`, waiting
+  for no handler and reading no `scroll` option: within a page that lands
+  on the previous entry's layout, and scroll anchoring then moves it as the
+  deferred render grows or shrinks the page. So from the `navigate` event
+  until that traversal settles — or is aborted — the router holds
+  anchoring off (`overflow-anchor: none` on the root element, counted
+  across traversals, the previous inline value put back once a layout has
+  been computed with it off — anchoring acts as a layout is computed, and
+  the settling commit's comes after its layout effects), for a traversal
+  in place and one that loads again; the other engines restore only after
+  the handler settles, where the anchoring held off changes nothing. A
+  traversal back to the page on screen, which keeps the position, is
+  restored by Firefox all the same, `scroll: 'manual'` or not, before the
+  task that dispatched `popstate` ends; so the router puts the position the
+  visitor had back in the next task (`keepPosition`, a `setTimeout` — a
+  frame callback never runs in a hidden tab), unless another navigation
+  moved the entry on. The other engines leave it, so there it is already
+  where it was.
+  `traversal.test.ts` holds that `finished` sees the entry's own render and
+  the position comes back onto it, for a traversal in place and one that
+  loads again, and that a traversal back to the page on screen keeps where
+  the visitor scrolled it.
 - **`useMatch` reads the platform, never the table.** It is `matchPath` over
   `usePathname`, which is why it works under the framework where `useRoute`
   cannot; `/*` on a table pattern is the one extension of the grammar it
