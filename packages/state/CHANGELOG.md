@@ -1,5 +1,19 @@
 # @k8ordo/state
 
+## 1.3.0
+
+### Patch Changes
+
+- ページの状態（`definePageState`）が、それを描くページのURLの値を読むようにしました。`@k8ordo/router`と`@k8ordo/framework`はURLを先に確定させ、次のページが届くまで前のページを画面に残します。これまでは、そのあいだ画面に残るページも次のページのURLの値で描かれ、絞り込んだ一覧が全件に戻るなど、離れる前と違う表示になっていました。
+
+  - 次のページは、これまでどおり最初の描画から自分のURLの値で描かれます。pathnameが同じ遷移（`update()`、戻る・進む、GETフォーム）には、これまでどおりすぐに従います。
+  - 読み込み中にURLが画面のページへ戻ったときは、そのURLの値に戻ります。
+  - 読み込み中に、離れていくページで呼んだ`update()`は何も書かず、`finished`はすぐに解決します。これまでは次のページのURLに書き、次のページを読み込み直していました。
+  - 画面のページを知らせないルーター（Next.jsや、`useInterceptedNavigation`で作った自前のホスト）の下では、これまでどおりURLに従います。
+  - `@k8ordo/router`と`@k8ordo/framework`もこの版に上げてください。どの木がどのpathnameのものかは、その2つが知らせます。
+
+- `useAppState`が、種類ごとのストアをすべてimportしないようにしました。定義（`definePageState`、`defineLocalState`など）が自分の種類のストアを結び、`useAppState`はそれを引くだけです。これまでは、たとえば`defineLocalState`だけを使うモジュールにも、ページとCookieのストア、`definePageState`、URLのコーデックが一緒に載っていました。公開のAPIは変わりません。
+
 ## 1.2.1
 
 ## 1.2.0

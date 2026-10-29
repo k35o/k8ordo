@@ -65,6 +65,14 @@
   dir: packages/framework
   intents:
     - framework-ssr-client-deps
+"@k8ordo/framework@1.3.0":
+  dir: packages/framework
+  intents:
+    - framework-client-chunks
+    - framework-server-css-first
+    - framework-static-client-links
+    - framework-static-links-check
+    - framework-tree-pathname
 "@k8ordo/i18n@1.0.0":
   dir: packages/i18n
   intents:
@@ -111,6 +119,11 @@
     - router-testing-engines
     - sour-pens-remember
     - typescript-7-peer-floor
+"@k8ordo/router@1.3.0":
+  dir: packages/router
+  intents:
+    - router-restore-same-page-traverse
+    - router-tree-pathname
 "@k8ordo/state@0.2.0":
   dir: packages/state
   intents:
@@ -139,6 +152,11 @@
   dir: packages/state
   intents:
     - zod-peer-floor
+"@k8ordo/state@1.3.0":
+  dir: packages/state
+  intents:
+    - state-page-state-stays-with-tree
+    - state-store-from-definition
 "@k8ordo/ui@2.0.0":
   dir: packages/ui
   intents:
