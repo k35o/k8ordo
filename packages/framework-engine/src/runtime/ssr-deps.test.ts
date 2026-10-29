@@ -255,12 +255,14 @@ const renderedIn = async (response: Response): Promise<Rendered> => {
 };
 
 // React を入口とは別のチャンクにする。入口が自分の 1 ファイルしか読まないと、
-// 入口の読むファイルかどうかで分かれる頼み方が、どの head にも現れない
+// 入口の読むファイルかどうかで分かれる頼み方が、どの head にも現れない。
+// エンジンの入口と枠の group（priority 2 と 1）より先に取らせる
 const REACT_APART: Rolldown.CodeSplittingOptions = {
   groups: [
     {
       name: 'react',
       test: /\/node_modules\/(?:react|react-dom|scheduler)\//u,
+      priority: 3,
     },
   ],
 };

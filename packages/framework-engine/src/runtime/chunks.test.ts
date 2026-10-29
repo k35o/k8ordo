@@ -45,6 +45,8 @@ let browser: Browser;
 let origin = '';
 /** Per built asset, by the path the HTML names it with, the pages it is of. */
 const pagesOf = new Map<string, readonly PageName[]>();
+/** Per built script, by the path the HTML names it with, its text. */
+const scripts = new Map<string, string>();
 /** Per built stylesheet, whose it is: a server component's or a client one's. */
 const sideOf = new Map<string, 'server' | 'client'>();
 
@@ -59,6 +61,7 @@ beforeAll(async () => {
   const assets = path.join(out, 'client', 'assets');
   for (const file of await readdir(assets)) {
     const text = await readFile(path.join(assets, file), 'utf8');
+    if (file.endsWith('.js')) scripts.set(`/assets/${file}`, text);
     pagesOf.set(
       `/assets/${file}`,
       PAGES.filter((page) => marksOf(page).some((mark) => text.includes(mark))),
@@ -330,4 +333,30 @@ describe.each(browserTypes)('pages loading their own, in $name', ({ type }) => {
     expect(new URL(page.url()).pathname).toBe('/a');
     await page.close();
   }, 30_000);
+});
+
+describe('the chunks every page loads', () => {
+  const holding = (text: string): string[] =>
+    [...scripts].flatMap(([asset, script]) =>
+      script.includes(text) ? [asset] : [],
+    );
+  // 枠の client コンポーネント（layout が描く）の文字
+  const frameFile = (): string | undefined =>
+    holding('only the browser runs the client')[0];
+
+  it('holds what a layout’s client components share with a page in the file of those components', () => {
+    expect(holding('only the browser runs the client')).toHaveLength(1);
+    expect(holding('MARK_SHARED')).toStrictEqual([frameFile()]);
+  });
+
+  // export を並べるモジュールを通ると、生の import の閉包は枠からページの
+  // 部品にまで届く。枠に入るのは、枠が使うものだけ
+  it('leaves in a page’s own file what it takes from a module that lists exports for the frame too', () => {
+    const page = holding('MARK_KIT_PAGE');
+
+    expect(holding('MARK_KIT_FRAME')).toStrictEqual([frameFile()]);
+    expect(page).toHaveLength(1);
+    expect(page).not.toContain(frameFile());
+    expect(pagesIn(page)).toStrictEqual(['a']);
+  });
 });

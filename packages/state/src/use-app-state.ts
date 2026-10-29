@@ -8,16 +8,9 @@ import type { MemoryState } from './memory-state';
 import type { OutputOf, PageState } from './page-state';
 import type { StateSchema, StateValues } from './schema/object';
 import type { LocalState, SessionState } from './storage-state';
-import { cookieInitialSnapshot, cookieStoreOf } from './store/cookie-store';
 import type { Patch, Store, UpdateHandle } from './store/core';
-import { memoryInitialSnapshot, memoryStoreOf } from './store/memory-store';
-import { pageInitialSnapshot, pageStoreOf } from './store/page-store';
+import { kindOf } from './store/kind';
 import type { UpdateOptions } from './store/page-store';
-import {
-  localStoreOf,
-  sessionStoreOf,
-  storageInitialSnapshot,
-} from './store/storage-store';
 import { TreePathname } from './tree-pathname';
 
 export type AnyState =
@@ -81,25 +74,10 @@ type OptionsFor<Def> = Def extends { kind: 'page'; url: StateSchema }
       }
     : never;
 
-const storeOf = (def: AnyState): Store =>
-  def.kind === 'page'
-    ? pageStoreOf(def)
-    : def.kind === 'local'
-      ? localStoreOf(def)
-      : def.kind === 'session'
-        ? sessionStoreOf(def)
-        : def.kind === 'cookie'
-          ? cookieStoreOf(def)
-          : memoryStoreOf(def);
+const storeOf = (def: AnyState): Store => kindOf(def).store();
 
 const initialOf = (def: AnyState, options: Options | undefined): StateValues =>
-  def.kind === 'page'
-    ? pageInitialSnapshot(def, options?.initialUrl)
-    : def.kind === 'local' || def.kind === 'session'
-      ? storageInitialSnapshot(def)
-      : def.kind === 'cookie'
-        ? cookieInitialSnapshot(def, options?.initialCookie)
-        : memoryInitialSnapshot(def);
+  kindOf(def).initial(options ?? {});
 
 const FULL = '*';
 

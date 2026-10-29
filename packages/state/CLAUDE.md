@@ -33,6 +33,17 @@ pnpm check         # check:write to auto-fix
   `resetStateRegistry()` clears for tests. Nothing in the package touches
   `navigation`/`location`/`localStorage`/`sessionStorage`/`document.cookie`/
   `cookieStore` at import time.
+- **A definition brings its own store.** Each `define*State` binds, in
+  `store/kind.ts`'s WeakMap, how its kind's store is made and what the
+  server and hydration renders show (`setKind`), handing the store its
+  codecs; `useAppState` only looks that up (`kindOf`), which throws
+  `… was not created by <definer> of this module instance` for a definition
+  from another copy of the package. It imports no store itself: a bundler
+  puts what a module importing `useAppState` loads together, so a module
+  defining only a local state would otherwise carry every kind's store and
+  `definePageState` with its URL codec. The stores import nothing but types
+  from the definitions, so there is no cycle between the two.
+  `src/chunks.test.ts` bundles a module per kind and reads what each loads.
 - **`update()` applies synchronously and writes in a microtask.** The echo is
   canonical — the merged state passes the schema inside `update()` with the
   same salvage an arrival gets, so no render ever shows a value the schema
@@ -153,19 +164,20 @@ src/
   schema/object.ts     StateSchema, absence rule, per-field salvage parse
   url/codec.ts         schema ⇄ URLSearchParams: parse + canonical search
   entry/codec.ts       StoredCodec: read typed stored values (entry, local, session, cookie)
-  page-state.ts        definePageState(); slot disjointness; internals WeakMap; urlReader (a url schema's reader, for the framework)
+  page-state.ts        definePageState(); slot disjointness; urlReader (a url schema's reader, for the framework)
   base.ts              withBase: Vite's base in front of a link
   storage-state.ts     defineLocalState() / defineSessionState(); storageKey, inlineRead
   cookie-state.ts      defineCookieState(); cookie name, value encoding, parseCookies
   row/codec.ts         RowCodec: [version, values] envelope, migrate, stale write-back flag
   memory-state.ts      defineMemoryState() — no schema by design
   store/core.ts        snapshot core: key-diff notify, picks, update handles
+  store/kind.ts        setKind / kindOf: the store and initial values each definition binds
   store/registry.ts    kind+key-keyed store registry + resetStateRegistry()
   store/page-store.ts  Navigation API wiring, batching, atomic two-face flush
   store/storage-store.ts Web Storage wiring (local, session), storage-event sync
   store/cookie-store.ts Cookie Store API wiring, change-event sync, in-flight guard
   store/memory-store.ts
-  use-app-state.ts     the client hook ('use client'); dispatch on def.kind
+  use-app-state.ts     the client hook ('use client'); the store its definition bound
   register.ts          Register interface for typed-route path constraint;
                        AcceptedPath checks a path (routes → path → any)
   traversal.test.ts    serves fixtures/traversal with Vite and opens it top-level

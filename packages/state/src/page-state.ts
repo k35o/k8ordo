@@ -5,6 +5,8 @@ import { createStoredCodec } from './entry/codec';
 import type { StoredCodec } from './entry/codec';
 import type { RegisteredPath } from './register';
 import type { StateSchema } from './schema/object';
+import { setKind } from './store/kind';
+import { pageInitialSnapshot, pageStoreOf } from './store/page-store';
 import { createUrlCodec } from './url/codec';
 import type { UrlCodec, UrlInput } from './url/codec';
 
@@ -62,21 +64,6 @@ export type PageInternals = {
   entry: StoredCodec | null;
   /** url keys first, then entry keys — the flat snapshot's full key set. */
   keys: readonly string[];
-};
-
-// The codecs stay reachable from the definition without being part of its
-// public shape — the definition is the readable API that crosses the RSC
-// boundary, the codecs are package internals.
-const internals = new WeakMap<PageState, PageInternals>();
-
-export const internalsOf = (def: PageState): PageInternals => {
-  const found = internals.get(def);
-  if (found === undefined) {
-    throw new TypeError(
-      `"${def.key}" was not created by definePageState of this module instance`,
-    );
-  }
-  return found;
 };
 
 export function definePageState<Url extends StateSchema>(
@@ -137,10 +124,17 @@ export function definePageState(
       return query === '' ? link : `${link}?${query}`;
     },
   };
-  internals.set(def, {
+  // The codecs stay reachable from the definition without being part of its
+  // public shape — the definition is the readable API that crosses the RSC
+  // boundary, the codecs are package internals.
+  const page: PageInternals = {
     url,
     entry,
     keys: [...(url?.keys ?? []), ...(entry?.keys ?? [])],
+  };
+  setKind(def, {
+    store: () => pageStoreOf(def, page),
+    initial: ({ initialUrl }) => pageInitialSnapshot(page, initialUrl),
   });
   return def;
 }

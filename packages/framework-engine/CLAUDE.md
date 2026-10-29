@@ -198,6 +198,32 @@ pnpm check         # check:write to auto-fix
   `_payload` and `_init`, which throws a thenable while it waits): a React
   that changed them would end the wait at once and bring the flicker back,
   which `runtime/chunks.test.ts` sees in every engine.
+- **The client build puts what every page loads in two chunks.** The
+  client environment's `codeSplitting` has two groups: `index`, what the
+  entry loads statically (Rolldown's `$initial` tag, priority 2), which keeps
+  the entry chunk's name; and `frame`, the RSC plugin's client-reference
+  group modules of the RSC entry's own chunk (priority 1) — the client
+  components of every layout, error and loading file, which the table
+  imports, and the framework's boundaries. Every page loads both, so a
+  module either shares with a page is put there rather than split into a
+  file every page then loads as well (Rolldown splits a module reached from
+  two different sets of entries into a chunk of its own). The frame group
+  names only the group modules and lets Rolldown add what they import as it
+  does once the tree is shaken: a closure walked over `importedIds` goes
+  through a module that only lists exports and pulls in what pages alone
+  use. Which group modules are the frame's is read in the client build's
+  `buildEnd` (`frameGroupsOf`), off the RSC plugin's manager (experimental,
+  as `server-actions.ts` says): the RSC bundle's entry chunk's module ids,
+  and each reference's `groupChunkId`, which the client build sets as it
+  loads the reference groups, before it splits anything. Vite merges an
+  application's `codeSplitting` with this one, so an application's group
+  wins only with a priority above 2, its `manualChunks` is ignored, and
+  `false` is overridden — `references/routing.md` says so.
+  `runtime/chunks.test.ts` holds that a module the frame shares with a page
+  lands in the frame's file, and that a page's part of a module listing
+  exports for both stays in the page's file; `examples/static-basic`'s
+  `build.test.ts` that the entry imports no file of its own; and
+  `runtime/ssr-deps.test.ts` splits React off at priority 3.
 - **The browser entry has no top-level await.** A chunk of client components
   imports what it shares with the entry from the entry's chunk, and so waits
   for the entry to finish evaluating; an entry awaiting those components in

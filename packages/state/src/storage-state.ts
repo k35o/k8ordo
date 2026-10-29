@@ -1,6 +1,8 @@
 import { createRowCodec } from './row/codec';
-import type { RowCodec, Versioning } from './row/codec';
+import type { Versioning } from './row/codec';
 import type { StateSchema } from './schema/object';
+import { setKind } from './store/kind';
+import { storageInitialSnapshot, storageStoreOf } from './store/storage-store';
 
 type StorageArea = 'localStorage' | 'sessionStorage';
 
@@ -76,21 +78,6 @@ const inlineReadOf = (
     : `(()=>{try{const r=${row};const v=Array.isArray(r)&&r.length===2&&r[0]===${String(version)}?r[1]:null;return ${isObjectExpression('v')}?v:null}catch{return null}})()`;
 };
 
-const codecs = new WeakMap<
-  StorageState<'local' | 'session', StateSchema>,
-  RowCodec
->();
-
-export const storageCodecOf = (def: LocalState | SessionState): RowCodec => {
-  const codec = codecs.get(def);
-  if (codec === undefined) {
-    throw new TypeError(
-      `"${def.key}" was not created by ${def.kind === 'local' ? 'defineLocalState' : 'defineSessionState'} of this module instance`,
-    );
-  }
-  return codec;
-};
-
 const defineStorageState = <
   Kind extends 'local' | 'session',
   Schema extends StateSchema,
@@ -110,7 +97,10 @@ const defineStorageState = <
     storageKey,
     inlineRead: () => inlineReadOf(area, storageKey, codec.version),
   };
-  codecs.set(def, codec);
+  setKind(def, {
+    store: () => storageStoreOf(def, codec),
+    initial: () => storageInitialSnapshot(codec),
+  });
   return def;
 };
 

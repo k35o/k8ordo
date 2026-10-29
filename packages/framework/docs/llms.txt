@@ -60,8 +60,10 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 
 - [Routing](references/routing.md): the `routes/` grammar and every refusal
   the build names, where a `fallback.tsx` may sit, how a page is sent in
-  each mode (each page loads only its own client components and CSS, and
-  the browser renders once they have loaded; Server Components' stylesheets
+  each mode (each page loads only its own client components and CSS, what
+  every page loads comes in at most two files — the entry's and the frame's,
+  which sets the client build's `codeSplitting` — and the browser renders
+  once they have loaded; Server Components' stylesheets
   come before client components', and a stylesheet once loaded stays),
   `loading.tsx`, `route.ts` (methods and `405` under server
   mode, a file under static mode), the generated `.k8ordo/` files (the

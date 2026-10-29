@@ -1,15 +1,18 @@
+import type { RowCodec } from '../row/codec';
 import type { StateValues } from '../schema/object';
-import { storageCodecOf } from '../storage-state';
 import type { LocalState, SessionState } from '../storage-state';
 import { createHandle, createStoreCore, resolvePatch } from './core';
 import type { Handle, Patch, Store, UpdateHandle } from './core';
 import { getOrCreateStore } from './registry';
 
+/** What a store reads off a local or a session definition. */
+type Stored = Pick<LocalState | SessionState, 'kind' | 'key' | 'storageKey'>;
+
 const createStorageStore = (
-  def: LocalState | SessionState,
+  def: Stored,
+  codec: RowCodec,
   storage: Storage,
 ): Store => {
-  const codec = storageCodecOf(def);
   const { storageKey } = def;
 
   const write = (values: Readonly<StateValues>): void => {
@@ -116,17 +119,16 @@ const createStorageStore = (
   };
 };
 
-export const localStoreOf = (def: LocalState): Store =>
-  getOrCreateStore('local', def.key, () =>
-    createStorageStore(def, localStorage),
-  );
-
-export const sessionStoreOf = (def: SessionState): Store =>
-  getOrCreateStore('session', def.key, () =>
-    createStorageStore(def, sessionStorage),
+export const storageStoreOf = (def: Stored, codec: RowCodec): Store =>
+  getOrCreateStore(def.kind, def.key, () =>
+    createStorageStore(
+      def,
+      codec,
+      def.kind === 'local' ? localStorage : sessionStorage,
+    ),
   );
 
 /** SSR and hydration see the defaults — the server has no Web Storage. */
-export const storageInitialSnapshot = (
-  def: LocalState | SessionState,
-): StateValues => ({ ...storageCodecOf(def).defaults });
+export const storageInitialSnapshot = (codec: RowCodec): StateValues => ({
+  ...codec.defaults,
+});

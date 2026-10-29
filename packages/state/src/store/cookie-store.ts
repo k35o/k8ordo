@@ -1,5 +1,5 @@
-import { cookieCodecOf, parseCookieText } from '../cookie-state';
 import type { CookieState } from '../cookie-state';
+import type { RowCodec } from '../row/codec';
 import type { StateValues } from '../schema/object';
 import { createHandle, createStoreCore, resolvePatch } from './core';
 import type { Handle, Patch, Store, UpdateHandle } from './core';
@@ -21,6 +21,16 @@ const rawCookie = (name: string): string | undefined => {
   return undefined;
 };
 
+export const parseCookieText = (text: string | undefined): unknown => {
+  if (text === undefined) return undefined;
+  try {
+    return JSON.parse(text);
+  } catch {
+    // 壊れた JSON もほかの古いデータと同じく、既定値から始める
+    return undefined;
+  }
+};
+
 const decoded = (raw: string | undefined): string | undefined => {
   if (raw === undefined) return undefined;
   try {
@@ -30,8 +40,7 @@ const decoded = (raw: string | undefined): string | undefined => {
   }
 };
 
-const createCookieStore = (def: CookieState): Store => {
-  const codec = cookieCodecOf(def);
+const createCookieStore = (def: CookieState, codec: RowCodec): Store => {
   const { cookieName } = def;
 
   const readRow = (): { values: StateValues; stale: boolean } =>
@@ -160,8 +169,8 @@ const createCookieStore = (def: CookieState): Store => {
   };
 };
 
-export const cookieStoreOf = (def: CookieState): Store =>
-  getOrCreateStore('cookie', def.key, () => createCookieStore(def));
+export const cookieStoreOf = (def: CookieState, codec: RowCodec): Store =>
+  getOrCreateStore('cookie', def.key, () => createCookieStore(def, codec));
 
 /**
  * What SSR and the hydration render see: the values the server read from the
@@ -169,10 +178,9 @@ export const cookieStoreOf = (def: CookieState): Store =>
  * Pure on purpose: the server must never touch `document` or create a store.
  */
 export const cookieInitialSnapshot = (
-  def: CookieState,
+  codec: RowCodec,
   initialCookie: Readonly<StateValues> | undefined,
 ): StateValues => {
-  const codec = cookieCodecOf(def);
   const base: StateValues = { ...codec.defaults };
   if (initialCookie !== undefined) {
     for (const key of codec.keys) {
