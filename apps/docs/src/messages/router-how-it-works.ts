@@ -106,13 +106,13 @@ export const stateInPlace = message({
 });
 
 export const stateTraverse = message({
-  ja: '戻ると進むでは、ブラウザがその履歴エントリを離れたときの位置に戻します。ページがそのエントリの値で描き終わってから戻すので、`useDeferredValue`で遅らせて描く一覧でも、離れたときの位置に戻ります。`finished`はその描画を待ちます。',
-  en: 'On back and forward, the browser restores the position the history entry was left at. It does so once the page has rendered that entry’s values, so a list rendered late through `useDeferredValue` comes back to where it was left too, and `finished` waits for that render.',
+  ja: '戻ると進むでは、その履歴エントリを離れたときの位置に戻ります。ページがそのエントリの値で描き終わってから戻すので、`useDeferredValue`で遅らせて描く一覧でも、離れたときの位置に戻ります。`finished`はその描画を待ちます。',
+  en: 'On back and forward, the scroll position returns to where the history entry was left. It does so once the page has rendered that entry’s values, so a list rendered late through `useDeferredValue` comes back to where it was left too, and `finished` waits for that render.',
 });
 
 export const stateRefresh = message({
-  ja: '例外は、`useInterceptedNavigation`に渡した`refresh`が`true`を返したときです。同じパスのページを読み込み直し、`finished`はその描画を待ちます。フォーカスは動かさず、トランジションの種類も付けません。スクロールは、戻ると進むでだけ、読み込み直したページが出てからブラウザが戻します。`<Router>`は読み込み直しませんが、`@k8ordo/framework`は`search`をexportしたページを読み込み直します。',
-  en: 'The exception is a `refresh` passed to `useInterceptedNavigation` that returns `true`. The page at the same path then loads again, and `finished` waits for it to render. Focus stays put, and no transition types are added. Only on back and forward does the browser restore the scroll position, once the page loaded again is on screen. `<Router>` never loads again in place, while `@k8ordo/framework` does for a page that exports `search`.',
+  ja: '例外は、`useInterceptedNavigation`に渡した`refresh`が`true`を返したときです。同じパスのページを読み込み直し、`finished`はその描画を待ちます。フォーカスは動かさず、トランジションの種類も付けません。スクロール位置は、戻ると進むでだけ、読み込み直したページが出てから戻ります。`<Router>`は読み込み直しませんが、`@k8ordo/framework`は`search`をexportしたページを読み込み直します。',
+  en: 'The exception is a `refresh` passed to `useInterceptedNavigation` that returns `true`. The page at the same path then loads again, and `finished` waits for it to render. Focus stays put, and no transition types are added. Only on back and forward does the scroll position come back, once the page loaded again is on screen. `<Router>` never loads again in place, while `@k8ordo/framework` does for a page that exports `search`.',
 });
 
 export const stateShown = message({
@@ -161,8 +161,8 @@ export const scrollFragment = message({
 });
 
 export const scrollTraverse = message({
-  ja: 'ただし、ブラウザの戻ると進むでは、ルーターはスクロールに触れません。ブラウザが保存していた位置に戻ります。読み込みの間に訪問者がスクロールしていると、ブラウザは位置を戻しません。',
-  en: 'On the browser’s back and forward, though, the router leaves scrolling alone, and the browser restores the position it saved. If the visitor scrolls while the page loads, the browser does not restore it.',
+  ja: 'ブラウザの戻ると進むでは、その履歴エントリを離れたときの位置に戻ります。戻すのはブラウザでなくルーターで、ページが画面に出るときに一度に置きます。読み込みの間に前のページをスクロールしても、戻る位置は変わりません。読み込み中に取り消したページのように、一度も画面に出なかった履歴エントリへ進んだときは、フラグメントの要素か先頭へ移ります。',
+  en: 'On the browser’s back and forward, the scroll position returns to where the history entry was left. The router puts it there, not the browser, and at once, as the page comes on screen. Scrolling the previous page while the next one loads does not change where it lands. An entry that never reached the screen, such as a page change called off while it loaded, goes to the fragment’s element or to the top.',
 });
 
 export const abortTitle = message({
@@ -203,8 +203,8 @@ export const guarantees = [
     en: 'A navigation that changes only the query or the entry’s state does not move focus, nor, except on back and forward, the scroll position.',
   }),
   message({
-    ja: '同じページの中の戻ると進むでは、ページがそのエントリを描き終えてから、ブラウザが保存していた位置に戻します。',
-    en: 'On back and forward within one page, the browser restores the position it saved once the page has rendered that entry.',
+    ja: '戻ると進むでは、同じページの中でも、ページがそのエントリを描き終えてから、そのエントリを離れたときの位置に戻します。',
+    en: 'On back and forward, within one page too, the scroll position returns to where the entry was left once the page has rendered that entry.',
   }),
   message({
     ja: '読み込み中に、画面に残るページの履歴エントリへ戻ると、スクロール位置はそのままです。',
@@ -239,8 +239,8 @@ export const nonGuarantees = [
     en: '`finished` does not wait for a `React.lazy` page’s code to load.',
   }),
   message({
-    ja: '戻ると進むでは、ルーターはスクロール位置を戻しません。戻すのはブラウザで、ルーターはページがそのエントリを描き終えるまで待つだけです。',
-    en: 'On back and forward, the router does not restore the scroll position. The browser does, and the router only waits until the page has rendered that entry.',
+    ja: '戻ると進むで戻すのは、文書のスクロール位置だけです。ページの中でスクロールする要素の位置と、ピンチズームの倍率は戻しません。',
+    en: 'On back and forward, only the document’s scroll position comes back, not that of an element scrolling inside the page, nor the pinch-zoom scale.',
   }),
   message({
     ja: '追い越されたナビゲーションでも、`React.lazy`のコードの読み込みは止めません。',

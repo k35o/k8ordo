@@ -439,6 +439,6 @@ export const searchState = message({
 });
 
 export const searchInitial = message({
-  ja: '受け取った値は、`initialUrl`として`useAppState`に渡します。サーバーでの描画もハイドレーションも、URLの値を使います。クエリが変わる遷移では、そのページがその場で読み込み直されます。再マウントもスクロールの移動も起きません。戻ると進むでは、読み込み直したページが出てから、ブラウザがそのエントリを離れたときの位置に戻します。',
-  en: 'Pass the values on to `useAppState` as `initialUrl`. The server render and the hydration both use the values from the URL. A navigation that changes the query loads that page again in place; nothing remounts, and the scroll position stays. On back and forward, the browser restores where that entry was left once the page loaded again is on screen.',
+  ja: '受け取った値は、`initialUrl`として`useAppState`に渡します。サーバーでの描画もハイドレーションも、URLの値を使います。クエリが変わる遷移では、そのページがその場で読み込み直されます。再マウントもスクロールの移動も起きません。戻ると進むでは、読み込み直したページが出てから、そのエントリを離れたときの位置に戻ります。',
+  en: 'Pass the values on to `useAppState` as `initialUrl`. The server render and the hydration both use the values from the URL. A navigation that changes the query loads that page again in place; nothing remounts, and the scroll position stays. On back and forward, the scroll position returns to where that entry was left once the page loaded again is on screen.',
 });
