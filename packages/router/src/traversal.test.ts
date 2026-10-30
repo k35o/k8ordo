@@ -1,3 +1,6 @@
+import { createServer as createHttpServer } from 'node:http';
+import type { Server } from 'node:http';
+import type { AddressInfo } from 'node:net';
 import { fileURLToPath } from 'node:url';
 
 import react from '@vitejs/plugin-react';
@@ -24,8 +27,19 @@ const browserTypes = [chromium, firefox, webkit]
 
 let server: ViteDevServer;
 let origin = '';
+// 訪問者がタブで寄る別のサイト。ポートが違えば origin も違う
+let outside: Server;
+let outsideOrigin = '';
 
 beforeAll(async () => {
+  outside = createHttpServer((_, response) => {
+    response.setHeader('content-type', 'text/html');
+    response.end('<!doctype html><title>outside</title><h1>outside</h1>');
+  });
+  await new Promise<void>((resolve) => {
+    outside.listen(0, '127.0.0.1', resolve);
+  });
+  outsideOrigin = `http://127.0.0.1:${String((outside.address() as AddressInfo).port)}`;
   server = await createServer({
     root,
     configFile: false,
@@ -43,6 +57,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await server.close();
+  outside.close();
 });
 
 const scrollY = (page: Page): Promise<number> =>
@@ -160,6 +175,53 @@ describe.each(browserTypes)(
       await traverse(page, 'back');
 
       await page.getByRole('heading', { name: 'short' }).waitFor();
+      await expect.poll(() => scrollY(page)).toBe(left);
+      await page.close();
+    }, 30_000);
+
+    // 別のサイトから戻ると、about の文書は bfcache から戻らなければ読み直される。
+    // WebKit はその文書の entries() に tall を並べず、tall への戻るの行き先に
+    // key を付けない
+    it('restores the position a page was left at when the visitor goes back to it past another site', async () => {
+      const page = await open('/tall');
+      await page.evaluate(() => {
+        window.scrollTo(0, 3000);
+      });
+      const left = await scrollY(page);
+      await navigateTo(page, '/about');
+      await page.goto(`${outsideOrigin}/`);
+      await page.goBack();
+      await page.getByRole('heading', { name: 'about' }).waitFor();
+
+      await page.goBack();
+
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
+      await expect.poll(() => scrollY(page)).toBe(left);
+      await page.close();
+    }, 30_000);
+
+    // 別のサイトから入り直した文書の navigation.entries() には、別のサイトより
+    // 前の entry が並ばない。そこで移っても、それらを離れた位置は忘れない
+    it('restores the position a page was left at when the visitor goes back to it past another site they came back in from and moved on', async () => {
+      const page = await open('/tall');
+      await page.evaluate(() => {
+        window.scrollTo(0, 3000);
+      });
+      const left = await scrollY(page);
+      await navigateTo(page, '/about');
+      await page.goto(`${outsideOrigin}/`);
+      await page.goto(`${origin}/short`);
+      await page.getByRole('heading', { name: 'short' }).waitFor();
+      await navigateTo(page, '/about');
+      await traverse(page, 'back');
+      await page.goBack();
+      await page.getByRole('heading', { name: 'outside' }).waitFor();
+      await page.goBack();
+      await page.getByRole('heading', { name: 'about' }).waitFor();
+
+      await page.goBack();
+
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
       await expect.poll(() => scrollY(page)).toBe(left);
       await page.close();
     }, 30_000);

@@ -155,6 +155,13 @@ const leftAt = new Map<string, Position>();
 // key は読み直しをまたいで変わらないので、タブの sessionStorage にも写す
 const LEFT_AT_KEY = '@k8ordo/router:left-at';
 
+// 間引くのは件数で、navigation.entries() に無いものではない。entries() はその
+// 文書から続く同じ origin の entry しか並べないので、別のサイトから入り直した
+// 文書で間引くと、別のサイトより前の entry の位置まで消える。捨てられた entry の
+// key がほかの entry に付くことはなく、間引くのは大きさのためだけ。残すのは
+// 最近離れた 100 件で、どのエンジンも 1 つのタブの履歴に 100 件より多くは持たない
+const LEFT_AT_LIMIT = 100;
+
 const readLeftAt = (): void => {
   try {
     const saved = sessionStorage.getItem(LEFT_AT_KEY);
@@ -170,10 +177,12 @@ const readLeftAt = (): void => {
 };
 
 const rememberLeftAt = (entry: string): void => {
+  // Map は入れた順に並ぶ。離れ直した entry を後ろへ移し、古いものを前から捨てる
+  leftAt.delete(entry);
   leftAt.set(entry, { left: window.scrollX, top: window.scrollY });
-  const live = new Set(navigation.entries().map(({ key }) => key));
   for (const key of leftAt.keys()) {
-    if (!live.has(key)) leftAt.delete(key);
+    if (leftAt.size <= LEFT_AT_LIMIT) break;
+    leftAt.delete(key);
   }
   try {
     sessionStorage.setItem(LEFT_AT_KEY, JSON.stringify([...leftAt]));
@@ -336,6 +345,10 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       // viewport, to where that entry was left.
       const inPlace = pathname === shown.current;
       const traverse = event.navigationType === 'traverse';
+      // WebKit は、戻るで読み直した文書の entries() に、同じ文書のまま戻れる
+      // それより前の entry を並べず、そこへの traverse の行き先に key を付けない。
+      // 離れた位置を引けないので、そのときだけ戻すのをブラウザに任せる
+      const browserRestores = traverse && event.destination.key === '';
       if (inPlace && !refresh(url)) {
         const calledOff =
           event.destination.key ===
@@ -357,11 +370,13 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
           resolve: () => {
             resolve(undefined);
           },
-          scroll: scrollPlanFor(
-            'traverse',
-            url.hash,
-            leftAt.get(event.destination.key),
-          ),
+          scroll: browserRestores
+            ? null
+            : scrollPlanFor(
+                'traverse',
+                url.hash,
+                leftAt.get(event.destination.key),
+              ),
           types: [],
         });
         event.signal.addEventListener(
@@ -374,7 +389,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         );
         setTraversed(id);
         event.intercept({
-          scroll: 'manual',
+          scroll: browserRestores ? 'after-transition' : 'manual',
           focusReset: 'manual',
           handler: () => promise,
         });
@@ -392,7 +407,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         if (latest.current === id) setPendingPathname(null);
       };
       const scroll =
-        inPlace && !traverse
+        (inPlace && !traverse) || browserRestores
           ? null
           : scrollPlanFor(
               event.navigationType,
@@ -408,7 +423,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         // the two from disagreeing, and keeps the behaviour where a browser
         // has not implemented the platform's half. A traversal included: the
         // hook puts back where it saw that entry left — a load in place too.
-        scroll: 'manual',
+        scroll: browserRestores ? 'after-transition' : 'manual',
         handler: async () => {
           // 失敗も中止も、名指していた遷移が終わったということ。新しい遷移が
           // 始まっていれば、それがもう自分の行き先を名指している
