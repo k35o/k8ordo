@@ -76,6 +76,9 @@ export default function ColorSchemeStoragePage() {
           </LocaleAnchor>
           <Rich>{t.rowsDefaultAfter()}</Rich>
         </p>
+        <p>
+          <Rich>{t.rowsBlocked()}</Rich>
+        </p>
       </DocSection>
 
       <DocSection id="read" title={t.readTitle}>

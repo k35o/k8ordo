@@ -8,10 +8,27 @@ import { getOrCreateStore } from './registry';
 /** What a store reads off a local or a session definition. */
 type Stored = Pick<LocalState | SessionState, 'kind' | 'key' | 'storageKey'>;
 
+type Area = Pick<Storage, 'getItem' | 'setItem'>;
+
+type Row = ReturnType<RowCodec['read']>;
+
+// サイトのデータを止めたブラウザでは、置き場所を読むだけで投げる。ストアには
+// getItem や setItem が投げるときと同じに見せ、失敗の扱いを 1 か所にまとめる
+const areaOf = (kind: Stored['kind']): Area => {
+  try {
+    return kind === 'local' ? localStorage : sessionStorage;
+  } catch (error) {
+    const refuse = (): never => {
+      throw error;
+    };
+    return { getItem: refuse, setItem: refuse };
+  }
+};
+
 const createStorageStore = (
   def: Stored,
   codec: RowCodec,
-  storage: Storage,
+  storage: Area,
 ): Store => {
   const { storageKey } = def;
 
@@ -19,7 +36,7 @@ const createStorageStore = (
     storage.setItem(storageKey, JSON.stringify(codec.row(values)));
   };
 
-  const readRow = (): { values: StateValues; stale: boolean } => {
+  const readRow = (): Row => {
     const text = storage.getItem(storageKey);
     let row: unknown;
     try {
@@ -38,17 +55,22 @@ const createStorageStore = (
   // その間に update() が今の版で書いていれば、何もしない
   const upgrade = (): void => {
     queueMicrotask(() => {
-      const { values, stale } = readRow();
-      if (!stale) return;
       try {
-        write(values);
+        const { values, stale } = readRow();
+        if (stale) write(values);
       } catch {
-        // 書けなくても読んだ値は正しい。次の読み込みでもう一度移行する
+        // 読めなくても書けなくても、先に読んだ値は正しい。次の読み込みでもう一度移行する
       }
     });
   };
 
-  const first = readRow();
+  let first: Row;
+  try {
+    first = readRow();
+  } catch {
+    // ストアは描画の中で作られるので、ここで投げるとページごとエラーの境界に落ちる
+    first = codec.read(undefined);
+  }
   const core = createStoreCore(codec.keys, first.values);
   if (first.stale) upgrade();
 
@@ -61,7 +83,14 @@ const createStorageStore = (
   const onStorage = (event: StorageEvent): void => {
     if (event.storageArea !== storage) return;
     if (event.key !== storageKey && event.key !== null) return;
-    const { values: fresh, stale } = readRow();
+    let row: Row;
+    try {
+      row = readRow();
+    } catch {
+      // 読めない行を既定値と読むと、画面の値まで巻き戻してしまう
+      return;
+    }
+    const { values: fresh, stale } = row;
     if (stale) upgrade();
     // A foreign tab's write must not roll back a batch that has not flushed
     // yet: the pending patch stays on top.
@@ -121,11 +150,7 @@ const createStorageStore = (
 
 export const storageStoreOf = (def: Stored, codec: RowCodec): Store =>
   getOrCreateStore(def.kind, def.key, () =>
-    createStorageStore(
-      def,
-      codec,
-      def.kind === 'local' ? localStorage : sessionStorage,
-    ),
+    createStorageStore(def, codec, areaOf(def.kind)),
   );
 
 /** SSR and hydration see the defaults — the server has no Web Storage. */
