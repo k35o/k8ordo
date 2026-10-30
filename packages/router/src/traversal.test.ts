@@ -260,6 +260,71 @@ describe.each(browserTypes)(
       await page.close();
     }, 30_000);
 
+    // WebKit は key の無い戻るで currententrychange を出さない。URL の動きが届くのは
+    // popstate だけ
+    it('keeps usePathname on the URL when the visitor goes back past another origin', async () => {
+      const page = await open('/tall');
+      await navigateTo(page, '/about');
+      await page.goto(`${outsideOrigin}/`);
+      await page.goBack();
+      await page.getByRole('heading', { name: 'about' }).waitFor();
+      expect(await page.getByTestId('pathname').textContent()).toBe('/about');
+
+      await page.goBack();
+
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
+      await expect
+        .poll(() => page.getByTestId('pathname').textContent())
+        .toBe('/tall');
+      await page.close();
+    }, 30_000);
+
+    it('restores the position an entry of the same page was left at, onto what that entry renders, when the visitor goes back to it past another origin', async () => {
+      const page = await open('/list?q=few');
+      await expect.poll(() => listCount(page)).toBe('30');
+      await page.evaluate(() => {
+        window.scrollTo(0, 1500);
+      });
+      await navigateTo(page, '/list');
+      await expect.poll(() => listCount(page)).toBe('90');
+      await navigateTo(page, '/about');
+      await page.goto(`${outsideOrigin}/`);
+      await page.goBack();
+      await page.getByRole('heading', { name: 'about' }).waitFor();
+      await page.goBack();
+      await expect.poll(() => listCount(page)).toBe('90');
+      await page.evaluate(() => {
+        window.scrollTo(0, 6000);
+      });
+
+      await page.goBack();
+
+      await expect.poll(() => listCount(page)).toBe('30');
+      await expect.poll(() => scrollY(page)).toBe(1500);
+      await page.close();
+    }, 30_000);
+
+    it('restores the position and what an entry of the same page renders when the visitor goes back past another origin and then forward to it', async () => {
+      const page = await open('/list?q=few');
+      await expect.poll(() => listCount(page)).toBe('30');
+      await navigateTo(page, '/list');
+      await expect.poll(() => listCount(page)).toBe('90');
+      await page.goto(`${outsideOrigin}/`);
+      await page.goBack();
+      await expect.poll(() => listCount(page)).toBe('90');
+      await page.evaluate(() => {
+        window.scrollTo(0, 6000);
+      });
+      await page.goBack();
+      await expect.poll(() => listCount(page)).toBe('30');
+
+      await page.goForward();
+
+      await expect.poll(() => listCount(page)).toBe('90');
+      await expect.poll(() => scrollY(page)).toBe(6000);
+      await page.close();
+    }, 30_000);
+
     // 別の origin から入り直した文書の navigation.entries() には、別の origin より
     // 前の entry が並ばない。そこで移っても、それらを離れた位置は忘れない
     it('restores the position a page was left at when the visitor goes back to it past another origin they came back in from and moved on', async () => {
@@ -299,6 +364,7 @@ describe.each(browserTypes)(
 
       await page.goBack();
 
+      await page.waitForFunction(() => navigation.currentEntry !== null);
       await page.getByRole('heading', { name: 'tall' }).waitFor();
       expect(new URL(page.url()).pathname).toBe('/tall');
       await navigateTo(page, '/short');
@@ -317,6 +383,8 @@ describe.each(browserTypes)(
 
       await page.goBack();
 
+      // 一覧は popstate で先に絞られる。文書の読み直しが終わるのを待つ
+      await page.waitForFunction(() => navigation.currentEntry !== null);
       await expect.poll(() => listCount(page)).toBe('30');
       expect(new URL(page.url()).search).toBe('?q=few');
       await navigateTo(page, '/short');

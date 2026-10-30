@@ -1,3 +1,6 @@
+import { createServer as createHttpServer } from 'node:http';
+import type { Server } from 'node:http';
+import type { AddressInfo } from 'node:net';
 import { fileURLToPath } from 'node:url';
 
 import react from '@vitejs/plugin-react';
@@ -24,8 +27,19 @@ const browserTypes = [chromium, firefox, webkit]
 
 let server: ViteDevServer;
 let origin = '';
+// 訪問者がタブで寄る同じサイトの別の origin
+let outside: Server;
+let outsideOrigin = '';
 
 beforeAll(async () => {
+  outside = createHttpServer((_, response) => {
+    response.setHeader('content-type', 'text/html');
+    response.end('<!doctype html><title>outside</title><h1>outside</h1>');
+  });
+  await new Promise<void>((resolve) => {
+    outside.listen(0, '127.0.0.1', resolve);
+  });
+  outsideOrigin = `http://127.0.0.1:${String((outside.address() as AddressInfo).port)}`;
   server = await createServer({
     root,
     configFile: false,
@@ -43,6 +57,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await server.close();
+  outside.close();
 });
 
 const textOf = (page: Page, testId: string): Promise<string | null> =>
@@ -83,6 +98,24 @@ describe.each(browserTypes)(
       await expect.poll(() => textOf(page, 'page')).toBe('2');
 
       await goBack(page);
+
+      await expect.poll(() => textOf(page, 'page')).toBe('1');
+      await page.close();
+    }, 30_000);
+
+    // WebKit は読み直した文書からそれより前の entry へ戻るとき、currententrychange
+    // を出さない。URL の動きが届くのは popstate だけ
+    it('reads the URL of the entry when the visitor goes back to it past another origin', async () => {
+      const page = await open();
+      await page.getByRole('button', { name: 'push next' }).click();
+      await expect.poll(() => textOf(page, 'page')).toBe('2');
+      await page.waitForFunction(() => navigation.transition === null);
+      await page.goto(`${outsideOrigin}/`);
+      await page.goBack();
+      await page.getByTestId('page').waitFor();
+      expect(await textOf(page, 'page')).toBe('2');
+
+      await page.goBack();
 
       await expect.poll(() => textOf(page, 'page')).toBe('1');
       await page.close();

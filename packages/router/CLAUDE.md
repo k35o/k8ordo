@@ -127,7 +127,9 @@ pnpm check         # check:write to auto-fix
   stretch: leaving records nothing (the browser keeps that entry's position
   itself), and a traversal to the stale `currentEntry` is a real one that
   restores what was recorded when that entry was left. A keyed traversal or a
-  push puts `currentEntry` right again.
+  push puts `currentEntry` right again. `popstate` is the only news of a
+  keyless traversal, so `usePathname` subscribes to it beside
+  `currententrychange`, and `@k8ordo/state`'s page store does the same.
   A traversal has a handler whether it changes the page, loads one in
   place, or only moves the search or the entry state: in the last case
   nothing is applied, but the page renders the entry it arrived at,
@@ -162,7 +164,8 @@ pnpm check         # check:write to auto-fix
   onto pages that measure themselves — after a reload, past an entry still
   loading, past another origin (and one the visitor came back in from and
   moved on, and going forward again from there, with and without following a
-  link first), after leaving more than 100 entries that are gone, and when the
+  link first, within a page too), after leaving more than 100 entries that are
+  gone, and when the
   visitor scrolls during the load; that an entry called off starts at the top;
   that a traversal back to the page on screen keeps where the visitor
   scrolled it; and that WebKit's traversal on coming back from the

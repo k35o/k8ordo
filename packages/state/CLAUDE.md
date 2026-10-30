@@ -96,6 +96,14 @@ pnpm check         # check:write to auto-fix
   never showed. Where no router provides a tree, the context is `null` and
   everything follows the URL. `use-app-state.browser.test.tsx` holds each
   of these; `examples/static-basic` holds them under the framework.
+- **A page store also re-reads on `popstate`.** WebKit, in a document it read
+  again on coming back from another origin, dispatches no
+  `currententrychange` for a traversal to an earlier entry, and `popstate` is
+  the only news of it. Re-reading twice elsewhere changes nothing: `sync` is
+  idempotent and `applyNext` tells no one of equal values. In that stretch
+  `currentEntry` still names the document's own entry, so the URL's values are
+  right and the entry's are whatever that entry holds: there is no key to read
+  the real one by. `traversal.test.ts` holds the URL's.
 - **Shared ground stays shared.** A page store rewrites only its own URL
   params and only its own namespace in the entry-state object — the rest of
   both travels untouched with every write it makes.
