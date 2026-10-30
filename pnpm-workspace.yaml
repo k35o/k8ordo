@@ -46,7 +46,7 @@ catalog:
   '@vitest/utils': 5.0.5
   # @k8ordo/ui/ai-sdk の peer。example が使う @ai-sdk/react は ai を exact で
   # 持つので、上げるときは同じ ai を持つ @ai-sdk/react と揃えて 1 コピーに保つ。
-  ai: 7.0.148
+  ai: 7.0.150
   # @k8ordo/framework の reactCompiler が使う、@vitejs/plugin-react の任意の peer。
   # 版は plugin-react の peer の範囲から選ぶので、plugin-react と揃えて手で上げる (renovate.json)
   oxc-transform-react: 0.152.0
