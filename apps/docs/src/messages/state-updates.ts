@@ -161,8 +161,8 @@ export const handleAbort = message({
 });
 
 export const handleFail = message({
-  ja: 'localStorage、sessionStorage、Cookieへの書き込みの失敗：その書き込みのエラーでrejectします。容量の上限、4KBを超えるCookie、書き込む値でスキーマが例外を出したときです。描画した値はそのまま残ります。',
-  en: 'A failed localStorage, sessionStorage or cookie write: the handle rejects with that error. A full quota, a cookie over 4 KB, or a schema that throws on the values about to be written. The rendered value stays.',
+  ja: 'localStorage、sessionStorage、Cookieへの書き込みの失敗：その書き込みのエラーでrejectします。容量の上限やサイトのデータの保存を止めたブラウザ、4KBを超えるCookie、書き込む値でスキーマが例外を出したときです。描画した値はそのまま残ります。',
+  en: 'A failed localStorage, sessionStorage or cookie write: the handle rejects with that error. A full quota, blocked site data, a cookie over 4 KB, or a schema that throws on the values about to be written. The rendered value stays.',
 });
 
 export const handleAction = message({

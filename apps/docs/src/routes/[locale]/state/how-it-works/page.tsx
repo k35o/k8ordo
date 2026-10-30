@@ -141,7 +141,13 @@ export default function StateHowItWorksPage() {
             </LocaleAnchor>
             <Rich>{t.nonRouterNextjsAfter()}</Rich>
           </li>
-          {[t.nonMutation, t.nonMemory, t.nonWrite, t.nonTree].map((item) => (
+          {[
+            t.nonMutation,
+            t.nonMemory,
+            t.nonWrite,
+            t.nonBlocked,
+            t.nonTree,
+          ].map((item) => (
             <li key={item()}>
               <Rich>{item()}</Rich>
             </li>

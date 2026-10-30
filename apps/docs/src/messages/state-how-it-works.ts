@@ -240,6 +240,11 @@ export const nonWrite = message({
   en: 'A write to Web Storage or a cookie can be refused, by a full quota or a cookie over 4 KB. The rendered value stays, and the `update()` handle rejects.',
 });
 
+export const nonBlocked = message({
+  ja: 'サイトのデータの保存を止めたブラウザでは、localStorageとsessionStorageを読むと`SecurityError`になります。`defineLocalState`と`defineSessionState`の状態は既定値で描画します。`update()`で変えた値は次に読み込むまでメモリに残り、ハンドルはそのエラーでrejectします。',
+  en: 'A browser that blocks site data fails with a `SecurityError` on any read of localStorage or sessionStorage. `defineLocalState` and `defineSessionState` state render their defaults. A value set with `update()` stays in memory until the next load, and the handle rejects with that error.',
+});
+
 export const nonTree = message({
   ja: 'どのページを描いているかを知らせないルーターの下では、ページの状態はURLに従います。`@k8ordo/router`の`useInterceptedNavigation`で作った自前のホストもこれに当たります。',
   en: 'Under a router that does not say which page a component renders in, a page state follows the URL. A host of your own built on `@k8ordo/router`’s `useInterceptedNavigation` is one.',

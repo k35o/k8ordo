@@ -186,6 +186,14 @@ const Prefs: FC = () => {
       >
         table
       </button>
+      <button
+        type="button"
+        onClick={() => {
+          lastHandle = update({ pageSize: 50 });
+        }}
+      >
+        page size
+      </button>
     </>
   );
 };
@@ -1425,6 +1433,190 @@ it('a newer row another tab writes is read but never written back', async () => 
   await frame();
   expect(localStorage.getItem('k8ordo-state:versioned')).toBe(
     '[3,{"view":"table","pageSize":50,"density":"compact"}]',
+  );
+});
+
+const refusal = () => new DOMException('denied', 'SecurityError');
+
+// サイトのデータを止めたブラウザは、置き場所を読むだけで投げる
+const refuseArea = (area: 'localStorage' | 'sessionStorage') =>
+  vi.spyOn(window, area, 'get').mockImplementation(() => {
+    throw refusal();
+  });
+
+const refuseGetItem = () =>
+  vi.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+    throw refusal();
+  });
+
+it('local state renders its defaults when reading localStorage throws', async () => {
+  localStorage.setItem(
+    'k8ordo-state:prefs',
+    JSON.stringify({ view: 'table', pageSize: 50 }),
+  );
+  const spy = refuseArea('localStorage');
+  try {
+    const screen = await render(<Prefs />);
+
+    await expect.element(screen.getByTestId('view')).toHaveTextContent('grid');
+    await expect
+      .element(screen.getByTestId('page-size'))
+      .toHaveTextContent('20');
+  } finally {
+    spy.mockRestore();
+  }
+});
+
+it('session state renders its defaults when reading sessionStorage throws', async () => {
+  sessionStorage.setItem(
+    'k8ordo-state:prefs',
+    JSON.stringify({ view: 'table', pageSize: 50 }),
+  );
+  const spy = refuseArea('sessionStorage');
+  try {
+    const screen = await render(<TabPrefs />);
+
+    await expect
+      .element(screen.getByTestId('tab-view'))
+      .toHaveTextContent('grid');
+  } finally {
+    spy.mockRestore();
+  }
+});
+
+it('updates with the area refused stay on screen together and each rejects with the refusal', async () => {
+  const spy = refuseArea('localStorage');
+  try {
+    const screen = await render(<Prefs />);
+
+    await screen.getByRole('button', { name: 'table' }).click();
+    await expect((lastHandle as UpdateHandle).finished).rejects.toThrow(
+      'denied',
+    );
+    await screen.getByRole('button', { name: 'page size' }).click();
+    await expect((lastHandle as UpdateHandle).finished).rejects.toThrow(
+      'denied',
+    );
+
+    await expect.element(screen.getByTestId('view')).toHaveTextContent('table');
+    await expect
+      .element(screen.getByTestId('page-size'))
+      .toHaveTextContent('50');
+  } finally {
+    spy.mockRestore();
+  }
+});
+
+it('local state renders its defaults when getItem throws', async () => {
+  localStorage.setItem(
+    'k8ordo-state:prefs',
+    JSON.stringify({ view: 'table', pageSize: 50 }),
+  );
+  const spy = refuseGetItem();
+  try {
+    const screen = await render(<Prefs />);
+
+    await expect.element(screen.getByTestId('view')).toHaveTextContent('grid');
+  } finally {
+    spy.mockRestore();
+  }
+});
+
+it('an update whose read throws writes nothing and rejects, so fields it could not read survive', async () => {
+  localStorage.setItem(
+    'k8ordo-state:prefs',
+    JSON.stringify({ view: 'grid', pageSize: 50 }),
+  );
+  const screen = await render(<Prefs />);
+  const spy = refuseGetItem();
+  try {
+    await screen.getByRole('button', { name: 'table' }).click();
+
+    await expect.element(screen.getByTestId('view')).toHaveTextContent('table');
+    await expect((lastHandle as UpdateHandle).finished).rejects.toThrow(
+      'denied',
+    );
+  } finally {
+    spy.mockRestore();
+  }
+  expect(
+    JSON.parse(localStorage.getItem('k8ordo-state:prefs') as string),
+  ).toStrictEqual({ view: 'grid', pageSize: 50 });
+});
+
+it("another tab's write that cannot be read leaves the values on screen", async () => {
+  localStorage.setItem(
+    'k8ordo-state:prefs',
+    JSON.stringify({ view: 'table', pageSize: 50 }),
+  );
+  const screen = await render(<Prefs />);
+  await expect.element(screen.getByTestId('view')).toHaveTextContent('table');
+  const spy = refuseGetItem();
+  try {
+    window.dispatchEvent(
+      new StorageEvent('storage', {
+        key: 'k8ordo-state:prefs',
+        storageArea: localStorage,
+      }),
+    );
+
+    await frame();
+    expect(screen.getByTestId('view').element().textContent).toBe('table');
+  } finally {
+    spy.mockRestore();
+  }
+});
+
+it('a migrated row the browser will not take back still renders its values', async () => {
+  localStorage.setItem('k8ordo-state:versioned', '[1,{"layout":"list"}]');
+  const spy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+    throw new DOMException('quota', 'QuotaExceededError');
+  });
+  try {
+    const screen = await render(<VersionedLocal />);
+
+    await expect
+      .element(screen.getByTestId('local-view'))
+      .toHaveTextContent('table');
+    await frame();
+  } finally {
+    spy.mockRestore();
+  }
+  expect(localStorage.getItem('k8ordo-state:versioned')).toBe(
+    '[1,{"layout":"list"}]',
+  );
+});
+
+it('a migrated row that cannot be read again is left for the next load', async () => {
+  const screen = await render(<VersionedLocal />);
+  localStorage.setItem('k8ordo-state:versioned', '[1,{"layout":"list"}]');
+  const { getItem } = Storage.prototype;
+  // storage イベントの中の読み取りだけ通し、書き戻しの前の読み直しで投げさせる
+  const spy = vi
+    .spyOn(Storage.prototype, 'getItem')
+    .mockImplementationOnce(function read(this: Storage, key) {
+      return getItem.call(this, key);
+    })
+    .mockImplementation(() => {
+      throw refusal();
+    });
+  try {
+    window.dispatchEvent(
+      new StorageEvent('storage', {
+        key: 'k8ordo-state:versioned',
+        storageArea: localStorage,
+      }),
+    );
+
+    await expect
+      .element(screen.getByTestId('local-view'))
+      .toHaveTextContent('table');
+    await frame();
+  } finally {
+    spy.mockRestore();
+  }
+  expect(localStorage.getItem('k8ordo-state:versioned')).toBe(
+    '[1,{"layout":"list"}]',
   );
 });
 
