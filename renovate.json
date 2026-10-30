@@ -23,7 +23,10 @@
     }
   ],
   "prConcurrentLimit": 10,
-  "ignorePaths": ["**/node_modules/**"],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "packages/framework-engine/fixtures/**"
+  ],
   "packageRules": [
     {
       "matchPackageNames": ["/^@storybook/", "/^storybook$/"],
