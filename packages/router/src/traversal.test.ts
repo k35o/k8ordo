@@ -200,6 +200,32 @@ describe.each(browserTypes)(
       await page.close();
     }, 30_000);
 
+    // 別のサイトから入り直した文書の navigation.entries() には、別のサイトより
+    // 前の entry が並ばない。そこで移っても、それらを離れた位置は忘れない
+    it('restores the position a page was left at when the visitor goes back to it past another site they came back in from and moved on', async () => {
+      const page = await open('/tall');
+      await page.evaluate(() => {
+        window.scrollTo(0, 3000);
+      });
+      const left = await scrollY(page);
+      await navigateTo(page, '/about');
+      await page.goto(`${outsideOrigin}/`);
+      await page.goto(`${origin}/short`);
+      await page.getByRole('heading', { name: 'short' }).waitFor();
+      await navigateTo(page, '/about');
+      await traverse(page, 'back');
+      await page.goBack();
+      await page.getByRole('heading', { name: 'outside' }).waitFor();
+      await page.goBack();
+      await page.getByRole('heading', { name: 'about' }).waitFor();
+
+      await page.goBack();
+
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
+      await expect.poll(() => scrollY(page)).toBe(left);
+      await page.close();
+    }, 30_000);
+
     it('restores the position a page was left at when the visitor goes forward to it from further down a longer page', async () => {
       const page = await open('/tall');
       await navigateTo(page, '/short');

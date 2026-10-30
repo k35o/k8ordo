@@ -155,6 +155,13 @@ const leftAt = new Map<string, Position>();
 // key は読み直しをまたいで変わらないので、タブの sessionStorage にも写す
 const LEFT_AT_KEY = '@k8ordo/router:left-at';
 
+// 間引くのは件数で、navigation.entries() に無いものではない。entries() はその
+// 文書から続く同じ origin の entry しか並べないので、別のサイトから入り直した
+// 文書で間引くと、別のサイトより前の entry の位置まで消える。捨てられた entry の
+// key がほかの entry に付くことはなく、間引くのは大きさのためだけ。残すのは
+// 最近離れた 100 件で、どのエンジンも 1 つのタブの履歴に 100 件より多くは持たない
+const LEFT_AT_LIMIT = 100;
+
 const readLeftAt = (): void => {
   try {
     const saved = sessionStorage.getItem(LEFT_AT_KEY);
@@ -170,10 +177,12 @@ const readLeftAt = (): void => {
 };
 
 const rememberLeftAt = (entry: string): void => {
+  // Map は入れた順に並ぶ。離れ直した entry を後ろへ移し、古いものを前から捨てる
+  leftAt.delete(entry);
   leftAt.set(entry, { left: window.scrollX, top: window.scrollY });
-  const live = new Set(navigation.entries().map(({ key }) => key));
   for (const key of leftAt.keys()) {
-    if (!live.has(key)) leftAt.delete(key);
+    if (leftAt.size <= LEFT_AT_LIMIT) break;
+    leftAt.delete(key);
   }
   try {
     sessionStorage.setItem(LEFT_AT_KEY, JSON.stringify([...leftAt]));
