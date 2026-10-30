@@ -37,7 +37,7 @@ const ToastTrigger = ({
 const closestToastItem = (element: HTMLElement) => {
   const item = element.closest('[data-toast-id]');
   if (!(item instanceof HTMLElement)) {
-    throw new Error('トーストの外側の要素が渡されました');
+    throw new TypeError('トーストの外側の要素が渡されました');
   }
   return item;
 };
