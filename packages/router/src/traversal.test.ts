@@ -27,9 +27,11 @@ const browserTypes = [chromium, firefox, webkit]
 
 let server: ViteDevServer;
 let origin = '';
-// 訪問者がタブで寄る別のサイト。ポートが違えば origin も違う
+// 訪問者がタブで寄る外のページ。127.0.0.1 の別のポートは同じサイトの別の origin、
+// localhost は別のサイト。WebKit は戻るの来かたがこの 2 つで違う
 let outside: Server;
 let outsideOrigin = '';
+let outsideSite = '';
 
 beforeAll(async () => {
   outside = createHttpServer((_, response) => {
@@ -37,9 +39,11 @@ beforeAll(async () => {
     response.end('<!doctype html><title>outside</title><h1>outside</h1>');
   });
   await new Promise<void>((resolve) => {
-    outside.listen(0, '127.0.0.1', resolve);
+    outside.listen(0, resolve);
   });
-  outsideOrigin = `http://127.0.0.1:${String((outside.address() as AddressInfo).port)}`;
+  const outsidePort = String((outside.address() as AddressInfo).port);
+  outsideOrigin = `http://127.0.0.1:${outsidePort}`;
+  outsideSite = `http://localhost:${outsidePort}`;
   server = await createServer({
     root,
     configFile: false,
@@ -80,6 +84,8 @@ describe.each(browserTypes)(
   'going back and forward in a top-level document, in $name',
   ({ type }) => {
     let browser: Browser;
+    // WebKit は移る回数を制限し、超えると QuotaExceededError を投げる
+    const movePause = type.name() === 'webkit' ? 110 : 0;
 
     beforeAll(async () => {
       browser = await type.launch();
@@ -88,6 +94,9 @@ describe.each(browserTypes)(
     afterAll(async () => {
       await browser.close();
     });
+
+    const listCount = (page: Page): Promise<string | null> =>
+      page.getByTestId('count').textContent();
 
     const open = async (pathname: string): Promise<Page> => {
       const page = await browser.newPage();
@@ -179,10 +188,10 @@ describe.each(browserTypes)(
       await page.close();
     }, 30_000);
 
-    // 別のサイトから戻ると、about の文書は bfcache から戻らなければ読み直される。
+    // 別の origin から戻ると、about の文書は bfcache から戻らなければ読み直される。
     // WebKit はその文書の entries() に tall を並べず、tall への戻るの行き先に
     // key を付けない
-    it('restores the position a page was left at when the visitor goes back to it past another site', async () => {
+    it('restores the position a page was left at when the visitor goes back to it past another origin', async () => {
       const page = await open('/tall');
       await page.evaluate(() => {
         window.scrollTo(0, 3000);
@@ -200,9 +209,125 @@ describe.each(browserTypes)(
       await page.close();
     }, 30_000);
 
-    // 別のサイトから入り直した文書の navigation.entries() には、別のサイトより
+    // WebKit は key の無い戻るのあとも currentEntry を読み直した entry のままにする。
+    // 次に移るときに、画面のページの位置をその entry のものとして書かない
+    it('restores the position a page was left at when the visitor goes back past another origin and then forward to it', async () => {
+      const page = await open('/tall');
+      await page.evaluate(() => {
+        window.scrollTo(0, 3000);
+      });
+      await navigateTo(page, '/short');
+      await page.goto(`${outsideOrigin}/`);
+      await page.goBack();
+      await page.getByRole('heading', { name: 'short' }).waitFor();
+      await page.evaluate(() => {
+        window.scrollTo(0, 500);
+      });
+      await page.goBack();
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
+      await expect.poll(() => scrollY(page)).toBe(3000);
+
+      await page.goForward();
+
+      await page.getByRole('heading', { name: 'short' }).waitFor();
+      await expect.poll(() => scrollY(page)).toBe(500);
+      await page.close();
+    }, 30_000);
+
+    it('restores the position a page was left at when the visitor goes back past another origin, follows a link from there, goes back and then forward to it', async () => {
+      const page = await open('/tall');
+      await page.evaluate(() => {
+        window.scrollTo(0, 3000);
+      });
+      await navigateTo(page, '/about');
+      await page.goto(`${outsideOrigin}/`);
+      await page.goBack();
+      await page.getByRole('heading', { name: 'about' }).waitFor();
+      await page.goBack();
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
+      await navigateTo(page, '/short');
+      await page.evaluate(() => {
+        window.scrollTo(0, 700);
+      });
+      await page.goBack();
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
+      await expect.poll(() => scrollY(page)).toBe(3000);
+
+      await page.goForward();
+
+      await page.getByRole('heading', { name: 'short' }).waitFor();
+      await expect.poll(() => scrollY(page)).toBe(700);
+      await page.close();
+    }, 30_000);
+
+    // WebKit は key の無い戻るで currententrychange を出さない。URL の動きが届くのは
+    // popstate だけ
+    it('keeps usePathname on the URL when the visitor goes back past another origin', async () => {
+      const page = await open('/tall');
+      await navigateTo(page, '/about');
+      await page.goto(`${outsideOrigin}/`);
+      await page.goBack();
+      await page.getByRole('heading', { name: 'about' }).waitFor();
+      expect(await page.getByTestId('pathname').textContent()).toBe('/about');
+
+      await page.goBack();
+
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
+      await expect
+        .poll(() => page.getByTestId('pathname').textContent())
+        .toBe('/tall');
+      await page.close();
+    }, 30_000);
+
+    it('restores the position an entry of the same page was left at, onto what that entry renders, when the visitor goes back to it past another origin', async () => {
+      const page = await open('/list?q=few');
+      await expect.poll(() => listCount(page)).toBe('30');
+      await page.evaluate(() => {
+        window.scrollTo(0, 1500);
+      });
+      await navigateTo(page, '/list');
+      await expect.poll(() => listCount(page)).toBe('90');
+      await navigateTo(page, '/about');
+      await page.goto(`${outsideOrigin}/`);
+      await page.goBack();
+      await page.getByRole('heading', { name: 'about' }).waitFor();
+      await page.goBack();
+      await expect.poll(() => listCount(page)).toBe('90');
+      await page.evaluate(() => {
+        window.scrollTo(0, 6000);
+      });
+
+      await page.goBack();
+
+      await expect.poll(() => listCount(page)).toBe('30');
+      await expect.poll(() => scrollY(page)).toBe(1500);
+      await page.close();
+    }, 30_000);
+
+    it('restores the position and what an entry of the same page renders when the visitor goes back past another origin and then forward to it', async () => {
+      const page = await open('/list?q=few');
+      await expect.poll(() => listCount(page)).toBe('30');
+      await navigateTo(page, '/list');
+      await expect.poll(() => listCount(page)).toBe('90');
+      await page.goto(`${outsideOrigin}/`);
+      await page.goBack();
+      await expect.poll(() => listCount(page)).toBe('90');
+      await page.evaluate(() => {
+        window.scrollTo(0, 6000);
+      });
+      await page.goBack();
+      await expect.poll(() => listCount(page)).toBe('30');
+
+      await page.goForward();
+
+      await expect.poll(() => listCount(page)).toBe('90');
+      await expect.poll(() => scrollY(page)).toBe(6000);
+      await page.close();
+    }, 30_000);
+
+    // 別の origin から入り直した文書の navigation.entries() には、別の origin より
     // 前の entry が並ばない。そこで移っても、それらを離れた位置は忘れない
-    it('restores the position a page was left at when the visitor goes back to it past another site they came back in from and moved on', async () => {
+    it('restores the position a page was left at when the visitor goes back to it past another origin they came back in from and moved on', async () => {
       const page = await open('/tall');
       await page.evaluate(() => {
         window.scrollTo(0, 3000);
@@ -225,6 +350,79 @@ describe.each(browserTypes)(
       await expect.poll(() => scrollY(page)).toBe(left);
       await page.close();
     }, 30_000);
+
+    // 別のサイトを挟むと、WebKit は読み直した文書からの戻るに navigate を出さず、
+    // popstate だけを出して currentEntry を null にする。URL だけが動いて前のページが
+    // 画面に残り、その文書では navigation.navigate() が AbortError になる。
+    // フィクスチャはクライアントで描くので、読み直した文書の位置は確かめない
+    it('shows the page the URL names, and keeps following links, when the visitor goes back past another site', async () => {
+      const page = await open('/tall');
+      await navigateTo(page, '/about');
+      await page.goto(`${outsideSite}/`);
+      await page.goBack();
+      await page.getByRole('heading', { name: 'about' }).waitFor();
+
+      await page.goBack();
+
+      await page.waitForFunction(() => navigation.currentEntry !== null);
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
+      expect(new URL(page.url()).pathname).toBe('/tall');
+      await navigateTo(page, '/short');
+      await page.getByRole('heading', { name: 'short' }).waitFor();
+      await page.close();
+    }, 30_000);
+
+    it('shows what the URL holds, and keeps following links, when the visitor goes back past another site within a page', async () => {
+      const page = await open('/list?q=few');
+      await expect.poll(() => listCount(page)).toBe('30');
+      await navigateTo(page, '/list');
+      await expect.poll(() => listCount(page)).toBe('90');
+      await page.goto(`${outsideSite}/`);
+      await page.goBack();
+      await expect.poll(() => listCount(page)).toBe('90');
+
+      await page.goBack();
+
+      // 一覧は popstate で先に絞られる。文書の読み直しが終わるのを待つ
+      await page.waitForFunction(() => navigation.currentEntry !== null);
+      await expect.poll(() => listCount(page)).toBe('30');
+      expect(new URL(page.url()).search).toBe('?q=few');
+      await navigateTo(page, '/short');
+      await page.getByRole('heading', { name: 'short' }).waitFor();
+      await page.close();
+    }, 30_000);
+
+    // 移っては戻る読み方では、切り捨てられた entry と hash の移動の key が記録に
+    // 積もる。tab の履歴に数件しか無くても、まだ戻れる entry を押し出さない
+    it('restores the position a page was left at when the visitor goes back to it after leaving more than 100 entries that are gone', async () => {
+      const page = await open('/tall');
+      await page.evaluate(() => {
+        window.scrollTo(0, 3000);
+      });
+      const left = await scrollY(page);
+      await navigateTo(page, '/about');
+      await page.evaluate(async (ms) => {
+        const move = async (go: () => NavigationResult): Promise<void> => {
+          await go().finished;
+          await new Promise((resolve) => {
+            setTimeout(resolve, ms);
+          });
+        };
+        for (let i = 0; i < 51; i += 1) {
+          await move(() => navigation.navigate('/short'));
+          await move(() => navigation.navigate('#again'));
+          await move(() => navigation.back());
+          await move(() => navigation.back());
+        }
+      }, movePause);
+      await page.getByRole('heading', { name: 'about' }).waitFor();
+
+      await traverse(page, 'back');
+
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
+      await expect.poll(() => scrollY(page)).toBe(left);
+      await page.close();
+    }, 60_000);
 
     it('restores the position a page was left at when the visitor goes forward to it from further down a longer page', async () => {
       const page = await open('/tall');
@@ -249,9 +447,6 @@ describe.each(browserTypes)(
     // 一覧は絞り込みを useDeferredValue で遅らせて描く。急ぎの描画のあとで
     // 位置を戻すと、まだ前の entry の一覧の高さの上に戻り、絞った描画で
     // スクロールアンカリングがずらす
-    const listCount = (page: Page): Promise<string | null> =>
-      page.getByTestId('count').textContent();
-
     /** The count the page shows once the traversal's `finished` settles. */
     const countWhenSettled = (
       page: Page,
@@ -402,6 +597,39 @@ describe.each(browserTypes)(
 
       expect(new URL(page.url()).pathname).toBe('/host.html');
       expect(await scrollY(page)).toBe(kept);
+      await page.close();
+    }, 30_000);
+
+    // WebKit は bfcache から戻した文書に、位置を戻す前の traverse を出す。行き先は
+    // 今の entry で、画面のページは動いていない。Playwright の WebKit は bfcache を
+    // 使わないので、そのイベントを同じ形で流し、ブラウザが戻す位置を続けて置く
+    it('leaves the position to the browser when WebKit announces coming back from the back/forward cache as a traversal to the entry on screen', async () => {
+      const page = await open('/short');
+
+      const settled = await page.evaluate(async () => {
+        navigation.dispatchEvent(
+          Object.assign(new Event('navigate'), {
+            canIntercept: true,
+            hashChange: false,
+            downloadRequest: null,
+            formData: null,
+            navigationType: 'traverse',
+            destination: {
+              key: navigation.currentEntry?.key,
+              url: location.href,
+            },
+            signal: new AbortController().signal,
+            intercept: () => undefined,
+          }),
+        );
+        window.scrollTo(0, 500);
+        await new Promise((resolve) => {
+          setTimeout(resolve, 50);
+        });
+        return window.scrollY;
+      });
+
+      expect(settled).toBe(500);
       await page.close();
     }, 30_000);
 

@@ -142,6 +142,7 @@ type Pending = {
   resolve: () => void;
   scroll: ScrollPlan | null;
   types: readonly string[];
+  keyless: boolean;
 };
 
 // 戻る・進むの位置はブラウザに戻させず、離れたときの位置を覚えて自分で置く。
@@ -155,11 +156,11 @@ const leftAt = new Map<string, Position>();
 // key は読み直しをまたいで変わらないので、タブの sessionStorage にも写す
 const LEFT_AT_KEY = '@k8ordo/router:left-at';
 
-// 間引くのは件数で、navigation.entries() に無いものではない。entries() はその
-// 文書から続く同じ origin の entry しか並べないので、別のサイトから入り直した
-// 文書で間引くと、別のサイトより前の entry の位置まで消える。捨てられた entry の
-// key がほかの entry に付くことはなく、間引くのは大きさのためだけ。残すのは
-// 最近離れた 100 件で、どのエンジンも 1 つのタブの履歴に 100 件より多くは持たない
+// 間引くのは上限を超えたときだけ。entries() はその文書から続く同じ origin の
+// entry しか並べないので、そのたびに間引くと、別のサイトから入り直した文書で
+// 別のサイトより前の entry の位置まで消える。捨てられた entry の key がほかの
+// entry に付くことはなく、間引くのは大きさのためだけ。どのエンジンも 1 つの
+// タブの履歴に 100 件より多くは持たない
 const LEFT_AT_LIMIT = 100;
 
 const readLeftAt = (): void => {
@@ -180,9 +181,15 @@ const rememberLeftAt = (entry: string): void => {
   // Map は入れた順に並ぶ。離れ直した entry を後ろへ移し、古いものを前から捨てる
   leftAt.delete(entry);
   leftAt.set(entry, { left: window.scrollX, top: window.scrollY });
-  for (const key of leftAt.keys()) {
-    if (leftAt.size <= LEFT_AT_LIMIT) break;
-    leftAt.delete(key);
+  if (leftAt.size > LEFT_AT_LIMIT) {
+    // 移っては戻ると、切り捨てられた entry の key が戻れる entry の間に積もる。
+    // 古さだけで捨てると、一度離れたきりの戻れる entry が先に押し出される
+    const listed = new Set(navigation.entries().map(({ key }) => key));
+    const keys = [...leftAt.keys()];
+    for (const key of [...keys.filter((k) => !listed.has(k)), ...keys]) {
+      if (leftAt.size <= LEFT_AT_LIMIT) break;
+      leftAt.delete(key);
+    }
   }
   try {
     sessionStorage.setItem(LEFT_AT_KEY, JSON.stringify([...leftAt]));
@@ -325,18 +332,41 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
   // The entry whose page is on screen while a page change loads — the URL's
   // entry otherwise. Going back to it is calling the change off, not going
   // back to a place the visitor left; and it is the entry a navigation in the
-  // meantime leaves, at the position the visitor has it scrolled to.
+  // meantime leaves, at the position the visitor has it scrolled to. An empty
+  // key names the entry a keyless traversal arrived at: WebKit leaves
+  // `currentEntry` where it was, so that entry is not the URL's as far as
+  // anything can read, and there is no key to record a position under.
   const onScreenEntry = useRef<string | null>(null);
 
   useEffect(() => {
     shown.current = normalizePathname(location.pathname);
     readLeftAt();
     const onNavigate = (event: NavigateEvent): void => {
+      const traverse = event.navigationType === 'traverse';
+      // WebKit は bfcache から戻した文書に、位置を戻す前の traverse を出す。行き先は
+      // 今の entry で、画面のページは離れていない。位置はこのあとブラウザが戻す
+      if (
+        traverse &&
+        isOurs(event) &&
+        onScreenEntry.current === null &&
+        event.destination.key === navigation.currentEntry?.key
+      ) {
+        event.intercept({ scroll: 'manual', focusReset: 'manual' });
+        return;
+      }
       // ページの読み込み中に離れるのは、URL の entry でなく画面に残るページの
       // entry。URL の entry はまだ画面に出ていない
       const leaving = onScreenEntry.current ?? navigation.currentEntry?.key;
-      if (leaving !== undefined) rememberLeftAt(leaving);
-      if (!isOurs(event)) return;
+      if (leaving !== undefined && leaving !== '') rememberLeftAt(leaving);
+      // WebKit は、戻るで読み直した文書の entries() に、同じ文書のまま戻れる
+      // それより前の entry を並べず、そこへの traverse の行き先に key を付けない。
+      // 離れた位置を引けないので、そのときだけ戻すのをブラウザに任せる
+      const keyless = traverse && event.destination.key === '';
+      if (!isOurs(event)) {
+        if (keyless) onScreenEntry.current = '';
+        else if (onScreenEntry.current === '') onScreenEntry.current = null;
+        return;
+      }
       const url = new URL(event.destination.url);
       const pathname = normalizePathname(url.pathname);
       // Same place — only the search or the entry state moved. Nothing to
@@ -344,16 +374,11 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       // page showing reads what moved. Only going back or forward moves the
       // viewport, to where that entry was left.
       const inPlace = pathname === shown.current;
-      const traverse = event.navigationType === 'traverse';
-      // WebKit は、戻るで読み直した文書の entries() に、同じ文書のまま戻れる
-      // それより前の entry を並べず、そこへの traverse の行き先に key を付けない。
-      // 離れた位置を引けないので、そのときだけ戻すのをブラウザに任せる
-      const browserRestores = traverse && event.destination.key === '';
       if (inPlace && !refresh(url)) {
         const calledOff =
-          event.destination.key ===
-          (onScreenEntry.current ?? navigation.currentEntry?.key);
-        onScreenEntry.current = null;
+          event.destination.key !== '' &&
+          event.destination.key === onScreenEntry.current;
+        onScreenEntry.current = keyless ? '' : null;
         if (!traverse || calledOff) {
           event.intercept({ scroll: 'manual', focusReset: 'manual' });
           if (calledOff) keepPosition(event.destination.key);
@@ -370,7 +395,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
           resolve: () => {
             resolve(undefined);
           },
-          scroll: browserRestores
+          scroll: keyless
             ? null
             : scrollPlanFor(
                 'traverse',
@@ -378,6 +403,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
                 leftAt.get(event.destination.key),
               ),
           types: [],
+          keyless,
         });
         event.signal.addEventListener(
           'abort',
@@ -389,7 +415,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         );
         setTraversed(id);
         event.intercept({
-          scroll: browserRestores ? 'after-transition' : 'manual',
+          scroll: keyless ? 'after-transition' : 'manual',
           focusReset: 'manual',
           handler: () => promise,
         });
@@ -407,7 +433,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         if (latest.current === id) setPendingPathname(null);
       };
       const scroll =
-        (inPlace && !traverse) || browserRestores
+        (inPlace && !traverse) || keyless
           ? null
           : scrollPlanFor(
               event.navigationType,
@@ -423,7 +449,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         // the two from disagreeing, and keeps the behaviour where a browser
         // has not implemented the platform's half. A traversal included: the
         // hook puts back where it saw that entry left — a load in place too.
-        scroll: browserRestores ? 'after-transition' : 'manual',
+        scroll: keyless ? 'after-transition' : 'manual',
         handler: async () => {
           // 失敗も中止も、名指していた遷移が終わったということ。新しい遷移が
           // 始まっていれば、それがもう自分の行き先を名指している
@@ -447,6 +473,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
               // 同じページの読み直しはページの切り替えではない。
               // ViewTransition が切り替えとして動かさないよう、型を付けない
               types: inPlace ? [] : transitionTypesFor(event.navigationType),
+              keyless,
             });
             event.signal.addEventListener(
               'abort',
@@ -469,8 +496,16 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       });
     };
     navigation.addEventListener('navigate', onNavigate);
+    // WebKit は、別のサイトを挟んで読み直した文書からそれより前の entry へ戻ると、
+    // navigate を出さずに popstate だけを出し、currentEntry を null にする。URL だけが
+    // 動いて画面は残り、この文書ではもう navigation.navigate() が AbortError になる
+    const onPopState = (): void => {
+      if (navigation.currentEntry === null) location.reload();
+    };
+    window.addEventListener('popstate', onPopState);
     return () => {
       navigation.removeEventListener('navigate', onNavigate);
+      window.removeEventListener('popstate', onPopState);
     };
   }, []);
 
@@ -485,7 +520,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
     const entry = pending.current.get(id);
     if (entry === undefined) return;
     pending.current.delete(id);
-    onScreenEntry.current = null;
+    onScreenEntry.current = entry.keyless ? '' : null;
     if (entry.scroll !== null) applyScroll(entry.scroll);
     if (latest.current === id) setPendingPathname(null);
     entry.resolve();

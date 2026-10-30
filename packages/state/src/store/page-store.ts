@@ -82,6 +82,8 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
     if (returned) core.touch();
   };
   navigation.addEventListener('currententrychange', sync);
+  // WebKit は key の無い traverse で currententrychange を出さない
+  window.addEventListener('popstate', sync);
 
   /**
    * The whole navigation state travels with every write we make: the entry
@@ -244,6 +246,7 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
     update,
     dispose: () => {
       navigation.removeEventListener('currententrychange', sync);
+      window.removeEventListener('popstate', sync);
       left.clear();
       bound.clear();
       core.clear();

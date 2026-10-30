@@ -1,4 +1,5 @@
 import {
+  memo,
   useDeferredValue,
   useLayoutEffect,
   useRef,
@@ -8,6 +9,7 @@ import type { FC, ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { defineRoutes } from '../../src/define-routes';
+import { usePathname } from '../../src/location';
 import { Router } from '../../src/router';
 
 const AboutPage: FC = () => <h1>about</h1>;
@@ -42,12 +44,15 @@ const ShortPage: FC = () => (
   </Measured>
 );
 
-// @k8ordo/state の url の欄と同じく、検索を currententrychange で読む外部の
-// store。急ぎの描画で入力の値が動き、絞った一覧は useDeferredValue で遅れて動く
+// @k8ordo/state の url の欄と同じく、検索を currententrychange と popstate で読む
+// 外部の store。急ぎの描画で入力の値が動き、絞った一覧は useDeferredValue で遅れて
+// 動く
 const subscribe = (onChange: () => void): (() => void) => {
   navigation.addEventListener('currententrychange', onChange);
+  window.addEventListener('popstate', onChange);
   return () => {
     navigation.removeEventListener('currententrychange', onChange);
+    window.removeEventListener('popstate', onChange);
   };
 };
 const readQuery = (): string =>
@@ -77,6 +82,16 @@ const ListPage: FC = () => {
   );
 };
 
+// ページをまたいで残るナビゲーションのように、ルーターの描画では描き直されない部品。
+// 親に描き直されなければ、URL の動きを知る手は usePathname の購読だけ
+const Where = memo(function Where() {
+  return (
+    <p data-testid="pathname" style={{ position: 'fixed', top: 0, right: 0 }}>
+      {usePathname()}
+    </p>
+  );
+});
+
 const routes = defineRoutes({
   '/about': AboutPage,
   '/tall': TallPage,
@@ -89,4 +104,9 @@ if (!rootElement) {
   throw new Error('Root element not found');
 }
 
-createRoot(rootElement).render(<Router routes={routes} />);
+createRoot(rootElement).render(
+  <>
+    <Where />
+    <Router routes={routes} />
+  </>,
+);

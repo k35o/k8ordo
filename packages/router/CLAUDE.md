@@ -100,24 +100,36 @@ pnpm check         # check:write to auto-fix
   listener records `scrollX` / `scrollY` for the entry being left before
   anything else — `onScreenEntry` while a page change loads, because the
   URL's entry is not on screen yet and a second navigation leaves the page
-  that is — keyed by the entry's `key`, kept to the 100 most recently left,
-  and mirrored into `sessionStorage`: a reload keeps the earlier entries in
-  the same document, so going back to them is still intercepted, and an
-  in-memory record would be gone. Never prune the record to
-  `navigation.entries()`: it lists only the same-origin run of entries
-  around the current one, so a document the visitor came back in on from
-  another site would drop the entries from before that site, and going back
-  to them through a document read again landed at the top. A key never
-  comes back once its entry is gone, so the cap is only about size; no
-  engine keeps more than 100 entries in a tab's history. An entry with no
-  record (a page change called off before it arrived) starts like a new
-  page. The visitor scrolling the old page during the load does not stop
+  that is — keyed by the entry's `key`, kept to 100, and mirrored into
+  `sessionStorage`: a reload keeps the earlier entries in the same document,
+  so going back to them is still intercepted, and an in-memory record would
+  be gone. Never prune the record to `navigation.entries()` while it fits:
+  it lists only the same-origin run of entries around the current one, so a
+  document the visitor came back in on from another site would drop the
+  entries from before that site, and going back to them through a document
+  read again landed at the top. A key never comes back once its entry is
+  gone, so the cap is only about size; no engine keeps more than 100 entries
+  in a tab's history. Over the cap it drops the least recently left key that
+  `entries()` does not list, and only then the least recently left of the
+  rest: moving on and coming back piles up the keys of truncated entries and
+  of fragment moves (every `navigate` records one, hash included), and age
+  alone would push out an entry left once and still there to go back to. An
+  entry with no record (a page change called off before it arrived) starts
+  like a new page. The visitor scrolling the old page during the load does not stop
   the restore — what they moved was the page being left. The one traversal
   left to the browser (`scroll: 'after-transition'`, no scroll plan) is one
   whose destination has an empty `key`: WebKit, in a document it read again
   on going back, lists none of the earlier entries it still treats as the
   same document, and a traversal to one comes keyless, with nothing to look
-  up.
+  up. WebKit also leaves `currentEntry` where it was after one and dispatches
+  no `currententrychange`, so until the next navigation `currentEntry` does
+  not name what is on screen. `onScreenEntry` holds the empty key for that
+  stretch: leaving records nothing (the browser keeps that entry's position
+  itself), and a traversal to the stale `currentEntry` is a real one that
+  restores what was recorded when that entry was left. A keyed traversal or a
+  push puts `currentEntry` right again. `popstate` is the only news of a
+  keyless traversal, so `usePathname` subscribes to it beside
+  `currententrychange`, and `@k8ordo/state`'s page store does the same.
   A traversal has a handler whether it changes the page, loads one in
   place, or only moves the search or the entry state: in the last case
   nothing is applied, but the page renders the entry it arrived at,
@@ -140,15 +152,41 @@ pnpm check         # check:write to auto-fix
   visitor had back in the next task (`keepPosition`, a `setTimeout` — a
   frame callback never runs in a hidden tab), unless another navigation
   moved the entry on. The other engines leave it, so there it is already
-  where it was.
+  where it was. WebKit, on bringing a document back from the back/forward
+  cache, dispatches a traversal to the current entry before it restores the
+  position, with `scrollY` still 0. That is no departure and nothing loads, so
+  outside a page change it is intercepted before anything is recorded and
+  moves nothing: `keepPosition` is only for a change being called off, or it
+  would hold the 0 and put the page back there after WebKit restored it.
   `traversal.test.ts` holds that `finished` sees the entry's own render and
   the position comes back onto it, for a page change, a traversal in place
   and one that loads again — each also from further down a longer page,
   onto pages that measure themselves — after a reload, past an entry still
-  loading, past another site (and one the visitor came back in from and
-  moved on), and when the visitor scrolls during the load; that an entry
-  called off starts at the top; and that a traversal back to the page on
-  screen keeps where the visitor scrolled it.
+  loading, past another origin (and one the visitor came back in from and
+  moved on, and going forward again from there, with and without following a
+  link first, within a page too), after leaving more than 100 entries that are
+  gone, and when the
+  visitor scrolls during the load; that an entry called off starts at the top;
+  that a traversal back to the page on screen keeps where the visitor
+  scrolled it; and that WebKit's traversal on coming back from the
+  back/forward cache leaves the position alone. Playwright's WebKit does not
+  use that cache, so that test replays the event, and the real one is checked
+  by hand in a `WKWebView` (the repro lands at 0 only on a page heavy enough
+  for WebKit to restore before the timer: the fixtures land right anyway, with
+  a `scrollTo(0, 0)` that the fix removes). It also holds that going back past
+  another site shows the page the URL names and links still work; a
+  client-rendered fixture has no position to assert after that document load.
+- **A history step the platform does not announce reloads the document.**
+  WebKit, in a document it read again on coming back from another _site_,
+  dispatches no `navigate` for a traversal to an earlier entry: only
+  `popstate`, with `currentEntry` now null. The URL has moved and the page has
+  not, and in that document `navigation.navigate()` rejects with an
+  `AbortError`, so no link works and nothing can be rendered in place. A
+  `popstate` that finds `currentEntry` null reloads, which is what going back
+  to that entry would have been in a document load: the browser restores a
+  server-rendered page's position, and the entry after it is reachable the
+  same way. From another _origin_ of the same site the same traversal is
+  announced, keyless (above).
 - **`useMatch` reads the platform, never the table.** It is `matchPath` over
   `usePathname`, which is why it works under the framework where `useRoute`
   cannot; `/*` on a table pattern is the one extension of the grammar it

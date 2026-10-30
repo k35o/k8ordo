@@ -46,8 +46,11 @@ export const BrowserPathname = ({
 
 const subscribe = (onChange: () => void): (() => void) => {
   navigation.addEventListener('currententrychange', onChange);
+  // WebKit は key の無い traverse で currententrychange を出さない
+  window.addEventListener('popstate', onChange);
   return () => {
     navigation.removeEventListener('currententrychange', onChange);
+    window.removeEventListener('popstate', onChange);
   };
 };
 
