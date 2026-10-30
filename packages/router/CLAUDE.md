@@ -100,18 +100,22 @@ pnpm check         # check:write to auto-fix
   listener records `scrollX` / `scrollY` for the entry being left before
   anything else — `onScreenEntry` while a page change loads, because the
   URL's entry is not on screen yet and a second navigation leaves the page
-  that is — keyed by the entry's `key`, kept to the 100 most recently left,
-  and mirrored into `sessionStorage`: a reload keeps the earlier entries in
-  the same document, so going back to them is still intercepted, and an
-  in-memory record would be gone. Never prune the record to
-  `navigation.entries()`: it lists only the same-origin run of entries
-  around the current one, so a document the visitor came back in on from
-  another site would drop the entries from before that site, and going back
-  to them through a document read again landed at the top. A key never
-  comes back once its entry is gone, so the cap is only about size; no
-  engine keeps more than 100 entries in a tab's history. An entry with no
-  record (a page change called off before it arrived) starts like a new
-  page. The visitor scrolling the old page during the load does not stop
+  that is — keyed by the entry's `key`, kept to 100, and mirrored into
+  `sessionStorage`: a reload keeps the earlier entries in the same document,
+  so going back to them is still intercepted, and an in-memory record would
+  be gone. Never prune the record to `navigation.entries()` while it fits:
+  it lists only the same-origin run of entries around the current one, so a
+  document the visitor came back in on from another site would drop the
+  entries from before that site, and going back to them through a document
+  read again landed at the top. A key never comes back once its entry is
+  gone, so the cap is only about size; no engine keeps more than 100 entries
+  in a tab's history. Over the cap it drops the least recently left key that
+  `entries()` does not list, and only then the least recently left of the
+  rest: moving on and coming back piles up the keys of truncated entries and
+  of fragment moves (every `navigate` records one, hash included), and age
+  alone would push out an entry left once and still there to go back to. An
+  entry with no record (a page change called off before it arrived) starts
+  like a new page. The visitor scrolling the old page during the load does not stop
   the restore — what they moved was the page being left. The one traversal
   left to the browser (`scroll: 'after-transition'`, no scroll plan) is one
   whose destination has an empty `key`: WebKit, in a document it read again
@@ -146,9 +150,10 @@ pnpm check         # check:write to auto-fix
   and one that loads again — each also from further down a longer page,
   onto pages that measure themselves — after a reload, past an entry still
   loading, past another site (and one the visitor came back in from and
-  moved on), and when the visitor scrolls during the load; that an entry
-  called off starts at the top; and that a traversal back to the page on
-  screen keeps where the visitor scrolled it.
+  moved on), after leaving more than 100 entries that are gone, and when the
+  visitor scrolls during the load; that an entry called off starts at the top;
+  and that a traversal back to the page on screen keeps where the visitor
+  scrolled it.
 - **`useMatch` reads the platform, never the table.** It is `matchPath` over
   `usePathname`, which is why it works under the framework where `useRoute`
   cannot; `/*` on a table pattern is the one extension of the grammar it

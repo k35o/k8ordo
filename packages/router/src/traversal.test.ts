@@ -80,6 +80,8 @@ describe.each(browserTypes)(
   'going back and forward in a top-level document, in $name',
   ({ type }) => {
     let browser: Browser;
+    // WebKit は移る回数を制限し、超えると QuotaExceededError を投げる
+    const movePause = type.name() === 'webkit' ? 110 : 0;
 
     beforeAll(async () => {
       browser = await type.launch();
@@ -225,6 +227,38 @@ describe.each(browserTypes)(
       await expect.poll(() => scrollY(page)).toBe(left);
       await page.close();
     }, 30_000);
+
+    // 移っては戻る読み方では、切り捨てられた entry と hash の移動の key が記録に
+    // 積もる。tab の履歴に数件しか無くても、まだ戻れる entry を押し出さない
+    it('restores the position a page was left at when the visitor goes back to it after leaving more than 100 entries that are gone', async () => {
+      const page = await open('/tall');
+      await page.evaluate(() => {
+        window.scrollTo(0, 3000);
+      });
+      const left = await scrollY(page);
+      await navigateTo(page, '/about');
+      await page.evaluate(async (ms) => {
+        const move = async (go: () => NavigationResult): Promise<void> => {
+          await go().finished;
+          await new Promise((resolve) => {
+            setTimeout(resolve, ms);
+          });
+        };
+        for (let i = 0; i < 51; i += 1) {
+          await move(() => navigation.navigate('/short'));
+          await move(() => navigation.navigate('#again'));
+          await move(() => navigation.back());
+          await move(() => navigation.back());
+        }
+      }, movePause);
+      await page.getByRole('heading', { name: 'about' }).waitFor();
+
+      await traverse(page, 'back');
+
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
+      await expect.poll(() => scrollY(page)).toBe(left);
+      await page.close();
+    }, 60_000);
 
     it('restores the position a page was left at when the visitor goes forward to it from further down a longer page', async () => {
       const page = await open('/tall');
