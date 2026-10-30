@@ -57,7 +57,9 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   the schema's field-by-field salvage and is written back in the current
   version by the browser store (`parseCookies` migrates but never writes), a
   newer row is salvaged and left alone, and a throwing `migrate` reads as
-  nothing stored without touching the row; a local or session definition also exposes
+  nothing stored without touching the row; where the browser blocks site
+  data, local and session state render their defaults and keep updates in
+  memory until the next load; a local or session definition also exposes
   `storageKey` (the key in its storage area, `k8ordo-state:<key>`) and
   `inlineRead()`, a JavaScript expression for an inline `<script>` that
   evaluates to the object stored in that area or `null` before hydration
@@ -81,7 +83,7 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   `cookieStore.set()`; memory applies per call), and returns
   `{ committed, finished }` promise handles (for non-navigating kinds they
   settle once the write lands, and a write that fails — the browser refuses
-  it (a full Web Storage area, a cookie over 4 KB) or the schema throws on
+  it (a full or blocked Web Storage area, a cookie over 4 KB) or the schema throws on
   it — rejects them with its error;
   `{ history: 'push' }` exists only on page state and takes effect only when
   a url value changes).

@@ -85,6 +85,11 @@ export const rowsDefaultAfter = message({
   en: '.',
 });
 
+export const rowsBlocked = message({
+  ja: 'サイトのデータの保存を止めたブラウザでは、選択を保存できません。プロバイダは`defaultPreference`で描画します。`setPreference`で選んだ配色は、次に読み込むまでメモリに残ります。',
+  en: 'A browser that blocks site data cannot store a choice. The provider renders `defaultPreference`, and a scheme set with `setPreference` stays in memory until the next load.',
+});
+
 export const readTitle = message({
   ja: 'プロバイダを通さない読み取り',
   en: 'Reading without the provider',

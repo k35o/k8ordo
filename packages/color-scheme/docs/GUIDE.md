@@ -210,6 +210,10 @@ every visitor who never chose.
   never reaches the tab that wrote, so a `localStorage.setItem` on the row
   in the same tab goes unnoticed until a reload: change it through
   `setPreference`.
+- **Blocked storage still renders.** A browser that blocks site data cannot
+  store a choice. The script and the provider both apply
+  `defaultPreference`, and a scheme set with `setPreference` stays in memory
+  until the next load.
 
 ## Testing
 

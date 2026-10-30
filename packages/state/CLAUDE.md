@@ -105,6 +105,16 @@ pnpm check         # check:write to auto-fix
   arrays and plain objects (anything else — Date, Map, class instances —
   compares by reference); unchanged fields keep their object identity across
   snapshots.
+- **Refused Web Storage is not an error on screen.** A browser that blocks
+  site data throws from the `localStorage` getter itself; `areaOf` hands the
+  store an area whose `getItem` and `setItem` rethrow that error, so a refused
+  area and a throwing `getItem` take one road. Stores are created during a
+  render, so the first read takes a refusal as nothing stored. A `storage`
+  event that cannot be read keeps the values on screen, a stale row's write
+  back waits for the next load, and `flush` passes the refusal to the handle
+  without writing: a row it could not read must not be overwritten with
+  defaults. The echo stays either way, which is what keeps updates in memory
+  until the next load.
 - **Boundary data is input.** URL params, Web Storage and cookie JSON, and
   restored entry state salvage field-by-field to their own defaults — never a
   throw, never a poisoned sibling. Memory has no schema because its values

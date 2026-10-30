@@ -33,6 +33,31 @@ beforeEach(() => {
 });
 
 describe('useColorScheme', () => {
+  it('still renders when the browser refuses localStorage, and a choice holds until the next load', async () => {
+    // サイトのデータを止めたブラウザは、localStorage を読むだけで投げる
+    const spy = vi
+      .spyOn(window, 'localStorage', 'get')
+      .mockImplementation(() => {
+        throw new DOMException('denied', 'SecurityError');
+      });
+    onTestFinished(() => {
+      spy.mockRestore();
+    });
+
+    const { result, act } = await renderHook(() => useColorScheme(), {
+      wrapper: DarkByDefault,
+    });
+    expect(result.current.preference).toBe('system');
+    expect(result.current.scheme).toBe('dark');
+
+    await act(() => {
+      result.current.setPreference('light');
+    });
+
+    expect(result.current.scheme).toBe('light');
+    expect(root.classList.contains('dark')).toBe(false);
+  });
+
   it('follows the system when nothing is stored', async () => {
     const { result } = await renderHook(() => useColorScheme(), {
       wrapper: SystemByDefault,

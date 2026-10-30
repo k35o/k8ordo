@@ -31,7 +31,7 @@ pnpm add @k8ordo/color-scheme @k8ordo/state zod
 
 | Package         | Version | Required | Needed for                                 |
 | --------------- | ------- | -------- | ------------------------------------------ |
-| `@k8ordo/state` | ^1.4.1  | yes      | where the preference lives (localStorage)  |
+| `@k8ordo/state` | ^1.4.2  | yes      | where the preference lives (localStorage)  |
 | `react`         | ≥19.3.0 | yes      | the provider and the hook                  |
 | `zod`           | ^4.6.6  | yes      | the one-field schema `@k8ordo/state` reads |
 | `typescript`    | ≥7.0.0  | optional | the shipped type declarations              |

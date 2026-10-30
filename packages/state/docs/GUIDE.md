@@ -478,9 +478,9 @@ never surface it. Updates with no navigation behind them return the same
 shape: entry-only, local, session and no-change page handles settle once the
 batch is flushed, cookie handles once the Cookie Store API has written it,
 memory handles on the spot. A local, session or cookie write that fails —
-the browser refuses it (a full quota, a cookie over 4 KB), or the schema
-throws on the values it was about to write — rejects the handle with that
-error while the rendered value stays.
+the browser refuses it (a full quota, blocked site data, a cookie over 4 KB),
+or the schema throws on the values it was about to write — rejects the handle
+with that error while the rendered value stays.
 
 - **Patches are validated on the spot.** The merged state goes through the
   schema inside `update()` itself, url fields by the road a URL arrival
@@ -692,6 +692,14 @@ with no library bookkeeping.
 `storage` event, cookie state through the Cookie Store API's `change` event;
 the same keyed subscription granularity applies. sessionStorage belongs to one
 tab, so its `storage` event reaches only other frames of that tab.
+
+**Blocked storage still renders.** A browser that blocks site data throws a
+`SecurityError` on any read of `localStorage` or `sessionStorage`. Local and
+session state render their defaults there, `update()` keeps a value in memory
+until the next load, and each handle rejects with that error, since nothing
+was stored. A `getItem` that throws on its own also renders the defaults;
+after that, a `storage` event it cannot read leaves the values on screen, and
+an `update()` rejects without writing, so the fields it could not read survive.
 
 **SSR sees real url values when your router hands you the search.** Pass the
 RSC-parsed url as `initialUrl` and the server render and the hydration render
