@@ -103,6 +103,10 @@ export default function FrameworkGetStartedPage() {
         </p>
         <p>
           <Rich>{t.layoutCharset()}</Rich>
+          <LocaleAnchor path="/:locale/framework/csp">
+            {m.framework.navCsp()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
         <Note>
           <p>
