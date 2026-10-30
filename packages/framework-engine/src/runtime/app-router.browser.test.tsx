@@ -122,7 +122,7 @@ const answerPayloadRequests = (
   vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
     if (!asksForPayload(input)) return passThrough(input, init);
     if (!(init?.signal instanceof AbortSignal)) {
-      throw new Error('a payload request without a signal');
+      throw new TypeError('a payload request without a signal');
     }
     return answer(init.signal);
   });
@@ -418,7 +418,7 @@ const countPayloadRequests = (
     if (!asksForPayload(input)) return passThrough(input, init);
     requested += 1;
     if (!(init?.signal instanceof AbortSignal)) {
-      throw new Error('a payload request without a signal');
+      throw new TypeError('a payload request without a signal');
     }
     return answer(requested, init.signal);
   });
