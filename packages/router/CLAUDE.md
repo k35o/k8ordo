@@ -160,7 +160,7 @@ pnpm check         # check:write to auto-fix
   the position comes back onto it, for a page change, a traversal in place
   and one that loads again — each also from further down a longer page,
   onto pages that measure themselves — after a reload, past an entry still
-  loading, past another site (and one the visitor came back in from and
+  loading, past another origin (and one the visitor came back in from and
   moved on, and going forward again from there, with and without following a
   link first), after leaving more than 100 entries that are gone, and when the
   visitor scrolls during the load; that an entry called off starts at the top;
@@ -170,7 +170,20 @@ pnpm check         # check:write to auto-fix
   use that cache, so that test replays the event, and the real one is checked
   by hand in a `WKWebView` (the repro lands at 0 only on a page heavy enough
   for WebKit to restore before the timer: the fixtures land right anyway, with
-  a `scrollTo(0, 0)` that the fix removes).
+  a `scrollTo(0, 0)` that the fix removes). It also holds that going back past
+  another site shows the page the URL names and links still work; a
+  client-rendered fixture has no position to assert after that document load.
+- **A history step the platform does not announce reloads the document.**
+  WebKit, in a document it read again on coming back from another _site_,
+  dispatches no `navigate` for a traversal to an earlier entry: only
+  `popstate`, with `currentEntry` now null. The URL has moved and the page has
+  not, and in that document `navigation.navigate()` rejects with an
+  `AbortError`, so no link works and nothing can be rendered in place. A
+  `popstate` that finds `currentEntry` null reloads, which is what going back
+  to that entry would have been in a document load: the browser restores a
+  server-rendered page's position, and the entry after it is reachable the
+  same way. From another _origin_ of the same site the same traversal is
+  announced, keyless (above).
 - **`useMatch` reads the platform, never the table.** It is `matchPath` over
   `usePathname`, which is why it works under the framework where `useRoute`
   cannot; `/*` on a table pattern is the one extension of the grammar it

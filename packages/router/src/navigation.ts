@@ -496,8 +496,16 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       });
     };
     navigation.addEventListener('navigate', onNavigate);
+    // WebKit は、別のサイトを挟んで読み直した文書からそれより前の entry へ戻ると、
+    // navigate を出さずに popstate だけを出し、currentEntry を null にする。URL だけが
+    // 動いて画面は残り、この文書ではもう navigation.navigate() が AbortError になる
+    const onPopState = (): void => {
+      if (navigation.currentEntry === null) location.reload();
+    };
+    window.addEventListener('popstate', onPopState);
     return () => {
       navigation.removeEventListener('navigate', onNavigate);
+      window.removeEventListener('popstate', onPopState);
     };
   }, []);
 

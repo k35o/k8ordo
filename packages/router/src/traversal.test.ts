@@ -27,9 +27,11 @@ const browserTypes = [chromium, firefox, webkit]
 
 let server: ViteDevServer;
 let origin = '';
-// 訪問者がタブで寄る別のサイト。ポートが違えば origin も違う
+// 訪問者がタブで寄る外のページ。127.0.0.1 の別のポートは同じサイトの別の origin、
+// localhost は別のサイト。WebKit は戻るの来かたがこの 2 つで違う
 let outside: Server;
 let outsideOrigin = '';
+let outsideSite = '';
 
 beforeAll(async () => {
   outside = createHttpServer((_, response) => {
@@ -37,9 +39,11 @@ beforeAll(async () => {
     response.end('<!doctype html><title>outside</title><h1>outside</h1>');
   });
   await new Promise<void>((resolve) => {
-    outside.listen(0, '127.0.0.1', resolve);
+    outside.listen(0, resolve);
   });
-  outsideOrigin = `http://127.0.0.1:${String((outside.address() as AddressInfo).port)}`;
+  const outsidePort = String((outside.address() as AddressInfo).port);
+  outsideOrigin = `http://127.0.0.1:${outsidePort}`;
+  outsideSite = `http://localhost:${outsidePort}`;
   server = await createServer({
     root,
     configFile: false,
@@ -90,6 +94,9 @@ describe.each(browserTypes)(
     afterAll(async () => {
       await browser.close();
     });
+
+    const listCount = (page: Page): Promise<string | null> =>
+      page.getByTestId('count').textContent();
 
     const open = async (pathname: string): Promise<Page> => {
       const page = await browser.newPage();
@@ -181,10 +188,10 @@ describe.each(browserTypes)(
       await page.close();
     }, 30_000);
 
-    // 別のサイトから戻ると、about の文書は bfcache から戻らなければ読み直される。
+    // 別の origin から戻ると、about の文書は bfcache から戻らなければ読み直される。
     // WebKit はその文書の entries() に tall を並べず、tall への戻るの行き先に
     // key を付けない
-    it('restores the position a page was left at when the visitor goes back to it past another site', async () => {
+    it('restores the position a page was left at when the visitor goes back to it past another origin', async () => {
       const page = await open('/tall');
       await page.evaluate(() => {
         window.scrollTo(0, 3000);
@@ -204,7 +211,7 @@ describe.each(browserTypes)(
 
     // WebKit は key の無い戻るのあとも currentEntry を読み直した entry のままにする。
     // 次に移るときに、画面のページの位置をその entry のものとして書かない
-    it('restores the position a page was left at when the visitor goes back past another site and then forward to it', async () => {
+    it('restores the position a page was left at when the visitor goes back past another origin and then forward to it', async () => {
       const page = await open('/tall');
       await page.evaluate(() => {
         window.scrollTo(0, 3000);
@@ -227,7 +234,7 @@ describe.each(browserTypes)(
       await page.close();
     }, 30_000);
 
-    it('restores the position a page was left at when the visitor goes back past another site, follows a link from there, goes back and then forward to it', async () => {
+    it('restores the position a page was left at when the visitor goes back past another origin, follows a link from there, goes back and then forward to it', async () => {
       const page = await open('/tall');
       await page.evaluate(() => {
         window.scrollTo(0, 3000);
@@ -253,9 +260,9 @@ describe.each(browserTypes)(
       await page.close();
     }, 30_000);
 
-    // 別のサイトから入り直した文書の navigation.entries() には、別のサイトより
+    // 別の origin から入り直した文書の navigation.entries() には、別の origin より
     // 前の entry が並ばない。そこで移っても、それらを離れた位置は忘れない
-    it('restores the position a page was left at when the visitor goes back to it past another site they came back in from and moved on', async () => {
+    it('restores the position a page was left at when the visitor goes back to it past another origin they came back in from and moved on', async () => {
       const page = await open('/tall');
       await page.evaluate(() => {
         window.scrollTo(0, 3000);
@@ -276,6 +283,44 @@ describe.each(browserTypes)(
 
       await page.getByRole('heading', { name: 'tall' }).waitFor();
       await expect.poll(() => scrollY(page)).toBe(left);
+      await page.close();
+    }, 30_000);
+
+    // 別のサイトを挟むと、WebKit は読み直した文書からの戻るに navigate を出さず、
+    // popstate だけを出して currentEntry を null にする。URL だけが動いて前のページが
+    // 画面に残り、その文書では navigation.navigate() が AbortError になる。
+    // フィクスチャはクライアントで描くので、読み直した文書の位置は確かめない
+    it('shows the page the URL names, and keeps following links, when the visitor goes back past another site', async () => {
+      const page = await open('/tall');
+      await navigateTo(page, '/about');
+      await page.goto(`${outsideSite}/`);
+      await page.goBack();
+      await page.getByRole('heading', { name: 'about' }).waitFor();
+
+      await page.goBack();
+
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
+      expect(new URL(page.url()).pathname).toBe('/tall');
+      await navigateTo(page, '/short');
+      await page.getByRole('heading', { name: 'short' }).waitFor();
+      await page.close();
+    }, 30_000);
+
+    it('shows what the URL holds, and keeps following links, when the visitor goes back past another site within a page', async () => {
+      const page = await open('/list?q=few');
+      await expect.poll(() => listCount(page)).toBe('30');
+      await navigateTo(page, '/list');
+      await expect.poll(() => listCount(page)).toBe('90');
+      await page.goto(`${outsideSite}/`);
+      await page.goBack();
+      await expect.poll(() => listCount(page)).toBe('90');
+
+      await page.goBack();
+
+      await expect.poll(() => listCount(page)).toBe('30');
+      expect(new URL(page.url()).search).toBe('?q=few');
+      await navigateTo(page, '/short');
+      await page.getByRole('heading', { name: 'short' }).waitFor();
       await page.close();
     }, 30_000);
 
@@ -334,9 +379,6 @@ describe.each(browserTypes)(
     // 一覧は絞り込みを useDeferredValue で遅らせて描く。急ぎの描画のあとで
     // 位置を戻すと、まだ前の entry の一覧の高さの上に戻り、絞った描画で
     // スクロールアンカリングがずらす
-    const listCount = (page: Page): Promise<string | null> =>
-      page.getByTestId('count').textContent();
-
     /** The count the page shows once the traversal's `finished` settles. */
     const countWhenSettled = (
       page: Page,
