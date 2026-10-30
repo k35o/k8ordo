@@ -11,6 +11,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     // スクリプトがサーバーの描いていない dark を足すので、その差分は報告させない
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta charSet="utf-8" />
+      </head>
       <body>
         {/* 描く前に <html> へクラスを付けるインラインスクリプトを、この応答の
             nonce で署名する */}

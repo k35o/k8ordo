@@ -153,6 +153,9 @@ import type { LayoutProps } from '@k8ordo/framework';
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en">
+      <head>
+        <meta charSet="utf-8" />
+      </head>
       <body>{children}</body>
     </html>
   );
@@ -184,6 +187,13 @@ Node.js, a static host — is in [Running and deploying](references/deploy.md).
 The root layout renders `<html>` and `<body>`: the framework has no document
 template of its own, because a template you cannot see is a template you
 cannot change.
+
+**The root layout names the encoding too.** A static host may send `text/html`
+with no charset, and a browser reading the page as anything but UTF-8 garbles
+the text outside ASCII. Under a [`csp`](references/csp.md#static-mode-hashes-in-a-meta)
+policy the payload script then no longer matches its hash and is refused, so
+the page never hydrates. `<meta charSet="utf-8" />` holds whatever the host
+sends.
 
 **The root layout is the document, and hydration checks all of it.** Anything
 that rewrites the HTML on the way to the browser — a CDN that inlines web

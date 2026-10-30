@@ -55,6 +55,11 @@ export const layoutDocument = message({
   en: '`src/routes/layout.tsx` is the layout around every page. The framework has no HTML template, so this file renders `<html>` and `<body>` too, and sets the `lang` of `<html>`.',
 });
 
+export const layoutCharset = message({
+  ja: '文字コードの宣言もこのファイルに書きます。静的ホストには`Content-Type`にcharsetを付けないものがあり、ブラウザがUTF-8以外で読むとASCII以外の文字が化けます。`csp`オプションを指定したページは、ペイロードのスクリプトがハッシュと合わなくなって拒否され、ハイドレーションされません。`csp`オプションの書き方は',
+  en: 'This file declares the encoding as well. Some static hosts send no charset in `Content-Type`, and a browser that reads the page as anything but UTF-8 garbles the text outside ASCII. Under the `csp` option, the payload script then no longer matches its hash and is refused, so the page never hydrates. How to set `csp` is in ',
+});
+
 export const layoutHydration = message({
   ja: 'ルートレイアウトが描画した文書は、まるごとハイドレーションの対象です。HTMLを書き換えるCDNの機能を有効にしていると、ハイドレーションに失敗することがあります。原因と直し方は',
   en: 'The whole document the root layout renders is hydrated. A CDN feature that rewrites HTML can make hydration fail. The cause and the fix are in ',

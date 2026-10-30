@@ -745,6 +745,8 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
   let cloudflare = false;
   // _redirects からペイロードの規則（index.rsc の行）を除いて読む
   let withoutPayloadRules = false;
+  // 真なら Content-Type に charset を付けない（Python の http.server など）
+  let withoutCharset = false;
   // ホストが受けた要求の pathname
   let requested: string[] = [];
 
@@ -844,11 +846,13 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
         response.writeHead(answer.status).end();
         return;
       }
+      const contentType =
+        CONTENT_TYPES[path.extname(answer.file)] ?? 'application/octet-stream';
       response
         .writeHead(answer.status, {
-          'content-type':
-            CONTENT_TYPES[path.extname(answer.file)] ??
-            'application/octet-stream',
+          'content-type': withoutCharset
+            ? contentType.replace(/;.*/u, '')
+            : contentType,
         })
         .end(readFileSync(answer.file));
     });
@@ -864,6 +868,7 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
     mountedAt = '/';
     cloudflare = false;
     withoutPayloadRules = false;
+    withoutCharset = false;
     requested = [];
   });
 
@@ -912,6 +917,16 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
         () => (window as unknown as { refused: string[] }).refused,
       ),
     ).toStrictEqual([]);
+    await page.close();
+  });
+
+  it('reads as UTF-8 and hydrates on a host that names no charset: the layout declares it', async () => {
+    withoutCharset = true;
+
+    const page = await openHydrated(`${origin}/ja/about`);
+
+    await page.getByRole('heading', { name: 'このお店について' }).waitFor();
+    expect(await page.evaluate(() => document.characterSet)).toBe('UTF-8');
     await page.close();
   });
 

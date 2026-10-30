@@ -16,6 +16,9 @@ export default function RootLayout({ children, pathname }: LayoutProps<'/'>) {
       lang={locale}
       suppressHydrationWarning
     >
+      <head>
+        <meta charSet="utf-8" />
+      </head>
       <body>
         {/* このインラインスクリプトは、ハッシュを vite.config.ts の csp で許す */}
         <ColorSchemeProvider>

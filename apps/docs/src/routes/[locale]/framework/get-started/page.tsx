@@ -27,6 +27,9 @@ const LAYOUT = `import type { LayoutProps } from '@k8ordo/framework';
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en">
+      <head>
+        <meta charSet="utf-8" />
+      </head>
       <body>{children}</body>
     </html>
   );
@@ -97,6 +100,13 @@ export default function FrameworkGetStartedPage() {
         <CodeBlock code={LAYOUT} lang="tsx" title="src/routes/layout.tsx" />
         <p>
           <Rich>{t.layoutDocument()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.layoutCharset()}</Rich>
+          <LocaleAnchor path="/:locale/framework/csp">
+            {m.framework.navCsp()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
         <Note>
           <p>
