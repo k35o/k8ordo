@@ -132,7 +132,7 @@ export const NarrowContainer: Story = {
     const box = container?.firstElementChild;
     const clearAll = canvasElement.querySelector('[aria-label="すべて削除"]');
     if (!(box instanceof HTMLElement) || !(clearAll instanceof HTMLElement)) {
-      throw new Error('要素が見つかりません');
+      throw new TypeError('要素が見つかりません');
     }
     await expect(clearAll.getBoundingClientRect().right).toBeLessThanOrEqual(
       box.getBoundingClientRect().right + 1,

@@ -151,7 +151,7 @@ export const fillGenerated = (
   }
   // The formatter keeps a blank line after the opening marker; writing the
   // formatted shape is what lets `--check` compare text.
-  return markdown.replace(
+  return markdown.replaceAll(
     pattern,
     () =>
       `<!-- generated:${name} -->\n\n${body}\n<!-- /generated:${name} -->\n`,

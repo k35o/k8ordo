@@ -65,8 +65,8 @@ catalog:
   # 宣言を消して vite-plus 任せにしないのは、消すと plugin-react や vitest の
   # peer に pnpm が本家 vite を自動で入れ、vitest の実体が割れて
   # expect.element の型が消えるため。
-  vite: npm:@voidzero-dev/vite-plus-core@1.3.0
-  vite-plus: 1.3.0
+  vite: npm:@voidzero-dev/vite-plus-core@1.4.0
+  vite-plus: 1.4.0
   vitest: 5.0.5
   vitest-browser-react: 2.3.0
   zod: 4.6.7
@@ -112,11 +112,11 @@ overrides:
 peerDependencyRules:
   allowAny:
     - vite
-  # storybook (10.6.2 時点の最新でも) の vite-plus の peer は ^0.1.15 || ^0.2.0 のまま。
-  # ここの Storybook (VRT・Chromatic) は 1.3 で動いているので 1.3 だけ足す。
+  # storybook (10.6.3 時点の最新でも) の vite-plus の peer は ^0.1.15 || ^0.2.0 のまま。
+  # ここの Storybook (VRT・Chromatic) は 1.4 で動いているので 1.4 だけ足す。
   # vite-plus を上げて警告が戻ったら、その版で Storybook が動くか確かめてから広げる。
   allowedVersions:
-    storybook>vite-plus: '1.3'
+    storybook>vite-plus: '1.4'
 
 minimumReleaseAgeExclude:
   - '@better-css-modules/*'
