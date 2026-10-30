@@ -23,7 +23,10 @@
     }
   ],
   "prConcurrentLimit": 10,
-  "ignorePaths": ["**/node_modules/**"],
+  "ignorePaths": [
+    "**/node_modules/**",
+    "packages/framework-engine/fixtures/**"
+  ],
   "packageRules": [
     {
       "matchPackageNames": ["/^@storybook/", "/^storybook$/"],
@@ -70,8 +73,13 @@
       "automerge": false
     },
     {
-      "description": "oxc-transform-react の 0.x の minor は @vitejs/plugin-react の peer の範囲を越える。plugin-react は patch でもその peer を動かす (6.1.2 で ^0.145.0 から ^0.152.0)。片方だけが上がって自動マージされないよう、patch も含めて 1 本の PR にまとめ、@k8ordo/framework の peer と changeset を手で直す",
-      "matchPackageNames": ["oxc-transform-react", "@vitejs/plugin-react"],
+      "description": "oxc-transform-react の版は @vitejs/plugin-react の peer の範囲から選ぶ。0.x の minor はその範囲を越えるので、単独では提案させない",
+      "matchPackageNames": ["oxc-transform-react"],
+      "enabled": false
+    },
+    {
+      "description": "plugin-react は patch でも oxc-transform-react の peer を動かす (6.1.2 で ^0.145.0 から ^0.152.0)。自動マージせず、この PR で catalog の oxc-transform-react、@k8ordo/framework の peer、changeset を手で直す。group:allNonMajor に混ぜると、全体の PR が止まる",
+      "matchPackageNames": ["@vitejs/plugin-react"],
       "groupName": "React Compiler peer dependencies",
       "automerge": false
     },

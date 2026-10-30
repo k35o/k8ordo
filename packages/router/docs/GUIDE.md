@@ -469,6 +469,15 @@ change called off while it loaded — starts at the top, or at its fragment,
 as a new page does. Only the document's scroll position comes back: an
 element scrolled inside the page and the pinch-zoom scale do not.
 
+WebKit is the exception. In a document it loaded again on coming back from
+another origin, it gives a traversal to an earlier entry no key, so the router
+has no recorded position to look up and the browser restores it instead. If
+the visitor scrolled the page still on screen while the next one loaded, the
+browser does not restore it, and the page stays where they scrolled it. Coming
+back from another site, WebKit does not report that traversal at all, so the
+router reloads the page: the browser restores the position of a page rendered
+on the server, and a page rendered on the client starts at the top.
+
 Any other state change never moves the viewport — same pathname, same
 place — so a filter update does not scroll the reader back to the top.
 
