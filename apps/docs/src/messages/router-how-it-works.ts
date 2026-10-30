@@ -165,6 +165,16 @@ export const scrollTraverse = message({
   en: 'On the browser’s back and forward, the scroll position returns to where the history entry was left. The router puts it there, not the browser, and at once, as the page comes on screen. Scrolling the previous page while the next one loads does not change where it lands. An entry that never reached the screen, such as a page change called off while it loaded, goes to the fragment’s element or to the top.',
 });
 
+export const scrollTraverseKeyless = message({
+  ja: '例外はWebKitです。別のオリジンから戻って読み直した文書から、それより前の履歴エントリへ戻ると、WebKitは行き先のキーを渡しません。このときはルーターでなくブラウザが位置を戻します。読み込みの間に前のページをスクロールすると、ブラウザは位置を戻さず、スクロールした位置に残ります。',
+  en: 'WebKit is the exception. In a document it loaded again on coming back from another origin, it gives a traversal to an earlier history entry no key, so the browser restores the position instead of the router. If the visitor scrolled the previous page while the next one loaded, the browser does not restore it, and the page stays where they scrolled it.',
+});
+
+export const scrollTraverseReload = message({
+  ja: '別のサイトから戻ったときは、WebKitが戻る操作を知らせないので、ルーターがページを再読み込みします。サーバーで描いたページはブラウザが位置を戻し、クライアントで描いたページは先頭に着きます。',
+  en: 'Coming back from another site, WebKit does not report that traversal at all, so the router reloads the page. The browser restores the position of a page rendered on the server, and a page rendered on the client starts at the top.',
+});
+
 export const abortTitle = message({
   ja: 'ナビゲーションの追い越し',
   en: 'Superseded navigations',
@@ -241,6 +251,10 @@ export const nonGuarantees = [
   message({
     ja: '戻ると進むで戻すのは、文書のスクロール位置だけです。ページの中でスクロールする要素の位置と、ピンチズームの倍率は戻しません。',
     en: 'On back and forward, only the document’s scroll position comes back, not that of an element scrolling inside the page, nor the pinch-zoom scale.',
+  }),
+  message({
+    ja: 'WebKitで別のオリジンや別のサイトから戻った文書では、離れたときの位置に戻らないことがあります。',
+    en: 'In a document WebKit loaded again on coming back from another origin or site, the position may not return to where the entry was left.',
   }),
   message({
     ja: '追い越されたナビゲーションでも、`React.lazy`のコードの読み込みは止めません。',
