@@ -16,7 +16,7 @@ This example showcases:
 
 ### Prerequisites
 
-- Node.js >=24.13.0
+- Node.js >=26.12.1
 - pnpm 12.x (`pnpm@12.4.0`)
 
 ### Installation & Setup
