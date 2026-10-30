@@ -121,7 +121,10 @@ pnpm check         # check:write to auto-fix
   whose destination has an empty `key`: WebKit, in a document it read again
   on going back, lists none of the earlier entries it still treats as the
   same document, and a traversal to one comes keyless, with nothing to look
-  up. WebKit also leaves `currentEntry` where it was after one and dispatches
+  up. The browser does not restore it if the visitor scrolled the old page
+  during the load, so there the page stays where they scrolled it: the GUIDE
+  and the site say so, and it is the one place that promise does not hold.
+  WebKit also leaves `currentEntry` where it was after one and dispatches
   no `currententrychange`, so until the next navigation `currentEntry` does
   not name what is on screen. `onScreenEntry` holds the empty key for that
   stretch: leaving records nothing (the browser keeps that entry's position

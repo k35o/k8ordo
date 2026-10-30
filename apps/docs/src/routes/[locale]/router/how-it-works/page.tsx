@@ -110,6 +110,12 @@ export default function RouterHowItWorksPage() {
         <p>
           <Rich>{t.scrollTraverse()}</Rich>
         </p>
+        <p>
+          <Rich>{t.scrollTraverseKeyless()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.scrollTraverseReload()}</Rich>
+        </p>
       </DocSection>
 
       <DocSection id="abort" title={t.abortTitle}>
