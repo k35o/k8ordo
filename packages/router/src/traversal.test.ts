@@ -490,6 +490,39 @@ describe.each(browserTypes)(
       await page.close();
     }, 30_000);
 
+    // WebKit は bfcache から戻した文書に、位置を戻す前の traverse を出す。行き先は
+    // 今の entry で、画面のページは動いていない。Playwright の WebKit は bfcache を
+    // 使わないので、そのイベントを同じ形で流し、ブラウザが戻す位置を続けて置く
+    it('leaves the position to the browser when WebKit announces coming back from the back/forward cache as a traversal to the entry on screen', async () => {
+      const page = await open('/short');
+
+      const settled = await page.evaluate(async () => {
+        navigation.dispatchEvent(
+          Object.assign(new Event('navigate'), {
+            canIntercept: true,
+            hashChange: false,
+            downloadRequest: null,
+            formData: null,
+            navigationType: 'traverse',
+            destination: {
+              key: navigation.currentEntry?.key,
+              url: location.href,
+            },
+            signal: new AbortController().signal,
+            intercept: () => undefined,
+          }),
+        );
+        window.scrollTo(0, 500);
+        await new Promise((resolve) => {
+          setTimeout(resolve, 50);
+        });
+        return window.scrollY;
+      });
+
+      expect(settled).toBe(500);
+      await page.close();
+    }, 30_000);
+
     // 読み込みのあいだに動かせるのは画面に残る前のページで、行き先の座標ではない
     it('restores the position a page was left at when the visitor goes back to it, even if they scroll the page still on screen while it loads', async () => {
       const page = await open('/host.html');

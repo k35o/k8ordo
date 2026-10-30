@@ -343,6 +343,17 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
     readLeftAt();
     const onNavigate = (event: NavigateEvent): void => {
       const traverse = event.navigationType === 'traverse';
+      // WebKit は bfcache から戻した文書に、位置を戻す前の traverse を出す。行き先は
+      // 今の entry で、画面のページは離れていない。位置はこのあとブラウザが戻す
+      if (
+        traverse &&
+        isOurs(event) &&
+        onScreenEntry.current === null &&
+        event.destination.key === navigation.currentEntry?.key
+      ) {
+        event.intercept({ scroll: 'manual', focusReset: 'manual' });
+        return;
+      }
       // ページの読み込み中に離れるのは、URL の entry でなく画面に残るページの
       // entry。URL の entry はまだ画面に出ていない
       const leaving = onScreenEntry.current ?? navigation.currentEntry?.key;
@@ -366,8 +377,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       if (inPlace && !refresh(url)) {
         const calledOff =
           event.destination.key !== '' &&
-          event.destination.key ===
-            (onScreenEntry.current ?? navigation.currentEntry?.key);
+          event.destination.key === onScreenEntry.current;
         onScreenEntry.current = keyless ? '' : null;
         if (!traverse || calledOff) {
           event.intercept({ scroll: 'manual', focusReset: 'manual' });

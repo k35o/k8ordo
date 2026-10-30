@@ -150,7 +150,12 @@ pnpm check         # check:write to auto-fix
   visitor had back in the next task (`keepPosition`, a `setTimeout` — a
   frame callback never runs in a hidden tab), unless another navigation
   moved the entry on. The other engines leave it, so there it is already
-  where it was.
+  where it was. WebKit, on bringing a document back from the back/forward
+  cache, dispatches a traversal to the current entry before it restores the
+  position, with `scrollY` still 0. That is no departure and nothing loads, so
+  outside a page change it is intercepted before anything is recorded and
+  moves nothing: `keepPosition` is only for a change being called off, or it
+  would hold the 0 and put the page back there after WebKit restored it.
   `traversal.test.ts` holds that `finished` sees the entry's own render and
   the position comes back onto it, for a page change, a traversal in place
   and one that loads again — each also from further down a longer page,
@@ -159,8 +164,13 @@ pnpm check         # check:write to auto-fix
   moved on, and going forward again from there, with and without following a
   link first), after leaving more than 100 entries that are gone, and when the
   visitor scrolls during the load; that an entry called off starts at the top;
-  and that a traversal back to the page on screen keeps where the visitor
-  scrolled it.
+  that a traversal back to the page on screen keeps where the visitor
+  scrolled it; and that WebKit's traversal on coming back from the
+  back/forward cache leaves the position alone. Playwright's WebKit does not
+  use that cache, so that test replays the event, and the real one is checked
+  by hand in a `WKWebView` (the repro lands at 0 only on a page heavy enough
+  for WebKit to restore before the timer: the fixtures land right anyway, with
+  a `scrollTo(0, 0)` that the fix removes).
 - **`useMatch` reads the platform, never the table.** It is `matchPath` over
   `usePathname`, which is why it works under the framework where `useRoute`
   cannot; `/*` on a table pattern is the one extension of the grammar it
