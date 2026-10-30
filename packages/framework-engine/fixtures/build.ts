@@ -91,9 +91,13 @@ export const buildFixture = async (
       },
     },
     plugins: [engine({ routesDir: 'routes' }, { mode, runtimeDir })],
-    // テストの下（NODE_ENV=test）では React の開発版を束ねるので、ブラウザの
-    // 入口のチャンクは本番の出力よりずっと大きい。大きさの警告は数えない
-    build: { chunkSizeWarningLimit: Number.POSITIVE_INFINITY },
+    build: {
+      // テストの下（NODE_ENV=test）では React の開発版を束ねるので、ブラウザの
+      // 入口のチャンクは本番の出力よりずっと大きい。大きさの警告は数えない
+      chunkSizeWarningLimit: Number.POSITIVE_INFINITY,
+      // プラグインにかかった時間の警告は、マシンの混み具合で出たり出なかったりする
+      rolldownOptions: { checks: { bundlerTimings: false } },
+    },
     resolve: { alias },
     environments: {
       rsc: { build: { outDir: path.join(out, 'rsc') } },
