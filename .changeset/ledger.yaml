@@ -12,6 +12,10 @@
   dir: packages/color-scheme
   intents:
     - zod-peer-floor
+"@k8ordo/color-scheme@1.4.2":
+  dir: packages/color-scheme
+  intents:
+    - state-storage-blocked
 "@k8ordo/form@0.1.1":
   dir: packages/form
   intents:
@@ -73,6 +77,10 @@
     - framework-static-client-links
     - framework-static-links-check
     - framework-tree-pathname
+"@k8ordo/framework@1.4.2":
+  dir: packages/framework
+  intents:
+    - framework-guide-charset
 "@k8ordo/i18n@1.0.0":
   dir: packages/i18n
   intents:
@@ -133,6 +141,14 @@
   intents:
     - router-left-at-across-sites
     - router-traverse-keyless-webkit
+"@k8ordo/router@1.4.2":
+  dir: packages/router
+  intents:
+    - router-bfcache-webkit-position
+    - router-left-at-cap-gone-entries
+    - router-popstate-without-navigate
+    - router-state-keyless-popstate
+    - router-traverse-after-keyless-webkit
 "@k8ordo/state@0.2.0":
   dir: packages/state
   intents:
@@ -166,6 +182,11 @@
   intents:
     - state-page-state-stays-with-tree
     - state-store-from-definition
+"@k8ordo/state@1.4.2":
+  dir: packages/state
+  intents:
+    - router-state-keyless-popstate
+    - state-storage-blocked
 "@k8ordo/ui@2.0.0":
   dir: packages/ui
   intents:
