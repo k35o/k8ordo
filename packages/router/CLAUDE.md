@@ -106,7 +106,12 @@ pnpm check         # check:write to auto-fix
   in-memory record would be gone. An entry with no record (a page change
   called off before it arrived) starts like a new page. The visitor
   scrolling the old page during the load does not stop the restore — what
-  they moved was the page being left.
+  they moved was the page being left. The one traversal left to the
+  browser (`scroll: 'after-transition'`, no scroll plan) is one whose
+  destination has an empty `key`: WebKit, in a document it read again on
+  going back, lists none of the earlier entries it still treats as the
+  same document, and a traversal to one comes keyless, with nothing to look
+  up.
   A traversal has a handler whether it changes the page, loads one in
   place, or only moves the search or the entry state: in the last case
   nothing is applied, but the page renders the entry it arrived at,
@@ -134,9 +139,9 @@ pnpm check         # check:write to auto-fix
   the position comes back onto it, for a page change, a traversal in place
   and one that loads again — each also from further down a longer page,
   onto pages that measure themselves — after a reload, past an entry still
-  loading, and when the visitor scrolls during the load; that an entry
-  called off starts at the top; and that a traversal back to the page on
-  screen keeps where the visitor scrolled it.
+  loading, past another site, and when the visitor scrolls during the load;
+  that an entry called off starts at the top; and that a traversal back to
+  the page on screen keeps where the visitor scrolled it.
 - **`useMatch` reads the platform, never the table.** It is `matchPath` over
   `usePathname`, which is why it works under the framework where `useRoute`
   cannot; `/*` on a table pattern is the one extension of the grammar it

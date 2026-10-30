@@ -336,6 +336,10 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       // viewport, to where that entry was left.
       const inPlace = pathname === shown.current;
       const traverse = event.navigationType === 'traverse';
+      // WebKit は、戻るで読み直した文書の entries() に、同じ文書のまま戻れる
+      // それより前の entry を並べず、そこへの traverse の行き先に key を付けない。
+      // 離れた位置を引けないので、そのときだけ戻すのをブラウザに任せる
+      const browserRestores = traverse && event.destination.key === '';
       if (inPlace && !refresh(url)) {
         const calledOff =
           event.destination.key ===
@@ -357,11 +361,13 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
           resolve: () => {
             resolve(undefined);
           },
-          scroll: scrollPlanFor(
-            'traverse',
-            url.hash,
-            leftAt.get(event.destination.key),
-          ),
+          scroll: browserRestores
+            ? null
+            : scrollPlanFor(
+                'traverse',
+                url.hash,
+                leftAt.get(event.destination.key),
+              ),
           types: [],
         });
         event.signal.addEventListener(
@@ -374,7 +380,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         );
         setTraversed(id);
         event.intercept({
-          scroll: 'manual',
+          scroll: browserRestores ? 'after-transition' : 'manual',
           focusReset: 'manual',
           handler: () => promise,
         });
@@ -392,7 +398,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         if (latest.current === id) setPendingPathname(null);
       };
       const scroll =
-        inPlace && !traverse
+        (inPlace && !traverse) || browserRestores
           ? null
           : scrollPlanFor(
               event.navigationType,
@@ -408,7 +414,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         // the two from disagreeing, and keeps the behaviour where a browser
         // has not implemented the platform's half. A traversal included: the
         // hook puts back where it saw that entry left — a load in place too.
-        scroll: 'manual',
+        scroll: browserRestores ? 'after-transition' : 'manual',
         handler: async () => {
           // 失敗も中止も、名指していた遷移が終わったということ。新しい遷移が
           // 始まっていれば、それがもう自分の行き先を名指している
