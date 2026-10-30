@@ -121,7 +121,13 @@ pnpm check         # check:write to auto-fix
   whose destination has an empty `key`: WebKit, in a document it read again
   on going back, lists none of the earlier entries it still treats as the
   same document, and a traversal to one comes keyless, with nothing to look
-  up.
+  up. WebKit also leaves `currentEntry` where it was after one and dispatches
+  no `currententrychange`, so until the next navigation `currentEntry` does
+  not name what is on screen. `onScreenEntry` holds the empty key for that
+  stretch: leaving records nothing (the browser keeps that entry's position
+  itself), and a traversal to the stale `currentEntry` is a real one that
+  restores what was recorded when that entry was left. A keyed traversal or a
+  push puts `currentEntry` right again.
   A traversal has a handler whether it changes the page, loads one in
   place, or only moves the search or the entry state: in the last case
   nothing is applied, but the page renders the entry it arrived at,
@@ -150,7 +156,8 @@ pnpm check         # check:write to auto-fix
   and one that loads again — each also from further down a longer page,
   onto pages that measure themselves — after a reload, past an entry still
   loading, past another site (and one the visitor came back in from and
-  moved on), after leaving more than 100 entries that are gone, and when the
+  moved on, and going forward again from there, with and without following a
+  link first), after leaving more than 100 entries that are gone, and when the
   visitor scrolls during the load; that an entry called off starts at the top;
   and that a traversal back to the page on screen keeps where the visitor
   scrolled it.

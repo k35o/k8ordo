@@ -142,6 +142,7 @@ type Pending = {
   resolve: () => void;
   scroll: ScrollPlan | null;
   types: readonly string[];
+  keyless: boolean;
 };
 
 // 戻る・進むの位置はブラウザに戻させず、離れたときの位置を覚えて自分で置く。
@@ -331,18 +332,30 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
   // The entry whose page is on screen while a page change loads — the URL's
   // entry otherwise. Going back to it is calling the change off, not going
   // back to a place the visitor left; and it is the entry a navigation in the
-  // meantime leaves, at the position the visitor has it scrolled to.
+  // meantime leaves, at the position the visitor has it scrolled to. An empty
+  // key names the entry a keyless traversal arrived at: WebKit leaves
+  // `currentEntry` where it was, so that entry is not the URL's as far as
+  // anything can read, and there is no key to record a position under.
   const onScreenEntry = useRef<string | null>(null);
 
   useEffect(() => {
     shown.current = normalizePathname(location.pathname);
     readLeftAt();
     const onNavigate = (event: NavigateEvent): void => {
+      const traverse = event.navigationType === 'traverse';
       // ページの読み込み中に離れるのは、URL の entry でなく画面に残るページの
       // entry。URL の entry はまだ画面に出ていない
       const leaving = onScreenEntry.current ?? navigation.currentEntry?.key;
-      if (leaving !== undefined) rememberLeftAt(leaving);
-      if (!isOurs(event)) return;
+      if (leaving !== undefined && leaving !== '') rememberLeftAt(leaving);
+      // WebKit は、戻るで読み直した文書の entries() に、同じ文書のまま戻れる
+      // それより前の entry を並べず、そこへの traverse の行き先に key を付けない。
+      // 離れた位置を引けないので、そのときだけ戻すのをブラウザに任せる
+      const keyless = traverse && event.destination.key === '';
+      if (!isOurs(event)) {
+        if (keyless) onScreenEntry.current = '';
+        else if (onScreenEntry.current === '') onScreenEntry.current = null;
+        return;
+      }
       const url = new URL(event.destination.url);
       const pathname = normalizePathname(url.pathname);
       // Same place — only the search or the entry state moved. Nothing to
@@ -350,16 +363,12 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       // page showing reads what moved. Only going back or forward moves the
       // viewport, to where that entry was left.
       const inPlace = pathname === shown.current;
-      const traverse = event.navigationType === 'traverse';
-      // WebKit は、戻るで読み直した文書の entries() に、同じ文書のまま戻れる
-      // それより前の entry を並べず、そこへの traverse の行き先に key を付けない。
-      // 離れた位置を引けないので、そのときだけ戻すのをブラウザに任せる
-      const browserRestores = traverse && event.destination.key === '';
       if (inPlace && !refresh(url)) {
         const calledOff =
+          event.destination.key !== '' &&
           event.destination.key ===
-          (onScreenEntry.current ?? navigation.currentEntry?.key);
-        onScreenEntry.current = null;
+            (onScreenEntry.current ?? navigation.currentEntry?.key);
+        onScreenEntry.current = keyless ? '' : null;
         if (!traverse || calledOff) {
           event.intercept({ scroll: 'manual', focusReset: 'manual' });
           if (calledOff) keepPosition(event.destination.key);
@@ -376,7 +385,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
           resolve: () => {
             resolve(undefined);
           },
-          scroll: browserRestores
+          scroll: keyless
             ? null
             : scrollPlanFor(
                 'traverse',
@@ -384,6 +393,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
                 leftAt.get(event.destination.key),
               ),
           types: [],
+          keyless,
         });
         event.signal.addEventListener(
           'abort',
@@ -395,7 +405,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         );
         setTraversed(id);
         event.intercept({
-          scroll: browserRestores ? 'after-transition' : 'manual',
+          scroll: keyless ? 'after-transition' : 'manual',
           focusReset: 'manual',
           handler: () => promise,
         });
@@ -413,7 +423,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         if (latest.current === id) setPendingPathname(null);
       };
       const scroll =
-        (inPlace && !traverse) || browserRestores
+        (inPlace && !traverse) || keyless
           ? null
           : scrollPlanFor(
               event.navigationType,
@@ -429,7 +439,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         // the two from disagreeing, and keeps the behaviour where a browser
         // has not implemented the platform's half. A traversal included: the
         // hook puts back where it saw that entry left — a load in place too.
-        scroll: browserRestores ? 'after-transition' : 'manual',
+        scroll: keyless ? 'after-transition' : 'manual',
         handler: async () => {
           // 失敗も中止も、名指していた遷移が終わったということ。新しい遷移が
           // 始まっていれば、それがもう自分の行き先を名指している
@@ -453,6 +463,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
               // 同じページの読み直しはページの切り替えではない。
               // ViewTransition が切り替えとして動かさないよう、型を付けない
               types: inPlace ? [] : transitionTypesFor(event.navigationType),
+              keyless,
             });
             event.signal.addEventListener(
               'abort',
@@ -491,7 +502,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
     const entry = pending.current.get(id);
     if (entry === undefined) return;
     pending.current.delete(id);
-    onScreenEntry.current = null;
+    onScreenEntry.current = entry.keyless ? '' : null;
     if (entry.scroll !== null) applyScroll(entry.scroll);
     if (latest.current === id) setPendingPathname(null);
     entry.resolve();

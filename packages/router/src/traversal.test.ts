@@ -202,6 +202,57 @@ describe.each(browserTypes)(
       await page.close();
     }, 30_000);
 
+    // WebKit は key の無い戻るのあとも currentEntry を読み直した entry のままにする。
+    // 次に移るときに、画面のページの位置をその entry のものとして書かない
+    it('restores the position a page was left at when the visitor goes back past another site and then forward to it', async () => {
+      const page = await open('/tall');
+      await page.evaluate(() => {
+        window.scrollTo(0, 3000);
+      });
+      await navigateTo(page, '/short');
+      await page.goto(`${outsideOrigin}/`);
+      await page.goBack();
+      await page.getByRole('heading', { name: 'short' }).waitFor();
+      await page.evaluate(() => {
+        window.scrollTo(0, 500);
+      });
+      await page.goBack();
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
+      await expect.poll(() => scrollY(page)).toBe(3000);
+
+      await page.goForward();
+
+      await page.getByRole('heading', { name: 'short' }).waitFor();
+      await expect.poll(() => scrollY(page)).toBe(500);
+      await page.close();
+    }, 30_000);
+
+    it('restores the position a page was left at when the visitor goes back past another site, follows a link from there, goes back and then forward to it', async () => {
+      const page = await open('/tall');
+      await page.evaluate(() => {
+        window.scrollTo(0, 3000);
+      });
+      await navigateTo(page, '/about');
+      await page.goto(`${outsideOrigin}/`);
+      await page.goBack();
+      await page.getByRole('heading', { name: 'about' }).waitFor();
+      await page.goBack();
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
+      await navigateTo(page, '/short');
+      await page.evaluate(() => {
+        window.scrollTo(0, 700);
+      });
+      await page.goBack();
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
+      await expect.poll(() => scrollY(page)).toBe(3000);
+
+      await page.goForward();
+
+      await page.getByRole('heading', { name: 'short' }).waitFor();
+      await expect.poll(() => scrollY(page)).toBe(700);
+      await page.close();
+    }, 30_000);
+
     // 別のサイトから入り直した文書の navigation.entries() には、別のサイトより
     // 前の entry が並ばない。そこで移っても、それらを離れた位置は忘れない
     it('restores the position a page was left at when the visitor goes back to it past another site they came back in from and moved on', async () => {
