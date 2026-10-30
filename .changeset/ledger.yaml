@@ -128,6 +128,11 @@
   dir: packages/router
   intents:
     - router-restore-traverse-position
+"@k8ordo/router@1.4.1":
+  dir: packages/router
+  intents:
+    - router-left-at-across-sites
+    - router-traverse-keyless-webkit
 "@k8ordo/state@0.2.0":
   dir: packages/state
   intents:
