@@ -22,8 +22,8 @@ catalog:
   '@better-css-modules/vite': 0.4.1
   # generative-UI アダプタの peer。@k8ordo/ui が開発対象にする版と examples が
   # 使う版を同じ 1 コピーに保つ (scripts/check-peer-copies.mjs が検査する)。
-  '@json-render/core': 0.21.2
-  '@json-render/react': 0.21.2
+  '@json-render/core': 0.21.3
+  '@json-render/react': 0.21.3
   '@openuidev/lang-core': 1.0.1
   '@openuidev/react-lang': 1.0.1
   '@tailwindcss/postcss': 4.3.3
