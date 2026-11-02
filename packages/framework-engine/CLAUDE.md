@@ -250,6 +250,22 @@ pnpm check         # check:write to auto-fix
   `runtime/entry.ssr.tsx` injects the RSC stream into the HTML and
   `runtime/entry.browser.tsx` reads it back; nothing refetches on load, which
   is what lets a prerendered `404.html` come alive.
+- **Both entries render the same root.** `useId` derives an id from where
+  its component sits among its siblings all the way up, and hydration keeps
+  the HTML's attributes, so a sibling of the application only one entry
+  renders gives every id below it one value in the HTML and another in the
+  browser: a reference by id the browser makes (an `anchor-name` set from
+  a ref, a lookup by `getElementById`) then misses the element. So
+  everything at the root besides the application is in `DocumentRoot`
+  (`runtime/document-root.tsx`), which both entries render around it: the
+  SSR entry's `Root` and the browser's `AppRouter` are its only child, and
+  `PageShownContext`, which only the SSR entry provides, is a context, which
+  `useId` does not count. The browser renders its `<style>` too, with no
+  nonce: React finds the HTML's by its `href` and keeps it, under
+  `createRoot` as well, which leaves a document's `<style>`s in place.
+  `runtime/hydrate-id.test.ts` compares the ids of a layout's and a page's
+  client component in the HTML and once hydrated, from a static build, a
+  server build and `vite dev`.
 - **The SSR graph holds no browser Flight client.** `@vitejs/plugin-rsc/browser`
   installs its own loader for client references the moment it is imported,
   and the SSR one it replaces is what puts a client component's stylesheet
@@ -311,8 +327,8 @@ pnpm check         # check:write to auto-fix
   leaves no link; the browser loads it from the payload. Awaiting the walk
   (`use(ready)`) matters under `vite dev`, where a reference's links come
   only from a read after its module has loaded, which the walk makes once
-  its wait ends. Ahead of `Root`, the render writes one `<style>` of its
-  own, empty (`STYLESHEET_ORDER_HREF`), under the precedence the RSC
+  its wait ends. Ahead of `Root`, `DocumentRoot` writes one `<style>` of
+  its own, empty (`STYLESHEET_ORDER_HREF`), under the precedence the RSC
   plugin links a Server Component's stylesheets with
   (`SERVER_STYLESHEETS`), and that is what keeps every Server Component's
   stylesheet — the root layout's first — before every client component's,
