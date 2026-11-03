@@ -4,6 +4,7 @@ import { rscStream } from 'rsc-html-stream/client';
 import { AppRouter, setDocumentClient } from './app-router';
 import { connectAppRouter } from './browser-payloads';
 import { whenClientReady } from './client-ready';
+import { DocumentRoot } from './document-root';
 import { mount } from './mount';
 import type { HydrateOptions } from './mount';
 import { reportCaught } from './page-boundary';
@@ -46,12 +47,14 @@ const start = async (): Promise<void> => {
   // message the visitor is reading disappears the moment the script loads.
   mount(
     document,
-    <AppRouter
-      notFound={payload.notFound}
-      pathname={payload.pathname}
-      search={payload.search}
-      tree={payload.tree}
-    />,
+    <DocumentRoot>
+      <AppRouter
+        notFound={payload.notFound}
+        pathname={payload.pathname}
+        search={payload.search}
+        tree={payload.tree}
+      />
+    </DocumentRoot>,
     payload.pathname,
     {
       formState: payload.formState as HydrateOptions['formState'],

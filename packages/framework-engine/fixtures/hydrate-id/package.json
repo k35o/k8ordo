@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "description": "A layout and a page that each render a client component calling useId, which runtime/hydrate-id.test.ts builds in both modes and serves under vite dev.",
+  "type": "module"
+}

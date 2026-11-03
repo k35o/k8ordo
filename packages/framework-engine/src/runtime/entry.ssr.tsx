@@ -12,8 +12,8 @@ import assetsManifest from 'virtual:vite-rsc/assets-manifest';
 import { AppRouter } from './app-router';
 import { noticeCancel } from './cancel';
 import { whenClientReady } from './client-ready';
+import { DocumentRoot } from './document-root';
 import { PageShownContext } from './page-shown';
-import { SERVER_STYLESHEETS, STYLESHEET_ORDER_HREF } from './payload';
 import type { ClientDeps, Payload } from './payload';
 
 type SsrOptions = NonNullable<Parameters<typeof renderToReadableStream>[1]>;
@@ -132,16 +132,9 @@ export async function renderHtml(
     import.meta.env.K8ORDO_MODE === 'static' ? undefined : nonce;
   const htmlStream = await renderToReadableStream(
     <PageShownContext value={() => shown.resolve(undefined)}>
-      {/* React は precedence の組を最初に頼まれた順に並べ、static は描く前に
-          client 参照の CSS を頼む。遷移で読む client の CSS は head の末尾に、
-          Server Component の CSS は同じ組の最後の後ろに入るので、その組を
-          ここで先に頼めば、どの開き方でも Server Component の CSS が先になる */}
-      <style
-        href={STYLESHEET_ORDER_HREF}
-        precedence={SERVER_STYLESHEETS}
-        nonce={styleNonce}
-      />
-      <Root />
+      <DocumentRoot styleNonce={styleNonce}>
+        <Root />
+      </DocumentRoot>
     </PageShownContext>,
     {
       bootstrapModules: [clientEntry],
