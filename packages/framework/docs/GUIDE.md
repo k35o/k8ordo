@@ -285,7 +285,9 @@ them with `mode: 'server'` is a type error:
 - `site` — the origin the site is served from, `https://example.com`. With
   it the build also writes `sitemap.xml`, listing every page it rendered;
   without it there is no sitemap, because a sitemap of relative URLs is not
-  one.
+  one. A `route.ts` that writes `sitemap.xml` as well stops the build,
+  naming both — keep one
+  ([Routing](references/routing.md#under-static-mode)).
 - `csp` — the Content-Security-Policy each page carries
   ([Content Security Policy](references/csp.md#static-mode-hashes-in-a-meta)).
 

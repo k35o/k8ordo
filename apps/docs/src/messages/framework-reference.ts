@@ -72,8 +72,8 @@ export const frameworkPaths = message({
 });
 
 export const frameworkSite = message({
-  ja: 'staticモードだけ。サイトの配信元です（`https://example.com`）。渡すと、ビルドが`sitemap.xml`も書きます。`route.ts`が受け取る`request.url`のoriginにもなります。',
-  en: 'Static mode only. The origin the site is served from, such as `https://example.com`. With it, the build also writes `sitemap.xml`. It is also the origin of the `request.url` a `route.ts` receives.',
+  ja: 'staticモードだけ。サイトの配信元です（`https://example.com`）。渡すと、ビルドが`sitemap.xml`も書きます。`route.ts`が受け取る`request.url`のoriginにもなります。`sitemap.xml`を書く`route.ts`もあると、ビルドが止まります。',
+  en: 'Static mode only. The origin the site is served from, such as `https://example.com`. With it, the build also writes `sitemap.xml`. It is also the origin of the `request.url` a `route.ts` receives. A `route.ts` that writes `sitemap.xml` as well stops the build.',
 });
 
 export const frameworkCsp = message({

@@ -353,6 +353,27 @@ A `route.ts` at `/` cannot be a file (the host serves `/` from `index.html`),
 nor one with pages written below it, which would need a directory of the same
 name. What it writes is not a page, so `sitemap.xml` leaves it out.
 
+Nor can a `route.ts` write a file the build writes itself — `sitemap.xml`
+when `site` is given, `404.html` beside a `not-found.tsx`, `_redirects` when
+there are shells, a page's `index.html` or `index.rsc` — since one would
+replace the other. Names that differ only in case count as the same file, as
+they are on macOS and Windows, so the build stops the same on every system.
+It stops before it renders anything, naming both:
+
+```
+static build writes a file of its own where these route.ts files write theirs, and one would replace the other — remove the route.ts, or what else writes the file:
+  sitemap.xml: src/routes/sitemap.xml/route.ts, and the "site" option writes it
+```
+
+For a sitemap of your own, keep the `route.ts` and drop `site`; the requests
+the build hands every `route.ts` then carry no origin of the site's, so write
+its absolute URLs from one of your own. A `route.ts` with params writes there
+only for a pathname `paths` gave it, and its line ends with that pathname to
+leave out of `paths`. Rules of your own for a host go in `public/_redirects`,
+which the build adds to its own. `vite dev` does not stop: it warns of what
+the build will refuse, for a `route.ts` whose URL has no params; the
+pathnames `paths` gives one with params only the build sees.
+
 Name the type in the `Response`. A string body with none is sent as
 `text/plain;charset=UTF-8` — the `Response` sets it — so a `sitemap.xml`
 returned that way is plain text on Vercel and in `vite dev`, whatever its
