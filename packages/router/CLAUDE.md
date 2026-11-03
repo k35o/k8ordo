@@ -177,19 +177,43 @@ pnpm check         # check:write to auto-fix
   by hand in a `WKWebView` (the repro lands at 0 only on a page heavy enough
   for WebKit to restore before the timer: the fixtures land right anyway, with
   a `scrollTo(0, 0)` that the fix removes). It also holds that going back past
-  another site shows the page the URL names and links still work; a
-  client-rendered fixture has no position to assert after that document load.
+  another site shows the page the URL names and links still work — to an
+  earlier entry, back to the entry the visitor came back in on after moving
+  on (also before the next page has loaded, and within a page that reads the
+  search, while a page that follows the URL itself keeps its document),
+  twice before the page has loaded its script, and with a link followed or a
+  step forward taken while the document reloads; a client-rendered fixture
+  has no position to assert after that document load.
 - **A history step the platform does not announce reloads the document.**
   WebKit, in a document it read again on coming back from another _site_,
   dispatches no `navigate` for a traversal to an earlier entry: only
   `popstate`, with `currentEntry` now null. The URL has moved and the page has
   not, and in that document `navigation.navigate()` rejects with an
-  `AbortError`, so no link works and nothing can be rendered in place. A
-  `popstate` that finds `currentEntry` null reloads, which is what going back
-  to that entry would have been in a document load: the browser restores a
-  server-rendered page's position, and the entry after it is reachable the
-  same way. From another _origin_ of the same site the same traversal is
-  announced, keyless (above).
+  `AbortError`, so no link works and nothing can be rendered in place. Once
+  the visitor moves on in that document, going back to its first entry is
+  not announced either — before the next page has loaded too, and then that
+  load is not called off and lands under the URL gone back to. `currentEntry`
+  is not null there (it follows that entry, or stays on the one loading), so
+  only the missing `navigate` tells. A `popstate` that finds `currentEntry`
+  null, or whose URL is not the destination of the last `navigate`, reloads,
+  which is what going back to that entry would have been in a document load:
+  the browser restores a server-rendered page's position, and the entry after
+  it is reachable the same way. The second only when the page on screen
+  cannot follow by itself — a pathname other than the tree's, a page change
+  still loading, or `refresh(url)` — so a search the page reads from
+  `popstate` costs no document load. A step that lands before the listener
+  exists (before hydration, or between the commit and the effect) leaves
+  `currentEntry` null with nothing to hear it, so the effect reloads when it
+  finds that — unless `entries()` is empty too, which is a document with no
+  Navigation API (an opaque origin), where a reload would loop. Once a reload
+  is asked for, no navigation is intercepted: intercepting one stops the
+  reload, and in a document whose `currentEntry` is null it rejects with an
+  `AbortError` as well, so a link followed then is the browser's document
+  load. A `popstate` then asks again, for the URL it moved to: WebKit
+  announces that step, and left alone, the reload already in flight lands
+  and undoes it. Chromium announces every step, so none of this runs there.
+  From another _origin_ of the same site the same traversal is announced,
+  keyless (above).
 - **`useMatch` reads the platform, never the table.** It is `matchPath` over
   `usePathname`, which is why it works under the framework where `useRoute`
   cannot; `/*` on a table pattern is the one extension of the grammar it

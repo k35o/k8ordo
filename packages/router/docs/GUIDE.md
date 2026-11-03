@@ -474,9 +474,14 @@ another origin, it gives a traversal to an earlier entry no key, so the router
 has no recorded position to look up and the browser restores it instead. If
 the visitor scrolled the page still on screen while the next one loaded, the
 browser does not restore it, and the page stays where they scrolled it. Coming
-back from another site, WebKit does not report that traversal at all, so the
-router reloads the page: the browser restores the position of a page rendered
-on the server, and a page rendered on the client starts at the top.
+back from another site, WebKit does not report some traversals at all — to an
+entry from before that site, and, once the visitor has moved on, back to the
+page they came back to, even before the next page has loaded — so the router
+reloads the page: the browser restores the position of a page rendered on the
+server, and a page rendered on the client starts at the top. A step within a
+page that only moves the search is not reloaded unless `refresh(url)` says the
+page reads it or a page is still loading. A link followed while the page
+reloads opens as a document load.
 
 Any other state change never moves the viewport — same pathname, same
 place — so a filter update does not scroll the reader back to the top.
