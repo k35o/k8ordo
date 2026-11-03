@@ -392,6 +392,254 @@ describe.each(browserTypes)(
       await page.close();
     }, 30_000);
 
+    // 別のサイトから戻って読み直した文書の中で移り、その文書の最初の entry へ戻ると、
+    // WebKit は navigate を出さずに popstate だけを出す。currentEntry はその entry へ動く
+    it('shows the page the URL names, and keeps following links, when the visitor goes back to the page they came back to from another site', async () => {
+      const page = await open('/tall');
+      await page.goto(`${outsideSite}/`);
+      await page.goBack();
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
+      await navigateTo(page, '/about');
+      await page.getByRole('heading', { name: 'about' }).waitFor();
+
+      await page.goBack();
+
+      await page.getByRole('heading', { name: 'tall' }).waitFor({
+        timeout: 10_000,
+      });
+      expect(new URL(page.url()).pathname).toBe('/tall');
+      await navigateTo(page, '/short');
+      await page.getByRole('heading', { name: 'short' }).waitFor();
+      await page.close();
+    }, 30_000);
+
+    // 次のページの読み込みの途中に戻っても、WebKit は navigate を出さないので、読み込みは
+    // 止まらずに前の URL の下へ着く。currentEntry は読み込み中の entry に残る
+    it('shows the page the URL names when the visitor goes back, before the next page has loaded, to the page they came back to from another site', async () => {
+      const page = await open('/host.html?q=few');
+      await expect.poll(() => listCount(page)).toBe('30');
+      await page.goto(`${outsideSite}/`);
+      await page.goBack();
+      await expect.poll(() => listCount(page)).toBe('30');
+      // 移る先の読み込みが終わるか、文書が去ると返る
+      const left = page
+        .evaluate(async () => {
+          const { controls } = globalThis as unknown as { controls: Controls };
+          controls.hold = true;
+          await navigation.navigate('/about').finished?.catch(() => undefined);
+        })
+        .catch(() => undefined);
+      await page.waitForURL(`${origin}/about`, { waitUntil: 'commit' });
+
+      await page.evaluate(() => {
+        history.back();
+      });
+      await page.waitForURL(`${origin}/host.html?q=few`, {
+        waitUntil: 'commit',
+      });
+      await page
+        .evaluate(() => {
+          (globalThis as unknown as { controls: Controls }).controls.release();
+        })
+        .catch(() => undefined);
+      await left;
+
+      await page.getByRole('heading', { name: 'host.html' }).waitFor({
+        timeout: 10_000,
+      });
+      expect(await listCount(page)).toBe('30');
+      expect(new URL(page.url()).search).toBe('?q=few');
+      await page.close();
+    }, 30_000);
+
+    it('shows what the URL holds when the visitor goes back within a page that reads it, to the entry they came back to from another site', async () => {
+      const page = await open('/host.html?reload&q=few');
+      await expect.poll(() => listCount(page)).toBe('30');
+      await page.goto(`${outsideSite}/`);
+      await page.goBack();
+      await expect.poll(() => listCount(page)).toBe('30');
+      await navigateTo(page, '/host.html?reload');
+      await expect.poll(() => listCount(page)).toBe('90');
+
+      await page.goBack();
+
+      // 一覧は読み直した文書が描く
+      await expect.poll(() => listCount(page), { timeout: 10_000 }).toBe('30');
+      expect(new URL(page.url()).search).toBe('?reload&q=few');
+      await page.close();
+    }, 30_000);
+
+    // 画面のページが popstate で URL を読み直すなら、文書は読み直さない
+    it('keeps the document when the visitor goes back within a page that follows the URL itself, to the entry they came back to from another site', async () => {
+      const page = await open('/list?q=few');
+      await expect.poll(() => listCount(page)).toBe('30');
+      await page.goto(`${outsideSite}/`);
+      await page.goBack();
+      await expect.poll(() => listCount(page)).toBe('30');
+      await navigateTo(page, '/list');
+      await expect.poll(() => listCount(page)).toBe('90');
+      // 読み直しを頼むと、その文書に reload の navigate が出る
+      await page.evaluate(() => {
+        const kinds: NavigationType[] = [];
+        Object.assign(globalThis, { kinds });
+        navigation.addEventListener('navigate', (event) => {
+          kinds.push(event.navigationType);
+        });
+      });
+
+      await page.goBack();
+
+      await expect.poll(() => listCount(page)).toBe('30');
+      expect(
+        await page.evaluate(
+          () => (globalThis as unknown as { kinds?: NavigationType[] }).kinds,
+        ),
+      ).not.toContain('reload');
+      await page.close();
+    }, 30_000);
+
+    // Firefox は iframe の中で、横取りした戻るを 2 回 commit し、popstate も 2 回出す。
+    // トップレベルの文書ではどのエンジンも 1 回なので、2 回目を同じタスクで出す
+    it('keeps the document when the browser dispatches popstate twice for a traversal it announced', async () => {
+      const page = await open('/tall');
+      await navigateTo(page, '/about');
+      await page.getByRole('heading', { name: 'about' }).waitFor();
+      await page.evaluate(() => {
+        Object.assign(globalThis, { kept: true });
+        window.addEventListener(
+          'popstate',
+          (event) => {
+            window.dispatchEvent(
+              new PopStateEvent('popstate', { state: event.state }),
+            );
+          },
+          { once: true },
+        );
+      });
+
+      await traverse(page, 'back');
+
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
+      expect(await page.evaluate(() => 'kept' in globalThis)).toBe(true);
+      await page.close();
+    }, 30_000);
+
+    // 回線が遅いと、別のサイトから戻って読み直す文書がスクリプトを読む前に、もう一度
+    // 戻れる。WebKit は popstate を誰も聞いていないうちに currentEntry を null にする
+    it('shows the page the URL names, and keeps following links, when the visitor goes back past another site twice before the page has loaded its script', async () => {
+      const page = await open('/tall');
+      await navigateTo(page, '/about');
+      await page.goto(`${outsideSite}/`);
+      const script = Promise.withResolvers<undefined>();
+      const entry = (url: URL): boolean => url.pathname === '/main.tsx';
+      await page.route(entry, async (route) => {
+        await script.promise;
+        await route.continue().catch(() => undefined);
+      });
+      await page.goBack({ waitUntil: 'commit' });
+
+      await page.goBack({ waitUntil: 'commit' });
+      script.resolve(undefined);
+      await page.unroute(entry);
+
+      // Chromium では、読み込みの途中の文書の中で戻ると、読み込みが終わる前に待ち始めた
+      // 要素の待ちが、要素が出ても返らない
+      await page.waitForLoadState();
+      await page.waitForFunction(() => navigation.currentEntry !== null, null, {
+        timeout: 10_000,
+      });
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
+      expect(new URL(page.url()).pathname).toBe('/tall');
+      await navigateTo(page, '/short');
+      await page.getByRole('heading', { name: 'short' }).waitFor();
+      await page.close();
+    }, 30_000);
+
+    // WebKit では、読み直しの要求が返る前にリンクを押せる。横取りすると読み直しが止まり、
+    // currentEntry が null の文書ではその遷移も AbortError になる
+    it('follows a link the visitor clicks as soon as they go back past another site', async () => {
+      const page = await open('/tall');
+      await navigateTo(page, '/about');
+      await page.goto(`${outsideSite}/`);
+      await page.goBack();
+      await page.getByRole('heading', { name: 'about' }).waitFor();
+      const reloading = Promise.withResolvers<undefined>();
+      const clicked = Promise.withResolvers<undefined>();
+      const reload = (url: URL): boolean => url.pathname === '/tall';
+      await page.route(reload, async (route) => {
+        reloading.resolve(undefined);
+        await clicked.promise;
+        await route.continue().catch(() => undefined);
+      });
+
+      await page.goBack();
+      // ほかのエンジンは navigate を出し、文書を読み直さずに描く
+      await Promise.race([
+        reloading.promise,
+        page
+          .getByRole('heading', { name: 'tall' })
+          .waitFor()
+          .catch(() => undefined),
+      ]);
+      await page.evaluate(() => {
+        const link = navigation.navigate('/short');
+        link.committed?.catch(() => undefined);
+        link.finished?.catch(() => undefined);
+      });
+      clicked.resolve(undefined);
+
+      await page.getByRole('heading', { name: 'short' }).waitFor({
+        timeout: 10_000,
+      });
+      expect(new URL(page.url()).pathname).toBe('/short');
+      await page.unroute(reload);
+      await page.close();
+    }, 30_000);
+
+    // 読み直しを頼んだあとに進むと、URL は進んだ先へ動く。そこで読み直しを頼み直さないと、
+    // 止めていた前の URL の読み直しが着いて、進んだ先が消える
+    it('shows the page the visitor goes forward to while the document reloads for going back past another site', async () => {
+      const page = await open('/tall');
+      await page.goto(`${outsideSite}/`);
+      await page.goBack();
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
+      await navigateTo(page, '/about');
+      await navigateTo(page, '/short');
+      await page.getByRole('heading', { name: 'short' }).waitFor();
+      const reloading = Promise.withResolvers<undefined>();
+      const forwarded = Promise.withResolvers<undefined>();
+      const reload = (url: URL): boolean => url.pathname === '/tall';
+      await page.route(reload, async (route) => {
+        reloading.resolve(undefined);
+        await forwarded.promise;
+        await route.continue().catch(() => undefined);
+      });
+      await page.evaluate(() => {
+        history.go(-2);
+      });
+      // ほかのエンジンは navigate を出し、文書を読み直さずに描く
+      await Promise.race([
+        reloading.promise,
+        page
+          .getByRole('heading', { name: 'tall' })
+          .waitFor()
+          .catch(() => undefined),
+      ]);
+
+      await page.evaluate(() => {
+        history.forward();
+      });
+      await page.waitForURL(`${origin}/about`, { waitUntil: 'commit' });
+      forwarded.resolve(undefined);
+
+      await page.getByRole('heading', { name: 'about' }).waitFor({
+        timeout: 10_000,
+      });
+      expect(new URL(page.url()).pathname).toBe('/about');
+      await page.unroute(reload);
+      await page.close();
+    }, 30_000);
+
     // 移っては戻る読み方では、切り捨てられた entry と hash の移動の key が記録に
     // 積もる。tab の履歴に数件しか無くても、まだ戻れる entry を押し出さない
     it('restores the position a page was left at when the visitor goes back to it after leaving more than 100 entries that are gone', async () => {

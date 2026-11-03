@@ -171,8 +171,8 @@ export const scrollTraverseKeyless = message({
 });
 
 export const scrollTraverseReload = message({
-  ja: '別のサイトから戻ったときは、WebKitが戻る操作を知らせないので、ルーターがページを再読み込みします。サーバーで描いたページはブラウザが位置を戻し、クライアントで描いたページは先頭に着きます。',
-  en: 'Coming back from another site, WebKit does not report that traversal at all, so the router reloads the page. The browser restores the position of a page rendered on the server, and a page rendered on the client starts at the top.',
+  ja: '別のサイトから戻ったときは、WebKitが一部の戻る操作を知らせません。別のサイトより前の履歴エントリへ戻るときと、戻ったページから移ったあとにそのページへ戻るときです。移った先の読み込みが終わる前に戻るときも含みます。このときはルーターがページを再読み込みします。サーバーで描いたページはブラウザが位置を戻し、クライアントで描いたページは先頭に着きます。同じページの中で検索だけが変わる戻るは、`refresh`がそのページを読み込み直すと答えたときと、ページの読み込みの途中のときだけ再読み込みします。再読み込みの途中に押したリンクは、文書の読み込みとして開きます。',
+  en: 'Coming back from another site, WebKit does not report some traversals at all: to an entry from before that site, and, once the visitor has moved on, back to the page they came back to, even before the next page has loaded. The router then reloads the page. The browser restores the position of a page rendered on the server, and a page rendered on the client starts at the top. A step within a page that only moves the search reloads only when `refresh` says the page loads again for it, or while a page is still loading. A link followed while the page reloads opens as a document load.',
 });
 
 export const abortTitle = message({
