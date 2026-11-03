@@ -507,6 +507,109 @@ describe('the shells a build writes', () => {
   });
 });
 
+const TAKEN =
+  'static build writes a file of its own where these route.ts files write theirs, and one would replace the other — remove the route.ts, or what else writes the file:';
+
+const home = (extra: Record<string, Answer> = {}): Record<string, Answer> => ({
+  '/': { body: '<p>home</p>' },
+  '/index.rsc': { body: 'home payload' },
+  ...extra,
+});
+
+describe('a route.ts at a file the build writes itself', () => {
+  describe('異常系', () => {
+    it('stops before writing anything, naming the route.ts and the "site" option, when both write sitemap.xml', async () => {
+      await routeFiles(['sitemap.xml/route.ts']);
+      await handlerAnswering(
+        home({ '/sitemap.xml': { body: '<urlset>own</urlset>' } }),
+      );
+
+      await expect(
+        hooks({ site: 'https://example.com' }).build(),
+      ).rejects.toThrow(
+        `${TAKEN}\n  sitemap.xml: src/routes/sitemap.xml/route.ts, and the "site" option writes it`,
+      );
+      await expect(clientFile('sitemap.xml')).rejects.toThrow(/ENOENT/u);
+      await expect(clientFile('index.html')).rejects.toThrow(/ENOENT/u);
+    });
+
+    it('names a route.ts paths gave 404.html beside a not-found.tsx, with the pathname to leave out of "paths", and one at _redirects beside a fallback.tsx, in one error', async () => {
+      await routeFiles([
+        ...POSTS,
+        'not-found.tsx',
+        '[file]/route.ts',
+        '_redirects/route.ts',
+      ]);
+      await handlerAnswering(site());
+
+      await expect(
+        hooks({ paths: () => ['/posts/1', '/404.html'] }).build(),
+      ).rejects.toThrow(
+        `${TAKEN}\n  404.html: src/routes/[file]/route.ts, and src/routes/not-found.tsx is written there; or leave /404.html out of "paths"\n  _redirects: src/routes/_redirects/route.ts, and the shells of src/routes/posts/[id]/fallback.tsx are reached through it — rules of your own go in public/_redirects, which the build adds to its own`,
+      );
+    });
+
+    it('names a route.ts at a page’s HTML or payload, or at a redirect’s HTML, with the page or the redirect', async () => {
+      await routeFiles([
+        'index.html/route.ts',
+        'about/page.tsx',
+        'about/index.rsc/route.ts',
+        'old/redirect.ts',
+        'old/index.html/route.ts',
+      ]);
+      await handlerAnswering(home());
+
+      await expect(hooks().build()).rejects.toThrow(
+        `${TAKEN}\n  about/index.rsc: src/routes/about/index.rsc/route.ts, and src/routes/about/page.tsx is written there\n  index.html: src/routes/index.html/route.ts, and src/routes/page.tsx is written there\n  old/index.html: src/routes/old/index.html/route.ts, and src/routes/old/redirect.ts is written there`,
+      );
+    });
+
+    it('stops on a route.ts whose file differs from the build’s only in case, as macOS and Windows take the two for one', async () => {
+      await routeFiles(['Sitemap.xml/route.ts']);
+      await handlerAnswering(
+        home({ '/Sitemap.xml': { body: '<urlset>own</urlset>' } }),
+      );
+
+      await expect(
+        hooks({ site: 'https://example.com' }).build(),
+      ).rejects.toThrow(
+        `${TAKEN}\n  Sitemap.xml (the same file as sitemap.xml on macOS and Windows): src/routes/Sitemap.xml/route.ts, and the "site" option writes it`,
+      );
+    });
+  });
+
+  describe('正常系', () => {
+    it('writes a route.ts at sitemap.xml as its own file when no "site" is given', async () => {
+      await routeFiles(['sitemap.xml/route.ts']);
+      await handlerAnswering(
+        home({ '/sitemap.xml': { body: '<urlset>own</urlset>' } }),
+      );
+      const { build, said } = hooks();
+
+      await build();
+
+      expect(await clientFile('sitemap.xml')).toBe('<urlset>own</urlset>');
+      expect(said.info).toStrictEqual(['k8ordo: wrote 2 routes']);
+    });
+
+    it('writes its sitemap beside a route.ts that writes another file', async () => {
+      await routeFiles(['feed.xml/route.ts']);
+      await handlerAnswering(home({ '/feed.xml': { body: '<rss/>' } }));
+      const { build, said } = hooks({ site: 'https://example.com' });
+
+      await build();
+
+      expect(await clientFile('sitemap.xml')).toBe(
+        '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n  <url><loc>https://example.com/</loc></url>\n</urlset>\n',
+      );
+      expect(await clientFile('feed.xml')).toBe('<rss/>');
+      expect(said.info).toStrictEqual([
+        'k8ordo: wrote 2 routes and sitemap.xml',
+      ]);
+    });
+  });
+});
+
 const ICON = {
   id: 'icon',
   name: 'Icon',
@@ -978,6 +1081,18 @@ describe('vite dev', () => {
     expect(await request('/posts/4')).toBe('/posts/!fallback');
     expect(said.warn).toStrictEqual([
       'k8ordo: the build will refuse "paths": the "paths" option supplied pathnames no route wants: /produtcs/2',
+    ]);
+  });
+
+  it('warns once that the build will stop on a route.ts at a file it writes itself, and leaves the route.ts to answer', async () => {
+    await routeFiles(['sitemap.xml/route.ts']);
+    const { serve, said } = hooks({ site: 'https://example.com' });
+    const request = serve();
+
+    expect(await request('/sitemap.xml')).toBe('/sitemap.xml');
+    expect(await request('/sitemap.xml')).toBe('/sitemap.xml');
+    expect(said.warn).toStrictEqual([
+      `k8ordo: the build will stop: ${TAKEN}\n  sitemap.xml: src/routes/sitemap.xml/route.ts, and the "site" option writes it`,
     ]);
   });
 

@@ -240,8 +240,17 @@ pnpm check         # check:write to auto-fix
   matcher's order, which of them answers. Anything but a `200` stops the
   build, as do a route at `/` and a route with written pathnames below it (a
   file cannot also be a directory). It is not a page: no `index.rsc`, not in
-  the sitemap. A file keeps no type, so the `Content-Type` its `GET`
-  answered is kept beside it — `StaticOutput.types`, by the file's path
+  the sitemap. Nor may its file be one the build writes itself — a page's
+  or a redirect's `index.html`, a page's `index.rsc`, `404.html`,
+  `sitemap.xml` under `site`, `_redirects` with shells: those are written
+  after the routes' files (a page's beside them), so one would replace the
+  other unseen, and `takenFiles` names each pair before anything renders.
+  It compares names without case, since macOS and Windows take two that
+  differ only in case for one file, and a build stops the same everywhere.
+  `vite dev` does not stop; it warns of the same from the tree
+  (`devRoutes`), for the patterns with no params only, since it calls
+  `paths` for nothing else. A file keeps no type, so the `Content-Type` its
+  `GET` answered is kept beside it — `StaticOutput.types`, by the file's path
   inside the client build — for the one adapter that can name a file's
   type; `serve`, `vite preview` and every other host go by the extension.
 - **A file never carries a nonce; the policy names hashes.** The handler

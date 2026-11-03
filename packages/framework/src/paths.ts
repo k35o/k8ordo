@@ -504,16 +504,20 @@ export const dirFor = (pathname: string): string => {
 };
 
 /**
- * Whether a route.ts answers a pathname the build writes, rather than a page:
- * the first declared pattern that matches it says, in the matcher's order.
- * The catch-all never answers a pathname the build was given.
+ * What answers a pathname the build writes: the first declared pattern that
+ * matches it, in the matcher's order. The catch-all never answers a pathname
+ * the build was given.
  */
-export const answeredByRoute = (dir: RouteDir, pathname: string): boolean => {
-  for (const each of declaredPatterns(dir)) {
-    if (each.kind === 'notFound') continue;
-    if (new URLPattern({ pathname: each.pattern }).test({ pathname })) {
-      return each.kind === 'route';
-    }
-  }
-  return false;
-};
+export const answering = (
+  dir: RouteDir,
+  pathname: string,
+): DeclaredPattern | undefined =>
+  declaredPatterns(dir).find(
+    (each) =>
+      each.kind !== 'notFound' &&
+      new URLPattern({ pathname: each.pattern }).test({ pathname }),
+  );
+
+/** Whether a route.ts answers a pathname the build writes, rather than a page. */
+export const answeredByRoute = (dir: RouteDir, pathname: string): boolean =>
+  answering(dir, pathname)?.kind === 'route';

@@ -6,6 +6,7 @@ import { pathToFileURL } from 'node:url';
 
 import {
   CLIENT_DEPS_HEADER,
+  declaredPatterns,
   decodePathname,
   exportsOf,
   FALLBACK_SEGMENT,
@@ -49,10 +50,13 @@ import {
 import type { ContentSecurityPolicy } from './documents';
 import {
   answeredByRoute,
+  answering,
   catchAllPath,
   catchAllPatterns,
   dirFor,
+  isConcrete,
   patternsNeedingPaths,
+  patternsOf,
   planPaths,
   planRefusals,
   shadowedShells,
@@ -98,7 +102,8 @@ export type StaticOptions = EngineOptions & {
    * The origin the site is served from — `https://example.com`. With it the
    * build also writes `sitemap.xml`, listing every page it rendered at its
    * URL, Vite's `base` included; without it, no sitemap, because a sitemap of
-   * relative URLs is not one.
+   * relative URLs is not one. A `route.ts` that writes `sitemap.xml` as well
+   * stops the build, naming both: keep one of them.
    */
   readonly site?: string;
   /**
@@ -247,6 +252,90 @@ const reexportRefusal = (files: readonly string[]): string =>
 /** The route files whose exports static mode reads. */
 const READ_BY_NAME = new Set(['route', 'page']);
 
+/** Where a pathname's file lands inside the client build, `/`-separated. */
+const fileAt = (pathname: string, name = ''): string =>
+  path.posix.join(dirFor(pathname), name).slice(1);
+
+/**
+ * Each route.ts whose file the build also writes for something else — a
+ * page's or a redirect's HTML, a page's payload, `404.html`, `sitemap.xml`,
+ * `_redirects` — as a line naming both. The build writes its own files after
+ * the routes', and a page's beside them, so one would replace the other
+ * without a word.
+ */
+const takenFiles = (
+  tree: RouteDir,
+  pathnames: readonly string[],
+  {
+    site,
+    shells,
+    named,
+  }: {
+    readonly site: boolean;
+    /** The fallback.tsx files whose shells the build writes `_redirects` for. */
+    readonly shells: readonly string[];
+    readonly named: (file: string) => string;
+  },
+): string[] => {
+  // Keyed without case: macOS and Windows take `Sitemap.xml` and
+  // `sitemap.xml` for one file, and a build stops the same on every system.
+  const own = new Map<string, { readonly file: string; readonly by: string }>();
+  const claim = (file: string, by: string): void => {
+    own.set(file.toLowerCase(), { file, by });
+  };
+  const routes: Array<{
+    readonly file: string;
+    readonly route: string;
+    /** The pathname `paths` gave a route.ts with params. */
+    readonly supplied: string | undefined;
+  }> = [];
+  for (const pathname of pathnames) {
+    const answer = answering(tree, pathname);
+    if (answer?.kind === 'route') {
+      routes.push({
+        file: fileAt(pathname),
+        route: answer.file,
+        supplied: isConcrete(answer.pattern) ? undefined : pathname,
+      });
+    } else if (answer !== undefined) {
+      const page = `${named(answer.file)} is written there`;
+      claim(fileAt(pathname, 'index.html'), page);
+      if (answer.kind === 'page') claim(fileAt(pathname, 'index.rsc'), page);
+    }
+  }
+  const notFound = declaredPatterns(tree).find(
+    (each) => each.kind === 'notFound',
+  );
+  if (notFound !== undefined) {
+    claim('404.html', `${named(notFound.file)} is written there`);
+  }
+  if (site) claim('sitemap.xml', 'the "site" option writes it');
+  if (shells.length > 0) {
+    claim(
+      '_redirects',
+      `the shells of ${shells.map((file) => named(file)).join(', ')} are reached through it — rules of your own go in public/_redirects, which the build adds to its own`,
+    );
+  }
+  return routes
+    .flatMap(({ file, route, supplied }) => {
+      const taken = own.get(file.toLowerCase());
+      if (taken === undefined) return [];
+      const sameAs =
+        taken.file === file
+          ? ''
+          : ` (the same file as ${taken.file} on macOS and Windows)`;
+      const unlisted =
+        supplied === undefined ? '' : `; or leave ${supplied} out of "paths"`;
+      return [`${file}${sameAs}: ${named(route)}, and ${taken.by}${unlisted}`];
+    })
+    .toSorted();
+};
+
+const takenRefusal = (lines: readonly string[]): string =>
+  `static build writes a file of its own where these route.ts files write theirs, and one would replace the other — remove the route.ts, or what else writes the file:\n${lines
+    .map((line) => `  ${line}`)
+    .join('\n')}`;
+
 /**
  * Static mode: the same request handler the server mode runs per request is
  * called at build time — for each route's HTML and again for its payload —
@@ -286,11 +375,31 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
   let suppliedInDev: Promise<readonly string[]> = Promise.resolve([]);
   const noticed = new Set<string>();
 
+  const fromRoot = (file: string): string =>
+    path.relative(root, path.join(routesDir, file));
+
+  // A route.ts that `paths` gives its pathname is left to the build: vite dev
+  // calls `paths` only for an application with a fallback.tsx.
   const devRoutes = (): Promise<DevRoutes> =>
     (routesRead ??= (async () => {
       const { tree, problems } = parseRouteTree(await scanRoutes(routesDir));
       const failed = problems.length > 0;
-      return { tree, failed, shapes: failed ? [] : fallbackShapes(tree) };
+      const shapes = failed ? [] : fallbackShapes(tree);
+      const taken = failed
+        ? []
+        : takenFiles(
+            tree,
+            patternsOf(tree).filter((pattern) => isConcrete(pattern)),
+            {
+              site: options.site !== undefined,
+              shells: shapes.map((shape) => shape.file),
+              named: fromRoot,
+            },
+          );
+      if (taken.length > 0) {
+        logger?.warn(`k8ordo: the build will stop: ${takenRefusal(taken)}`);
+      }
+      return { tree, failed, shapes };
     })());
 
   const devShells = (): Promise<DevShells> =>
@@ -742,6 +851,16 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
             `static build cannot write a route.ts as a file at ${unfileable.join('; ')}`,
           );
         }
+        const taken = takenFiles(tree, plan.paths, {
+          site: options.site !== undefined,
+          shells: fallbackShapes(tree)
+            .filter((shape) =>
+              plan.shells.some((shell) => shell.pattern === shape.pattern),
+            )
+            .map((shape) => shape.file),
+          named: fromRoot,
+        });
+        if (taken.length > 0) throw new Error(takenRefusal(taken));
         const entry = path.resolve(root, rscOut, 'index.js');
         const entryModule = (await import(pathToFileURL(entry).href)) as {
           default: Handler;
@@ -1035,25 +1154,23 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
       order: 'pre',
       async handler() {
         const files = await scanRoutes(routesDir);
-        const named = (file: string): string =>
-          path.relative(root, path.join(routesDir, file));
         const guards = files
           .filter((file) => slotOf(file) === 'guard')
-          .map((file) => named(file));
+          .map((file) => fromRoot(file));
         const exported = await readExports(routesDir, files);
         const routes = [...exported]
           .filter(([file]) => slotOf(file) === 'route')
-          .map(([file, names]) => [named(file), unwritable(names)] as const)
+          .map(([file, names]) => [fromRoot(file), unwritable(names)] as const)
           .filter(([, methods]) => methods.length > 0);
         const searching = [...pagesReadingSearch(exported)].map((file) =>
-          named(file),
+          fromRoot(file),
         );
         const reexporting = [...exported]
           .filter(
             ([file, names]) =>
               READ_BY_NAME.has(slotOf(file) ?? '') && names.has(REEXPORTS_ALL),
           )
-          .map(([file]) => named(file));
+          .map(([file]) => fromRoot(file));
         const refusals = [
           ...(guards.length > 0 ? [guardRefusal(guards)] : []),
           ...(routes.length > 0 ? [routeRefusal(routes)] : []),
