@@ -81,6 +81,10 @@
   dir: packages/framework
   intents:
     - framework-guide-charset
+"@k8ordo/framework@1.4.3":
+  dir: packages/framework
+  intents:
+    - framework-hydrate-use-id
 "@k8ordo/i18n@1.0.0":
   dir: packages/i18n
   intents:
