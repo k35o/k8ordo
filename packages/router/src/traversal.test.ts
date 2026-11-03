@@ -498,6 +498,32 @@ describe.each(browserTypes)(
       await page.close();
     }, 30_000);
 
+    // Firefox は iframe の中で、横取りした戻るを 2 回 commit し、popstate も 2 回出す。
+    // トップレベルの文書ではどのエンジンも 1 回なので、2 回目を同じタスクで出す
+    it('keeps the document when the browser dispatches popstate twice for a traversal it announced', async () => {
+      const page = await open('/tall');
+      await navigateTo(page, '/about');
+      await page.getByRole('heading', { name: 'about' }).waitFor();
+      await page.evaluate(() => {
+        Object.assign(globalThis, { kept: true });
+        window.addEventListener(
+          'popstate',
+          (event) => {
+            window.dispatchEvent(
+              new PopStateEvent('popstate', { state: event.state }),
+            );
+          },
+          { once: true },
+        );
+      });
+
+      await traverse(page, 'back');
+
+      await page.getByRole('heading', { name: 'tall' }).waitFor();
+      expect(await page.evaluate(() => 'kept' in globalThis)).toBe(true);
+      await page.close();
+    }, 30_000);
+
     // 回線が遅いと、別のサイトから戻って読み直す文書がスクリプトを読む前に、もう一度
     // 戻れる。WebKit は popstate を誰も聞いていないうちに currentEntry を null にする
     it('shows the page the URL names, and keeps following links, when the visitor goes back past another site twice before the page has loaded its script', async () => {

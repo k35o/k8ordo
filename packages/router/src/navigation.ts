@@ -348,7 +348,9 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       reloading = true;
       location.reload();
     };
-    // 最後の navigate の行き先。popstate がそれを指していなければ、その一歩は知らされていない
+    // 最後の navigate の行き先。popstate がそれを指していなければ、その一歩は知らされていない。
+    // popstate では消さない。Firefox は iframe の中で横取りした traverse を 2 回 commit し、
+    // 行き先を指す popstate を 2 回出す
     let announced: string | null = null;
     // WebKit で popstate を聞く前（hydrate の前や、描いてから effect までの間）に下の戻るが
     // 届くと、currentEntry は null のまま残る。entries() が空なのは Navigation API を持たない
@@ -520,14 +522,12 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
     // currentEntry は null にならないが、URL だけが動いて画面は残る。次のページの
     // 読み込みの途中なら、その読み込みも止まらず、戻った URL の下に着く
     const onPopState = (): void => {
-      const known = announced === location.href;
-      announced = null;
       // 読み直しの途中の一歩は、頼んだ読み直しが前の URL のまま着いて消すので、頼み直す
       if (reloading || navigation.currentEntry === null) {
         reload();
         return;
       }
-      if (known) return;
+      if (announced === location.href) return;
       // 画面のページが自分で URL を読み直せるなら、読み直さない
       const url = new URL(location.href);
       if (

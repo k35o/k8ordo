@@ -183,7 +183,10 @@ pnpm check         # check:write to auto-fix
   search, while a page that follows the URL itself keeps its document),
   twice before the page has loaded its script, and with a link followed or a
   step forward taken while the document reloads; a client-rendered fixture
-  has no position to assert after that document load.
+  has no position to assert after that document load. And that a traversal
+  the platform announced keeps its document when a second `popstate` follows
+  the first — the test dispatches the second itself, since only Firefox in an
+  iframe sends two.
 - **A history step the platform does not announce reloads the document.**
   WebKit, in a document it read again on coming back from another _site_,
   dispatches no `navigate` for a traversal to an earlier entry: only
@@ -212,6 +215,9 @@ pnpm check         # check:write to auto-fix
   load. A `popstate` then asks again, for the URL it moved to: WebKit
   announces that step, and left alone, the reload already in flight lands
   and undoes it. Chromium announces every step, so none of this runs there.
+  A `popstate` does not use up the destination it matched: Firefox, in an
+  iframe, commits an intercepted traversal twice and dispatches `popstate`
+  for each, both at that destination.
   From another _origin_ of the same site the same traversal is announced,
   keyless (above).
 - **`useMatch` reads the platform, never the table.** It is `matchPath` over
