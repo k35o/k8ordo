@@ -85,6 +85,10 @@
   dir: packages/framework
   intents:
     - framework-hydrate-use-id
+"@k8ordo/framework@1.4.4":
+  dir: packages/framework
+  intents:
+    - framework-site-route-conflict
 "@k8ordo/i18n@1.0.0":
   dir: packages/i18n
   intents:
@@ -153,6 +157,10 @@
     - router-popstate-without-navigate
     - router-state-keyless-popstate
     - router-traverse-after-keyless-webkit
+"@k8ordo/router@1.4.4":
+  dir: packages/router
+  intents:
+    - router-unannounced-traverse-webkit
 "@k8ordo/state@0.2.0":
   dir: packages/state
   intents:
