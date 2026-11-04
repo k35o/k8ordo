@@ -537,10 +537,18 @@ describe.each(browserTypes)(
         await route.continue().catch(() => undefined);
       });
       await page.goBack({ waitUntil: 'commit' });
+      // Chromium の goBack は履歴をブラウザのプロセスに問い合わせる。commit を待って返った
+      // 直後は、ブラウザがまだ文書の付け替えを終えておらず、Not attached to an active page
+      // で落ちることがある。ページの中での評価は Chromium が遷移を終えるまで送らずに止めて
+      // おくので、それが返ってから戻る
+      expect(
+        await page.evaluate(() => document.querySelector('h1') === null),
+      ).toBe(true);
 
       await page.goBack({ waitUntil: 'commit' });
+      // unroute は最後にする。放してすぐだと、Playwright が要求の横取りを止める途中に
+      // スクリプトが出したモジュールの要求が、続けられずに止まったままになり load が来ない
       script.resolve(undefined);
-      await page.unroute(entry);
 
       // Chromium では、読み込みの途中の文書の中で戻ると、読み込みが終わる前に待ち始めた
       // 要素の待ちが、要素が出ても返らない
@@ -552,6 +560,7 @@ describe.each(browserTypes)(
       expect(new URL(page.url()).pathname).toBe('/tall');
       await navigateTo(page, '/short');
       await page.getByRole('heading', { name: 'short' }).waitFor();
+      await page.unroute(entry);
       await page.close();
     }, 30_000);
 
