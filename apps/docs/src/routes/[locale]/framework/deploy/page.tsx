@@ -26,6 +26,7 @@ const STATIC_OUTPUT = `dist/
     old/
       index.html
     404.html
+    client-files.json
     sitemap.xml
     assets/
   rsc/

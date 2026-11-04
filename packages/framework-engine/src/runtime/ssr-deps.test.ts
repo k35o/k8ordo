@@ -125,6 +125,16 @@ const linksInHead = (html: string): string[] =>
   );
 
 /**
+ * `linksInHead`, sorted, each file named without its hash: the client entry
+ * reads the mode, so it and every file naming it differ between a static
+ * and a server build of the same application.
+ */
+const sameFilesIn = (html: string): string[] =>
+  linksInHead(html)
+    .map((link) => link.replaceAll(/-[\w-]{8}(\.(?:js|css)")/gu, '$1'))
+    .toSorted();
+
+/**
  * The deps of the payload's client references the head neither links as a
  * stylesheet nor preloads as a module.
  */
@@ -603,9 +613,7 @@ describe('the HTML of a streamed document', () => {
       const documents = await twice(pathname);
 
       for (const { html } of [...files, ...documents]) {
-        expect(linksInHead(html).toSorted()).toStrictEqual(
-          linksInHead(files[0].html).toSorted(),
-        );
+        expect(sameFilesIn(html)).toStrictEqual(sameFilesIn(files[0].html));
       }
     },
   );

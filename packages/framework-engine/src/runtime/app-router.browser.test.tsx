@@ -651,6 +651,25 @@ describe('prefetching the page a link leads to', () => {
     expect(reloadDocument).not.toHaveBeenCalled();
     expect(screen.container.textContent).toBe('next');
   });
+
+  it('fetches nothing for the links on screen under a coarse pointer — each would be a render', async () => {
+    pointer('coarse');
+    const requested = countPayloadRequests();
+    await render(
+      <AppRouter
+        pathname="/"
+        tree={
+          <a href="/next" style={{ pointerEvents: 'none' }}>
+            next
+          </a>
+        }
+      />,
+    );
+
+    await twoFrames();
+
+    expect(requested()).toBe(0);
+  });
 });
 
 // ペイロードを取りに来た pathname を順に集め、どれにも NEXT で答える
@@ -1243,3 +1262,189 @@ function answerHeldOpen(body: unknown): () => AbortSignal | undefined {
   });
   return () => signal;
 }
+
+// 主なポインタの細かさを決める。(pointer: coarse) の問い合わせだけを、決めた
+// 答えになる問い合わせに替える
+const realMatchMedia = globalThis.matchMedia.bind(globalThis);
+const pointer = (kind: 'coarse' | 'fine'): void => {
+  vi.stubGlobal('matchMedia', (query: string) =>
+    realMatchMedia(
+      query === '(pointer: coarse)'
+        ? kind === 'coarse'
+          ? 'all'
+          : 'not all'
+        : query,
+    ),
+  );
+};
+
+// IntersectionObserver の知らせは描画のあとに来る。2 フレーム待つ
+const twoFrames = (): Promise<unknown> =>
+  new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(resolve);
+    });
+  });
+
+// ペイロードを頼んだ優先度を順に集め、どれにも NEXT で答える
+const recordPriorities = (): Array<RequestPriority | undefined> => {
+  const asked: Array<RequestPriority | undefined> = [];
+  vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
+    if (!asksForPayload(input)) return passThrough(input, init);
+    asked.push(init?.priority);
+    return Promise.resolve(payloadResponse(NEXT));
+  });
+  return asked;
+};
+
+// ビルドの書いた部品の一覧を返し、ページのペイロードには NEXT で答えるホスト。
+// 一覧を読み終えたかと、ペイロードを頼まれたときに file が張られていたかを返す
+const answerListing = (
+  listed: { files: string[]; pages: Record<string, number[]> },
+  file: string,
+): { read: boolean; linkedWhenAsked: boolean | undefined } => {
+  const host = {
+    read: false,
+    linkedWhenAsked: undefined as boolean | undefined,
+  };
+  vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
+    if (urlOf(input).pathname === '/client-files.json') {
+      const response = Response.json(listed);
+      const parse = response.json.bind(response);
+      response.json = async () => {
+        const parsed: unknown = await parse();
+        host.read = true;
+        return parsed;
+      };
+      return Promise.resolve(response);
+    }
+    if (!asksForPayload(input)) return passThrough(input, init);
+    host.linkedWhenAsked =
+      document.head.querySelector(`link[href="${file}"]`) !== null;
+    return Promise.resolve(payloadResponse(NEXT));
+  });
+  return host;
+};
+
+describe('under a static build', () => {
+  beforeEach(() => {
+    vi.stubEnv('K8ORDO_MODE', 'static');
+    vi.stubEnv('DEV', false);
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
+    for (const link of document.head.querySelectorAll(
+      'link[href^="/listed-app/"]',
+    )) {
+      link.remove();
+    }
+  });
+
+  it('goes back to the page the document arrived as without asking for it', async () => {
+    const requested = recordPayloadRequests();
+    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+    await navigation.navigate('/next').finished;
+
+    await navigation.back().finished;
+
+    await expect.element(screen.getByText('first page')).toBeInTheDocument();
+    expect(requested).toStrictEqual(['/next/index.rsc']);
+  });
+
+  it('shows a page visited before without asking for it again', async () => {
+    const requested = recordPayloadRequests();
+    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+    await navigation.navigate('/next').finished;
+    await navigation.back().finished;
+
+    await navigation.navigate('/next').finished;
+
+    await expect.element(screen.getByText('next page')).toBeInTheDocument();
+    expect(requested).toStrictEqual(['/next/index.rsc']);
+  });
+
+  it('lets the request of a page it left run on, so the page comes back whole', async () => {
+    const signalOf = answerEachHeldOpen();
+    rsc.payloads.set('/a/index.rsc', () => ({
+      tree: (
+        <>
+          page a
+          <Suspense fallback={null}>
+            <StillToCome on={signalOf('/a/index.rsc')} />
+          </Suspense>
+        </>
+      ),
+      pathname: '/a',
+      client: RUNNING,
+    }));
+    rsc.payloads.set('/b/index.rsc', () => ({
+      tree: 'page b',
+      pathname: '/b',
+      client: RUNNING,
+    }));
+    const screen = await renderRouter();
+    await navigation.navigate('/a').finished;
+
+    await navigation.navigate('/b').finished;
+    await expect.element(screen.getByText('page b')).toBeInTheDocument();
+    await twoFrames();
+
+    expect(signalOf('/a/index.rsc')?.aborted).toBe(false);
+  });
+
+  it('fetches the links on screen ahead under a coarse pointer, at low priority', async () => {
+    pointer('coarse');
+    const priorities = recordPriorities();
+
+    await render(<AppRouter pathname="/" tree={<a href="/next">next</a>} />);
+
+    await vi.waitFor(() => {
+      expect(priorities).toStrictEqual(['low']);
+    });
+  });
+
+  it('leaves the links on screen to a pointer’s intent under a fine pointer', async () => {
+    pointer('fine');
+    const requested = countPayloadRequests();
+    const screen = await render(
+      <AppRouter
+        pathname="/"
+        tree={
+          <a href="/next" style={{ pointerEvents: 'none' }}>
+            next
+          </a>
+        }
+      />,
+    );
+    await twoFrames();
+    const beforeIntent = requested();
+
+    pointerOnto(screen.getByRole('link').element());
+
+    expect(beforeIntent).toBe(0);
+    await vi.waitFor(() => {
+      expect(requested()).toBe(1);
+    });
+  });
+
+  it('links the files its build listed for a page before asking for the page', async () => {
+    const host = answerListing(
+      { files: ['/listed-app/next.js'], pages: { '/next/index.rsc': [0] } },
+      '/listed-app/next.js',
+    );
+    const screen = await render(
+      <AppRouter pathname="/" tree={<a href="/next">next</a>} />,
+    );
+    await vi.waitFor(() => {
+      expect(host.read).toBe(true);
+    });
+    await nextTask();
+
+    pointerOnto(screen.getByRole('link').element());
+
+    await vi.waitFor(() => {
+      expect(host.linkedWhenAsked).toBe(true);
+    });
+  });
+});

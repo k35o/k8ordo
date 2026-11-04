@@ -446,7 +446,64 @@ describe('the static build', () => {
   it('ships the client entry, so the page hydrates', () => {
     expect(read('index.html')).toMatch(/<script[^>]+type="module"/u);
   });
+
+  it('lists the client files of each page by a payload it wrote, naming only files it wrote', () => {
+    const { files, pages } = listedClientFiles(client);
+
+    expect(Object.keys(pages).length).toBeGreaterThan(0);
+    for (const page of Object.keys(pages)) {
+      expect(existsSync(path.join(client, page))).toBe(true);
+    }
+    for (const file of files) {
+      expect(existsSync(path.join(client, file))).toBe(true);
+    }
+  });
+
+  it('lists for a page what its HTML links and another page’s does not', () => {
+    const products = filesListedFor(client, '/products/index.rsc');
+
+    expect(products.length).toBeGreaterThan(0);
+    for (const file of products) {
+      expect(read('products', 'index.html')).toContain(`href="${file}"`);
+      expect(read('index.html')).not.toContain(`href="${file}"`);
+    }
+  });
+
+  it('leaves out of the list what every page loads: the client entry', () => {
+    const entry = /<script type="module" src="([^"]+)"/u.exec(
+      read('index.html'),
+    )?.[1];
+
+    expect(entry).toBeDefined();
+    expect(listedClientFiles(client).files).not.toContain(entry);
+  });
 });
+
+// ビルドが書いた、ページごとの client の部品の一覧
+const listedClientFiles = (
+  dir: string,
+): {
+  readonly files: readonly string[];
+  readonly pages: Readonly<Record<string, readonly number[]>>;
+} =>
+  JSON.parse(readFileSync(path.join(dir, 'client-files.json'), 'utf8')) as {
+    files: string[];
+    pages: Record<string, number[]>;
+  };
+
+// 一覧がそのページに挙げたファイル
+const filesListedFor = (dir: string, page: string): string[] => {
+  const { files, pages } = listedClientFiles(dir);
+  return (pages[page] ?? []).map((index) => files[index] ?? '');
+};
+
+// Playwright はどのエンジンでも主なポインタを粗くはできないので、
+// その問い合わせの答えを替える。ページの中で走る
+const coarsePointer = (): void => {
+  const real = window.matchMedia.bind(window);
+  window.matchMedia = (query) =>
+    real(query === '(pointer: coarse)' ? 'all' : query);
+};
 
 // 書かれるはずの _redirects。ホストの規則の形そのものが主張なので、行ごとに書く
 const REDIRECTS = [
@@ -492,6 +549,13 @@ describe('the static build under a base', () => {
     const html = readUnderBase('products', 'index.html');
     expect(html).toContain('href="/site/products/1"');
     expect(html).toMatch(/src="\/site\/assets\/[^"]+\.js"/u);
+  });
+
+  it('lists the client files of each page by its payload’s URL under the base', () => {
+    const { files, pages } = listedClientFiles(underBase);
+
+    expect(Object.keys(pages)).toContain('/site/products/index.rsc');
+    for (const file of files) expect(file).toMatch(/^\/site\/assets\//u);
   });
 
   it('lists each page in the sitemap at its URL under the base', () => {
@@ -963,6 +1027,76 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
     await page.getByRole('heading', { name: 'products' }).waitFor();
     expect(new URL(page.url()).pathname).toBe('/site/products');
     expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
+    await page.close();
+  });
+
+  it('fetches the links on screen ahead under a coarse pointer, so following one asks the host for nothing', async () => {
+    const page = await browser.newPage();
+    await page.addInitScript(coarsePointer);
+    await page.goto(origin);
+    await expect
+      .poll(() => requested, { timeout: 10_000 })
+      .toContain('/products/index.rsc');
+    const before = requested.length;
+
+    await page.getByRole('link', { name: 'products', exact: true }).click();
+
+    await page.getByRole('heading', { name: 'products' }).waitFor();
+    expect(requested.slice(before)).not.toContain('/products/index.rsc');
+    await page.close();
+  });
+
+  it('goes back to the page it arrived on without asking the host for it', async () => {
+    const page = await openHydrated(origin);
+    await page.getByRole('link', { name: 'products', exact: true }).click();
+    await page.getByRole('heading', { name: 'products' }).waitFor();
+    const before = requested.length;
+
+    await page.goBack();
+
+    await page.getByTestId('title').getByText('home').waitFor();
+    expect(requested.slice(before)).not.toContain('/index.rsc');
+    expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
+    await page.close();
+  });
+
+  it('links the files the build listed for a page before that page’s payload arrives', async () => {
+    const products = filesListedFor(client, '/products/index.rsc');
+    const page = await browser.newPage();
+    const listRead = page.waitForResponse('**/client-files.json');
+    // ペイロードを止めておき、その間に部品が張られることを見る
+    const { promise: released, resolve: release } =
+      Promise.withResolvers<undefined>();
+    await page.route('**/products/index.rsc', async (route) => {
+      await released;
+      await route.continue();
+    });
+    await page.goto(origin);
+    await page.getByText(/time zone: (?!not yet)/u).waitFor();
+    await (await listRead).finished();
+    await page.evaluate(
+      () =>
+        new Promise((resolve) => {
+          setTimeout(resolve, 0);
+        }),
+    );
+
+    await page.getByRole('link', { name: 'products', exact: true }).hover();
+
+    await expect
+      .poll(() =>
+        page.evaluate(
+          (hrefs) =>
+            hrefs.filter(
+              (href) =>
+                document.head.querySelector(`link[href="${href}"]`) === null,
+            ),
+          products,
+        ),
+      )
+      .toStrictEqual([]);
+    expect(products.length).toBeGreaterThan(0);
+    release(undefined);
     await page.close();
   });
 

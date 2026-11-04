@@ -6,6 +6,7 @@ import { pathToFileURL } from 'node:url';
 
 import {
   CLIENT_DEPS_HEADER,
+  CLIENT_FILES_PATH,
   declaredPatterns,
   decodePathname,
   exportsOf,
@@ -40,6 +41,7 @@ import type { Connect, Logger, Plugin, ResolvedConfig } from 'vite';
 
 import {
   asFile,
+  clientFiles,
   policyProblems,
   redirectPage,
   sitemap,
@@ -310,6 +312,10 @@ const takenFiles = (
     claim('404.html', `${named(notFound.file)} is written there`);
   }
   if (site) claim('sitemap.xml', 'the "site" option writes it');
+  claim(
+    CLIENT_FILES_PATH.slice(1),
+    'the build lists there what each page’s client components need',
+  );
   if (shells.length > 0) {
     claim(
       '_redirects',
@@ -892,6 +898,10 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         };
         // The type each route.ts's GET answered with, by the file it wrote.
         const types = new Map<string, string>();
+        // What the payload of every HTML document written names, and of each
+        // page by its payload's URL path: what CLIENT_FILES_PATH lists.
+        const documents: Array<readonly ClientDeps[]> = [];
+        const pageFiles = new Map<string, readonly ClientDeps[]>();
         await inParallel(
           plan.paths.flatMap((pathname) => {
             if (byRoute.has(pathname)) {
@@ -918,7 +928,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
             const dir = path.join(clientDir, dirFor(pathname));
             return [
               async () => {
-                const { status, notFound, unlinked } = await write(
+                const { status, notFound, unlinked, named } = await write(
                   path.join(dir, 'index.html'),
                   handler,
                   urlFor(pathname),
@@ -926,6 +936,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
                   { notFoundIsPage: false },
                 );
                 unlinks(pathname, unlinked);
+                if (named !== null) documents.push(named);
                 if (status === 404) {
                   (notFound ? disowned : refused).push(pathname);
                 }
@@ -935,13 +946,21 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
                 // finds nothing at index.rsc and hands the URL to the browser,
                 // which loads the HTML above and follows it.
                 if (status === 200) {
+                  const payload = urlFor(payloadPathFor(pathname));
                   await write(
                     path.join(dir, 'index.rsc'),
                     handler,
-                    urlFor(payloadPathFor(pathname)),
+                    payload,
                     csp,
-                    { notFoundIsPage: false },
+                    {
+                      notFoundIsPage: false,
+                    },
                   );
+                  // The payload is the render the HTML was: it names the same.
+                  // Keyed as a browser's URL spells the path.
+                  if (named !== null) {
+                    pageFiles.set(new URL(payload).pathname, named);
+                  }
                 }
               },
             ];
@@ -952,7 +971,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         // would mean nothing in this mode.
         const unmatched = catchAllPath(tree);
         if (unmatched !== null) {
-          const { status, unlinked } = await write(
+          const { status, unlinked, named } = await write(
             path.join(clientDir, '404.html'),
             handler,
             urlFor(unmatched),
@@ -960,6 +979,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
             { notFoundIsPage: true },
           );
           unlinks('404.html', unlinked);
+          if (named !== null) documents.push(named);
           if (status === 500) failed.push('404.html');
         }
 
@@ -985,6 +1005,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
             );
             const named = `${shell.location} (${fallbacks.get(shell.pattern) ?? ''})`;
             unlinks(shell.location, answered.unlinked);
+            if (answered.named !== null) documents.push(answered.named);
             if (answered.status === 500) {
               failed.push(shell.location);
             } else if (answered.status === 404) {
@@ -1077,6 +1098,11 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
             `k8ordo: the shell for ${location} has "${FALLBACK_SEGMENT}" in its HTML — a layout wrote the shell's pathname into the page (a link, a canonical URL); derive what depends on the URL in a client component`,
           );
         }
+
+        await writeFile(
+          path.join(clientDir, CLIENT_FILES_PATH.slice(1)),
+          JSON.stringify(clientFiles(pageFiles, documents)),
+        );
 
         // The build knows every page it wrote, which is what a sitemap is.
         // Redirects and route.ts files are not pages, a not-found is not a
@@ -1239,6 +1265,11 @@ type Written = {
    * `null` for HTML whose handler did not say what its payload names.
    */
   readonly unlinked: readonly ClientDeps[] | null;
+  /**
+   * The client components the payload of the HTML written names; `null`
+   * for what was not written as HTML, or whose handler did not say.
+   */
+  readonly named: readonly ClientDeps[] | null;
 };
 
 /**
@@ -1268,6 +1299,7 @@ const write = async (
     notFound,
     shell: answered,
     unlinked: [],
+    named: null,
   };
   // A page that failed to render is not a page, and neither is a 404 anywhere
   // but the not-found's own file: nothing is written, and the caller stops
@@ -1296,10 +1328,12 @@ const write = async (
   }
   const html = asFile(await response.text(), nonce, csp);
   await writeFile(file, html);
-  const named = response.headers.get(CLIENT_DEPS_HEADER);
+  const said = response.headers.get(CLIENT_DEPS_HEADER);
+  const named = said === null ? null : readClientDeps(said);
   return {
     ...written,
-    unlinked: named === null ? null : unlinkedDeps(html, readClientDeps(named)),
+    unlinked: named === null ? null : unlinkedDeps(html, named),
+    named,
   };
 };
 
