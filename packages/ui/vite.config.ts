@@ -162,6 +162,27 @@ export default defineConfig({
         tags: { include: ['contrast-more'] },
         context: { contrast: 'more' },
       }),
+      // ストーリーの play からは絵を撮れないので、撮って比べる試験は
+      // ストーリーの外に置き、同じ強制カラーで走らせる
+      {
+        extends: true,
+        test: {
+          name: { label: 'forced-colors', color: 'yellow' },
+          include: ['src/styles/**/*.test.tsx'],
+          browser: {
+            enabled: true,
+            instances: browsers.map((browser) => ({ browser })),
+            provider: playwright({
+              contextOptions: {
+                reducedMotion: 'reduce',
+                forcedColors: 'active',
+              },
+            }),
+            headless: true,
+            screenshotFailures: false,
+          },
+        },
+      },
       {
         extends: true,
         test: {
