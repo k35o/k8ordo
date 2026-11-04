@@ -1397,7 +1397,18 @@ describe('under a static build', () => {
     pointer('coarse');
     const priorities = recordPriorities();
 
-    await render(<AppRouter pathname="/" tree={<a href="/next">next</a>} />);
+    // 本物のポインタは (0, 0) にあり、Linux では左上のリンクに本物の
+    // pointerover が届いて、先にホバーの先読みが走る
+    await render(
+      <AppRouter
+        pathname="/"
+        tree={
+          <a href="/next" style={{ pointerEvents: 'none' }}>
+            next
+          </a>
+        }
+      />,
+    );
 
     await vi.waitFor(() => {
       expect(priorities).toStrictEqual(['low']);
@@ -1433,8 +1444,16 @@ describe('under a static build', () => {
       { files: ['/listed-app/next.js'], pages: { '/next/index.rsc': [0] } },
       '/listed-app/next.js',
     );
+    // 一覧を読む前に本物のポインタのホバーで先読みが走らないよう、当てない
     const screen = await render(
-      <AppRouter pathname="/" tree={<a href="/next">next</a>} />,
+      <AppRouter
+        pathname="/"
+        tree={
+          <a href="/next" style={{ pointerEvents: 'none' }}>
+            next
+          </a>
+        }
+      />,
     );
     await vi.waitFor(() => {
       expect(host.read).toBe(true);
