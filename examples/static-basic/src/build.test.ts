@@ -811,6 +811,9 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
   let withoutPayloadRules = false;
   // 真なら Content-Type に charset を付けない（Python の http.server など）
   let withoutCharset = false;
+  // 真なら HTML に Trusted Types を強制する。破る書き込みは拒まれ、
+  // securitypolicyviolation で知らされる
+  let trustedTypes = false;
   // ホストが受けた要求の pathname
   let requested: string[] = [];
 
@@ -917,6 +920,11 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
           'content-type': withoutCharset
             ? contentType.replace(/;.*/u, '')
             : contentType,
+          ...(trustedTypes && contentType.startsWith('text/html')
+            ? {
+                'content-security-policy': "require-trusted-types-for 'script'",
+              }
+            : {}),
         })
         .end(readFileSync(answer.file));
     });
@@ -933,6 +941,7 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
     cloudflare = false;
     withoutPayloadRules = false;
     withoutCharset = false;
+    trustedTypes = false;
     requested = [];
   });
 
@@ -1286,6 +1295,162 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
       headings: await page.getByTestId('title').count(),
     }).toStrictEqual({ hiddenSegments: 0, titles: 1, headings: 1 });
     await context.close();
+  });
+
+  // HTML の要素のまま hydrate したかを見る。パーサーが読み終えた時点の要素を
+  // 覚えておき、描き直していれば、文書にあるのは別の要素になる。ペイロードは
+  // 本文の最後のスクリプトまで読まないと揃わないので、React はその前には描かない。
+  // 描き直すと React がインラインのスクリプトの中身と src も書き直し、Trusted
+  // Types を強制する文書ではそれが拒まれるので、その違反も数える
+  type Problems = {
+    readonly replaced: readonly string[];
+    readonly kept: readonly string[];
+    readonly refused: readonly string[];
+    readonly titles: number;
+    readonly thrown: readonly string[];
+    readonly errors: readonly string[];
+  };
+
+  const openWatched = async (
+    url: string,
+  ): Promise<{
+    page: Page;
+    status: number | undefined;
+    problems: () => Promise<Problems>;
+  }> => {
+    trustedTypes = true;
+    const page = await browser.newPage();
+    const thrown: string[] = [];
+    const logged: string[] = [];
+    page.on('pageerror', (error) => thrown.push(error.message));
+    page.on('console', (message) => {
+      // 404.html は 404 で届き、ブラウザは文書そのものの失敗として書き出す
+      if (
+        message.location().url === url &&
+        message.text().startsWith('Failed to load resource')
+      ) {
+        return;
+      }
+      logged.push(`${message.type()}: ${message.text()}`);
+    });
+    await page.addInitScript(() => {
+      const refused: string[] = [];
+      const written = new Map<string, Element>();
+      Object.assign(window, { refused, written });
+      document.addEventListener('securitypolicyviolation', (event) => {
+        refused.push(`${event.effectiveDirective} ${event.sample}`);
+      });
+      document.addEventListener('readystatechange', () => {
+        if (document.readyState !== 'interactive') return;
+        for (const selector of ['nav', 'main', '[data-testid="title"]']) {
+          const found = document.querySelector(selector);
+          if (found !== null) written.set(selector, found);
+        }
+      });
+    });
+    const response = await page.goto(url);
+    return {
+      page,
+      status: response?.status(),
+      problems: async () => {
+        // 違反の知らせは後のタスクで届くので、ひと巡り待ってから読む
+        await page.evaluate(
+          () =>
+            new Promise((resolve) => {
+              setTimeout(resolve, 0);
+            }),
+        );
+        return {
+          ...(await page.evaluate(() => {
+            const { refused, written } = window as unknown as {
+              refused: string[];
+              written: Map<string, Element>;
+            };
+            return {
+              replaced: [...written]
+                .filter(
+                  ([selector, node]) =>
+                    document.querySelector(selector) !== node,
+                )
+                .map(([selector]) => selector),
+              kept: [...written.keys()],
+              refused,
+              titles: document.querySelectorAll('title').length,
+            };
+          })),
+          thrown,
+          errors: logged.filter((line) => line.startsWith('error:')),
+        };
+      },
+    };
+  };
+
+  describe('a document the host sent, hydrated in place', () => {
+    it('is 404.html at a URL the site does not have, whose client components then read the visitor’s locale', async () => {
+      const { page, status, problems } = await openWatched(
+        `${origin}/ja/nowhere`,
+      );
+
+      await page.getByText('このアドレスには何もありません').waitFor();
+
+      expect({ status, ...(await problems()) }).toStrictEqual({
+        status: 404,
+        replaced: [],
+        kept: ['nav', 'main', '[data-testid="title"]'],
+        refused: [],
+        titles: 1,
+        thrown: [],
+        errors: [],
+      });
+      await page.close();
+    });
+
+    it('is a shell at a value the build did not write', async () => {
+      const { page, status, problems } = await openWatched(
+        `${origin}/ja/posts/3`,
+      );
+
+      await page.getByRole('heading', { name: 'third post' }).waitFor();
+
+      expect({ status, ...(await problems()) }).toStrictEqual({
+        status: 200,
+        replaced: [],
+        kept: ['nav', 'main'],
+        refused: [],
+        titles: 1,
+        thrown: [],
+        errors: [],
+      });
+      await page.close();
+    });
+
+    it.each([
+      { how: 'with a trailing slash', url: '/ja/about/', cloudflare: false },
+      {
+        how: 'after the host’s redirect to the trailing slash',
+        url: '/ja/about',
+        cloudflare: true,
+      },
+    ])('is a page at its own URL $how', async (each) => {
+      cloudflare = each.cloudflare;
+      const { page, problems } = await openWatched(`${origin}${each.url}`);
+
+      await page.getByText(/time zone: (?!not yet)/u).waitFor();
+
+      expect({
+        pathname: pathnameOf(page),
+        ...(await problems()),
+      }).toStrictEqual({
+        pathname: '/ja/about/',
+        replaced: [],
+        kept: ['nav', 'main', '[data-testid="title"]'],
+        refused: [],
+        titles: 1,
+        thrown: [],
+        errors: [],
+      });
+      await page.close();
+    });
   });
 
   // 殻の本文はブラウザでしか描かれない。見出しが出たら JS が握っている

@@ -89,3 +89,18 @@
 .invalid:focus-visible::-moz-range-thumb {
   box-shadow: var(--shadow-ring-error), var(--shadow-xs);
 }
+
+/* 輪は box-shadow なので強制カラーでは消える。透明な outline を引いて
+   システムの色で塗らせる。input ではなくつまみに引くのは、RangeSlider の
+   重なった 2 本のどちらにフォーカスがあるかを見せるため */
+@media (forced-colors: active) {
+  .input:focus-visible::-webkit-slider-thumb {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+
+  .input:focus-visible::-moz-range-thumb {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+  }
+}

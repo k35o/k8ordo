@@ -1,11 +1,10 @@
 import { createFromReadableStream } from '@vitejs/plugin-rsc/browser';
 import { rscStream } from 'rsc-html-stream/client';
 
-import { AppRouter, setDocumentClient } from './app-router';
+import { setDocumentClient } from './app-router';
 import { connectAppRouter } from './browser-payloads';
 import { whenClientReady } from './client-ready';
-import { DocumentRoot } from './document-root';
-import { mount } from './mount';
+import { mount, renderedHere } from './mount';
 import type { HydrateOptions } from './mount';
 import { reportCaught } from './page-boundary';
 import type { Payload } from './payload';
@@ -22,10 +21,16 @@ const start = async (): Promise<void> => {
   // SSR entry. Reading it here rather than fetching it again is what makes
   // hydration see exactly what the server saw — and what lets a page the
   // application does not have (its prerendered 404) come alive at all.
-  const payload = await createFromReadableStream<Payload>(
-    rscStream as ReadableStream<Uint8Array>,
-  );
+  const [stream, copy] = (rscStream as ReadableStream<Uint8Array>).tee();
+  const payload = await createFromReadableStream<Payload>(stream);
   setDocumentClient(payload.client);
+  // HTML rendered for another pathname is rendered again where the browser
+  // is, once it is hydrated. Its own tree would not do: React does not render
+  // an element it was handed before again, so the payload is read once more,
+  // into a tree whose every element is new.
+  let reread: Promise<Payload> | undefined;
+  if (renderedHere(payload.pathname)) void copy.cancel();
+  else reread = createFromReadableStream<Payload>(copy);
 
   // Not as soon as the script runs: a boundary the stream has not moved in
   // yet cannot be hydrated, and a context that changes as the page hydrates
@@ -37,30 +42,17 @@ const start = async (): Promise<void> => {
   await whenRevealed();
   // Nor before the client components the page renders have loaded: one
   // still loading suspends where it renders, and the boundary above it
-  // shows its fallback in place of the server's HTML — at once in HTML
-  // rendered afresh (a 404.html, a shell), and in a hydrated page as soon as
-  // a context above the boundary changes.
+  // shows its fallback in place of the server's HTML as soon as a context
+  // above the boundary changes.
   await whenClientReady([payload.tree, payload.notFound], { rows: 'wait' });
 
   // Present only when a form was posted without JavaScript. Hydration has to
   // be told, or React discards the result the page came back with and the
   // message the visitor is reading disappears the moment the script loads.
-  mount(
-    document,
-    <DocumentRoot>
-      <AppRouter
-        notFound={payload.notFound}
-        pathname={payload.pathname}
-        search={payload.search}
-        tree={payload.tree}
-      />
-    </DocumentRoot>,
-    payload.pathname,
-    {
-      formState: payload.formState as HydrateOptions['formState'],
-      onCaughtError: reportCaught,
-    },
-  );
+  mount(document, payload, reread, {
+    formState: payload.formState as HydrateOptions['formState'],
+    onCaughtError: reportCaught,
+  });
 };
 
 // oxlint-disable-next-line unicorn/prefer-top-level-await -- awaited at the top, the wait for client components would never end (see above)

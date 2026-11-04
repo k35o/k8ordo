@@ -61,8 +61,8 @@ export const payloadSharedBuild = message({
 });
 
 export const payloadReady = message({
-  ja: '最初に開いたページは、描くクライアントコンポーネントを読み終えてからハイドレーションします。`404.html`のように描き直すページも同じで、サーバーのHTMLは1回で入れ替わります。遷移も、行き先のクライアントコンポーネントを読み終えてから画面を替えます。',
-  en: 'The first page opened hydrates once the client components it renders have loaded. A page rendered afresh, as `404.html` is, waits the same way, and the server’s HTML is replaced in one go. A client navigation, too, changes the screen once the next page’s client components have loaded.',
+  ja: '最初に開いたページは、描くクライアントコンポーネントを読み終えてからハイドレーションします。遷移も、行き先のクライアントコンポーネントを読み終えてから画面を替えます。',
+  en: 'The first page opened hydrates once the client components it renders have loaded. A client navigation, too, changes the screen once the next page’s client components have loaded.',
 });
 
 export const staticTitle = message({

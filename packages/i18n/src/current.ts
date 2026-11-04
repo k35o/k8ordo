@@ -27,10 +27,14 @@ export type RegisteredSet = {
 
 const STORAGE_KEY = Symbol.for('@k8ordo/i18n/storage');
 const SET_KEY = Symbol.for('@k8ordo/i18n/locales');
+// @k8ordo/framework の runtime が置く。framework はこのパッケージに依存しない
+// ので、同じ名前で globalThis の同じ値を指す
+const HYDRATING_KEY = Symbol.for('@k8ordo/i18n/hydrating-pathname');
 
 type Global = {
   [STORAGE_KEY]?: LocaleStorage;
   [SET_KEY]?: RegisteredSet;
+  [HYDRATING_KEY]?: string | undefined;
   process?: { getBuiltinModule?: (id: string) => unknown };
   document?: unknown;
   location?: { pathname: string };
@@ -72,8 +76,15 @@ export const register = (set: RegisteredSet): void => {
  * The browser's pathname in the application's terms: Vite's `base` taken
  * off, so the first segment is the one the route table's `[locale]` names —
  * `/docs/en/ui` is `/en/ui` under `base: '/docs/'`.
+ *
+ * While `@k8ordo/framework` hydrates HTML rendered for another pathname (a
+ * prerendered 404, served at whatever URL), it is that pathname, which the
+ * framework gives in the same terms and takes back once hydration is done:
+ * a message read while hydrating has to agree with the text written there.
  */
 export const browserPathname = (): string => {
+  const hydrating = global[HYDRATING_KEY];
+  if (hydrating !== undefined) return hydrating;
   const pathname = global.location?.pathname ?? '/';
   // Vite の外（Next.js など）では import.meta.env が、型（Vite のもの）に反して
   // undefined になる。base は無いものとして読む

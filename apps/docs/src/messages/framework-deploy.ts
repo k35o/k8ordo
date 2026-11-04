@@ -132,8 +132,8 @@ export const notFoundLocale = message({
 });
 
 export const notFoundHydrate = message({
-  ja: 'ブラウザはこのファイルをハイドレーションせず、訪問者が開いたURLで描画し直します。Client Componentは、`usePathname()`で最初の描画から訪問者のURLを読めます。このサイトの`404.html`は日本語で書かれていて、`/en/…`で開くと描画し直した時点で英語になります。',
-  en: 'The browser does not hydrate this file. It renders the page again at the URL the visitor opened, and a Client Component reads that URL with `usePathname()` from its first render. This site’s `404.html` is written in Japanese, and opened at an `/en/…` URL it turns English once the browser renders it again.',
+  ja: 'ブラウザはこのファイルを、書かれた要素のままハイドレーションします。その間、`usePathname()`と文言はファイルを描画したときのpathnameを読むので、HTMLと食い違いません。ハイドレーションを終えると、訪問者が開いたURLで描画し直します。このサイトの`404.html`は日本語で書かれていて、`/en/…`で開くと描画し直した時点で英語になります。',
+  en: 'The browser hydrates this file as written, keeping its elements. While it does, `usePathname()` and messages read the pathname the file was rendered for, so they agree with the HTML. Once it is hydrated, the page is rendered again at the URL the visitor opened. This site’s `404.html` is written in Japanese, and opened at an `/en/…` URL it turns English once the browser renders it again.',
 });
 
 export const sitemapTitle = message({

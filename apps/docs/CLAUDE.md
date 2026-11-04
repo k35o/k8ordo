@@ -52,12 +52,13 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   (a catch-all still answers; it only renders in no locale). Every message in
   the file therefore renders in `locales.default`, so it is Japanese as
   served, whichever `/en/…` pages the build rendered alongside it. The browser
-  does not hydrate it — the framework renders a document drawn for another
-  URL afresh — so client components read the visitor's URL from their first
-  render: the messages, and the shell, which takes the locale from `usePathname`
-  when its param is the sentinel, falling back to `locales.default` only when
-  the URL has none either. The file becomes English the moment it renders on
-  an `/en/…` URL. A visitor with JavaScript off keeps the Japanese one; one
+  hydrates it as written — while it hydrates, the messages and `usePathname`
+  read the pathname it was drawn for — and the framework then renders it
+  again at the visitor's URL, where client components read that URL: the
+  messages, and the shell, which takes the locale from `usePathname` when its
+  param is the sentinel, falling back to `locales.default` only when the URL
+  has none either. The file becomes English the moment it is rendered again
+  on an `/en/…` URL. A visitor with JavaScript off keeps the Japanese one; one
   file cannot be both. Under the dev server (and `mode: 'server'`) a 404 is
   rendered at the visitor's URL, where the schema accepts `en`, so it is
   English from the server's HTML on.

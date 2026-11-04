@@ -109,6 +109,11 @@
       outline: none;
       border-radius: var(--radius-sm);
       box-shadow: var(--shadow-ring-info);
+
+      @media (forced-colors: active) {
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+      }
     }
 
     :not(pre) > code {
