@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import { STYLESHEET_ORDER_HREF } from '@k8ordo/framework-engine';
-import type { ClientDeps } from '@k8ordo/framework-engine';
+import type { ClientDeps, ClientFiles } from '@k8ordo/framework-engine';
 
 const escapeMarkup = (value: string): string =>
   value
@@ -36,6 +36,50 @@ export const sitemap = (site: string, pathnames: readonly string[]): string => {
 export const redirectPage = (to: string): string => {
   const escaped = escapeMarkup(to);
   return `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=${escaped}"><link rel="canonical" href="${escaped}"><title>Redirecting</title></head><body><a href="${escaped}">${escaped}</a></body></html>\n`;
+};
+
+const filesOf = (named: readonly ClientDeps[]): Set<string> =>
+  new Set(named.flatMap(({ js, css }) => [...js, ...css]));
+
+/**
+ * What a client navigation links ahead of a page (`CLIENT_FILES_PATH`):
+ * each page's files — what its client components need, by its payload's
+ * path — less the files every document links, which the one the visitor
+ * arrived on has loaded already. Sorted, so a build writes the same bytes
+ * whatever order its pages rendered in.
+ */
+export const clientFiles = (
+  pages: ReadonlyMap<string, readonly ClientDeps[]>,
+  documents: Iterable<readonly ClientDeps[]>,
+): ClientFiles => {
+  let everywhere: Set<string> | undefined;
+  for (const named of documents) {
+    const files = filesOf(named);
+    everywhere = everywhere?.intersection(files) ?? files;
+  }
+  const own = [...pages]
+    .map(
+      ([page, named]) =>
+        [
+          page,
+          [...filesOf(named)].filter((file) => everywhere?.has(file) !== true),
+        ] as const,
+    )
+    .filter(([, files]) => files.length > 0)
+    .toSorted(([a], [b]) => (a < b ? -1 : 1));
+  const files = [...new Set(own.flatMap(([, listed]) => listed))].toSorted();
+  const indexOf = new Map(files.map((file, index) => [file, index]));
+  return {
+    files,
+    pages: Object.fromEntries(
+      own.map(([page, listed]) => [
+        page,
+        listed
+          .flatMap((file) => indexOf.get(file) ?? [])
+          .toSorted((a, b) => a - b),
+      ]),
+    ),
+  };
 };
 
 /**

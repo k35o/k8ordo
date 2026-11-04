@@ -242,7 +242,8 @@ pnpm check         # check:write to auto-fix
   file cannot also be a directory). It is not a page: no `index.rsc`, not in
   the sitemap. Nor may its file be one the build writes itself — a page's
   or a redirect's `index.html`, a page's `index.rsc`, `404.html`,
-  `sitemap.xml` under `site`, `_redirects` with shells: those are written
+  `sitemap.xml` under `site`, `_redirects` with shells,
+  `client-files.json`: those are written
   after the routes' files (a page's beside them), so one would replace the
   other unseen, and `takenFiles` names each pair before anything renders.
   It compares names without case, since macOS and Windows take two that
@@ -312,6 +313,25 @@ pnpm check         # check:write to auto-fix
   `examples/static-basic`'s `build.test.ts` builds with the SSR's `preinit`
   and `preloadModule` emptied, the RSC plugin's and the engine's, and sees
   every page, `404.html` and both shells counted.
+- **A static build lists each page's client files beside the pages.**
+  `client-files.json` (the engine's `CLIENT_FILES_PATH` and `ClientFiles`)
+  is what a client navigation links ahead of a payload
+  (`packages/framework-engine/CLAUDE.md`). `write` hands back what each HTML
+  answer's `CLIENT_DEPS_HEADER` named (`named`), and `clientFiles`
+  (`documents.ts`) keeps, per page with a payload, its references' `js` and
+  `css` less the files every HTML document written links — pages,
+  `404.html` and shells alike, since the visitor may have arrived on any of
+  them — keyed by the payload's path as `new URL` spells it, so a pathname
+  that is not ASCII is the key a browser looks up. Each file is listed once
+  and named by its index; pages and files are sorted, so a build writes the
+  same bytes whatever order its pages rendered in. A shell is not listed (a
+  browser asks for it at a value's URL). Written always, before
+  `_redirects`, whose built rules then list it among the files a shell
+  rule would catch; it is a file the build writes itself, so a `route.ts`
+  there is refused (`takenFiles`). `src/documents.test.ts` holds the
+  computation, `src/static.test.ts` the wiring and the refusal, and
+  `examples/static-basic`'s `build.test.ts` the built list and the site
+  that reads it.
 - **`site` is the only reason a sitemap exists.** Without the origin a
   sitemap would list relative URLs, which is not a sitemap; with it every
   page the build wrote is listed, redirects and the not-found excluded.
@@ -430,7 +450,8 @@ src/
                     a URL of a static build; serve and vite preview share it
   documents.ts      sitemap / redirectPage — the two files the build writes
                     itself rather than taking from the handler, escaped as
-                    markup; asFile / policyProblems — a page as a file: its
+                    markup; clientFiles — the list a navigation links ahead
+                    of a payload; asFile / policyProblems — a page as a file: its
                     nonce off, its Content-Security-Policy <meta> with the
                     framework's hashes; unlinkedDeps / unlinkedMessage —
                     what of its client components a page's HTML does not

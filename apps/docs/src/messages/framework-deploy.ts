@@ -43,6 +43,10 @@ export const outputList = [
     en: '`404.html`: `not-found.tsx`, rendered.',
   }),
   message({
+    ja: '`client-files.json`：ページごとに、Client Componentが読み込むファイルを並べたものです。クライアント側の遷移が、ペイロードと同時に取り始めます。',
+    en: '`client-files.json`: the files each page’s Client Components load, which a client navigation starts fetching beside the payload.',
+  }),
+  message({
     ja: '`sitemap.xml`：`site`を渡したときだけ書かれます。',
     en: '`sitemap.xml`: written only when `site` is given.',
   }),
