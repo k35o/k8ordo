@@ -17,6 +17,7 @@ pnpm test --project=components               # Component tests only (Storybook +
 pnpm test --project=components-dark          # The same stories with the dark theme
 pnpm test --project=components-forced-colors # Stories tagged forced-colors, under forced colors
 pnpm test --project=components-contrast-more # Stories tagged contrast-more, under prefers-contrast: more
+pnpm test --project=forced-colors            # Screenshot comparisons under forced colors (src/styles/*.test.tsx)
 pnpm test --project=form                     # Fields with @k8ordo/form's derived attributes, and FormValue (Playwright)
 pnpm test --project=hooks src/internal/focus-trap.test.tsx # Single test file (needs its project)
 TEST_BROWSER=webkit pnpm test --project=hooks # One engine only (chromium / firefox / webkit)
@@ -375,7 +376,7 @@ The stylesheet follows `prefers-contrast: more` and `forced-colors: active`; `@k
 
 ### Focus Style
 
-`focusRing.ring` (`src/components/_internal/focus-ring.module.css`): on `:focus-visible`, a transparent border, no outline, and `box-shadow: var(--shadow-ring-info)`; under forced colors a transparent 2px outline, which the browser paints, since the ring is a shadow. Where the component has a shadow of its own, write the focus rule locally with both, ring first (`var(--shadow-ring-info), var(--shadow-xs)`). An item that shows focus with a ground instead (`DropdownMenu`, `ListBox`) keeps a transparent 2px outline and colors it under `prefers-contrast: more`.
+`focusRing.ring` (`src/components/_internal/focus-ring.module.css`): on `:focus-visible`, a transparent border, no outline, and `box-shadow: var(--shadow-ring-info)`; under forced colors a transparent 2px outline, which the browser paints, since the ring is a shadow. Where the component has a shadow of its own, write the focus rule locally with both, ring first (`var(--shadow-ring-info), var(--shadow-xs)`). An item that shows focus with a ground instead (`DropdownMenu`, `ListBox`) keeps a transparent 2px outline and colors it under `prefers-contrast: more`. The range thumb (`src/components/form/slider/range-input-class.module.css`, shared by `Slider`, `RangeSlider`, and `ColorPicker`) draws both the ring and its forced-colors outline on `::-webkit-slider-thumb` / `::-moz-range-thumb`, not on the input.
 
 ### The Tailwind bridge
 
@@ -393,6 +394,7 @@ The stylesheet follows `prefers-contrast: more` and `forced-colors: active`; `@k
 - A form field in a story is given a name (`aria-label` in the meta `args`, and on any field a custom `render` draws), not a disabled `label` rule.
 - `src/styles/contrast.stories.tsx` renders every pair in `docs/references/color.md`'s contrast table, AAA rows under `color-contrast-enhanced`; keep the two in step.
 - The OS color settings cannot be switched per story, so they get projects of their own: `components-forced-colors` (Playwright `forcedColors: 'active'`) runs only stories tagged `forced-colors`, `components-contrast-more` (`contrast: 'more'`) only those tagged `contrast-more`, and `components` excludes both tags. Those stories live in `src/styles/high-contrast.stories.tsx`, hidden from the sidebar (`!dev`) and from Chromatic. Browser context options go in `playwright({ contextOptions })`; Vitest 5 ignores `instances[].context`.
+- A focus mark a play function cannot read (a range thumb is a pseudo-element; WebKit emulates forced colors as the media query alone, so a transparent outline still reads as transparent) is compared as screenshots, with and without focus, in `src/styles/forced-colors.test.tsx`, run by the `forced-colors` project (plain Vitest browser tests under `forcedColors: 'active'`). WebKit keeps the `box-shadow` ring, so those tests catch a regression only in Chromium and Firefox.
 - a11y addon fails a story on violations (`test: 'error'`), `color-contrast` included. Only overlay stories that axe misreads while they fade in turn `color-contrast` off for themselves: every `Modal` story, and one story each in `Dialog` and `Popover`.
 - Mock date is set to `2023-01-02 12:34:56` in Storybook.
 
