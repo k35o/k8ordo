@@ -24,6 +24,11 @@ const locales = defineLocales({
 });
 const home = message({ ja: 'ホーム', en: 'Home' });
 
+// @k8ordo/framework の runtime が、別の pathname のために描いた HTML を
+// hydrate する間だけ置き、終えたら消す
+const HYDRATING = Symbol.for('@k8ordo/i18n/hydrating-pathname');
+const hydrating = globalThis as { [HYDRATING]?: string | undefined };
+
 describe('getLocale (browser)', () => {
   it('is the first segment of location.pathname, or the default when the URL has none', () => {
     const original = location.pathname;
@@ -132,6 +137,40 @@ describe('getLocale under a base', () => {
       history.replaceState(null, '', '/docs/');
       expect(locales.getLocale()).toBe('ja');
     } finally {
+      history.replaceState(null, '', original);
+    }
+  });
+
+  it('reads the pathname a framework is hydrating as it is given, in the table’s terms', () => {
+    const original = location.pathname;
+    try {
+      history.replaceState(null, '', '/docs/ja/posts/3');
+      hydrating[HYDRATING] = '/en/posts/!fallback';
+      expect(home()).toBe('Home');
+    } finally {
+      hydrating[HYDRATING] = undefined;
+      history.replaceState(null, '', original);
+    }
+  });
+});
+
+describe('while a framework hydrates HTML rendered for another pathname', () => {
+  it('reads the locale of the pathname the HTML was rendered for, and the URL’s once hydration is done', () => {
+    const original = location.pathname;
+    try {
+      // 404.html はビルドの番兵の pathname で描かれ、どの URL でも配られる
+      history.replaceState(null, '', '/en/missing');
+      hydrating[HYDRATING] = '/__k8ordo-not-found__/__k8ordo-not-found__';
+      expect(home()).toBe('ホーム');
+      expect(locales.getLocale()).toBe('ja');
+      expect(currentLocale()).toBe('ja');
+
+      hydrating[HYDRATING] = undefined;
+
+      expect(home()).toBe('Home');
+      expect(locales.getLocale()).toBe('en');
+    } finally {
+      hydrating[HYDRATING] = undefined;
       history.replaceState(null, '', original);
     }
   });

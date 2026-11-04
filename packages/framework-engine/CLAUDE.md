@@ -183,10 +183,9 @@ pnpm check         # check:write to auto-fix
   The Flight client hands a client component over as a lazy element type
   and starts importing it as the payload is read; a render that meets one
   still loading suspends there, and the nearest `<Suspense>` shows its
-  fallback — over the server's HTML on a first render (at once under
-  `createRoot`, and in a hydrated page as soon as a context above a
-  dehydrated boundary changes), and as a new page's `<Suspense>` in a
-  navigation. `whenClientReady` (`runtime/client-ready.ts`) walks a
+  fallback — over the server's HTML on a first render, as soon as a
+  context above a dehydrated boundary changes, and as a new page's
+  `<Suspense>` in a navigation. `whenClientReady` (`runtime/client-ready.ts`) walks a
   payload's trees — element types and props, arrays, plain objects, rows on
   their way — and settles once every lazy type has loaded and every row
   has arrived, except, for `rows: 'leave'`, a row still on its way inside a
@@ -241,8 +240,9 @@ pnpm check         # check:write to auto-fix
   the pathname, so payload paths, redirects, the match and `pathname` never
   see it; a `redirect.ts` target gets it back in front (`locationOf`), while
   a Server Action's `redirect(to)` is a URL and is sent as given. The client
-  claims only same-origin URLs under the base, and `mount` compares the
-  payload's `pathname` with `location` minus the base. `entry.rsc` exports
+  claims only same-origin URLs under the base, and `renderedHere`
+  (`runtime/mount.tsx`) compares the payload's `pathname` with `location`
+  minus the base. `entry.rsc` exports
   `base` (`import.meta.env.BASE_URL` as built) for `serve`, and the plugin
   refuses a base that is not a path from the root (`'./'`, another origin),
   under which no URL says which page it is.
@@ -261,8 +261,7 @@ pnpm check         # check:write to auto-fix
   SSR entry's `Root` and the browser's `AppRouter` are its only child, and
   `PageShownContext`, which only the SSR entry provides, is a context, which
   `useId` does not count. The browser renders its `<style>` too, with no
-  nonce: React finds the HTML's by its `href` and keeps it, under
-  `createRoot` as well, which leaves a document's `<style>`s in place.
+  nonce: React finds the HTML's by its `href` and keeps it.
   `runtime/hydrate-id.test.ts` compares the ids of a layout's and a page's
   client component in the HTML and once hydrated, from a static build, a
   server build and `vite dev`.
@@ -391,15 +390,41 @@ pnpm check         # check:write to auto-fix
   row a not-found receives late, included — and that a server says
   nothing; `runtime/payload.test.ts` carries a name that is not ASCII
   through a header.
-- **Only HTML rendered for the browser's pathname is hydrated.**
-  `runtime/mount.ts` compares the payload's `pathname` with `location`
-  (normalized as `usePathname` normalizes) and renders anything else afresh
-  with `createRoot`. That is `404.html`, rendered once under the build's
-  sentinel, and a fallback.tsx's shell, rendered for `/ja/posts/!fallback`
-  and served at `/ja/posts/3`: a component that reads the URL as it renders
-  (`@k8ordo/i18n`'s messages) cannot agree with it at the visitor's URL, and
-  a failed hydration regenerates the page anyway, reported as an error and
-  with the server's `<title>` left behind in `<head>`.
+- **HTML rendered for another pathname is hydrated as rendered, then
+  rendered where the browser is.** That is `404.html`, rendered once under
+  the build's sentinel, and a fallback.tsx's shell, rendered for
+  `/ja/posts/!fallback` and served at `/ja/posts/3`. A component that reads
+  the URL as it renders (`@k8ordo/i18n`'s messages) cannot agree with such
+  HTML at the visitor's URL, and a failed hydration regenerates the page,
+  reported as an error, with the server's `<title>` left behind in
+  `<head>`; rendering it afresh instead (`createRoot`) replaces every
+  element, so a page under
+  `require-trusted-types-for 'script'` is refused the inline scripts and
+  `src`s React writes again. So `renderedHere` (`runtime/mount.tsx`)
+  compares the payload's `pathname` with `location` (normalized as
+  `usePathname` normalizes), and HTML rendered elsewhere is hydrated as if
+  the browser were there: `usePathname` reads `PathnameProvider` while
+  hydrating, and a message, which is no hook, reads the pathname `hydrateAs`
+  puts on `globalThis` under `Symbol.for('@k8ordo/i18n/hydrating-pathname')`
+  (`runtime/hydrating-pathname.ts`; `@k8ordo/i18n`'s `browserPathname` reads
+  the same name, a promise between the two changed in both in one release).
+  Then the URL is handed back and the page rendered again in two
+  transitions. React hydrates a Suspense boundary at its own pace, when the
+  browser is idle, and says nowhere that it is done, so `AppRouter` first
+  changes `Hydrating`, a context no component reads: a context changing
+  above a boundary not yet hydrated makes React hydrate it before that
+  transition commits, and the commit's layout effect hands the URL back.
+  The second transition renders `reread`, the payload read again from a
+  `tee()` of the HTML's stream: React does not render an element it was
+  handed before again, so only a tree whose every element is new reaches
+  every component below. It is applied only over the tree hydrated (or the
+  not-found its shell swapped in): a navigation applied first, which hands
+  the URL back as it applies, keeps its page. `runtime/mount.browser.test.tsx`
+  hydrates a 404 with nested boundaries and sees its nodes kept, no error,
+  and the text and the router at the URL — and fails with the context
+  change or that check taken out; `examples/static-basic`'s `build.test.ts`
+  opens a built `404.html`, a shell and pages behind a trailing slash and a
+  redirect in every engine, with Trusted Types enforced.
 - **A payload names the client it was rendered for.** `Payload.client` is
   the URL of the script the page's HTML loads (`getClientEntryUrl()`, which
   the RSC plugin exposes to the SSR environment only, so the RSC entry reads
@@ -707,7 +732,8 @@ src/
   runtime/recover.tsx        a failed client render falls back to a document load
   runtime/reload.ts          location.reload, the one seam a test can watch
   runtime/params.ts          runs the paramsSchema exports along a matched stack, and above a not-found
-  runtime/mount.ts           hydrate what was rendered for this pathname, render anything else afresh
+  runtime/mount.tsx          hydrate the HTML as rendered; renderedHere, whether it was rendered where the browser is
+  runtime/hydrating-pathname.ts  the pathname @k8ordo/i18n reads while HTML rendered elsewhere is hydrated
   runtime/pathname.ts        decodePathname, before a pathname may name a file
   runtime/redirect.ts        redirect(), what a Server Action throws — bundled into the ./server entry
   runtime/redirect-file.ts   where a redirect.ts sends a pathname the table matched to it

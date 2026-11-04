@@ -171,8 +171,8 @@ export const notFoundCause = message({
 });
 
 export const notFoundFix = message({
-  ja: '訪問者のロケールで出したい文は、ハイドレーションが終わってからブラウザで描画します。HTMLの文のままハイドレーションすると、ブラウザが描画する文と食い違います。`@k8ordo/framework`は`404.html`をハイドレーションせずに描画し直すので、Client Componentの文言が訪問者のロケールになります。詳しくは`@k8ordo/framework`の',
-  en: 'Render text that should follow the visitor’s locale in the browser, after hydration. Hydrated as it is, the HTML’s text disagrees with what the browser renders. `@k8ordo/framework` renders `404.html` again instead of hydrating it, so a Client Component’s messages come out in the visitor’s locale. See `@k8ordo/framework`’s ',
+  ja: '訪問者のロケールで出したい文は、ハイドレーションが終わってからブラウザで描画します。`@k8ordo/framework`は`404.html`を書かれたとおりにハイドレーションし、終えたら訪問者のURLで描画し直します。そのため、Client Componentの文言は訪問者のロケールになります。詳しくは`@k8ordo/framework`の',
+  en: 'Render text that should follow the visitor’s locale in the browser, after hydration. `@k8ordo/framework` hydrates `404.html` as written and then renders it again at the visitor’s URL, so a Client Component’s messages come out in the visitor’s locale. See `@k8ordo/framework`’s ',
 });
 
 export const boundaryTitle = message({

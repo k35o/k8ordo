@@ -50,11 +50,16 @@ pnpm check         # check:write to auto-fix
   cannot see would silently render the default. In the browser
   `location.pathname`'s first segment below Vite's `base`
   (`browserPathname` in `current.ts`) is the locale, read as a message
-  renders. That agrees with the server's HTML only because the HTML was
-  rendered for the same URL: the engine renders a document drawn for another
-  one (`404.html`) afresh instead of hydrating it
-  (`packages/framework-engine/src/runtime/mount.ts`). Do not add a provider
-  or a hook; do not pass the locale as a prop.
+  renders. That agrees with the server's HTML only where the HTML was
+  rendered for the same URL. A document drawn for another one (`404.html`,
+  a shell) is hydrated with `Symbol.for('@k8ordo/i18n/hydrating-pathname')`
+  on `globalThis` naming the pathname it was drawn for, in the table's
+  terms, which `browserPathname` reads in place of `location` until the
+  engine deletes it and renders the page again at the URL
+  (`packages/framework-engine/src/runtime/hydrating-pathname.ts`). The
+  engine cannot import this package, so the name is a promise between the
+  two, changed in both in one release. Do not add a provider or a hook; do
+  not pass the locale as a prop.
 - **The last set to define itself is the one messages read.**
   `defineLocales` registers `{ default, is }` on `globalThis` (last wins, so
   a dev server re-evaluating `i18n.ts` under HMR is what messages see next)

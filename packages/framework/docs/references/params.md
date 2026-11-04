@@ -302,11 +302,11 @@ value from the URL in the browser.
 
 ### Reading the value in the browser
 
-The browser does not hydrate a shell: it was rendered for
-`/posts/!fallback`, not for the visitor's URL, so the browser renders it
-afresh where the visitor is, as it does `404.html`, and the server's HTML
-stays on screen until then. A client component inside it reads the
-visitor's URL from its first render.
+The browser hydrates a shell as it was rendered for `/posts/!fallback`,
+keeping every element the build wrote, as it does `404.html`, and renders it
+again where the visitor is once it is hydrated. What the `fallback.tsx`
+renders was left to the browser by the build, so a client component inside
+it reads the visitor's URL from its first render.
 
 Below a `fallback.tsx`, `useMatch()` and `usePathname()` wait for the
 browser on their own: in the build's render they suspend, as
