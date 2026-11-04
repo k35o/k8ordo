@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
 import { page } from 'vitest/browser';
 
+import { Prose } from '../components/data-display/prose';
 import { ColorPicker } from '../components/form/color-picker';
 import { RangeSlider } from '../components/form/range-slider';
 import { Slider } from '../components/form/slider';
@@ -65,5 +66,21 @@ describe('強制カラーでのフォーカスの印', () => {
     focusVisibly(hue);
 
     expect(await pictureAround(hue)).not.toBe(blurred);
+  });
+
+  it('Prose は、本文のリンクにフォーカスがあると絵が変わる', async () => {
+    await render(
+      <Prose>
+        <p>
+          本文の中の<a href="#forced-colors">リンク</a>
+        </p>
+      </Prose>,
+    );
+    const link = page.getByRole('link', { name: 'リンク' }).element();
+    const blurred = await pictureAround(link);
+
+    focusVisibly(link);
+
+    expect(await pictureAround(link)).not.toBe(blurred);
   });
 });
