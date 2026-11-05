@@ -8,10 +8,7 @@ import './index.css';
 declare module 'vitest/browser' {
   // oxlint-disable-next-line typescript/consistent-type-definitions -- augmentation needs a merge-open interface
   interface BrowserCommands {
-    emulateMedia: (options: {
-      media: 'print' | null;
-      contrast?: 'more' | null;
-    }) => Promise<void>;
+    emulateMedia: (options: { media: 'print' | null }) => Promise<void>;
   }
 }
 
@@ -45,22 +42,26 @@ const keepShownInPrint = () => {
 };
 
 afterEach(async () => {
-  await commands.emulateMedia({ media: null, contrast: null });
-  root.classList.remove('dark');
+  await commands.emulateMedia({ media: null });
+  // 印を .dark より先に外す。.dark を外してから印を消し、次の試験が .dark を
+  // 付けるまでスタイルが計算されないと、Firefox は :has(.print-as-shown) の
+  // 変化を取りこぼし、印があるときのスタイルのまま残す
   document.querySelector('.print-as-shown')?.remove();
+  root.classList.remove('dark');
 });
 
-describe.each([
-  { label: '既定のコントラスト', contrast: null },
-  { label: 'prefers-contrast: more', contrast: 'more' },
-] as const)('$label で刷る', ({ contrast }) => {
+// contrast は試験の中で切り替えず、プロジェクトが contextOptions で敷く（vite.config.ts）
+const contrast = matchMedia('(prefers-contrast: more)').matches
+  ? 'prefers-contrast: more'
+  : '既定のコントラスト';
+
+describe(`${contrast} で刷る`, () => {
   it('.dark が付いていても、.dark が上書きするトークンはライトの値になる', async () => {
     const names = darkTokenNames();
-    await commands.emulateMedia({ media: null, contrast });
     const light = tokensOf(names);
     root.classList.add('dark');
 
-    await commands.emulateMedia({ media: 'print', contrast });
+    await commands.emulateMedia({ media: 'print' });
 
     expect(names.length).toBeGreaterThan(40);
     expect(tokensOf(names)).toStrictEqual(light);
@@ -68,13 +69,12 @@ describe.each([
 
   it('print-as-shown を含む .dark は、ダークの値のまま刷る', async () => {
     const names = darkTokenNames();
-    await commands.emulateMedia({ media: null, contrast });
     const light = tokensOf(names);
     root.classList.add('dark');
     const dark = tokensOf(names);
     keepShownInPrint();
 
-    await commands.emulateMedia({ media: 'print', contrast });
+    await commands.emulateMedia({ media: 'print' });
 
     expect(dark).not.toStrictEqual(light);
     expect(tokensOf(names)).toStrictEqual(dark);

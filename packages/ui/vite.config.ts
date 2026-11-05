@@ -7,6 +7,7 @@ import react from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
 import { vrt } from 'storybook-addon-vrt/vitest-plugin';
 import { defineConfig } from 'vite-plus';
+import type { BrowserCommand } from 'vitest/node';
 
 // Lightning CSS が下げて書き換えないよう、新しいブラウザを target にする。
 // 既定の target では :dir() が :lang() の並びに、入れ子が平らに書き換わる。
@@ -79,6 +80,41 @@ const storiesProject = ({
       // addon が vitest 5 に対応したら消してよい。
       viewport: { width: 1200, height: 900 },
       instances: browsers.map((browser) => ({ browser })),
+    },
+  },
+});
+
+const emulateMedia: BrowserCommand<[options: { media: 'print' | null }]> = (
+  { page },
+  options,
+) => page.emulateMedia(options);
+
+// 印刷の媒体は contextOptions で敷けないので、試験の中から emulateMedia で
+// 切り替える。contrast も同じコマンドで変えられるが、Firefox は contrast だけを
+// 変えても計算済みのスタイルを作り直さない（matchMedia だけが切り替わる）。
+// contrast は contextOptions で敷き、設定ごとにプロジェクトを分ける
+const printProject = ({
+  label,
+  color,
+  context,
+}: {
+  label: string;
+  color: 'white' | 'cyan';
+  context?: { contrast: 'more' };
+}) => ({
+  extends: true,
+  test: {
+    name: { label, color },
+    include: ['src/styles/print.test.tsx'],
+    browser: {
+      enabled: true,
+      instances: browsers.map((browser) => ({ browser })),
+      provider: playwright({
+        contextOptions: { reducedMotion: 'reduce', ...context },
+      }),
+      headless: true,
+      screenshotFailures: false,
+      commands: { emulateMedia },
     },
   },
 });
@@ -183,29 +219,12 @@ export default defineConfig({
           },
         },
       },
-      {
-        extends: true,
-        test: {
-          name: { label: 'print', color: 'white' },
-          include: ['src/styles/print.test.tsx'],
-          browser: {
-            enabled: true,
-            instances: browsers.map((browser) => ({ browser })),
-            provider: playwright({
-              contextOptions: { reducedMotion: 'reduce' },
-            }),
-            headless: true,
-            screenshotFailures: false,
-            // 印刷の媒体は contextOptions で敷けないので、試験の中から切り替える
-            commands: {
-              emulateMedia: (
-                { page },
-                options: { media: 'print' | null; contrast?: 'more' | null },
-              ) => page.emulateMedia(options),
-            },
-          },
-        },
-      },
+      printProject({ label: 'print', color: 'white' }),
+      printProject({
+        label: 'print-contrast-more',
+        color: 'cyan',
+        context: { contrast: 'more' },
+      }),
       {
         extends: true,
         test: {
