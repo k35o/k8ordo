@@ -18,9 +18,8 @@ import type {
  *
  * and every `href()` in the app is checked against the table's linkable
  * patterns. A router that is not `@k8ordo/router` registers its path union
- * directly — `interface Register { path: Route }` with `Route` from `next` —
- * which is also what the framework's generator emitted before `routes`
- * existed. Declared as an interface — the one exception to the repository's
+ * directly — `interface Register { path: Route }` with `Route` from `next`.
+ * Declared as an interface — the one exception to the repository's
  * type-only rule — because declaration merging is the entire mechanism.
  */
 // oxlint-disable-next-line typescript/consistent-type-definitions, typescript/no-empty-object-type -- augmentation needs a merge-open interface

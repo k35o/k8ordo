@@ -183,8 +183,7 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
   ): UpdateHandle => {
     // A tree being left shows the values it was left with, not the URL's:
     // written, they would land on the next page's URL, which never showed
-    // them, and load it again. A batch that ends where it started settles
-    // the same way.
+    // them, and load it again.
     if (tree !== null && tree !== at) return settledHandle();
     const resolved = resolvePatch(patch, core.snapshot(), page.keys, def.key);
     // The echo is synchronous AND canonical: the merged state goes through
