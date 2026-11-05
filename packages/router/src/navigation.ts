@@ -13,10 +13,10 @@ import {
   useSyncExternalStore,
 } from 'react';
 
-import { withoutBase } from './base';
 import { leftAt, rememberLeftAt, restoreLeftAt } from './left-at';
 import type { Position } from './left-at';
-import { normalizePathname } from './paths';
+import { appPathname } from './location';
+import { decodeOrKeep, normalizePathname } from './paths';
 
 /**
  * What the decision below reads. Spelled out rather than taking the event,
@@ -95,13 +95,7 @@ export const scrollPlanFor = (
     return { kind: 'position', ...left };
   }
   if (hash.length > 1) {
-    let id = hash.slice(1);
-    try {
-      id = decodeURIComponent(id);
-    } catch {
-      // 復号できない fragment は書かれたままの綴りで探す
-    }
-    return { kind: 'fragment', id };
+    return { kind: 'fragment', id: decodeOrKeep(hash.slice(1)) };
   }
   return { kind: 'top' };
 };
@@ -453,9 +447,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
 
       const id = count.current++;
       latest.current = id;
-      setPendingPathname(
-        normalizePathname(withoutBase(url.pathname) ?? url.pathname),
-      );
+      setPendingPathname(appPathname(url.pathname));
       const settled = (): void => {
         if (latest.current === id) setPendingPathname(null);
       };

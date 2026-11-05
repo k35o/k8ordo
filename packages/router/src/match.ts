@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from './location';
-import { normalizePathname } from './paths';
+import { decodeOrKeep, normalizePathname } from './paths';
 import type { ParamsOf } from './paths';
 import type { RegisteredNavigablePattern, RegisteredPattern } from './register';
 
@@ -14,14 +14,6 @@ import type { RegisteredNavigablePattern, RegisteredPattern } from './register';
 export type MatchablePattern =
   | RegisteredPattern
   | `${RegisteredNavigablePattern}/*`;
-
-const decode = (value: string): string => {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
-};
 
 export type MatchOptions = {
   /**
@@ -63,7 +55,7 @@ export const matchPath = <P extends MatchablePattern>(
     // Numeric keys are URLPattern's anonymous wildcard captures — the
     // table only names params, so only named ones surface.
     if (!/^\d+$/u.test(name) && value !== undefined) {
-      params[name] = decode(value);
+      params[name] = decodeOrKeep(value);
     }
   }
   return params as ParamsOf<P>;
