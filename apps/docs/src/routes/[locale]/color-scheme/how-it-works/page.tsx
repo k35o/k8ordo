@@ -180,6 +180,7 @@ export default function ColorSchemeHowItWorksPage() {
             t.guaranteeFirstPaint,
             t.guaranteeSameRule,
             t.guaranteeHydration,
+            t.guaranteeThemeColor,
             t.guaranteeDefault,
             t.guaranteeWrite,
             t.guaranteeTabs,

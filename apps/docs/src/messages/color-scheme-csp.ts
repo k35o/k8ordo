@@ -16,8 +16,8 @@ export const blockedEffect = message({
 });
 
 export const blockedFlash = message({
-  ja: 'それまでは`<html>`に`dark`クラスが付かないので、ライトの配色で描かれます。ダークになる訪問者には、ライトの画面が一瞬見えます。',
-  en: 'Until then `<html>` has no `dark` class, so the page is painted light. A visitor who gets dark briefly sees the light scheme.',
+  ja: 'それまでは`<html>`に`dark`クラスが付かないので、ライトの配色で描かれます。ダークになる訪問者には、ライトの画面が一瞬見えます。`themeColor`を渡していても、`theme-color`の`meta`は書かれません。',
+  en: 'Until then `<html>` has no `dark` class, so the page is painted light. A visitor who gets dark briefly sees the light scheme. Even with `themeColor`, no `theme-color` `<meta>` is written.',
 });
 
 export const blockedUnsafe = message({
@@ -76,16 +76,16 @@ export const hashStaticBefore = message({
 });
 
 export const defaultTitle = message({
-  ja: '既定値とハッシュ',
-  en: 'The default and the hash',
+  ja: '渡す値とハッシュ',
+  en: 'Props and the hash',
 });
 
 export const defaultSame = message({
-  ja: 'スクリプトの文字列には既定値が入るので、ハッシュは既定値ごとに違います。`ColorSchemeScript`に`defaultPreference`を渡しているなら、`colorSchemeScriptHash()`にも同じ値を渡します。',
-  en: 'The default is written into the script, so each default gives a different hash. When `ColorSchemeScript` is given a `defaultPreference`, give `colorSchemeScriptHash()` the same value.',
+  ja: 'スクリプトの文字列には、既定値と`themeColor`の色が入ります。そのため、ハッシュは渡した値ごとに違います。`ColorSchemeScript`に`defaultPreference`や`themeColor`を渡しているなら、`colorSchemeScriptHash()`にも同じ値を渡します。',
+  en: 'The default and the `themeColor` colors are written into the script, so each value gives a different hash. When `ColorSchemeScript` is given a `defaultPreference` or a `themeColor`, give `colorSchemeScriptHash()` the same values.',
 });
 
 export const defaultNonce = message({
-  ja: 'nonceで許可しているときは、既定値を変えてもポリシーはそのままです。',
-  en: 'A policy that allows the script by nonce does not change with the default.',
+  ja: 'nonceで許可しているときは、既定値や色を変えてもポリシーはそのままです。',
+  en: 'A policy that allows the script by nonce does not change with the default or the colors.',
 });

@@ -1,3 +1,4 @@
+import { Pitfall } from '../../../../components/callout';
 import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
@@ -37,6 +38,12 @@ const PROPERTY = `:root {
 .dark {
   color-scheme: dark;
 }`;
+
+const THEME_COLOR = `<head>
+  <ColorSchemeScript
+    themeColor={{ light: '#ffffff', dark: '#1f1f1f' }}
+  />
+</head>`;
 
 const CONTRAST = `@media (prefers-contrast: more) {
   :root {
@@ -110,6 +117,36 @@ export default function ColorSchemeStylingPage() {
         <p>
           <Rich>{t.propertyLightDark()}</Rich>
         </p>
+      </DocSection>
+
+      <DocSection id="theme-color" title={t.themeColorTitle}>
+        <CodeBlock
+          code={THEME_COLOR}
+          lang="tsx"
+          marks={{ 3: 'highlight' }}
+          title="src/routes/layout.tsx"
+        />
+        <p>
+          <Rich>{t.themeColorWhat()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.themeColorScript()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.themeColorPinned()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.themeColorHashBefore()}</Rich>
+          <LocaleAnchor path="/:locale/color-scheme/csp">
+            {m.colorScheme.navCsp()}
+          </LocaleAnchor>
+          <Rich>{t.themeColorHashAfter()}</Rich>
+        </p>
+        <Pitfall>
+          <p>
+            <Rich>{t.themeColorOwn()}</Rich>
+          </p>
+        </Pitfall>
       </DocSection>
 
       <DocSection id="contrast" title={t.contrastTitle}>

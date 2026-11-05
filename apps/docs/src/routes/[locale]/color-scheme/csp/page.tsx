@@ -36,7 +36,10 @@ const HASH = `import { colorSchemeScriptHash } from '@k8ordo/color-scheme';
 const policy = \`script-src 'self' \${await colorSchemeScriptHash()}\`;`;
 
 const DEFAULT_LAYOUT = `<head>
-  <ColorSchemeScript defaultPreference="dark" />
+  <ColorSchemeScript
+    defaultPreference="dark"
+    themeColor={themeColor}
+  />
 </head>
 <body>
   <ColorSchemeProvider defaultPreference="dark">
@@ -44,7 +47,11 @@ const DEFAULT_LAYOUT = `<head>
   </ColorSchemeProvider>
 </body>`;
 
-const DEFAULT_HASH = `const policy = \`script-src 'self' \${await colorSchemeScriptHash('dark')}\`;`;
+const DEFAULT_HASH = `const hash = await colorSchemeScriptHash({
+  defaultPreference: 'dark',
+  themeColor,
+});
+const policy = \`script-src 'self' \${hash}\`;`;
 
 export default function ColorSchemeCspPage() {
   return (
@@ -104,10 +111,14 @@ export default function ColorSchemeCspPage() {
         <CodeBlock
           code={DEFAULT_LAYOUT}
           lang="tsx"
-          marks={{ 2: 'highlight', 5: 'highlight' }}
+          marks={{ 3: 'highlight', 4: 'highlight', 8: 'highlight' }}
           title="src/routes/layout.tsx"
         />
-        <CodeBlock code={DEFAULT_HASH} lang="ts" marks={{ 1: 'highlight' }} />
+        <CodeBlock
+          code={DEFAULT_HASH}
+          lang="ts"
+          marks={{ 2: 'highlight', 3: 'highlight' }}
+        />
         <p>
           <Rich>{t.defaultSame()}</Rich>
         </p>

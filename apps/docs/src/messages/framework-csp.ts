@@ -66,8 +66,8 @@ export const ownHash = message({
 });
 
 export const ownPreference = message({
-  ja: '`ColorSchemeScript`に`defaultPreference`を渡しているときは、`colorSchemeScriptHash()`にも同じ値を渡します。`defaultPreference`の値でスクリプトの中身とハッシュが変わります。',
-  en: 'If `ColorSchemeScript` is given a `defaultPreference`, pass the same value to `colorSchemeScriptHash()`. The value changes the script and its hash.',
+  ja: '`ColorSchemeScript`に`defaultPreference`や`themeColor`を渡しているときは、`colorSchemeScriptHash()`にも同じ値を渡します。その値でスクリプトの中身とハッシュが変わります。',
+  en: 'If `ColorSchemeScript` is given a `defaultPreference` or a `themeColor`, pass the same values to `colorSchemeScriptHash()`. They change the script and its hash.',
 });
 
 export const ownRefused = message({

@@ -66,6 +66,11 @@ export default function ColorSchemeReferencePage() {
             description: t.scriptDefault,
           },
           {
+            name: 'themeColor',
+            type: '{ light: string; dark: string } | undefined',
+            description: t.scriptThemeColor,
+          },
+          {
             name: 'nonce',
             type: 'string | undefined',
             description: t.scriptNonce,
@@ -186,14 +191,19 @@ export default function ColorSchemeReferencePage() {
         name="colorSchemeScriptHash"
         params={[
           {
-            name: 'defaultPreference',
+            name: 'options.defaultPreference',
             type: "ColorSchemePreference = 'system'",
             description: t.hashDefault,
+          },
+          {
+            name: 'options.themeColor',
+            type: '{ light: string; dark: string } | undefined',
+            description: t.hashThemeColor,
           },
         ]}
         returns={{ type: 'Promise<string>', description: t.hashReturns }}
         signature={`colorSchemeScriptHash(
-  defaultPreference?: ColorSchemePreference,
+  options?: ColorSchemeScriptOptions,
 ): Promise<string>`}
         summary={t.hashSummary}
       >
@@ -236,10 +246,23 @@ export default function ColorSchemeReferencePage() {
 
       <ApiEntry
         from={FROM}
+        id="color-scheme-script-options"
+        name="ColorSchemeScriptOptions"
+        signature={`type ColorSchemeScriptOptions = {
+  readonly defaultPreference?: ColorSchemePreference;
+  readonly themeColor?: {
+    readonly light: string;
+    readonly dark: string;
+  };
+};`}
+        summary={t.scriptOptionsSummary}
+      />
+
+      <ApiEntry
+        from={FROM}
         id="color-scheme-script-props"
         name="ColorSchemeScriptProps"
-        signature={`type ColorSchemeScriptProps = {
-  readonly defaultPreference?: ColorSchemePreference;
+        signature={`type ColorSchemeScriptProps = ColorSchemeScriptOptions & {
   readonly nonce?: string;
 };`}
         summary={t.scriptPropsSummary}

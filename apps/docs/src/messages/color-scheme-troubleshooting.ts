@@ -26,13 +26,13 @@ export const cspTitle = message({
 });
 
 export const cspCause = message({
-  ja: 'スクリプトを制限するポリシーが、インラインスクリプトを許可していません。ハッシュで許可している場合は、`ColorSchemeScript`と違う`defaultPreference`で計算したハッシュか、古いバージョンのハッシュを書き写していることがあります。',
-  en: 'A policy that restricts scripts does not allow the inline one. When it is allowed by hash, the hash may have been computed for a different `defaultPreference` than `ColorSchemeScript`’s, or copied from an older version.',
+  ja: 'スクリプトを制限するポリシーが、インラインスクリプトを許可していません。ハッシュで許可している場合は、`ColorSchemeScript`と違う`defaultPreference`や`themeColor`で計算したハッシュか、古いバージョンのハッシュを書き写していることがあります。',
+  en: 'A policy that restricts scripts does not allow the inline one. When it is allowed by hash, the hash may have been computed for a different `defaultPreference` or `themeColor` than `ColorSchemeScript`’s, or copied from an older version.',
 });
 
 export const cspFix = message({
-  ja: "nonceで許可するなら、`ColorSchemeScript`の`nonce`にリクエストごとのnonceを渡します（`@k8ordo/framework`のserverモードでは`nonce()`）。ハッシュで許可するなら、`ColorSchemeScript`と同じ`defaultPreference`を`colorSchemeScriptHash()`に渡し、ポリシーを組み立てるたびに計算します。`'unsafe-inline'`は使いません。ほかのインラインスクリプトまで許可してしまいます。",
-  en: "To allow it by nonce, pass the request’s nonce to `ColorSchemeScript`’s `nonce` (`nonce()` in `@k8ordo/framework`’s server mode). To allow it by hash, pass `ColorSchemeScript`’s `defaultPreference` to `colorSchemeScriptHash()` and compute the hash each time you build the policy, instead of copying it. Do not use `'unsafe-inline'`: it allows every other inline script too.",
+  ja: "nonceで許可するなら、`ColorSchemeScript`の`nonce`にリクエストごとのnonceを渡します（`@k8ordo/framework`のserverモードでは`nonce()`）。ハッシュで許可するなら、`ColorSchemeScript`と同じ`defaultPreference`と`themeColor`を`colorSchemeScriptHash()`に渡し、ポリシーを組み立てるたびに計算します。`'unsafe-inline'`は使いません。ほかのインラインスクリプトまで許可してしまいます。",
+  en: "To allow it by nonce, pass the request’s nonce to `ColorSchemeScript`’s `nonce` (`nonce()` in `@k8ordo/framework`’s server mode). To allow it by hash, pass `ColorSchemeScript`’s `defaultPreference` and `themeColor` to `colorSchemeScriptHash()` and compute the hash each time you build the policy, instead of copying it. Do not use `'unsafe-inline'`: it allows every other inline script too.",
 });
 
 export const hydrationTitle = message({

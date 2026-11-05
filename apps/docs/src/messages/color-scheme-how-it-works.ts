@@ -189,6 +189,11 @@ export const guaranteeHydration = message({
   en: 'The hydration render writes nothing to `<html>`. Hydration never removes the class the script added.',
 });
 
+export const guaranteeThemeColor = message({
+  ja: '`themeColor`を渡すと、スクリプトは`theme-color`の`meta`をクラスと同時に書きます。その色は、ハイドレーションのあとも画面の配色と同じです。',
+  en: 'Given `themeColor`, the script writes the `theme-color` `<meta>` along with the class. Their color matches the scheme on screen after hydration too.',
+});
+
 export const guaranteeDefault = message({
   ja: "何も選んでいない訪問者には既定値が適用されます。既定値が`'system'`なら、ページを開いたままでもOSの設定の変更に従います。",
   en: "A visitor who chose nothing gets the default. With a `'system'` default, the scheme follows changes to the OS setting while the page stays open.",
@@ -220,8 +225,8 @@ export const nonGuaranteeMarkup = message({
 });
 
 export const nonGuaranteeCsp = message({
-  ja: 'CSPがインラインスクリプトを止めると、ハイドレーションまで`<html>`に`dark`クラスは付きません。nonceかハッシュは、アプリがポリシーに書きます。',
-  en: 'If a CSP blocks the inline script, `<html>` gets no `dark` class until hydration. The application puts the nonce or the hash in its policy.',
+  ja: 'CSPがインラインスクリプトを止めると、ハイドレーションまで`<html>`に`dark`クラスは付きません。`theme-color`の`meta`は書かれないままです。nonceかハッシュは、アプリがポリシーに書きます。',
+  en: 'If a CSP blocks the inline script, `<html>` gets no `dark` class until hydration, and no `theme-color` `<meta>` is ever written. The application puts the nonce or the hash in its policy.',
 });
 
 export const nonGuaranteePosition = message({
@@ -245,8 +250,8 @@ export const nonGuaranteeSameTab = message({
 });
 
 export const nonGuaranteeStyles = message({
-  ja: '書くのは`<html>`の`dark`クラスだけです。色とCSSの`color-scheme`プロパティは設定せず、`prefers-contrast`と`forced-colors`も保存しません。',
-  en: 'All it writes is the `dark` class on `<html>`. It sets neither colors nor the CSS `color-scheme` property, and stores neither `prefers-contrast` nor `forced-colors`.',
+  ja: '書くのは`<html>`の`dark`クラスと、`themeColor`を渡したときの`theme-color`の`meta`だけです。ページの色とCSSの`color-scheme`プロパティは設定せず、`prefers-contrast`と`forced-colors`も保存しません。',
+  en: 'All it writes is the `dark` class on `<html>`, and the `theme-color` `<meta>` when given `themeColor`. It sets neither the page’s colors nor the CSS `color-scheme` property, and stores neither `prefers-contrast` nor `forced-colors`.',
 });
 
 // 実演（クライアント）が名指すのはここから下の文言だけなので、バンドルに載るのもこれだけで済む
