@@ -449,8 +449,9 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
           }
           // A load that ignores the signal can come back after a second
           // navigation has already taken over. Applying it then would put the
-          // page the visitor left back on screen, and the listener below would
-          // never fire — an abort that already happened does not fire again.
+          // page the visitor left back on screen, and the listener `track`
+          // adds would never fire — an abort that already happened does not
+          // fire again.
           if (event.signal.aborted) throw event.signal.reason as Error;
           const committed = track(
             id,
