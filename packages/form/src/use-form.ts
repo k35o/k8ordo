@@ -141,6 +141,12 @@ export type UseFormReturn<
   formError: FormErrorView;
   /** True once any field differs from the value it was rendered with. */
   isDirty: boolean;
+  /**
+   * Reads a control's validity again and shows what it says, as leaving the
+   * control does — for a verdict that lands after the blur, such as
+   * `useAsyncCheck`'s answer.
+   */
+  revalidate: (control: Control) => void;
 };
 
 const rowCountsFor = (
@@ -412,6 +418,13 @@ export const useForm = <
     [evaluate],
   );
 
+  const revalidate = useCallback(
+    (control: Control) => {
+      evaluate(control, false);
+    },
+    [evaluate],
+  );
+
   const onInput = useCallback(
     (event: SyntheticEvent<HTMLFormElement>) => {
       const { target } = event;
@@ -657,6 +670,7 @@ export const useForm = <
     array,
     formError,
     isDirty: domDirty || structuralDirty,
+    revalidate,
   };
 };
 

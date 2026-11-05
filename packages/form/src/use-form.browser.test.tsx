@@ -306,12 +306,13 @@ const AsyncSlug: FC<{
 }> = ({ check = checkTaken }) => {
   const form = useForm(asyncFields, NO_STATE);
   const slug = form.field('slug');
-  const taken = useAsyncCheck(check);
+  const taken = useAsyncCheck(check, form.revalidate);
 
   return (
     <form {...form.props}>
       <input aria-label="slug" {...slug.input} {...taken.props} />
       <p data-testid="slug-error">{slug.error ?? ''}</p>
+      <p data-testid="slug-checking">{String(taken.isChecking)}</p>
       <button type="button">away</button>
     </form>
   );
@@ -1326,6 +1327,52 @@ describe('useForm in a browser', () => {
     await expect
       .element(screen.getByTestId('slug-error'))
       .toHaveTextContent('');
+  });
+
+  it('shows an answer without telling the form of a blur that never happened', async () => {
+    const onBlur = vi.fn();
+    const { answers, check } = checkByHand();
+    const screen = await render(<AsyncSlug check={check} />);
+    document.querySelector('form')?.addEventListener('focusout', onBlur);
+
+    await screen.getByLabelText('slug').fill('taken');
+    await screen.getByRole('button', { name: 'away' }).click();
+    expect(onBlur).toHaveBeenCalledTimes(1);
+
+    answers[0]?.resolve('使われています');
+    await expect
+      .element(screen.getByTestId('slug-error'))
+      .toHaveTextContent('使われています');
+    expect(onBlur).toHaveBeenCalledTimes(1);
+    expect(answers).toHaveLength(1);
+  });
+
+  it('applies no verdict for a check that fails, and reports what it threw', async () => {
+    const failure = new Error('問い合わせに失敗しました');
+    const reported: unknown[] = [];
+    // 試験の失敗として数えられないよう、報告を受け取って止める
+    const onError = (event: ErrorEvent): void => {
+      event.preventDefault();
+      reported.push(event.error);
+    };
+    window.addEventListener('error', onError);
+    try {
+      const screen = await render(
+        <AsyncSlug check={() => Promise.reject(failure)} />,
+      );
+      const slug = screen.getByLabelText('slug');
+
+      await slug.fill('k8o');
+      await screen.getByRole('button', { name: 'away' }).click();
+
+      await expect.poll(() => reported).toStrictEqual([failure]);
+      await expect
+        .element(screen.getByTestId('slug-checking'))
+        .toHaveTextContent('false');
+      expect((slug.element() as HTMLInputElement).validationMessage).toBe('');
+    } finally {
+      window.removeEventListener('error', onError);
+    }
   });
 
   it('lets an async message go when the field is emptied', async () => {

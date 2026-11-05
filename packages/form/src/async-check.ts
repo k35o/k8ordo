@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import type { UseFormReturn } from './use-form';
+
 /**
  * Ask the server about one field while the person is still filling the form.
  *
@@ -20,12 +22,12 @@ export type AsyncCheck = {
 
 export const useAsyncCheck = (
   check: (value: string) => Promise<string | undefined>,
+  revalidate: UseFormReturn['revalidate'],
 ): AsyncCheck => {
   const control = useRef<HTMLInputElement | null>(null);
   const latest = useRef(0);
-  // The value the newest answer was about. Applying an answer dispatches a
-  // focusout that re-enters run() on this very input; without this note it
-  // would ask the server about the same value forever.
+  // The value the newest answer was about: leaving the field while it still
+  // holds that value has nothing new to ask.
   const answered = useRef<string | null>(null);
   const [isChecking, setIsChecking] = useState(false);
 
@@ -39,12 +41,7 @@ export const useAsyncCheck = (
 
   const run = useCallback(() => {
     const node = control.current;
-    if (node === null) {
-      return;
-    }
-    if (node.value === answered.current) {
-      // Same value, same verdict — and this is also what stops the dispatched
-      // focusout below from asking the server in an endless circle.
+    if (node === null || node.value === answered.current) {
       return;
     }
     // Whatever was in flight is about an older value now.
@@ -52,8 +49,8 @@ export const useAsyncCheck = (
     if (node.value === '') {
       // An emptied field no longer holds the value a previous answer was
       // about; without this, "taken" would outlive the value it described.
-      // The real blur is still bubbling, so the form's own pass reads the
-      // cleared validity — no synthetic event needed here.
+      // The blur is still bubbling, so the form's own pass reads the cleared
+      // validity.
       answered.current = null;
       node.setCustomValidity('');
       return;
@@ -76,19 +73,17 @@ export const useAsyncCheck = (
         }
         answered.current = issuedFor;
         current.setCustomValidity(message ?? '');
-        // React's onBlur listens for focusout, so this is what re-runs the
-        // form's own pass and puts the message on screen.
-        current.dispatchEvent(new FocusEvent('focusout', { bubbles: true }));
-      } catch {
-        // A failed probe must not fake a verdict either way; the server
-        // re-checks the real submission.
+        revalidate(current);
       } finally {
         if (ticket === latest.current) {
           setIsChecking(false);
         }
       }
-    })();
-  }, [check]);
+      // A check that fails applies no verdict either way — the server checks
+      // the submission — and what it threw is reported as an uncaught error
+      // would be, since nobody awaits this.
+    })().catch(reportError);
+  }, [check, revalidate]);
 
   const ref = useCallback((node: HTMLInputElement | null) => {
     control.current = node;

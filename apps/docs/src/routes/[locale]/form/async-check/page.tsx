@@ -20,7 +20,7 @@ export async function checkHandle(handle: string) {
 }`;
 
 const ATTACH = `const handle = form.field('handle');
-const taken = useAsyncCheck(checkHandle);
+const taken = useAsyncCheck(checkHandle, form.revalidate);
 
 <input {...handle.input} {...taken.props} />
 {handle.error !== undefined && <p>{handle.error}</p>}

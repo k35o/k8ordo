@@ -97,6 +97,10 @@ checks (`refine`) vanish from its output without a trace.
 ## Conventions
 
 - `type`, not `interface`; no `@ts-ignore`; no skipped tests.
+- A verdict that lands outside an event — `useAsyncCheck`'s answer — reaches
+  the hook through `revalidate(control)`, never a dispatched event: a
+  synthetic `focusout` re-enters the control's own `onBlur` and tells every
+  blur listener of a blur that never happened.
 - Comments explain why the straightforward version was not used — not what the
   code does.
 - Tests state a guarantee in their name ("marks a field required only when the
