@@ -22,19 +22,20 @@ export type UpdateOptions = {
 
 const storedEntryState = (): unknown => navigation.currentEntry?.getState();
 
-const readLive = (def: PageState, page: PageInternals): StateValues => {
-  const live: StateValues = {};
-  if (page.url !== null) {
-    Object.assign(live, page.url.parse(new URL(location.href).searchParams));
-  }
-  if (page.entry !== null) {
-    const stored = storedEntryState();
-    Object.assign(
-      live,
-      page.entry.parse(isRecord(stored) ? stored[def.key] : undefined),
-    );
-  }
-  return live;
+const readLive = (
+  def: PageState,
+  page: PageInternals,
+): { url: StateValues; entry: StateValues } => {
+  const url =
+    page.url === null
+      ? {}
+      : page.url.parse(new URL(location.href).searchParams);
+  if (page.entry === null) return { url, entry: {} };
+  const stored = storedEntryState();
+  return {
+    url,
+    entry: page.entry.parse(isRecord(stored) ? stored[def.key] : undefined),
+  };
 };
 
 /**
@@ -50,7 +51,11 @@ const livePathname = (): string => {
 };
 
 const createPageStore = (def: PageState, page: PageInternals): Store => {
-  const core = createStoreCore(page.keys, readLive(def, page));
+  const initial = readLive(def, page);
+  const core = createStoreCore(page.keys, {
+    ...initial.url,
+    ...initial.entry,
+  });
 
   // An intercepting router commits the URL before the next tree arrives, and
   // the tree on screen meanwhile reads the values the URL had as it was left:
@@ -81,7 +86,7 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
     // A concurrent platform event (another store's write landing, a
     // traversal) must not roll back a batch that has not flushed yet: the
     // pending patch stays on top of whatever became true.
-    core.applyNext(pending === null ? live : { ...live, ...pending });
+    core.applyNext({ ...live.url, ...live.entry, ...pending });
     // 戻った木は取っておいた値を読んでいた。URL の値が行き先のものと同じなら
     // applyNext は誰にも知らせないので、ここで読み直させる
     if (returned) core.touch();
@@ -124,20 +129,14 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
       // snapshot, which an interleaved currententrychange may have reshaped.
       // Parse-level comparison, not string comparison: a batch that ends back
       // where it started must not navigate at all.
-      const url = new URL(location.href);
-      const stored = storedEntryState();
-      const liveUrl = page.url === null ? {} : page.url.parse(url.searchParams);
-      const liveEntry =
-        page.entry === null
-          ? {}
-          : page.entry.parse(isRecord(stored) ? stored[def.key] : undefined);
-      const target = canonical({ ...liveUrl, ...liveEntry, ...patch });
+      const live = readLive(def, page);
+      const target = canonical({ ...live.url, ...live.entry, ...patch });
       const urlChanged =
-        page.url?.keys.some((key) => !sameValue(liveUrl[key], target[key])) ??
+        page.url?.keys.some((key) => !sameValue(live.url[key], target[key])) ??
         false;
       const entryChanged =
         page.entry?.keys.some(
-          (key) => !sameValue(liveEntry[key], target[key]),
+          (key) => !sameValue(live.entry[key], target[key]),
         ) ?? false;
 
       if (!urlChanged && !entryChanged) {
@@ -146,7 +145,7 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
         return;
       }
 
-      const state = carryState(stored, target);
+      const state = carryState(storedEntryState(), target);
 
       if (!urlChanged) {
         // The hidden face alone moved: no navigation, works under any router.
@@ -157,6 +156,7 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
 
       // Only this definition's params are rewritten: the URL is shared ground
       // (other page states, tracking params), not this store's property.
+      const url = new URL(location.href);
       if (page.url !== null) {
         for (const key of page.url.keys) url.searchParams.delete(key);
         for (const [key, value] of new URLSearchParams(
