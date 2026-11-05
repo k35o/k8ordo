@@ -141,8 +141,9 @@ const applyScroll = (plan: ScrollPlan): void => {
 type Pending = {
   resolve: () => void;
   scroll: ScrollPlan | null;
-  types: readonly string[];
-  keyless: boolean;
+  // 同じページの戻る・進むは持たない。画面の entry は navigate のときに決まり、
+  // ページの切り替えではないので型も付けない
+  change?: { types: readonly string[]; keyless: boolean };
 };
 
 // Firefox は intercept した traverse でも scroll の指定を見ず、popstate を
@@ -344,6 +345,28 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         pendingPathname === null &&
         !refresh(url),
     );
+    const track = (
+      id: number,
+      entry: Omit<Pending, 'resolve'>,
+      signal: AbortSignal,
+    ): Promise<undefined> => {
+      const { promise, resolve, reject } = Promise.withResolvers<undefined>();
+      pending.current.set(id, {
+        ...entry,
+        resolve: () => {
+          resolve(undefined);
+        },
+      });
+      signal.addEventListener(
+        'abort',
+        () => {
+          pending.current.delete(id);
+          reject(signal.reason as Error);
+        },
+        { once: true },
+      );
+      return promise;
+    };
     const onNavigate = (event: NavigateEvent): void => {
       steps.heard(event.destination.url);
       // 読み直しを頼んだ文書は去るところ。そのあとの遷移は横取りせずブラウザに任せる。
@@ -381,6 +404,21 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       // page showing reads what moved. Only going back or forward moves the
       // viewport, to where that entry was left.
       const inPlace = pathname === shown.current;
+      const plan =
+        keyless || (inPlace && !traverse)
+          ? null
+          : scrollPlanFor(
+              event.navigationType,
+              url.hash,
+              leftAt(event.destination.key),
+            );
+      // The platform would scroll "after transition" — after the handler
+      // settles — but the handler settles only once the tree is on screen,
+      // which is exactly when this hook scrolls itself. Doing it here keeps
+      // the two from disagreeing, and keeps the behaviour where a browser
+      // has not implemented the platform's half. A traversal included: the
+      // hook puts back where it saw that entry left — a load in place too.
+      const scroll = keyless ? 'after-transition' : 'manual';
       if (inPlace && !refresh(url)) {
         const calledOff =
           event.destination.key !== '' &&
@@ -395,36 +433,14 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         // より前なので、ページが同じタスクで出す更新と同じ描画にまとまり、遅らせた
         // 描画の lane も 1 本を分け合う。handler の走る時機はエンジンで違う
         const id = count.current++;
-        const { promise, resolve, reject } = Promise.withResolvers<undefined>();
+        const arrived = track(id, { scroll: plan }, event.signal);
         // handler が走る前に中止されると、誰も待たない reject になる
-        promise.catch(() => undefined);
-        pending.current.set(id, {
-          resolve: () => {
-            resolve(undefined);
-          },
-          scroll: keyless
-            ? null
-            : scrollPlanFor(
-                'traverse',
-                url.hash,
-                leftAt(event.destination.key),
-              ),
-          types: [],
-          keyless,
-        });
-        event.signal.addEventListener(
-          'abort',
-          () => {
-            pending.current.delete(id);
-            reject(event.signal.reason as Error);
-          },
-          { once: true },
-        );
+        arrived.catch(() => undefined);
         setTraversed(id);
         event.intercept({
-          scroll: keyless ? 'after-transition' : 'manual',
+          scroll,
           focusReset: 'manual',
-          handler: () => promise,
+          handler: () => arrived,
         });
         return;
       }
@@ -439,24 +455,10 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       const settled = (): void => {
         if (latest.current === id) setPendingPathname(null);
       };
-      const scroll =
-        (inPlace && !traverse) || keyless
-          ? null
-          : scrollPlanFor(
-              event.navigationType,
-              url.hash,
-              leftAt(event.destination.key),
-            );
       event.intercept({
         // A load in place moves neither the viewport nor focus.
         ...(inPlace ? { focusReset: 'manual' as const } : {}),
-        // The platform would scroll "after transition" — after the handler
-        // settles — but the handler settles only once the tree is on screen,
-        // which is exactly when this hook scrolls itself. Doing it here keeps
-        // the two from disagreeing, and keeps the behaviour where a browser
-        // has not implemented the platform's half. A traversal included: the
-        // hook puts back where it saw that entry left — a load in place too.
-        scroll: keyless ? 'after-transition' : 'manual',
+        scroll,
         handler: async () => {
           // 失敗も中止も、名指していた遷移が終わったということ。新しい遷移が
           // 始まっていれば、それがもう自分の行き先を名指している
@@ -473,32 +475,28 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
           // page the visitor left back on screen, and the listener below would
           // never fire — an abort that already happened does not fire again.
           if (event.signal.aborted) throw event.signal.reason as Error;
-          await new Promise<void>((resolve, reject) => {
-            pending.current.set(id, {
-              resolve,
-              scroll,
-              // 同じページの読み直しはページの切り替えではない。
-              // ViewTransition が切り替えとして動かさないよう、型を付けない
-              types: inPlace ? [] : transitionTypesFor(event.navigationType),
-              keyless,
-            });
-            event.signal.addEventListener(
-              'abort',
-              () => {
-                pending.current.delete(id);
-                reject(event.signal.reason as Error);
+          const committed = track(
+            id,
+            {
+              scroll: plan,
+              change: {
+                // 同じページの読み直しはページの切り替えではない。
+                // ViewTransition が切り替えとして動かさないよう、型を付けない
+                types: inPlace ? [] : transitionTypesFor(event.navigationType),
+                keyless,
               },
-              { once: true },
-            );
-            // Recorded at apply rather than at commit: a navigation that
-            // arrives in between must see this page as the one showing.
-            shown.current = pathname;
-            apply(value);
-            // Batched with the caller's own update, so its deferred copy
-            // moves in the same background commit as the host's — and names
-            // which navigation that commit belongs to.
-            setApplied(id);
-          });
+            },
+            event.signal,
+          );
+          // Recorded at apply rather than at commit: a navigation that
+          // arrives in between must see this page as the one showing.
+          shown.current = pathname;
+          apply(value);
+          // Batched with the caller's own update, so its deferred copy
+          // moves in the same background commit as the host's — and names
+          // which navigation that commit belongs to.
+          setApplied(id);
+          await committed;
         },
       });
     };
@@ -520,7 +518,9 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
     const entry = pending.current.get(id);
     if (entry === undefined) return;
     pending.current.delete(id);
-    onScreenEntry.current = entry.keyless ? '' : null;
+    if (entry.change !== undefined) {
+      onScreenEntry.current = entry.change.keyless ? '' : null;
+    }
     if (entry.scroll !== null) applyScroll(entry.scroll);
     if (latest.current === id) setPendingPathname(null);
     entry.resolve();
@@ -540,7 +540,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
   // are said here, and the background commit is the one that claims them.
   useLayoutEffect(() => {
     if (applied === onScreen) return;
-    const types = pending.current.get(applied)?.types ?? [];
+    const types = pending.current.get(applied)?.change?.types ?? [];
     startTransition(() => {
       for (const type of types) addTransitionType(type);
     });
