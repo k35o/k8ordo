@@ -1,23 +1,25 @@
-import { useDeferredValue, useLayoutEffect, useRef, useState } from 'react';
+import { useDeferredValue, useState } from 'react';
 import type { FC } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { useInterceptedNavigation } from '../../src/navigation';
+import { List } from './list';
 
 // フレームワークのランタイムのように、読み込みを待ってから木を当てるホスト。
 // 試験が hold を立てると、読み込みは release まで終わらず、前のページが画面に
 // 残る。?reload の付いた URL は search を読むページで、同じ pathname でも
 // 読み直す
-const ITEMS = Array.from({ length: 90 }, (_, index) => index);
+declare global {
+  var controls: { hold: boolean; release: () => void };
+}
 
 const waiting: Array<() => void> = [];
-const controls = {
+globalThis.controls = {
   hold: false,
   release: (): void => {
     for (const go of waiting.splice(0)) go();
   },
 };
-Object.assign(globalThis, { controls });
 
 const Host: FC = () => {
   const [latest, setLatest] = useState(location.href);
@@ -42,29 +44,10 @@ const Host: FC = () => {
     refresh: (url) => url.searchParams.has('reload'),
   });
   const shown = new URL(useDeferredValue(latest));
-  const items =
-    shown.searchParams.get('q') === 'few'
-      ? ITEMS.filter((i) => i % 3 === 0)
-      : ITEMS;
-  // 描くたびに一覧の高さを測り、画面に出す commit の中で layout を強制する
-  const list = useRef<HTMLUListElement>(null);
-  useLayoutEffect(() => {
-    const element = list.current;
-    if (element !== null) {
-      element.dataset.height = String(element.getBoundingClientRect().height);
-    }
-  });
   return (
     <>
       <h1>{shown.pathname.slice(1)}</h1>
-      <p data-testid="count">{items.length}</p>
-      <ul ref={list} style={{ margin: 0, padding: 0 }}>
-        {items.map((i) => (
-          <li key={i} style={{ height: '100px', listStyle: 'none' }}>
-            {i}
-          </li>
-        ))}
-      </ul>
+      <List few={shown.searchParams.get('q') === 'few'} />
     </>
   );
 };

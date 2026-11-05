@@ -1,16 +1,11 @@
-import {
-  memo,
-  useDeferredValue,
-  useLayoutEffect,
-  useRef,
-  useSyncExternalStore,
-} from 'react';
-import type { FC, ReactNode } from 'react';
+import { memo, useDeferredValue, useSyncExternalStore } from 'react';
+import type { FC } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { defineRoutes } from '../../src/define-routes';
 import { usePathname } from '../../src/location';
 import { Router } from '../../src/router';
+import { List, Measured } from './list';
 
 const AboutPage: FC = () => <h1>about</h1>;
 
@@ -20,19 +15,6 @@ const TallPage: FC = () => (
     <h1>tall</h1>
   </div>
 );
-
-// 描くたびに自分の高さを layout effect で測る部品。@k8ordo/ui の Tabs の
-// useWritingMode のように、ページを画面に出す commit の中で layout を強制する
-const Measured: FC<{ children: ReactNode }> = ({ children }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  useLayoutEffect(() => {
-    const element = ref.current;
-    if (element !== null) {
-      element.dataset.height = String(element.getBoundingClientRect().height);
-    }
-  });
-  return <div ref={ref}>{children}</div>;
-};
 
 // 前のページより背の低いページ。前のページの位置がこのページで下げられる量を
 // 超えたまま layout が走ると、位置はこのページの下端に切り詰められる
@@ -58,26 +40,14 @@ const subscribe = (onChange: () => void): (() => void) => {
 const readQuery = (): string =>
   new URL(location.href).searchParams.get('q') ?? '';
 
-const ITEMS = Array.from({ length: 90 }, (_, index) => index);
-
 const ListPage: FC = () => {
   const q = useSyncExternalStore(subscribe, readQuery, () => '');
   const shown = useDeferredValue(q);
-  const items = shown === 'few' ? ITEMS.filter((i) => i % 3 === 0) : ITEMS;
   return (
     <>
       <h1>list</h1>
       <input aria-label="q" readOnly value={q} />
-      <p data-testid="count">{items.length}</p>
-      <Measured>
-        <ul style={{ margin: 0, padding: 0 }}>
-          {items.map((i) => (
-            <li key={i} style={{ height: '100px', listStyle: 'none' }}>
-              {i}
-            </li>
-          ))}
-        </ul>
-      </Measured>
+      <List few={shown === 'few'} />
     </>
   );
 };
