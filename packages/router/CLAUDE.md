@@ -302,7 +302,8 @@ src/
   location.tsx      usePathname / PathnameProvider / BrowserPathname (where you are, without the table)
   match.ts          matchPath / useMatch ("which section am I in", without the table)
   boundary.tsx      RouteErrorBoundary (the boundary that renders the table's error)
-  router.tsx        Router / Outlet / useRoute / useParams
+  outlet.tsx        Outlet (a layout's hole, nested by context; the table's boundaries render it too)
+  router.tsx        Router / useRoute / useParams
   tree-pathname.ts  TreePathname, the pathname each tree was applied for (not exported)
   not-found.ts      notFound / isNotFound (the framework answers it; branded, not a class)
   traversal.test.ts serves fixtures/traversal with Vite and opens it top-level

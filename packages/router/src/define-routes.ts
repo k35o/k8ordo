@@ -3,6 +3,7 @@ import type { ComponentType, ReactNode } from 'react';
 
 import { RouteErrorBoundary } from './boundary';
 import type { ErrorComponent } from './boundary';
+import { Outlet } from './outlet';
 import {
   decodeOrKeep,
   isGroupKey,
@@ -124,7 +125,7 @@ const boundaryFor = (
     createElement(
       RouteErrorBoundary,
       { fallback },
-      children === undefined ? outlet() : children,
+      children === undefined ? createElement(Outlet) : children,
     );
   return Boundary;
 };
@@ -144,20 +145,9 @@ const loadingFor = (
     createElement(
       Suspense,
       { fallback: createElement(Fallback) },
-      children === undefined ? outlet() : children,
+      children === undefined ? createElement(Outlet) : children,
     );
   return Loading;
-};
-
-/**
- * What a boundary renders when a renderer hands it no children. Set once by
- * the client router, which is the one renderer that nests by context rather
- * than by prop; the framework always passes `children`.
- */
-let outlet: () => ReactNode = () => null;
-
-export const setBoundaryOutlet = (render: () => ReactNode): void => {
-  outlet = render;
 };
 
 export function defineRoutes<R extends RoutesRecord>(record: R): Routes<R> {
