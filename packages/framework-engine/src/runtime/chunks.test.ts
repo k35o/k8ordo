@@ -215,7 +215,7 @@ describe.each(browserTypes)('pages loading their own, in $name', ({ type }) => {
     await page.close();
   }, 30_000);
 
-  it('keeps the body and the title on screen while HTML rendered for another pathname renders afresh', async () => {
+  it('keeps the body and the title on screen while HTML rendered for another pathname is rendered again where the browser is', async () => {
     const page = await open('/elsewhere');
     await settled(page);
 

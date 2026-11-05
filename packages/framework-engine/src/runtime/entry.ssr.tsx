@@ -111,17 +111,10 @@ export async function renderHtml(
   let ready: Promise<void> | undefined;
   // 描く前に読むと、client 参照の preinit と preloadModule が Fizz の要求の外で
   // 出て捨てられる。描画の中で読み始めれば、その続きが要求の
-  // AsyncLocalStorage を引き継ぐ。読んだ木を描く前に歩くのは、props で渡す
-  // だけで描かない要素の参照を、モジュールを読み終えたあとのページでも誰かが
-  // 読むようにするため。ブラウザの最初の mount はその JS も待つ。server では
-  // 届いていない行を待たない。歩きには client コンポーネントが描く Suspense が
-  // 見えないので、待つと殻がその中身を待ってしまう。届いたときに続きで歩く。
-  // static では、RSC の描画が名指した部品をすべて、読み始める前に自分で link
-  // する。歩きは props の Map・Set・Promise・iterator・async iterable・stream
-  // の中を見ないので、その中にしかない要素は、モジュールを初めて読むページで
-  // しか link されない。歩きを広げないのは、iterator と stream は一度しか
-  // 読めず、歩けば部品より先に使い切るため。RSC プラグインより先に頼めば、
-  // モジュールを読んでいたかで head が変わらない
+  // AsyncLocalStorage を引き継ぐ。描く前に歩くのは、props で渡すだけで描かない
+  // 要素の参照も読ませるため。server では、client コンポーネントが描く
+  // Suspense が歩きに見えず、待つと殻がその中身を待つので、届いていない行は
+  // 届いたときに続きで歩く。static は名指された部品を、読む前に自分で link する
   function Root(): ReactNode {
     linkClientDeps(named);
     reading ??= createFromReadableStream<Payload>(forHtml, { nonce });

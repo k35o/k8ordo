@@ -47,7 +47,7 @@ const whenSettled = (thenable: PromiseLike<unknown>): Promise<void> =>
     );
   });
 
-export type ClientReadyOptions = {
+type ClientReadyOptions = {
   /**
    * What to do with a row still on its way: `'wait'` for it; `'leave'` one
    * inside a `<Suspense>` to that boundary's fallback, as a transition
