@@ -132,12 +132,6 @@ const SYMPTOMS: readonly Symptom[] = [
     fix: t.vercelRoutesServerFix,
   },
   {
-    id: 'vercel-header-key',
-    title: t.vercelHeaderKeyTitle,
-    cause: t.vercelHeaderKeyCause,
-    fix: t.vercelHeaderKeyFix,
-  },
-  {
     id: 'shell-html',
     title: t.shellHtmlTitle,
     cause: t.shellHtmlCause,

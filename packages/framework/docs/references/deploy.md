@@ -647,13 +647,6 @@ What to keep in mind:
   `caseSensitive: true`, while the routes `vercel()` writes itself are
   case-sensitive, as the route table is. A route without it answers
   `/POSTS/first` as well.
-- **`has` names a header in lowercase**, as Vercel compares it. `vercel()`
-  refuses another spelling when it is called:
-
-  ```text
-  vercel() route ^/posts/([a-z0-9-]+)$ has the header key "Accept" — write it lowercase ("accept"), as Vercel compares it
-  ```
-
 - **Nothing else is checked.** The routes are written as given — under a
   `base` their `src` and `dest` carry it — and their patterns are Vercel's
   (PCRE), which JavaScript's `RegExp` would misjudge, so a mistake shows once

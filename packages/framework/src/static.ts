@@ -53,9 +53,7 @@ import {
   catchAllPath,
   catchAllPatterns,
   dirFor,
-  isConcrete,
   patternsNeedingPaths,
-  patternsOf,
   planPaths,
   planRefusals,
   shadowedShells,
@@ -276,26 +274,15 @@ const takenFiles = (
     readonly named: (file: string) => string;
   },
 ): string[] => {
-  // Keyed without case: macOS and Windows take `Sitemap.xml` and
-  // `sitemap.xml` for one file, and a build stops the same on every system.
-  const own = new Map<string, { readonly file: string; readonly by: string }>();
+  const own = new Map<string, string>();
   const claim = (file: string, by: string): void => {
-    own.set(file.toLowerCase(), { file, by });
+    own.set(file, by);
   };
-  const routes: Array<{
-    readonly file: string;
-    readonly route: string;
-    /** The pathname `paths` gave a route.ts with params. */
-    readonly supplied: string | undefined;
-  }> = [];
+  const routes: Array<{ readonly file: string; readonly route: string }> = [];
   for (const pathname of pathnames) {
     const answer = answering(tree, pathname);
     if (answer?.kind === 'route') {
-      routes.push({
-        file: fileAt(pathname),
-        route: answer.file,
-        supplied: isConcrete(answer.pattern) ? undefined : pathname,
-      });
+      routes.push({ file: fileAt(pathname), route: answer.file });
     } else if (answer !== undefined) {
       const page = `${named(answer.file)} is written there`;
       claim(fileAt(pathname, 'index.html'), page);
@@ -320,16 +307,9 @@ const takenFiles = (
     );
   }
   return routes
-    .flatMap(({ file, route, supplied }) => {
-      const taken = own.get(file.toLowerCase());
-      if (taken === undefined) return [];
-      const sameAs =
-        taken.file === file
-          ? ''
-          : ` (the same file as ${taken.file} on macOS and Windows)`;
-      const unlisted =
-        supplied === undefined ? '' : `; or leave ${supplied} out of "paths"`;
-      return [`${file}${sameAs}: ${named(route)}, and ${taken.by}${unlisted}`];
+    .flatMap(({ file, route }) => {
+      const by = own.get(file);
+      return by === undefined ? [] : [`${file}: ${named(route)}, and ${by}`];
     })
     .toSorted();
 };
@@ -381,28 +361,11 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
   const fromRoot = (file: string): string =>
     path.relative(root, path.join(routesDir, file));
 
-  // A route.ts that `paths` gives its pathname is left to the build: vite dev
-  // calls `paths` only for an application with a fallback.tsx.
   const devRoutes = (): Promise<DevRoutes> =>
     (routesRead ??= (async () => {
       const { tree, problems } = parseRouteTree(await scanRoutes(routesDir));
       const failed = problems.length > 0;
-      const shapes = failed ? [] : fallbackShapes(tree);
-      const taken = failed
-        ? []
-        : takenFiles(
-            tree,
-            patternsOf(tree).filter((pattern) => isConcrete(pattern)),
-            {
-              site: options.site !== undefined,
-              shells: shapes.map((shape) => shape.file),
-              named: fromRoot,
-            },
-          );
-      if (taken.length > 0) {
-        logger?.warn(`k8ordo: the build will stop: ${takenRefusal(taken)}`);
-      }
-      return { tree, failed, shapes };
+      return { tree, failed, shapes: failed ? [] : fallbackShapes(tree) };
     })());
 
   const devShells = (): Promise<DevShells> =>

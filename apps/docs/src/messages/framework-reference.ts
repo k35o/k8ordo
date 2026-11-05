@@ -508,7 +508,7 @@ export const vercelCaveats = [
     en: 'Vercel matches `src` against the whole pathname: `^/posts/` does not match `/posts/first`, so write `^/posts/.+$`.',
   }),
   message({
-    ja: '`has`のヘッダーの`key`は小文字で書きます。Vercelは小文字で比べるので、ほかの書き方は`vercel()`を呼んだ時点でエラーになります。ほかは検査しないので、間違いはデプロイして初めて分かります。',
-    en: 'Write a `has` header’s `key` in lowercase, as Vercel compares it; another spelling is refused when `vercel()` is called. Nothing else is checked, so a mistake shows once deployed.',
+    ja: 'ルートは検査しないので、間違いはデプロイして初めて分かります。',
+    en: 'Nothing in the routes is checked, so a mistake shows once deployed.',
   }),
 ] as const;

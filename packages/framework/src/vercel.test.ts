@@ -151,26 +151,4 @@ describe('vercel', () => {
       );
     },
   );
-
-  it.each(['beforeFiles', 'beforeNotFound'] as const)(
-    'refuses a has header key in %s that is not lowercase, naming the route',
-    (place) => {
-      expect(() =>
-        vercel({
-          [place]: [
-            {
-              src: '^/posts/([a-z0-9-]+)$',
-              has: [
-                { type: 'header', key: 'Accept', value: '.*text/markdown.*' },
-              ],
-              dest: '/posts/$1/article.md',
-              check: true,
-            },
-          ],
-        }),
-      ).toThrow(
-        'vercel() route ^/posts/([a-z0-9-]+)$ has the header key "Accept" — write it lowercase ("accept"), as Vercel compares it',
-      );
-    },
-  );
 });

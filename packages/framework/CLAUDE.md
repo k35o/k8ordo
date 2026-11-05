@@ -246,11 +246,7 @@ pnpm check         # check:write to auto-fix
   `client-files.json`: those are written
   after the routes' files (a page's beside them), so one would replace the
   other unseen, and `takenFiles` names each pair before anything renders.
-  It compares names without case, since macOS and Windows take two that
-  differ only in case for one file, and a build stops the same everywhere.
-  `vite dev` does not stop; it warns of the same from the tree
-  (`devRoutes`), for the patterns with no params only, since it calls
-  `paths` for nothing else. A file keeps no type, so the `Content-Type` its
+  A file keeps no type, so the `Content-Type` its
   `GET` answered is kept beside it — `StaticOutput.types`, by the file's path
   inside the client build — for the one adapter that can name a file's
   type; `serve`, `vite preview` and every other host go by the extension.
@@ -370,9 +366,8 @@ pnpm check         # check:write to auto-fix
   the shells' rewrites and `404.html`, so a catch-all of the application's
   never hides a shell. Only static mode takes them — `configResolved`
   refuses them under server mode, where the handler answers every URL no
-  file names — and the one thing checked in them is a `has` header key,
-  refused when `vercel()` is called unless lowercase: their patterns are
-  Vercel's (PCRE), which a check with JavaScript's `RegExp` would misjudge.
+  file names — and nothing in them is checked: their patterns are Vercel's
+  (PCRE), which a check with JavaScript's `RegExp` would misjudge.
   `vite dev`, `vite preview` and `serve` never apply them; an imitation of
   Vercel's routing nothing here can check against Vercel would be worse
   than none.

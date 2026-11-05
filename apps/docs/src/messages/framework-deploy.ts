@@ -308,12 +308,8 @@ export const vercelRoutesMind = [
     en: 'Vercel matches `src` regardless of case unless the route says `caseSensitive: true`, while the routes `vercel()` writes itself are case-sensitive, as the route table is.',
   }),
   message({
-    ja: '`has`のヘッダーの`key`は小文字で書きます。ほかの書き方は`vercel()`を呼んだ時点でエラーになります。',
-    en: 'Write a `has` header’s `key` in lowercase. Another spelling is refused when `vercel()` is called.',
-  }),
-  message({
-    ja: 'ほかは検査しません。`base`の下でも渡したまま書くので、`src`と`dest`に`base`を含めます。パターンはVercelのもの（PCRE）で、間違いはデプロイして初めて分かるので、変更はプレビューのデプロイで先に確かめます。',
-    en: 'Nothing else is checked. The routes are written as given, so under a `base` their `src` and `dest` carry it, and their patterns are Vercel’s (PCRE): a mistake shows once deployed, so try a change on a preview deployment first.',
+    ja: 'ルートは検査しません。`base`の下でも渡したまま書くので、`src`と`dest`に`base`を含めます。パターンはVercelのもの（PCRE）で、間違いはデプロイして初めて分かるので、変更はプレビューのデプロイで先に確かめます。',
+    en: 'Nothing in the routes is checked. They are written as given, so under a `base` their `src` and `dest` carry it, and their patterns are Vercel’s (PCRE): a mistake shows once deployed, so try a change on a preview deployment first.',
   }),
   message({
     ja: 'serverモードでは受け取りません。ファイルの無いURLにはハンドラが答えるので、`guard.ts`や`route.ts`で返すものを決めます。渡すとビルドがエラーになります。',

@@ -32,7 +32,6 @@ export type VercelRoute = {
   readonly caseSensitive?: boolean;
   readonly has?: ReadonlyArray<{
     readonly type: 'header';
-    /** Lowercase, as Vercel compares it. */
     readonly key: string;
     readonly value?: string;
   }>;

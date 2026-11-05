@@ -533,7 +533,7 @@ describe('a route.ts at a file the build writes itself', () => {
       await expect(clientFile('index.html')).rejects.toThrow(/ENOENT/u);
     });
 
-    it('names a route.ts paths gave 404.html beside a not-found.tsx, with the pathname to leave out of "paths", and one at _redirects beside a fallback.tsx, in one error', async () => {
+    it('names a route.ts paths gave 404.html beside a not-found.tsx, and one at _redirects beside a fallback.tsx, in one error', async () => {
       await routeFiles([
         ...POSTS,
         'not-found.tsx',
@@ -545,7 +545,7 @@ describe('a route.ts at a file the build writes itself', () => {
       await expect(
         hooks({ paths: () => ['/posts/1', '/404.html'] }).build(),
       ).rejects.toThrow(
-        `${TAKEN}\n  404.html: src/routes/[file]/route.ts, and src/routes/not-found.tsx is written there; or leave /404.html out of "paths"\n  _redirects: src/routes/_redirects/route.ts, and the shells of src/routes/posts/[id]/fallback.tsx are reached through it — rules of your own go in public/_redirects, which the build adds to its own`,
+        `${TAKEN}\n  404.html: src/routes/[file]/route.ts, and src/routes/not-found.tsx is written there\n  _redirects: src/routes/_redirects/route.ts, and the shells of src/routes/posts/[id]/fallback.tsx are reached through it — rules of your own go in public/_redirects, which the build adds to its own`,
       );
     });
 
@@ -570,19 +570,6 @@ describe('a route.ts at a file the build writes itself', () => {
 
       await expect(hooks().build()).rejects.toThrow(
         `${TAKEN}\n  client-files.json: src/routes/client-files.json/route.ts, and the build lists there what each page’s client components need`,
-      );
-    });
-
-    it('stops on a route.ts whose file differs from the build’s only in case, as macOS and Windows take the two for one', async () => {
-      await routeFiles(['Sitemap.xml/route.ts']);
-      await handlerAnswering(
-        home({ '/Sitemap.xml': { body: '<urlset>own</urlset>' } }),
-      );
-
-      await expect(
-        hooks({ site: 'https://example.com' }).build(),
-      ).rejects.toThrow(
-        `${TAKEN}\n  Sitemap.xml (the same file as sitemap.xml on macOS and Windows): src/routes/Sitemap.xml/route.ts, and the "site" option writes it`,
       );
     });
   });
@@ -998,18 +985,6 @@ describe('vite dev', () => {
     expect(await request('/posts/4')).toBe('/posts/!fallback');
     expect(said.warn).toStrictEqual([
       'k8ordo: the build will refuse "paths": the "paths" option supplied pathnames no route wants: /produtcs/2',
-    ]);
-  });
-
-  it('warns once that the build will stop on a route.ts at a file it writes itself, and leaves the route.ts to answer', async () => {
-    await routeFiles(['sitemap.xml/route.ts']);
-    const { serve, said } = hooks({ site: 'https://example.com' });
-    const request = serve();
-
-    expect(await request('/sitemap.xml')).toBe('/sitemap.xml');
-    expect(await request('/sitemap.xml')).toBe('/sitemap.xml');
-    expect(said.warn).toStrictEqual([
-      `k8ordo: the build will stop: ${TAKEN}\n  sitemap.xml: src/routes/sitemap.xml/route.ts, and the "site" option writes it`,
     ]);
   });
 

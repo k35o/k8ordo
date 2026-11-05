@@ -24,17 +24,6 @@ export type { VercelOptions, VercelRoute } from './vercel-output';
  */
 export const vercel = (options: VercelOptions = {}): Plugin => {
   const { beforeFiles, beforeNotFound } = options;
-  // Vercel は header の key を小文字で比べるので、大文字の key は黙って当たらない
-  // おそれがある。route は渡されたまま書くので、小文字に直さずに止める
-  for (const route of [...(beforeFiles ?? []), ...(beforeNotFound ?? [])]) {
-    for (const { key } of route.has ?? []) {
-      if (key !== key.toLowerCase()) {
-        throw new Error(
-          `vercel() route ${route.src} has the header key "${key}" — write it lowercase ("${key.toLowerCase()}"), as Vercel compares it`,
-        );
-      }
-    }
-  }
   let isStatic = false;
   let logger: Logger | undefined;
   return {
