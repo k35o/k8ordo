@@ -64,6 +64,7 @@ import {
   cloudflareCounts,
   cloudflareMatches,
   formatRedirects,
+  PLACEHOLDER,
   rewriteFor,
   rewritesAfterFiles,
   rulesOf,
@@ -328,19 +329,6 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
    * can be tried locally. The URL is rewritten to the shell pathname before
    * the RSC plugin's handler reads it; everything else passes untouched.
    */
-  const answerUnbuilt = async (
-    request: Connect.IncomingMessage,
-    next: Connect.NextFunction,
-  ): Promise<void> => {
-    try {
-      await rewriteUnbuilt(request);
-    } catch (error) {
-      next(error);
-      return;
-    }
-    next();
-  };
-
   const rewriteUnbuilt = async (
     request: Connect.IncomingMessage,
   ): Promise<void> => {
@@ -348,10 +336,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
       return;
     }
     // RSC プラグインと同じく originalUrl を読む。base はそちらに残っている
-    const url = new URL(
-      request.originalUrl ?? request.url ?? '/',
-      'http://k8ordo.localhost',
-    );
+    const url = new URL(request.originalUrl ?? request.url ?? '/', ORIGIN);
     const own = withoutBase(url.pathname, base);
     if (own === null) {
       return;
@@ -443,7 +428,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
     }
     const ownRules = own === null ? [] : rulesOf(own);
     const hiding = ownRules.flatMap(({ line, from }) => {
-      if (!from.includes('*') && !/:[A-Za-z]/u.test(from)) return [];
+      if (!from.includes('*') && !PLACEHOLDER.test(from)) return [];
       const hidden = shells.find((shell) =>
         cloudflareMatches(from, withBase(shell.pathname, base)),
       );
@@ -469,7 +454,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
     for (const from of built.unlisted) {
       const read = from.includes('*')
         ? '"*" as a splat'
-        : `"${/:[A-Za-z]\w*/u.exec(from)?.[0] ?? ':'}" as a placeholder`;
+        : `"${PLACEHOLDER.exec(from)?.[0] ?? ':'}" as a placeholder`;
       misread.push(
         `k8ordo: _redirects cannot list ${from} — Cloudflare and Netlify read ${read}, so on Cloudflare a shell answers it`,
       );
@@ -509,9 +494,12 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
           )
           .catch(() => undefined);
         return () => {
-          server.middlewares.use((request, _response, next) => {
-            void answerUnbuilt(request, next);
-          });
+          server.middlewares.use(
+            middlewareOf(async (request) => {
+              await rewriteUnbuilt(request);
+              return false;
+            }),
+          );
         };
       },
     },
@@ -568,18 +556,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         );
         return true;
       };
-      server.middlewares.use((request, response, next) => {
-        void (async () => {
-          let answered: boolean;
-          try {
-            answered = await answeredHere(request, response);
-          } catch (error) {
-            next(error);
-            return;
-          }
-          if (!answered) next();
-        })();
-      });
+      server.middlewares.use(middlewareOf(answeredHere));
     },
 
     watchChange(file) {
@@ -817,6 +794,30 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
 
   return [refuse, prerender];
 };
+
+/**
+ * A Connect middleware from a step that says whether it answered the request
+ * — Connect awaits nothing, so a step that rejects reaches `next` this way.
+ */
+const middlewareOf =
+  (
+    answered: (
+      request: Connect.IncomingMessage,
+      response: ServerResponse,
+    ) => Promise<boolean>,
+  ): Connect.NextHandleFunction =>
+  (request, response, next) => {
+    void (async () => {
+      let done: boolean;
+      try {
+        done = await answered(request, response);
+      } catch (error) {
+        next(error);
+        return;
+      }
+      if (!done) next();
+    })();
+  };
 
 /** The host adapter among the plugins, if any. */
 const adapterOf = (

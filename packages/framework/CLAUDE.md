@@ -425,7 +425,8 @@ src/
                     framework's hashes; writtenOutsideScripts — what a
                     layout wrote into a shell, outside its scripts
   server.ts         ./server: the engine's redirect, response API, nonce and types — no Vite, no Node
-  static-file.ts    safeJoin — request pathname → path inside the build output (pure)
+  static-file.ts    safeJoin — request pathname → path inside the build output
+                    (pure); isFile
   encoding.ts       which content coding a request gets, what is worth compressing
   server-mode.ts    serverMode: the handler built with every dependency in it,
                     dist/server.js bundled from serve, and the client

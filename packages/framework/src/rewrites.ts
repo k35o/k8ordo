@@ -1,6 +1,7 @@
 import { FALLBACK_SEGMENT, payloadPathFor } from '@k8ordo/framework-engine';
 import { withBase } from '@k8ordo/router';
 
+import { isParamSegment } from './paths';
 import type { Shell } from './paths';
 
 /**
@@ -15,9 +16,7 @@ const SHELL_COMMENT =
   "# @k8ordo/framework: values the build did not write, answered by their fallback.tsx's shell";
 
 /** What Cloudflare reads as a placeholder: `:` and a letter, anywhere. */
-const PLACEHOLDER = /:[A-Za-z]\w*/u;
-
-const PARAM_SEGMENT = /^:[A-Za-z_]\w*$/u;
+export const PLACEHOLDER = /:[A-Za-z]\w*/u;
 
 const decodeSegment = (segment: string): string => {
   try {
@@ -92,8 +91,7 @@ export const shellRules = (
   const known = (shell: Shell): number =>
     shell.location
       .split('/')
-      .filter((segment) => segment !== '' && !PARAM_SEGMENT.test(segment))
-      .length;
+      .filter((segment) => segment !== '' && !isParamSegment(segment)).length;
   const ordered = shells.toSorted(
     (a, b) =>
       patterns.indexOf(a.pattern) - patterns.indexOf(b.pattern) ||
@@ -106,7 +104,7 @@ export const shellRules = (
     let placeholders = 0;
     const segments = shell.location.split('/').map((segment) => {
       if (segment === '') return { from: ['', ''], to: '' };
-      if (!PARAM_SEGMENT.test(segment)) {
+      if (!isParamSegment(segment)) {
         const [sent, canonical] = spellingsOf(segment);
         return { from: [sent, canonical], to: canonical };
       }
@@ -132,11 +130,13 @@ export const shellRules = (
   return byFrom([...documents, ...payloads]);
 };
 
+const PLACEHOLDER_OR_SPLAT = new RegExp(`(${PLACEHOLDER.source}|\\*)`, 'u');
+
 /** A `from` as Cloudflare matches it: anchored, a placeholder one segment. */
 const cloudflarePattern = (from: string): RegExp =>
   new RegExp(
     `^${from
-      .split(/(:[A-Za-z]\w*|\*)/u)
+      .split(PLACEHOLDER_OR_SPLAT)
       .map((part, index) =>
         index % 2 === 0 ? RegExp.escape(part) : part === '*' ? '.*' : '[^/]+',
       )
@@ -374,7 +374,7 @@ export const rewriteFor = (
       wanted.length === given.length &&
       wanted.every((segment, index) => {
         const at = given[index] as string;
-        return PARAM_SEGMENT.test(segment) ? at !== '' : segment === at;
+        return isParamSegment(segment) ? at !== '' : segment === at;
       })
     ) {
       return rule.to;

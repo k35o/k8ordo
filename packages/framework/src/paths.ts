@@ -27,7 +27,7 @@ export const patternsOf = (dir: RouteDir): string[] =>
 /** A `:name` segment: a parameter a pattern, or a shell location, leaves open. */
 const PARAM_SEGMENT = /^:[A-Za-z_]\w*$/u;
 
-const isParamSegment = (segment: string): boolean =>
+export const isParamSegment = (segment: string): boolean =>
   PARAM_SEGMENT.test(segment);
 
 /**
