@@ -1,8 +1,16 @@
+import { formFields, parseForm } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
 import type { ComponentProps } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
+import { z } from 'zod';
 
+import {
+  ActionForm,
+  fill,
+  memo,
+  MemoField,
+} from '../../../../.storybook/action-form';
 import { afterRenderingUpdate } from '../../../../.storybook/focus';
 import {
   finishPending,
@@ -198,5 +206,65 @@ export const ForwardsRef: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'focus' }));
 
     await expect(canvas.getByRole('switch')).toHaveFocus();
+  },
+};
+
+const notification = z.object({ notify: z.boolean(), memo });
+const notificationFields = formFields(notification);
+const received = fn();
+
+const NotificationForm = () => (
+  <ActionForm
+    fields={notificationFields}
+    onReceive={received}
+    serve={(data) => parseForm(notification, data)}
+  >
+    {(form) => {
+      const notify = form.field('notify');
+      return (
+        <>
+          <Switch
+            {...notify.input}
+            invalid={notify.invalid}
+            label="通知を受け取る"
+          />
+          <MemoField field={form.field('memo')} />
+        </>
+      );
+    }}
+  </ActionForm>
+);
+
+// @k8ordo/form の formFields を広げるだけでつながる
+export const WithForm: Story = {
+  render: () => <NotificationForm />,
+  play: async ({ canvas, userEvent }) => {
+    const memoField = () => canvas.getByLabelText('メモ', { exact: false });
+    const submit = () =>
+      userEvent.click(canvas.getByRole('button', { name: '送信' }));
+
+    // reset でオフに戻り、isDirty も下りる
+    await userEvent.click(canvas.getByText('通知を受け取る'));
+    await expect(await canvas.findByText('変更あり')).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'リセット' }));
+    await expect(canvas.getByRole('switch')).not.toBeChecked();
+    await expect(await canvas.findByText('変更なし')).toBeVisible();
+
+    // 送信に失敗しても、オンにした状態を描き直す
+    await userEvent.click(canvas.getByText('通知を受け取る'));
+    await fill(userEvent, memoField(), '却下');
+    await submit();
+    await expect(await canvas.findByText('却下されました')).toBeVisible();
+    await expect(canvas.getByRole('switch')).toBeChecked();
+
+    // オンにして送ると true が届く
+    await fill(userEvent, memoField(), 'よろしく');
+    await submit();
+    await waitFor(() =>
+      expect(received).toHaveBeenLastCalledWith({
+        notify: true,
+        memo: 'よろしく',
+      }),
+    );
   },
 };

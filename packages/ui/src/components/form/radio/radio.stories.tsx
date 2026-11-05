@@ -1,13 +1,22 @@
+import { formFields, parseForm } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import type { ComponentProps } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
+import { z } from 'zod';
 
+import {
+  ActionForm,
+  fill,
+  memo,
+  MemoField,
+} from '../../../../.storybook/action-form';
 import { afterRenderingUpdate } from '../../../../.storybook/focus';
 import {
   finishPending,
   PendingForm,
 } from '../../../../.storybook/pending-form';
+import { FormControl } from '../form-control';
 import { Radio } from './radio';
 
 import styles from './radio.stories.module.css';
@@ -177,5 +186,74 @@ export const Invalid: Story = {
       'aria-invalid',
       'true',
     );
+  },
+};
+
+const planChoice = z.object({
+  plan: z.enum(['free', 'pro'], 'プランを選んでください'),
+  memo,
+});
+const planChoiceFields = formFields(planChoice);
+const PLANS = [
+  { value: 'free', label: '無料' },
+  { value: 'pro', label: 'プロ' },
+];
+
+const PlanForm = () => (
+  <ActionForm
+    fields={planChoiceFields}
+    serve={(data) => parseForm(planChoice, data)}
+  >
+    {(form) => {
+      const plan = form.field('plan');
+      return (
+        <>
+          <FormControl
+            errorText={plan.error}
+            invalid={plan.invalid}
+            label="プラン"
+            labelAs="legend"
+            renderInput={(props) => (
+              <Radio {...props} {...plan.input} options={PLANS} />
+            )}
+            required={plan.required}
+          />
+          <MemoField field={form.field('memo')} />
+        </>
+      );
+    }}
+  </ActionForm>
+);
+
+// @k8ordo/form の formFields を広げるだけでつながる
+export const WithForm: Story = {
+  render: () => <PlanForm />,
+  play: async ({ canvas, userEvent }) => {
+    const radio = (name: string) => canvas.getByRole('radio', { name });
+    const memoField = () => canvas.getByLabelText('メモ', { exact: false });
+    const submit = () =>
+      userEvent.click(canvas.getByRole('button', { name: '送信' }));
+
+    // reset で選択を外し、isDirty も下りる
+    await userEvent.click(canvas.getByText('プロ'));
+    await expect(await canvas.findByText('変更あり')).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'リセット' }));
+    await expect(radio('プロ')).not.toBeChecked();
+    await expect(await canvas.findByText('変更なし')).toBeVisible();
+
+    // 選ばずに送ると zod の文言を出し、最初のラジオへフォーカスを移す
+    await fill(userEvent, memoField(), 'よろしく');
+    await submit();
+    await expect(
+      await canvas.findByText('プランを選んでください'),
+    ).toBeVisible();
+    await waitFor(() => expect(radio('無料')).toHaveFocus());
+
+    // 送信に失敗しても、選んだ値を描き直す
+    await userEvent.click(canvas.getByText('プロ'));
+    await fill(userEvent, memoField(), '却下');
+    await submit();
+    await expect(await canvas.findByText('却下されました')).toBeVisible();
+    await expect(radio('プロ')).toBeChecked();
   },
 };
