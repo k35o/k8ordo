@@ -92,7 +92,7 @@ export async function renderHtml(
       nonce,
     }));
   }
-  let payload: Promise<Payload> | undefined;
+  let reading: Promise<Payload> | undefined;
   let ready: Promise<void> | undefined;
   // 描く前に読むと、client 参照の preinit と preloadModule が Fizz の要求の外で
   // 出て捨てられる。描画の中で読み始めれば、その続きが要求の
@@ -109,20 +109,13 @@ export async function renderHtml(
   // モジュールを読んでいたかで head が変わらない
   function Root(): ReactNode {
     linkClientDeps(named);
-    payload ??= createFromReadableStream<Payload>(forHtml, { nonce });
-    const { notFound, pathname, search, tree } = use(payload);
-    ready ??= whenClientReady([tree, notFound], {
+    reading ??= createFromReadableStream<Payload>(forHtml, { nonce });
+    const payload = use(reading);
+    ready ??= whenClientReady([payload.tree, payload.notFound], {
       rows: import.meta.env.K8ORDO_MODE === 'static' ? 'wait' : 'follow',
     });
     use(ready);
-    return (
-      <AppRouter
-        notFound={notFound}
-        pathname={pathname}
-        search={search}
-        tree={tree}
-      />
-    );
+    return <AppRouter arrived={payload} />;
   }
   const shown = Promise.withResolvers<undefined>();
   let readerLeft = false;

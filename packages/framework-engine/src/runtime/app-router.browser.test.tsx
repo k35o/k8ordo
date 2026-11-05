@@ -89,6 +89,17 @@ connectAppRouter();
 const RUNNING = '/assets/index-running.js';
 const DEPLOYED = '/assets/index-deployed.js';
 
+/** The payload the document arrived with: `/`, rendered for the client this tab runs. */
+const documentPayload = (
+  tree: ReactNode,
+  rest: Partial<Payload> = {},
+): Payload => ({
+  pathname: '/',
+  tree,
+  client: RUNNING,
+  ...rest,
+});
+
 const passThrough = globalThis.fetch;
 
 // ペイロードは search を付けて頼まれる（search を読むページのため）ので、
@@ -194,7 +205,9 @@ afterEach(async () => {
 describe('a client navigation', () => {
   it('renders the next page when its payload was rendered for the client this document runs', async () => {
     answerWith({ tree: 'next page', pathname: '/next', client: RUNNING });
-    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+    const screen = await render(
+      <AppRouter arrived={documentPayload('first page')} />,
+    );
 
     await navigation.navigate('/next').finished;
 
@@ -204,7 +217,9 @@ describe('a client navigation', () => {
 
   it('loads the URL as a document instead when its payload was rendered for a client deployed since', async () => {
     answerWith({ tree: 'next page', pathname: '/next', client: DEPLOYED });
-    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+    const screen = await render(
+      <AppRouter arrived={documentPayload('first page')} />,
+    );
 
     // 文書が置き換わるので、このナビゲーションは終わらない。戻るときに
     // 中断されるのを、未処理の失敗にしない
@@ -223,7 +238,9 @@ describe('a client navigation', () => {
     rsc.imports = new Promise((resolve) => {
       imported = resolve;
     });
-    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+    const screen = await render(
+      <AppRouter arrived={documentPayload('first page')} />,
+    );
     navigation.navigate('/next').finished?.catch(() => undefined);
     await vi.waitFor(() => {
       expect(rsc.decoding).toBe(1);
@@ -246,7 +263,9 @@ describe('a client navigation', () => {
       { tree: 'not found page', pathname: '/nowhere', client: RUNNING },
       404,
     );
-    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+    const screen = await render(
+      <AppRouter arrived={documentPayload('first page')} />,
+    );
 
     await navigation.navigate('/nowhere').finished;
 
@@ -265,7 +284,9 @@ describe('a client navigation the answer cannot complete in place', () => {
     'loads the destination as a document when the host answers with %s',
     async (_, status) => {
       answerPayloadRequests(() => Promise.resolve(html(status)));
-      const screen = await render(<AppRouter pathname="/" tree="first page" />);
+      const screen = await render(
+        <AppRouter arrived={documentPayload('first page')} />,
+      );
 
       // 文書が置き換わるので、このナビゲーションは終わらない
       navigation.navigate('/next').finished?.catch(() => undefined);
@@ -283,7 +304,9 @@ describe('a client navigation the answer cannot complete in place', () => {
     answerPayloadRequests(() =>
       Promise.reject(new TypeError('Failed to fetch')),
     );
-    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+    const screen = await render(
+      <AppRouter arrived={documentPayload('first page')} />,
+    );
 
     navigation.navigate('/next').finished?.catch(() => undefined);
 
@@ -308,7 +331,9 @@ describe('a client navigation the answer cannot complete in place', () => {
         ),
       ),
     );
-    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+    const screen = await render(
+      <AppRouter arrived={documentPayload('first page')} />,
+    );
 
     navigation.navigate('/next').finished?.catch(() => undefined);
 
@@ -330,7 +355,9 @@ describe('a client navigation the answer cannot complete in place', () => {
         });
       });
     });
-    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+    const screen = await render(
+      <AppRouter arrived={documentPayload('first page')} />,
+    );
     navigation.navigate('/next').finished?.catch(() => undefined);
     await vi.waitFor(() => {
       expect(requested).toBe(1);
@@ -355,7 +382,9 @@ describe("a Server Action's answer", () => {
       client: RUNNING,
       returnValue: 'saved',
     });
-    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+    const screen = await render(
+      <AppRouter arrived={documentPayload('first page')} />,
+    );
 
     await expect(serverCallback()('action-id', [])).resolves.toBe('saved');
 
@@ -372,7 +401,9 @@ describe("a Server Action's answer", () => {
       client: DEPLOYED,
       returnValue: 'saved',
     });
-    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+    const screen = await render(
+      <AppRouter arrived={documentPayload('first page')} />,
+    );
 
     const outcome = serverCallback()('action-id', []);
 
@@ -473,7 +504,7 @@ describe('prefetching the page a link leads to', () => {
     async (_, intent) => {
       const requested = countPayloadRequests();
       const screen = await render(
-        <AppRouter pathname="/" tree={<a href="/next">next</a>} />,
+        <AppRouter arrived={documentPayload(<a href="/next">next</a>)} />,
       );
 
       intent(screen.getByRole('link').element());
@@ -490,7 +521,7 @@ describe('prefetching the page a link leads to', () => {
   it('fetches a page once however many times its link is touched', async () => {
     const requested = countPayloadRequests();
     const screen = await render(
-      <AppRouter pathname="/" tree={<a href="/next">next</a>} />,
+      <AppRouter arrived={documentPayload(<a href="/next">next</a>)} />,
     );
     const link = screen.getByRole('link').element();
 
@@ -503,7 +534,7 @@ describe('prefetching the page a link leads to', () => {
   it('hands what it fetched to one navigation only — the next visit fetches afresh', async () => {
     const requested = recordPayloadRequests();
     const screen = await render(
-      <AppRouter pathname="/" tree={<a href="/next">next</a>} />,
+      <AppRouter arrived={documentPayload(<a href="/next">next</a>)} />,
     );
     pointerOnto(screen.getByRole('link').element());
     await navigation.navigate('/next').finished;
@@ -559,7 +590,9 @@ describe('prefetching the page a link leads to', () => {
     ['a link to the page on screen', () => <a href="/?q=shoes">search</a>],
   ])('fetches nothing for %s', async (_, tree) => {
     const requested = countPayloadRequests();
-    const screen = await render(<AppRouter pathname="/" tree={tree()} />);
+    const screen = await render(
+      <AppRouter arrived={documentPayload(tree())} />,
+    );
     const link = screen.getByRole('link').element();
 
     for (const [, intent] of intents) intent(link);
@@ -572,14 +605,13 @@ describe('prefetching the page a link leads to', () => {
     const requested = countPayloadRequests();
     const screen = await render(
       <AppRouter
-        pathname="/"
-        tree={
+        arrived={documentPayload(
           <nav data-k8ordo-prefetch={false}>
             <a data-k8ordo-prefetch href="/next">
               next
             </a>
-          </nav>
-        }
+          </nav>,
+        )}
       />,
     );
 
@@ -592,7 +624,7 @@ describe('prefetching the page a link leads to', () => {
   it('drops what it fetched once a Server Action answers, which may have changed it', async () => {
     const requested = countPayloadRequests();
     const screen = await render(
-      <AppRouter pathname="/" tree={<a href="/next">next</a>} />,
+      <AppRouter arrived={documentPayload(<a href="/next">next</a>)} />,
     );
     pointerOnto(screen.getByRole('link').element());
     await nextTask();
@@ -606,7 +638,7 @@ describe('prefetching the page a link leads to', () => {
   it('asks again when the prefetch failed', async () => {
     const requested = countPayloadRequests(offlineAtFirst);
     const screen = await render(
-      <AppRouter pathname="/" tree={<a href="/next">next</a>} />,
+      <AppRouter arrived={documentPayload(<a href="/next">next</a>)} />,
     );
     pointerOnto(screen.getByRole('link').element());
     await nextTask();
@@ -628,16 +660,15 @@ describe('prefetching the page a link leads to', () => {
     });
     const screen = await render(
       <AppRouter
-        pathname="/"
-        tree={
+        arrived={documentPayload(
           // 動かしていない本物のポインタは (0, 0) にあり、左上に描いたリンクに
           // 重なる。戻ったあとで Chromium がホバーを計算し直すと本物の
           // pointerover が届き、先読みを正しくやり直す。数えたいのは遷移と
           // 戻りが頼んだものだけなので、本物のポインタはリンクに当てない
           <a href="/next" style={{ pointerEvents: 'none' }}>
             next
-          </a>
-        }
+          </a>,
+        )}
       />,
     );
     pointerOnto(screen.getByRole('link').element());
@@ -657,12 +688,11 @@ describe('prefetching the page a link leads to', () => {
     const requested = countPayloadRequests();
     await render(
       <AppRouter
-        pathname="/"
-        tree={
+        arrived={documentPayload(
           <a href="/next" style={{ pointerEvents: 'none' }}>
             next
-          </a>
-        }
+          </a>,
+        )}
       />,
     );
 
@@ -707,7 +737,9 @@ describe('under a base', () => {
 
   it('fetches the payload that sits beside the page under the base', async () => {
     const requested = recordPayloadRequests();
-    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+    const screen = await render(
+      <AppRouter arrived={documentPayload('first page')} />,
+    );
 
     await navigation.navigate('/site/next').finished;
 
@@ -717,7 +749,9 @@ describe('under a base', () => {
 
   it('leaves a URL outside the base to the browser', async () => {
     const requested = recordPayloadRequests();
-    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+    const screen = await render(
+      <AppRouter arrived={documentPayload('first page')} />,
+    );
 
     // 引き受けなければ文書の読み込みになってテストが落ちるので、ここでは
     // テストがルーターを演じる。引き受けなかったことは、取りに行かないことで見る
@@ -735,7 +769,7 @@ describe('under a base', () => {
   it('fetches a link below the base ahead, at the payload beside its page', async () => {
     const requested = recordPayloadRequests();
     const screen = await render(
-      <AppRouter pathname="/" tree={<a href="/site/next">next</a>} />,
+      <AppRouter arrived={documentPayload(<a href="/site/next">next</a>)} />,
     );
 
     pointerOnto(screen.getByRole('link').element());
@@ -747,7 +781,9 @@ describe('under a base', () => {
   it('fetches nothing ahead for a link outside the base', async () => {
     const requested = recordPayloadRequests();
     const screen = await render(
-      <AppRouter pathname="/" tree={<a href="/elsewhere">elsewhere</a>} />,
+      <AppRouter
+        arrived={documentPayload(<a href="/elsewhere">elsewhere</a>)}
+      />,
     );
 
     pointerOnto(screen.getByRole('link').element());
@@ -770,9 +806,10 @@ describe('a page that reads the search', () => {
     const asked = answerBySearch(searched);
     const screen = await render(
       <AppRouter
-        pathname={location.pathname}
-        search={location.search}
-        tree="first"
+        arrived={documentPayload('first', {
+          pathname: location.pathname,
+          search: location.search,
+        })}
       />,
     );
 
@@ -790,9 +827,10 @@ describe('a page that reads the search', () => {
     const requested = countPayloadRequests();
     await render(
       <AppRouter
-        pathname={location.pathname}
-        search={location.search}
-        tree={<p>first</p>}
+        arrived={documentPayload(<p>first</p>, {
+          pathname: location.pathname,
+          search: location.search,
+        })}
       />,
     );
 
@@ -804,7 +842,9 @@ describe('a page that reads the search', () => {
   it('leaves a page that does not read the search alone when it moves', async () => {
     const requested = countPayloadRequests();
     await render(
-      <AppRouter pathname={location.pathname} tree={<p>first</p>} />,
+      <AppRouter
+        arrived={documentPayload(<p>first</p>, { pathname: location.pathname })}
+      />,
     );
 
     await navigation.navigate(`${location.pathname}?q=shoes`, {
@@ -882,7 +922,7 @@ const held = (): {
 };
 
 const renderRouter = (tree: ReactNode = 'first page') =>
-  render(<AppRouter pathname="/" tree={tree} />, {
+  render(<AppRouter arrived={documentPayload(tree)} />, {
     createRootOptions: { onCaughtError: reportCaught },
   });
 
@@ -1093,7 +1133,9 @@ describe('the pathname a tree is applied for', () => {
     }));
     const next = held();
     answerByPathname({ '/next/index.rsc': next.answer });
-    await render(<AppRouter pathname="/" tree={<TreeProbe id="first" />} />);
+    await render(
+      <AppRouter arrived={documentPayload(<TreeProbe id="first" />)} />,
+    );
     await vi.waitFor(() => {
       expect(textOf('first')).toBe(first());
     });
@@ -1122,7 +1164,9 @@ describe('the pathname a tree is applied for', () => {
       returnValue: 'saved',
     }));
     answerWith({ $payload: 'answer' } as unknown as Payload);
-    await render(<AppRouter pathname="/" tree={<TreeProbe id="first" />} />);
+    await render(
+      <AppRouter arrived={documentPayload(<TreeProbe id="first" />)} />,
+    );
 
     await expect(serverCallback()('action-id', [])).resolves.toBe('saved');
 
@@ -1343,7 +1387,9 @@ describe('under a static build', () => {
 
   it('goes back to the page the document arrived as without asking for it', async () => {
     const requested = recordPayloadRequests();
-    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+    const screen = await render(
+      <AppRouter arrived={documentPayload('first page')} />,
+    );
     await navigation.navigate('/next').finished;
 
     await navigation.back().finished;
@@ -1354,7 +1400,9 @@ describe('under a static build', () => {
 
   it('shows a page visited before without asking for it again', async () => {
     const requested = recordPayloadRequests();
-    const screen = await render(<AppRouter pathname="/" tree="first page" />);
+    const screen = await render(
+      <AppRouter arrived={documentPayload('first page')} />,
+    );
     await navigation.navigate('/next').finished;
     await navigation.back().finished;
 
@@ -1401,12 +1449,11 @@ describe('under a static build', () => {
     // pointerover が届いて、先にホバーの先読みが走る
     await render(
       <AppRouter
-        pathname="/"
-        tree={
+        arrived={documentPayload(
           <a href="/next" style={{ pointerEvents: 'none' }}>
             next
-          </a>
-        }
+          </a>,
+        )}
       />,
     );
 
@@ -1420,12 +1467,11 @@ describe('under a static build', () => {
     const requested = countPayloadRequests();
     const screen = await render(
       <AppRouter
-        pathname="/"
-        tree={
+        arrived={documentPayload(
           <a href="/next" style={{ pointerEvents: 'none' }}>
             next
-          </a>
-        }
+          </a>,
+        )}
       />,
     );
     await twoFrames();
@@ -1447,12 +1493,11 @@ describe('under a static build', () => {
     // 一覧を読む前に本物のポインタのホバーで先読みが走らないよう、当てない
     const screen = await render(
       <AppRouter
-        pathname="/"
-        tree={
+        arrived={documentPayload(
           <a href="/next" style={{ pointerEvents: 'none' }}>
             next
-          </a>
-        }
+          </a>,
+        )}
       />,
     );
     await vi.waitFor(() => {

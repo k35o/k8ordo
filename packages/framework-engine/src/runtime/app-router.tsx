@@ -308,18 +308,11 @@ const INTENTS = ['pointerover', 'focusin', 'pointerdown'] as const;
  * renders `not-found.tsx` and this renders whatever came back.
  */
 export function AppRouter({
-  pathname,
-  search,
-  tree,
-  notFound,
+  arrived,
   reread,
 }: {
-  pathname: string;
-  /** The search the page was rendered with, when it reads the search. */
-  search?: string | undefined;
-  tree: ReactNode;
-  /** A shell's not-found, when the tree is a shell. */
-  notFound?: ReactNode | undefined;
+  /** The payload the document's HTML was rendered from. */
+  arrived: Payload;
   /**
    * The same payload read again, when the HTML was rendered for another
    * pathname than the browser's: hydration keeps what the server wrote, and
@@ -329,8 +322,8 @@ export function AppRouter({
   reread?: Promise<Payload> | undefined;
 }): ReactNode {
   const [latest, setLatest] = useState<Applied>(() => ({
-    tree,
-    notFound,
+    tree: arrived.tree,
+    notFound: arrived.notFound,
     order: 0,
     // payload の pathname は表の語で、殻では殻の pathname なので使わない
     pathname:
@@ -340,12 +333,11 @@ export function AppRouter({
   }));
   const current = useDeferredValue(latest);
   const [hydrating, setHydrating] = useState(reread !== undefined);
-  const arrived = useRef({ tree, pathname, search, notFound });
   const prefetched = useRef<PageCache<Payload | null>>(null);
   // The search the tree last applied was rendered with — `undefined` when its
   // page does not read the search, which is every page that did not declare
   // it. Only for such a page does a navigation that keeps the pathname load.
-  const searchApplied = useRef(search);
+  const searchApplied = useRef(arrived.search);
   // The trees applied whose requests may still be streaming.
   const streaming = useRef<Streaming[]>([]);
   // Navigations whose page has not arrived. The URL commits before the next
@@ -382,7 +374,7 @@ export function AppRouter({
           // 遷移が当てた木は、その URL のために描かれている
           if (previous.order !== 0) return previous;
           // 殻は fallback.tsx の notFound() で not-found に替わっていることがある
-          return previous.tree === tree
+          return previous.tree === arrived.tree
             ? { ...previous, tree: again.tree, notFound: again.notFound }
             : { ...previous, tree: again.notFound };
         });
@@ -391,7 +383,7 @@ export function AppRouter({
     return () => {
       unmounted.abort();
     };
-  }, [hydrating, reread, tree]);
+  }, [hydrating, reread, arrived.tree]);
 
   // A tree neither asked for nor on screen will never render again, so what
   // it is still receiving is cancelled.
@@ -489,12 +481,9 @@ export function AppRouter({
   // きたときに取り直さない
   useEffect(() => {
     if (!payloadsAreFiles()) return;
-    cacheIn(prefetched).keep(payloadUrlFor(new URL(location.href)), {
-      ...arrived.current,
-      client: documentClient ?? '',
-    });
+    cacheIn(prefetched).keep(payloadUrlFor(new URL(location.href)), arrived);
     void readClientFiles();
-  }, []);
+  }, [arrived]);
 
   // 粗いポインタにはホバーが無く、タップは押し始めとクリックがほぼ同時に
   // 来るので、先に取る間が無い。代わりに画面のリンクを取る。ファイルに限る
@@ -613,7 +602,7 @@ export function AppRouter({
   // `usePathname` until the browser can answer for itself.
   return (
     <Hydrating value={hydrating}>
-      <PathnameProvider pathname={pathname}>
+      <PathnameProvider pathname={arrived.pathname}>
         <NavigationGeneration value={generation}>
           <TreePathname value={current.pathname}>
             <Recover>

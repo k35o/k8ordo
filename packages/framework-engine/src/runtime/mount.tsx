@@ -41,13 +41,7 @@ export const mount = (
   return hydrateRoot(
     container,
     <DocumentRoot>
-      <AppRouter
-        notFound={payload.notFound}
-        pathname={payload.pathname}
-        reread={reread}
-        search={payload.search}
-        tree={payload.tree}
-      />
+      <AppRouter arrived={payload} reread={reread} />
     </DocumentRoot>,
     options,
   );
