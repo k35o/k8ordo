@@ -37,6 +37,12 @@ const t = m.theming;
 
 const DARK = `document.documentElement.classList.add('dark');`;
 
+const PRINT_CSS = `.deck {
+  print-color-adjust: exact;
+}`;
+
+const PRINT_TSX = `<div className={clsx(styles.deck, 'print-as-shown')}>{slides}</div>`;
+
 const CONTRAST = `.button[aria-pressed='true'] {
   background-color: var(--color-primary-bg-emphasize);
 
@@ -384,6 +390,17 @@ export default function Theming() {
             @k8ordo/color-scheme
           </LocaleAnchor>
           <Rich>{t.darkModeLibraryAfter()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection id="print" title={t.printTitle}>
+        <CodeBlock code={PRINT_CSS} lang="css" title="deck.module.css" />
+        <CodeBlock code={PRINT_TSX} lang="tsx" title="deck.tsx" />
+        <p>
+          <Rich>{t.printLight()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.printAsShown()}</Rich>
         </p>
       </DocSection>
 
