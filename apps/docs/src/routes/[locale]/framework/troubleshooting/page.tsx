@@ -82,12 +82,6 @@ const SYMPTOMS: readonly Symptom[] = [
     cause: t.renderCause,
     fix: t.renderFix,
   },
-  {
-    id: 'links',
-    title: t.linksTitle,
-    cause: t.linksCause,
-    fix: t.linksFix,
-  },
   { id: 'dev', title: t.devTitle, cause: t.devCause, fix: t.devFix },
   {
     id: 'status',
@@ -126,22 +120,10 @@ const SYMPTOMS: readonly Symptom[] = [
     fix: t.ownRedirectsFix,
   },
   {
-    id: 'vercel-redirects',
-    title: t.vercelRedirectsTitle,
-    cause: t.vercelRedirectsCause,
-    fix: t.vercelRedirectsFix,
-  },
-  {
     id: 'vercel-routes-server',
     title: t.vercelRoutesServerTitle,
     cause: t.vercelRoutesServerCause,
     fix: t.vercelRoutesServerFix,
-  },
-  {
-    id: 'vercel-header-key',
-    title: t.vercelHeaderKeyTitle,
-    cause: t.vercelHeaderKeyCause,
-    fix: t.vercelHeaderKeyFix,
   },
   {
     id: 'shell-html',

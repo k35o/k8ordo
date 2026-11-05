@@ -41,17 +41,12 @@ export const redirectPage = (to: string): string => {
 const filesOf = (named: readonly ClientDeps[]): Set<string> =>
   new Set(named.flatMap(({ js, css }) => [...js, ...css]));
 
-/**
- * What a client navigation links ahead of a page (`CLIENT_FILES_PATH`):
- * each page's files — what its client components need, by its payload's
- * path — less the files every document links, which the one the visitor
- * arrived on has loaded already. Sorted, so a build writes the same bytes
- * whatever order its pages rendered in.
- */
+/** What `CLIENT_FILES_PATH` lists: each page's files, by its payload's path. */
 export const clientFiles = (
   pages: ReadonlyMap<string, readonly ClientDeps[]>,
   documents: Iterable<readonly ClientDeps[]>,
 ): ClientFiles => {
+  // どの文書も読み込むものは、訪問者が着いた文書が読み込み済み
   let everywhere: Set<string> | undefined;
   for (const named of documents) {
     const files = filesOf(named);
@@ -66,6 +61,7 @@ export const clientFiles = (
         ] as const,
     )
     .filter(([, files]) => files.length > 0)
+    // 描いた順によらず、ビルドが毎回同じバイトを書くように並べる
     .toSorted(([a], [b]) => (a < b ? -1 : 1));
   const files = [...new Set(own.flatMap(([, listed]) => listed))].toSorted();
   const indexOf = new Map(files.map((file, index) => [file, index]));
@@ -239,15 +235,8 @@ const serialize = (
 };
 
 /**
- * The page as a file. The handler signed the framework's own inline scripts
- * — the payload, React's — with a nonce, and a file cannot carry one:
- * everyone reads the same file, so the nonce is taken off. With a policy,
- * what it signed is named by hash instead, in a `<meta>` ahead of everything
- * the page loads — behind only the charset React writes first in `<head>` —
- * and so is the framework's one `<style>`, which keeps the Server
- * Components' stylesheets first; an inline script of the application's is
- * the application's to allow, by its hash in that policy, and one that
- * reached the page from content is refused.
+ * The page as a file: without the nonce, which everyone reading the same file
+ * makes worth nothing, and with a policy, what it signed named by hash.
  */
 export const asFile = (
   html: string,
@@ -319,151 +308,4 @@ export const writtenOutsideScripts = (html: string): string[] => {
     if (end === -1) return written;
     from = end + 1;
   }
-};
-
-// React が属性の値に書く実体参照
-const REFERENCE = /&(?:amp|lt|gt|quot|#x27);/gu;
-const REFERENCED = new Map([
-  ['&amp;', '&'],
-  ['&lt;', '<'],
-  ['&gt;', '>'],
-  ['&quot;', '"'],
-  ['&#x27;', "'"],
-]);
-
-const attributeOf = (tag: string, name: string): string | undefined =>
-  new RegExp(`\\s${name}="([^"]*)"`, 'u')
-    .exec(tag)?.[1]
-    ?.replaceAll(REFERENCE, (reference) => REFERENCED.get(reference) ?? '');
-
-/**
- * What of the client components a page's payload names its HTML does not
- * link: a stylesheet not linked as one in `<head>`, a script neither
- * preloaded as a module there nor loaded by a `<script>` — by component,
- * only those missing something. A `<link>` written into a script's text, or
- * into `<body>`, links nothing before the page has run; React hoists every
- * resource of a page it waited for into `<head>`. With no `</head>`, the
- * whole document is its head.
- */
-export const unlinkedDeps = (
-  html: string,
-  named: readonly ClientDeps[],
-): ClientDeps[] => {
-  const outside = writtenOutsideScripts(html).join('');
-  const end = outside.indexOf('</head>');
-  const head = end === -1 ? outside : outside.slice(0, end);
-  const stylesheets = new Set<string>();
-  const modules = new Set<string>();
-  for (const [tag] of head.matchAll(/<link\b[^>]*>/gu)) {
-    const href = attributeOf(tag, 'href');
-    if (href === undefined) continue;
-    const rel = attributeOf(tag, 'rel');
-    if (rel === 'stylesheet') stylesheets.add(href);
-    if (rel === 'modulepreload') modules.add(href);
-  }
-  for (const [, attributes = ''] of html.matchAll(SCRIPT)) {
-    const src = attributeOf(attributes, 'src');
-    if (src !== undefined) modules.add(src);
-  }
-  return named
-    .map((component) => ({
-      ...component,
-      js: component.js.filter((href) => !modules.has(href)),
-      css: component.css.filter((href) => !stylesheets.has(href)),
-    }))
-    .filter(({ js, css }) => js.length > 0 || css.length > 0);
-};
-
-const counting = (count: number, one: string, many: string): string =>
-  `${String(count)} ${count === 1 ? one : many}`;
-
-/** How many files the message names, before it counts the rest. */
-const LISTED = 20;
-/** How many pages a file's line names, before it counts the rest. */
-const EXAMPLES = 3;
-
-const pagesOf = (pages: Iterable<string>): string => {
-  const sorted = [...pages].toSorted();
-  const named = sorted.slice(0, EXAMPLES).join(', ');
-  return `${counting(sorted.length, 'page', 'pages')} (${sorted.length > EXAMPLES ? `${named}, …` : named})`;
-};
-
-/**
- * The error a static build stops with when HTML it wrote does not link
- * what the client components its payload names need: `unlinked` holds, by
- * page (its pathname, `404.html`, a shell's location), what each component
- * misses, or `null` when the handler did not say; `report` asks for the
- * report. Each file is named once, with how many pages miss it, a few of
- * them and a component that needs it, the files most pages miss first and
- * only so many: a component's files include what the client entry loads,
- * so a failure across the site would otherwise repeat the same files for
- * every page and component, past what a report can carry.
- */
-export const unlinkedMessage = (
-  unlinked: ReadonlyMap<string, readonly ClientDeps[] | null>,
-  report: string,
-): string => {
-  const unsaid: string[] = [];
-  // 部品は参照で数える。export 名だけでは、別々のモジュールの default が 1 つになる
-  const missed = new Map<
-    string,
-    {
-      readonly pages: Set<string>;
-      readonly components: Map<string, string>;
-    }
-  >();
-  for (const [page, components] of unlinked) {
-    if (components === null) {
-      unsaid.push(page);
-      continue;
-    }
-    for (const { id, name, js, css } of components) {
-      for (const file of [...css, ...js]) {
-        const by = missed.get(file) ?? {
-          pages: new Set(),
-          components: new Map(),
-        };
-        by.pages.add(page);
-        by.components.set(`${id}#${name}`, name);
-        missed.set(file, by);
-      }
-    }
-  }
-  const files = [...missed].toSorted(
-    ([a, { pages: x }], [b, { pages: y }]) =>
-      y.size - x.size || (a < b ? -1 : 1),
-  );
-  const components = new Set(
-    files.flatMap(([, { components: needing }]) => [...needing.keys()]),
-  );
-  const summary = [
-    ...(files.length > 0
-      ? [
-          `${counting(unlinked.size - unsaid.length, 'HTML file misses', 'HTML files miss')} ${counting(files.length, 'file', 'files')} of ${counting(components.size, 'component', 'components')}`,
-        ]
-      : []),
-    ...(unsaid.length > 0
-      ? [
-          `the handler did not say what the payload of ${counting(unsaid.length, 'HTML file', 'HTML files')} names`,
-        ]
-      : []),
-  ];
-  return [
-    `static build wrote HTML that does not link everything the client components its payload names need: ${summary.join(', and ')}`,
-    report,
-    ...(unsaid.length > 0
-      ? [
-          `  ${pagesOf(unsaid)} — the handler did not say what its payload names`,
-        ]
-      : []),
-    ...files.slice(0, LISTED).map(([file, { pages, components: needing }]) => {
-      const [first = '', ...others] = [...needing.values()].toSorted();
-      return `  ${file} — ${pagesOf(pages)}, for ${first}${others.length > 0 ? ` and ${String(others.length)} more` : ''}`;
-    }),
-    ...(files.length > LISTED
-      ? [
-          `  … and ${counting(files.length - LISTED, 'more file', 'more files')}`,
-        ]
-      : []),
-  ].join('\n');
 };

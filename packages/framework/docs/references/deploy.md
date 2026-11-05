@@ -213,12 +213,10 @@ way `auto-trailing-slash` does, with nothing to set.
 ### Vercel
 
 Vercel never reads `_redirects`; `vercel()` writes the same rewrites as
-routes ([Deploying to Vercel](#deploying-to-vercel)). A build that runs on
-Vercel and writes shells without it says so:
-
-```
-k8ordo: this build runs on Vercel, which does not read _redirects — add vercel() from @k8ordo/framework/vercel, or the shells are never served
-```
+routes ([Deploying to Vercel](#deploying-to-vercel)). Without it the shells
+are never served there. With it the build still writes `_redirects`, for
+`serve` and `vite preview`, and says none of the warnings above: they are
+about how Cloudflare reads the file.
 
 ### Other hosts
 
@@ -647,13 +645,6 @@ What to keep in mind:
   `caseSensitive: true`, while the routes `vercel()` writes itself are
   case-sensitive, as the route table is. A route without it answers
   `/POSTS/first` as well.
-- **`has` names a header in lowercase**, as Vercel compares it. `vercel()`
-  refuses another spelling when it is called:
-
-  ```text
-  vercel() route ^/posts/([a-z0-9-]+)$ has the header key "Accept" — write it lowercase ("accept"), as Vercel compares it
-  ```
-
 - **Nothing else is checked.** The routes are written as given — under a
   `base` their `src` and `dest` carry it — and their patterns are Vercel's
   (PCRE), which JavaScript's `RegExp` would misjudge, so a mistake shows once

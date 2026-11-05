@@ -216,9 +216,9 @@ export const staticVercelTypes = message({
   en: 'A file a `route.ts` wrote is served with the `Content-Type` its `GET` returned, written per file in the `overrides` of `config.json`: a `blog/feed` without an extension gets the feed’s type rather than `application/octet-stream`. The type is written even when the extension says the same, so nothing rests on the type Vercel gives an extension. `vite preview` and `serve` go by the extension.',
 });
 
-export const staticVercelWarn = message({
-  ja: 'Vercelの上で`vercel()`の無いビルドがシェルを書くと、ビルドが警告します。そのままでは、シェルを返すものが無いためです。',
-  en: 'A build on Vercel that writes shells without `vercel()` warns: nothing would serve them.',
+export const staticVercelRedirects = message({
+  ja: '`vercel()`の無いビルドでは、Vercelの上でシェルを返すものがありません。`vercel()`のあるビルドも、`serve`と`vite preview`のために`_redirects`を書きます。Cloudflareがこのファイルをどう読むかの警告は出しません。',
+  en: 'Without `vercel()`, nothing serves the shells on Vercel. A build with it still writes `_redirects`, for `serve` and `vite preview`, and says none of the warnings about how Cloudflare reads the file.',
 });
 
 export const vercelRoutesTitle = message({
@@ -308,12 +308,8 @@ export const vercelRoutesMind = [
     en: 'Vercel matches `src` regardless of case unless the route says `caseSensitive: true`, while the routes `vercel()` writes itself are case-sensitive, as the route table is.',
   }),
   message({
-    ja: '`has`のヘッダーの`key`は小文字で書きます。ほかの書き方は`vercel()`を呼んだ時点でエラーになります。',
-    en: 'Write a `has` header’s `key` in lowercase. Another spelling is refused when `vercel()` is called.',
-  }),
-  message({
-    ja: 'ほかは検査しません。`base`の下でも渡したまま書くので、`src`と`dest`に`base`を含めます。パターンはVercelのもの（PCRE）で、間違いはデプロイして初めて分かるので、変更はプレビューのデプロイで先に確かめます。',
-    en: 'Nothing else is checked. The routes are written as given, so under a `base` their `src` and `dest` carry it, and their patterns are Vercel’s (PCRE): a mistake shows once deployed, so try a change on a preview deployment first.',
+    ja: 'ルートは検査しません。`base`の下でも渡したまま書くので、`src`と`dest`に`base`を含めます。パターンはVercelのもの（PCRE）で、間違いはデプロイして初めて分かるので、変更はプレビューのデプロイで先に確かめます。',
+    en: 'Nothing in the routes is checked. They are written as given, so under a `base` their `src` and `dest` carry it, and their patterns are Vercel’s (PCRE): a mistake shows once deployed, so try a change on a preview deployment first.',
   }),
   message({
     ja: 'serverモードでは受け取りません。ファイルの無いURLにはハンドラが答えるので、`guard.ts`や`route.ts`で返すものを決めます。渡すとビルドがエラーになります。',

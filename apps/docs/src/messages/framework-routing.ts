@@ -418,8 +418,8 @@ export const routeRefused = [
     en: 'A `route.ts` with pages below it',
   }),
   message({
-    ja: 'ビルドが自分で書くファイルと同じ場所に書く`route.ts`（`site`を渡したときの`sitemap.xml`、`not-found.tsx`があるときの`404.html`、シェルがあるときの`_redirects`、`client-files.json`、ページの`index.html`と`index.rsc`）。大文字と小文字だけが違う名前も、macOSとWindowsでは同じファイルになるので、どのOSでも止まります。エラー文が`route.ts`ともう一方の両方を挙げるので、どちらかを外します。`paths`で値をもらう`route.ts`なら、`paths`からその値を外します。`vite dev`は止まらず、パラメータの無い`route.ts`なら警告を出します',
-    en: 'A `route.ts` writing a file the build writes itself (`sitemap.xml` when `site` is given, `404.html` beside a `not-found.tsx`, `_redirects` when there are shells, `client-files.json`, a page’s `index.html` and `index.rsc`). Names that differ only in case are the same file on macOS and Windows, so they stop the build on every system. The error names the `route.ts` and the other side; remove one of them, or, for a `route.ts` given its value by `paths`, leave that value out of `paths`. `vite dev` does not stop, and warns when the URL has no params',
+    ja: 'ビルドが自分で書くファイルと同じ場所に書く`route.ts`（`site`を渡したときの`sitemap.xml`、`not-found.tsx`があるときの`404.html`、シェルがあるときの`_redirects`、`client-files.json`、ページの`index.html`と`index.rsc`）。エラー文が`route.ts`ともう一方の両方を挙げるので、どちらかを外します。`vite dev`は止まりません',
+    en: 'A `route.ts` writing a file the build writes itself (`sitemap.xml` when `site` is given, `404.html` beside a `not-found.tsx`, `_redirects` when there are shells, `client-files.json`, a page’s `index.html` and `index.rsc`). The error names the `route.ts` and the other side; remove one of them. `vite dev` does not stop',
   }),
 ] as const;
 

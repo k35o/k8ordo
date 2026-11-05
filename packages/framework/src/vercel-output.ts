@@ -1,11 +1,13 @@
-import { cp, rm, stat, writeFile } from 'node:fs/promises';
+import { cp, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { sharedDir } from '@k8ordo/framework-engine';
 import { withBase } from '@k8ordo/router';
 
+import { isParamSegment } from './paths';
 import type { Rewrite } from './rewrites';
 import type { StaticOutput } from './static';
+import { isFile } from './static-file';
 
 /**
  * A route as Vercel's Build Output API (v3) reads it, written to
@@ -32,7 +34,6 @@ export type VercelRoute = {
   readonly caseSensitive?: boolean;
   readonly has?: ReadonlyArray<{
     readonly type: 'header';
-    /** Lowercase, as Vercel compares it. */
     readonly key: string;
     readonly value?: string;
   }>;
@@ -84,9 +85,6 @@ const configFor = (base: string) => ({
   ],
 });
 
-/** A `from` placeholder of `_redirects`: one segment. */
-const PLACEHOLDER = /^:[A-Za-z]\w*$/u;
-
 /**
  * A `_redirects` rule as a route of Vercel's: `from` as an anchored regex —
  * a placeholder one segment, every literal run escaped whole, so it starts
@@ -101,7 +99,7 @@ const routeOf = (rule: Rewrite) => {
   let literal = '';
   for (const [index, segment] of rule.from.split('/').entries()) {
     const run = index === 0 ? segment : `/${segment}`;
-    if (index > 0 && PLACEHOLDER.test(segment)) {
+    if (index > 0 && isParamSegment(segment)) {
       source += `${RegExp.escape(`${literal}/`)}[^/]+`;
       literal = '';
     } else {
@@ -127,7 +125,8 @@ const routeOf = (rule: Rewrite) => {
  * gives an extension.
  */
 const staticConfigFor = (
-  { base, rewrites, notFound, types }: StaticOutput,
+  base: string,
+  { rewrites, notFound, types }: StaticOutput,
   { beforeFiles = [], beforeNotFound = [] }: VercelOptions,
 ) => ({
   version: 3,
@@ -175,15 +174,9 @@ const FUNCTION_CONFIG = {
  */
 const isCompressedCopy = async (file: string): Promise<boolean> => {
   const original = file.replace(/\.(?:br|gz)$/u, '');
-  if (original === file) return false;
-  try {
-    return (await stat(original)).isFile();
-  } catch {
-    return false;
-  }
+  return original !== file && (await isFile(original));
 };
 
-/** The nearest directory holding both. */
 const json = (value: unknown): string => `${JSON.stringify(value, null, 2)}\n`;
 
 /**
@@ -234,18 +227,23 @@ export const writeVercelOutput = async (
  * would serve it as a file.
  */
 export const writeStaticVercelOutput = async (
+  {
+    root,
+    client,
+    base,
+  }: { readonly root: string; readonly client: string; readonly base: string },
   output: StaticOutput,
   routes: VercelOptions = {},
 ): Promise<void> => {
-  const dir = path.join(output.root, '.vercel', 'output');
+  const dir = path.join(root, '.vercel', 'output');
   await rm(dir, { recursive: true, force: true });
-  const redirects = path.join(output.client, '_redirects');
-  await cp(output.client, path.join(dir, 'static', output.base), {
+  const redirects = path.join(client, '_redirects');
+  await cp(client, path.join(dir, 'static', base), {
     recursive: true,
     filter: (source) => source !== redirects,
   });
   await writeFile(
     path.join(dir, 'config.json'),
-    json(staticConfigFor(output, routes)),
+    json(staticConfigFor(base, output, routes)),
   );
 };

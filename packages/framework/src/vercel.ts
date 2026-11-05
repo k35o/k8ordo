@@ -2,7 +2,7 @@ import path from 'node:path';
 
 import type { Logger, Plugin } from 'vite';
 
-import type { StaticOutput } from './static';
+import type { StaticAdapter, StaticOutput } from './static';
 import { writeStaticVercelOutput, writeVercelOutput } from './vercel-output';
 import type { VercelOptions } from './vercel-output';
 
@@ -24,19 +24,19 @@ export type { VercelOptions, VercelRoute } from './vercel-output';
  */
 export const vercel = (options: VercelOptions = {}): Plugin => {
   const { beforeFiles, beforeNotFound } = options;
-  // Vercel は header の key を小文字で比べるので、大文字の key は黙って当たらない
-  // おそれがある。route は渡されたまま書くので、小文字に直さずに止める
-  for (const route of [...(beforeFiles ?? []), ...(beforeNotFound ?? [])]) {
-    for (const { key } of route.has ?? []) {
-      if (key !== key.toLowerCase()) {
-        throw new Error(
-          `vercel() route ${route.src} has the header key "${key}" — write it lowercase ("${key.toLowerCase()}"), as Vercel compares it`,
-        );
-      }
-    }
-  }
   let isStatic = false;
   let logger: Logger | undefined;
+  let root = '';
+  let base = '/';
+  let client = '';
+  const api: StaticAdapter = {
+    // 静的ビルドのページは k8ordo:static の buildApp が書き終えて初めて揃う。
+    // こちらの buildApp はその前にも後にも並びうるので、書き終えた側から呼ぶ
+    async writeStatic(output: StaticOutput): Promise<void> {
+      await writeStaticVercelOutput({ root, client, base }, output, options);
+      logger?.info('k8ordo: wrote .vercel/output');
+    },
+  };
   return {
     name: 'k8ordo:vercel',
     apply: 'build',
@@ -46,7 +46,11 @@ export const vercel = (options: VercelOptions = {}): Plugin => {
       isStatic = config.plugins.some(
         (plugin) => plugin.name === 'k8ordo:static',
       );
-      ({ logger } = config);
+      ({ logger, root, base } = config);
+      client = path.resolve(
+        root,
+        config.environments.client?.build.outDir ?? 'dist/client',
+      );
       if (
         !isStatic &&
         (beforeFiles !== undefined || beforeNotFound !== undefined)
@@ -57,14 +61,7 @@ export const vercel = (options: VercelOptions = {}): Plugin => {
       }
     },
 
-    // 静的ビルドのページは k8ordo:static の buildApp が書き終えて初めて揃う。
-    // こちらの buildApp はその前にも後にも並びうるので、書き終えた側から呼ぶ
-    api: {
-      async writeStatic(output: StaticOutput): Promise<void> {
-        await writeStaticVercelOutput(output, options);
-        logger?.info('k8ordo: wrote .vercel/output');
-      },
-    },
+    api,
 
     buildApp: {
       // After the RSC plugin's own buildApp, which builds every environment.

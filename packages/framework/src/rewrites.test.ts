@@ -8,6 +8,7 @@ import {
   formatRedirects,
   parseRedirects,
   rewriteFor,
+  rewritesAfterFiles,
   rulesOf,
   shellRules,
 } from './rewrites';
@@ -308,6 +309,39 @@ describe('builtRules', () => {
     const froms = new Set(rules.map((rule) => rule.from));
     for (const rule of rules)
       expect(froms.has(canonical(rule.from))).toBe(true);
+  });
+});
+
+describe('rewritesAfterFiles', () => {
+  it('answers the payload URL of a built URL that is not a page with the shell’s HTML, then the shells', () => {
+    expect(
+      rewritesAfterFiles(
+        [shellAt('/posts/:id', '/posts/:id')],
+        ['/posts/old', '/posts/feed.xml', '/about/old'],
+        '/site/',
+      ),
+    ).toStrictEqual([
+      { from: '/site/posts/feed.xml/index.rsc', to: '/site/posts/!fallback/' },
+      { from: '/site/posts/old/index.rsc', to: '/site/posts/!fallback/' },
+      { from: '/site/posts/:p1', to: '/site/posts/!fallback/' },
+      {
+        from: '/site/posts/:p1/index.rsc',
+        to: '/site/posts/!fallback/index.rsc',
+      },
+    ]);
+  });
+
+  it('keeps a payload URL whose spelling Cloudflare would read a placeholder in', () => {
+    expect(
+      rewritesAfterFiles(
+        [shellAt('/posts/:id', '/posts/:id')],
+        ['/posts/a:b'],
+        '/',
+      ).slice(0, 2),
+    ).toStrictEqual([
+      { from: '/posts/a%3Ab/index.rsc', to: '/posts/!fallback/' },
+      { from: '/posts/a:b/index.rsc', to: '/posts/!fallback/' },
+    ]);
   });
 });
 

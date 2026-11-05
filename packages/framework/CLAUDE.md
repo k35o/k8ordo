@@ -203,9 +203,10 @@ pnpm check         # check:write to auto-fix
   (a shared parameter position, or one URL the build did not write).
   `planRefusals` words every refusal; `vite dev` logs the same words.
 - **A shell is written only when its own pattern answered.** The build asks
-  the handler for each shell pathname, HTML and payload, and writes them
-  only on a 200 carrying `SHELL_HEADER` for that pattern; anything else
-  stops the build naming the location (a params schema, a `notFound()`,
+  the handler for each shell pathname, HTML and payload, and writes the
+  HTML only on a 200 carrying `SHELL_HEADER` for that pattern, and the
+  payload only on a 200 after it; anything else stops the build naming the
+  location (a params schema, a `notFound()`,
   another route). A shell is never in the sitemap. Its HTML
   outside scripts is searched for `!fallback`, which a layout writing its
   `pathname` leaves, and the build warns.
@@ -218,11 +219,16 @@ pnpm check         # check:write to auto-fix
   never from the output, which a build with `emptyOutDir: false` already
   merged); then the shells' document rules and payload rules, placeholders
   named by position. Targets are spelled as Cloudflare re-encodes them. The
-  build warns about what a host would get wrong reading it: Cloudflare's
-  static and dynamic limits, a built URL a rule cannot list, an own rule
-  that hides a shell, a Vercel build without `vercel()`. A `k8ordo:vercel`
-  plugin is handed `StaticOutput` through `api.writeStatic` once the files
-  are written.
+  build warns about what Cloudflare would get wrong reading it: its static
+  and dynamic limits, a built URL a rule cannot list, an own rule that hides
+  a shell. A host adapter — a plugin whose `api` has `writeStatic`, found by
+  that and not by name, so this package's static mode knows no host — is
+  handed `StaticOutput` once the files are written: the rewrites a host
+  applies after its files (`rewritesAfterFiles`, the built URLs' own rules
+  aside, and not the application's `public/_redirects`, which such a host
+  never reads), whether `404.html` was written, and the route.ts types. With
+  one, `_redirects` is still written, for `serve` and `vite preview`, and
+  none of the warnings is said.
 - **`vite dev` answers an unlisted value with the shell.** `k8ordo:static`'s
   `configureServer` (`pre`, so its middleware runs after Vite's own and
   before the RSC handler) rewrites a request a shell rule matches, for a
@@ -236,29 +242,25 @@ pnpm check         # check:write to auto-fix
   `NOT_FOUND_HEADER`, and the build names each kind in its own message.
 - **Under static mode a route.ts is a file.** The build calls its `GET` once
   per pathname (with `site`'s origin in the URL when given) and writes the
-  body at the pathname — `answeredByRoute` asks the declared patterns, in the
-  matcher's order, which of them answers. Anything but a `200` stops the
-  build, as do a route at `/` and a route with written pathnames below it (a
-  file cannot also be a directory). It is not a page: no `index.rsc`, not in
-  the sitemap. Nor may its file be one the build writes itself — a page's
-  or a redirect's `index.html`, a page's `index.rsc`, `404.html`,
-  `sitemap.xml` under `site`, `_redirects` with shells,
-  `client-files.json`: those are written
-  after the routes' files (a page's beside them), so one would replace the
-  other unseen, and `takenFiles` names each pair before anything renders.
-  It compares names without case, since macOS and Windows take two that
-  differ only in case for one file, and a build stops the same everywhere.
-  `vite dev` does not stop; it warns of the same from the tree
-  (`devRoutes`), for the patterns with no params only, since it calls
-  `paths` for nothing else. A file keeps no type, so the `Content-Type` its
+  body at the pathname — `answersOf` asks the declared patterns once, in the
+  matcher's order, which of them answers each pathname. Anything but a
+  `200` stops the build. It is not a page: no `index.rsc`, not in the
+  sitemap. Before anything renders, `routeFileRefusals` names in one error
+  each route.ts that cannot be its file: one at `/`, one with written
+  pathnames below it (a file cannot also be a directory), and one at a file
+  the build writes itself — a page's or a redirect's `index.html`, a page's
+  `index.rsc`, `404.html`, `sitemap.xml` under `site`, `_redirects` with
+  shells, `client-files.json`: those are written after the routes' files (a
+  page's beside them), so one would replace the other unseen. A file keeps
+  no type, so the `Content-Type` its
   `GET` answered is kept beside it — `StaticOutput.types`, by the file's path
   inside the client build — for the one adapter that can name a file's
   type; `serve`, `vite preview` and every other host go by the extension.
 - **A file never carries a nonce; the policy names hashes.** The handler
   signs the framework's inline scripts with a nonce per render and says it in
-  `NONCE_HEADER`; `write` takes it off every page (`asFile`) whether or not
-  a `csp` was given — a nonce in a file everyone reads is worth nothing, and
-  a random one would make every build differ. With `csp`, what that nonce
+  `NONCE_HEADER`; `writeHtml` takes it off every page (`asFile`) whether or
+  not a `csp` was given — a nonce in a file everyone reads is worth nothing,
+  and a random one would make every build differ. With `csp`, what that nonce
   signed is hashed into `script-src` of a `<meta>` placed first in `<head>`
   after the `<meta charSet>` React writes there (a browser looks for the
   encoding only in the first 1024 bytes, which a policy naming many hashes
@@ -279,49 +281,11 @@ pnpm check         # check:write to auto-fix
   defines) or one with `'strict-dynamic'` — under which the module script,
   allowed only by `'self'`, never loads — is refused when the plugin is
   created (`policyProblems`).
-- **A static build checks every HTML it writes against what its payload
-  named.** `write` reads the engine's `CLIENT_DEPS_HEADER` off each answer it
-  writes as HTML (one saying `NONCE_HEADER`: a page, `404.html`, a shell),
-  and `unlinkedDeps` compares it with the file as written: each client
-  component's stylesheets have to be a `<link rel="stylesheet">` in
-  `<head>`, its scripts a `<link rel="modulepreload">` there or a
-  `<script src>`. A `<link>` in a script's text or in `<body>` does not
-  count, nor does a stylesheet only preloaded; attribute values are read
-  back from React's entity references (a URL `renderBuiltUrl` gave a query
-  has its `&` written `&amp;`). A file missing one, or HTML whose answer did
-  not say (an engine that lost the header would otherwise turn the check
-  off for that page alone), stops the build once every file is written, in
-  the same error as the other kinds (`unlinkedMessage`): a line counting the
-  HTML files, the files they miss and the components that need them — by
-  reference, the header's id and export name, so two default exports are
-  two; one saying this is a bug in this package, where to report it, and
-  the versions of this package, `react` and `react-dom` (the React that
-  writes the links is the application's peer); then each file once, the
-  most missed first and at most 20, with how many pages miss it, a few of them
-  named as the other kinds name a page (its pathname, `404.html`, a shell's
-  location), and a component that needs it by its export's name. Each
-  component's files include what the client entry loads, so a failure
-  across a site would otherwise repeat those files for every page and
-  component, past what a report can carry. The engine links every file it
-  says (`packages/framework-engine/CLAUDE.md`), so what this catches is the
-  engine or React losing one, not a shape of the application. Nothing turns
-  it off: no application can fix what it names, and a false failure is as
-  much a bug to report. Not checked: server mode, which renders per
-  request, and `vite dev`, whose manifest names no files; the CSS of a
-  chunk a client component imports dynamically (`React.lazy`), which is not
-  among a reference's `deps`; a Server Component's CSS; a reference the
-  manifest does not list, which the RSC plugin gives no files.
-  `src/documents.test.ts` holds the reading and the message, its count of
-  two default exports and its length when every page fails included,
-  `src/static.test.ts` the error, and
-  `examples/static-basic`'s `build.test.ts` builds with the SSR's `preinit`
-  and `preloadModule` emptied, the RSC plugin's and the engine's, and sees
-  every page, `404.html` and both shells counted.
 - **A static build lists each page's client files beside the pages.**
   `client-files.json` (the engine's `CLIENT_FILES_PATH` and `ClientFiles`)
   is what a client navigation links ahead of a payload
-  (`packages/framework-engine/CLAUDE.md`). `write` hands back what each HTML
-  answer's `CLIENT_DEPS_HEADER` named (`named`), and `clientFiles`
+  (`packages/framework-engine/CLAUDE.md`). `writeHtml` hands back what each
+  HTML answer's `CLIENT_DEPS_HEADER` named (`named`), and `clientFiles`
   (`documents.ts`) keeps, per page with a payload, its references' `js` and
   `css` less the files every HTML document written links — pages,
   `404.html` and shells alike, since the visitor may have arrived on any of
@@ -332,7 +296,7 @@ pnpm check         # check:write to auto-fix
   browser asks for it at a value's URL). Written always, before
   `_redirects`, whose built rules then list it among the files a shell
   rule would catch; it is a file the build writes itself, so a `route.ts`
-  there is refused (`takenFiles`). `src/documents.test.ts` holds the
+  there is refused (`routeFileRefusals`). `src/documents.test.ts` holds the
   computation, `src/static.test.ts` the wiring and the refusal, and
   `examples/static-basic`'s `build.test.ts` the built list and the site
   that reads it.
@@ -345,7 +309,7 @@ pnpm check         # check:write to auto-fix
   slash is the router's `normalizePathname`, and decoding a pathname for the
   filesystem is the engine's `decodePathname`, which `serve` uses too.
 - **Pages are counted in the table's terms and asked for under the base.**
-  `urlFor` puts `builder.config.base` in front of every pathname the
+  `Render.urlFor` puts `builder.config.base` in front of every pathname the
   handler is asked for (HTML, payload, `404.html`) and of every sitemap
   `<loc>`, while files go to `dirFor(pathname)` inside the client build —
   the directory a host serves at the base. The `paths` option is in the
@@ -355,7 +319,8 @@ pnpm check         # check:write to auto-fix
   `order: 'post'` — and writes into the client build's own output directory,
   which Vite may hand over as an absolute path, so resolve it rather than
   joining. The refusals that need the compiled environments (the `/server`
-  importers and Server Actions) are said there, before anything is written.
+  importers and Server Actions) are said there, before anything is written,
+  in one error with what the plan and the route files refuse.
 - **The request's URL is the `Host` header and the path, written, never
   resolved.** `urlOf` writes the request target after `http://<Host>`; resolved
   against it instead, `//evil.test/x` is a URL on evil.test, and the handler's
@@ -395,7 +360,8 @@ pnpm check         # check:write to auto-fix
   the client and the function. Under `mode: 'static'` its own `buildApp`
   does nothing — placed first it would copy the client before a page is
   written — and `k8ordo:static` calls its `api.writeStatic` once every file
-  is in place: the client without `_redirects` (Vercel never reads it, and
+  is in place, which writes from the plugin's own resolved config (`root`,
+  the client's `outDir`, `base`): the client without `_redirects` (Vercel never reads it, and
   would serve it), no function, and the rewrites as routes after
   `handle: 'filesystem'` — the payload URL of a built non-page, the shells'
   documents (`…/index.html`, a trailing slash allowed) and payloads —
@@ -408,9 +374,8 @@ pnpm check         # check:write to auto-fix
   the shells' rewrites and `404.html`, so a catch-all of the application's
   never hides a shell. Only static mode takes them — `configResolved`
   refuses them under server mode, where the handler answers every URL no
-  file names — and the one thing checked in them is a `has` header key,
-  refused when `vercel()` is called unless lowercase: their patterns are
-  Vercel's (PCRE), which a check with JavaScript's `RegExp` would misjudge.
+  file names — and nothing in them is checked: their patterns are Vercel's
+  (PCRE), which a check with JavaScript's `RegExp` would misjudge.
   `vite dev`, `vite preview` and `serve` never apply them; an imitation of
   Vercel's routing nothing here can check against Vercel would be worse
   than none.
@@ -444,9 +409,9 @@ src/
                     shells and vite preview's static host
   paths.ts          patternsOf / patternsNeedingPaths / planPaths /
                     catchAllPatterns / catchAllPath / dirFor / isConcrete /
-                    answeredByRoute / shellPathname / shadowedShells /
-                    planRefusals — pure functions (supplied pathnames
-                    matched with URLPattern)
+                    fileAt / answersOf / shellPathname / shadowedShells /
+                    planRefusals / routeFileRefusals — pure functions
+                    (supplied pathnames matched with URLPattern)
   rewrites.ts       the _redirects rules: shellRules / builtRules /
                     formatRedirects / cloudflareCounts, and parseRedirects /
                     rewriteFor, which apply them — pure functions
@@ -457,11 +422,11 @@ src/
                     markup; clientFiles — the list a navigation links ahead
                     of a payload; asFile / policyProblems — a page as a file: its
                     nonce off, its Content-Security-Policy <meta> with the
-                    framework's hashes; unlinkedDeps / unlinkedMessage —
-                    what of its client components a page's HTML does not
-                    link, and the error that names it
+                    framework's hashes; writtenOutsideScripts — what a
+                    layout wrote into a shell, outside its scripts
   server.ts         ./server: the engine's redirect, response API, nonce and types — no Vite, no Node
-  static-file.ts    safeJoin — request pathname → path inside the build output (pure)
+  static-file.ts    safeJoin — request pathname → path inside the build output
+                    (pure); isFile
   encoding.ts       which content coding a request gets, what is worth compressing
   server-mode.ts    serverMode: the handler built with every dependency in it,
                     dist/server.js bundled from serve, and the client

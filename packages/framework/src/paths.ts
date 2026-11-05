@@ -1,4 +1,7 @@
+import { posix } from 'node:path';
+
 import {
+  CLIENT_FILES_PATH,
   declaredPatterns,
   decodePathname,
   FALLBACK_SEGMENT,
@@ -24,7 +27,7 @@ export const patternsOf = (dir: RouteDir): string[] =>
 /** A `:name` segment: a parameter a pattern, or a shell location, leaves open. */
 const PARAM_SEGMENT = /^:[A-Za-z_]\w*$/u;
 
-const isParamSegment = (segment: string): boolean =>
+export const isParamSegment = (segment: string): boolean =>
   PARAM_SEGMENT.test(segment);
 
 /**
@@ -43,6 +46,16 @@ export const isConcrete = (pattern: string): boolean =>
  */
 export const catchAllPatterns = (dir: RouteDir): string[] =>
   patternsOf(dir).filter((pattern) => pattern.endsWith('/*'));
+
+/** A table with more than one catch-all, which no static host can serve. */
+export const catchAllRefusals = (dir: RouteDir): string[] => {
+  const catchAlls = catchAllPatterns(dir);
+  return catchAlls.length > 1
+    ? [
+        `a static host answers every unknown URL from one file, so only one not-found.tsx can be represented — this table declares ${catchAlls.join(', ')}`,
+      ]
+    : [];
+};
 
 /**
  * A pathname the table can only answer with its catch-all, so the build can
@@ -503,21 +516,102 @@ export const dirFor = (pathname: string): string => {
   return decoded;
 };
 
-/**
- * What answers a pathname the build writes: the first declared pattern that
- * matches it, in the matcher's order. The catch-all never answers a pathname
- * the build was given.
- */
-export const answering = (
-  dir: RouteDir,
-  pathname: string,
-): DeclaredPattern | undefined =>
-  declaredPatterns(dir).find(
-    (each) =>
-      each.kind !== 'notFound' &&
-      new URLPattern({ pathname: each.pattern }).test({ pathname }),
-  );
+/** Where a pathname's file lands inside the client build, `/`-separated. */
+export const fileAt = (pathname: string, name = ''): string =>
+  posix.join(dirFor(pathname), name).slice(1);
 
-/** Whether a route.ts answers a pathname the build writes, rather than a page. */
-export const answeredByRoute = (dir: RouteDir, pathname: string): boolean =>
-  answering(dir, pathname)?.kind === 'route';
+/**
+ * What answers each pathname the build writes: the first declared pattern
+ * that matches it, in the matcher's order. The catch-all never answers a
+ * pathname the build was given.
+ */
+export const answersOf = (
+  dir: RouteDir,
+  pathnames: readonly string[],
+): Map<string, DeclaredPattern> => {
+  const declared = declaredPatterns(dir).filter(
+    (each) => each.kind !== 'notFound',
+  );
+  return new Map(
+    pathnames.flatMap((pathname) => {
+      const answer = declared.find((each) =>
+        new URLPattern({ pathname: each.pattern }).test({ pathname }),
+      );
+      return answer === undefined ? [] : [[pathname, answer] as const];
+    }),
+  );
+};
+
+/**
+ * Each route.ts the build cannot write as the file its GET answers, in one
+ * message: at `/`, below which every file goes; where something else is
+ * written below it; or where the build writes a file of its own, after the
+ * routes' files — a page's beside them — so one would replace the other
+ * without a word.
+ */
+export const routeFileRefusals = (
+  tree: RouteDir,
+  plan: PathPlan,
+  answers: ReadonlyMap<string, DeclaredPattern>,
+  {
+    site,
+    named,
+  }: { readonly site: boolean; readonly named: (file: string) => string },
+): string[] => {
+  const written = new Map<string, string>();
+  for (const [pathname, answer] of answers) {
+    if (answer.kind === 'route') continue;
+    const by = `${named(answer.file)} is written there`;
+    written.set(fileAt(pathname, 'index.html'), by);
+    if (answer.kind === 'page') written.set(fileAt(pathname, 'index.rsc'), by);
+  }
+  const notFound = declaredPatterns(tree).find(
+    (each) => each.kind === 'notFound',
+  );
+  if (notFound !== undefined) {
+    written.set('404.html', `${named(notFound.file)} is written there`);
+  }
+  if (site) written.set('sitemap.xml', 'the "site" option writes it');
+  written.set(
+    CLIENT_FILES_PATH.slice(1),
+    'the build lists there what each page’s client components need',
+  );
+  if (plan.shells.length > 0) {
+    const fallbacks = fallbackShapes(tree)
+      .filter((shape) =>
+        plan.shells.some((shell) => shell.pattern === shape.pattern),
+      )
+      .map((shape) => named(shape.file));
+    written.set(
+      '_redirects',
+      `the shells of ${fallbacks.join(', ')} are reached through it — rules of your own go in public/_redirects, which the build adds to its own`,
+    );
+  }
+  const directories = [
+    ...plan.paths,
+    ...plan.shells.map((shell) => shell.pathname),
+  ];
+  const lines = [...answers]
+    .flatMap(([pathname, answer]) => {
+      if (answer.kind !== 'route') return [];
+      const route = named(answer.file);
+      if (pathname === '/') {
+        return [`/: ${route}, and a static host serves / from index.html`];
+      }
+      const file = fileAt(pathname);
+      const by = written.get(file);
+      if (by !== undefined) return [`${file}: ${route}, and ${by}`];
+      const below = directories.find((each) => each.startsWith(`${pathname}/`));
+      return below === undefined
+        ? []
+        : [`${file}: ${route}, and ${below} is written below it`];
+    })
+    .toSorted();
+  return lines.length === 0
+    ? []
+    : [
+        `static build writes a route.ts as the file its GET answers, and these cannot be written — remove the route.ts, or what else is written there:\n${lines
+          .map((line) => `  ${line}`)
+          .join('\n')}`,
+      ];
+};

@@ -1,13 +1,11 @@
 import { mkdir, readdir, writeFile, readFile } from 'node:fs/promises';
 import type { ServerResponse } from 'node:http';
-import { createRequire } from 'node:module';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 import {
   CLIENT_DEPS_HEADER,
   CLIENT_FILES_PATH,
-  declaredPatterns,
   decodePathname,
   exportsOf,
   FALLBACK_SEGMENT,
@@ -45,31 +43,30 @@ import {
   policyProblems,
   redirectPage,
   sitemap,
-  unlinkedDeps,
-  unlinkedMessage,
   writtenOutsideScripts,
 } from './documents';
 import type { ContentSecurityPolicy } from './documents';
 import {
-  answeredByRoute,
-  answering,
+  answersOf,
   catchAllPath,
-  catchAllPatterns,
+  catchAllRefusals,
   dirFor,
-  isConcrete,
+  fileAt,
   patternsNeedingPaths,
-  patternsOf,
   planPaths,
   planRefusals,
+  routeFileRefusals,
   shadowedShells,
 } from './paths';
-import type { Shell } from './paths';
+import type { PathPlan, Shell } from './paths';
 import {
   builtRules,
   cloudflareCounts,
   cloudflareMatches,
   formatRedirects,
+  PLACEHOLDER,
   rewriteFor,
+  rewritesAfterFiles,
   rulesOf,
   shellRules,
 } from './rewrites';
@@ -124,32 +121,24 @@ type Handler = (request: Request) => Promise<Response>;
 
 /**
  * What a host adapter writes a static build from, once every file is in
- * place: `vercel()`'s `api.writeStatic` is handed it.
+ * place, besides the client build it publishes.
  */
 export type StaticOutput = {
-  readonly root: string;
-  /** The client build, absolute: the files to publish. */
-  readonly client: string;
-  readonly base: string;
-  /**
-   * The rewrites a host applies only when no file answers: the payload URL
-   * of a built URL that is not a page answered with HTML, then the shells'
-   * rules — `_redirects`' order, its built URLs' own rules aside.
-   */
+  /** `rewritesAfterFiles`. */
   readonly rewrites: readonly Rewrite[];
   /** Whether `404.html` was written. */
   readonly notFound: boolean;
   /**
    * The `Content-Type` each route.ts's `GET` answered with, by the file it
-   * wrote: its path inside `client`, `/`-separated. A `GET` that named none
-   * is not here.
+   * wrote: its path inside the client build, `/`-separated. A `GET` that
+   * named none is not here.
    */
   readonly types: ReadonlyMap<string, string>;
 };
 
-/** What the plugin `vercel()` adds lends the static build. */
-type VercelApi = {
-  readonly writeStatic?: (output: StaticOutput) => void | Promise<void>;
+/** What a host adapter's plugin lends the static build: `vercel()`'s. */
+export type StaticAdapter = {
+  readonly writeStatic: (output: StaticOutput) => void | Promise<void>;
 };
 
 /** What `vite dev` reads of the routes: the tree, and its shells' shapes. */
@@ -254,94 +243,6 @@ const reexportRefusal = (files: readonly string[]): string =>
 /** The route files whose exports static mode reads. */
 const READ_BY_NAME = new Set(['route', 'page']);
 
-/** Where a pathname's file lands inside the client build, `/`-separated. */
-const fileAt = (pathname: string, name = ''): string =>
-  path.posix.join(dirFor(pathname), name).slice(1);
-
-/**
- * Each route.ts whose file the build also writes for something else — a
- * page's or a redirect's HTML, a page's payload, `404.html`, `sitemap.xml`,
- * `_redirects` — as a line naming both. The build writes its own files after
- * the routes', and a page's beside them, so one would replace the other
- * without a word.
- */
-const takenFiles = (
-  tree: RouteDir,
-  pathnames: readonly string[],
-  {
-    site,
-    shells,
-    named,
-  }: {
-    readonly site: boolean;
-    /** The fallback.tsx files whose shells the build writes `_redirects` for. */
-    readonly shells: readonly string[];
-    readonly named: (file: string) => string;
-  },
-): string[] => {
-  // Keyed without case: macOS and Windows take `Sitemap.xml` and
-  // `sitemap.xml` for one file, and a build stops the same on every system.
-  const own = new Map<string, { readonly file: string; readonly by: string }>();
-  const claim = (file: string, by: string): void => {
-    own.set(file.toLowerCase(), { file, by });
-  };
-  const routes: Array<{
-    readonly file: string;
-    readonly route: string;
-    /** The pathname `paths` gave a route.ts with params. */
-    readonly supplied: string | undefined;
-  }> = [];
-  for (const pathname of pathnames) {
-    const answer = answering(tree, pathname);
-    if (answer?.kind === 'route') {
-      routes.push({
-        file: fileAt(pathname),
-        route: answer.file,
-        supplied: isConcrete(answer.pattern) ? undefined : pathname,
-      });
-    } else if (answer !== undefined) {
-      const page = `${named(answer.file)} is written there`;
-      claim(fileAt(pathname, 'index.html'), page);
-      if (answer.kind === 'page') claim(fileAt(pathname, 'index.rsc'), page);
-    }
-  }
-  const notFound = declaredPatterns(tree).find(
-    (each) => each.kind === 'notFound',
-  );
-  if (notFound !== undefined) {
-    claim('404.html', `${named(notFound.file)} is written there`);
-  }
-  if (site) claim('sitemap.xml', 'the "site" option writes it');
-  claim(
-    CLIENT_FILES_PATH.slice(1),
-    'the build lists there what each page’s client components need',
-  );
-  if (shells.length > 0) {
-    claim(
-      '_redirects',
-      `the shells of ${shells.map((file) => named(file)).join(', ')} are reached through it — rules of your own go in public/_redirects, which the build adds to its own`,
-    );
-  }
-  return routes
-    .flatMap(({ file, route, supplied }) => {
-      const taken = own.get(file.toLowerCase());
-      if (taken === undefined) return [];
-      const sameAs =
-        taken.file === file
-          ? ''
-          : ` (the same file as ${taken.file} on macOS and Windows)`;
-      const unlisted =
-        supplied === undefined ? '' : `; or leave ${supplied} out of "paths"`;
-      return [`${file}${sameAs}: ${named(route)}, and ${taken.by}${unlisted}`];
-    })
-    .toSorted();
-};
-
-const takenRefusal = (lines: readonly string[]): string =>
-  `static build writes a file of its own where these route.ts files write theirs, and one would replace the other — remove the route.ts, or what else writes the file:\n${lines
-    .map((line) => `  ${line}`)
-    .join('\n')}`;
-
 /**
  * Static mode: the same request handler the server mode runs per request is
  * called at build time — for each route's HTML and again for its payload —
@@ -363,18 +264,12 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
   let routesDir = '';
   let base = '/';
   let logger: Logger | undefined;
-  // The plugin list the RSC pipeline's registry is reached through, kept the
-  // way `root` is: empty until Vite resolves the config, which is before any
-  // module is compiled.
   let plugins: ResolvedConfig['plugins'] = [];
   // Who imports the request API, found while the environments build and
   // named once they have — no module graph lists an import by the specifier
   // it was written as.
   const serverImporters = new Set<string>();
 
-  // vite dev: what the routes and `paths` say, read once per change. `paths`
-  // is called only for an application with a fallback.tsx, and again only
-  // when the patterns handed to it changed.
   let routesRead: Promise<DevRoutes> | undefined;
   let shellsRead: Promise<DevShells> | undefined;
   let suppliedFor: string | undefined;
@@ -384,28 +279,11 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
   const fromRoot = (file: string): string =>
     path.relative(root, path.join(routesDir, file));
 
-  // A route.ts that `paths` gives its pathname is left to the build: vite dev
-  // calls `paths` only for an application with a fallback.tsx.
   const devRoutes = (): Promise<DevRoutes> =>
     (routesRead ??= (async () => {
       const { tree, problems } = parseRouteTree(await scanRoutes(routesDir));
       const failed = problems.length > 0;
-      const shapes = failed ? [] : fallbackShapes(tree);
-      const taken = failed
-        ? []
-        : takenFiles(
-            tree,
-            patternsOf(tree).filter((pattern) => isConcrete(pattern)),
-            {
-              site: options.site !== undefined,
-              shells: shapes.map((shape) => shape.file),
-              named: fromRoot,
-            },
-          );
-      if (taken.length > 0) {
-        logger?.warn(`k8ordo: the build will stop: ${takenRefusal(taken)}`);
-      }
-      return { tree, failed, shapes };
+      return { tree, failed, shapes: failed ? [] : fallbackShapes(tree) };
     })());
 
   const devShells = (): Promise<DevShells> =>
@@ -445,19 +323,6 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
    * can be tried locally. The URL is rewritten to the shell pathname before
    * the RSC plugin's handler reads it; everything else passes untouched.
    */
-  const answerUnbuilt = async (
-    request: Connect.IncomingMessage,
-    next: Connect.NextFunction,
-  ): Promise<void> => {
-    try {
-      await rewriteUnbuilt(request);
-    } catch (error) {
-      next(error);
-      return;
-    }
-    next();
-  };
-
   const rewriteUnbuilt = async (
     request: Connect.IncomingMessage,
   ): Promise<void> => {
@@ -465,10 +330,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
       return;
     }
     // RSC プラグインと同じく originalUrl を読む。base はそちらに残っている
-    const url = new URL(
-      request.originalUrl ?? request.url ?? '/',
-      'http://k8ordo.localhost',
-    );
+    const url = new URL(request.originalUrl ?? request.url ?? '/', ORIGIN);
     const own = withoutBase(url.pathname, base);
     if (own === null) {
       return;
@@ -530,9 +392,8 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
   /**
    * Writes `dist/client/_redirects` once every file is in place — the
    * built URLs a shell rule would also catch, the application's own rules
-   * from `public/_redirects`, then the shells' — and says what a host would
-   * get wrong reading it. Returns the rewrites a host adapter applies after
-   * its files: the payload URLs of built non-pages, then the shells'.
+   * from `public/_redirects`, then the shells' — and returns what Cloudflare
+   * would get wrong reading it.
    */
   const writeRedirects = async ({
     clientDir,
@@ -544,10 +405,8 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
     readonly shells: readonly Shell[];
     readonly notPages: readonly string[];
     readonly publicDir: string | null;
-  }): Promise<Rewrite[]> => {
-    const warn = (message: string): void => {
-      logger?.warn(message);
-    };
+  }): Promise<string[]> => {
+    const misread: string[] = [];
     const shellRewrites = shellRules(shells, base);
     // dist/client/ のものは、emptyOutDir: false なら前のビルドが重ねた後の
     // ファイルが残っている。アプリのものは public から読む
@@ -563,7 +422,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
     }
     const ownRules = own === null ? [] : rulesOf(own);
     const hiding = ownRules.flatMap(({ line, from }) => {
-      if (!from.includes('*') && !/:[A-Za-z]/u.test(from)) return [];
+      if (!from.includes('*') && !PLACEHOLDER.test(from)) return [];
       const hidden = shells.find((shell) =>
         cloudflareMatches(from, withBase(shell.pathname, base)),
       );
@@ -578,7 +437,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
               )} line "${line}" matches ${hidden.location} before its shell's rule, so that shell is never served`,
           ];
     });
-    for (const message of hiding) warn(message);
+    misread.push(...hiding);
     const built = builtRules(
       await filesBelow(clientDir),
       notPages,
@@ -589,8 +448,8 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
     for (const from of built.unlisted) {
       const read = from.includes('*')
         ? '"*" as a splat'
-        : `"${/:[A-Za-z]\w*/u.exec(from)?.[0] ?? ':'}" as a placeholder`;
-      warn(
+        : `"${PLACEHOLDER.exec(from)?.[0] ?? ':'}" as a placeholder`;
+      misread.push(
         `k8ordo: _redirects cannot list ${from} — Cloudflare and Netlify read ${read}, so on Cloudflare a shell answers it`,
       );
     }
@@ -598,22 +457,16 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
     await writeFile(path.join(clientDir, '_redirects'), text);
     const counted = cloudflareCounts(text);
     if (counted.static > 2000) {
-      warn(
+      misread.push(
         `k8ordo: _redirects has ${String(counted.static)} rules Cloudflare counts as static; it reads 2,000 and skips the rest, so a built page past them is answered by its shell there`,
       );
     }
     if (counted.dynamic > 100) {
-      warn(
+      misread.push(
         `k8ordo: _redirects has ${String(counted.dynamic)} rules Cloudflare counts as dynamic; it reads 100 and ignores the rest of the file — the shell payload rules go first (navigations to those values become document loads), then document rules (those values 404)`,
       );
     }
-    // ファイルが先に答えるホストには、ページでない URL のペイロードの規則だけが要る
-    return [
-      ...built.rules.filter(
-        (rule) => rule.from.endsWith('/index.rsc') && rule.to.endsWith('/'),
-      ),
-      ...shellRewrites,
-    ];
+    return misread;
   };
 
   const prerender: Plugin = {
@@ -635,9 +488,12 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
           )
           .catch(() => undefined);
         return () => {
-          server.middlewares.use((request, _response, next) => {
-            void answerUnbuilt(request, next);
-          });
+          server.middlewares.use(
+            middlewareOf(async (request) => {
+              await rewriteUnbuilt(request);
+              return false;
+            }),
+          );
         };
       },
     },
@@ -694,18 +550,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         );
         return true;
       };
-      server.middlewares.use((request, response, next) => {
-        void (async () => {
-          let answered: boolean;
-          try {
-            answered = await answeredHere(request, response);
-          } catch (error) {
-            next(error);
-            return;
-          }
-          if (!answered) next();
-        })();
-      });
+      server.middlewares.use(middlewareOf(answeredHere));
     },
 
     watchChange(file) {
@@ -784,396 +629,127 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
       order: 'post',
       async handler(builder) {
         const { tree } = parseRouteTree(await scanRoutes(routesDir));
-        const supplied =
-          (await options.paths?.(patternsNeedingPaths(tree))) ?? [];
-        const plan = planPaths(tree, supplied);
-        const catchAlls = catchAllPatterns(tree);
-        const unplanned = [
+        const plan = planPaths(
+          tree,
+          (await options.paths?.(patternsNeedingPaths(tree))) ?? [],
+        );
+        const answers = answersOf(tree, plan.paths);
+        // RSC の仕組みは action とリクエストの API をどちらのモードでもコンパイル
+        // するので、static で受けないと言えるのはビルドが断るときだけ
+        const actions = serverActionModules(builder.config);
+        const importers = [...serverImporters].toSorted();
+        const refusals = [
           ...planRefusals(
             plan,
             shadowedShells(tree, plan.shells, new Set(plan.paths)),
           ),
-          ...(catchAlls.length > 1
-            ? [
-                `a static host answers every unknown URL from one file, so only one not-found.tsx can be represented — this table declares ${catchAlls.join(', ')}`,
-              ]
-            : []),
-        ];
-        if (unplanned.length > 0) throw new Error(unplanned.join('\n\n'));
-
-        // A file cannot receive a POST. The RSC pipeline compiles an action
-        // in either mode, so the mode's promise only holds if the build says
-        // no — before writing an application whose form posts into nothing.
-        // The request API compiles in either mode as well, for the same
-        // reason refused by name.
-        const actions = serverActionModules(builder.config);
-        const importers = [...serverImporters].toSorted();
-        const unanswerable = [
+          ...catchAllRefusals(tree),
           ...(actions.length > 0 ? [actionRefusal(actions)] : []),
           ...(importers.length > 0 ? [serverImportRefusal(importers)] : []),
+          ...routeFileRefusals(tree, plan, answers, {
+            site: options.site !== undefined,
+            named: fromRoot,
+          }),
         ];
-        if (unanswerable.length > 0) {
-          throw new Error(unanswerable.join('\n\n'));
-        }
+        if (refusals.length > 0) throw new Error(refusals.join('\n\n'));
 
         const rscOut = builder.environments.rsc?.config.build.outDir;
         const client = builder.environments.client?.config;
         if (rscOut === undefined || client === undefined) {
           throw new Error('static build ran without the rsc/client builds');
         }
-
         // outDir はすでに絶対パスのことがあるので resolve で受ける
         const clientDir = path.resolve(root, client.build.outDir);
-        // ページは表の pathname で数え、ハンドラには base を付けた URL で頼む。
-        // 書き出す先は client/ の中の表の pathname（client/ が base に置かれる）
-        // With `site`, what a route.ts reads off its request is where the site
-        // is served — an RSS feed's links are absolute.
         const origin =
           options.site === undefined ? ORIGIN : new URL(options.site).origin;
-        const urlFor = (pathname: string): string =>
-          `${origin}${withBase(pathname, base)}`;
-        // A route.ts is written as the file its GET answers, at its pathname.
-        const byRoute = new Set(
-          plan.paths.filter((pathname) => answeredByRoute(tree, pathname)),
-        );
-        // 殻もディレクトリとして書くので、route.ts のファイルの下に来てはいけない
-        const directories = [
-          ...plan.paths,
-          ...plan.shells.map((shell) => shell.pathname),
-        ];
-        const unfileable = [...byRoute].flatMap((route) => {
-          if (route === '/') {
-            return [`${route} — a static host serves / from index.html`];
-          }
-          const below = directories.find((pathname) =>
-            pathname.startsWith(`${route}/`),
-          );
-          return below === undefined
-            ? []
-            : [`${route} — ${below} is written below it, as a directory`];
-        });
-        if (unfileable.length > 0) {
-          throw new Error(
-            `static build cannot write a route.ts as a file at ${unfileable.join('; ')}`,
-          );
-        }
-        const taken = takenFiles(tree, plan.paths, {
-          site: options.site !== undefined,
-          shells: fallbackShapes(tree)
-            .filter((shape) =>
-              plan.shells.some((shell) => shell.pattern === shape.pattern),
-            )
-            .map((shape) => shape.file),
-          named: fromRoot,
-        });
-        if (taken.length > 0) throw new Error(takenRefusal(taken));
-        const entry = path.resolve(root, rscOut, 'index.js');
-        const entryModule = (await import(pathToFileURL(entry).href)) as {
-          default: Handler;
+        const render: Render = {
+          handler: (
+            (await import(
+              pathToFileURL(path.resolve(root, rscOut, 'index.js')).href
+            )) as { default: Handler }
+          ).default,
+          clientDir,
+          urlFor: (pathname) => `${origin}${withBase(pathname, base)}`,
+          csp,
         };
-        const handler = entryModule.default;
-
-        // A supplied pathname the route's params schema refuses would be
-        // written as a 404 page under a URL the site claims to have. The
-        // handler answers it the way it answers any unknown URL; here that
-        // answer is a build error naming the pathname.
-        const refused: string[] = [];
-        // The same for a page that said notFound(): the pathname was supplied
-        // for a page the application then disowned.
-        const disowned: string[] = [];
-        // A page that threw while rendering: the handler answers 500 with
-        // the message, and a build that wrote it would ship the failure.
-        const failed: string[] = [];
-        // What was written as a redirect rather than a page.
-        const redirected = new Set<string>();
-        // A route.ts whose GET did not answer with something to write.
-        const unanswered: string[] = [];
-        // What a page's HTML does not link of the client components its
-        // payload names, by page.
-        const unlinkedPages = new Map<string, Written['unlinked']>();
-        const unlinks = (page: string, missing: Written['unlinked']): void => {
-          if (missing === null || missing.length > 0) {
-            unlinkedPages.set(page, missing);
-          }
-        };
-        // The type each route.ts's GET answered with, by the file it wrote.
-        const types = new Map<string, string>();
-        // What the payload of every HTML document written names, and of each
-        // page by its payload's URL path: what CLIENT_FILES_PATH lists.
-        const documents: Array<readonly ClientDeps[]> = [];
-        const pageFiles = new Map<string, readonly ClientDeps[]>();
-        await inParallel(
-          plan.paths.flatMap((pathname) => {
-            if (byRoute.has(pathname)) {
-              return [
-                async () => {
-                  const file = path.join(clientDir, dirFor(pathname));
-                  const { status, type } = await writeRoute(
-                    file,
-                    handler,
-                    urlFor(pathname),
-                  );
-                  if (status !== 200) {
-                    unanswered.push(`${pathname} (${String(status)})`);
-                  } else if (type !== null) {
-                    types.set(
-                      path.relative(clientDir, file).split(path.sep).join('/'),
-                      type,
-                    );
-                  }
-                },
-              ];
-            }
-            // The URL keeps its escapes; only the file name is decoded.
-            const dir = path.join(clientDir, dirFor(pathname));
-            return [
-              async () => {
-                const { status, notFound, unlinked, named } = await write(
-                  path.join(dir, 'index.html'),
-                  handler,
-                  urlFor(pathname),
-                  csp,
-                  { notFoundIsPage: false },
-                );
-                unlinks(pathname, unlinked);
-                if (named !== null) documents.push(named);
-                if (status === 404) {
-                  (notFound ? disowned : refused).push(pathname);
-                }
-                if (status === 500) failed.push(pathname);
-                if (status === 307 || status === 308) redirected.add(pathname);
-                // Only a page has a payload. A client navigation to a redirect
-                // finds nothing at index.rsc and hands the URL to the browser,
-                // which loads the HTML above and follows it.
-                if (status === 200) {
-                  const payload = urlFor(payloadPathFor(pathname));
-                  await write(
-                    path.join(dir, 'index.rsc'),
-                    handler,
-                    payload,
-                    csp,
-                    {
-                      notFoundIsPage: false,
-                    },
-                  );
-                  // The payload is the render the HTML was: it names the same.
-                  // Keyed as a browser's URL spells the path.
-                  if (named !== null) {
-                    pageFiles.set(new URL(payload).pathname, named);
-                  }
-                }
-              },
-            ];
-          }),
-        );
-        // A static host answers an unknown URL from a file, so the
-        // application's own not-found has to be one — otherwise declaring it
-        // would mean nothing in this mode.
-        const unmatched = catchAllPath(tree);
-        if (unmatched !== null) {
-          const { status, unlinked, named } = await write(
-            path.join(clientDir, '404.html'),
-            handler,
-            urlFor(unmatched),
-            csp,
-            { notFoundIsPage: true },
-          );
-          unlinks('404.html', unlinked);
-          if (named !== null) documents.push(named);
-          if (status === 500) failed.push('404.html');
-        }
-
-        // A value the build did not write is answered by its fallback.tsx's
-        // shell: rendered once for the shell pathname, HTML and payload,
-        // where a host's rule finds it. Only an answer that says it is this
-        // pattern's shell is written — the table walks in its own order.
+        const notFoundAt = catchAllPath(tree);
         const fallbacks = new Map(
           fallbackShapes(tree).map((shape) => [shape.pattern, shape.file]),
         );
-        const shellRefused: string[] = [];
-        const shellDisowned: string[] = [];
-        const shellTaken: string[] = [];
-        await inParallel(
-          plan.shells.map((shell) => async () => {
-            const dir = path.join(clientDir, dirFor(shell.pathname));
-            const answered = await write(
-              path.join(dir, 'index.html'),
-              handler,
-              urlFor(shell.pathname),
-              csp,
-              { notFoundIsPage: false, shell: shell.pattern },
-            );
-            const named = `${shell.location} (${fallbacks.get(shell.pattern) ?? ''})`;
-            unlinks(shell.location, answered.unlinked);
-            if (answered.named !== null) documents.push(answered.named);
-            if (answered.status === 500) {
-              failed.push(shell.location);
-            } else if (answered.status === 404) {
-              (answered.notFound ? shellDisowned : shellRefused).push(
-                shell.location,
-              );
-            } else if (answered.shell === null) {
-              shellTaken.push(
-                `the shell for ${named} was answered by another route, which took "${FALLBACK_SEGMENT}" as a value`,
-              );
-            } else if (answered.shell === shell.pattern) {
-              await write(
-                path.join(dir, 'index.rsc'),
-                handler,
-                urlFor(payloadPathFor(shell.pathname)),
-                csp,
-                { notFoundIsPage: false, shell: shell.pattern },
-              );
-            } else {
-              shellTaken.push(
-                `the shell for ${named} was answered by ${fallbacks.get(answered.shell) ?? answered.shell}, which the table tries first — supply shell locations that pattern cannot match`,
-              );
-            }
-          }),
-        );
-        // Each kind is a different mistake, and fixing one should not be
-        // what reveals the next.
-        const unwritten = [
-          ...(failed.length > 0
-            ? [
-                `static build could not render ${failed.toSorted().join(', ')} — see the error above`,
-              ]
-            : []),
-          ...(unlinkedPages.size > 0
-            ? [unlinkedMessage(unlinkedPages, bugReport())]
-            : []),
-          ...(unanswered.length > 0
-            ? [
-                `static build writes a route.ts from a GET that answers 200, and these did not: ${unanswered.toSorted().join(', ')}`,
-              ]
-            : []),
-          ...(refused.length > 0
-            ? [
-                `the "paths" option supplied pathnames a params schema refused: ${refused.toSorted().join(', ')}`,
-              ]
-            : []),
-          ...(disowned.length > 0
-            ? [
-                `the "paths" option supplied pathnames whose page called notFound(): ${disowned.toSorted().join(', ')}`,
-              ]
-            : []),
-          ...(shellRefused.length > 0
-            ? [
-                `the "paths" option supplied shell locations a params schema refused: ${shellRefused.toSorted().join(', ')}`,
-              ]
-            : []),
-          ...(shellDisowned.length > 0
-            ? [
-                shellDisowned
-                  .toSorted()
-                  .map(
-                    (location) =>
-                      `the shell for ${location} called notFound() while it rendered, and a shell has no value to disown — call notFound() from the client component that reads the value in the browser`,
-                  )
-                  .join('\n'),
-              ]
-            : []),
-          ...(shellTaken.length > 0 ? [shellTaken.toSorted().join('\n')] : []),
+        const rendered = [
+          ...(await inParallel(
+            plan.paths.map(
+              (pathname) => () =>
+                answers.get(pathname)?.kind === 'route'
+                  ? renderRoute(render, pathname)
+                  : renderPage(render, pathname),
+            ),
+          )),
+          ...(notFoundAt === null
+            ? []
+            : [await renderNotFound(render, notFoundAt)]),
+          ...(await inParallel(
+            plan.shells.map(
+              (shell) => () => renderShell(render, shell, fallbacks),
+            ),
+          )),
         ];
-        if (unwritten.length > 0) throw new Error(unwritten.join('\n\n'));
+        const failures = failureMessages(rendered);
+        if (failures.length > 0) throw new Error(failures.join('\n\n'));
 
-        // Every layout renders a shell with the shell pathname as `pathname`.
-        // What one wrote of it into the page is the same for every value the
-        // shell answers — a link, a canonical URL — so the build says so.
-        const leaking = await Promise.all(
-          plan.shells.map(async (shell) => {
-            const html = await readFile(
-              path.join(clientDir, dirFor(shell.pathname), 'index.html'),
-              'utf8',
-            );
-            return writtenOutsideScripts(html).some((written) =>
-              written.includes(FALLBACK_SEGMENT),
-            )
-              ? [shell.location]
-              : [];
-          }),
-        );
-        for (const location of leaking.flat()) {
+        for (const location of await leakingShells(clientDir, plan.shells)) {
           builder.config.logger.warn(
             `k8ordo: the shell for ${location} has "${FALLBACK_SEGMENT}" in its HTML — a layout wrote the shell's pathname into the page (a link, a canonical URL); derive what depends on the URL in a client component`,
           );
         }
-
-        await writeFile(
-          path.join(clientDir, CLIENT_FILES_PATH.slice(1)),
-          JSON.stringify(clientFiles(pageFiles, documents)),
+        await writeClientFiles(clientDir, rendered);
+        const notPages = rendered.flatMap((each) =>
+          each.kind === 'route' || each.kind === 'redirect'
+            ? [each.pathname]
+            : [],
         );
-
-        // The build knows every page it wrote, which is what a sitemap is.
-        // Redirects and route.ts files are not pages, a not-found is not a
-        // URL to offer, and a shell is not one either — it stands for values
-        // the build never saw.
         if (options.site !== undefined) {
-          await writeFile(
-            path.join(clientDir, 'sitemap.xml'),
-            sitemap(
-              options.site,
-              plan.paths
-                .filter(
-                  (pathname) =>
-                    !redirected.has(pathname) && !byRoute.has(pathname),
-                )
-                .map((pathname) => withBase(pathname, base)),
-            ),
+          await writeSitemap(
+            clientDir,
+            options.site,
+            plan.paths
+              .filter((pathname) => !notPages.includes(pathname))
+              .map((pathname) => withBase(pathname, base)),
           );
         }
-
-        const rewrites =
-          plan.shells.length === 0
-            ? []
-            : await writeRedirects({
-                clientDir,
-                shells: plan.shells,
-                notPages: [...redirected, ...byRoute],
-                publicDir:
-                  client.build.copyPublicDir && builder.config.publicDir !== ''
-                    ? builder.config.publicDir
-                    : null,
-              });
-
-        const vercel = builder.config.plugins.find(
-          (plugin) => plugin.name === 'k8ordo:vercel',
-        );
-        // Vite の型では api は any なので、静的ビルドが呼ぶ形をここで言う
-        const writeStatic = (vercel?.api as VercelApi | undefined)?.writeStatic;
-        if (writeStatic !== undefined) {
-          await writeStatic({
-            root,
-            client: clientDir,
-            base,
-            rewrites,
-            notFound: unmatched !== null,
-            types,
+        const adapter = adapterOf(builder.config.plugins);
+        if (plan.shells.length > 0) {
+          const misread = await writeRedirects({
+            clientDir,
+            shells: plan.shells,
+            notPages,
+            publicDir:
+              client.build.copyPublicDir && builder.config.publicDir !== ''
+                ? builder.config.publicDir
+                : null,
           });
-        } else if (
-          vercel === undefined &&
-          process.env.VERCEL !== undefined &&
-          plan.shells.length > 0
-        ) {
-          builder.config.logger.warn(
-            'k8ordo: this build runs on Vercel, which does not read _redirects — add vercel() from @k8ordo/framework/vercel, or the shells are never served',
-          );
+          // アダプタのあるホストは _redirects を読まない。それでも書くのは
+          // vite preview と serve のため
+          if (adapter === undefined) {
+            for (const message of misread) builder.config.logger.warn(message);
+          }
         }
+        await adapter?.writeStatic({
+          rewrites: rewritesAfterFiles(plan.shells, notPages, base),
+          notFound: notFoundAt !== null,
+          types: typesOf(rendered),
+        });
 
-        const shells =
-          plan.shells.length === 0
-            ? ''
-            : `, ${String(plan.shells.length)} ${plan.shells.length === 1 ? 'shell' : 'shells'} (${plan.shells.map((shell) => shell.location).join(', ')})`;
         builder.config.logger.info(
-          `k8ordo: wrote ${String(plan.paths.length)} routes${shells}${unmatched === null ? '' : ' and 404.html'}${options.site === undefined ? '' : ' and sitemap.xml'}${plan.shells.length === 0 ? '' : ' and _redirects'}`,
+          `k8ordo: wrote ${summaryOf(plan, {
+            notFound: notFoundAt !== null,
+            sitemap: options.site !== undefined,
+          })}`,
         );
       },
     },
   };
 
-  // What only a running server can have is refused before anything is built.
-  // Server Actions are the exception: the RSC pipeline finds them only while
-  // it compiles, so the build names them once it has.
   const refuse: Plugin = {
     name: 'k8ordo:static-refuses',
     buildApp: {
@@ -1212,22 +788,39 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
 };
 
 /**
- * Where a bug in the HTML is reported, and what the report names: this
- * package, and the React that rendered the HTML — a peer, whichever version
- * the application installed.
+ * A Connect middleware from a step that says whether it answered the request
+ * — Connect awaits nothing, so a step that rejects reaches `next` this way.
  */
-const bugReport = (): string => {
-  const required = createRequire(import.meta.url);
-  const manifestOf = (name: string): Record<string, unknown> =>
-    required(`${name}/package.json`) as Record<string, unknown>;
-  const { bugs } = manifestOf('@k8ordo/framework') as {
-    readonly bugs: { readonly url: string };
+const middlewareOf =
+  (
+    answered: (
+      request: Connect.IncomingMessage,
+      response: ServerResponse,
+    ) => Promise<boolean>,
+  ): Connect.NextHandleFunction =>
+  (request, response, next) => {
+    void (async () => {
+      let done: boolean;
+      try {
+        done = await answered(request, response);
+      } catch (error) {
+        next(error);
+        return;
+      }
+      if (!done) next();
+    })();
   };
-  const versions = ['@k8ordo/framework', 'react', 'react-dom'].map(
-    (name) => `${name} ${String(manifestOf(name).version)}`,
-  );
-  return `This is a bug in @k8ordo/framework, not in this application: report it at ${bugs.url} with this message (${versions.join(', ')})`;
-};
+
+/** The host adapter among the plugins, if any. */
+const adapterOf = (
+  plugins: ResolvedConfig['plugins'],
+): StaticAdapter | undefined =>
+  plugins
+    // Vite の型では api は any なので、静的ビルドが呼ぶ形をここで言う
+    .map((plugin) => plugin.api as Partial<StaticAdapter> | undefined)
+    .find(
+      (api): api is StaticAdapter => typeof api?.writeStatic === 'function',
+    );
 
 /**
  * A render is a whole page: components, their data, and whatever the app's
@@ -1238,19 +831,275 @@ const bugReport = (): string => {
  */
 const WIDTH = 8;
 
-const inParallel = async (
-  tasks: ReadonlyArray<() => Promise<unknown>>,
-): Promise<void> => {
+const inParallel = async <T>(
+  tasks: ReadonlyArray<() => Promise<T>>,
+): Promise<T[]> => {
+  const results: T[] = [];
   let next = 0;
   const worker = async (): Promise<void> => {
-    for (let task = tasks[next++]; task !== undefined; task = tasks[next++]) {
+    for (let at = next++; at < tasks.length; at = next++) {
       // A worker is sequential on purpose — that is what bounds the width.
-      await task();
+      results[at] = await (tasks[at] as () => Promise<T>)();
     }
   };
   await Promise.all(
     Array.from({ length: Math.min(WIDTH, tasks.length) }, worker),
   );
+  return results;
+};
+
+/** What the build asks the handler with, and where it writes the answers. */
+type Render = {
+  readonly handler: Handler;
+  /** The client build, absolute. */
+  readonly clientDir: string;
+  /** A pathname in the table's terms as the URL the handler is asked for. */
+  readonly urlFor: (pathname: string) => string;
+  readonly csp: ContentSecurityPolicy | undefined;
+};
+
+/** What stops the build, by kind; `FAILURES` words each. */
+type Failure = keyof typeof FAILURES;
+
+/** What writing one pathname, `404.html` or a shell came to. */
+type Rendered =
+  | {
+      readonly kind: 'failure';
+      readonly failure: Failure;
+      /** How the message names it. */
+      readonly name: string;
+    }
+  | {
+      readonly kind: 'route';
+      readonly pathname: string;
+      /** The `Content-Type` its `GET` answered with. */
+      readonly type: string | null;
+    }
+  | { readonly kind: 'redirect'; readonly pathname: string }
+  | {
+      readonly kind: 'document';
+      /** `null` when the handler did not say. */
+      readonly named: readonly ClientDeps[] | null;
+      /** A page's payload, as a browser's URL spells its path. */
+      readonly payload: string | null;
+    };
+
+const FAILURES = {
+  render: (names: readonly string[]) =>
+    `static build could not render ${names.join(', ')} — see the error above`,
+  route: (names: readonly string[]) =>
+    `static build writes a route.ts from a GET that answers 200, and these did not: ${names.join(', ')}`,
+  refused: (names: readonly string[]) =>
+    `the "paths" option supplied pathnames a params schema refused: ${names.join(', ')}`,
+  disowned: (names: readonly string[]) =>
+    `the "paths" option supplied pathnames whose page called notFound(): ${names.join(', ')}`,
+  shellRefused: (names: readonly string[]) =>
+    `the "paths" option supplied shell locations a params schema refused: ${names.join(', ')}`,
+  shellDisowned: (names: readonly string[]) =>
+    names
+      .map(
+        (location) =>
+          `the shell for ${location} called notFound() while it rendered, and a shell has no value to disown — call notFound() from the client component that reads the value in the browser`,
+      )
+      .join('\n'),
+  shellTaken: (names: readonly string[]) => names.join('\n'),
+};
+
+const failed = (failure: Failure, name: string): Rendered => ({
+  kind: 'failure',
+  failure,
+  name,
+});
+
+/** Every kind that stopped the build, in `FAILURES`' order, each sorted. */
+const failureMessages = (rendered: readonly Rendered[]): string[] =>
+  Object.entries(FAILURES).flatMap(([failure, message]) => {
+    const names = rendered
+      .flatMap((each) =>
+        each.kind === 'failure' && each.failure === failure ? [each.name] : [],
+      )
+      .toSorted();
+    return names.length === 0 ? [] : [message(names)];
+  });
+
+const renderRoute = async (
+  { handler, clientDir, urlFor }: Render,
+  pathname: string,
+): Promise<Rendered> => {
+  const { status, type } = await writeBody(
+    path.join(clientDir, dirFor(pathname)),
+    handler,
+    urlFor(pathname),
+  );
+  return status === 200
+    ? { kind: 'route', pathname, type }
+    : failed('route', `${pathname} (${String(status)})`);
+};
+
+const renderPage = async (
+  render: Render,
+  pathname: string,
+): Promise<Rendered> => {
+  // URL はエスケープのまま頼み、ファイルの名前だけを復号する
+  const dir = path.join(render.clientDir, dirFor(pathname));
+  const { status, notFound, named } = await writeHtml(
+    path.join(dir, 'index.html'),
+    render,
+    render.urlFor(pathname),
+    { notFoundIsPage: false },
+  );
+  if (status === 500) return failed('render', pathname);
+  if (status === 404)
+    return failed(notFound ? 'disowned' : 'refused', pathname);
+  // リダイレクトにペイロードは無い。クライアントの遷移は index.rsc に何も
+  // 見つけず、URL をブラウザに渡し、上の HTML がリダイレクトする
+  if (status === 307 || status === 308) return { kind: 'redirect', pathname };
+  if (status !== 200) return { kind: 'document', named, payload: null };
+  const payload = render.urlFor(payloadPathFor(pathname));
+  const written = await writeBody(
+    path.join(dir, 'index.rsc'),
+    render.handler,
+    payload,
+  );
+  return written.status === 200
+    ? { kind: 'document', named, payload: new URL(payload).pathname }
+    : failed('render', pathname);
+};
+
+const renderNotFound = async (
+  render: Render,
+  pathname: string,
+): Promise<Rendered> => {
+  const { status, named } = await writeHtml(
+    path.join(render.clientDir, '404.html'),
+    render,
+    render.urlFor(pathname),
+    { notFoundIsPage: true },
+  );
+  return status === 500
+    ? failed('render', '404.html')
+    : { kind: 'document', named, payload: null };
+};
+
+const renderShell = async (
+  render: Render,
+  shell: Shell,
+  fallbacks: ReadonlyMap<string, string>,
+): Promise<Rendered> => {
+  const dir = path.join(render.clientDir, dirFor(shell.pathname));
+  const answered = await writeHtml(
+    path.join(dir, 'index.html'),
+    render,
+    render.urlFor(shell.pathname),
+    { notFoundIsPage: false, shell: shell.pattern },
+  );
+  const named = `${shell.location} (${fallbacks.get(shell.pattern) ?? ''})`;
+  if (answered.status === 500) return failed('render', shell.location);
+  if (answered.status === 404) {
+    return failed(
+      answered.notFound ? 'shellDisowned' : 'shellRefused',
+      shell.location,
+    );
+  }
+  if (answered.shell === null) {
+    return failed(
+      'shellTaken',
+      `the shell for ${named} was answered by another route, which took "${FALLBACK_SEGMENT}" as a value`,
+    );
+  }
+  if (answered.shell !== shell.pattern) {
+    return failed(
+      'shellTaken',
+      `the shell for ${named} was answered by ${fallbacks.get(answered.shell) ?? answered.shell}, which the table tries first — supply shell locations that pattern cannot match`,
+    );
+  }
+  const payload = await writeBody(
+    path.join(dir, 'index.rsc'),
+    render.handler,
+    render.urlFor(payloadPathFor(shell.pathname)),
+  );
+  return payload.status === 200
+    ? { kind: 'document', named: answered.named, payload: null }
+    : failed('render', shell.location);
+};
+
+/** The shells whose HTML outside its scripts holds the shell pathname. */
+const leakingShells = async (
+  clientDir: string,
+  shells: readonly Shell[],
+): Promise<string[]> =>
+  (
+    await Promise.all(
+      shells.map(async (shell) => {
+        const html = await readFile(
+          path.join(clientDir, dirFor(shell.pathname), 'index.html'),
+          'utf8',
+        );
+        return writtenOutsideScripts(html).some((written) =>
+          written.includes(FALLBACK_SEGMENT),
+        )
+          ? [shell.location]
+          : [];
+      }),
+    )
+  ).flat();
+
+const writeClientFiles = async (
+  clientDir: string,
+  rendered: readonly Rendered[],
+): Promise<void> => {
+  const documents = rendered.flatMap((each) =>
+    each.kind === 'document' && each.named !== null ? [each] : [],
+  );
+  await writeFile(
+    path.join(clientDir, CLIENT_FILES_PATH.slice(1)),
+    JSON.stringify(
+      clientFiles(
+        new Map(
+          documents.flatMap(({ payload, named }) =>
+            payload === null || named === null ? [] : [[payload, named]],
+          ),
+        ),
+        documents.map(({ named }) => named ?? []),
+      ),
+    ),
+  );
+};
+
+const writeSitemap = async (
+  clientDir: string,
+  site: string,
+  pathnames: readonly string[],
+): Promise<void> => {
+  await writeFile(
+    path.join(clientDir, 'sitemap.xml'),
+    sitemap(site, pathnames),
+  );
+};
+
+/** The type each route.ts's `GET` answered with, by the file it wrote. */
+const typesOf = (rendered: readonly Rendered[]): Map<string, string> =>
+  new Map(
+    rendered.flatMap((each) =>
+      each.kind === 'route' && each.type !== null
+        ? [[fileAt(each.pathname), each.type] as const]
+        : [],
+    ),
+  );
+
+/** What the build says it wrote, after `k8ordo: wrote `. */
+const summaryOf = (
+  plan: PathPlan,
+  {
+    notFound,
+    sitemap: listed,
+  }: { readonly notFound: boolean; readonly sitemap: boolean },
+): string => {
+  const shells =
+    plan.shells.length === 0
+      ? ''
+      : `, ${String(plan.shells.length)} ${plan.shells.length === 1 ? 'shell' : 'shells'} (${plan.shells.map((shell) => shell.location).join(', ')})`;
+  return `${String(plan.paths.length)} routes${shells}${notFound ? ' and 404.html' : ''}${listed ? ' and sitemap.xml' : ''}${plan.shells.length === 0 ? '' : ' and _redirects'}`;
 };
 
 type Written = {
@@ -1260,12 +1109,6 @@ type Written = {
   /** The pattern whose shell the handler said it rendered, if any. */
   readonly shell: string | null;
   /**
-   * What of the client components its payload names the HTML written does
-   * not link, by component; none for what was not written as HTML, and
-   * `null` for HTML whose handler did not say what its payload names.
-   */
-  readonly unlinked: readonly ClientDeps[] | null;
-  /**
    * The client components the payload of the HTML written names; `null`
    * for what was not written as HTML, or whose handler did not say.
    */
@@ -1273,15 +1116,14 @@ type Written = {
 };
 
 /**
- * Writes what the handler answered, and says with which status. A page's
+ * Writes the HTML the handler answered, and says with which status. A page's
  * HTML says the nonce the framework signed its scripts with, which the file
  * says as hashes in the application's policy, if it gave one.
  */
-const write = async (
+const writeHtml = async (
   file: string,
-  handler: Handler,
+  { handler, csp }: Render,
   url: string,
-  csp: ContentSecurityPolicy | undefined,
   {
     notFoundIsPage,
     shell,
@@ -1298,7 +1140,6 @@ const write = async (
     status: response.status,
     notFound,
     shell: answered,
-    unlinked: [],
     named: null,
   };
   // A page that failed to render is not a page, and neither is a 404 anywhere
@@ -1326,25 +1167,19 @@ const write = async (
     await writeFile(file, Buffer.from(await response.arrayBuffer()));
     return written;
   }
-  const html = asFile(await response.text(), nonce, csp);
-  await writeFile(file, html);
+  await writeFile(file, asFile(await response.text(), nonce, csp));
   const said = response.headers.get(CLIENT_DEPS_HEADER);
-  const named = said === null ? null : readClientDeps(said);
-  return {
-    ...written,
-    unlinked: named === null ? null : unlinkedDeps(html, named),
-    named,
-  };
+  return { ...written, named: said === null ? null : readClientDeps(said) };
 };
 
 /**
- * Writes what a route.ts's GET answered, as the file at its pathname, and
- * says the type it answered with — a file keeps none, so a static host serves
- * it with the type its extension says, and only an adapter that can name a
- * file's type (`vercel()`) serves the GET's. Anything but a 200 is not a file
- * the site has, and nothing is written.
+ * Writes the body a 200 answered as it is — a route.ts's file, a payload —
+ * and says the type it answered with: a file keeps none, so a static host
+ * serves it with the type its extension says, and only an adapter that can
+ * name a file's type (`vercel()`) serves the GET's. Anything but a 200 is not
+ * a file the site has, and nothing is written.
  */
-const writeRoute = async (
+const writeBody = async (
   file: string,
   handler: Handler,
   url: string,

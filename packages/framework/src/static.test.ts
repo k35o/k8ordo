@@ -83,7 +83,6 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-  vi.unstubAllEnvs();
   await rm(root, { recursive: true, force: true });
 });
 
@@ -322,6 +321,9 @@ const site = (extra: Record<string, Answer> = {}): Record<string, Answer> => ({
 const clientFile = (file: string): Promise<string> =>
   readFile(path.join(root, 'dist', 'client', file), 'utf8');
 
+const TAKEN =
+  'static build writes a route.ts as the file its GET answers, and these cannot be written — remove the route.ts, or what else is written there:';
+
 describe('the shells a build writes', () => {
   it('writes each shell’s HTML and payload under its shell pathname, and leaves it out of the sitemap', async () => {
     await routeFiles(POSTS);
@@ -388,6 +390,30 @@ describe('the shells a build writes', () => {
     );
   });
 
+  it('stops the build naming a page and a shell whose payload failed to render, which the HTML did not', async () => {
+    await routeFiles(POSTS);
+    await handlerAnswering(
+      site({
+        '/posts/1/index.rsc': { status: 500, body: 'the payload threw' },
+        '/posts/!fallback/index.rsc': {
+          status: 500,
+          headers: SHELL_HEADER,
+          body: 'the shell’s payload threw',
+        },
+      }),
+    );
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {
+      // 描けなかったことは throw の文言で確かめる
+    });
+
+    await expect(hooks({ paths: () => ['/posts/1'] }).build()).rejects.toThrow(
+      'static build could not render /posts/1, /posts/:id — see the error above',
+    );
+    expect(logged).toHaveBeenCalledWith(
+      'k8ordo: http://k8ordo.localhost/posts/1/index.rsc — the payload threw',
+    );
+  });
+
   it('refuses a shell another route answered, and writes nothing for it', async () => {
     await routeFiles(POSTS);
     await handlerAnswering(
@@ -430,7 +456,7 @@ describe('the shells a build writes', () => {
     await handlerAnswering(site());
 
     await expect(hooks().build()).rejects.toThrow(
-      'static build cannot write a route.ts as a file at /posts — /posts/!fallback is written below it, as a directory',
+      `${TAKEN}\n  posts: src/routes/posts/route.ts, and /posts/!fallback is written below it`,
     );
   });
 
@@ -507,9 +533,6 @@ describe('the shells a build writes', () => {
   });
 });
 
-const TAKEN =
-  'static build writes a file of its own where these route.ts files write theirs, and one would replace the other — remove the route.ts, or what else writes the file:';
-
 const home = (extra: Record<string, Answer> = {}): Record<string, Answer> => ({
   '/': { body: '<p>home</p>' },
   '/index.rsc': { body: 'home payload' },
@@ -533,7 +556,7 @@ describe('a route.ts at a file the build writes itself', () => {
       await expect(clientFile('index.html')).rejects.toThrow(/ENOENT/u);
     });
 
-    it('names a route.ts paths gave 404.html beside a not-found.tsx, with the pathname to leave out of "paths", and one at _redirects beside a fallback.tsx, in one error', async () => {
+    it('names a route.ts paths gave 404.html beside a not-found.tsx, and one at _redirects beside a fallback.tsx, in one error', async () => {
       await routeFiles([
         ...POSTS,
         'not-found.tsx',
@@ -545,7 +568,24 @@ describe('a route.ts at a file the build writes itself', () => {
       await expect(
         hooks({ paths: () => ['/posts/1', '/404.html'] }).build(),
       ).rejects.toThrow(
-        `${TAKEN}\n  404.html: src/routes/[file]/route.ts, and src/routes/not-found.tsx is written there; or leave /404.html out of "paths"\n  _redirects: src/routes/_redirects/route.ts, and the shells of src/routes/posts/[id]/fallback.tsx are reached through it — rules of your own go in public/_redirects, which the build adds to its own`,
+        `${TAKEN}\n  404.html: src/routes/[file]/route.ts, and src/routes/not-found.tsx is written there\n  _redirects: src/routes/_redirects/route.ts, and the shells of src/routes/posts/[id]/fallback.tsx are reached through it — rules of your own go in public/_redirects, which the build adds to its own`,
+      );
+    });
+
+    it('names in one error a route.ts at /, one with a page below it and one at a file the build writes', async () => {
+      await rm(path.join(root, 'src', 'routes', 'page.tsx'));
+      await routeFiles([
+        'route.ts',
+        'feed/route.ts',
+        'feed/latest/page.tsx',
+        'sitemap.xml/route.ts',
+      ]);
+      await handlerAnswering({});
+
+      await expect(
+        hooks({ site: 'https://example.com' }).build(),
+      ).rejects.toThrow(
+        `${TAKEN}\n  /: src/routes/route.ts, and a static host serves / from index.html\n  feed: src/routes/feed/route.ts, and /feed/latest is written below it\n  sitemap.xml: src/routes/sitemap.xml/route.ts, and the "site" option writes it`,
       );
     });
 
@@ -570,19 +610,6 @@ describe('a route.ts at a file the build writes itself', () => {
 
       await expect(hooks().build()).rejects.toThrow(
         `${TAKEN}\n  client-files.json: src/routes/client-files.json/route.ts, and the build lists there what each page’s client components need`,
-      );
-    });
-
-    it('stops on a route.ts whose file differs from the build’s only in case, as macOS and Windows take the two for one', async () => {
-      await routeFiles(['Sitemap.xml/route.ts']);
-      await handlerAnswering(
-        home({ '/Sitemap.xml': { body: '<urlset>own</urlset>' } }),
-      );
-
-      await expect(
-        hooks({ site: 'https://example.com' }).build(),
-      ).rejects.toThrow(
-        `${TAKEN}\n  Sitemap.xml (the same file as sitemap.xml on macOS and Windows): src/routes/Sitemap.xml/route.ts, and the "site" option writes it`,
       );
     });
   });
@@ -631,12 +658,6 @@ const CARD = {
   js: ['/assets/card-B2.js'],
   css: ['/assets/card-C3.css'],
 };
-const MISSING = {
-  id: 'missing',
-  name: 'Missing',
-  js: ['/assets/not-found-D4.js'],
-  css: ['/assets/not-found-E5.css'],
-};
 
 /** A page's HTML as the handler answers it, saying what its payload names. */
 const htmlNaming = (
@@ -651,140 +672,6 @@ const htmlNaming = (
     ...extra.headers,
   },
   body: `<!DOCTYPE html><html><head>${links.map((href) => (href.endsWith('.css') ? `<link rel="stylesheet" href="${href}"/>` : `<link rel="modulepreload" href="${href}"/>`)).join('')}</head><body></body></html>`,
-});
-
-const UNLINKED =
-  'static build wrote HTML that does not link everything the client components its payload names need: ';
-
-const BUG_REPORT =
-  /^This is a bug in @k8ordo\/framework, not in this application: report it at https:\/\/github\.com\/k35o\/k8ordo\/issues with this message \(@k8ordo\/framework \d+\.\d+\.\d+\S*, react \d+\.\d+\.\d+\S*, react-dom \d+\.\d+\.\d+\S*\)$/u;
-
-/**
- * The lines of the error from the one saying what HTML does not link, the
- * line asking for a report taken apart.
- */
-const unlinkedIn = (
-  error: string,
-): { readonly said: string[]; readonly report: string } => {
-  const [said = '', report = '', ...rest] = error
-    .slice(error.indexOf(UNLINKED))
-    .split('\n');
-  return { said: [said, ...rest], report };
-};
-
-describe('the client components’ links a build checks', () => {
-  it('writes HTML that links everything its payload names, and goes on', async () => {
-    await routeFiles([...POSTS, 'not-found.tsx']);
-    await handlerAnswering(
-      site({
-        '/': htmlNaming([ICON], ['/assets/icon-A1.js']),
-        '/posts/!fallback': htmlNaming(
-          [CARD],
-          ['/assets/card-C3.css', '/assets/card-B2.js'],
-          { headers: SHELL_HEADER },
-        ),
-        '*': htmlNaming(
-          [MISSING],
-          ['/assets/not-found-E5.css', '/assets/not-found-D4.js'],
-          { status: 404 },
-        ),
-      }),
-    );
-
-    await hooks({ paths: () => ['/posts/1'] }).build();
-
-    expect(await clientFile('index.html')).toContain('icon-A1.js');
-    expect(await clientFile('404.html')).toContain('not-found-E5.css');
-  });
-
-  it('stops, once every page is written, naming each file a page, 404.html or shell does not link, with the pages and a component that need it, after where to report it', async () => {
-    await routeFiles([...POSTS, 'not-found.tsx']);
-    await handlerAnswering(
-      site({
-        '/': htmlNaming([ICON, CARD], ['/assets/card-C3.css']),
-        '/posts/!fallback': htmlNaming([CARD], ['/assets/card-B2.js'], {
-          headers: SHELL_HEADER,
-        }),
-        '*': htmlNaming([MISSING], [], { status: 404 }),
-      }),
-    );
-
-    const stopped = await hooks({ paths: () => ['/posts/1'] })
-      .build()
-      .then(() => '', String);
-
-    const { said, report } = unlinkedIn(stopped);
-
-    expect(said).toStrictEqual([
-      `${UNLINKED}3 HTML files miss 5 files of 3 components`,
-      '  /assets/card-B2.js — 1 page (/), for Card',
-      '  /assets/card-C3.css — 1 page (/posts/:id), for Card',
-      '  /assets/icon-A1.js — 1 page (/), for Icon',
-      '  /assets/not-found-D4.js — 1 page (404.html), for Missing',
-      '  /assets/not-found-E5.css — 1 page (404.html), for Missing',
-    ]);
-    expect(report).toMatch(BUG_REPORT);
-    expect(await clientFile('index.html')).toContain('card-C3.css');
-  });
-
-  it('stops on HTML whose handler did not say what its payload names', async () => {
-    await handlerAnswering({
-      '/': { headers: { 'x-k8ordo-nonce': 'bm9uY2U=' }, body: '<p>home</p>' },
-      '/index.rsc': { body: 'home payload' },
-    });
-
-    const { said, report } = unlinkedIn(
-      await hooks()
-        .build()
-        .then(() => '', String),
-    );
-
-    expect(said).toStrictEqual([
-      `${UNLINKED}the handler did not say what the payload of 1 HTML file names`,
-      '  1 page (/) — the handler did not say what its payload names',
-    ]);
-    expect(report).toMatch(BUG_REPORT);
-  });
-
-  it('names a page it could not render and one whose HTML misses something in the same error', async () => {
-    await routeFiles(POSTS);
-    await handlerAnswering(
-      site({
-        '/': { status: 500, body: 'home threw' },
-        '/posts/1': htmlNaming([ICON], []),
-      }),
-    );
-    vi.spyOn(console, 'error').mockImplementation(() => {
-      // 描けなかったことは throw の文言で確かめる
-    });
-
-    await expect(hooks({ paths: () => ['/posts/1'] }).build()).rejects.toThrow(
-      `static build could not render / — see the error above\n\n${UNLINKED}1 HTML file misses 1 file of 1 component\n`,
-    );
-  });
-
-  it('names a page by its pathname in the table, whatever the base', async () => {
-    await handlerAnswering({
-      '/site/': htmlNaming([ICON], []),
-      '/site/index.rsc': { body: 'home payload' },
-    });
-
-    await expect(hooks({}, '/site/').build()).rejects.toThrow(
-      '\n  /assets/icon-A1.js — 1 page (/), for Icon',
-    );
-  });
-
-  it('checks nothing it does not write as HTML: a payload, a route.ts’s file, a redirect', async () => {
-    await routeFiles(['feed/route.ts', 'old/redirect.ts']);
-    await handlerAnswering({
-      '/': htmlNaming([ICON], ['/assets/icon-A1.js']),
-      '/index.rsc': { body: 'home payload' },
-      '/feed': { body: '<rss/>' },
-      '/old': { status: 308, headers: { location: '/' } },
-    });
-
-    await expect(hooks().build()).resolves.toBeUndefined();
-  });
 });
 
 describe('the client files a build lists', () => {
@@ -954,47 +841,39 @@ describe('the _redirects a build writes', () => {
   });
 });
 
-describe('a build for Vercel', () => {
-  it('warns that Vercel never reads _redirects when no vercel() is there to write its routes', async () => {
-    vi.stubEnv('VERCEL', '1');
-    await routeFiles(POSTS);
-    await handlerAnswering(site());
-    const { build, said } = hooks();
+/** A host adapter's plugin, keeping what the build handed it. */
+const adapter = () => {
+  const handed: StaticOutput[] = [];
+  return {
+    handed,
+    plugin: {
+      name: 'adapter',
+      api: {
+        writeStatic: (output: StaticOutput) => {
+          handed.push(output);
+        },
+      },
+    },
+  };
+};
 
-    await build();
-
-    expect(said.warn).toContain(
-      'k8ordo: this build runs on Vercel, which does not read _redirects — add vercel() from @k8ordo/framework/vercel, or the shells are never served',
-    );
-  });
-
-  it('hands vercel() what it writes its routes from, once the files are in place', async () => {
-    vi.stubEnv('VERCEL', '1');
+describe('a build with a host adapter', () => {
+  it('hands it the rewrites after the files and whether 404.html was written, and says nothing of how Cloudflare reads _redirects', async () => {
     await routeFiles([...POSTS, 'posts/old/redirect.ts']);
     await handlerAnswering(
       site({
         '/posts/old': { status: 308, headers: { location: '/posts/1' } },
+        '/posts/a:b': { body: '<p>a:b</p>' },
+        '/posts/a:b/index.rsc': { body: 'a:b payload' },
       }),
     );
-    const written: StaticOutput[] = [];
-    const { build, said } = hooks({ paths: () => ['/posts/1'] });
+    const { handed, plugin } = adapter();
+    const { build, said } = hooks({ paths: () => ['/posts/1', '/posts/a:b'] });
 
-    await build([
-      {
-        name: 'k8ordo:vercel',
-        api: {
-          writeStatic: (output: StaticOutput) => {
-            written.push(output);
-          },
-        },
-      },
-    ]);
+    await build([plugin]);
 
-    expect(written).toStrictEqual([
+    expect(handed).toStrictEqual([
       {
-        root,
-        client: path.join(root, 'dist', 'client'),
-        base: '/',
         rewrites: [
           { from: '/posts/old/index.rsc', to: '/posts/!fallback/' },
           { from: '/posts/:p1', to: '/posts/!fallback/' },
@@ -1004,10 +883,11 @@ describe('a build for Vercel', () => {
         types: new Map(),
       },
     ]);
+    expect(await clientFile('_redirects')).toContain('/posts/:p1');
     expect(said.warn).toStrictEqual([]);
   });
 
-  it('hands vercel() the type each route.ts’s GET answered, by the file it wrote', async () => {
+  it('hands it the type each route.ts’s GET answered, by the file it wrote', async () => {
     await routeFiles([
       'feed/route.ts',
       'notes.txt/route.ts',
@@ -1030,21 +910,12 @@ describe('a build for Vercel', () => {
         body: '# a b',
       },
     });
-    const written: StaticOutput[] = [];
+    const { handed, plugin } = adapter();
     const { build } = hooks({ paths: () => ['/docs/a%20b/article.md'] });
 
-    await build([
-      {
-        name: 'k8ordo:vercel',
-        api: {
-          writeStatic: (output: StaticOutput) => {
-            written.push(output);
-          },
-        },
-      },
-    ]);
+    await build([plugin]);
 
-    expect(written.map((output) => output.types)).toStrictEqual([
+    expect(handed.map((output) => output.types)).toStrictEqual([
       new Map([
         ['feed', 'application/rss+xml;charset=utf-8'],
         ['notes.txt', 'text/plain;charset=UTF-8'],
@@ -1138,18 +1009,6 @@ describe('vite dev', () => {
     expect(await request('/posts/4')).toBe('/posts/!fallback');
     expect(said.warn).toStrictEqual([
       'k8ordo: the build will refuse "paths": the "paths" option supplied pathnames no route wants: /produtcs/2',
-    ]);
-  });
-
-  it('warns once that the build will stop on a route.ts at a file it writes itself, and leaves the route.ts to answer', async () => {
-    await routeFiles(['sitemap.xml/route.ts']);
-    const { serve, said } = hooks({ site: 'https://example.com' });
-    const request = serve();
-
-    expect(await request('/sitemap.xml')).toBe('/sitemap.xml');
-    expect(await request('/sitemap.xml')).toBe('/sitemap.xml');
-    expect(said.warn).toStrictEqual([
-      `k8ordo: the build will stop: ${TAKEN}\n  sitemap.xml: src/routes/sitemap.xml/route.ts, and the "site" option writes it`,
     ]);
   });
 

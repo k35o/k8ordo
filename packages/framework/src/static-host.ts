@@ -1,25 +1,17 @@
-import { readFile, stat } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 
 import { withoutBase } from '@k8ordo/router';
 
 import { parseRedirects, rewriteFor } from './rewrites';
 import type { Rewrite } from './rewrites';
-import { safeJoin } from './static-file';
+import { isFile, safeJoin } from './static-file';
 
 /** The file a static host serves, and under which status. */
 export type StaticAnswer = {
   readonly file: string;
   readonly status: 200 | 404;
 } | null;
-
-const isFile = async (candidate: string): Promise<boolean> => {
-  try {
-    return (await stat(candidate)).isFile();
-  } catch {
-    return false;
-  }
-};
 
 /** The file a URL names in the client build: itself, or a directory's index.html. */
 const fileAt = async (

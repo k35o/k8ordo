@@ -29,7 +29,7 @@ import {
 } from './encoding';
 import type { Encoding } from './encoding';
 import type { Rewrite } from './rewrites';
-import { safeJoin } from './static-file';
+import { isFile, safeJoin } from './static-file';
 import { readRules, resolveStatic } from './static-host';
 
 export type ServeOptions = {
@@ -119,14 +119,6 @@ const urlOf = (incoming: IncomingMessage): URL | null => {
   const host = incoming.headers.host ?? 'localhost';
   if (!target.startsWith('/') || !AUTHORITY.test(host)) return null;
   return URL.parse(`http://${host}${target}`);
-};
-
-const isFile = async (candidate: string): Promise<boolean> => {
-  try {
-    return (await stat(candidate)).isFile();
-  } catch {
-    return false;
-  }
 };
 
 const fileFor = async (

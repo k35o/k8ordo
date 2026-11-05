@@ -1,3 +1,4 @@
+import { stat } from 'node:fs/promises';
 import path from 'node:path';
 
 import { decodePathname } from '@k8ordo/framework-engine';
@@ -13,4 +14,12 @@ export const safeJoin = (root: string, pathname: string): string | null => {
   const resolved = path.resolve(root, `.${path.posix.normalize(decoded)}`);
   if (resolved !== root && !resolved.startsWith(root + path.sep)) return null;
   return resolved;
+};
+
+export const isFile = async (candidate: string): Promise<boolean> => {
+  try {
+    return (await stat(candidate)).isFile();
+  } catch {
+    return false;
+  }
 };

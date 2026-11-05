@@ -118,21 +118,17 @@ afterAll(async () => {
 });
 
 describe('writeVercelOutput', () => {
-  it('sends every request that names no file to the handler, and marks only a hashed file that answered immutable', async () => {
-    expect(await read('config.json')).toStrictEqual({
-      version: 3,
-      routes: [
-        { handle: 'filesystem' },
-        { src: '^/.*$', dest: '/handler' },
-        { handle: 'hit' },
-        {
-          src: '^\\/assets\\/.+$',
-          headers: { 'cache-control': 'public, max-age=31536000, immutable' },
-          continue: true,
-          important: true,
-        },
-      ],
-    });
+  it('sends every request that names no file to the handler', async () => {
+    const { version, routes } = (await read('config.json')) as {
+      version: number;
+      routes: readonly Route[];
+    };
+
+    expect(version).toBe(3);
+    expect(routes.slice(0, 2)).toStrictEqual([
+      { handle: 'filesystem' },
+      { src: '^/.*$', dest: '/handler' },
+    ]);
   });
 
   it('ships the client build as static files, without the copies compressed for serve', async () => {
@@ -171,7 +167,6 @@ describe('writeVercelOutput', () => {
 
 describe('writeVercelOutput under a base', () => {
   let under: string;
-  let routes: readonly Route[];
 
   // base を '/site/' にしたビルド。client/ の中身はその下で配られる
   beforeAll(async () => {
@@ -194,12 +189,6 @@ describe('writeVercelOutput under a base', () => {
       },
       '/site.v2/',
     );
-    ({ routes } = JSON.parse(
-      await readFile(
-        path.join(under, '.vercel', 'output', 'config.json'),
-        'utf8',
-      ),
-    ) as { routes: readonly Route[] });
   });
 
   afterAll(async () => {
@@ -211,19 +200,6 @@ describe('writeVercelOutput under a base', () => {
       path.join(under, '.vercel', 'output', 'static', 'site.v2', 'assets'),
     );
     expect(files).toStrictEqual(['app-abc123.js']);
-  });
-
-  it('marks a file under assets/ below the base immutable, matching its whole path as Vercel does', () => {
-    expect(matches(routes.at(-1), '/site.v2/assets/app-abc123.js')).toBe(true);
-  });
-
-  it.each([
-    '/site.v2/assets/',
-    '/site.v2/en/assets/app-abc123.js',
-    '/siteXv2/assets/app-abc123.js',
-    '/assets/app-abc123.js',
-  ])('never marks %s immutable', (pathname) => {
-    expect(matches(routes.at(-1), pathname)).toBe(false);
   });
 });
 
@@ -259,10 +235,8 @@ describe('writeStaticVercelOutput', () => {
     types: ReadonlyMap<string, string> = new Map(),
   ): Promise<Config> => {
     await writeStaticVercelOutput(
+      { root: built, client: path.join(built, 'dist', 'client'), base },
       {
-        root: built,
-        client: path.join(built, 'dist', 'client'),
-        base,
         rewrites: REWRITES.map((rule) => ({
           from: `${base.slice(0, -1)}${rule.from}`,
           to: `${base.slice(0, -1)}${rule.to}`,
@@ -382,17 +356,39 @@ describe('writeStaticVercelOutput', () => {
     expect(destOf(routes, '/nope')).toBeNull();
   });
 
-  it('marks only a hashed file that answered immutable', async () => {
-    const routes = await writeStatic('/', true);
+  it.each([
+    [
+      '/',
+      '/assets/app-abc123.js',
+      ['/assets/', '/en/assets/app-abc123.js', '/index.html'],
+    ],
+    [
+      '/site.v2/',
+      '/site.v2/assets/app-abc123.js',
+      [
+        '/site.v2/assets/',
+        '/site.v2/en/assets/app-abc123.js',
+        '/siteXv2/assets/app-abc123.js',
+        '/assets/app-abc123.js',
+      ],
+    ],
+  ])(
+    'under the base %s, marks %s immutable once a file answered, matching the whole path as Vercel does, and nothing else',
+    async (base, hashed, others) => {
+      const routes = await writeStatic(base, true);
 
-    expect(routes.at(-2)).toStrictEqual({ handle: 'hit' });
-    expect(routes.at(-1)).toStrictEqual({
-      src: '^\\/assets\\/.+$',
-      headers: { 'cache-control': 'public, max-age=31536000, immutable' },
-      continue: true,
-      important: true,
-    });
-  });
+      expect(routes.at(-2)).toStrictEqual({ handle: 'hit' });
+      expect(routes.at(-1)).toMatchObject({
+        headers: { 'cache-control': 'public, max-age=31536000, immutable' },
+        continue: true,
+        important: true,
+      });
+      expect(matches(routes.at(-1), hashed)).toBe(true);
+      for (const pathname of others) {
+        expect(matches(routes.at(-1), pathname)).toBe(false);
+      }
+    },
+  );
 
   it('puts beforeFiles ahead of the files and beforeNotFound between the shells and 404.html, each as given and in order', async () => {
     const accept = [
@@ -477,21 +473,6 @@ describe('writeStaticVercelOutput', () => {
     ]);
   });
 
-  it('marks a file under assets/ immutable, matching its whole path as Vercel does', async () => {
-    const routes = await writeStatic('/', true);
-
-    expect(matches(routes.at(-1), '/assets/app-abc123.js')).toBe(true);
-  });
-
-  it.each(['/assets/', '/en/assets/app-abc123.js', '/index.html'])(
-    'never marks %s immutable',
-    async (pathname) => {
-      const routes = await writeStatic('/', true);
-
-      expect(matches(routes.at(-1), pathname)).toBe(false);
-    },
-  );
-
   it('puts the client build, the rewrites and 404.html under the base', async () => {
     const routes = await writeStatic('/site/', true);
 
@@ -547,19 +528,4 @@ describe('writeStaticVercelOutput', () => {
 
     expect(config).not.toHaveProperty('overrides');
   });
-
-  it('marks a file under assets/ below the base immutable, matching its whole path as Vercel does', async () => {
-    const routes = await writeStatic('/site/', true);
-
-    expect(matches(routes.at(-1), '/site/assets/app-abc123.js')).toBe(true);
-  });
-
-  it.each(['/site/assets/', '/assets/app-abc123.js'])(
-    'never marks %s immutable below the base',
-    async (pathname) => {
-      const routes = await writeStatic('/site/', true);
-
-      expect(matches(routes.at(-1), pathname)).toBe(false);
-    },
-  );
 });

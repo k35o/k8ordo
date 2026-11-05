@@ -339,7 +339,7 @@ export default function FrameworkDeployPage() {
             <Rich>{t.staticVercelTypes()}</Rich>
           </p>
           <p>
-            <Rich>{t.staticVercelWarn()}</Rich>
+            <Rich>{t.staticVercelRedirects()}</Rich>
           </p>
         </DocSubsection>
         <DocSubsection id="vercel-routes" title={t.vercelRoutesTitle}>
