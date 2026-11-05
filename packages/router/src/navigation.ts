@@ -160,6 +160,56 @@ const keepPosition = (entry: string): void => {
   }, 0);
 };
 
+// WebKit は、別のサイトを挟んで読み直した文書からそれより前の entry へ戻ると、
+// navigate を出さずに popstate だけを出し、currentEntry を null にする。URL だけが
+// 動いて画面は残り、この文書ではもう navigation.navigate() が AbortError になる。
+// その文書の中で移ってから、文書の最初の entry へ戻るときも navigate を出さない。
+// currentEntry は null にならないが、URL だけが動いて画面は残る。次のページの
+// 読み込みの途中なら、その読み込みも止まらず、戻った URL の下に着く
+const reloadOnUnannouncedSteps = (
+  followsInPlace: (url: URL) => boolean,
+): {
+  heard: (destination: string) => void;
+  reloading: () => boolean;
+  stop: () => void;
+} => {
+  let reloading = false;
+  const reload = (): void => {
+    reloading = true;
+    location.reload();
+  };
+  // 最後の navigate の行き先。popstate がそれを指していなければ、その一歩は知らされていない。
+  // popstate では消さない。Firefox は iframe の中で横取りした traverse を 2 回 commit し、
+  // 行き先を指す popstate を 2 回出す
+  let announced: string | null = null;
+  // WebKit で popstate を聞く前（hydrate の前や、描いてから effect までの間）に戻るが
+  // 届くと、currentEntry は null のまま残る。entries() が空なのは Navigation API を持たない
+  // 文書（opaque な origin）で、読み直しても同じなので読み直さない
+  if (navigation.currentEntry === null && navigation.entries().length > 0) {
+    reload();
+  }
+  const onPopState = (): void => {
+    // 読み直しの途中の一歩は、頼んだ読み直しが前の URL のまま着いて消すので、頼み直す
+    if (reloading || navigation.currentEntry === null) {
+      reload();
+      return;
+    }
+    if (announced === location.href) return;
+    // 画面のページが自分で URL を読み直せるなら、読み直さない
+    if (!followsInPlace(new URL(location.href))) reload();
+  };
+  window.addEventListener('popstate', onPopState);
+  return {
+    heard: (destination) => {
+      announced = destination;
+    },
+    reloading: () => reloading,
+    stop: () => {
+      window.removeEventListener('popstate', onPopState);
+    },
+  };
+};
+
 /**
  * The pathname a page change is loading, in the table's terms — `null` when
  * none is. One per document, like the navigation it follows: there is one
@@ -288,26 +338,17 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
   useEffect(() => {
     shown.current = normalizePathname(location.pathname);
     restoreLeftAt();
-    // 読み直しを頼んだ文書は去るところ。そのあとの遷移は横取りせずブラウザに任せる。
-    // 横取りすると読み直しが止まり、currentEntry が null の文書では遷移も AbortError になる
-    let reloading = false;
-    const reload = (): void => {
-      reloading = true;
-      location.reload();
-    };
-    // 最後の navigate の行き先。popstate がそれを指していなければ、その一歩は知らされていない。
-    // popstate では消さない。Firefox は iframe の中で横取りした traverse を 2 回 commit し、
-    // 行き先を指す popstate を 2 回出す
-    let announced: string | null = null;
-    // WebKit で popstate を聞く前（hydrate の前や、描いてから effect までの間）に下の戻るが
-    // 届くと、currentEntry は null のまま残る。entries() が空なのは Navigation API を持たない
-    // 文書（opaque な origin）で、読み直しても同じなので読み直さない
-    if (navigation.currentEntry === null && navigation.entries().length > 0) {
-      reload();
-    }
+    const steps = reloadOnUnannouncedSteps(
+      (url) =>
+        normalizePathname(url.pathname) === shown.current &&
+        pendingPathname === null &&
+        !refresh(url),
+    );
     const onNavigate = (event: NavigateEvent): void => {
-      announced = event.destination.url;
-      if (reloading) return;
+      steps.heard(event.destination.url);
+      // 読み直しを頼んだ文書は去るところ。そのあとの遷移は横取りせずブラウザに任せる。
+      // 横取りすると読み直しが止まり、currentEntry が null の文書では遷移も AbortError になる
+      if (steps.reloading()) return;
       const traverse = event.navigationType === 'traverse';
       // WebKit は bfcache から戻した文書に、位置を戻す前の traverse を出す。行き先は
       // 今の entry で、画面のページは離れていない。位置はこのあとブラウザが戻す
@@ -462,34 +503,9 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       });
     };
     navigation.addEventListener('navigate', onNavigate);
-    // WebKit は、別のサイトを挟んで読み直した文書からそれより前の entry へ戻ると、
-    // navigate を出さずに popstate だけを出し、currentEntry を null にする。URL だけが
-    // 動いて画面は残り、この文書ではもう navigation.navigate() が AbortError になる。
-    // その文書の中で移ってから、文書の最初の entry へ戻るときも navigate を出さない。
-    // currentEntry は null にならないが、URL だけが動いて画面は残る。次のページの
-    // 読み込みの途中なら、その読み込みも止まらず、戻った URL の下に着く
-    const onPopState = (): void => {
-      // 読み直しの途中の一歩は、頼んだ読み直しが前の URL のまま着いて消すので、頼み直す
-      if (reloading || navigation.currentEntry === null) {
-        reload();
-        return;
-      }
-      if (announced === location.href) return;
-      // 画面のページが自分で URL を読み直せるなら、読み直さない
-      const url = new URL(location.href);
-      if (
-        normalizePathname(url.pathname) === shown.current &&
-        pendingPathname === null &&
-        !refresh(url)
-      ) {
-        return;
-      }
-      reload();
-    };
-    window.addEventListener('popstate', onPopState);
     return () => {
       navigation.removeEventListener('navigate', onNavigate);
-      window.removeEventListener('popstate', onPopState);
+      steps.stop();
     };
   }, []);
 
