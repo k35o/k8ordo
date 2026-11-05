@@ -236,24 +236,26 @@ let applies = 0;
 const Hydrating = createContext(false);
 
 /**
- * Takes over the request of a payload whose tree is being applied, and
- * returns what applying it puts in state.
+ * Takes over the request of a payload whose tree is being applied, records
+ * the search it was rendered with, and returns what applying it puts in state.
  */
 const hold = (
-  streaming: Streaming[],
+  streaming: RefObject<Streaming[]>,
+  searchApplied: RefObject<string | undefined>,
   payload: Payload,
   pathname: string,
 ): Applied => {
   // HTML の hydrate を待たずに来た遷移の木は、行き先の URL で描く
   doneHydrating();
   applies += 1;
+  searchApplied.current = payload.search;
   const stream = streams.get(payload);
   if (stream !== undefined) {
     stream.keep();
     // ファイルは最後まで読ませる。ページは置き場に残って次の訪問に渡るので、
     // 途中で切ると、戻ったときに欠けたページを出す
     if (!payloadsAreFiles()) {
-      streaming.push({
+      streaming.current.push({
         trees:
           payload.notFound === undefined
             ? [payload.tree]
@@ -402,8 +404,7 @@ export function AppRouter({
   useEffect(() => {
     mounted = {
       apply: (payload, postedTo) => {
-        searchApplied.current = payload.search;
-        const next = hold(streaming.current, payload, postedTo);
+        const next = hold(streaming, searchApplied, payload, postedTo);
         startTransition(() => {
           setLatest(next);
         });
@@ -452,11 +453,11 @@ export function AppRouter({
       if (!canRender(payload)) return reloadInstead();
       markNavigated();
       const next = hold(
-        streaming.current,
+        streaming,
+        searchApplied,
         payload,
         normalizePathname(new URL(url).pathname),
       );
-      searchApplied.current = payload.search;
       startTransition(() => {
         setLatest(next);
       });
@@ -563,8 +564,9 @@ export function AppRouter({
     },
     apply: (loaded) => {
       markNavigated();
-      searchApplied.current = loaded.payload.search;
-      setLatest(hold(streaming.current, loaded.payload, loaded.pathname));
+      setLatest(
+        hold(streaming, searchApplied, loaded.payload, loaded.pathname),
+      );
     },
     // A page that reads the search is rendered for the one it was given, so
     // a navigation that moves it loads the page again; a page that does not
