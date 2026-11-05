@@ -75,7 +75,8 @@ They are declared outside any layer, so to override one, declare it after
 `styles.css` is loaded: between unlayered rules of equal specificity, source
 order decides. `@k8ordo/ui/tokens` exports the same tokens as data, a DTCG
 resolver document (Resolver Module 2025.10), with each mode (`.dark`,
-`prefers-contrast: more`) as a modifier.
+`prefers-contrast: more`, and their [print](#printing) overrides) as a
+modifier.
 
 [better-css-modules](https://github.com/k35o/better-css-modules) holds CSS
 Modules to these tokens: list `@k8ordo/ui/styles.css` in its `globalCss`, and
@@ -125,6 +126,21 @@ controls, a `<dialog>`'s default colors) follows the tokens rather than the OS.
 Your own CSS follows the same way when it reads the tokens. With
 `tailwind.css`, the `dark:` variant applies under `.dark` and `light:`
 everywhere else.
+
+### Printing
+
+Printing puts the light values back. Browsers leave a page's backgrounds out
+of a printout by default, so the dark values would print light text on white
+paper. Under `@media print`, a `.dark` element takes the `:root` values of the
+color tokens (the light high-contrast ones under `prefers-contrast: more`) and
+`color-scheme: light`, and the `dark:` and `light:` variants of `tailwind.css`
+switch with them.
+
+To print in the scheme on screen, such as a slide deck printed with its
+backgrounds (`print-color-adjust: exact`), put the `print-as-shown` class on an
+element inside the `.dark` one. A `.dark` element that contains it keeps its
+dark values in print. With `dark` on `<html>`, that is the whole page, so hide
+what you do not print.
 
 ### Wording language (i18n)
 

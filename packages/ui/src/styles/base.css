@@ -14,6 +14,13 @@
     color-scheme: dark;
   }
 
+  /* tokens.css の印刷の分岐と同じ条件で、ネイティブ部品もライトに戻す */
+  @media print {
+    .dark:where(:not(:has(.print-as-shown))) {
+      color-scheme: light;
+    }
+  }
+
   body:has(dialog[open]) {
     overflow: hidden;
   }

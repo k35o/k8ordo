@@ -435,3 +435,91 @@
     --color-secondary-border: var(--cyan-300);
   }
 }
+
+@media print {
+  /* .dark を @media screen で囲まずに :root の値を繰り返すのは、.print-as-shown を
+     含む .dark（背景ごと刷るスライドなど）には、印刷でもダークの値が要るから。
+     :root と揃っていることは print.test.tsx が確かめる。:where は詳細度を .dark
+     のままにして、利用側が後から書いたトークンに勝たないようにするため */
+  .dark:where(:not(:has(.print-as-shown))) {
+    --color-fg-base: var(--gray-900);
+    --color-fg-subtle: var(--gray-600);
+    --color-fg-mute: var(--gray-700);
+    --color-fg-inverse: var(--gray-50);
+    --color-fg-info: var(--blue-800);
+    --color-fg-success: var(--green-800);
+    --color-fg-warning: var(--yellow-800);
+    --color-fg-error: var(--red-800);
+
+    --color-bg-base: var(--white);
+    --color-bg-raised: var(--white);
+    --color-bg-surface: var(--gray-50);
+    --color-bg-subtle: var(--gray-100);
+    --color-bg-mute: var(--gray-200);
+    --color-bg-emphasize: var(--gray-300);
+    --color-bg-inverse: var(--gray-900);
+    --color-bg-info: var(--blue-100);
+    --color-bg-success: var(--green-100);
+    --color-bg-warning: var(--yellow-100);
+    --color-bg-error: var(--red-100);
+
+    --color-border-base: var(--gray-400);
+    --color-border-subtle: var(--gray-100);
+    --color-border-mute: var(--gray-200);
+    --color-border-emphasize: var(--gray-500);
+    --color-border-inverse: var(--gray-700);
+    --color-border-info: var(--blue-500);
+    --color-border-success: var(--green-500);
+    --color-border-warning: var(--yellow-500);
+    --color-border-error: var(--red-500);
+
+    --color-primary-fg: var(--teal-800);
+    --color-primary-bg: var(--teal-200);
+    --color-primary-bg-subtle: var(--teal-50);
+    --color-primary-bg-mute: var(--teal-100);
+    --color-primary-bg-emphasize: var(--teal-300);
+    --color-primary-border: var(--teal-500);
+
+    --color-secondary-fg: var(--cyan-800);
+    --color-secondary-bg: var(--cyan-200);
+    --color-secondary-bg-subtle: var(--cyan-50);
+    --color-secondary-bg-mute: var(--cyan-100);
+    --color-secondary-bg-emphasize: var(--cyan-300);
+    --color-secondary-border: var(--cyan-500);
+
+    --color-group-primary: var(--teal-800);
+    --color-group-secondary: var(--cyan-800);
+    --color-group-tertiary: var(--pink-800);
+    --color-group-quaternary: var(--purple-800);
+
+    --color-logo-primary: var(--teal-700);
+    --color-logo-secondary: var(--teal-600);
+  }
+}
+
+@media print and (prefers-contrast: more) {
+  .dark:where(:not(:has(.print-as-shown))) {
+    --color-fg-base: var(--gray-950);
+    --color-fg-subtle: var(--gray-800);
+    --color-fg-mute: var(--gray-900);
+    --color-fg-info: var(--blue-900);
+    --color-fg-success: var(--green-900);
+    --color-fg-warning: var(--yellow-900);
+    --color-fg-error: var(--red-900);
+
+    --color-border-base: var(--gray-600);
+    --color-border-subtle: var(--gray-500);
+    --color-border-mute: var(--gray-500);
+    --color-border-emphasize: var(--gray-800);
+    --color-border-info: var(--blue-700);
+    --color-border-success: var(--green-700);
+    --color-border-warning: var(--yellow-700);
+    --color-border-error: var(--red-700);
+
+    --color-primary-fg: var(--teal-900);
+    --color-primary-border: var(--teal-700);
+
+    --color-secondary-fg: var(--cyan-900);
+    --color-secondary-border: var(--cyan-700);
+  }
+}

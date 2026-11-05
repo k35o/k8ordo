@@ -168,7 +168,7 @@ export default defineConfig({
         extends: true,
         test: {
           name: { label: 'forced-colors', color: 'yellow' },
-          include: ['src/styles/**/*.test.tsx'],
+          include: ['src/styles/forced-colors.test.tsx'],
           browser: {
             enabled: true,
             instances: browsers.map((browser) => ({ browser })),
@@ -180,6 +180,29 @@ export default defineConfig({
             }),
             headless: true,
             screenshotFailures: false,
+          },
+        },
+      },
+      {
+        extends: true,
+        test: {
+          name: { label: 'print', color: 'white' },
+          include: ['src/styles/print.test.tsx'],
+          browser: {
+            enabled: true,
+            instances: browsers.map((browser) => ({ browser })),
+            provider: playwright({
+              contextOptions: { reducedMotion: 'reduce' },
+            }),
+            headless: true,
+            screenshotFailures: false,
+            // 印刷の媒体は contextOptions で敷けないので、試験の中から切り替える
+            commands: {
+              emulateMedia: (
+                { page },
+                options: { media: 'print' | null; contrast?: 'more' | null },
+              ) => page.emulateMedia(options),
+            },
           },
         },
       },

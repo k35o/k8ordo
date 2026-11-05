@@ -48,6 +48,13 @@ const ruleOf = (css: string, selector: string): string => {
   return css.slice(start, css.indexOf('}', start) + 1);
 };
 
+// 1 つの規則を囲む @media の条件
+const mediaOf = (css: string, selector: string) => {
+  const start = css.indexOf(`${selector} {`);
+  if (start === -1) throw new Error(`${selector} was not generated`);
+  return /@media ([^{]+) \{\s*$/.exec(css.slice(0, start))?.[1];
+};
+
 describe('@k8ordo/ui/tailwind.css', () => {
   it('色のユーティリティは --color-* のトークンを読む', () => {
     const css = build(['bg-bg-base', 'text-fg-mute', 'border-primary-border']);
@@ -158,11 +165,32 @@ describe('@k8ordo/ui/tailwind.css', () => {
     ).toStrictEqual([]);
   });
 
-  it('dark・light・vertical の変種を持つ', () => {
-    const css = build(['dark:hidden', 'light:hidden', 'vertical:hidden']);
+  it('dark・light の変種は、画面では .dark で、印刷では print-as-shown を含む .dark で分かれる', () => {
+    const css = build(['dark:hidden', 'light:hidden']);
 
-    expect(css).toContain('.dark\\:hidden:where(.dark, .dark *)');
-    expect(css).toContain('.light\\:hidden:where(:not(.dark, .dark *))');
+    expect(mediaOf(css, '.dark\\:hidden:where(.dark, .dark *)')).toBe(
+      'not print',
+    );
+    expect(
+      mediaOf(
+        css,
+        '.dark\\:hidden:where(.dark:has(.print-as-shown), .dark:has(.print-as-shown) *)',
+      ),
+    ).toBe('print');
+    expect(mediaOf(css, '.light\\:hidden:where(:not(.dark, .dark *))')).toBe(
+      'not print',
+    );
+    expect(
+      mediaOf(
+        css,
+        '.light\\:hidden:where(:not(.dark:has(.print-as-shown), .dark:has(.print-as-shown) *))',
+      ),
+    ).toBe('print');
+  });
+
+  it('vertical の変種を持つ', () => {
+    const css = build(['vertical:hidden']);
+
     expect(css).toContain(
       '.vertical\\:hidden:where(.writing-v, .writing-v *):not(.writing-h, .writing-h *)',
     );

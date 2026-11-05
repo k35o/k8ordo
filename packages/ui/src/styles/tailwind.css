@@ -153,8 +153,35 @@
   --breakpoint-2xl: 96rem;
 }
 
-@custom-variant dark (&:where(.dark, .dark *));
-@custom-variant light (&:where(:not(.dark, .dark *)));
+/* .dark の中を印刷で分けるのは、トークンが印刷では .print-as-shown を含む .dark
+   でだけダークのままになり、それ以外はライトに戻るから（tokens.css） */
+@custom-variant dark {
+  @media not print {
+    &:where(.dark, .dark *) {
+      @slot;
+    }
+  }
+
+  @media print {
+    &:where(.dark:has(.print-as-shown), .dark:has(.print-as-shown) *) {
+      @slot;
+    }
+  }
+}
+
+@custom-variant light {
+  @media not print {
+    &:where(:not(.dark, .dark *)) {
+      @slot;
+    }
+  }
+
+  @media print {
+    &:where(:not(.dark:has(.print-as-shown), .dark:has(.print-as-shown) *)) {
+      @slot;
+    }
+  }
+}
 
 /* 縦書き。`.writing-v` 配下に適用し、`.writing-h` 配下の島では無効化する */
 @custom-variant vertical (
