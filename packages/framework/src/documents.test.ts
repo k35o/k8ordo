@@ -56,6 +56,10 @@ const NONCE = 'bm9uY2Vub25jZW5vbmNlMQ==';
 const page = (body: string): string =>
   `<!DOCTYPE html><html><head><title>t</title></head><body>${body}</body></html>`;
 
+// React が書く形の文書
+const documentOf = (head: string, body = ''): string =>
+  `<!DOCTYPE html><html><head><meta charSet="utf-8"/>${head}</head><body>${body}</body></html>`;
+
 const policyOf = (html: string): string | undefined =>
   /<meta http-equiv="Content-Security-Policy" content="([^"]*)">/u.exec(
     html,
@@ -169,10 +173,48 @@ describe('asFile', () => {
     );
   });
 
-  it('puts the policy first in <head>, ahead of anything it governs', () => {
+  it('puts the policy first in a <head> that declares no charset, ahead of anything it governs', () => {
     const html = asFile(page(''), NONCE, { 'object-src': ["'none'"] });
     expect(html).toBe(
       `<!DOCTYPE html><html><head><meta http-equiv="Content-Security-Policy" content="object-src &apos;none&apos;"><title>t</title></head><body></body></html>`,
+    );
+  });
+
+  it('puts the policy right after the charset that opens <head>, with nothing it governs between them', () => {
+    const html = asFile(
+      documentOf(
+        `<script nonce="${NONCE}">console.log(1)</script><link rel="stylesheet" href="/a.css"/>`,
+      ),
+      NONCE,
+      { 'script-src': ["'self'"] },
+    );
+    expect(html).toBe(
+      `<!DOCTYPE html><html><head><meta charSet="utf-8"/><meta http-equiv="Content-Security-Policy" content="script-src &apos;self&apos; &apos;sha256-CihokcEcBW4atb/CW/XWsvWwbTjqwQlE9nj9ii5ww5M=&apos;"><script>console.log(1)</script><link rel="stylesheet" href="/a.css"/></head><body></body></html>`,
+    );
+  });
+
+  it('keeps the charset within the first 1024 bytes, where a browser looks for it, however many scripts the policy names', () => {
+    const scripts = Array.from(
+      { length: 30 },
+      (_, index) => `<script nonce="${NONCE}">chunk(${String(index)})</script>`,
+    ).join('');
+    const html = asFile(documentOf('', scripts), NONCE, {
+      'script-src': ["'self'"],
+    });
+    expect(policyOf(html)?.length).toBeGreaterThan(1024);
+    expect(
+      new TextDecoder().decode(new TextEncoder().encode(html).slice(0, 1024)),
+    ).toContain('<meta charSet="utf-8"/>');
+  });
+
+  it('never puts the policy behind anything it governs, even to follow a charset declared later', () => {
+    const html = asFile(
+      '<!DOCTYPE html><html><head><link rel="stylesheet" href="/a.css"/><meta charSet="utf-8"/></head><body></body></html>',
+      NONCE,
+      { 'object-src': ["'none'"] },
+    );
+    expect(html).toBe(
+      `<!DOCTYPE html><html><head><meta http-equiv="Content-Security-Policy" content="object-src &apos;none&apos;"><link rel="stylesheet" href="/a.css"/><meta charSet="utf-8"/></head><body></body></html>`,
     );
   });
 
@@ -366,10 +408,6 @@ const BUTTON = {
   js: ['/assets/button-B1.js'],
   css: ['/assets/button-C2.css'],
 };
-
-// React が書く形の文書
-const documentOf = (head: string, body = ''): string =>
-  `<!DOCTYPE html><html><head><meta charset="utf-8"/>${head}</head><body>${body}</body></html>`;
 
 describe('unlinkedDeps', () => {
   it('takes a stylesheet linked in <head>, and a script preloaded there or loaded by a <script>', () => {

@@ -191,6 +191,10 @@ const ORDER_STYLE = new RegExp(
   'u',
 );
 
+// 文字コードの宣言は文書の最初の 1024 バイトに要るので、ポリシーはその後ろに置く。
+// <head> の先頭のものに限る: <meta> のポリシーは、それより前にあるものには効かない
+const CHARSET = /^<meta(?:\s[^>]*)?\scharset=[^>]*>/iu;
+
 // ブラウザは改行を LF に揃えてからハッシュを取る
 const hashOf = (source: string): string =>
   `'sha256-${createHash('sha256')
@@ -239,10 +243,11 @@ const serialize = (
  * — the payload, React's — with a nonce, and a file cannot carry one:
  * everyone reads the same file, so the nonce is taken off. With a policy,
  * what it signed is named by hash instead, in a `<meta>` ahead of everything
- * the page loads, and so is the framework's one `<style>`, which keeps the
- * Server Components' stylesheets first; an inline script of the
- * application's is the application's to allow, by its hash in that policy,
- * and one that reached the page from content is refused.
+ * the page loads — behind only the charset React writes first in `<head>` —
+ * and so is the framework's one `<style>`, which keeps the Server
+ * Components' stylesheets first; an inline script of the application's is
+ * the application's to allow, by its hash in that policy, and one that
+ * reached the page from content is refused.
  */
 export const asFile = (
   html: string,
@@ -267,7 +272,8 @@ export const asFile = (
   }
   const order = ORDER_STYLE.exec(unsigned);
   const styleHash = order === null ? null : hashOf(order[1] ?? '');
-  const at = head.index + head[0].length;
+  const opened = head.index + head[0].length;
+  const at = opened + (CHARSET.exec(unsigned.slice(opened))?.[0].length ?? 0);
   const meta = `<meta http-equiv="Content-Security-Policy" content="${escapeMarkup(serialize(policy, [...hashes], styleHash))}">`;
   return `${unsigned.slice(0, at)}${meta}${unsigned.slice(at)}`;
 };

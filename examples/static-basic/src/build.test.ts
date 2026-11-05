@@ -126,10 +126,10 @@ afterAll(() => {
   rmSync(previous, { recursive: true, force: true });
 });
 
-// <head> の先頭に置かれた <meta> のポリシー。無ければ空
-const policyFirstIn = (html: string): string =>
+// <head> を開く charset の直後に置かれた <meta> のポリシー。無ければ空
+const policyAfterCharsetIn = (html: string): string =>
   (
-    /^<!DOCTYPE html><html[^>]*><head><meta http-equiv="Content-Security-Policy" content="([^"]*)">/u.exec(
+    /^<!DOCTYPE html><html[^>]*><head><meta charSet="utf-8"\/><meta http-equiv="Content-Security-Policy" content="([^"]*)">/u.exec(
       html,
     )?.[1] ?? ''
   ).replaceAll('&apos;', "'");
@@ -383,10 +383,10 @@ describe('the static build', () => {
     '404.html',
     'en/posts/!fallback/index.html',
   ])(
-    'writes the application’s policy first in the <head> of %s, naming each inline script and the framework’s style by hash',
+    'writes the application’s policy in the <head> of %s right after its charset, naming each inline script and the framework’s style by hash',
     (file) => {
       const html = read(file);
-      const policy = policyFirstIn(html);
+      const policy = policyAfterCharsetIn(html);
       // style-src のハッシュは、head の CSS の並びを決める中身の無い style
       expect(policy).toMatch(
         /^script-src 'self'( 'sha256-[A-Za-z0-9+/]{43}=')+; style-src 'self' 'sha256-47DEQpj8HBSa\+\/TImW\+5JCeuQeRkm5NMpJWZG3hSuFU='; object-src 'none'; base-uri 'none'$/u,
@@ -1757,7 +1757,7 @@ describe('vite preview of the static build', () => {
 
     expect(response.status).toBe(200);
     expect(html).toContain('loading the post…');
-    expect(policyFirstIn(html)).not.toBe('');
+    expect(policyAfterCharsetIn(html)).not.toBe('');
   });
 
   it('answers its payload with the shell’s payload', async () => {
@@ -1773,7 +1773,7 @@ describe('vite preview of the static build', () => {
 
     expect(response.status).toBe(200);
     expect(html).toBe(read('en', 'posts', '1', 'index.html'));
-    expect(policyFirstIn(html)).not.toBe('');
+    expect(policyAfterCharsetIn(html)).not.toBe('');
   });
 
   it('answers a URL the build has nothing for with 404.html under 404', async () => {

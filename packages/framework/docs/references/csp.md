@@ -78,10 +78,12 @@ Static mode only. A file cannot carry a nonce — everyone reads the same
 one — so the build names what the framework signed by hash, and leaves no
 nonce in what it writes. Give the plugin the policy as `csp`, directives and
 their sources (`ContentSecurityPolicy`), and each page gets it in a
-`<meta http-equiv="Content-Security-Policy">` first in its `<head>`, with the
-hashes of that page's framework scripts added wherever a script element is
-decided — `script-src` (made from `default-src` when only that was given)
-and `script-src-elem` when given:
+`<meta http-equiv="Content-Security-Policy">` first in its `<head>` after
+the `<meta charSet>` (a browser looks for the encoding only in the first
+1024 bytes, which a policy naming many hashes outgrows), with the hashes of
+that page's framework scripts added wherever a script element is decided —
+`script-src` (made from `default-src` when only that was given) and
+`script-src-elem` when given:
 
 ```ts
 // vite.config.ts

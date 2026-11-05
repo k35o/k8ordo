@@ -36,8 +36,8 @@ export const optionTitle = message({
 });
 
 export const optionShape = message({
-  ja: '`csp`には、ディレクティブごとにソースの配列を渡します。各ページの`<head>`の先頭に`<meta http-equiv="Content-Security-Policy">`が書かれます。`csp`を渡さなければ`<meta>`は書かれません。',
-  en: 'Give `csp` an array of sources per directive. Each page gets a `<meta http-equiv="Content-Security-Policy">` first in its `<head>`. Without `csp`, no `<meta>` is written.',
+  ja: '`csp`には、ディレクティブごとにソースの配列を渡します。各ページの`<head>`には、先頭の`<meta charSet>`のすぐ後ろに`<meta http-equiv="Content-Security-Policy">`が書かれます。`csp`を渡さなければ`<meta>`は書かれません。',
+  en: 'Give `csp` an array of sources per directive. Each page gets a `<meta http-equiv="Content-Security-Policy">` in its `<head>`, right after the `<meta charSet>` that opens it. Without `csp`, no `<meta>` is written.',
 });
 
 export const optionHash = message({
