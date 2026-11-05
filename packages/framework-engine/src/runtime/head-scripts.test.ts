@@ -1,15 +1,8 @@
-import { readFile } from 'node:fs/promises';
-import { createServer } from 'node:http';
-import type { Server } from 'node:http';
-import type { AddressInfo } from 'node:net';
-import path from 'node:path';
-
-import { chromium, firefox, webkit } from 'playwright';
 import type { Browser, Page } from 'playwright';
 import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
-import { buildFixture } from '../../fixtures/build';
-import type { BuiltFixture } from '../../fixtures/build';
+import { browserTypes, buildFixture, serveBuilt } from '../../fixtures/build';
+import type { BuiltFixture, ServedBuild } from '../../fixtures/build';
 import {
   scriptsBeforeStylesheets,
   scriptsBeforeStylesheetsStream,
@@ -198,15 +191,6 @@ describe('scriptsBeforeStylesheetsStream', () => {
   });
 });
 
-// CI はエンジンごとにジョブを分けて並べるので、TEST_BROWSER で 1 つに絞れる
-const browserTypes = [chromium, firefox, webkit]
-  .filter(
-    (type) =>
-      process.env.TEST_BROWSER === undefined ||
-      process.env.TEST_BROWSER === type.name(),
-  )
-  .map((type) => ({ name: type.name(), type }));
-
 const reportedOn = (page: Page): string[] => {
   const reported: string[] = [];
   page.on('console', (message) => {
@@ -220,50 +204,22 @@ const reportedOn = (page: Page): string[] => {
 
 describe('a layout that writes a script in <head>', () => {
   let built: BuiltFixture | undefined;
-  let server: Server;
+  let served: ServedBuild | undefined;
   let origin = '';
   // スタイルシートの応答を止めておける。止めている間に動いたスクリプトは、
   // スタイルシートより前にあった
   let stylesheets = Promise.resolve();
 
   beforeAll(async () => {
-    const { handler, out } = (built = await buildFixture('head-scripts'));
-    const answer = async (url: URL): Promise<Response> => {
-      if (!url.pathname.startsWith('/assets/'))
-        return handler(new Request(url));
-      const isStylesheet = url.pathname.endsWith('.css');
-      if (isStylesheet) await stylesheets;
-      try {
-        return new Response(
-          await readFile(path.join(out, 'client', url.pathname)),
-          {
-            headers: {
-              'content-type': isStylesheet ? 'text/css' : 'text/javascript',
-            },
-          },
-        );
-      } catch {
-        return new Response(null, { status: 404 });
-      }
-    };
-    server = createServer((incoming, outgoing) => {
-      void (async () => {
-        const response = await answer(new URL(incoming.url ?? '/', origin));
-        outgoing.writeHead(
-          response.status,
-          Object.fromEntries(response.headers),
-        );
-        outgoing.end(Buffer.from(await response.arrayBuffer()));
-      })();
+    built = await buildFixture('head-scripts');
+    served = await serveBuilt(built, {
+      hold: (url) => (url.pathname.endsWith('.css') ? stylesheets : undefined),
     });
-    await new Promise<void>((resolve) => {
-      server.listen(0, '127.0.0.1', resolve);
-    });
-    origin = `http://127.0.0.1:${String((server.address() as AddressInfo).port)}`;
+    ({ origin } = served);
   }, 120_000);
 
   afterAll(async () => {
-    server.close();
+    served?.close();
     await built?.dispose();
   });
 

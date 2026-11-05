@@ -1,13 +1,3 @@
-import { readFile } from 'node:fs/promises';
-import { createServer } from 'node:http';
-import type { IncomingMessage, Server } from 'node:http';
-import type { AddressInfo } from 'node:net';
-import path from 'node:path';
-import { Readable } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
-import type { ReadableStream as NodeReadableStream } from 'node:stream/web';
-
-import { chromium, firefox, webkit } from 'playwright';
 import type { Browser, Page } from 'playwright';
 import {
   afterAll,
@@ -19,20 +9,11 @@ import {
   vi,
 } from 'vite-plus/test';
 
-import { buildFixture } from '../../fixtures/build';
-import type { BuiltFixture } from '../../fixtures/build';
-
-// CI はエンジンごとにジョブを分けて並べるので、TEST_BROWSER で 1 つに絞れる
-const browserTypes = [chromium, firefox, webkit]
-  .filter(
-    (type) =>
-      process.env.TEST_BROWSER === undefined ||
-      process.env.TEST_BROWSER === type.name(),
-  )
-  .map((type) => ({ name: type.name(), type }));
+import { browserTypes, buildFixture, serveBuilt } from '../../fixtures/build';
+import type { BuiltFixture, ServedBuild } from '../../fixtures/build';
 
 let built: BuiltFixture | undefined;
-let server: Server;
+let served: ServedBuild | undefined;
 let browser: Browser;
 let origin = '';
 
@@ -41,68 +22,12 @@ const handler = (pathname: string): Promise<Response> => {
   return built.handler(new Request(`${origin}${pathname}`));
 };
 
-const requestOf = async (
-  incoming: IncomingMessage,
-  url: URL,
-): Promise<Request> => {
-  const headers = new Headers();
-  for (const [name, value] of Object.entries(incoming.headers)) {
-    for (const each of [value ?? []].flat()) headers.append(name, each);
-  }
-  const method = incoming.method ?? 'GET';
-  return new Request(url, {
-    method,
-    headers,
-    body:
-      method === 'GET' || method === 'HEAD'
-        ? null
-        : new Uint8Array(
-            Buffer.concat((await Array.fromAsync(incoming)) as Buffer[]),
-          ),
-  });
-};
-
 // ページがデータを待ってから答え、その中身が後から流れてくるのは、
 // 組み上がったアプリを流したままのサーバーでしか起きない
 beforeAll(async () => {
-  const { handler: handle, out } = (built = await buildFixture('streaming'));
-
-  // ハッシュ付きの資産はファイルから、それ以外はハンドラが答える。
-  // @k8ordo/framework/serve と同じく、ハンドラにはメソッドとヘッダーと
-  // 本文も渡し（Server Action は POST で届く）、答えは流れてきたとおりに
-  // 送り、訪問者が去れば読むのをやめる
-  const answer = async (incoming: IncomingMessage): Promise<Response> => {
-    const url = new URL(incoming.url ?? '/', origin);
-    if (!url.pathname.startsWith('/assets/')) {
-      return handle(await requestOf(incoming, url));
-    }
-    try {
-      const body = await readFile(path.join(out, 'client', url.pathname));
-      return new Response(body, {
-        headers: { 'content-type': 'text/javascript' },
-      });
-    } catch {
-      return new Response(null, { status: 404 });
-    }
-  };
-  server = createServer((incoming, outgoing) => {
-    void (async () => {
-      const response = await answer(incoming);
-      outgoing.writeHead(response.status, Object.fromEntries(response.headers));
-      if (response.body === null) {
-        outgoing.end();
-        return;
-      }
-      await pipeline(
-        Readable.fromWeb(response.body as unknown as NodeReadableStream),
-        outgoing,
-      ).catch(() => undefined);
-    })();
-  });
-  await new Promise<void>((resolve) => {
-    server.listen(0, '127.0.0.1', resolve);
-  });
-  origin = `http://127.0.0.1:${String((server.address() as AddressInfo).port)}`;
+  built = await buildFixture('streaming');
+  served = await serveBuilt(built);
+  ({ origin } = served);
 }, 120_000);
 
 afterEach(() => {
@@ -110,7 +35,7 @@ afterEach(() => {
 });
 
 afterAll(async () => {
-  server.close();
+  served?.close();
   await built?.dispose();
 });
 

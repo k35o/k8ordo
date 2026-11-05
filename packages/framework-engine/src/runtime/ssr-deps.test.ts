@@ -2,26 +2,16 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-import { chromium, firefox, webkit } from 'playwright';
 import type { Browser, Page } from 'playwright';
 import type { Plugin, Rolldown } from 'vite';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
 
-import { buildFixture, serveFixture } from '../../fixtures/build';
+import { browserTypes, buildFixture, serveFixture } from '../../fixtures/build';
 import type { BuiltFixture, ServedFixture } from '../../fixtures/build';
 import type { Mode } from '../host';
 import { CLIENT_DEPS_HEADER, readClientDeps } from './payload';
 import type { ClientDeps } from './payload';
 import { STYLESHEET_ORDER_HREF } from './stylesheets';
-
-// CI はエンジンごとにジョブを分けて並べるので、TEST_BROWSER で 1 つに絞れる
-const browserTypes = [chromium, firefox, webkit]
-  .filter(
-    (type) =>
-      process.env.TEST_BROWSER === undefined ||
-      process.env.TEST_BROWSER === type.name(),
-  )
-  .map((type) => ({ name: type.name(), type }));
 
 type Deps = { readonly js: readonly string[]; readonly css: readonly string[] };
 

@@ -1,8 +1,15 @@
-import { mkdtemp, rm, symlink } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, symlink } from 'node:fs/promises';
+import { createServer as createHttpServer } from 'node:http';
+import type { IncomingMessage } from 'node:http';
+import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { Readable } from 'node:stream';
+import { pipeline } from 'node:stream/promises';
+import type { ReadableStream as NodeReadableStream } from 'node:stream/web';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
+import { chromium, firefox, webkit } from 'playwright';
 import { createBuilder, createLogger, createServer } from 'vite';
 import type { PluginOption, Rolldown } from 'vite';
 
@@ -134,6 +141,118 @@ export const buildFixture = async (
       await Promise.allSettled(answers);
       await rm(runtimeDir, { recursive: true, force: true });
       await rm(out, { recursive: true, force: true });
+    },
+  };
+};
+
+/**
+ * The engines a test opens pages in. CI runs one engine per job, narrowed
+ * by `TEST_BROWSER`.
+ */
+export const browserTypes = [chromium, firefox, webkit]
+  .filter(
+    (type) =>
+      process.env.TEST_BROWSER === undefined ||
+      process.env.TEST_BROWSER === type.name(),
+  )
+  .map((type) => ({ name: type.name(), type }));
+
+export type ServedBuild = {
+  /** Where the server listens, with no trailing slash. */
+  readonly origin: string;
+  /** Stops the server. The build stays. */
+  readonly close: () => void;
+};
+
+const ASSET_TYPES: Readonly<Record<string, string>> = {
+  '.css': 'text/css',
+  '.js': 'text/javascript',
+};
+
+/** The request a browser sent, as the handler takes one. */
+const requestOf = async (
+  incoming: IncomingMessage,
+  url: URL,
+): Promise<Request> => {
+  const headers = new Headers();
+  for (const [name, value] of Object.entries(incoming.headers)) {
+    for (const each of [value ?? []].flat()) headers.append(name, each);
+  }
+  const method = incoming.method ?? 'GET';
+  return new Request(url, {
+    method,
+    headers,
+    body:
+      method === 'GET' || method === 'HEAD'
+        ? null
+        : new Uint8Array(
+            Buffer.concat((await Array.fromAsync(incoming)) as Buffer[]),
+          ),
+  });
+};
+
+/**
+ * Serves a build as `@k8ordo/framework/serve` splits the work: a file under
+ * `/assets/` from the client build, everything else from the handler, with
+ * the request's method, headers and body, and the answer streamed as it
+ * comes. `hold` is awaited before an asset is sent, so a test can keep one
+ * back; `rewrite` hands the handler another URL than the one asked for.
+ */
+export const serveBuilt = async (
+  built: BuiltFixture,
+  {
+    hold,
+    rewrite = (url) => url,
+  }: {
+    readonly hold?: (url: URL) => Promise<void> | undefined;
+    readonly rewrite?: (url: URL) => URL;
+  } = {},
+): Promise<ServedBuild> => {
+  let origin = '';
+  const answer = async (incoming: IncomingMessage): Promise<Response> => {
+    const url = new URL(incoming.url ?? '/', origin);
+    if (!url.pathname.startsWith('/assets/')) {
+      return built.handler(await requestOf(incoming, rewrite(url)));
+    }
+    await hold?.(url);
+    try {
+      return new Response(
+        await readFile(path.join(built.out, 'client', url.pathname)),
+        {
+          headers: {
+            'content-type':
+              ASSET_TYPES[path.extname(url.pathname)] ??
+              'application/octet-stream',
+          },
+        },
+      );
+    } catch {
+      return new Response(null, { status: 404 });
+    }
+  };
+  const server = createHttpServer((incoming, outgoing) => {
+    void (async () => {
+      const response = await answer(incoming);
+      outgoing.writeHead(response.status, Object.fromEntries(response.headers));
+      if (response.body === null) {
+        outgoing.end();
+        return;
+      }
+      // 訪問者が去れば読むのをやめる
+      await pipeline(
+        Readable.fromWeb(response.body as unknown as NodeReadableStream),
+        outgoing,
+      ).catch(() => undefined);
+    })();
+  });
+  await new Promise<void>((resolve) => {
+    server.listen(0, '127.0.0.1', resolve);
+  });
+  origin = `http://127.0.0.1:${String((server.address() as AddressInfo).port)}`;
+  return {
+    origin,
+    close: () => {
+      server.close();
     },
   };
 };

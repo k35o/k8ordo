@@ -1,62 +1,26 @@
-import { readFile } from 'node:fs/promises';
-import { createServer } from 'node:http';
-import type { AddressInfo } from 'node:net';
-import path from 'node:path';
-
-import { chromium, firefox, webkit } from 'playwright';
 import type { Browser } from 'playwright';
 import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
-import { buildFixture, serveFixture } from '../../fixtures/build';
+import {
+  browserTypes,
+  buildFixture,
+  serveBuilt,
+  serveFixture,
+} from '../../fixtures/build';
 import type { Mode } from '../host';
-
-// CI はエンジンごとにジョブを分けて並べるので、TEST_BROWSER で 1 つに絞れる
-const browserTypes = [chromium, firefox, webkit]
-  .filter(
-    (type) =>
-      process.env.TEST_BROWSER === undefined ||
-      process.env.TEST_BROWSER === type.name(),
-  )
-  .map((type) => ({ name: type.name(), type }));
 
 type Serving = {
   readonly origin: string;
   readonly stop: () => Promise<void>;
 };
 
-// ハッシュ付きの資産はファイルから、それ以外はハンドラが答える。
-// @k8ordo/framework/serve と同じ分担
 const serveBuild = async (mode: Mode): Promise<Serving> => {
   const built = await buildFixture('hydrate-id', { mode });
-  const answer = async (url: URL): Promise<Response> => {
-    if (!url.pathname.startsWith('/assets/')) {
-      return built.handler(new Request(url));
-    }
-    try {
-      const body = await readFile(path.join(built.out, 'client', url.pathname));
-      return new Response(body, {
-        headers: { 'content-type': 'text/javascript' },
-      });
-    } catch {
-      return new Response(null, { status: 404 });
-    }
-  };
-  let origin = '';
-  const server = createServer((incoming, outgoing) => {
-    void (async () => {
-      const response = await answer(new URL(incoming.url ?? '/', origin));
-      outgoing.writeHead(response.status, Object.fromEntries(response.headers));
-      outgoing.end(Buffer.from(await response.arrayBuffer()));
-    })();
-  });
-  await new Promise<void>((resolve) => {
-    server.listen(0, '127.0.0.1', resolve);
-  });
-  origin = `http://127.0.0.1:${String((server.address() as AddressInfo).port)}`;
+  const { origin, close } = await serveBuilt(built);
   return {
     origin,
     stop: async () => {
-      server.close();
+      close();
       await built.dispose();
     },
   };

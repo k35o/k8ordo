@@ -1,24 +1,11 @@
 import { readdir, readFile } from 'node:fs/promises';
-import { createServer } from 'node:http';
-import type { Server } from 'node:http';
-import type { AddressInfo } from 'node:net';
 import path from 'node:path';
 
-import { chromium, firefox, webkit } from 'playwright';
 import type { Browser, Page } from 'playwright';
 import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
-import { buildFixture } from '../../fixtures/build';
-import type { BuiltFixture } from '../../fixtures/build';
-
-// CI はエンジンごとにジョブを分けて並べるので、TEST_BROWSER で 1 つに絞れる
-const browserTypes = [chromium, firefox, webkit]
-  .filter(
-    (type) =>
-      process.env.TEST_BROWSER === undefined ||
-      process.env.TEST_BROWSER === type.name(),
-  )
-  .map((type) => ({ name: type.name(), type }));
+import { browserTypes, buildFixture, serveBuilt } from '../../fixtures/build';
+import type { BuiltFixture, ServedBuild } from '../../fixtures/build';
 
 /** The fixture's two pages and its not-found. */
 const PAGES = ['a', 'b', 'n'] as const;
@@ -40,7 +27,7 @@ const marksOf = (page: PageName): readonly string[] => [
 const SLOW = 400;
 
 let built: BuiltFixture | undefined;
-let server: Server;
+let served: ServedBuild | undefined;
 let browser: Browser;
 let origin = '';
 /** Per built asset, by the path the HTML names it with, the pages it is of. */
@@ -57,7 +44,7 @@ const wait = (ms: number): Promise<void> =>
 
 // どのページがどのファイルを読むかは、組み上がったアプリにしか現れない
 beforeAll(async () => {
-  const { handler, out } = (built = await buildFixture('chunks'));
+  const { out } = (built = await buildFixture('chunks'));
   const assets = path.join(out, 'client', 'assets');
   for (const file of await readdir(assets)) {
     const text = await readFile(path.join(assets, file), 'utf8');
@@ -76,46 +63,22 @@ beforeAll(async () => {
     }
   }
 
-  // ハッシュ付きの資産はファイルから、それ以外はハンドラが答える。
-  // ページの client コンポーネントの JS だけを遅らせる
-  const answer = async (url: URL): Promise<Response> => {
-    if (url.pathname.startsWith('/assets/')) {
-      const isScript = url.pathname.endsWith('.js');
-      if (isScript && (pagesOf.get(url.pathname) ?? []).length > 0) {
-        await wait(SLOW);
-      }
-      try {
-        const body = await readFile(path.join(out, 'client', url.pathname));
-        return new Response(body, {
-          headers: {
-            'content-type': isScript ? 'text/javascript' : 'text/css',
-          },
-        });
-      } catch {
-        return new Response(null, { status: 404 });
-      }
-    }
-    // 404.html と同じく、別の pathname で描いた HTML をこの URL で返す
-    if (url.pathname === '/elsewhere') {
-      return handler(new Request(`${origin}/nowhere`));
-    }
-    return handler(new Request(url));
-  };
-  server = createServer((incoming, outgoing) => {
-    void (async () => {
-      const response = await answer(new URL(incoming.url ?? '/', origin));
-      outgoing.writeHead(response.status, Object.fromEntries(response.headers));
-      outgoing.end(Buffer.from(await response.arrayBuffer()));
-    })();
+  // ページの client コンポーネントの JS だけを遅らせる。/elsewhere には、
+  // 404.html と同じく、別の pathname で描いた HTML を返す
+  served = await serveBuilt(built, {
+    hold: (url) =>
+      url.pathname.endsWith('.js') &&
+      (pagesOf.get(url.pathname) ?? []).length > 0
+        ? wait(SLOW)
+        : undefined,
+    rewrite: (url) =>
+      url.pathname === '/elsewhere' ? new URL('/nowhere', url) : url,
   });
-  await new Promise<void>((resolve) => {
-    server.listen(0, '127.0.0.1', resolve);
-  });
-  origin = `http://127.0.0.1:${String((server.address() as AddressInfo).port)}`;
+  ({ origin } = served);
 }, 120_000);
 
 afterAll(async () => {
-  server.close();
+  served?.close();
   await built?.dispose();
 });
 
