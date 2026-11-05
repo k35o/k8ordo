@@ -46,3 +46,4 @@ export type {
   RouteContext,
 } from './register';
 export { Outlet, Router, useParams, useRoute } from './router';
+export { TreePathname } from './tree-pathname';

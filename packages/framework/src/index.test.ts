@@ -23,6 +23,7 @@ const WITHHELD: Readonly<Record<string, string>> = {
   NavigationGeneration: "a seam the framework's client runtime is built from",
   useInterceptedNavigation:
     "a seam the framework's client runtime is built from",
+  TreePathname: "a seam the framework's client runtime is built from",
   NavigationHandler: "the handler of useInterceptedNavigation, the runtime's",
   withoutBase:
     'the framework takes the base off a request before anything reads the pathname',

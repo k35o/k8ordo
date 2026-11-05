@@ -4,6 +4,7 @@ import {
   NavigationGeneration,
   normalizePathname,
   PathnameProvider,
+  TreePathname,
   useInterceptedNavigation,
   withoutBase,
 } from '@k8ordo/router';
@@ -37,7 +38,6 @@ import {
   Recover,
   reloadInstead,
 } from './recover';
-import { TreePathname } from './tree-pathname';
 
 /**
  * Where a Server Action's answer lands. The callback has to be registered

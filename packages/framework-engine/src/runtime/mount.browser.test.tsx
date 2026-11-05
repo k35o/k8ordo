@@ -1,4 +1,4 @@
-import { usePathname } from '@k8ordo/router';
+import { TreePathname, usePathname } from '@k8ordo/router';
 import { Suspense, use, useLayoutEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { Root } from 'react-dom/client';
@@ -16,7 +16,6 @@ import { AppRouter, setDocumentClient, setPayloadReader } from './app-router';
 import { DocumentRoot } from './document-root';
 import { mount, renderedHere } from './mount';
 import type { Payload } from './payload';
-import { TreePathname } from './tree-pathname';
 
 const CLIENT = '/assets/index-running.js';
 
