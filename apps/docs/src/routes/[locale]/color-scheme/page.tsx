@@ -7,6 +7,9 @@ import * as m from '../../../messages';
 import styles from '../../../styles/pages/color-scheme.module.css';
 
 const HERO_LAYOUT = `<html lang="ja" suppressHydrationWarning>
+  <head>
+    <ColorSchemeScript />
+  </head>
   <body>
     <ColorSchemeProvider>{children}</ColorSchemeProvider>
   </body>
@@ -16,9 +19,9 @@ const HERO_TOGGLE = `const { scheme, setPreference } = useColorScheme();
 
 setPreference(scheme === 'dark' ? 'light' : 'dark');`;
 
-const CLAIM_CSP_NONCE = `<ColorSchemeProvider nonce={nonce()}>
-  {children}
-</ColorSchemeProvider>`;
+const CLAIM_CSP_NONCE = `<head>
+  <ColorSchemeScript nonce={nonce()} />
+</head>`;
 
 const CLAIM_CSP_HASH = `const scriptSrc = ["'self'", await colorSchemeScriptHash()];`;
 

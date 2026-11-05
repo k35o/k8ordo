@@ -11,13 +11,13 @@ export const flashTitle = message({
 });
 
 export const flashCause = message({
-  ja: 'インラインスクリプトが、最初の描画の前に走っていません。多いのは、CSPがスクリプトを止めている場合と、プロバイダが入れ子のレイアウトにあって外側が先に描かれる場合です。',
-  en: 'The inline script did not run before the first paint. Usually a CSP blocked it, or the provider sits in a nested layout and whatever is outside it paints first.',
+  ja: 'インラインスクリプトが、最初の描画の前に走っていません。多いのは、CSPがスクリプトを止めている場合と、スクリプトがスタイルシートの後ろにあってその読み込みを待つ場合です。',
+  en: 'The inline script did not run before the first paint. Usually a CSP blocked it, or the script comes after a stylesheet and waits for it to load.',
 });
 
 export const flashFix = message({
-  ja: 'コンソールにCSPの違反が出ていれば、次の「CSPで止まるスクリプト」を見てください。出ていなければ、プロバイダをルートレイアウトの`<body>`の中に置き、ページ全体を包みます。',
-  en: 'If the console reports a CSP violation, see “Inline script blocked by CSP” below. Otherwise move the provider into the root layout, inside `<body>`, around the whole page.',
+  ja: 'コンソールにCSPの違反が出ていれば、次の「CSPで止まるスクリプト」を見てください。出ていなければ、`<ColorSchemeScript />`をルートレイアウトの`<head>`に置きます。`@k8ordo/framework`を使っていないときは、送られるHTMLでスクリプトがどのスタイルシートよりも前にあるかを確かめます。',
+  en: 'If the console reports a CSP violation, see “Inline script blocked by CSP” below. Otherwise put `<ColorSchemeScript />` in the root layout’s `<head>`. Without `@k8ordo/framework`, check that the HTML as sent has the script ahead of every stylesheet.',
 });
 
 export const cspTitle = message({
@@ -26,13 +26,13 @@ export const cspTitle = message({
 });
 
 export const cspCause = message({
-  ja: 'スクリプトを制限するポリシーが、インラインスクリプトを許可していません。ハッシュで許可している場合は、プロバイダと違う`defaultPreference`で計算したハッシュか、古いバージョンのハッシュを書き写していることがあります。',
-  en: 'A policy that restricts scripts does not allow the inline one. When it is allowed by hash, the hash may have been computed for a different `defaultPreference` than the provider’s, or copied from an older version.',
+  ja: 'スクリプトを制限するポリシーが、インラインスクリプトを許可していません。ハッシュで許可している場合は、`ColorSchemeScript`と違う`defaultPreference`で計算したハッシュか、古いバージョンのハッシュを書き写していることがあります。',
+  en: 'A policy that restricts scripts does not allow the inline one. When it is allowed by hash, the hash may have been computed for a different `defaultPreference` than `ColorSchemeScript`’s, or copied from an older version.',
 });
 
 export const cspFix = message({
-  ja: "nonceで許可するなら、プロバイダの`nonce`にリクエストごとのnonceを渡します（`@k8ordo/framework`のserverモードでは`nonce()`）。ハッシュで許可するなら、プロバイダと同じ`defaultPreference`を`colorSchemeScriptHash()`に渡し、ポリシーを組み立てるたびに計算します。`'unsafe-inline'`は使いません。ほかのインラインスクリプトまで許可してしまいます。",
-  en: "To allow it by nonce, pass the request’s nonce to the provider’s `nonce` (`nonce()` in `@k8ordo/framework`’s server mode). To allow it by hash, pass the provider’s `defaultPreference` to `colorSchemeScriptHash()` and compute the hash each time you build the policy, instead of copying it. Do not use `'unsafe-inline'`: it allows every other inline script too.",
+  ja: "nonceで許可するなら、`ColorSchemeScript`の`nonce`にリクエストごとのnonceを渡します（`@k8ordo/framework`のserverモードでは`nonce()`）。ハッシュで許可するなら、`ColorSchemeScript`と同じ`defaultPreference`を`colorSchemeScriptHash()`に渡し、ポリシーを組み立てるたびに計算します。`'unsafe-inline'`は使いません。ほかのインラインスクリプトまで許可してしまいます。",
+  en: "To allow it by nonce, pass the request’s nonce to `ColorSchemeScript`’s `nonce` (`nonce()` in `@k8ordo/framework`’s server mode). To allow it by hash, pass `ColorSchemeScript`’s `defaultPreference` to `colorSchemeScriptHash()` and compute the hash each time you build the policy, instead of copying it. Do not use `'unsafe-inline'`: it allows every other inline script too.",
 });
 
 export const hydrationTitle = message({
@@ -146,13 +146,13 @@ export const scriptTitle = message({
 });
 
 export const scriptCause = message({
-  ja: 'テストのようにブラウザだけで描くと、Reactはプロバイダが描くインラインの`<script>`を実行しません。開発ビルドのReactは、そのことをコンソールにエラーとして出します。',
-  en: 'Rendered in the browser only, as in a test, React does not execute the inline `<script>` the provider renders. Its development build logs that as an error.',
+  ja: 'テストのようにブラウザだけで描くと、Reactは`ColorSchemeScript`が描くインラインの`<script>`を実行しません。開発ビルドのReactは、そのことをコンソールにエラーとして出します。',
+  en: 'Rendered in the browser only, as in a test, React does not execute the inline `<script>` that `ColorSchemeScript` renders. Its development build logs that as an error.',
 });
 
 export const scriptFix = message({
-  ja: 'テストが失敗したわけではないので、直すものはありません。テストで見る`<html>`のクラスは、プロバイダのeffectが付けています。',
-  en: 'Nothing failed, so there is nothing to fix. The class a test sees on `<html>` is written by the provider’s effect.',
+  ja: 'テストでは`ColorSchemeScript`を描かず、プロバイダだけを`wrapper`に渡します。テストで見る`<html>`のクラスは、プロバイダのeffectが付けています。',
+  en: 'In a test, leave `ColorSchemeScript` out and pass only the provider as the `wrapper`. The class a test sees on `<html>` is written by the provider’s effect.',
 });
 
 export const seeBefore = message({

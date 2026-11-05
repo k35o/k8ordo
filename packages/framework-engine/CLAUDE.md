@@ -602,7 +602,7 @@ pnpm check         # check:write to auto-fix
   `rsc-html-stream` (the payload written into the HTML). `nonce()` reads it
   in every phase, the render included — signing a script is not writing the
   response — so a guard names it in the header it writes and a layout signs
-  a script of its own (`<ColorSchemeProvider nonce>`). Under
+  a script of its own (`<ColorSchemeScript nonce>`). Under
   static mode the HTML also says it in `NONCE_HEADER`, and the build
   takes it off the file and names what it signed by hash; static mode refuses
   `@k8ordo/framework/server` and with it `nonce()`, since what an application signed with it would land

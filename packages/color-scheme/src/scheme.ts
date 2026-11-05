@@ -47,10 +47,10 @@ export const resolve = (
 };
 
 /**
- * The inline script the provider renders before its children: the rule
- * above, run before the first paint. The schema does not run there, so the
- * stored value is checked by hand and anything else reads as nothing
- * chosen — the same salvage the store applies.
+ * The inline script `ColorSchemeScript` renders: the rule above, run before
+ * the first paint. The schema does not run there, so the stored value is
+ * checked by hand and anything else reads as nothing chosen — the same
+ * salvage the store applies.
  */
 export const scriptFor = (defaultPreference: ColorSchemePreference): string =>
   `(()=>{const s=${colorSchemeState.inlineRead()};const v=s&&s.preference;const p=v==="dark"||v==="light"?v:${JSON.stringify(defaultPreference)};if(p==="dark"||(p!=="light"&&matchMedia(${JSON.stringify(DARK_QUERY)}).matches))document.documentElement.classList.add(${JSON.stringify(DARK_CLASS)})})()`;
@@ -58,8 +58,8 @@ export const scriptFor = (defaultPreference: ColorSchemePreference): string =>
 /**
  * The inline script's hash as a CSP source, `'sha256-…'`, for a policy that
  * allows it by what it is rather than by a nonce — the static mode's `csp`
- * option, or a header that names no nonce. Give it the default the provider
- * is given: the script carries it.
+ * option, or a header that names no nonce. Give it the default
+ * `ColorSchemeScript` is given: the script carries it.
  */
 export const colorSchemeScriptHash = async (
   defaultPreference: ColorSchemePreference = 'system',

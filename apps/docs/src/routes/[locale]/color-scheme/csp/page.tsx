@@ -7,7 +7,10 @@ import * as m from '../../../../messages';
 
 const t = m.colorSchemeCsp;
 
-const LAYOUT = `import { ColorSchemeProvider } from '@k8ordo/color-scheme';
+const LAYOUT = `import {
+  ColorSchemeProvider,
+  ColorSchemeScript,
+} from '@k8ordo/color-scheme';
 import { nonce } from '@k8ordo/framework/server';
 import type { ReactNode } from 'react';
 
@@ -18,10 +21,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <ColorSchemeScript nonce={nonce()} />
+      </head>
       <body>
-        <ColorSchemeProvider nonce={nonce()}>
-          {children}
-        </ColorSchemeProvider>
+        <ColorSchemeProvider>{children}</ColorSchemeProvider>
       </body>
     </html>
   );
@@ -31,9 +35,14 @@ const HASH = `import { colorSchemeScriptHash } from '@k8ordo/color-scheme';
 
 const policy = \`script-src 'self' \${await colorSchemeScriptHash()}\`;`;
 
-const DEFAULT_LAYOUT = `<ColorSchemeProvider defaultPreference="dark">
-  {children}
-</ColorSchemeProvider>`;
+const DEFAULT_LAYOUT = `<head>
+  <ColorSchemeScript defaultPreference="dark" />
+</head>
+<body>
+  <ColorSchemeProvider defaultPreference="dark">
+    {children}
+  </ColorSchemeProvider>
+</body>`;
 
 const DEFAULT_HASH = `const policy = \`script-src 'self' \${await colorSchemeScriptHash('dark')}\`;`;
 
@@ -56,10 +65,10 @@ export default function ColorSchemeCspPage() {
 
       <DocSection id="nonce" title={t.nonceTitle}>
         <CodeBlock
-          callouts={{ 13: t.nonceCallout() }}
+          callouts={{ 16: t.nonceCallout() }}
           code={LAYOUT}
           lang="tsx"
-          marks={{ 13: 'highlight' }}
+          marks={{ 16: 'highlight' }}
           title="src/routes/layout.tsx"
         />
         <p>
@@ -95,7 +104,7 @@ export default function ColorSchemeCspPage() {
         <CodeBlock
           code={DEFAULT_LAYOUT}
           lang="tsx"
-          marks={{ 1: 'highlight' }}
+          marks={{ 2: 'highlight', 5: 'highlight' }}
           title="src/routes/layout.tsx"
         />
         <CodeBlock code={DEFAULT_HASH} lang="ts" marks={{ 1: 'highlight' }} />

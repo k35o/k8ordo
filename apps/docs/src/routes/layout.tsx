@@ -1,4 +1,4 @@
-import { ColorSchemeProvider } from '@k8ordo/color-scheme';
+import { ColorSchemeProvider, ColorSchemeScript } from '@k8ordo/color-scheme';
 import type { ReactNode } from 'react';
 
 import { locales } from '../i18n';
@@ -17,7 +17,7 @@ export default function Root({
   // 間違ったまま読む。ロケールは URL の先頭区間にしか無い。
   const locale = locales.delocalize(pathname).locale ?? locales.default;
   return (
-    // Provider のスクリプトが hydrate 前に dark クラスを付けるので、html の
+    // head のスクリプトが hydrate 前に dark クラスを付けるので、html の
     // 属性だけはサーバーの出力と一致しない。それが目的の差分なので警告を抑える。
     // <title> はここには無い。React 19 が各ページの <title> を head に持ち上げる
     // ので、ここにも書くと 2 つ並ぶ。
@@ -33,9 +33,8 @@ export default function Root({
           content="k8ordo - React libraries that use Baseline features without holding back"
           name="description"
         />
+        <ColorSchemeScript />
       </head>
-      {/* Provider が hydrate 前に dark を付けるスクリプトを先頭に描くので、
-          body の中で全部を包む */}
       <body className={styles.body}>
         <ColorSchemeProvider>{children}</ColorSchemeProvider>
       </body>

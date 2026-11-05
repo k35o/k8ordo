@@ -16,8 +16,8 @@ export const classWhen = message({
 });
 
 export const classTiming = message({
-  ja: '最初の描画の前にインラインスクリプトがクラスを付けます。そのあとは`ColorSchemeProvider`が付け外しします。スタイルシートはこのクラスを読むだけで、訪問者の選択に従います。',
-  en: 'An inline script adds the class before the first paint, and `ColorSchemeProvider` adds and removes it after that. A stylesheet only has to read the class to follow the visitor’s choice.',
+  ja: '最初の描画の前に`ColorSchemeScript`がクラスを付けます。そのあとは`ColorSchemeProvider`が付け外しします。スタイルシートはこのクラスを読むだけで、訪問者の選択に従います。',
+  en: '`ColorSchemeScript` adds the class before the first paint, and `ColorSchemeProvider` adds and removes it after that. A stylesheet only has to read the class to follow the visitor’s choice.',
 });
 
 export const classUi = message({

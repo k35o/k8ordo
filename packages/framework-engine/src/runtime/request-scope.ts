@@ -172,7 +172,7 @@ export const requestHeaders = (): Headers =>
 /**
  * The nonce this answer's inline scripts carry: the framework's own — the
  * payload written into the HTML, React's — and any the application signs
- * with it, as `<ColorSchemeProvider nonce={nonce()}>`. A new one per
+ * with it, as `<ColorSchemeScript nonce={nonce()} />`. A new one per
  * request. Readable wherever the request is in progress, the render
  * included: signing a script is not writing the response. A guard names it
  * in the `Content-Security-Policy` it writes; a build into files turns what

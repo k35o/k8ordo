@@ -96,13 +96,13 @@ export const scriptTitle = message({
 });
 
 export const scriptNotRun = message({
-  ja: 'テストのようにサーバーを通さずブラウザだけで描画すると、プロバイダのインラインスクリプトは実行されません。Reactは、ブラウザで自分が作ったインラインの`<script>`を実行しません。',
-  en: 'When it renders only in the browser with no server render, as in a test, the provider’s inline script does not run. React never executes an inline `<script>` it creates in the browser.',
+  ja: 'テストのようにサーバーを通さずブラウザだけで描画すると、`ColorSchemeScript`のインラインスクリプトは実行されません。Reactは、ブラウザで自分が作ったインラインの`<script>`を実行しません。',
+  en: 'When it renders only in the browser with no server render, as in a test, `ColorSchemeScript`’s inline script does not run. React never executes an inline `<script>` it creates in the browser.',
 });
 
 export const scriptConsole = message({
-  ja: '開発ビルドのReactは、`Encountered a script tag while rendering React component`で始まるエラーをコンソールに出します。テストが失敗したわけではありません。',
-  en: 'React’s development build logs an error to the console starting with `Encountered a script tag while rendering React component`. It does not mean the test failed.',
+  ja: '描画すると、開発ビルドのReactは`Encountered a script tag while rendering React component`で始まるエラーをコンソールに出します。フックのテストでは`ColorSchemeScript`を描かず、プロバイダだけを`wrapper`に渡します。',
+  en: 'Rendered, it makes React’s development build log an error starting with `Encountered a script tag while rendering React component`. A test of the hook leaves `ColorSchemeScript` out and passes only the provider as the `wrapper`.',
 });
 
 export const scriptClass = message({

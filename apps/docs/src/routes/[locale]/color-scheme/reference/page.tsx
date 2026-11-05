@@ -10,13 +10,16 @@ import styles from '../../../../styles/pages/color-scheme/reference.module.css';
 const t = m.colorSchemeReference;
 const FROM = '@k8ordo/color-scheme';
 
-const PROVIDER_EXAMPLE = `export default function RootLayout({
+const LAYOUT_EXAMPLE = `export default function RootLayout({
   children,
 }: {
   children: ReactNode;
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <ColorSchemeScript />
+      </head>
       <body>
         <ColorSchemeProvider>{children}</ColorSchemeProvider>
       </body>
@@ -52,6 +55,34 @@ export default function ColorSchemeReferencePage() {
       path="/:locale/color-scheme/reference"
     >
       <ApiEntry
+        caveats={t.scriptCaveats}
+        from={FROM}
+        id="color-scheme-script"
+        name="ColorSchemeScript"
+        params={[
+          {
+            name: 'defaultPreference',
+            type: "ColorSchemePreference = 'system'",
+            description: t.scriptDefault,
+          },
+          {
+            name: 'nonce',
+            type: 'string | undefined',
+            description: t.scriptNonce,
+          },
+        ]}
+        signature="ColorSchemeScript(props: ColorSchemeScriptProps): ReactNode"
+        summary={t.scriptSummary}
+      >
+        <CodeBlock
+          code={LAYOUT_EXAMPLE}
+          lang="tsx"
+          marks={{ 9: 'highlight' }}
+          title="layout.tsx"
+        />
+      </ApiEntry>
+
+      <ApiEntry
         caveats={t.providerCaveats}
         from={FROM}
         id="color-scheme-provider"
@@ -63,11 +94,6 @@ export default function ColorSchemeReferencePage() {
             description: t.providerDefault,
           },
           {
-            name: 'nonce',
-            type: 'string | undefined',
-            description: t.providerNonce,
-          },
-          {
             name: 'children',
             type: 'ReactNode',
             description: t.providerChildren,
@@ -77,9 +103,9 @@ export default function ColorSchemeReferencePage() {
         summary={t.providerSummary}
       >
         <CodeBlock
-          code={PROVIDER_EXAMPLE}
+          code={LAYOUT_EXAMPLE}
           lang="tsx"
-          marks={{ 7: 'highlight', 9: 'highlight' }}
+          marks={{ 7: 'highlight', 12: 'highlight' }}
           title="layout.tsx"
         />
       </ApiEntry>
@@ -203,10 +229,20 @@ export default function ColorSchemeReferencePage() {
         name="ColorSchemeProviderProps"
         signature={`type ColorSchemeProviderProps = {
   readonly defaultPreference?: ColorSchemePreference;
-  readonly nonce?: string;
   readonly children: ReactNode;
 };`}
         summary={t.providerPropsSummary}
+      />
+
+      <ApiEntry
+        from={FROM}
+        id="color-scheme-script-props"
+        name="ColorSchemeScriptProps"
+        signature={`type ColorSchemeScriptProps = {
+  readonly defaultPreference?: ColorSchemePreference;
+  readonly nonce?: string;
+};`}
+        summary={t.scriptPropsSummary}
       />
 
       <ApiEntry

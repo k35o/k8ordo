@@ -42,12 +42,11 @@ const SCRIPT = `(() => {
     document.documentElement.classList.add('dark');
 })();`;
 
-const FIRST_CHILD = `return (
-  <>
-    <script nonce={nonce}>{scriptFor(defaultPreference)}</script>
-    <ColorSchemeContext value={value}>{children}</ColorSchemeContext>
-  </>
-);`;
+const POSITION = `<head>
+  <meta charset="utf-8" />
+  <script>(() => { … })()</script>
+  <link rel="stylesheet" href="/assets/index.css" />
+</head>`;
 
 const READS_STORE = `const useReadsStore = (): boolean =>
   useSyncExternalStore(
@@ -113,21 +112,21 @@ export default function ColorSchemeHowItWorksPage() {
         </p>
       </DocSection>
 
-      <DocSection id="first-child" title={t.firstChildTitle}>
+      <DocSection id="position" title={t.positionTitle}>
         <CodeBlock
-          code={FIRST_CHILD}
-          lang="tsx"
+          callouts={{ 3: t.positionScriptCallout() }}
+          code={POSITION}
+          lang="html"
           marks={{ 3: 'highlight' }}
-          title="provider.tsx"
         />
         <p>
-          <Rich>{t.firstChildOrder()}</Rich>
+          <Rich>{t.positionOrder()}</Rich>
         </p>
         <p>
-          <Rich>{t.firstChildBody()}</Rich>
+          <Rich>{t.positionHead()}</Rich>
         </p>
         <p>
-          <Rich>{t.firstChildHydration()}</Rich>
+          <Rich>{t.positionHydration()}</Rich>
         </p>
       </DocSection>
 
@@ -198,6 +197,8 @@ export default function ColorSchemeHowItWorksPage() {
             t.nonGuaranteeServer,
             t.nonGuaranteeMarkup,
             t.nonGuaranteeCsp,
+            t.nonGuaranteePosition,
+            t.nonGuaranteeSameDefault,
             t.nonGuaranteeTwoProviders,
             t.nonGuaranteeSameTab,
             t.nonGuaranteeStyles,

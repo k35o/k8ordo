@@ -1,4 +1,4 @@
-import { ColorSchemeProvider } from '@k8ordo/color-scheme';
+import { ColorSchemeProvider, ColorSchemeScript } from '@k8ordo/color-scheme';
 import { href } from '@k8ordo/framework';
 import { nonce } from '@k8ordo/framework/server';
 import type { ReactNode } from 'react';
@@ -13,11 +13,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta charSet="utf-8" />
-      </head>
-      <body>
         {/* 描く前に <html> へクラスを付けるインラインスクリプトを、この応答の
             nonce で署名する */}
-        <ColorSchemeProvider nonce={nonce()}>
+        <ColorSchemeScript nonce={nonce()} />
+      </head>
+      <body>
+        <ColorSchemeProvider>
           <nav>
             {/* Navigation API の下では素の <a> がそのままクライアント遷移 */}
             <a href={href('/')}>home</a>{' '}

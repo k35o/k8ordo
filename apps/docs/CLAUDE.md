@@ -8,8 +8,9 @@ internal and has no page: an application installs `@k8ordo/framework`, never
 the engine. The site also dogfoods
 `@k8ordo/state`, `@k8ordo/form`, `@k8ordo/i18n`, and `@k8ordo/color-scheme`:
 the writing-mode preference is a `defineLocalState` (`src/theme/state.ts`),
-the colour scheme is `@k8ordo/color-scheme`'s (`<ColorSchemeProvider>` in
-the root layout's `<body>`, `useColorScheme()` in the header's switcher),
+the colour scheme is `@k8ordo/color-scheme`'s (`<ColorSchemeScript />` in
+the root layout's `<head>`, `<ColorSchemeProvider>` in its `<body>`,
+`useColorScheme()` in the header's switcher),
 `/state`'s live demo is a real `definePageState` on the page's own URL,
 `/form`'s live demo is a GET filter form whose constraints and URL state come
 from one schema (`src/demos/form/`), and every word on the
@@ -119,10 +120,11 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
 - **Sitemap**: `framework({ mode: 'static', site: 'https://ordo.k8o.me' })` in
   `vite.config.ts` makes the build write `dist/client/sitemap.xml` listing
   every page it rendered. Nothing here maintains a page list by hand.
-- **The colour scheme is `@k8ordo/color-scheme`'s.** The root layout wraps
-  everything inside `<body>` in `<ColorSchemeProvider>`, which renders the
-  pre-paint inline script itself, and `src/components/theme-switcher.tsx`
-  calls `useColorScheme()`; there is no theme context and no hand-written
+- **The colour scheme is `@k8ordo/color-scheme`'s.** The root layout puts
+  `<ColorSchemeScript />`, the pre-paint inline script, in `<head>` — the
+  framework writes it ahead of the stylesheets — and wraps everything
+  inside `<body>` in `<ColorSchemeProvider>`; `src/components/theme-switcher.tsx`
+  calls `useColorScheme()`. There is no theme context and no hand-written
   inline script here. The writing-mode
   preference stays the site's own `defineLocalState` in `src/theme/state.ts`
   (`writing-mode`, `mode?: 'horizontal' | 'vertical'`), a directive-free

@@ -403,6 +403,27 @@ describe('the static build', () => {
   );
 
   it.each([
+    'index.html',
+    'products/1/index.html',
+    '404.html',
+    'en/posts/!fallback/index.html',
+  ])(
+    'writes the colour-scheme script in the <head> of %s under the policy, ahead of every stylesheet',
+    (file) => {
+      const html = read(file);
+      const script = html.indexOf('k8ordo-state:color-scheme');
+
+      expect(html.indexOf('</head>')).toBeGreaterThan(script);
+      // ポリシーの <meta> より後ろなら、ポリシーがこのスクリプトにも効く
+      expect(script).toBeGreaterThan(
+        html.indexOf('http-equiv="Content-Security-Policy"'),
+      );
+      // スタイルシートより後ろだと、それが届くまで動かず、その間に描かれる
+      expect(html.indexOf('<style')).toBeGreaterThan(script);
+    },
+  );
+
+  it.each([
     ['en', 'about the shop', 'Open since September 1, 2026.'],
     ['ja', 'このお店について', '2026年9月2日から営業しています。'],
   ])(
