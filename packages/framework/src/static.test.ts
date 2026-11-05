@@ -391,6 +391,30 @@ describe('the shells a build writes', () => {
     );
   });
 
+  it('stops the build naming a page and a shell whose payload failed to render, which the HTML did not', async () => {
+    await routeFiles(POSTS);
+    await handlerAnswering(
+      site({
+        '/posts/1/index.rsc': { status: 500, body: 'the payload threw' },
+        '/posts/!fallback/index.rsc': {
+          status: 500,
+          headers: SHELL_HEADER,
+          body: 'the shell’s payload threw',
+        },
+      }),
+    );
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {
+      // 描けなかったことは throw の文言で確かめる
+    });
+
+    await expect(hooks({ paths: () => ['/posts/1'] }).build()).rejects.toThrow(
+      'static build could not render /posts/1, /posts/:id — see the error above',
+    );
+    expect(logged).toHaveBeenCalledWith(
+      'k8ordo: http://k8ordo.localhost/posts/1/index.rsc — the payload threw',
+    );
+  });
+
   it('refuses a shell another route answered, and writes nothing for it', async () => {
     await routeFiles(POSTS);
     await handlerAnswering(

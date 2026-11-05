@@ -766,7 +766,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
               return [
                 async () => {
                   const file = path.join(clientDir, dirFor(pathname));
-                  const { status, type } = await writeRoute(
+                  const { status, type } = await writeBody(
                     file,
                     handler,
                     urlFor(pathname),
@@ -801,18 +801,16 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
                 // which loads the HTML above and follows it.
                 if (status === 200) {
                   const payload = urlFor(payloadPathFor(pathname));
-                  await write(
+                  const written = await writeBody(
                     path.join(dir, 'index.rsc'),
                     handler,
                     payload,
-                    csp,
-                    {
-                      notFoundIsPage: false,
-                    },
                   );
-                  // The payload is the render the HTML was: it names the same.
-                  // Keyed as a browser's URL spells the path.
-                  if (named !== null) {
+                  if (written.status !== 200) {
+                    failed.push(pathname);
+                  } else if (named !== null) {
+                    // The payload is the render the HTML was: it names the same.
+                    // Keyed as a browser's URL spells the path.
                     pageFiles.set(new URL(payload).pathname, named);
                   }
                 }
@@ -869,13 +867,12 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
                 `the shell for ${named} was answered by another route, which took "${FALLBACK_SEGMENT}" as a value`,
               );
             } else if (answered.shell === shell.pattern) {
-              await write(
+              const payload = await writeBody(
                 path.join(dir, 'index.rsc'),
                 handler,
                 urlFor(payloadPathFor(shell.pathname)),
-                csp,
-                { notFoundIsPage: false, shell: shell.pattern },
               );
+              if (payload.status !== 200) failed.push(shell.location);
             } else {
               shellTaken.push(
                 `the shell for ${named} was answered by ${fallbacks.get(answered.shell) ?? answered.shell}, which the table tries first — supply shell locations that pattern cannot match`,
@@ -1156,13 +1153,13 @@ const write = async (
 };
 
 /**
- * Writes what a route.ts's GET answered, as the file at its pathname, and
- * says the type it answered with — a file keeps none, so a static host serves
- * it with the type its extension says, and only an adapter that can name a
- * file's type (`vercel()`) serves the GET's. Anything but a 200 is not a file
- * the site has, and nothing is written.
+ * Writes the body a 200 answered as it is — a route.ts's file, a payload —
+ * and says the type it answered with: a file keeps none, so a static host
+ * serves it with the type its extension says, and only an adapter that can
+ * name a file's type (`vercel()`) serves the GET's. Anything but a 200 is not
+ * a file the site has, and nothing is written.
  */
-const writeRoute = async (
+const writeBody = async (
   file: string,
   handler: Handler,
   url: string,

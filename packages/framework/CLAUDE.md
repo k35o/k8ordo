@@ -203,9 +203,10 @@ pnpm check         # check:write to auto-fix
   (a shared parameter position, or one URL the build did not write).
   `planRefusals` words every refusal; `vite dev` logs the same words.
 - **A shell is written only when its own pattern answered.** The build asks
-  the handler for each shell pathname, HTML and payload, and writes them
-  only on a 200 carrying `SHELL_HEADER` for that pattern; anything else
-  stops the build naming the location (a params schema, a `notFound()`,
+  the handler for each shell pathname, HTML and payload, and writes the
+  HTML only on a 200 carrying `SHELL_HEADER` for that pattern, and the
+  payload only on a 200 after it; anything else stops the build naming the
+  location (a params schema, a `notFound()`,
   another route). A shell is never in the sitemap. Its HTML
   outside scripts is searched for `!fallback`, which a layout writing its
   `pathname` leaves, and the build warns.
