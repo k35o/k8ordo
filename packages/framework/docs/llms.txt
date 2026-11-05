@@ -64,7 +64,9 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   every page loads comes in at most two files — the entry's and the frame's,
   which sets the client build's `codeSplitting` — and the browser renders
   once they have loaded; Server Components' stylesheets
-  come before client components', and a stylesheet once loaded stays),
+  come before client components', a stylesheet once loaded stays, and an
+  inline classic script in `<head>` is moved ahead of every stylesheet, so
+  a script that has to run before the first paint goes there),
   `loading.tsx`, `route.ts` (methods and `405` under server
   mode, a file under static mode), the generated `.k8ordo/` files (the
   route table, and the `Register`s: the table's, and `@k8ordo/i18n`'s when

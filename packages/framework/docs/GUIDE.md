@@ -296,8 +296,9 @@ them with `mode: 'server'` is a type error:
 Each topic has a reference of its own. Read the one the task needs:
 
 - [Routing](references/routing.md): the `routes/` grammar and what the build
-  refuses, how a page answers and streams, `loading.tsx`, `route.ts`, the
-  generated `.k8ordo/` files, titles, and fetching the next page ahead.
+  refuses, how a page answers and streams, where a script that has to run
+  before the first paint goes, `loading.tsx`, `route.ts`, the generated
+  `.k8ordo/` files, titles, and fetching the next page ahead.
 - [Parameters](references/params.md): typing parameters with `paramsSchema`,
   what a refused value becomes, and, under static mode, supplying the
   pathnames with `paths` and answering the values it does not list with a

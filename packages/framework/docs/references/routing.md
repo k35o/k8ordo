@@ -163,6 +163,41 @@ ahead, applies to every page after it in the tab. Keep the selectors of the
 CSS a page or a client component imports to its own elements — a CSS
 Module's classes — and import what every page needs in the root layout.
 
+**A script in `<head>` runs before the stylesheets.** React writes what it
+hoists into `<head>` — every stylesheet among it — ahead of what the root
+layout put there, and a script after a stylesheet waits for it to load,
+while the browser may paint the page without what the script sets. So the
+framework moves each inline classic script of `<head>` — no `src`, no
+`type` — ahead of the first stylesheet there, in the order the layout wrote
+them, in either mode and under `vite dev`. It is the place for a script that
+has to run before the first paint, such as `@k8ordo/color-scheme`'s:
+
+```tsx
+// src/routes/layout.tsx
+import { ColorSchemeScript } from '@k8ordo/color-scheme';
+import type { LayoutProps } from '@k8ordo/framework';
+
+export default function RootLayout({ children }: LayoutProps<'/'>) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta charSet="utf-8" />
+        <ColorSchemeScript />
+      </head>
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+Such a script runs before any of the page's CSS has loaded: it can set a
+class or an attribute on `<html>`, but a style it computes reads none of
+that CSS. A script with a `src` or a `type` stays where React wrote it, and
+so does one inside a `<noscript>` or a `<template>`, and every script in
+`<body>`. Under `mode: 'static'` the policy's `<meta>` stays first in
+`<head>`, so the policy covers the scripts moved after it
+([Content Security Policy](csp.md#static-mode-hashes-in-a-meta)).
+
 ## What the build refuses
 
 Every problem is reported, not just the first, and each names the file:
