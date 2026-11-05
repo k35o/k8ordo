@@ -263,9 +263,10 @@ pnpm check         # check:write to auto-fix
   after the `<meta charSet>` React writes there (a browser looks for the
   encoding only in the first 1024 bytes, which a policy naming many hashes
   outgrows; only a charset that opens `<head>` is passed over, since a
-  policy does not govern what comes before it), and so is the engine's one `<style>` (`STYLESHEET_ORDER_HREF`, empty, which
-  keeps the Server Components' stylesheets first; the engine leaves it
-  unsigned under static mode) wherever a style element is decided —
+  policy does not govern what comes before it), and so is the engine's one
+  `<style>` (`STYLESHEET_ORDER_HREF`, empty, which keeps the Server
+  Components' stylesheets first; the engine leaves it unsigned under static
+  mode) wherever a style element is decided —
   `style-src-elem`, `style-src`, or `style-src` made from `default-src` —
   and only where the policy would refuse it: beside an `'unsafe-inline'`
   that lets it in, a hash would turn that off for every `style` attribute
