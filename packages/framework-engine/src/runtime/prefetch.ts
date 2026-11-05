@@ -21,7 +21,10 @@ export const KEPT_PAGES = 50;
  * it: `data-k8ordo-prefetch="false"`. The nearest element carrying it decides,
  * so a link can opt back in inside a region that opted out.
  */
-export const PREFETCH_ATTRIBUTE = 'data-k8ordo-prefetch';
+const PREFETCH_ATTRIBUTE = 'data-k8ordo-prefetch';
+
+/** What starts a prefetch: a pointer onto a link, focus on one, a press. */
+const INTENTS = ['pointerover', 'focusin', 'pointerdown'] as const;
 
 /**
  * The URL a pointer, a focus or a press is about to follow, when following it
@@ -47,6 +50,51 @@ export const prefetchTargetOf = (target: EventTarget | null): URL | null => {
     return null;
   }
   return url;
+};
+
+/**
+ * Prefetches the link a pointer, a focus or a press is about to follow, and
+ * returns what stops it.
+ */
+export const prefetchOnIntent = (
+  prefetch: (url: URL) => Promise<unknown>,
+): (() => void) => {
+  const onIntent = (event: Event): void => {
+    const url = prefetchTargetOf(event.target);
+    if (url !== null) void prefetch(url);
+  };
+  // 捕捉段で聞く。途中の要素が伝播を止めても、押し始めは見逃さない
+  for (const type of INTENTS) {
+    document.addEventListener(type, onIntent, { capture: true, passive: true });
+  }
+  return () => {
+    for (const type of INTENTS) {
+      document.removeEventListener(type, onIntent, { capture: true });
+    }
+  };
+};
+
+/**
+ * Prefetches the links on screen (`prefetchInView`) while the primary pointer
+ * is coarse, and returns what stops it.
+ */
+export const prefetchInViewUnderTouch = (
+  prefetch: (url: URL) => Promise<unknown>,
+): (() => void) => {
+  // 粗いポインタにはホバーが無く、タップは押し始めとクリックがほぼ同時に
+  // 来るので、先に取る間が無い。代わりに画面のリンクを取る
+  const coarse = matchMedia('(pointer: coarse)');
+  let stop: (() => void) | undefined;
+  const follow = (): void => {
+    stop?.();
+    stop = coarse.matches ? prefetchInView(prefetch) : undefined;
+  };
+  follow();
+  coarse.addEventListener('change', follow);
+  return () => {
+    coarse.removeEventListener('change', follow);
+    stop?.();
+  };
 };
 
 /**

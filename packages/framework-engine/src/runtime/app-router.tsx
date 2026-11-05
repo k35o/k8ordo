@@ -25,7 +25,11 @@ import { doneHydrating } from './hydrating-pathname';
 import { isPayload } from './is-payload';
 import type { Payload } from './payload';
 import { payloadPathFor } from './payload-path';
-import { createPageCache, prefetchInView, prefetchTargetOf } from './prefetch';
+import {
+  createPageCache,
+  prefetchInViewUnderTouch,
+  prefetchOnIntent,
+} from './prefetch';
 import type { PageCache } from './prefetch';
 import {
   markNavigated,
@@ -291,9 +295,6 @@ const cacheIn = (
 const payloadUrlFor = (url: URL): string =>
   `${payloadPathFor(url.pathname)}${url.search}`;
 
-/** What starts a prefetch: a pointer onto a link, focus on one, a press. */
-const INTENTS = ['pointerover', 'focusin', 'pointerdown'] as const;
-
 /**
  * The client half under the framework: the tree comes from the server, so
  * there is no route table in the browser at all — only navigation. The
@@ -480,48 +481,19 @@ export function AppRouter({
     void readClientFiles();
   }, [arrived]);
 
-  // 粗いポインタにはホバーが無く、タップは押し始めとクリックがほぼ同時に
-  // 来るので、先に取る間が無い。代わりに画面のリンクを取る。ファイルに限る
-  // のは、リクエストごとに描くページでは、通り過ぎたリンクの数だけサーバーが
-  // 描き、30 秒で捨てることになるから
   useEffect(() => {
-    if (!payloadsAreFiles()) return undefined;
-    const coarse = matchMedia('(pointer: coarse)');
-    let stop: (() => void) | undefined;
-    const follow = (): void => {
-      stop?.();
-      stop = coarse.matches
-        ? prefetchInView((url) =>
-            cacheIn(prefetched).prefetch(payloadUrlFor(url), 'low'),
-          )
-        : undefined;
-    };
-    follow();
-    coarse.addEventListener('change', follow);
+    const prefetch =
+      (priority: RequestPriority) =>
+      (url: URL): Promise<Payload | null> =>
+        cacheIn(prefetched).prefetch(payloadUrlFor(url), priority);
+    // 画面のリンクを取るのはファイルに限る。リクエストごとに描くページでは、
+    // 通り過ぎたリンクの数だけサーバーが描き、30 秒で捨てることになる
+    const stops = payloadsAreFiles()
+      ? [prefetchInViewUnderTouch(prefetch('low'))]
+      : [];
+    stops.push(prefetchOnIntent(prefetch('auto')));
     return () => {
-      coarse.removeEventListener('change', follow);
-      stop?.();
-    };
-  }, []);
-
-  useEffect(() => {
-    const onIntent = (event: Event): void => {
-      const url = prefetchTargetOf(event.target);
-      if (url !== null) {
-        void cacheIn(prefetched).prefetch(payloadUrlFor(url), 'auto');
-      }
-    };
-    // 捕捉段で聞く。途中の要素が伝播を止めても、押し始めは見逃さない
-    for (const type of INTENTS) {
-      document.addEventListener(type, onIntent, {
-        capture: true,
-        passive: true,
-      });
-    }
-    return () => {
-      for (const type of INTENTS) {
-        document.removeEventListener(type, onIntent, { capture: true });
-      }
+      for (const stop of stops) stop();
     };
   }, []);
 
