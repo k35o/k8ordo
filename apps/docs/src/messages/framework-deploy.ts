@@ -216,9 +216,9 @@ export const staticVercelTypes = message({
   en: 'A file a `route.ts` wrote is served with the `Content-Type` its `GET` returned, written per file in the `overrides` of `config.json`: a `blog/feed` without an extension gets the feed’s type rather than `application/octet-stream`. The type is written even when the extension says the same, so nothing rests on the type Vercel gives an extension. `vite preview` and `serve` go by the extension.',
 });
 
-export const staticVercelWarn = message({
-  ja: 'Vercelの上で`vercel()`の無いビルドがシェルを書くと、ビルドが警告します。そのままでは、シェルを返すものが無いためです。',
-  en: 'A build on Vercel that writes shells without `vercel()` warns: nothing would serve them.',
+export const staticVercelRedirects = message({
+  ja: '`vercel()`の無いビルドでは、Vercelの上でシェルを返すものがありません。`vercel()`のあるビルドも、`serve`と`vite preview`のために`_redirects`を書きます。Cloudflareがこのファイルをどう読むかの警告は出しません。',
+  en: 'Without `vercel()`, nothing serves the shells on Vercel. A build with it still writes `_redirects`, for `serve` and `vite preview`, and says none of the warnings about how Cloudflare reads the file.',
 });
 
 export const vercelRoutesTitle = message({

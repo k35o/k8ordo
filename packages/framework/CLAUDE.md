@@ -219,11 +219,16 @@ pnpm check         # check:write to auto-fix
   never from the output, which a build with `emptyOutDir: false` already
   merged); then the shells' document rules and payload rules, placeholders
   named by position. Targets are spelled as Cloudflare re-encodes them. The
-  build warns about what a host would get wrong reading it: Cloudflare's
-  static and dynamic limits, a built URL a rule cannot list, an own rule
-  that hides a shell, a Vercel build without `vercel()`. A `k8ordo:vercel`
-  plugin is handed `StaticOutput` through `api.writeStatic` once the files
-  are written.
+  build warns about what Cloudflare would get wrong reading it: its static
+  and dynamic limits, a built URL a rule cannot list, an own rule that hides
+  a shell. A host adapter — a plugin whose `api` has `writeStatic`, found by
+  that and not by name, so this package's static mode knows no host — is
+  handed `StaticOutput` once the files are written: the rewrites a host
+  applies after its files (`rewritesAfterFiles`, the built URLs' own rules
+  aside, and not the application's `public/_redirects`, which such a host
+  never reads), whether `404.html` was written, and the route.ts types. With
+  one, `_redirects` is still written, for `serve` and `vite preview`, and
+  none of the warnings is said.
 - **`vite dev` answers an unlisted value with the shell.** `k8ordo:static`'s
   `configureServer` (`pre`, so its middleware runs after Vite's own and
   before the RSC handler) rewrites a request a shell rule matches, for a
@@ -354,7 +359,8 @@ pnpm check         # check:write to auto-fix
   the client and the function. Under `mode: 'static'` its own `buildApp`
   does nothing — placed first it would copy the client before a page is
   written — and `k8ordo:static` calls its `api.writeStatic` once every file
-  is in place: the client without `_redirects` (Vercel never reads it, and
+  is in place, which writes from the plugin's own resolved config (`root`,
+  the client's `outDir`, `base`): the client without `_redirects` (Vercel never reads it, and
   would serve it), no function, and the rewrites as routes after
   `handle: 'filesystem'` — the payload URL of a built non-page, the shells'
   documents (`…/index.html`, a trailing slash allowed) and payloads —

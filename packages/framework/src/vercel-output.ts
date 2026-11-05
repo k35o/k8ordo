@@ -126,7 +126,8 @@ const routeOf = (rule: Rewrite) => {
  * gives an extension.
  */
 const staticConfigFor = (
-  { base, rewrites, notFound, types }: StaticOutput,
+  base: string,
+  { rewrites, notFound, types }: StaticOutput,
   { beforeFiles = [], beforeNotFound = [] }: VercelOptions,
 ) => ({
   version: 3,
@@ -233,18 +234,23 @@ export const writeVercelOutput = async (
  * would serve it as a file.
  */
 export const writeStaticVercelOutput = async (
+  {
+    root,
+    client,
+    base,
+  }: { readonly root: string; readonly client: string; readonly base: string },
   output: StaticOutput,
   routes: VercelOptions = {},
 ): Promise<void> => {
-  const dir = path.join(output.root, '.vercel', 'output');
+  const dir = path.join(root, '.vercel', 'output');
   await rm(dir, { recursive: true, force: true });
-  const redirects = path.join(output.client, '_redirects');
-  await cp(output.client, path.join(dir, 'static', output.base), {
+  const redirects = path.join(client, '_redirects');
+  await cp(client, path.join(dir, 'static', base), {
     recursive: true,
     filter: (source) => source !== redirects,
   });
   await writeFile(
     path.join(dir, 'config.json'),
-    json(staticConfigFor(output, routes)),
+    json(staticConfigFor(base, output, routes)),
   );
 };

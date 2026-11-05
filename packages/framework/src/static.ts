@@ -65,6 +65,7 @@ import {
   cloudflareMatches,
   formatRedirects,
   rewriteFor,
+  rewritesAfterFiles,
   rulesOf,
   shellRules,
 } from './rewrites';
@@ -119,32 +120,24 @@ type Handler = (request: Request) => Promise<Response>;
 
 /**
  * What a host adapter writes a static build from, once every file is in
- * place: `vercel()`'s `api.writeStatic` is handed it.
+ * place, besides the client build it publishes.
  */
 export type StaticOutput = {
-  readonly root: string;
-  /** The client build, absolute: the files to publish. */
-  readonly client: string;
-  readonly base: string;
-  /**
-   * The rewrites a host applies only when no file answers: the payload URL
-   * of a built URL that is not a page answered with HTML, then the shells'
-   * rules — `_redirects`' order, its built URLs' own rules aside.
-   */
+  /** `rewritesAfterFiles`. */
   readonly rewrites: readonly Rewrite[];
   /** Whether `404.html` was written. */
   readonly notFound: boolean;
   /**
    * The `Content-Type` each route.ts's `GET` answered with, by the file it
-   * wrote: its path inside `client`, `/`-separated. A `GET` that named none
-   * is not here.
+   * wrote: its path inside the client build, `/`-separated. A `GET` that
+   * named none is not here.
    */
   readonly types: ReadonlyMap<string, string>;
 };
 
-/** What the plugin `vercel()` adds lends the static build. */
-type VercelApi = {
-  readonly writeStatic?: (output: StaticOutput) => void | Promise<void>;
+/** What a host adapter's plugin lends the static build: `vercel()`'s. */
+export type StaticAdapter = {
+  readonly writeStatic: (output: StaticOutput) => void | Promise<void>;
 };
 
 /** What `vite dev` reads of the routes: the tree, and its shells' shapes. */
@@ -420,9 +413,8 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
   /**
    * Writes `dist/client/_redirects` once every file is in place — the
    * built URLs a shell rule would also catch, the application's own rules
-   * from `public/_redirects`, then the shells' — and says what a host would
-   * get wrong reading it. Returns the rewrites a host adapter applies after
-   * its files: the payload URLs of built non-pages, then the shells'.
+   * from `public/_redirects`, then the shells' — and returns what Cloudflare
+   * would get wrong reading it.
    */
   const writeRedirects = async ({
     clientDir,
@@ -434,10 +426,8 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
     readonly shells: readonly Shell[];
     readonly notPages: readonly string[];
     readonly publicDir: string | null;
-  }): Promise<Rewrite[]> => {
-    const warn = (message: string): void => {
-      logger?.warn(message);
-    };
+  }): Promise<string[]> => {
+    const misread: string[] = [];
     const shellRewrites = shellRules(shells, base);
     // dist/client/ のものは、emptyOutDir: false なら前のビルドが重ねた後の
     // ファイルが残っている。アプリのものは public から読む
@@ -468,7 +458,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
               )} line "${line}" matches ${hidden.location} before its shell's rule, so that shell is never served`,
           ];
     });
-    for (const message of hiding) warn(message);
+    misread.push(...hiding);
     const built = builtRules(
       await filesBelow(clientDir),
       notPages,
@@ -480,7 +470,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
       const read = from.includes('*')
         ? '"*" as a splat'
         : `"${/:[A-Za-z]\w*/u.exec(from)?.[0] ?? ':'}" as a placeholder`;
-      warn(
+      misread.push(
         `k8ordo: _redirects cannot list ${from} — Cloudflare and Netlify read ${read}, so on Cloudflare a shell answers it`,
       );
     }
@@ -488,22 +478,16 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
     await writeFile(path.join(clientDir, '_redirects'), text);
     const counted = cloudflareCounts(text);
     if (counted.static > 2000) {
-      warn(
+      misread.push(
         `k8ordo: _redirects has ${String(counted.static)} rules Cloudflare counts as static; it reads 2,000 and skips the rest, so a built page past them is answered by its shell there`,
       );
     }
     if (counted.dynamic > 100) {
-      warn(
+      misread.push(
         `k8ordo: _redirects has ${String(counted.dynamic)} rules Cloudflare counts as dynamic; it reads 100 and ignores the rest of the file — the shell payload rules go first (navigations to those values become document loads), then document rules (those values 404)`,
       );
     }
-    // ファイルが先に答えるホストには、ページでない URL のペイロードの規則だけが要る
-    return [
-      ...built.rules.filter(
-        (rule) => rule.from.endsWith('/index.rsc') && rule.to.endsWith('/'),
-      ),
-      ...shellRewrites,
-    ];
+    return misread;
   };
 
   const prerender: Plugin = {
@@ -969,42 +953,28 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
           );
         }
 
-        const rewrites =
-          plan.shells.length === 0
-            ? []
-            : await writeRedirects({
-                clientDir,
-                shells: plan.shells,
-                notPages: [...redirected, ...byRoute],
-                publicDir:
-                  client.build.copyPublicDir && builder.config.publicDir !== ''
-                    ? builder.config.publicDir
-                    : null,
-              });
-
-        const vercel = builder.config.plugins.find(
-          (plugin) => plugin.name === 'k8ordo:vercel',
-        );
-        // Vite の型では api は any なので、静的ビルドが呼ぶ形をここで言う
-        const writeStatic = (vercel?.api as VercelApi | undefined)?.writeStatic;
-        if (writeStatic !== undefined) {
-          await writeStatic({
-            root,
-            client: clientDir,
-            base,
-            rewrites,
-            notFound: unmatched !== null,
-            types,
+        const notPages = [...redirected, ...byRoute];
+        const adapter = adapterOf(builder.config.plugins);
+        if (plan.shells.length > 0) {
+          const misread = await writeRedirects({
+            clientDir,
+            shells: plan.shells,
+            notPages,
+            publicDir:
+              client.build.copyPublicDir && builder.config.publicDir !== ''
+                ? builder.config.publicDir
+                : null,
           });
-        } else if (
-          vercel === undefined &&
-          process.env.VERCEL !== undefined &&
-          plan.shells.length > 0
-        ) {
-          builder.config.logger.warn(
-            'k8ordo: this build runs on Vercel, which does not read _redirects — add vercel() from @k8ordo/framework/vercel, or the shells are never served',
-          );
+          // アダプタのあるホストは _redirects を読まない。書くのは vite preview と serve のため
+          if (adapter === undefined) {
+            for (const message of misread) builder.config.logger.warn(message);
+          }
         }
+        await adapter?.writeStatic({
+          rewrites: rewritesAfterFiles(plan.shells, notPages, base),
+          notFound: unmatched !== null,
+          types,
+        });
 
         const shells =
           plan.shells.length === 0
@@ -1056,6 +1026,17 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
 
   return [refuse, prerender];
 };
+
+/** The host adapter among the plugins, if any. */
+const adapterOf = (
+  plugins: ResolvedConfig['plugins'],
+): StaticAdapter | undefined =>
+  plugins
+    // Vite の型では api は any なので、静的ビルドが呼ぶ形をここで言う
+    .map((plugin) => plugin.api as Partial<StaticAdapter> | undefined)
+    .find(
+      (api): api is StaticAdapter => typeof api?.writeStatic === 'function',
+    );
 
 /**
  * A render is a whole page: components, their data, and whatever the app's

@@ -83,7 +83,6 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-  vi.unstubAllEnvs();
   await rm(root, { recursive: true, force: true });
 });
 
@@ -842,47 +841,39 @@ describe('the _redirects a build writes', () => {
   });
 });
 
-describe('a build for Vercel', () => {
-  it('warns that Vercel never reads _redirects when no vercel() is there to write its routes', async () => {
-    vi.stubEnv('VERCEL', '1');
-    await routeFiles(POSTS);
-    await handlerAnswering(site());
-    const { build, said } = hooks();
+/** A host adapter's plugin, keeping what the build handed it. */
+const adapter = () => {
+  const handed: StaticOutput[] = [];
+  return {
+    handed,
+    plugin: {
+      name: 'adapter',
+      api: {
+        writeStatic: (output: StaticOutput) => {
+          handed.push(output);
+        },
+      },
+    },
+  };
+};
 
-    await build();
-
-    expect(said.warn).toContain(
-      'k8ordo: this build runs on Vercel, which does not read _redirects — add vercel() from @k8ordo/framework/vercel, or the shells are never served',
-    );
-  });
-
-  it('hands vercel() what it writes its routes from, once the files are in place', async () => {
-    vi.stubEnv('VERCEL', '1');
+describe('a build with a host adapter', () => {
+  it('hands it the rewrites after the files and whether 404.html was written, and says nothing of how Cloudflare reads _redirects', async () => {
     await routeFiles([...POSTS, 'posts/old/redirect.ts']);
     await handlerAnswering(
       site({
         '/posts/old': { status: 308, headers: { location: '/posts/1' } },
+        '/posts/a:b': { body: '<p>a:b</p>' },
+        '/posts/a:b/index.rsc': { body: 'a:b payload' },
       }),
     );
-    const written: StaticOutput[] = [];
-    const { build, said } = hooks({ paths: () => ['/posts/1'] });
+    const { handed, plugin } = adapter();
+    const { build, said } = hooks({ paths: () => ['/posts/1', '/posts/a:b'] });
 
-    await build([
-      {
-        name: 'k8ordo:vercel',
-        api: {
-          writeStatic: (output: StaticOutput) => {
-            written.push(output);
-          },
-        },
-      },
-    ]);
+    await build([plugin]);
 
-    expect(written).toStrictEqual([
+    expect(handed).toStrictEqual([
       {
-        root,
-        client: path.join(root, 'dist', 'client'),
-        base: '/',
         rewrites: [
           { from: '/posts/old/index.rsc', to: '/posts/!fallback/' },
           { from: '/posts/:p1', to: '/posts/!fallback/' },
@@ -892,10 +883,11 @@ describe('a build for Vercel', () => {
         types: new Map(),
       },
     ]);
+    expect(await clientFile('_redirects')).toContain('/posts/:p1');
     expect(said.warn).toStrictEqual([]);
   });
 
-  it('hands vercel() the type each route.ts’s GET answered, by the file it wrote', async () => {
+  it('hands it the type each route.ts’s GET answered, by the file it wrote', async () => {
     await routeFiles([
       'feed/route.ts',
       'notes.txt/route.ts',
@@ -918,21 +910,12 @@ describe('a build for Vercel', () => {
         body: '# a b',
       },
     });
-    const written: StaticOutput[] = [];
+    const { handed, plugin } = adapter();
     const { build } = hooks({ paths: () => ['/docs/a%20b/article.md'] });
 
-    await build([
-      {
-        name: 'k8ordo:vercel',
-        api: {
-          writeStatic: (output: StaticOutput) => {
-            written.push(output);
-          },
-        },
-      },
-    ]);
+    await build([plugin]);
 
-    expect(written.map((output) => output.types)).toStrictEqual([
+    expect(handed.map((output) => output.types)).toStrictEqual([
       new Map([
         ['feed', 'application/rss+xml;charset=utf-8'],
         ['notes.txt', 'text/plain;charset=UTF-8'],

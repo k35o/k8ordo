@@ -1,5 +1,5 @@
 import { mkdtempSync, rmSync } from 'node:fs';
-import { mkdir, readFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -68,62 +68,35 @@ describe('vercel', () => {
     ).rejects.toThrow('the build for Vercel ran without the client build');
   });
 
-  it('hands its routes to the static output it writes', async () => {
+  it('writes a static build from its own config: the client build it names, at the base, under the root', async () => {
     const { api } = vercelOf(
-      await resolved([
-        framework({ mode: 'static' }),
-        vercel({
-          beforeFiles: [
-            { src: '^/old$', status: 308, headers: { Location: '/new' } },
-          ],
-          beforeNotFound: [
-            {
-              src: '^/.*$',
-              has: [
-                { type: 'header', key: 'accept', value: '.*text/markdown.*' },
-              ],
-              dest: '/not-found.md',
-              status: 404,
-            },
-          ],
-        }),
-      ]),
+      await resolveConfig(
+        {
+          root,
+          configFile: false,
+          logLevel: 'silent',
+          base: '/site/',
+          plugins: [framework({ mode: 'static' }), vercel()],
+          environments: { client: { build: { outDir: 'out/app' } } },
+        },
+        'build',
+      ),
     );
-    const client = path.join(root, 'dist', 'client');
-    await mkdir(client, { recursive: true });
+    await mkdir(path.join(root, 'out', 'app'), { recursive: true });
+    await writeFile(path.join(root, 'out', 'app', 'index.html'), '<p>home</p>');
 
     await api.writeStatic?.({
-      root,
-      client,
-      base: '/',
       rewrites: [],
       notFound: false,
       types: new Map(),
     });
 
-    const config = JSON.parse(
+    expect(
       await readFile(
-        path.join(root, '.vercel', 'output', 'config.json'),
+        path.join(root, '.vercel', 'output', 'static', 'site', 'index.html'),
         'utf8',
       ),
-    ) as { routes: unknown };
-    expect(config.routes).toStrictEqual([
-      { src: '^/old$', status: 308, headers: { Location: '/new' } },
-      { handle: 'filesystem' },
-      {
-        src: '^/.*$',
-        has: [{ type: 'header', key: 'accept', value: '.*text/markdown.*' }],
-        dest: '/not-found.md',
-        status: 404,
-      },
-      { handle: 'hit' },
-      {
-        src: '^\\/assets\\/.+$',
-        headers: { 'cache-control': 'public, max-age=31536000, immutable' },
-        continue: true,
-        important: true,
-      },
-    ]);
+    ).toBe('<p>home</p>');
   });
 
   it.each([

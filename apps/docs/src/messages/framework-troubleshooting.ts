@@ -300,21 +300,6 @@ export const ownRedirectsFix = message({
   en: 'Remove that rule, or narrow it so it misses the shell locations.',
 });
 
-export const vercelRedirectsTitle = message({
-  ja: '`this build runs on Vercel, which does not read _redirects`',
-  en: '`this build runs on Vercel, which does not read _redirects`',
-});
-
-export const vercelRedirectsCause = message({
-  ja: 'Vercelの上のビルドがシェルを書きましたが、`vercel()`がありません。Vercelは`_redirects`を読まないので、どのURLにもシェルは返りません。',
-  en: 'A build on Vercel wrote shells without `vercel()`. Vercel does not read `_redirects`, so no URL is ever answered with a shell.',
-});
-
-export const vercelRedirectsFix = message({
-  ja: '`@k8ordo/framework/vercel`の`vercel()`を`framework()`の隣に足します。',
-  en: 'Add `vercel()` from `@k8ordo/framework/vercel` beside `framework()`.',
-});
-
 export const vercelRoutesServerTitle = message({
   ja: "`vercel() takes beforeFiles and beforeNotFound under mode: 'static' only`",
   en: "`vercel() takes beforeFiles and beforeNotFound under mode: 'static' only`",

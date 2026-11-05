@@ -259,10 +259,8 @@ describe('writeStaticVercelOutput', () => {
     types: ReadonlyMap<string, string> = new Map(),
   ): Promise<Config> => {
     await writeStaticVercelOutput(
+      { root: built, client: path.join(built, 'dist', 'client'), base },
       {
-        root: built,
-        client: path.join(built, 'dist', 'client'),
-        base,
         rewrites: REWRITES.map((rule) => ({
           from: `${base.slice(0, -1)}${rule.from}`,
           to: `${base.slice(0, -1)}${rule.to}`,

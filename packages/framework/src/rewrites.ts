@@ -148,6 +148,41 @@ const cloudflarePattern = (from: string): RegExp =>
 export const cloudflareMatches = (from: string, pathname: string): boolean =>
   cloudflarePattern(from).test(pathname);
 
+/** The first of the rules whose `from` Cloudflare's matching takes a URL with. */
+const firstMatchOf = (
+  rules: readonly Rewrite[],
+): ((url: string) => Rewrite | undefined) => {
+  const matchers = rules.map((rule) => ({
+    rule,
+    pattern: cloudflarePattern(rule.from),
+  }));
+  return (url) => matchers.find(({ pattern }) => pattern.test(url))?.rule;
+};
+
+/**
+ * The payload URL of each built URL that is not a page — a `redirect.ts`, a
+ * `route.ts`'s file — that a shell's payload rule would catch, as a browser
+ * sends it and canonically, answered with that shell's HTML: a client
+ * navigation to it then becomes a document load instead of rendering the
+ * shell.
+ */
+const notPageRules = (
+  notPages: readonly string[],
+  shells: readonly Rewrite[],
+  base: string,
+): Rewrite[] => {
+  const firstMatch = firstMatchOf(shells);
+  return notPages.flatMap((page) =>
+    pathSpellings(payloadPathFor(page)).flatMap((spelled) => {
+      const from = withBase(spelled, base);
+      const rule = firstMatch(from);
+      return rule?.to.endsWith('/index.rsc') === true
+        ? [{ from, to: rule.to.slice(0, -'index.rsc'.length) }]
+        : [];
+    }),
+  );
+};
+
 /** The files a host serves that no rule needs to repeat. */
 const isOwnFile = (file: string): boolean =>
   file === '_redirects' ||
@@ -170,13 +205,10 @@ const urlsOf = (file: string): string[] => {
  * itself (Cloudflare applies rules before files, and a static rule is looked
  * up first) — as a browser sends it and canonically, both answered with the
  * canonical spelling, which Cloudflare re-encodes a target into and would
- * otherwise redirect to — and the payload URL of a built URL that is not a page — a
- * `redirect.ts` or a `route.ts` file — answered with the shell's HTML, so a
- * client navigation to it becomes a document load instead of rendering the
- * shell. A URL a rule could not list as itself (Cloudflare and Netlify read
- * `:b` in `/a:b` as a placeholder, `*` as a splat) is left out and returned
- * in `unlisted`; a `from` the application's own rules already have is left
- * to them.
+ * otherwise redirect to — and `notPageRules`. A URL a rule could not list as
+ * itself (Cloudflare and Netlify read `:b` in `/a:b` as a placeholder, `*` as
+ * a splat) is left out and returned in `unlisted`; a `from` the
+ * application's own rules already have is left to them.
  *
  * @param files the client build's files, relative to it, POSIX separators
  * @param notPages pathnames written without a payload, in the table's terms
@@ -189,12 +221,7 @@ export const builtRules = (
   own: readonly string[],
   base: string,
 ): { rules: Rewrite[]; unlisted: string[] } => {
-  const matchers = shells.map((rule) => ({
-    rule,
-    pattern: cloudflarePattern(rule.from),
-  }));
-  const firstMatch = (url: string): Rewrite | undefined =>
-    matchers.find(({ pattern }) => pattern.test(url))?.rule;
+  const firstMatch = firstMatchOf(shells);
   const rules: Rewrite[] = [];
   const unlisted = new Set<string>();
   const list = (from: string, to: string): void => {
@@ -217,19 +244,32 @@ export const builtRules = (
       }
     }
   }
-  for (const page of notPages) {
-    for (const spelled of pathSpellings(payloadPathFor(page))) {
-      const from = withBase(spelled, base);
-      const rule = firstMatch(from);
-      if (rule?.to.endsWith('/index.rsc') === true) {
-        list(from, rule.to.slice(0, -'index.rsc'.length));
-      }
-    }
+  for (const { from, to } of notPageRules(notPages, shells, base)) {
+    list(from, to);
   }
   return {
     rules: byFrom(rules).toSorted((a, b) => compare(a.from, b.from)),
     unlisted: [...unlisted].toSorted(compare),
   };
+};
+
+/**
+ * What a host that serves its files first applies once none answered:
+ * `notPageRules`, then the shells' — `_redirects`' order, its built URLs'
+ * own rules aside, which such a host has no need of.
+ */
+export const rewritesAfterFiles = (
+  shells: readonly Shell[],
+  notPages: readonly string[],
+  base: string,
+): Rewrite[] => {
+  const shellRewrites = shellRules(shells, base);
+  return [
+    ...byFrom(notPageRules(notPages, shellRewrites, base)).toSorted((a, b) =>
+      compare(a.from, b.from),
+    ),
+    ...shellRewrites,
+  ];
 };
 
 const lineOf = (rule: Rewrite): string => `${rule.from} ${rule.to} 200`;

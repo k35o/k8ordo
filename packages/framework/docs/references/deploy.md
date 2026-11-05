@@ -213,12 +213,10 @@ way `auto-trailing-slash` does, with nothing to set.
 ### Vercel
 
 Vercel never reads `_redirects`; `vercel()` writes the same rewrites as
-routes ([Deploying to Vercel](#deploying-to-vercel)). A build that runs on
-Vercel and writes shells without it says so:
-
-```
-k8ordo: this build runs on Vercel, which does not read _redirects — add vercel() from @k8ordo/framework/vercel, or the shells are never served
-```
+routes ([Deploying to Vercel](#deploying-to-vercel)). Without it the shells
+are never served there. With it the build still writes `_redirects`, for
+`serve` and `vite preview`, and says none of the warnings above: they are
+about how Cloudflare reads the file.
 
 ### Other hosts
 

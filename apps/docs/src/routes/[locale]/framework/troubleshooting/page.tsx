@@ -120,12 +120,6 @@ const SYMPTOMS: readonly Symptom[] = [
     fix: t.ownRedirectsFix,
   },
   {
-    id: 'vercel-redirects',
-    title: t.vercelRedirectsTitle,
-    cause: t.vercelRedirectsCause,
-    fix: t.vercelRedirectsFix,
-  },
-  {
     id: 'vercel-routes-server',
     title: t.vercelRoutesServerTitle,
     cause: t.vercelRoutesServerCause,
