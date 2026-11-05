@@ -107,7 +107,7 @@ pnpm check         # check:write to auto-fix
   `./server` declarations, which share `EngineOptions`'s chunk (`host.ts`).
   The plugin compiles only the environments whose consumer is the client,
   so Server Components and the HTML render of client components stay as
-  written; `examples/static-basic`'s `build.test.ts` reads that from a
+  written; `@k8ordo/framework`'s `refusals.test.ts` reads that from a
   build's source maps. `oxc-transform-react` is `@k8ordo/framework`'s
   optional peer, not this package's.
 - **The browser holds no route table.** `runtime/app-router.tsx` claims every

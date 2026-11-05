@@ -46,8 +46,11 @@ pnpm check         # check:write to auto-fix
   nothing in production is the worst of the two. `import type` is erased
   before it resolves and passes; `import { type X }` is kept as a bare import
   under `verbatimModuleSyntax` and is refused, as it should be, since it
-  loads the module. A route.ts's methods and a page's `search` are read by
-  name, so a route.ts or page with `export * from` is refused as well (the
+  loads the module. `src/refusals.test.ts` builds and serves an application
+  under `fixtures/` for each refusal, one root apiece, and also holds that a
+  page or a not-found that fails to render stops the build naming it. A
+  route.ts's methods and a page's `search` are read by name, so a route.ts
+  or page with `export * from` is refused as well (the
   engine's `exportsOf` lists it as `REEXPORTS_ALL`). The build only compiles
   the application's own modules — a dependency left external imports
   `/server` unseen — so the handler compiled for `mode: 'static'` runs every
@@ -438,6 +441,10 @@ src/
   vercel.ts         ./vercel: the plugin that writes it
   cli.ts            bin k8ordo: `k8ordo generate`, .k8ordo/ from the resolved
                     config through the engine plugin's api, building nothing
+fixtures/
+  build.ts          failedBuild / compiledBuild / devServer — a fixture built or
+                    served with the built dist/vite.mjs, in this process
+  <name>/           one application each, src/routes/ and what it imports
 ```
 
 ## Conventions

@@ -52,8 +52,8 @@ const linkRuntime = async (): Promise<string> => {
 };
 
 // 生成された表は @k8ordo/framework/generated から読むが、このパッケージは
-// それに同梱される側なので依存に持てない。その入口は router の再 export
-// だけなので、router を直接読ませる。search を読むページの表が import
+// それに同梱される側なので依存に持てない。その入口が値として出すのは
+// router の再 export だけなので、router を直接読ませる。search を読むページの表が import
 // する @k8ordo/state も依存に無いので、フィクスチャの読み方に差し替える
 const alias = {
   '@k8ordo/framework/generated': '@k8ordo/router',

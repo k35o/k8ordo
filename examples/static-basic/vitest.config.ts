@@ -7,9 +7,9 @@ export default defineConfig({
   test: {
     fsModuleCache: true,
     include: ['src/**/*.test.ts'],
-    // build.test.ts のビルドも dev.test.ts の dev サーバも、同じ
-    // .k8ordo/routes.gen.ts をそれぞれの routesDir から書き直す。並行させると
-    // 片方が書いている最中の中身をもう片方が読む
+    // dev.test.ts は src/routes を書き換えて dev サーバの入れ替えを確かめる。
+    // 同じソースを読む build.test.ts のビルドと並べると、書き換えの途中を
+    // ビルドが拾う
     fileParallelism: false,
   },
 });
