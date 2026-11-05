@@ -152,8 +152,6 @@ export const declaredPatterns = (
   return found;
 };
 
-const declared = declaredPatterns;
-
 /** Every `redirect.ts`, with the pattern its directory puts it under. */
 export const declaredRedirects = (dir: RouteDir): DeclaredPattern[] =>
   declaredPatterns(dir).filter((each) => each.kind === 'redirect');
@@ -171,7 +169,7 @@ export const declaredRouteFiles = (dir: RouteDir): DeclaredPattern[] =>
  * never served, with nothing to see in the directory tree.
  */
 export const unreachableRoutes = (tree: RouteDir): Problem[] => {
-  const all = declared(tree);
+  const all = declaredPatterns(tree);
   const problems: Problem[] = [];
   for (const [index, route] of all.entries()) {
     if (route.pattern.includes(':') || route.pattern.includes('*')) continue;
