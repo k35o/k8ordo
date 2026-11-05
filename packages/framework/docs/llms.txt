@@ -72,7 +72,9 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   route table, and the `Register`s: the table's, and `@k8ordo/i18n`'s when
   `src/i18n.ts` exports `locales` by name) and `k8ordo generate`, which
   writes them before `tsc` without a build, titles,
-  and fetching the next page ahead (`data-k8ordo-prefetch`).
+  and fetching the next page ahead (`data-k8ordo-prefetch`; under static
+  mode also the links on screen for a coarse pointer, every page kept for
+  going back and forward, and `client-files.json` linked with a payload).
 - [Parameters](references/params.md): `paramsSchema` — a refused value is a
   pathname the pattern does not answer — and, under static mode, the `paths`
   option: supplying pathnames, expanding a parameter every page shares, and
@@ -105,7 +107,7 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   mode, and `connect-src` for the data a `fallback.tsx`'s shell fetches.
 - [Running and deploying](references/deploy.md): a static build's
   `dist/client/` (HTML, `index.rsc` payloads, shells, `404.html`,
-  `sitemap.xml`, `_redirects`), the rewrites that reach a shell on Netlify,
+  `client-files.json`, `sitemap.xml`, `_redirects`), the rewrites that reach a shell on Netlify,
   Cloudflare Workers static assets (`html_handling`, the 2,000/100 rule
   limits) and Pages, Vercel and any other host, and `serve` and
   `vite preview` serving a static build as a static host;

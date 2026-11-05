@@ -127,22 +127,65 @@ pnpm check         # check:write to auto-fix
   regenerated in `watchChange`, which Vite awaits before moving a change
   through the module graph, and hard-invalidated after: the update only
   soft-invalidates it, and the old table would import a deleted page.
-- **A prefetched page is used once, briefly, and never across an action.**
-  `app-router.tsx` listens on the document (capture phase) for `pointerover`,
-  `focusin` and `pointerdown` on a link `prefetchTargetOf` accepts — same
-  origin and under the base, no `download`, no other `target`, not the page on
-  screen, no `data-k8ordo-prefetch="false"` on it or the nearest element
-  carrying the attribute — and reads that page's payload the way a navigation
-  would (`fetchPage`, which waits for the client components it names, so
-  those are loaded too). `createPrefetchCache` hands each load to the next
-  navigation of that page within `PREFETCH_LIFETIME` (30 s from the start) and
-  forgets it; a failed load is forgotten at once, and a Server Action's answer
-  forgets everything. A load forgotten untaken is aborted, and a taken one is
-  aborted by the taking navigation's signal, which is what keeps the router's
-  "a superseded navigation's fetch is cancelled" true for a prefetched page.
-  Keep it single-use: a page taken from the cache twice would show a
-  server-mode page as it was when first hovered. No Speculation Rules —
-  Chromium only.
+- **A page rendered per request is used once, briefly, and never across an
+  action; a page written into a file is kept.** `app-router.tsx` listens on
+  the document (capture phase) for `pointerover`, `focusin` and
+  `pointerdown` on a link `prefetchTargetOf` accepts — same origin and under
+  the base, no `download`, no other `target`, not the page on screen, no
+  `data-k8ordo-prefetch="false"` on it or the nearest element carrying the
+  attribute — and reads that page's payload the way a navigation would
+  (`fetchPage`, which waits for the client components it names, so those
+  are loaded too). Every load goes through `createPageCache`, in one of two
+  kinds chosen by `payloadsAreFiles()` (`K8ORDO_MODE === 'static'` and not
+  `DEV`; read at each use, since a test switches it). **Renders** (server
+  mode, and `vite dev` in either): a prefetch is handed to the next
+  navigation of that page within `PREFETCH_LIFETIME` (30 s from the start)
+  and forgotten, a navigation's own load is not held, and a Server Action's
+  answer forgets everything. Keep it single-use: a page taken twice would
+  show a server-mode page as it was when first hovered. **Files** (a static
+  build): every load is held — a prefetch's, a navigation's own, and the
+  document's page (`keep`, from what `AppRouter` arrived with) — with no
+  lifetime, and handed to every navigation, going back and forward
+  included, up to `KEPT_PAGES` (50), the least recently used given up first
+  (never one a navigation waits for). In both, a failed load is forgotten at
+  once; a load forgotten while still on its way and with nobody waiting is
+  aborted; and a navigation that took a load on its way aborts it with its
+  signal unless another navigation still waits for it, which is what keeps
+  the router's "a superseded navigation's fetch is cancelled" true for a
+  prefetched page. Among files a settled load is never aborted — its tree
+  may be on screen. Under files and a coarse primary pointer
+  (`(pointer: coarse)`, followed through `change`), `prefetchInView` also
+  prefetches the links on screen: an `IntersectionObserver` over every
+  `a[href]` (a `MutationObserver` observes the ones React adds and
+  unobserves the ones it removes, which an observer would otherwise keep
+  alive), one at a time in the order they came into view, a link that left
+  before its turn passed over, at `priority: 'low'` (intents fetch at
+  `'auto'`). One at a time, so a tap shares the connection with one
+  prefetch at most. No `requestIdleCallback` (not in Safari), no
+  Speculation Rules (Chromium only), no Network Information (not Baseline),
+  and no viewport prefetch under renders, where each link would be a
+  server render. `prefetch.test.ts` holds both kinds;
+  `prefetch.browser.test.tsx` the watching;
+  `app-router.browser.test.tsx` the wiring in either mode.
+- **A static build's client files are linked as the payload is asked for.**
+  The static build writes `CLIENT_FILES_PATH` (`/client-files.json`, under
+  the base; `ClientFiles` in `payload.ts`) from the `CLIENT_DEPS_HEADER` of
+  every HTML it wrote (`packages/framework/CLAUDE.md`). Under files
+  `AppRouter` reads it once (`readClientFiles`, `priority: 'low'`; a list
+  that cannot be read leaves nothing behind), and `fetchPage` links the
+  page's files before its request leaves (`preloadClientFiles`, looked up
+  by the payload's path without its search): a script as
+  `<link rel="modulepreload">`, a stylesheet as `<link rel="preload"
+  as="style">`, each once per document and none the document links already
+  (a stylesheet it applied, preloaded again, is a fetch nobody uses), with
+  `crossOrigin=''` as Vite's preload helper asks, so its later request is
+  served from the preload.
+  A stylesheet is preloaded, not applied: the list may come from a newer
+  deploy than the document, and its CSS would restyle the page on screen.
+  The client component's own import applies it, as without the list.
+  `client-files.browser.test.tsx` holds the reading and linking, and
+  `examples/static-basic`'s `build.test.ts` that the built site links a
+  page's files while its payload is held back.
 - **A tree carries the pathname it is the page of.** `Applied` holds it
   beside the tree (normalized, in the URL's terms; `null` in the HTML
   render), and `AppRouter` provides the deferred one under the router's
@@ -173,8 +216,10 @@ pnpm check         # check:write to auto-fix
   and loads the document. So the signal a payload was fetched under — a
   navigation's, or a prefetch's — cancels it only until its tree is applied
   (`hold` unties it), and `AppRouter` cancels it once the tree is neither the
-  one asked for nor the one on screen. The router's "a superseded
-  navigation's fetch is cancelled" still holds, one render later.
+  one asked for nor the one on screen — except among files, where nothing
+  cancels it after that: the page stays in the cache, and cut short it would
+  come back broken. The router's "a superseded navigation's fetch is
+  cancelled" still holds, one render later.
   `runtime/streaming.test.ts` overtakes such a navigation with a click, and
   overtakes one into a page awaiting its data outside any `<Suspense>`, which
   is not applied before it arrives, with a click, with Back and with a
@@ -183,10 +228,9 @@ pnpm check         # check:write to auto-fix
   The Flight client hands a client component over as a lazy element type
   and starts importing it as the payload is read; a render that meets one
   still loading suspends there, and the nearest `<Suspense>` shows its
-  fallback — over the server's HTML on a first render (at once under
-  `createRoot`, and in a hydrated page as soon as a context above a
-  dehydrated boundary changes), and as a new page's `<Suspense>` in a
-  navigation. `whenClientReady` (`runtime/client-ready.ts`) walks a
+  fallback — over the server's HTML on a first render, as soon as a
+  context above a dehydrated boundary changes, and as a new page's
+  `<Suspense>` in a navigation. `whenClientReady` (`runtime/client-ready.ts`) walks a
   payload's trees — element types and props, arrays, plain objects, rows on
   their way — and settles once every lazy type has loaded and every row
   has arrived, except, for `rows: 'leave'`, a row still on its way inside a
@@ -241,8 +285,9 @@ pnpm check         # check:write to auto-fix
   the pathname, so payload paths, redirects, the match and `pathname` never
   see it; a `redirect.ts` target gets it back in front (`locationOf`), while
   a Server Action's `redirect(to)` is a URL and is sent as given. The client
-  claims only same-origin URLs under the base, and `mount` compares the
-  payload's `pathname` with `location` minus the base. `entry.rsc` exports
+  claims only same-origin URLs under the base, and `renderedHere`
+  (`runtime/mount.tsx`) compares the payload's `pathname` with `location`
+  minus the base. `entry.rsc` exports
   `base` (`import.meta.env.BASE_URL` as built) for `serve`, and the plugin
   refuses a base that is not a path from the root (`'./'`, another origin),
   under which no URL says which page it is.
@@ -261,8 +306,7 @@ pnpm check         # check:write to auto-fix
   SSR entry's `Root` and the browser's `AppRouter` are its only child, and
   `PageShownContext`, which only the SSR entry provides, is a context, which
   `useId` does not count. The browser renders its `<style>` too, with no
-  nonce: React finds the HTML's by its `href` and keeps it, under
-  `createRoot` as well, which leaves a document's `<style>`s in place.
+  nonce: React finds the HTML's by its `href` and keeps it.
   `runtime/hydrate-id.test.ts` compares the ids of a layout's and a page's
   client component in the HTML and once hydrated, from a static build, a
   server build and `vite dev`.
@@ -361,7 +405,8 @@ pnpm check         # check:write to auto-fix
   renders each twice, cold and loaded — in production, since a test build
   tags every reference per render and loads it afresh, which hides the
   loss — holding the static heads of the last two the same both times, a
-  static head's links the same as a server's, where the plugin alone asks,
+  static head's links the same as a server's (each file named without its
+  hash, since the client entry reads the mode), where the plugin alone asks,
   on the pages a render reads whole, and a server's links of the contained
   ones only where they first load, and, on a page with both, the page's own
   stylesheets before its client components' in either mode, the ordering
@@ -414,15 +459,41 @@ pnpm check         # check:write to auto-fix
   row a not-found receives late, included — and that a server says
   nothing; `runtime/payload.test.ts` carries a name that is not ASCII
   through a header.
-- **Only HTML rendered for the browser's pathname is hydrated.**
-  `runtime/mount.ts` compares the payload's `pathname` with `location`
-  (normalized as `usePathname` normalizes) and renders anything else afresh
-  with `createRoot`. That is `404.html`, rendered once under the build's
-  sentinel, and a fallback.tsx's shell, rendered for `/ja/posts/!fallback`
-  and served at `/ja/posts/3`: a component that reads the URL as it renders
-  (`@k8ordo/i18n`'s messages) cannot agree with it at the visitor's URL, and
-  a failed hydration regenerates the page anyway, reported as an error and
-  with the server's `<title>` left behind in `<head>`.
+- **HTML rendered for another pathname is hydrated as rendered, then
+  rendered where the browser is.** That is `404.html`, rendered once under
+  the build's sentinel, and a fallback.tsx's shell, rendered for
+  `/ja/posts/!fallback` and served at `/ja/posts/3`. A component that reads
+  the URL as it renders (`@k8ordo/i18n`'s messages) cannot agree with such
+  HTML at the visitor's URL, and a failed hydration regenerates the page,
+  reported as an error, with the server's `<title>` left behind in
+  `<head>`; rendering it afresh instead (`createRoot`) replaces every
+  element, so a page under
+  `require-trusted-types-for 'script'` is refused the inline scripts and
+  `src`s React writes again. So `renderedHere` (`runtime/mount.tsx`)
+  compares the payload's `pathname` with `location` (normalized as
+  `usePathname` normalizes), and HTML rendered elsewhere is hydrated as if
+  the browser were there: `usePathname` reads `PathnameProvider` while
+  hydrating, and a message, which is no hook, reads the pathname `hydrateAs`
+  puts on `globalThis` under `Symbol.for('@k8ordo/i18n/hydrating-pathname')`
+  (`runtime/hydrating-pathname.ts`; `@k8ordo/i18n`'s `browserPathname` reads
+  the same name, a promise between the two changed in both in one release).
+  Then the URL is handed back and the page rendered again in two
+  transitions. React hydrates a Suspense boundary at its own pace, when the
+  browser is idle, and says nowhere that it is done, so `AppRouter` first
+  changes `Hydrating`, a context no component reads: a context changing
+  above a boundary not yet hydrated makes React hydrate it before that
+  transition commits, and the commit's layout effect hands the URL back.
+  The second transition renders `reread`, the payload read again from a
+  `tee()` of the HTML's stream: React does not render an element it was
+  handed before again, so only a tree whose every element is new reaches
+  every component below. It is applied only over the tree hydrated (or the
+  not-found its shell swapped in): a navigation applied first, which hands
+  the URL back as it applies, keeps its page. `runtime/mount.browser.test.tsx`
+  hydrates a 404 with nested boundaries and sees its nodes kept, no error,
+  and the text and the router at the URL — and fails with the context
+  change or that check taken out; `examples/static-basic`'s `build.test.ts`
+  opens a built `404.html`, a shell and pages behind a trailing slash and a
+  redirect in every engine, with Trusted Types enforced.
 - **A payload names the client it was rendered for.** `Payload.client` is
   the URL of the script the page's HTML loads (`getClientEntryUrl()`, which
   the RSC plugin exposes to the SSR environment only, so the RSC entry reads
@@ -724,14 +795,16 @@ src/
   runtime/payload.ts         what a page is on the wire (tree, pathname, client, action result), and the headers a static build reads
   runtime/payload-path.ts    where a payload lives: /x → /x/index.rsc
   runtime/is-payload.ts      whether an answer is a payload or a document load
-  runtime/prefetch.ts        which link to fetch ahead, and how long a fetched page stays usable
+  runtime/prefetch.ts        which link to fetch ahead (on intent, and on screen), and how long a fetched page stays usable
+  runtime/client-files.ts    a static build's list of each page's client files, linked ahead of its payload
   runtime/revealed.ts        when every streamed boundary is on screen
   runtime/head-scripts.ts    the head's inline scripts, moved ahead of its stylesheets
   runtime/client-ready.ts    when the client components a payload's trees name have loaded
   runtime/recover.tsx        a failed client render falls back to a document load
   runtime/reload.ts          location.reload, the one seam a test can watch
   runtime/params.ts          runs the paramsSchema exports along a matched stack, and above a not-found
-  runtime/mount.ts           hydrate what was rendered for this pathname, render anything else afresh
+  runtime/mount.tsx          hydrate the HTML as rendered; renderedHere, whether it was rendered where the browser is
+  runtime/hydrating-pathname.ts  the pathname @k8ordo/i18n reads while HTML rendered elsewhere is hydrated
   runtime/pathname.ts        decodePathname, before a pathname may name a file
   runtime/redirect.ts        redirect(), what a Server Action throws — bundled into the ./server entry
   runtime/redirect-file.ts   where a redirect.ts sends a pathname the table matched to it

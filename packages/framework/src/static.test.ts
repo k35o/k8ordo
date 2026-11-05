@@ -564,6 +564,15 @@ describe('a route.ts at a file the build writes itself', () => {
       );
     });
 
+    it('names a route.ts at client-files.json, where the build lists what each page’s client components need', async () => {
+      await routeFiles(['client-files.json/route.ts']);
+      await handlerAnswering(home({ '/client-files.json': { body: '{}' } }));
+
+      await expect(hooks().build()).rejects.toThrow(
+        `${TAKEN}\n  client-files.json: src/routes/client-files.json/route.ts, and the build lists there what each page’s client components need`,
+      );
+    });
+
     it('stops on a route.ts whose file differs from the build’s only in case, as macOS and Windows take the two for one', async () => {
       await routeFiles(['Sitemap.xml/route.ts']);
       await handlerAnswering(
@@ -775,6 +784,54 @@ describe('the client components’ links a build checks', () => {
     });
 
     await expect(hooks().build()).resolves.toBeUndefined();
+  });
+});
+
+describe('the client files a build lists', () => {
+  it('lists what each page’s client components need beyond what every document links, by the payload’s path as a browser spells it', async () => {
+    await routeFiles(['über/page.tsx', 'not-found.tsx']);
+    await handlerAnswering({
+      '/': htmlNaming([ICON], ['/assets/icon-A1.js']),
+      '/index.rsc': { body: 'home payload' },
+      '/%C3%BCber': htmlNaming(
+        [ICON, CARD],
+        ['/assets/icon-A1.js', '/assets/card-B2.js', '/assets/card-C3.css'],
+      ),
+      '/%C3%BCber/index.rsc': { body: 'über payload' },
+      '*': htmlNaming([ICON], ['/assets/icon-A1.js'], { status: 404 }),
+    });
+
+    await hooks().build();
+
+    expect(JSON.parse(await clientFile('client-files.json'))).toStrictEqual({
+      files: ['/assets/card-B2.js', '/assets/card-C3.css'],
+      pages: { '/%C3%BCber/index.rsc': [0, 1] },
+    });
+  });
+
+  it('lists each page under the base', async () => {
+    await handlerAnswering({
+      '/site/': htmlNaming(
+        [CARD],
+        ['/assets/card-B2.js', '/assets/card-C3.css'],
+      ),
+      '/site/index.rsc': { body: 'home payload' },
+      '/site/about': htmlNaming([ICON], ['/assets/icon-A1.js']),
+      '/site/about/index.rsc': { body: 'about payload' },
+    });
+    await routeFiles(['about/page.tsx']);
+
+    await hooks({}, '/site/').build();
+
+    expect(
+      Object.keys(
+        (
+          JSON.parse(await clientFile('client-files.json')) as {
+            pages: Record<string, unknown>;
+          }
+        ).pages,
+      ),
+    ).toStrictEqual(['/site/about/index.rsc', '/site/index.rsc']);
   });
 });
 

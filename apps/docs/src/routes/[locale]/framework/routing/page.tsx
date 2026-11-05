@@ -564,10 +564,19 @@ export default function FrameworkRoutingPage() {
         </p>
         <Items items={t.prefetchSkipped} />
         <p>
+          <Rich>{t.prefetchTouch()}</Rich>
+        </p>
+        <p>
           <Rich>{t.prefetchStop()}</Rich>
         </p>
         <p>
           <Rich>{t.prefetchOnce()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.prefetchKept()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.prefetchClientFiles()}</Rich>
         </p>
         <Note>
           <p>

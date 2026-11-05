@@ -15,6 +15,7 @@ export {
 } from './runtime/pathname';
 export {
   CLIENT_DEPS_HEADER,
+  CLIENT_FILES_PATH,
   clientDepsHeader,
   NONCE_HEADER,
   NOT_FOUND_HEADER,
@@ -22,7 +23,7 @@ export {
   SHELL_HEADER,
   STYLESHEET_ORDER_HREF,
 } from './runtime/payload';
-export type { ClientDeps } from './runtime/payload';
+export type { ClientDeps, ClientFiles } from './runtime/payload';
 export {
   exportsOf,
   pagesReadingSearch,

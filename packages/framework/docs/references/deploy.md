@@ -23,6 +23,7 @@ dist/
         index.html
         index.rsc
     404.html              not-found.tsx, rendered
+    client-files.json     what each page's client components load, for a navigation to link ahead
     sitemap.xml           every page above, when `site` is set
     _redirects            how a host reaches the shells, when there are any
     assets/…              the client bundle
@@ -72,11 +73,14 @@ any 404 is. Its `pathname` is such a URL, and where a parameter sits above
 so `params.<name>` there is not a value the application named. Treat it as you
 must treat any parameter under `mode: 'server'`, where `/:locale/*` matches
 `/fr/anything` too: validate it, and read what the visitor actually typed from
-`usePathname()` in a client component. The browser does not hydrate this file:
-it was rendered for another URL, so anything a component reads from the URL
-while it renders (`@k8ordo/i18n`'s messages read the locale segment) would
-disagree with it. The browser renders it afresh instead, where the visitor is,
-and a client component sees their URL from its first render. A visitor
+`usePathname()` in a client component. The browser hydrates this file as it
+was written, keeping every element in it. While it hydrates, what a component
+reads from the URL as it renders — `usePathname()`, and `@k8ordo/i18n`'s
+messages, which read the locale segment — is the pathname the file was
+rendered for, so it agrees with what is written there. Once the file is
+hydrated, the page is rendered again where the visitor is, and a client
+component reads their URL from then on: an effect that runs on the first
+commit sees the build's pathname first, then the visitor's. A visitor
 without JavaScript keeps whatever the build's render produced.
 
 ## Rewrites to a shell

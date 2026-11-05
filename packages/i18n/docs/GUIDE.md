@@ -481,11 +481,11 @@ at once, and none lends its locale to another. The `404.html` a static host
 serves for everything else is rendered once, by the catch-all under the
 build's sentinel segment, which the schema refuses — so it is in the default
 locale whatever the build rendered before it, and cannot follow the
-visitor's. The browser does not hydrate it: it was rendered for another URL,
-and a message read while hydrating would disagree with the text written
-there. It renders the file afresh where the visitor is instead, so its client
-components come out in their locale once the script runs, and a visitor
-without JavaScript keeps the default.
+visitor's. The browser hydrates it as written: while it hydrates, messages
+read the pathname it was rendered for, so they agree with the text written
+there. Once it is hydrated, `@k8ordo/framework` renders it again where the
+visitor is, so its client components come out in their locale once the
+script runs, and a visitor without JavaScript keeps the default.
 
 ## Alongside the rest of k8ordo
 

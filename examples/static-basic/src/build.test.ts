@@ -467,7 +467,64 @@ describe('the static build', () => {
   it('ships the client entry, so the page hydrates', () => {
     expect(read('index.html')).toMatch(/<script[^>]+type="module"/u);
   });
+
+  it('lists the client files of each page by a payload it wrote, naming only files it wrote', () => {
+    const { files, pages } = listedClientFiles(client);
+
+    expect(Object.keys(pages).length).toBeGreaterThan(0);
+    for (const page of Object.keys(pages)) {
+      expect(existsSync(path.join(client, page))).toBe(true);
+    }
+    for (const file of files) {
+      expect(existsSync(path.join(client, file))).toBe(true);
+    }
+  });
+
+  it('lists for a page what its HTML links and another page’s does not', () => {
+    const products = filesListedFor(client, '/products/index.rsc');
+
+    expect(products.length).toBeGreaterThan(0);
+    for (const file of products) {
+      expect(read('products', 'index.html')).toContain(`href="${file}"`);
+      expect(read('index.html')).not.toContain(`href="${file}"`);
+    }
+  });
+
+  it('leaves out of the list what every page loads: the client entry', () => {
+    const entry = /<script type="module" src="([^"]+)"/u.exec(
+      read('index.html'),
+    )?.[1];
+
+    expect(entry).toBeDefined();
+    expect(listedClientFiles(client).files).not.toContain(entry);
+  });
 });
+
+// ビルドが書いた、ページごとの client の部品の一覧
+const listedClientFiles = (
+  dir: string,
+): {
+  readonly files: readonly string[];
+  readonly pages: Readonly<Record<string, readonly number[]>>;
+} =>
+  JSON.parse(readFileSync(path.join(dir, 'client-files.json'), 'utf8')) as {
+    files: string[];
+    pages: Record<string, number[]>;
+  };
+
+// 一覧がそのページに挙げたファイル
+const filesListedFor = (dir: string, page: string): string[] => {
+  const { files, pages } = listedClientFiles(dir);
+  return (pages[page] ?? []).map((index) => files[index] ?? '');
+};
+
+// Playwright はどのエンジンでも主なポインタを粗くはできないので、
+// その問い合わせの答えを替える。ページの中で走る
+const coarsePointer = (): void => {
+  const real = window.matchMedia.bind(window);
+  window.matchMedia = (query) =>
+    real(query === '(pointer: coarse)' ? 'all' : query);
+};
 
 // 書かれるはずの _redirects。ホストの規則の形そのものが主張なので、行ごとに書く
 const REDIRECTS = [
@@ -513,6 +570,13 @@ describe('the static build under a base', () => {
     const html = readUnderBase('products', 'index.html');
     expect(html).toContain('href="/site/products/1"');
     expect(html).toMatch(/src="\/site\/assets\/[^"]+\.js"/u);
+  });
+
+  it('lists the client files of each page by its payload’s URL under the base', () => {
+    const { files, pages } = listedClientFiles(underBase);
+
+    expect(Object.keys(pages)).toContain('/site/products/index.rsc');
+    for (const file of files) expect(file).toMatch(/^\/site\/assets\//u);
   });
 
   it('lists each page in the sitemap at its URL under the base', () => {
@@ -768,6 +832,9 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
   let withoutPayloadRules = false;
   // 真なら Content-Type に charset を付けない（Python の http.server など）
   let withoutCharset = false;
+  // 真なら HTML に Trusted Types を強制する。破る書き込みは拒まれ、
+  // securitypolicyviolation で知らされる
+  let trustedTypes = false;
   // ホストが受けた要求の pathname
   let requested: string[] = [];
 
@@ -874,6 +941,11 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
           'content-type': withoutCharset
             ? contentType.replace(/;.*/u, '')
             : contentType,
+          ...(trustedTypes && contentType.startsWith('text/html')
+            ? {
+                'content-security-policy': "require-trusted-types-for 'script'",
+              }
+            : {}),
         })
         .end(readFileSync(answer.file));
     });
@@ -890,6 +962,7 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
     cloudflare = false;
     withoutPayloadRules = false;
     withoutCharset = false;
+    trustedTypes = false;
     requested = [];
   });
 
@@ -984,6 +1057,76 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
     await page.getByRole('heading', { name: 'products' }).waitFor();
     expect(new URL(page.url()).pathname).toBe('/site/products');
     expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
+    await page.close();
+  });
+
+  it('fetches the links on screen ahead under a coarse pointer, so following one asks the host for nothing', async () => {
+    const page = await browser.newPage();
+    await page.addInitScript(coarsePointer);
+    await page.goto(origin);
+    await expect
+      .poll(() => requested, { timeout: 10_000 })
+      .toContain('/products/index.rsc');
+    const before = requested.length;
+
+    await page.getByRole('link', { name: 'products', exact: true }).click();
+
+    await page.getByRole('heading', { name: 'products' }).waitFor();
+    expect(requested.slice(before)).not.toContain('/products/index.rsc');
+    await page.close();
+  });
+
+  it('goes back to the page it arrived on without asking the host for it', async () => {
+    const page = await openHydrated(origin);
+    await page.getByRole('link', { name: 'products', exact: true }).click();
+    await page.getByRole('heading', { name: 'products' }).waitFor();
+    const before = requested.length;
+
+    await page.goBack();
+
+    await page.getByTestId('title').getByText('home').waitFor();
+    expect(requested.slice(before)).not.toContain('/index.rsc');
+    expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
+    await page.close();
+  });
+
+  it('links the files the build listed for a page before that page’s payload arrives', async () => {
+    const products = filesListedFor(client, '/products/index.rsc');
+    const page = await browser.newPage();
+    const listRead = page.waitForResponse('**/client-files.json');
+    // ペイロードを止めておき、その間に部品が張られることを見る
+    const { promise: released, resolve: release } =
+      Promise.withResolvers<undefined>();
+    await page.route('**/products/index.rsc', async (route) => {
+      await released;
+      await route.continue();
+    });
+    await page.goto(origin);
+    await page.getByText(/time zone: (?!not yet)/u).waitFor();
+    await (await listRead).finished();
+    await page.evaluate(
+      () =>
+        new Promise((resolve) => {
+          setTimeout(resolve, 0);
+        }),
+    );
+
+    await page.getByRole('link', { name: 'products', exact: true }).hover();
+
+    await expect
+      .poll(() =>
+        page.evaluate(
+          (hrefs) =>
+            hrefs.filter(
+              (href) =>
+                document.head.querySelector(`link[href="${href}"]`) === null,
+            ),
+          products,
+        ),
+      )
+      .toStrictEqual([]);
+    expect(products.length).toBeGreaterThan(0);
+    release(undefined);
     await page.close();
   });
 
@@ -1173,6 +1316,162 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
       headings: await page.getByTestId('title').count(),
     }).toStrictEqual({ hiddenSegments: 0, titles: 1, headings: 1 });
     await context.close();
+  });
+
+  // HTML の要素のまま hydrate したかを見る。パーサーが読み終えた時点の要素を
+  // 覚えておき、描き直していれば、文書にあるのは別の要素になる。ペイロードは
+  // 本文の最後のスクリプトまで読まないと揃わないので、React はその前には描かない。
+  // 描き直すと React がインラインのスクリプトの中身と src も書き直し、Trusted
+  // Types を強制する文書ではそれが拒まれるので、その違反も数える
+  type Problems = {
+    readonly replaced: readonly string[];
+    readonly kept: readonly string[];
+    readonly refused: readonly string[];
+    readonly titles: number;
+    readonly thrown: readonly string[];
+    readonly errors: readonly string[];
+  };
+
+  const openWatched = async (
+    url: string,
+  ): Promise<{
+    page: Page;
+    status: number | undefined;
+    problems: () => Promise<Problems>;
+  }> => {
+    trustedTypes = true;
+    const page = await browser.newPage();
+    const thrown: string[] = [];
+    const logged: string[] = [];
+    page.on('pageerror', (error) => thrown.push(error.message));
+    page.on('console', (message) => {
+      // 404.html は 404 で届き、ブラウザは文書そのものの失敗として書き出す
+      if (
+        message.location().url === url &&
+        message.text().startsWith('Failed to load resource')
+      ) {
+        return;
+      }
+      logged.push(`${message.type()}: ${message.text()}`);
+    });
+    await page.addInitScript(() => {
+      const refused: string[] = [];
+      const written = new Map<string, Element>();
+      Object.assign(window, { refused, written });
+      document.addEventListener('securitypolicyviolation', (event) => {
+        refused.push(`${event.effectiveDirective} ${event.sample}`);
+      });
+      document.addEventListener('readystatechange', () => {
+        if (document.readyState !== 'interactive') return;
+        for (const selector of ['nav', 'main', '[data-testid="title"]']) {
+          const found = document.querySelector(selector);
+          if (found !== null) written.set(selector, found);
+        }
+      });
+    });
+    const response = await page.goto(url);
+    return {
+      page,
+      status: response?.status(),
+      problems: async () => {
+        // 違反の知らせは後のタスクで届くので、ひと巡り待ってから読む
+        await page.evaluate(
+          () =>
+            new Promise((resolve) => {
+              setTimeout(resolve, 0);
+            }),
+        );
+        return {
+          ...(await page.evaluate(() => {
+            const { refused, written } = window as unknown as {
+              refused: string[];
+              written: Map<string, Element>;
+            };
+            return {
+              replaced: [...written]
+                .filter(
+                  ([selector, node]) =>
+                    document.querySelector(selector) !== node,
+                )
+                .map(([selector]) => selector),
+              kept: [...written.keys()],
+              refused,
+              titles: document.querySelectorAll('title').length,
+            };
+          })),
+          thrown,
+          errors: logged.filter((line) => line.startsWith('error:')),
+        };
+      },
+    };
+  };
+
+  describe('a document the host sent, hydrated in place', () => {
+    it('is 404.html at a URL the site does not have, whose client components then read the visitor’s locale', async () => {
+      const { page, status, problems } = await openWatched(
+        `${origin}/ja/nowhere`,
+      );
+
+      await page.getByText('このアドレスには何もありません').waitFor();
+
+      expect({ status, ...(await problems()) }).toStrictEqual({
+        status: 404,
+        replaced: [],
+        kept: ['nav', 'main', '[data-testid="title"]'],
+        refused: [],
+        titles: 1,
+        thrown: [],
+        errors: [],
+      });
+      await page.close();
+    });
+
+    it('is a shell at a value the build did not write', async () => {
+      const { page, status, problems } = await openWatched(
+        `${origin}/ja/posts/3`,
+      );
+
+      await page.getByRole('heading', { name: 'third post' }).waitFor();
+
+      expect({ status, ...(await problems()) }).toStrictEqual({
+        status: 200,
+        replaced: [],
+        kept: ['nav', 'main'],
+        refused: [],
+        titles: 1,
+        thrown: [],
+        errors: [],
+      });
+      await page.close();
+    });
+
+    it.each([
+      { how: 'with a trailing slash', url: '/ja/about/', cloudflare: false },
+      {
+        how: 'after the host’s redirect to the trailing slash',
+        url: '/ja/about',
+        cloudflare: true,
+      },
+    ])('is a page at its own URL $how', async (each) => {
+      cloudflare = each.cloudflare;
+      const { page, problems } = await openWatched(`${origin}${each.url}`);
+
+      await page.getByText(/time zone: (?!not yet)/u).waitFor();
+
+      expect({
+        pathname: pathnameOf(page),
+        ...(await problems()),
+      }).toStrictEqual({
+        pathname: '/ja/about/',
+        replaced: [],
+        kept: ['nav', 'main', '[data-testid="title"]'],
+        refused: [],
+        titles: 1,
+        thrown: [],
+        errors: [],
+      });
+      await page.close();
+    });
   });
 
   // 殻の本文はブラウザでしか描かれない。見出しが出たら JS が握っている

@@ -124,3 +124,22 @@ export const clientDepsHeader = (named: Iterable<ClientDeps>): string =>
 /** What `clientDepsHeader` said. */
 export const readClientDeps = (value: string): ClientDeps[] =>
   JSON.parse(decodeURIComponent(value)) as ClientDeps[];
+
+/**
+ * Where a static build lists the files each page's client components need,
+ * at the root of the site under Vite's `base`. A navigation links them as it
+ * asks for the payload, instead of once the payload has named them — a
+ * round trip sooner.
+ */
+export const CLIENT_FILES_PATH = '/client-files.json';
+
+/**
+ * What `CLIENT_FILES_PATH` holds: every file once, and for each page — by
+ * its payload's path, under the base, as a browser's URL spells it — the
+ * indexes of its files. A file every document links is left out: the
+ * document the visitor arrived on loaded it already.
+ */
+export type ClientFiles = {
+  readonly files: readonly string[];
+  readonly pages: Readonly<Record<string, readonly number[]>>;
+};

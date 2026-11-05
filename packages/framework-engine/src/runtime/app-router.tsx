@@ -8,21 +8,25 @@ import {
   withoutBase,
 } from '@k8ordo/router';
 import {
+  createContext,
   startTransition,
   useDeferredValue,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
 import type { ReactNode, RefObject } from 'react';
 
+import { preloadClientFiles, readClientFiles } from './client-files';
 import { whenClientReady } from './client-ready';
 import { ShowNotFound } from './fallback-boundary';
+import { doneHydrating } from './hydrating-pathname';
 import { isPayload } from './is-payload';
 import type { Payload } from './payload';
 import { payloadPathFor } from './payload-path';
-import { createPrefetchCache, prefetchTargetOf } from './prefetch';
-import type { PrefetchCache } from './prefetch';
+import { createPageCache, prefetchInView, prefetchTargetOf } from './prefetch';
+import type { PageCache } from './prefetch';
 import { markNavigated, Recover, reloadInstead } from './recover';
 import { TreePathname } from './tree-pathname';
 
@@ -69,6 +73,15 @@ const canRender = (payload: Payload): boolean =>
  * transition leaves it.
  */
 const WHEN_APPLIED = { rows: 'leave' } as const;
+
+/**
+ * Whether a page's payload is a file — the same until the next deploy,
+ * however often it is asked for. Under `vite dev` a static application's
+ * pages are rendered per request too.
+ */
+const payloadsAreFiles = (): boolean =>
+  // 読むたびに見る。テストがモードを切り替える
+  import.meta.env.K8ORDO_MODE === 'static' && !import.meta.env.DEV;
 
 /**
  * How many trees navigations have applied — the router's, and `vite dev`'s
@@ -149,19 +162,25 @@ const streams = new WeakMap<Payload, Stream>();
  * A page's payload, or `null` when what came back is not one — a file the
  * host serves, or a URL nothing answers. It resolves once the client
  * components the page renders have loaded, so a prefetch has those in hand
- * too.
+ * too; what a static build listed of their files is linked as the request
+ * leaves.
  */
 const fetchPage = async (
   payloadPath: string,
   signal: AbortSignal,
+  priority: RequestPriority = 'auto',
 ): Promise<Payload | null> => {
   signal.throwIfAborted();
+  preloadClientFiles(payloadPath);
   const request = new AbortController();
   const cancel = (): void => {
     request.abort(signal.reason);
   };
   signal.addEventListener('abort', cancel, { once: true });
-  const response = await fetch(payloadPath, { signal: request.signal });
+  const response = await fetch(payloadPath, {
+    signal: request.signal,
+    priority,
+  });
   if (!isPayload(response)) return null;
   const payload = await readPayload(
     response.body as ReadableStream<Uint8Array>,
@@ -213,6 +232,15 @@ type Loaded = { readonly payload: Payload; readonly pathname: string };
 let applies = 0;
 
 /**
+ * Read by no component: it changes so that React finishes hydrating. React
+ * hydrates a Suspense boundary at its own pace, when the browser is idle,
+ * and says nowhere when it is done; a context that changes above a boundary
+ * not yet hydrated makes React hydrate it before the transition that changed
+ * the context commits, so that commit is where all of the HTML is hydrated.
+ */
+const Hydrating = createContext(false);
+
+/**
  * Takes over the request of a payload whose tree is being applied, and
  * returns what applying it puts in state.
  */
@@ -221,18 +249,24 @@ const hold = (
   payload: Payload,
   pathname: string,
 ): Applied => {
+  // HTML の hydrate を待たずに来た遷移の木は、行き先の URL で描く
+  doneHydrating();
   applies += 1;
   const stream = streams.get(payload);
   if (stream !== undefined) {
     stream.keep();
-    streaming.push({
-      trees:
-        payload.notFound === undefined
-          ? [payload.tree]
-          : [payload.tree, payload.notFound],
-      cancel: stream.cancel,
-      order: applies,
-    });
+    // ファイルは最後まで読ませる。ページは置き場に残って次の訪問に渡るので、
+    // 途中で切ると、戻ったときに欠けたページを出す
+    if (!payloadsAreFiles()) {
+      streaming.push({
+        trees:
+          payload.notFound === undefined
+            ? [payload.tree]
+            : [payload.tree, payload.notFound],
+        cancel: stream.cancel,
+        order: applies,
+      });
+    }
   }
   return {
     tree: payload.tree,
@@ -243,16 +277,14 @@ const hold = (
 };
 
 /**
- * The router's prefetch cache, made the first time it is asked for. It is
- * only ever asked for in an event or an effect; made as `useRef`'s initial
- * value it would be built, and thrown away, on every render.
+ * The router's page cache, made the first time it is asked for. It is only
+ * ever asked for in an event or an effect; made as `useRef`'s initial value
+ * it would be built, and thrown away, on every render.
  */
 const cacheIn = (
-  ref: RefObject<PrefetchCache<Payload | null> | null>,
-): PrefetchCache<Payload | null> =>
-  (ref.current ??= createPrefetchCache((payloadPath, signal: AbortSignal) =>
-    fetchPage(payloadPath, signal),
-  ));
+  ref: RefObject<PageCache<Payload | null> | null>,
+): PageCache<Payload | null> =>
+  (ref.current ??= createPageCache(fetchPage, { files: payloadsAreFiles() }));
 
 /**
  * Where a page's payload is asked for: its path, with the URL's search. A page
@@ -280,6 +312,7 @@ export function AppRouter({
   search,
   tree,
   notFound,
+  reread,
 }: {
   pathname: string;
   /** The search the page was rendered with, when it reads the search. */
@@ -287,6 +320,13 @@ export function AppRouter({
   tree: ReactNode;
   /** A shell's not-found, when the tree is a shell. */
   notFound?: ReactNode | undefined;
+  /**
+   * The same payload read again, when the HTML was rendered for another
+   * pathname than the browser's: hydration keeps what the server wrote, and
+   * this copy — the same page, every element new — renders it again at the
+   * URL once all of it is hydrated.
+   */
+  reread?: Promise<Payload> | undefined;
 }): ReactNode {
   const [latest, setLatest] = useState<Applied>(() => ({
     tree,
@@ -299,7 +339,9 @@ export function AppRouter({
         : normalizePathname(location.pathname),
   }));
   const current = useDeferredValue(latest);
-  const prefetched = useRef<PrefetchCache<Payload | null>>(null);
+  const [hydrating, setHydrating] = useState(reread !== undefined);
+  const arrived = useRef({ tree, pathname, search, notFound });
+  const prefetched = useRef<PageCache<Payload | null>>(null);
   // The search the tree last applied was rendered with — `undefined` when its
   // page does not read the search, which is every page that did not declare
   // it. Only for such a page does a navigation that keeps the pathname load.
@@ -314,6 +356,42 @@ export function AppRouter({
   // `componentDidCatch` in the same commit, which would refuse the swap the
   // applied shell asks for.
   const loading = useRef(0);
+
+  // 別の pathname の HTML は、境界がすべて hydrate を終えてから描き直す。
+  // その前に i18n が今の URL を読むと、まだ hydrate していない境界が HTML と
+  // 食い違い、React がその境界を作り直す
+  useEffect(() => {
+    if (!hydrating) return;
+    startTransition(() => {
+      setHydrating(false);
+    });
+  }, [hydrating]);
+
+  // hydrate を終えたコミットの中で URL を返す。次の描画が先に来ても、
+  // それは今の URL で描く
+  useLayoutEffect(() => {
+    if (hydrating || reread === undefined) return undefined;
+    doneHydrating();
+    const unmounted = new AbortController();
+    void (async () => {
+      const again = await reread;
+      await whenClientReady([again.tree, again.notFound], { rows: 'wait' });
+      if (unmounted.signal.aborted) return;
+      startTransition(() => {
+        setLatest((previous) => {
+          // 遷移が当てた木は、その URL のために描かれている
+          if (previous.order !== 0) return previous;
+          // 殻は fallback.tsx の notFound() で not-found に替わっていることがある
+          return previous.tree === tree
+            ? { ...previous, tree: again.tree, notFound: again.notFound }
+            : { ...previous, tree: again.notFound };
+        });
+      });
+    })();
+    return () => {
+      unmounted.abort();
+    };
+  }, [hydrating, reread, tree]);
 
   // A tree neither asked for nor on screen will never render again, so what
   // it is still receiving is cancelled.
@@ -407,10 +485,47 @@ export function AppRouter({
     };
   }, []);
 
+  // static のビルドでは文書のページもファイルなので、置き場に持つ。戻って
+  // きたときに取り直さない
+  useEffect(() => {
+    if (!payloadsAreFiles()) return;
+    cacheIn(prefetched).keep(payloadUrlFor(new URL(location.href)), {
+      ...arrived.current,
+      client: documentClient ?? '',
+    });
+    void readClientFiles();
+  }, []);
+
+  // 粗いポインタにはホバーが無く、タップは押し始めとクリックがほぼ同時に
+  // 来るので、先に取る間が無い。代わりに画面のリンクを取る。ファイルに限る
+  // のは、リクエストごとに描くページでは、通り過ぎたリンクの数だけサーバーが
+  // 描き、30 秒で捨てることになるから
+  useEffect(() => {
+    if (!payloadsAreFiles()) return undefined;
+    const coarse = matchMedia('(pointer: coarse)');
+    let stop: (() => void) | undefined;
+    const follow = (): void => {
+      stop?.();
+      stop = coarse.matches
+        ? prefetchInView((url) =>
+            cacheIn(prefetched).prefetch(payloadUrlFor(url), 'low'),
+          )
+        : undefined;
+    };
+    follow();
+    coarse.addEventListener('change', follow);
+    return () => {
+      coarse.removeEventListener('change', follow);
+      stop?.();
+    };
+  }, []);
+
   useEffect(() => {
     const onIntent = (event: Event): void => {
       const url = prefetchTargetOf(event.target);
-      if (url !== null) cacheIn(prefetched).prefetch(payloadUrlFor(url));
+      if (url !== null) {
+        void cacheIn(prefetched).prefetch(payloadUrlFor(url), 'auto');
+      }
     };
     // 捕捉段で聞く。途中の要素が伝播を止めても、押し始めは見逃さない
     for (const type of INTENTS) {
@@ -439,8 +554,7 @@ export function AppRouter({
         const payloadPath = payloadUrlFor(url);
         let payload: Payload | null;
         try {
-          payload = await (cacheIn(prefetched).take(payloadPath, signal) ??
-            fetchPage(payloadPath, signal));
+          payload = await cacheIn(prefetched).load(payloadPath, signal);
         } catch (error) {
           if (signal.aborted) throw error;
           // The network, or a server that could not answer: the same rule
@@ -498,16 +612,20 @@ export function AppRouter({
   // table where it is. The pathname the server rendered for is what seeds
   // `usePathname` until the browser can answer for itself.
   return (
-    <PathnameProvider pathname={pathname}>
-      <NavigationGeneration value={generation}>
-        <TreePathname value={current.pathname}>
-          <Recover>
-            <ShowNotFound value={current.notFound === undefined ? null : show}>
-              {current.tree}
-            </ShowNotFound>
-          </Recover>
-        </TreePathname>
-      </NavigationGeneration>
-    </PathnameProvider>
+    <Hydrating value={hydrating}>
+      <PathnameProvider pathname={pathname}>
+        <NavigationGeneration value={generation}>
+          <TreePathname value={current.pathname}>
+            <Recover>
+              <ShowNotFound
+                value={current.notFound === undefined ? null : show}
+              >
+                {current.tree}
+              </ShowNotFound>
+            </Recover>
+          </TreePathname>
+        </NavigationGeneration>
+      </PathnameProvider>
+    </Hydrating>
   );
 }

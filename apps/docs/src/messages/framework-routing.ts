@@ -418,8 +418,8 @@ export const routeRefused = [
     en: 'A `route.ts` with pages below it',
   }),
   message({
-    ja: 'ビルドが自分で書くファイルと同じ場所に書く`route.ts`（`site`を渡したときの`sitemap.xml`、`not-found.tsx`があるときの`404.html`、シェルがあるときの`_redirects`、ページの`index.html`と`index.rsc`）。大文字と小文字だけが違う名前も、macOSとWindowsでは同じファイルになるので、どのOSでも止まります。エラー文が`route.ts`ともう一方の両方を挙げるので、どちらかを外します。`paths`で値をもらう`route.ts`なら、`paths`からその値を外します。`vite dev`は止まらず、パラメータの無い`route.ts`なら警告を出します',
-    en: 'A `route.ts` writing a file the build writes itself (`sitemap.xml` when `site` is given, `404.html` beside a `not-found.tsx`, `_redirects` when there are shells, a page’s `index.html` and `index.rsc`). Names that differ only in case are the same file on macOS and Windows, so they stop the build on every system. The error names the `route.ts` and the other side; remove one of them, or, for a `route.ts` given its value by `paths`, leave that value out of `paths`. `vite dev` does not stop, and warns when the URL has no params',
+    ja: 'ビルドが自分で書くファイルと同じ場所に書く`route.ts`（`site`を渡したときの`sitemap.xml`、`not-found.tsx`があるときの`404.html`、シェルがあるときの`_redirects`、`client-files.json`、ページの`index.html`と`index.rsc`）。大文字と小文字だけが違う名前も、macOSとWindowsでは同じファイルになるので、どのOSでも止まります。エラー文が`route.ts`ともう一方の両方を挙げるので、どちらかを外します。`paths`で値をもらう`route.ts`なら、`paths`からその値を外します。`vite dev`は止まらず、パラメータの無い`route.ts`なら警告を出します',
+    en: 'A `route.ts` writing a file the build writes itself (`sitemap.xml` when `site` is given, `404.html` beside a `not-found.tsx`, `_redirects` when there are shells, `client-files.json`, a page’s `index.html` and `index.rsc`). Names that differ only in case are the same file on macOS and Windows, so they stop the build on every system. The error names the `route.ts` and the other side; remove one of them, or, for a `route.ts` given its value by `paths`, leave that value out of `paths`. `vite dev` does not stop, and warns when the URL has no params',
   }),
 ] as const;
 
@@ -528,19 +528,34 @@ export const prefetchSkipped = [
   }),
 ] as const;
 
+export const prefetchTouch = message({
+  ja: 'staticモードでは、主なポインターが粗い端末（`(pointer: coarse)`）のとき、画面に入ったリンクも先読みします。入った順に1つずつ、低い優先度で取得します。番が来る前に画面から出たリンクは飛ばします。',
+  en: 'Under static mode, where the primary pointer is coarse (`(pointer: coarse)`), the links on screen are prefetched too. They are fetched one at a time in the order they came into view, at low priority, and a link that leaves the screen before its turn is passed over.',
+});
+
 export const prefetchStop = message({
-  ja: '先読みを止めるには、リンクかそれを囲む要素に`data-k8ordo-prefetch="false"`を付けます。描画の重いページへのリンクに使います。いちばん近い要素の値が使われるので、止めた範囲の中のリンクに`"true"`を付ければ、そのリンクだけを先読みに戻せます。',
-  en: 'To stop prefetching, mark the link or any element around it `data-k8ordo-prefetch="false"`. Use it for links to pages that are expensive to render. The nearest element carrying the attribute decides, so `"true"` brings one link back inside a region that opted out.',
+  ja: '先読みを止めるには、リンクかそれを囲む要素に`data-k8ordo-prefetch="false"`を付けます。描画の重いページへのリンクや、スマートフォンでスクロールしていく長い一覧に使います。いちばん近い要素の値が使われるので、止めた範囲の中のリンクに`"true"`を付ければ、そのリンクだけを先読みに戻せます。',
+  en: 'To stop prefetching, mark the link or any element around it `data-k8ordo-prefetch="false"`. Use it for links to pages that are expensive to render, or for a long list a visitor scrolls through on a phone. The nearest element carrying the attribute decides, so `"true"` brings one link back inside a region that opted out.',
 });
 
 export const prefetchOnce = message({
-  ja: '先読みしたページは、そのページへの次の遷移で1回だけ使われます。使えるのは取得を始めてから30秒以内で、過ぎると遷移のときに取り直します。Server Actionの結果を受け取ったときも、先読みしたものはすべて捨てます。',
-  en: 'A prefetched page is used once, by the next navigation to it, and only within 30 seconds of the fetch starting. After that the navigation fetches it again. A Server Action’s result drops everything prefetched too.',
+  ja: 'serverモードでは、画面に入ったリンクは先読みしません。スクロールで通り過ぎたリンクの数だけ、サーバーで描画することになるためです。先読みしたページは、そのページへの次の遷移で1回だけ使われます。使えるのは取得を始めてから30秒以内で、過ぎると遷移のときに取り直します。Server Actionの結果を受け取ったときも、先読みしたものはすべて捨てます。',
+  en: 'Under server mode the links on screen are not prefetched: every link a visitor scrolls past would be a render on the server. A prefetched page is used once, by the next navigation to it, and only within 30 seconds of the fetch starting. After that the navigation fetches it again. A Server Action’s result drops everything prefetched too.',
+});
+
+export const prefetchKept = message({
+  ja: 'staticモードでは、取得したページを持ち続けます。ページは次のデプロイまで変わらないファイルだからです。先読みしたページ、遷移で取得したページ、最初に開いたページは、そのページへのどの遷移でも使われます。戻るや進むでも、ホストから取り直しません。タブが持つのは、最近使った50ページまでです。届いている途中で離れたページも、最後まで受け取ります。戻ったときに一部が欠けることはありません。`vite dev`ではどちらのモードでもリクエストごとに描き、serverモードと同じ扱いになります。',
+  en: 'Under static mode a page is a file that stays the same until the next deploy, so the pages fetched are kept. A page prefetched, one a navigation fetched, and the page first opened are each used by every navigation to them, going back and forward included, without asking the host again. The tab keeps the 50 pages it used most recently. A page left while it was still arriving goes on arriving, so going back to it shows it whole. Under `vite dev` pages are rendered per request in either mode, and are kept as under server mode.',
+});
+
+export const prefetchClientFiles = message({
+  ja: 'staticモードでは、ビルドが`client-files.json`も書きます。ページごとに、そのClient Componentが読み込むスクリプトとスタイルシートを並べたもので、どのページも読み込むものは除きます。ランタイムは文書が動き始めたら、これを低い優先度で1回読みます。ページのペイロードを頼むと同時に、そのページのファイルも取り始めます。スクリプトは`<link rel="modulepreload">`で、スタイルシートは`<link rel="preload" as="style">`で取ります。ペイロードがファイルを名指すのを待たないので、1往復早く取り始められます。スタイルシートが当たるのは、これまでどおりそれを使うClient Componentを読み込んだときです。シェルが答える値のように一覧に無いページは、一覧が無いときと同じように読み込みます。',
+  en: 'A static build also writes `client-files.json`: for each page, the scripts and stylesheets its Client Components load, less those every page loads. The runtime reads it once, at low priority, after the document starts. Whenever it asks for a page’s payload, it starts fetching that page’s files at the same moment — scripts with `<link rel="modulepreload">`, stylesheets with `<link rel="preload" as="style">` — instead of waiting a round trip for the payload to name them. A stylesheet still applies only once the Client Component that uses it loads. A page the list leaves out, such as a value a shell answers, loads as it would without the list.',
 });
 
 export const prefetchSpeculation = message({
-  ja: 'ブラウザのSpeculation Rulesは使いません。Baselineに入っていないためです。',
-  en: 'The browser’s Speculation Rules are not used, since they are not Baseline.',
+  ja: 'ブラウザのSpeculation Rulesと、データセーバーの有無を読むNetwork Information APIは使いません。どちらもBaselineに入っていないためです。',
+  en: 'Neither the browser’s Speculation Rules nor the Network Information API, which would say whether a visitor saves data, is used: neither is Baseline.',
 });
 
 export const demoTitle = message({
@@ -588,8 +603,12 @@ export const demoSteps = [
     en: '“The deploy page” sits inside `data-k8ordo-prefetch="false"`, so pointing at it adds nothing.',
   }),
   message({
-    ja: '「パラメータのページ」にもう一度合わせても、最初に取得してから30秒たつまでは一覧に加わりません。',
-    en: 'Point at “The parameters page” again. Nothing is added until 30 seconds after the first fetch.',
+    ja: '「パラメータのページ」にもう一度合わせても、一覧は増えません。このサイトはstaticモードなので、一度取得したページを持ち続けます。',
+    en: 'Point at “The parameters page” again. Nothing is added: this site runs in static mode, so a page fetched once is kept.',
+  }),
+  message({
+    ja: 'スマートフォンなどタッチの画面で開くと、ポインターを合わせなくても、画面に入ったリンクから順に一覧に加わります。',
+    en: 'Open this page on a touch screen. The links join the list as they come into view, with nothing pointed at.',
   }),
   message({
     ja: 'ヘッダーやサイドバーにある、ほかのページへのリンクに合わせても、同じように一覧に加わります。',

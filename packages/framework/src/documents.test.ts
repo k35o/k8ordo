@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import {
   asFile,
+  clientFiles,
   policyProblems,
   redirectPage,
   sitemap,
@@ -59,6 +60,90 @@ const policyOf = (html: string): string | undefined =>
   /<meta http-equiv="Content-Security-Policy" content="([^"]*)">/u.exec(
     html,
   )?.[1];
+
+// 1 つの client コンポーネントが要るファイル。入口のスクリプトはどれも要る
+const needing = (js: string[], css: string[] = []) => ({
+  id: '/src/components/x.tsx',
+  name: 'default',
+  js: ['/assets/entry.js', ...js],
+  css,
+});
+
+describe('clientFiles', () => {
+  it('lists each page’s files by its payload’s path, leaving out what every document links', () => {
+    const home = [needing(['/assets/home.js'])];
+    const about = [needing(['/assets/about.js'], ['/assets/about.css'])];
+
+    expect(
+      clientFiles(
+        new Map([
+          ['/index.rsc', home],
+          ['/about/index.rsc', about],
+        ]),
+        [home, about],
+      ),
+    ).toStrictEqual({
+      files: ['/assets/about.css', '/assets/about.js', '/assets/home.js'],
+      pages: { '/about/index.rsc': [0, 1], '/index.rsc': [2] },
+    });
+  });
+
+  it('leaves out a page whose files every document links', () => {
+    const shared = [needing(['/assets/shared.js'])];
+    const about = [needing(['/assets/shared.js', '/assets/about.js'])];
+
+    expect(
+      clientFiles(
+        new Map([
+          ['/index.rsc', shared],
+          ['/about/index.rsc', about],
+        ]),
+        [shared, about],
+      ),
+    ).toStrictEqual({
+      files: ['/assets/about.js'],
+      pages: { '/about/index.rsc': [0] },
+    });
+  });
+
+  it('keeps a file a document that is no page does not link — a 404.html, a shell', () => {
+    const home = [needing(['/assets/layout.js'])];
+    const notFound = [needing([])];
+
+    expect(
+      clientFiles(new Map([['/index.rsc', home]]), [home, notFound]),
+    ).toStrictEqual({
+      files: ['/assets/layout.js'],
+      pages: { '/index.rsc': [0] },
+    });
+  });
+
+  it('writes the same list whatever order the pages rendered in', () => {
+    const a = [needing(['/assets/b.js', '/assets/a.js'])];
+    const b = [needing(['/assets/c.js'])];
+    const pages = (order: Array<[string, typeof a]>) =>
+      clientFiles(
+        new Map(order),
+        order.map(([, named]) => named),
+      );
+
+    expect(
+      JSON.stringify(
+        pages([
+          ['/b/index.rsc', b],
+          ['/a/index.rsc', a],
+        ]),
+      ),
+    ).toBe(
+      JSON.stringify(
+        pages([
+          ['/a/index.rsc', a],
+          ['/b/index.rsc', b],
+        ]),
+      ),
+    );
+  });
+});
 
 describe('asFile', () => {
   it('names the hash of every inline script signed with the page’s nonce, and of nothing else', () => {

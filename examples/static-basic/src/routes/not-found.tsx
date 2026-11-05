@@ -1,3 +1,11 @@
+import { NothingHere } from '../components/nothing-here';
+
 export default function NotFoundPage() {
-  return <h1 data-testid="title">not found</h1>;
+  return (
+    <>
+      <title>not found</title>
+      <h1 data-testid="title">not found</h1>
+      <NothingHere />
+    </>
+  );
 }
