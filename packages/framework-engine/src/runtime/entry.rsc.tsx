@@ -789,8 +789,7 @@ const matchNotFound = (
 type Rendered = {
   readonly stream: ReadableStream<Uint8Array>;
   /**
-   * Under mode: 'static', the client components it has named so far, by
-   * reference.
+   * Under mode: 'static', the client modules it has named so far, by id.
    */
   readonly named: ReadonlyMap<string, ClientDeps>;
   /** What threw while rendering — notFound() aside, which is an answer. */
@@ -840,13 +839,8 @@ const renderPayload = (
       },
       import.meta.env.K8ORDO_MODE === 'static'
         ? {
-            onClientReference: ({ id, name, deps }) => {
-              named.set(`${id}#${name}`, {
-                id,
-                name,
-                js: deps.js,
-                css: deps.css,
-              });
+            onClientReference: ({ id, deps }) => {
+              named.set(id, { js: deps.js, css: deps.css });
             },
           }
         : undefined,

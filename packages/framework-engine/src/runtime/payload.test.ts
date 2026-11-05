@@ -10,14 +10,10 @@ import {
 // 共有チャンクになる
 const SHARED = [
   {
-    id: 'ad45eb3277a6',
-    name: 'Button',
     js: ['/assets/共有-cLEA3hoH.js'],
     css: [],
   },
   {
-    id: '0d6b5e3f9c21',
-    name: 'Card',
     js: ['/assets/共有-cLEA3hoH.js', '/assets/card-D7A9USJg.js'],
     css: ['/assets/card-C2TfACgz.css'],
   },

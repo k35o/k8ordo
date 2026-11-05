@@ -286,7 +286,7 @@ pnpm check         # check:write to auto-fix
   is what a client navigation links ahead of a payload
   (`packages/framework-engine/CLAUDE.md`). `writeHtml` hands back what each
   HTML answer's `CLIENT_DEPS_HEADER` named (`named`), and `clientFiles`
-  (`documents.ts`) keeps, per page with a payload, its references' `js` and
+  (`documents.ts`) keeps, per page with a payload, its modules' `js` and
   `css` less the files every HTML document written links — pages,
   `404.html` and shells alike, since the visitor may have arrived on any of
   them — keyed by the payload's path as `new URL` spells it, so a pathname

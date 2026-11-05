@@ -647,14 +647,10 @@ describe('a route.ts at a file the build writes itself', () => {
 });
 
 const ICON = {
-  id: 'icon',
-  name: 'Icon',
   js: ['/assets/icon-A1.js'],
   css: [],
 };
 const CARD = {
-  id: 'card',
-  name: 'Card',
   js: ['/assets/card-B2.js'],
   css: ['/assets/card-C3.css'],
 };

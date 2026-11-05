@@ -440,21 +440,19 @@ pnpm check         # check:write to auto-fix
   the reading on strings and split streams, and builds
   `fixtures/head-scripts/`, whose layout's script runs in every engine
   while the stylesheet is held back, and hydrates with nothing reported.
-- **A static page's HTML says which client components its payload named.**
+- **A static page's HTML says which client modules its payload named.**
   What the RSC render kept for the HTML render to link (above), the HTML
-  answer says in `CLIENT_DEPS_HEADER`, and the framework's build checks the
-  HTML links every file (`packages/framework/CLAUDE.md`): exactly one entry
-  per reference — the id the manifest keys its module with, its export's
-  name and that reference's `deps`, so two default exports are two entries
-  named `default`. The last render's only — a page that said `notFound()`
+  answer says in `CLIENT_DEPS_HEADER`, and the framework's build lists it in
+  `CLIENT_FILES_PATH` (below): one entry per module, its `deps` as the
+  manifest has them. The last render's only — a page that said `notFound()`
   is rendered again — and only on HTML: a payload and a server say
   nothing. It is made once the body is read: the HTML carries the payload
   whole, so every reference has been named by then. The value is
   URI-encoded JSON: a header is bytes, and a chunk two client components
   share is named after a module whose name need not be ASCII.
   `runtime/ssr-deps.test.ts` holds that the header says, cold and loaded,
-  one entry for each reference the Flight rows written into the HTML name,
-  with its id, name and files in the manifest — two default exports, a
+  one entry for each module the Flight rows written into the HTML name,
+  with its files in the manifest — two default exports, a
   component passed as a value, ones in a prop's containers, and one in a
   row a not-found receives late, included — and that a server says
   nothing; `runtime/payload.test.ts` carries a name that is not ASCII

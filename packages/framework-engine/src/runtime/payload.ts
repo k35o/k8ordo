@@ -80,23 +80,17 @@ export const NONCE_HEADER = 'x-k8ordo-nonce';
  */
 export const SHELL_HEADER = 'x-k8ordo-shell';
 
-/**
- * A client component a payload names — the id the build's manifest keys its
- * module with, and its export's name: two exports are two components — and
- * the stylesheets and scripts the manifest says it needs.
- */
+/** What a client module a payload names needs, as the build's manifest lists it. */
 export type ClientDeps = {
-  readonly id: string;
-  readonly name: string;
   readonly js: readonly string[];
   readonly css: readonly string[];
 };
 
 /**
  * Said by the handler under mode: 'static' alone, on a page's HTML: every
- * client component the payload it rendered names (`clientDepsHeader`) — what
- * the HTML render was handed to link — which the build checks the HTML
- * links.
+ * client module the payload it rendered names (`clientDepsHeader`) — what
+ * the HTML render was handed to link — which the build lists in
+ * `CLIENT_FILES_PATH`.
  */
 export const CLIENT_DEPS_HEADER = 'x-k8ordo-client-deps';
 

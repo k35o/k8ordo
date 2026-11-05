@@ -72,11 +72,9 @@ const referencesIn = (html: string): string[] => [
   ...new Set(namedIn(html).map(({ id }) => id)),
 ];
 
-/** Each client reference the payload names, with its files in the manifest. */
+/** Each client module the payload names, with its files in the manifest. */
 const namedWithDeps = (manifest: Manifest, html: string): ClientDeps[] =>
-  namedIn(html).map(({ id, name }) => ({
-    id,
-    name,
+  referencesIn(html).map((id) => ({
     js: manifest.clientReferenceDeps[id]?.js ?? [],
     css: manifest.clientReferenceDeps[id]?.css ?? [],
   }));
@@ -223,14 +221,13 @@ const readUntil = async (response: Response, text: string): Promise<string> => {
 };
 
 /**
- * Client components, each as one entry of its module, name and files, in an
- * order of their own: two equal only if they say the same components, each
- * with its own files, as many times. None said is none.
+ * Client modules, each as its files, in an order of their own: two equal
+ * only if they say the same modules' files, as many times. None said is none.
  */
 const entriesOf = (named: readonly ClientDeps[] | null): string[] =>
   (named ?? [])
-    .map(({ id, name, js, css }) =>
-      JSON.stringify({ id, name, js: js.toSorted(), css: css.toSorted() }),
+    .map(({ js, css }) =>
+      JSON.stringify({ js: js.toSorted(), css: css.toSorted() }),
     )
     .toSorted();
 
@@ -436,7 +433,7 @@ describe('the HTML of a file', () => {
     '/promised/x',
     '/defaults',
   ])(
-    'says, with the HTML of %s, every client component its payload names and what each needs, whether they had loaded or not',
+    'says, with the HTML of %s, every client module its payload names and what each needs, whether they had loaded or not',
     async (pathname) => {
       for (const { html, said } of await twice(pathname)) {
         const { css, js } = needed(manifest(), html);
