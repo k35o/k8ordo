@@ -138,7 +138,7 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   `sitemap.xml`, and
   `options.csp` (directives → sources, `ContentSecurityPolicy`) is the
   Content-Security-Policy written into each page's `<meta>`, first in
-  `<head>`, with the hashes of the framework's own inline scripts on that
+  `<head>` after the `<meta charSet>`, with the hashes of the framework's own inline scripts on that
   page added to `script-src` (or `default-src` made into it) and
   `script-src-elem`; a policy with `'strict-dynamic'`, `frame-ancestors`,
   `report-uri`, `report-to` or `sandbox` is refused. `FrameworkOptions` is

@@ -259,8 +259,11 @@ pnpm check         # check:write to auto-fix
   `NONCE_HEADER`; `write` takes it off every page (`asFile`) whether or not
   a `csp` was given — a nonce in a file everyone reads is worth nothing, and
   a random one would make every build differ. With `csp`, what that nonce
-  signed is hashed into `script-src` of a `<meta>` placed first in `<head>`,
-  and so is the engine's one `<style>` (`STYLESHEET_ORDER_HREF`, empty, which
+  signed is hashed into `script-src` of a `<meta>` placed first in `<head>`
+  after the `<meta charSet>` React writes there (a browser looks for the
+  encoding only in the first 1024 bytes, which a policy naming many hashes
+  outgrows; only a charset that opens `<head>` is passed over, since a
+  policy does not govern what comes before it), and so is the engine's one `<style>` (`STYLESHEET_ORDER_HREF`, empty, which
   keeps the Server Components' stylesheets first; the engine leaves it
   unsigned under static mode) wherever a style element is decided —
   `style-src-elem`, `style-src`, or `style-src` made from `default-src` —
