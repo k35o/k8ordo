@@ -6,18 +6,23 @@ import type { ReactNode } from 'react';
 import { reloadDocument } from './reload';
 
 /**
- * Whether a client navigation has put a tree on screen yet. Until one has,
- * the tree being rendered is the one the server sent as HTML. A fact about
+ * How many trees navigations have applied — the router's, and `vite dev`'s
+ * reload of the page on screen. Until one has, the tree being rendered is the
+ * one the server sent as HTML. A Server Action's answer is not counted:
+ * answers to actions called in a row apply one after another. A fact about
  * the document, not about a component, which is why it is not a prop.
  */
-let navigated = false;
+let navigations = 0;
 
 export const markNavigated = (): void => {
-  navigated = true;
+  navigations += 1;
 };
 
+/** Taken before a Server Action is sent, and handed to `answerAction`. */
+export const navigationsApplied = (): number => navigations;
+
 /** Whether the tree on screen came from a client navigation, not the HTML. */
-export const isNavigated = (): boolean => navigated;
+export const isNavigated = (): boolean => navigations > 0;
 
 /**
  * The document is being replaced; a value returned now would render into a
@@ -52,7 +57,7 @@ export class Recover extends Component<
   }
 
   override componentDidCatch(error: unknown): void {
-    if (!navigated) throw error;
+    if (!isNavigated()) throw error;
     reloadDocument();
   }
 

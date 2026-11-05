@@ -6,13 +6,10 @@ import {
   setServerCallback,
 } from '@vitejs/plugin-rsc/browser';
 
-import {
-  answerAction,
-  navigationsApplied,
-  setPayloadReader,
-} from './app-router';
+import { answerAction, setPayloadReader } from './app-router';
 import { ACTION_ID_HEADER } from './payload';
 import type { Payload } from './payload';
+import { navigationsApplied } from './recover';
 
 /**
  * Hands app-router the browser's Flight client: how a fetched payload is

@@ -27,7 +27,12 @@ import type { Payload } from './payload';
 import { payloadPathFor } from './payload-path';
 import { createPageCache, prefetchInView, prefetchTargetOf } from './prefetch';
 import type { PageCache } from './prefetch';
-import { markNavigated, Recover, reloadInstead } from './recover';
+import {
+  markNavigated,
+  navigationsApplied,
+  Recover,
+  reloadInstead,
+} from './recover';
 import { TreePathname } from './tree-pathname';
 
 /**
@@ -84,16 +89,6 @@ const payloadsAreFiles = (): boolean =>
   import.meta.env.K8ORDO_MODE === 'static' && !import.meta.env.DEV;
 
 /**
- * How many trees navigations have applied — the router's, and `vite dev`'s
- * reload of the page on screen. A Server Action's answer is not counted:
- * answers to actions called in a row apply one after another.
- */
-let navigations = 0;
-
-/** Taken before a Server Action is sent, and handed to `answerAction`. */
-export const navigationsApplied = (): number => navigations;
-
-/**
  * What a Server Action's answer does to the document, once it is read.
  * `sent` is `navigationsApplied()` as the action was sent, and `url` where
  * it was posted: the answer is that page.
@@ -118,7 +113,7 @@ export const answerAction = async (
   // A navigation applied another page while the action ran or its answer
   // loaded: the answer is the page the visitor left, and would put it back
   // under the URL they are at. The caller still gets its value.
-  if (navigations === sent) {
+  if (navigationsApplied() === sent) {
     mounted?.apply(payload, normalizePathname(new URL(url).pathname));
   }
   return payload.returnValue;
@@ -456,7 +451,6 @@ export function AppRouter({
       if (payload === null || location.href !== url) return;
       if (!canRender(payload)) return reloadInstead();
       markNavigated();
-      navigations += 1;
       const next = hold(
         streaming.current,
         payload,
@@ -569,7 +563,6 @@ export function AppRouter({
     },
     apply: (loaded) => {
       markNavigated();
-      navigations += 1;
       searchApplied.current = loaded.payload.search;
       setLatest(hold(streaming.current, loaded.payload, loaded.pathname));
     },
