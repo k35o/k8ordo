@@ -4,7 +4,7 @@ import type { FC } from 'react';
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
-  answeredByRoute,
+  answersOf,
   catchAllPath,
   catchAllPatterns,
   dirFor,
@@ -203,7 +203,7 @@ describe('dirFor', () => {
   });
 });
 
-describe('answeredByRoute', () => {
+describe('answersOf', () => {
   const tree = treeOf([
     'page.tsx',
     'feed.xml/route.ts',
@@ -212,14 +212,30 @@ describe('answeredByRoute', () => {
     'not-found.tsx',
   ]);
 
-  it('says a route.ts answers the pathnames its pattern takes', () => {
-    expect(answeredByRoute(tree, '/feed.xml')).toBe(true);
-    expect(answeredByRoute(tree, '/api/7')).toBe(true);
+  it('answers each pathname with the first pattern that takes it, in the matcher’s order', () => {
+    const answers = answersOf(tree, [
+      '/',
+      '/feed.xml',
+      '/api/7',
+      '/api/special',
+    ]);
+
+    expect(
+      [...answers].map(([pathname, { kind, pattern }]) => [
+        pathname,
+        kind,
+        pattern,
+      ]),
+    ).toStrictEqual([
+      ['/', 'page', '/'],
+      ['/feed.xml', 'route', '/feed.xml'],
+      ['/api/7', 'route', '/api/:id'],
+      ['/api/special', 'page', '/api/special'],
+    ]);
   });
 
-  it('says a page answers what it takes, in the matcher’s order', () => {
-    expect(answeredByRoute(tree, '/')).toBe(false);
-    expect(answeredByRoute(tree, '/api/special')).toBe(false);
+  it('never answers a pathname with the catch-all', () => {
+    expect(answersOf(tree, ['/missing/deep']).size).toBe(0);
   });
 });
 

@@ -392,10 +392,10 @@ Nor can a `route.ts` write a file the build writes itself — `sitemap.xml`
 when `site` is given, `404.html` beside a `not-found.tsx`, `_redirects` when
 there are shells, `client-files.json`, a page's `index.html` or `index.rsc`
 — since one would replace the other. It stops before it renders anything,
-naming both:
+naming every such `route.ts` in one error, each beside what is in its way:
 
 ```
-static build writes a file of its own where these route.ts files write theirs, and one would replace the other — remove the route.ts, or what else writes the file:
+static build writes a route.ts as the file its GET answers, and these cannot be written — remove the route.ts, or what else is written there:
   sitemap.xml: src/routes/sitemap.xml/route.ts, and the "site" option writes it
 ```
 

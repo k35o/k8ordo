@@ -6,7 +6,6 @@ import { pathToFileURL } from 'node:url';
 import {
   CLIENT_DEPS_HEADER,
   CLIENT_FILES_PATH,
-  declaredPatterns,
   decodePathname,
   exportsOf,
   FALLBACK_SEGMENT,
@@ -48,14 +47,15 @@ import {
 } from './documents';
 import type { ContentSecurityPolicy } from './documents';
 import {
-  answeredByRoute,
-  answering,
+  answersOf,
   catchAllPath,
   catchAllPatterns,
   dirFor,
+  fileAt,
   patternsNeedingPaths,
   planPaths,
   planRefusals,
+  routeFileRefusals,
   shadowedShells,
 } from './paths';
 import type { Shell } from './paths';
@@ -248,76 +248,6 @@ const reexportRefusal = (files: readonly string[]): string =>
 
 /** The route files whose exports static mode reads. */
 const READ_BY_NAME = new Set(['route', 'page']);
-
-/** Where a pathname's file lands inside the client build, `/`-separated. */
-const fileAt = (pathname: string, name = ''): string =>
-  path.posix.join(dirFor(pathname), name).slice(1);
-
-/**
- * Each route.ts whose file the build also writes for something else — a
- * page's or a redirect's HTML, a page's payload, `404.html`, `sitemap.xml`,
- * `_redirects` — as a line naming both. The build writes its own files after
- * the routes', and a page's beside them, so one would replace the other
- * without a word.
- */
-const takenFiles = (
-  tree: RouteDir,
-  pathnames: readonly string[],
-  {
-    site,
-    shells,
-    named,
-  }: {
-    readonly site: boolean;
-    /** The fallback.tsx files whose shells the build writes `_redirects` for. */
-    readonly shells: readonly string[];
-    readonly named: (file: string) => string;
-  },
-): string[] => {
-  const own = new Map<string, string>();
-  const claim = (file: string, by: string): void => {
-    own.set(file, by);
-  };
-  const routes: Array<{ readonly file: string; readonly route: string }> = [];
-  for (const pathname of pathnames) {
-    const answer = answering(tree, pathname);
-    if (answer?.kind === 'route') {
-      routes.push({ file: fileAt(pathname), route: answer.file });
-    } else if (answer !== undefined) {
-      const page = `${named(answer.file)} is written there`;
-      claim(fileAt(pathname, 'index.html'), page);
-      if (answer.kind === 'page') claim(fileAt(pathname, 'index.rsc'), page);
-    }
-  }
-  const notFound = declaredPatterns(tree).find(
-    (each) => each.kind === 'notFound',
-  );
-  if (notFound !== undefined) {
-    claim('404.html', `${named(notFound.file)} is written there`);
-  }
-  if (site) claim('sitemap.xml', 'the "site" option writes it');
-  claim(
-    CLIENT_FILES_PATH.slice(1),
-    'the build lists there what each page’s client components need',
-  );
-  if (shells.length > 0) {
-    claim(
-      '_redirects',
-      `the shells of ${shells.map((file) => named(file)).join(', ')} are reached through it — rules of your own go in public/_redirects, which the build adds to its own`,
-    );
-  }
-  return routes
-    .flatMap(({ file, route }) => {
-      const by = own.get(file);
-      return by === undefined ? [] : [`${file}: ${named(route)}, and ${by}`];
-    })
-    .toSorted();
-};
-
-const takenRefusal = (lines: readonly string[]): string =>
-  `static build writes a file of its own where these route.ts files write theirs, and one would replace the other — remove the route.ts, or what else writes the file:\n${lines
-    .map((line) => `  ${line}`)
-    .join('\n')}`;
 
 /**
  * Static mode: the same request handler the server mode runs per request is
@@ -792,41 +722,17 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
           options.site === undefined ? ORIGIN : new URL(options.site).origin;
         const urlFor = (pathname: string): string =>
           `${origin}${withBase(pathname, base)}`;
-        // A route.ts is written as the file its GET answers, at its pathname.
-        const byRoute = new Set(
-          plan.paths.filter((pathname) => answeredByRoute(tree, pathname)),
-        );
-        // 殻もディレクトリとして書くので、route.ts のファイルの下に来てはいけない
-        const directories = [
-          ...plan.paths,
-          ...plan.shells.map((shell) => shell.pathname),
-        ];
-        const unfileable = [...byRoute].flatMap((route) => {
-          if (route === '/') {
-            return [`${route} — a static host serves / from index.html`];
-          }
-          const below = directories.find((pathname) =>
-            pathname.startsWith(`${route}/`),
-          );
-          return below === undefined
-            ? []
-            : [`${route} — ${below} is written below it, as a directory`];
-        });
-        if (unfileable.length > 0) {
-          throw new Error(
-            `static build cannot write a route.ts as a file at ${unfileable.join('; ')}`,
-          );
-        }
-        const taken = takenFiles(tree, plan.paths, {
+        const answers = answersOf(tree, plan.paths);
+        const unfileable = routeFileRefusals(tree, plan, answers, {
           site: options.site !== undefined,
-          shells: fallbackShapes(tree)
-            .filter((shape) =>
-              plan.shells.some((shell) => shell.pattern === shape.pattern),
-            )
-            .map((shape) => shape.file),
           named: fromRoot,
         });
-        if (taken.length > 0) throw new Error(takenRefusal(taken));
+        if (unfileable.length > 0) throw new Error(unfileable.join('\n\n'));
+        const byRoute = new Set(
+          plan.paths.filter(
+            (pathname) => answers.get(pathname)?.kind === 'route',
+          ),
+        );
         const entry = path.resolve(root, rscOut, 'index.js');
         const entryModule = (await import(pathToFileURL(entry).href)) as {
           default: Handler;
@@ -868,10 +774,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
                   if (status !== 200) {
                     unanswered.push(`${pathname} (${String(status)})`);
                   } else if (type !== null) {
-                    types.set(
-                      path.relative(clientDir, file).split(path.sep).join('/'),
-                      type,
-                    );
+                    types.set(fileAt(pathname), type);
                   }
                 },
               ];

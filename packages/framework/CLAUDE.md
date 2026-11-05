@@ -236,17 +236,17 @@ pnpm check         # check:write to auto-fix
   `NOT_FOUND_HEADER`, and the build names each kind in its own message.
 - **Under static mode a route.ts is a file.** The build calls its `GET` once
   per pathname (with `site`'s origin in the URL when given) and writes the
-  body at the pathname — `answeredByRoute` asks the declared patterns, in the
-  matcher's order, which of them answers. Anything but a `200` stops the
-  build, as do a route at `/` and a route with written pathnames below it (a
-  file cannot also be a directory). It is not a page: no `index.rsc`, not in
-  the sitemap. Nor may its file be one the build writes itself — a page's
-  or a redirect's `index.html`, a page's `index.rsc`, `404.html`,
-  `sitemap.xml` under `site`, `_redirects` with shells,
-  `client-files.json`: those are written
-  after the routes' files (a page's beside them), so one would replace the
-  other unseen, and `takenFiles` names each pair before anything renders.
-  A file keeps no type, so the `Content-Type` its
+  body at the pathname — `answersOf` asks the declared patterns once, in the
+  matcher's order, which of them answers each pathname. Anything but a
+  `200` stops the build. It is not a page: no `index.rsc`, not in the
+  sitemap. Before anything renders, `routeFileRefusals` names in one error
+  each route.ts that cannot be its file: one at `/`, one with written
+  pathnames below it (a file cannot also be a directory), and one at a file
+  the build writes itself — a page's or a redirect's `index.html`, a page's
+  `index.rsc`, `404.html`, `sitemap.xml` under `site`, `_redirects` with
+  shells, `client-files.json`: those are written after the routes' files (a
+  page's beside them), so one would replace the other unseen. A file keeps
+  no type, so the `Content-Type` its
   `GET` answered is kept beside it — `StaticOutput.types`, by the file's path
   inside the client build — for the one adapter that can name a file's
   type; `serve`, `vite preview` and every other host go by the extension.
@@ -290,7 +290,7 @@ pnpm check         # check:write to auto-fix
   browser asks for it at a value's URL). Written always, before
   `_redirects`, whose built rules then list it among the files a shell
   rule would catch; it is a file the build writes itself, so a `route.ts`
-  there is refused (`takenFiles`). `src/documents.test.ts` holds the
+  there is refused (`routeFileRefusals`). `src/documents.test.ts` holds the
   computation, `src/static.test.ts` the wiring and the refusal, and
   `examples/static-basic`'s `build.test.ts` the built list and the site
   that reads it.
@@ -401,9 +401,9 @@ src/
                     shells and vite preview's static host
   paths.ts          patternsOf / patternsNeedingPaths / planPaths /
                     catchAllPatterns / catchAllPath / dirFor / isConcrete /
-                    answeredByRoute / shellPathname / shadowedShells /
-                    planRefusals — pure functions (supplied pathnames
-                    matched with URLPattern)
+                    fileAt / answersOf / shellPathname / shadowedShells /
+                    planRefusals / routeFileRefusals — pure functions
+                    (supplied pathnames matched with URLPattern)
   rewrites.ts       the _redirects rules: shellRules / builtRules /
                     formatRedirects / cloudflareCounts, and parseRedirects /
                     rewriteFor, which apply them — pure functions

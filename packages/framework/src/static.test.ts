@@ -322,6 +322,9 @@ const site = (extra: Record<string, Answer> = {}): Record<string, Answer> => ({
 const clientFile = (file: string): Promise<string> =>
   readFile(path.join(root, 'dist', 'client', file), 'utf8');
 
+const TAKEN =
+  'static build writes a route.ts as the file its GET answers, and these cannot be written — remove the route.ts, or what else is written there:';
+
 describe('the shells a build writes', () => {
   it('writes each shell’s HTML and payload under its shell pathname, and leaves it out of the sitemap', async () => {
     await routeFiles(POSTS);
@@ -430,7 +433,7 @@ describe('the shells a build writes', () => {
     await handlerAnswering(site());
 
     await expect(hooks().build()).rejects.toThrow(
-      'static build cannot write a route.ts as a file at /posts — /posts/!fallback is written below it, as a directory',
+      `${TAKEN}\n  posts: src/routes/posts/route.ts, and /posts/!fallback is written below it`,
     );
   });
 
@@ -507,9 +510,6 @@ describe('the shells a build writes', () => {
   });
 });
 
-const TAKEN =
-  'static build writes a file of its own where these route.ts files write theirs, and one would replace the other — remove the route.ts, or what else writes the file:';
-
 const home = (extra: Record<string, Answer> = {}): Record<string, Answer> => ({
   '/': { body: '<p>home</p>' },
   '/index.rsc': { body: 'home payload' },
@@ -546,6 +546,23 @@ describe('a route.ts at a file the build writes itself', () => {
         hooks({ paths: () => ['/posts/1', '/404.html'] }).build(),
       ).rejects.toThrow(
         `${TAKEN}\n  404.html: src/routes/[file]/route.ts, and src/routes/not-found.tsx is written there\n  _redirects: src/routes/_redirects/route.ts, and the shells of src/routes/posts/[id]/fallback.tsx are reached through it — rules of your own go in public/_redirects, which the build adds to its own`,
+      );
+    });
+
+    it('names in one error a route.ts at /, one with a page below it and one at a file the build writes', async () => {
+      await rm(path.join(root, 'src', 'routes', 'page.tsx'));
+      await routeFiles([
+        'route.ts',
+        'feed/route.ts',
+        'feed/latest/page.tsx',
+        'sitemap.xml/route.ts',
+      ]);
+      await handlerAnswering({});
+
+      await expect(
+        hooks({ site: 'https://example.com' }).build(),
+      ).rejects.toThrow(
+        `${TAKEN}\n  /: src/routes/route.ts, and a static host serves / from index.html\n  feed: src/routes/feed/route.ts, and /feed/latest is written below it\n  sitemap.xml: src/routes/sitemap.xml/route.ts, and the "site" option writes it`,
       );
     });
 
