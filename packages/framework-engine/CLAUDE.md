@@ -417,6 +417,29 @@ pnpm check         # check:write to auto-fix
   what a page waits for under a client component's `<Suspense>`, under an
   `error.tsx`, and in a prop never rendered; `runtime/form-state.test.ts`
   posts a form whose action returns a client component.
+- **A script in `<head>` comes before the stylesheets.** React writes what
+  it hoists into `<head>` — the stylesheets with a precedence, the
+  framework's ordering `<style>` among them — ahead of the head's own
+  children, so an inline script the root layout put there comes after
+  them. A script after a stylesheet waits for it to load, and the browser
+  may paint in between: on k8o.me a colour-scheme script so placed let 12
+  of 32 dark loads paint light first. `renderHtml` pipes React's stream
+  through `scriptsBeforeStylesheetsStream` (`runtime/head-scripts.ts`),
+  which holds the bytes until `</head>` has arrived, moves each inline
+  classic script of the head (no `src`, no `type`) ahead of the first
+  `<link rel="stylesheet">` or `<style>` there, in order, and passes the
+  rest on as it comes; a document that does not open with a `<head>` is
+  passed on from its first bytes. It reads the head as HTML is parsed —
+  what a `<script>`, `<style>`, `<noscript>`, `<template>`, `<title>` or
+  `<textarea>` holds is text, never an element of the head — so a
+  `</head>` in a script's text is not the end, and a stylesheet inside a
+  `<noscript>` is not one. Hydration finds a moved script, since React
+  hydrates `<head>` skipping what it does not expect; under static mode
+  the policy's `<meta>`, which `@k8ordo/framework` puts right after
+  `<head>` later, still comes first. `runtime/head-scripts.test.ts` holds
+  the reading on strings and split streams, and builds
+  `fixtures/head-scripts/`, whose layout's script runs in every engine
+  while the stylesheet is held back, and hydrates with nothing reported.
 - **A static page's HTML says which client components its payload named.**
   What the RSC render kept for the HTML render to link (above), the HTML
   answer says in `CLIENT_DEPS_HEADER`, and the framework's build checks the
@@ -650,7 +673,7 @@ pnpm check         # check:write to auto-fix
   `rsc-html-stream` (the payload written into the HTML). `nonce()` reads it
   in every phase, the render included — signing a script is not writing the
   response — so a guard names it in the header it writes and a layout signs
-  a script of its own (`<ColorSchemeProvider nonce>`). Under
+  a script of its own (`<ColorSchemeScript nonce>`). Under
   static mode the HTML also says it in `NONCE_HEADER`, and the build
   takes it off the file and names what it signed by hash; static mode refuses
   `@k8ordo/framework/server` and with it `nonce()`, since what an application signed with it would land
@@ -775,6 +798,7 @@ src/
   runtime/prefetch.ts        which link to fetch ahead (on intent, and on screen), and how long a fetched page stays usable
   runtime/client-files.ts    a static build's list of each page's client files, linked ahead of its payload
   runtime/revealed.ts        when every streamed boundary is on screen
+  runtime/head-scripts.ts    the head's inline scripts, moved ahead of its stylesheets
   runtime/client-ready.ts    when the client components a payload's trees name have loaded
   runtime/recover.tsx        a failed client render falls back to a document load
   runtime/reload.ts          location.reload, the one seam a test can watch
@@ -850,6 +874,9 @@ fixtures/
   form-state/routes/         a form whose Server Action returns a client
                              component, which runtime/form-state.test.ts
                              posts without JavaScript
+  head-scripts/routes/       a layout writing an inline script in <head> and
+                             importing CSS, which runtime/head-scripts.test.ts
+                             opens in each engine with the CSS held back
 ```
 
 ## Conventions

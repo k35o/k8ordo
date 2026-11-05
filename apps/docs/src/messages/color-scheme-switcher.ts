@@ -86,8 +86,8 @@ export const defaultTitle = message({
 });
 
 export const defaultProp = message({
-  ja: "何も選んでいない訪問者に出す配色は、プロバイダの`defaultPreference`で決めます。省略すると`'system'`で、OSの設定に従います。",
-  en: "What a visitor who chose nothing gets is the provider’s `defaultPreference`. Left out, it is `'system'`, which follows the OS setting.",
+  ja: "何も選んでいない訪問者に出す配色は、`defaultPreference`で決めます。最初の描画の前は`ColorSchemeScript`が、ハイドレーションのあとはプロバイダが使うので、2つに同じ値を渡します。省略すると`'system'`で、OSの設定に従います。",
+  en: "What a visitor who chose nothing gets is the `defaultPreference`. `ColorSchemeScript` applies it before the first paint and the provider after hydration, so give both the same value. Left out, it is `'system'`, which follows the OS setting.",
 });
 
 export const defaultNotStored = message({

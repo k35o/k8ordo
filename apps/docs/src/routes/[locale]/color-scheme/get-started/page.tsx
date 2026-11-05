@@ -10,7 +10,10 @@ import * as m from '../../../../messages';
 
 const t = m.colorSchemeGetStarted;
 
-const LAYOUT = `import { ColorSchemeProvider } from '@k8ordo/color-scheme';
+const LAYOUT = `import {
+  ColorSchemeProvider,
+  ColorSchemeScript,
+} from '@k8ordo/color-scheme';
 import type { ReactNode } from 'react';
 
 export default function RootLayout({
@@ -20,6 +23,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <ColorSchemeScript />
+      </head>
       <body>
         <ColorSchemeProvider>{children}</ColorSchemeProvider>
       </body>
@@ -86,12 +92,13 @@ export default function ColorSchemeGetStartedPage() {
       <DocSection id="provider" title={t.providerTitle}>
         <CodeBlock
           callouts={{
-            10: t.providerSuppressCallout(),
-            12: t.providerWrapCallout(),
+            13: t.providerSuppressCallout(),
+            15: t.providerScriptCallout(),
+            18: t.providerWrapCallout(),
           }}
           code={LAYOUT}
           lang="tsx"
-          marks={{ 10: 'highlight', 12: 'highlight' }}
+          marks={{ 13: 'highlight', 15: 'highlight', 18: 'highlight' }}
           title="src/routes/layout.tsx"
         />
         <p>
@@ -103,6 +110,11 @@ export default function ColorSchemeGetStartedPage() {
         <p>
           <Rich>{t.providerSuppress()}</Rich>
         </p>
+        <Note>
+          <p>
+            <Rich>{t.providerOrder()}</Rich>
+          </p>
+        </Note>
       </DocSection>
 
       <DocSection id="color" title={t.colorTitle}>

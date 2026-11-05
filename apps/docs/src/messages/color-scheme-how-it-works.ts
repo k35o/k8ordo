@@ -51,8 +51,8 @@ export const readersScript = message({
 });
 
 export const readersScriptDefault = message({
-  ja: 'プロバイダの既定値がここに入る',
-  en: 'The provider’s default goes here',
+  ja: '`defaultPreference`の値がここに入る',
+  en: 'The `defaultPreference` goes here',
 });
 
 export const readersWhy = message({
@@ -65,22 +65,27 @@ export const readersHand = message({
   en: 'The script cannot use the schema, so it checks the stored value by hand and gets the same result as the store. `colorSchemeState.inlineRead()` builds the expression that reads the stored value, taking the key and shape from the `@k8ordo/state` definition.',
 });
 
-export const firstChildTitle = message({
+export const positionTitle = message({
   ja: 'スクリプトの位置',
   en: 'Script position',
 });
 
-export const firstChildOrder = message({
-  ja: 'プロバイダは、受け取った`children`より前に`<script>`を描画します。ブラウザはHTMLを読み進めて`<script>`に着いた時点で実行するので、ページの中身より先に`<html>`へクラスが付きます。',
-  en: 'The provider renders the `<script>` before the `children` it receives. The browser runs a `<script>` as soon as the parser reaches it, so the class is on `<html>` before the page’s content.',
+export const positionScriptCallout = message({
+  ja: 'どのスタイルシートよりも前',
+  en: 'Ahead of every stylesheet',
 });
 
-export const firstChildBody = message({
-  ja: 'プロバイダより前にある要素は、クラスが付く前に描画されることがあります。プロバイダをルートレイアウトの`<body>`の中に置き、ページ全体を包むのはこのためです。',
-  en: 'Anything before the provider may be painted before the class is on. That is why the provider goes inside `<body>` in the root layout, around the whole page.',
+export const positionOrder = message({
+  ja: 'ブラウザは、HTMLを読み進めて`<script>`に着いた時点でそれを実行します。ただし、前にスタイルシートがあると、その読み込みが終わるまで待ちます。待つ間にブラウザが描画すると、ダークの訪問者にもライトの画面が見えます。',
+  en: 'The browser runs a `<script>` as soon as the parser reaches it, unless a stylesheet comes before it. Then the script waits for that stylesheet to load. If the browser paints while it waits, a dark visitor sees a light page.',
 });
 
-export const firstChildHydration = message({
+export const positionHead = message({
+  ja: '`ColorSchemeScript`を`<head>`に置くのは、どのスタイルシートよりも前で実行するためです。Reactは、持ち上げたスタイルシートを`<head>`の中でレイアウトの子より前に書きます。`@k8ordo/framework`は、`<head>`のインラインスクリプトをそのスタイルシートの前へ移します。上は、そうして送られる`<head>`です。',
+  en: '`ColorSchemeScript` goes in `<head>` so that it runs ahead of every stylesheet. React writes the stylesheets it hoists into `<head>` before the layout’s own children, and `@k8ordo/framework` moves the head’s inline scripts in front of them. Above is the `<head>` that is then sent.',
+});
+
+export const positionHydration = message({
   ja: 'ハイドレーションのとき、Reactはこの`<script>`要素をそのまま引き継ぎ、もう一度は実行しません。',
   en: 'On hydration React adopts the `<script>` element in place and does not run it again.',
 });
@@ -170,8 +175,8 @@ export const guaranteesTitle = message({
 });
 
 export const guaranteeFirstPaint = message({
-  ja: 'インラインスクリプトが実行できれば、プロバイダの中身は`<html>`の`dark`クラスが決まった配色どおりになってから描画されます。',
-  en: 'When the inline script may run, the provider’s content is painted after the `dark` class on `<html>` matches the decided scheme.',
+  ja: 'インラインスクリプトがスタイルシートより前で実行できれば、ページは`<html>`の`dark`クラスが決まった配色どおりになってから描画されます。',
+  en: 'When the inline script may run, ahead of the stylesheets, the page is painted after the `dark` class on `<html>` matches the decided scheme.',
 });
 
 export const guaranteeSameRule = message({
@@ -219,9 +224,19 @@ export const nonGuaranteeCsp = message({
   en: 'If a CSP blocks the inline script, `<html>` gets no `dark` class until hydration. The application puts the nonce or the hash in its policy.',
 });
 
+export const nonGuaranteePosition = message({
+  ja: 'スクリプトをスタイルシートより前に置くのは、HTMLを書く側です。`@k8ordo/framework`はそうしますが、ほかの仕組みでは送られるHTMLで確かめます。',
+  en: 'Putting the script ahead of the stylesheets is up to whatever writes the HTML. `@k8ordo/framework` does; elsewhere, check the HTML as sent.',
+});
+
+export const nonGuaranteeSameDefault = message({
+  ja: '`ColorSchemeScript`とプロバイダに同じ`defaultPreference`を渡したかは確かめません。違うと、何も選んでいない訪問者の配色がハイドレーションのあとで切り替わります。',
+  en: 'Nothing checks that `ColorSchemeScript` and the provider are given the same `defaultPreference`. If they differ, a visitor who chose nothing sees the scheme change after hydration.',
+});
+
 export const nonGuaranteeTwoProviders = message({
-  ja: 'プロバイダが2つあると、それぞれがスクリプトを出力してクラスを書きます。`defaultPreference`が違えば、配色が食い違います。',
-  en: 'With two providers, each outputs its own script and writes the class. If their `defaultPreference` values differ, they disagree.',
+  ja: 'プロバイダが2つあると、それぞれがクラスを書きます。`defaultPreference`が違えば、配色が食い違います。',
+  en: 'With two providers, each writes the class. If their `defaultPreference` values differ, they disagree.',
 });
 
 export const nonGuaranteeSameTab = message({

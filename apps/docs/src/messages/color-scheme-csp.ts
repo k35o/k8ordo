@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'プロバイダは最初の描画の前にインラインスクリプトを実行します。Content-Security-Policy（CSP）の下では、nonceかハッシュをポリシーに書いて許可します。',
-  en: 'The provider runs an inline script before the first paint. Allow it under a Content-Security-Policy (CSP) with a nonce or a hash.',
+  ja: '`ColorSchemeScript`は、最初の描画の前にインラインスクリプトを実行します。Content-Security-Policy（CSP）の下では、nonceかハッシュをポリシーに書いて許可します。',
+  en: '`ColorSchemeScript` runs an inline script before the first paint. Allow it under a Content-Security-Policy (CSP) with a nonce or a hash.',
 });
 
 export const blockedTitle = message({
@@ -36,8 +36,8 @@ export const nonceCallout = message({
 });
 
 export const nonceProp = message({
-  ja: "ポリシーに書いたnonceを、プロバイダの`nonce` propに渡します。スクリプトの`nonce`属性にその値が付き、`script-src 'nonce-…'`の下で実行されます。",
-  en: "Pass the nonce the policy names to the provider’s `nonce` prop. The script gets it as its `nonce` attribute and runs under `script-src 'nonce-…'`.",
+  ja: "ポリシーに書いたnonceを、`ColorSchemeScript`の`nonce` propに渡します。スクリプトの`nonce`属性にその値が付き、`script-src 'nonce-…'`の下で実行されます。",
+  en: "Pass the nonce the policy names to `ColorSchemeScript`’s `nonce` prop. The script gets it as its `nonce` attribute and runs under `script-src 'nonce-…'`.",
 });
 
 export const nonceServerBefore = message({
@@ -81,8 +81,8 @@ export const defaultTitle = message({
 });
 
 export const defaultSame = message({
-  ja: 'スクリプトの文字列にはプロバイダの既定値が入るので、ハッシュは既定値ごとに違います。プロバイダに`defaultPreference`を渡しているなら、`colorSchemeScriptHash()`にも同じ値を渡します。',
-  en: 'The provider’s default is written into the script, so each default gives a different hash. When the provider is given a `defaultPreference`, give `colorSchemeScriptHash()` the same value.',
+  ja: 'スクリプトの文字列には既定値が入るので、ハッシュは既定値ごとに違います。`ColorSchemeScript`に`defaultPreference`を渡しているなら、`colorSchemeScriptHash()`にも同じ値を渡します。',
+  en: 'The default is written into the script, so each default gives a different hash. When `ColorSchemeScript` is given a `defaultPreference`, give `colorSchemeScriptHash()` the same value.',
 });
 
 export const defaultNonce = message({

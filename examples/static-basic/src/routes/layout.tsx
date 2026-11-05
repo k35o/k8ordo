@@ -1,4 +1,4 @@
-import { ColorSchemeProvider } from '@k8ordo/color-scheme';
+import { ColorSchemeProvider, ColorSchemeScript } from '@k8ordo/color-scheme';
 import { href } from '@k8ordo/framework';
 import type { LayoutProps } from '@k8ordo/framework';
 
@@ -18,9 +18,10 @@ export default function RootLayout({ children, pathname }: LayoutProps<'/'>) {
     >
       <head>
         <meta charSet="utf-8" />
+        {/* このインラインスクリプトは、ハッシュを vite.config.ts の csp で許す */}
+        <ColorSchemeScript />
       </head>
       <body>
-        {/* このインラインスクリプトは、ハッシュを vite.config.ts の csp で許す */}
         <ColorSchemeProvider>
           <nav>
             {/* Navigation API の下では素の <a> がそのままクライアント遷移 */}

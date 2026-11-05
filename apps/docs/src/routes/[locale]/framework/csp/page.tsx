@@ -56,7 +56,10 @@ export default function guard() {
   responseHeaders().set('content-security-policy', policy);
 }`;
 
-const LAYOUT = `import { ColorSchemeProvider } from '@k8ordo/color-scheme';
+const LAYOUT = `import {
+  ColorSchemeProvider,
+  ColorSchemeScript,
+} from '@k8ordo/color-scheme';
 import { nonce } from '@k8ordo/framework/server';
 import type { ReactNode } from 'react';
 
@@ -67,10 +70,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <ColorSchemeScript nonce={nonce()} />
+      </head>
       <body>
-        <ColorSchemeProvider nonce={nonce()}>
-          {children}
-        </ColorSchemeProvider>
+        <ColorSchemeProvider>{children}</ColorSchemeProvider>
       </body>
     </html>
   );
@@ -189,7 +193,7 @@ export default function FrameworkCspPage() {
           <CodeBlock
             code={LAYOUT}
             lang="tsx"
-            marks={{ 13: 'highlight' }}
+            marks={{ 16: 'highlight' }}
             title="src/routes/layout.tsx"
           />
           <p>

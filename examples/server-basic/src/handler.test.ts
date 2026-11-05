@@ -565,6 +565,16 @@ describe('a Content-Security-Policy with a nonce', () => {
     },
   );
 
+  it('writes the colour-scheme script ahead of every stylesheet in <head>', async () => {
+    const html = await (await handler(new Request(`${ORIGIN}/`))).text();
+    const script = html.indexOf('k8ordo-state:color-scheme');
+
+    expect(script).toBeGreaterThan(-1);
+    expect(html.indexOf('</head>')).toBeGreaterThan(script);
+    // スタイルシートより後ろだと、それが届くまで動かず、その間に描かれる
+    expect(html.indexOf('<style')).toBeGreaterThan(script);
+  });
+
   it('signs each answer with a nonce of its own', async () => {
     const [first, second] = await Promise.all([
       handler(new Request(`${ORIGIN}/`)),

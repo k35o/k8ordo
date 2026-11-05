@@ -8,9 +8,10 @@ the first in localStorage (through `@k8ordo/state`), reads the second from
 `prefers-color-scheme`, and resolves both into the third — the `dark` class
 on `<html>`, which `@k8ordo/ui`'s tokens read, and Tailwind's `dark:` too
 once the stylesheet declares `@custom-variant dark (&:where(.dark, .dark *));`
-(`@k8ordo/ui/tailwind.css` already does). One provider does all of it: it
-renders the inline script that puts the class there before the first paint,
-keeps it right after hydration, and hands a hook what it reads.
+(`@k8ordo/ui/tailwind.css` already does). Two pieces do it:
+`<ColorSchemeScript>`, an inline script in `<head>`, puts the class there
+before the first paint, and `<ColorSchemeProvider>` keeps it right after
+hydration and hands a hook what it reads.
 
 Like every k8ordo package it assumes React 19 and Server Components, uses
 only what has reached Baseline newly available, and ships no polyfills or
@@ -43,26 +44,29 @@ legacy fallbacks.
 ## The shape of it
 
 ```
-routes/layout.tsx   <body><ColorSchemeProvider>{children}</ColorSchemeProvider></body>
-                        │ renders <script> first → class on <html> before the first paint
+routes/layout.tsx   <head><ColorSchemeScript /></head>
+                        │ runs before the stylesheets → class on <html> before the first paint
+                    <body><ColorSchemeProvider>{children}</ColorSchemeProvider></body>
                         │ reads the store + the system → keeps the class in step
 components          useColorScheme() → { scheme, preference, setPreference }
 ```
 
 ## Setup
 
-The provider goes in the root layout — a Server Component — inside `<body>`
-and around everything, so the script it renders comes before anything the
-page paints:
+Both go in the root layout — a Server Component: the script in `<head>`,
+and the provider inside `<body>`, around everything:
 
 ```tsx
 // src/routes/layout.tsx
-import { ColorSchemeProvider } from '@k8ordo/color-scheme';
+import { ColorSchemeProvider, ColorSchemeScript } from '@k8ordo/color-scheme';
 import type { ReactNode } from 'react';
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <ColorSchemeScript />
+      </head>
       <body>
         <ColorSchemeProvider>{children}</ColorSchemeProvider>
       </body>
@@ -74,33 +78,46 @@ export default function RootLayout({ children }: { children: ReactNode }) {
 `suppressHydrationWarning` on `<html>`, because the script adds a class the
 server did not render — that difference is the point, not a mistake.
 
+The script has to come before every stylesheet in the HTML as sent. A
+script after a stylesheet waits for it to load, and the browser may paint
+the page in the meantime — light, for a visitor who gets dark. React writes
+the stylesheets it hoists into `<head>` ahead of what the layout put there,
+and `@k8ordo/framework` moves the inline scripts of the `<head>` back in
+front of them, so under the framework the layout above is all it takes.
+Without the framework, check the HTML your server sends: the script has to
+come before the first `<link rel="stylesheet">` and `<style>`.
+
 Nothing else is required: the first paint is right, and a visitor who
 never chooses follows the system, in either direction, for as long as the
-page is open. To start every visitor somewhere other than the system, say
-so once: `<ColorSchemeProvider defaultPreference="dark">`.
+page is open. To start every visitor somewhere other than the system, give
+both the same default: `<ColorSchemeScript defaultPreference="dark" />` and
+`<ColorSchemeProvider defaultPreference="dark">`. The script applies it
+before the first paint and the provider after hydration; told different
+defaults, a visitor who never chose sees the scheme change as the page
+hydrates.
 
 ### Under a Content-Security-Policy
 
-The script is inline, so a policy that restricts scripts has to allow it,
-by nonce or by hash. Blocked, it costs the first paint and nothing else: the
-provider's effect still writes the class after hydration, but until then
-`<html>` has no `dark` class and the page is painted light, so a visitor who
-gets dark — by choice or by a `'dark'` default — sees the flash the script
-exists to prevent. Do not reach for `'unsafe-inline'`, which allows
-every inline script that reaches the page; name this one.
+`ColorSchemeScript` is an inline script, so a policy that restricts scripts
+has to allow it, by nonce or by hash. Blocked, it costs the first paint and
+nothing else: the provider's effect still writes the class after hydration,
+but until then `<html>` has no `dark` class and the page is painted light,
+so a visitor who gets dark — by choice or by a `'dark'` default — sees the
+flash the script exists to prevent. Do not reach for `'unsafe-inline'`,
+which allows every inline script that reaches the page; name this one.
 
 `nonce` puts the answer's nonce on it — in `@k8ordo/framework`'s server
 mode, `nonce()` from `@k8ordo/framework/server`, which the render may read
 (signing a script is not writing the response):
 
 ```tsx
-<ColorSchemeProvider nonce={nonce()}>{children}</ColorSchemeProvider>
+<ColorSchemeScript nonce={nonce()} />
 ```
 
 `colorSchemeScriptHash(defaultPreference?)` resolves to its hash as a CSP
 source, `'sha256-…'`, for a policy that allows it by what it is — the
 `csp` option of its static mode, whose files cannot carry a nonce, or a
-header that names none. Pass it the `defaultPreference` the provider is
+header that names none. Pass it the `defaultPreference` the script is
 given: the script carries it, so the hash depends on it.
 
 ```ts
@@ -188,9 +205,11 @@ every visitor who never chose.
 ## What it guarantees
 
 - **No flash.** The script runs before the first paint and reads the same
-  row the provider writes; a dark page loads dark. It is an inline script,
-  so a Content-Security-Policy that restricts scripts has to allow it (see
-  "Under a Content-Security-Policy").
+  row the provider writes; a dark page loads dark. That holds while the
+  script comes before every stylesheet in the HTML as sent, which
+  `@k8ordo/framework` ensures for a script in the root layout's `<head>`
+  (see "Setup"). It is an inline script, so a Content-Security-Policy that
+  restricts scripts has to allow it (see "Under a Content-Security-Policy").
 - **Nothing chosen follows the default, and a `'system'` default follows
   the system.** A visitor who never chose is never pinned to what the
   system said on their first visit, and a row that is not a JSON object, or
@@ -219,8 +238,8 @@ every visitor who never chose.
 
 Under a browser, `localStorage.clear()`, remove the class from
 `document.documentElement`, and `resetStateRegistry()` from `@k8ordo/state`
-between tests; render the hook under `<ColorSchemeProvider>` (a `wrapper`).
-A client-only mount does not run the script the provider renders: React
-never executes an inline `<script>` it creates in the browser (in
-development it logs an error saying so), so the class a test sees is the
-one the provider's effect wrote.
+between tests; render the hook under `<ColorSchemeProvider>` (a `wrapper`),
+and leave `ColorSchemeScript` out: React never executes an inline
+`<script>` it creates in the browser (in development it logs an error
+saying so), so the class a test sees is the one the provider's effect
+wrote.

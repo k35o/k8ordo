@@ -2,27 +2,48 @@ import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
   ja: '`@k8ordo/color-scheme`がexportするコンポーネントとフック、値、型の一覧です。',
-  en: 'Everything `@k8ordo/color-scheme` exports: the component, the hook, values and types.',
+  en: 'Everything `@k8ordo/color-scheme` exports: the components, the hook, values and types.',
 });
 
+export const scriptSummary = message({
+  ja: '最初の描画の前に`<html>`へ`dark`クラスを付けるインラインスクリプトです。ルートレイアウトの`<head>`に置きます。',
+  en: 'The inline script that puts `dark` on `<html>` before the first paint. It goes in the root layout’s `<head>`.',
+});
+
+export const scriptDefault = message({
+  ja: '何も選んでいない訪問者に、最初の描画で適用する値です。プロバイダの`defaultPreference`と同じ値を渡します。',
+  en: 'What applies to a visitor who has chosen nothing, at the first paint. Pass the same value as the provider’s `defaultPreference`.',
+});
+
+export const scriptNonce = message({
+  ja: 'スクリプトに付けるnonceです。`@k8ordo/framework`のserverモードでは`nonce()`を渡します。ハッシュで許可するときは省略します。',
+  en: 'The nonce to put on the script. In `@k8ordo/framework`’s server mode, pass `nonce()`. Leave it out when the script is allowed by hash.',
+});
+
+export const scriptCaveats = [
+  message({
+    ja: 'ディレクティブの無いモジュールからexportしているので、Server Componentのルートレイアウトでそのまま描画します。',
+    en: 'It is exported from a module with no directive, so a root layout that is a Server Component renders it as it is.',
+  }),
+  message({
+    ja: 'どのスタイルシートよりも前に置きます。`@k8ordo/framework`は、`<head>`に書いたインラインスクリプトをスタイルシートより前へ移します。',
+    en: 'It has to come before every stylesheet. `@k8ordo/framework` moves the inline scripts written in `<head>` ahead of the stylesheets.',
+  }),
+] as const;
+
 export const providerSummary = message({
-  ja: 'ページ全体を包むプロバイダです。ルートレイアウトの`<body>`の中に置きます。最初の描画の前に`<html>`へ`dark`クラスを付けるインラインスクリプトを描画します。その後の変更でもクラスを更新します。',
-  en: 'The provider that wraps the whole page. It goes in the root layout, inside `<body>`. It renders the inline script that puts `dark` on `<html>` before the first paint. It keeps the class updated after that.',
+  ja: 'ページ全体を包むプロバイダです。ルートレイアウトの`<body>`の中に置きます。ハイドレーションのあと、保存した選択やOSの設定が変わるたびに`<html>`の`dark`クラスを更新します。',
+  en: 'The provider that wraps the whole page. It goes in the root layout, inside `<body>`. After hydration it updates `dark` on `<html>` whenever the stored choice or the OS setting changes.',
 });
 
 export const providerDefault = message({
-  ja: "何も選んでいない訪問者に適用する値です。`'system'`ならOSの設定に従います。`'light'`か`'dark'`なら、訪問者が選ぶまでその配色になります。",
-  en: "What applies to a visitor who has chosen nothing. `'system'` follows the OS setting. `'light'` or `'dark'` keeps every visitor on that scheme until they choose.",
-});
-
-export const providerNonce = message({
-  ja: 'インラインスクリプトに付けるnonceです。`@k8ordo/framework`のserverモードでは`nonce()`を渡します。ハッシュで許可するときは省略します。',
-  en: 'The nonce to put on the inline script. In `@k8ordo/framework`’s server mode, pass `nonce()`. Leave it out when the script is allowed by hash.',
+  ja: "何も選んでいない訪問者に適用する値です。`'system'`ならOSの設定に従います。`'light'`か`'dark'`なら、訪問者が選ぶまでその配色になります。`ColorSchemeScript`にも同じ値を渡します。",
+  en: "What applies to a visitor who has chosen nothing. `'system'` follows the OS setting. `'light'` or `'dark'` keeps every visitor on that scheme until they choose. Give `ColorSchemeScript` the same value.",
 });
 
 export const providerChildren = message({
-  ja: 'ページ全体です。スクリプトはこれより前に描画されます。',
-  en: 'The whole page. The script is rendered before it.',
+  ja: 'ページ全体です。',
+  en: 'The whole page.',
 });
 
 export const providerCaveats = [
@@ -35,8 +56,8 @@ export const providerCaveats = [
     en: 'Put `suppressHydrationWarning` on `<html>`. The `class` the script adds is not in the server HTML, and React reports it as a mismatch in development.',
   }),
   message({
-    ja: 'アプリに1つだけ置きます。2つあると、それぞれがスクリプトを出力してクラスを付けるので、結果が食い違うことがあります。',
-    en: 'Put exactly one in the application. With two, each outputs its own script and writes the class, and they can disagree.',
+    ja: 'アプリに1つだけ置きます。2つあると、それぞれがクラスを付けるので、結果が食い違うことがあります。',
+    en: 'Put exactly one in the application. With two, each writes the class, and they can disagree.',
   }),
 ] as const;
 
@@ -136,13 +157,13 @@ export const stateCaveats = [
 ] as const;
 
 export const hashSummary = message({
-  ja: "プロバイダが描画するインラインスクリプトのSHA-256を、CSPのソースの形（`'sha256-…'`）で返します。nonceを使わずにスクリプトを許可するポリシーに入れます。",
-  en: "Resolves to the SHA-256 of the provider’s inline script as a CSP source, `'sha256-…'`. Put it in a policy that allows the script without a nonce.",
+  ja: "`ColorSchemeScript`が描画するインラインスクリプトのSHA-256を、CSPのソースの形（`'sha256-…'`）で返します。nonceを使わずにスクリプトを許可するポリシーに入れます。",
+  en: "Resolves to the SHA-256 of `ColorSchemeScript`’s inline script as a CSP source, `'sha256-…'`. Put it in a policy that allows the script without a nonce.",
 });
 
 export const hashDefault = message({
-  ja: 'プロバイダに渡している`defaultPreference`です。既定値はスクリプトの文字列に入るので、この値でハッシュが変わります。',
-  en: 'The `defaultPreference` the provider is given. The default is written into the script, so the hash depends on it.',
+  ja: '`ColorSchemeScript`に渡している`defaultPreference`です。既定値はスクリプトの文字列に入るので、この値でハッシュが変わります。',
+  en: 'The `defaultPreference` `ColorSchemeScript` is given. The default is written into the script, so the hash depends on it.',
 });
 
 export const hashReturns = message({
@@ -184,6 +205,11 @@ export const preferenceSummary = message({
 export const providerPropsSummary = message({
   ja: '`ColorSchemeProvider`のpropsの型です。プロバイダを包むコンポーネントを自分で作るときに使います。',
   en: 'The props of `ColorSchemeProvider`. Use it for a component of your own that wraps the provider.',
+});
+
+export const scriptPropsSummary = message({
+  ja: '`ColorSchemeScript`のpropsの型です。スクリプトを包むコンポーネントを自分で作るときに使います。',
+  en: 'The props of `ColorSchemeScript`. Use it for a component of your own that wraps the script.',
 });
 
 export const hookTypeSummary = message({

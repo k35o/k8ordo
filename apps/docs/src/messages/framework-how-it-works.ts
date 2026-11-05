@@ -142,6 +142,10 @@ export const guaranteesList = [
     ja: '`<head>`では、Server ComponentのCSSがClient ComponentのCSSより前に並び、その先頭はルートレイアウトのCSSです。文書として開いたときも、クライアント側の遷移で移ったときも、serverモードでシェルのあとに流れる部分でも同じです。',
     en: 'In `<head>`, the Server Components’ CSS comes before the Client Components’ CSS, the root layout’s first. That holds for a page loaded as a document, one reached by a client navigation, and what streams after the shell under server mode.',
   }),
+  message({
+    ja: '`<head>`に書いたインラインスクリプトのうち`src`も`type`も無いものは、そこのどのスタイルシートよりも前に移します。書いた順は変えません。どちらのモードでも、`vite dev`でも同じです。',
+    en: 'An inline script written in `<head>` with no `src` and no `type` is moved ahead of every stylesheet there, in the order it was written. That holds under either mode and under `vite dev`.',
+  }),
 ] as const;
 
 export const nonGuaranteesTitle = message({

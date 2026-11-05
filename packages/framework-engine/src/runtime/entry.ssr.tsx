@@ -13,6 +13,7 @@ import { AppRouter } from './app-router';
 import { noticeCancel } from './cancel';
 import { whenClientReady } from './client-ready';
 import { DocumentRoot } from './document-root';
+import { scriptsBeforeStylesheetsStream } from './head-scripts';
 import { PageShownContext } from './page-shown';
 import type { ClientDeps, Payload } from './payload';
 
@@ -171,7 +172,13 @@ export async function renderHtml(
     ]);
   }
   return noticeCancel(
-    htmlStream.pipeThrough(injectRSCPayload(forHydration, { nonce })),
+    htmlStream
+      // React は head に、持ち上げた stylesheet を先に、レイアウトの子を後ろに
+      // 書く。stylesheet の後ろのインラインスクリプトはその読み込みを待ち、
+      // その間にブラウザが描くことがあるので、レイアウトが head に書いたものを
+      // 前へ移す
+      .pipeThrough(scriptsBeforeStylesheetsStream())
+      .pipeThrough(injectRSCPayload(forHydration, { nonce })),
     () => {
       readerLeft = true;
     },

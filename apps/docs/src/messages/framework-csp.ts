@@ -66,8 +66,8 @@ export const ownHash = message({
 });
 
 export const ownPreference = message({
-  ja: '`ColorSchemeProvider`に`defaultPreference`を渡しているときは、`colorSchemeScriptHash()`にも同じ値を渡します。`defaultPreference`の値でスクリプトの中身とハッシュが変わります。',
-  en: 'If `ColorSchemeProvider` is given a `defaultPreference`, pass the same value to `colorSchemeScriptHash()`. The value changes the script and its hash.',
+  ja: '`ColorSchemeScript`に`defaultPreference`を渡しているときは、`colorSchemeScriptHash()`にも同じ値を渡します。`defaultPreference`の値でスクリプトの中身とハッシュが変わります。',
+  en: 'If `ColorSchemeScript` is given a `defaultPreference`, pass the same value to `colorSchemeScriptHash()`. The value changes the script and its hash.',
 });
 
 export const ownRefused = message({
@@ -151,8 +151,8 @@ export const signTitle = message({
 });
 
 export const signProvider = message({
-  ja: 'アプリ自身のインラインスクリプトには、同じnonceを付けます。`@k8ordo/color-scheme`なら、ルートレイアウトで`ColorSchemeProvider`に`nonce={nonce()}`を渡します。',
-  en: 'The application’s own inline scripts carry the same nonce. For `@k8ordo/color-scheme`, pass `nonce={nonce()}` to `ColorSchemeProvider` in the root layout.',
+  ja: 'アプリ自身のインラインスクリプトには、同じnonceを付けます。`@k8ordo/color-scheme`なら、ルートレイアウトの`<head>`で`ColorSchemeScript`に`nonce={nonce()}`を渡します。',
+  en: 'The application’s own inline scripts carry the same nonce. For `@k8ordo/color-scheme`, pass `nonce={nonce()}` to `ColorSchemeScript` in the root layout’s `<head>`.',
 });
 
 export const signStyle = message({

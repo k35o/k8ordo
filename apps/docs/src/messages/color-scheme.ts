@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const description = message({
-  ja: '訪問者が選んだ配色をlocalStorageに保存し、OSの設定と合わせて`<html>`の`dark`クラスに反映するReactのダークモードです。ルートレイアウトに置く1つのプロバイダが、最初の描画の前に`dark`クラスを付けます。その後もOSの設定や保存した選択が変わると、クラスを更新します。',
-  en: 'React dark mode that stores the visitor’s choice in localStorage, resolves it against the OS setting, and puts the `dark` class on `<html>`. One provider in the root layout sets the `dark` class before the first paint, then updates it when the OS setting or the saved preference changes.',
+  ja: '訪問者が選んだ配色をlocalStorageに保存し、OSの設定と合わせて`<html>`の`dark`クラスに反映するReactのダークモードです。ルートレイアウトの`<head>`に置くスクリプトが、最初の描画の前に`dark`クラスを付けます。そのあとはプロバイダが、OSの設定や保存した選択の変化に合わせてクラスを更新します。',
+  en: 'React dark mode that stores the visitor’s choice in localStorage, resolves it against the OS setting, and puts the `dark` class on `<html>`. A script in the root layout’s `<head>` sets the `dark` class before the first paint, and a provider updates it when the OS setting or the saved preference changes.',
 });
 
 export const tagline = message({
@@ -17,8 +17,8 @@ export const claimNoFlashTitle = message({
 
 export const claimNoFlashBody = [
   message({
-    ja: 'プロバイダは、子要素より前にインラインスクリプトを出力します。このスクリプトが、保存した選択を読み、最初の描画の前に`<html>`へ`dark`クラスを付けます。',
-    en: 'The provider outputs an inline script ahead of its children. The script reads the saved preference and puts the `dark` class on `<html>` before the first paint.',
+    ja: '`<ColorSchemeScript>`は、`<head>`に置くインラインスクリプトです。保存した選択を読み、最初の描画の前に`<html>`へ`dark`クラスを付けます。',
+    en: '`<ColorSchemeScript>` is an inline script you put in `<head>`. It reads the saved preference and puts the `dark` class on `<html>` before the first paint.',
   }),
   message({
     ja: '何も選んでいない訪問者には、OSの設定に合わせた配色が出ます。',
@@ -33,8 +33,8 @@ export const claimCspTitle = message({
 
 export const claimCspBody = [
   message({
-    ja: "インラインスクリプトは、プロバイダに渡す`nonce`か、スクリプトのハッシュでCSPに許可させます。`'unsafe-inline'`は要りません。",
-    en: "A CSP can allow the inline script by the `nonce` you pass to the provider or by the script’s hash. No `'unsafe-inline'` is needed.",
+    ja: "インラインスクリプトは、`ColorSchemeScript`に渡す`nonce`か、スクリプトのハッシュでCSPに許可させます。`'unsafe-inline'`は要りません。",
+    en: "A CSP can allow the inline script by the `nonce` you pass to `ColorSchemeScript` or by the script’s hash. No `'unsafe-inline'` is needed.",
   }),
   message({
     ja: '`colorSchemeScriptHash()`は、インストールしたバージョンのスクリプトからハッシュを計算します。ポリシーを書く場所で毎回呼べば、更新しても古い値が残りません。',

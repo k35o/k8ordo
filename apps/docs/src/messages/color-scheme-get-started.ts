@@ -21,13 +21,18 @@ export const installStateAfter = message({
 });
 
 export const providerTitle = message({
-  ja: 'プロバイダの配置',
-  en: 'Placing the provider',
+  ja: 'レイアウトへの配置',
+  en: 'In the root layout',
 });
 
 export const providerSuppressCallout = message({
   ja: 'スクリプトが付けるクラスについての警告を止める',
   en: 'Silences the warning about the class the script adds',
+});
+
+export const providerScriptCallout = message({
+  ja: '最初の描画の前にクラスを付ける',
+  en: 'Puts the class on before the first paint',
 });
 
 export const providerWrapCallout = message({
@@ -36,13 +41,18 @@ export const providerWrapCallout = message({
 });
 
 export const providerPlace = message({
-  ja: 'ルートレイアウトの`<body>`の中に`<ColorSchemeProvider>`を置き、ページ全体を包みます。プロバイダはClient Componentですが、ルートレイアウトはServer Componentのままで構いません。',
-  en: 'Put `<ColorSchemeProvider>` inside `<body>` in the root layout, around the whole page. The provider is a Client Component, but the root layout can stay a Server Component.',
+  ja: 'ルートレイアウトの`<head>`に`<ColorSchemeScript />`を置きます。`<body>`の中には`<ColorSchemeProvider>`を置き、ページ全体を包みます。プロバイダはClient Componentですが、ルートレイアウトはServer Componentのままで構いません。',
+  en: 'Put `<ColorSchemeScript />` in the root layout’s `<head>`, and `<ColorSchemeProvider>` inside its `<body>`, around the whole page. The provider is a Client Component, but the root layout can stay a Server Component.',
 });
 
 export const providerScript = message({
-  ja: 'プロバイダは、ページの中身より先にインラインの`<script>`を出力します。このスクリプトは保存した選択を読みます。選択が無ければOSの設定に従い、ダークなら最初の描画の前に`<html>`へ`dark`クラスを付けます。`<head>`に置くものはありません。',
-  en: 'The provider renders an inline `<script>` ahead of the page’s content. The script reads the stored choice, or follows the OS setting when nothing is stored. When that is dark, it puts the `dark` class on `<html>` before the first paint. Nothing goes in `<head>`.',
+  ja: '`ColorSchemeScript`は、インラインの`<script>`を出力します。このスクリプトは保存した選択を読みます。選択が無ければOSの設定に従い、ダークなら最初の描画の前に`<html>`へ`dark`クラスを付けます。',
+  en: '`ColorSchemeScript` renders an inline `<script>`. The script reads the stored choice, or follows the OS setting when nothing is stored. When that is dark, it puts the `dark` class on `<html>` before the first paint.',
+});
+
+export const providerOrder = message({
+  ja: 'スクリプトは、どのスタイルシートよりも前にある必要があります。後ろにあると、スタイルシートの読み込みを待つ間にライトの画面が描かれることがあります。`@k8ordo/framework`は、`<head>`に書いたインラインスクリプトをスタイルシートより前に移します。',
+  en: 'The script has to come before every stylesheet. After one, it waits for that stylesheet to load, and the browser may paint the page light in the meantime. `@k8ordo/framework` moves the inline scripts written in `<head>` ahead of the stylesheets.',
 });
 
 export const providerSuppress = message({

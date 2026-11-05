@@ -11,13 +11,7 @@ import {
 } from 'react';
 import type { ReactNode } from 'react';
 
-import {
-  colorSchemeState,
-  DARK_CLASS,
-  DARK_QUERY,
-  resolve,
-  scriptFor,
-} from './scheme';
+import { colorSchemeState, DARK_CLASS, DARK_QUERY, resolve } from './scheme';
 import type { ColorScheme, ColorSchemePreference } from './scheme';
 
 export type UseColorScheme = {
@@ -45,13 +39,13 @@ const subscribeSystem = (onChange: () => void): (() => void) => {
   };
 };
 const readSystemDark = (): boolean => matchMedia(DARK_QUERY).matches;
-// A server has no system to ask; the inline script is what keeps the first
+// A server has no system to ask; `ColorSchemeScript` is what keeps the first
 // paint right, and this render is corrected the moment it hydrates.
 const serverSystemDark = (): boolean => false;
 
 // Whether this render reads the real store. The hydration render reads the
 // server's guesses instead — nothing stored, a light system — and must not
-// write them onto a document the inline script already put right; React
+// write them onto a document `ColorSchemeScript` already put right; React
 // re-renders from the store straight after, and that render writes.
 const subscribeNever = (): (() => void) => () => {
   // nothing changes what this reports
@@ -67,28 +61,21 @@ export type ColorSchemeProviderProps = {
   /**
    * What applies while the visitor has chosen nothing. `'system'` follows
    * `prefers-color-scheme`; a scheme starts every visitor there until they
-   * choose.
+   * choose. Give `ColorSchemeScript` the same.
    */
   readonly defaultPreference?: ColorSchemePreference;
-  /**
-   * The nonce the page's `Content-Security-Policy` lets inline scripts run
-   * with, put on the inline script — under `@k8ordo/framework`'s server mode,
-   * `nonce()` from `@k8ordo/framework/server`. A policy that allows the script by its hash
-   * instead names `colorSchemeScriptHash()`.
-   */
-  readonly nonce?: string;
   readonly children: ReactNode;
 };
 
 /**
- * The one place the scheme is decided and written. Goes in the root
- * layout, inside `<body>`, around everything: it renders the inline script
- * that puts the class on `<html>` before the first paint, keeps the class
- * in step afterwards, and hands `useColorScheme` what it reads.
+ * The one place the scheme is decided and written after the first paint.
+ * Goes in the root layout, inside `<body>`, around everything: it keeps the
+ * class on `<html>` in step with the stored preference and the system, and
+ * hands `useColorScheme` what it reads. The class before the first paint is
+ * `ColorSchemeScript`'s, in `<head>`.
  */
 export function ColorSchemeProvider({
   defaultPreference = 'system',
-  nonce,
   children,
 }: ColorSchemeProviderProps): ReactNode {
   const [{ preference }, update] = useAppState(colorSchemeState);
@@ -116,15 +103,7 @@ export function ColorSchemeProvider({
     [scheme, preference, setPreference],
   );
 
-  return (
-    <>
-      {/* Before the children, so the parser runs it before it reaches what
-          they render — the first paint is already right, and hydration
-          finds the node in place and does not run it again. */}
-      <script nonce={nonce}>{scriptFor(defaultPreference)}</script>
-      <ColorSchemeContext value={value}>{children}</ColorSchemeContext>
-    </>
-  );
+  return <ColorSchemeContext value={value}>{children}</ColorSchemeContext>;
 }
 
 /** The visitor's colour scheme and a way to change it, from the provider above. */

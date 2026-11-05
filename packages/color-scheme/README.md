@@ -5,7 +5,7 @@ light, dark, or nothing, which follows the default (the system unless told
 otherwise) — lives in localStorage through `@k8ordo/state`; one rule resolves
 it against `prefers-color-scheme`; the result is the `dark` class on `<html>`,
 put there by an inline script before the first paint and kept there after
-hydration. One provider does all of that; a hook reads it. `@k8ordo/ui`'s
+hydration. A script in `<head>` and a provider do that; a hook reads it. `@k8ordo/ui`'s
 tokens read the class; Tailwind's `dark:` does too once the stylesheet declares
 `@custom-variant dark (&:where(.dark, .dark *));` — `@k8ordo/ui/tailwind.css`
 already does.
@@ -31,7 +31,7 @@ pnpm add @k8ordo/color-scheme @k8ordo/state zod
 
 | Package         | Version | Required | Needed for                                 |
 | --------------- | ------- | -------- | ------------------------------------------ |
-| `@k8ordo/state` | ^1.5.0  | yes      | where the preference lives (localStorage)  |
+| `@k8ordo/state` | ^2.0.0  | yes      | where the preference lives (localStorage)  |
 | `react`         | ≥19.3.0 | yes      | the provider and the hook                  |
 | `zod`           | ^4.6.6  | yes      | the one-field schema `@k8ordo/state` reads |
 | `typescript`    | ≥7.0.0  | optional | the shipped type declarations              |
@@ -41,16 +41,20 @@ pnpm add @k8ordo/color-scheme @k8ordo/state zod
 
 ## Quick Start
 
-The provider goes in the root layout, inside `<body>`, around everything. It
-renders the inline script itself, so nothing goes in `<head>`:
+The script goes in the root layout's `<head>`, and the provider inside
+`<body>`, around everything. `@k8ordo/framework` writes the script ahead of
+every stylesheet, which it has to be for the first paint to be right:
 
 ```tsx
 // src/routes/layout.tsx — a Server Component
-import { ColorSchemeProvider } from '@k8ordo/color-scheme';
+import { ColorSchemeProvider, ColorSchemeScript } from '@k8ordo/color-scheme';
 
 export default function RootLayout({ children }) {
   return (
     <html suppressHydrationWarning>
+      <head>
+        <ColorSchemeScript />
+      </head>
       <body>
         <ColorSchemeProvider>{children}</ColorSchemeProvider>
       </body>
@@ -82,8 +86,8 @@ export function SchemeSwitcher() {
 `scheme` is what is on screen; `preference` is what the visitor asked for
 (`'system'` when nothing is stored); `setPreference('system')` stores none, so
 the provider's default applies again. That default is the system unless told
-otherwise: `<ColorSchemeProvider defaultPreference="dark">` starts every
-visitor dark until they choose.
+otherwise: `defaultPreference="dark"` on both `<ColorSchemeScript>` and
+`<ColorSchemeProvider>` starts every visitor dark until they choose.
 
 ## AI Agent Documentation
 
@@ -96,8 +100,9 @@ Point your agent at them once by pasting this into your project's `CLAUDE.md` /
 ```markdown
 Use `@k8ordo/color-scheme` for light and dark mode. Before touching the
 colour scheme, read `node_modules/@k8ordo/color-scheme/docs/GUIDE.md`. One
-`<ColorSchemeProvider>` wraps everything inside the root layout's `<body>`,
-with `suppressHydrationWarning` on `<html>`; components read and change the
+`<ColorSchemeScript />` goes in the root layout's `<head>` and one
+`<ColorSchemeProvider>` wraps everything inside its `<body>`, with
+`suppressHydrationWarning` on `<html>`; components read and change the
 scheme through `useColorScheme()`. Never toggle the `dark` class, query
 `prefers-color-scheme` for the scheme, or write the stored preference
 yourself — the provider owns all three, and `setPreference` is the one way in.

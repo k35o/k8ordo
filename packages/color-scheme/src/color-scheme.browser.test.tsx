@@ -15,6 +15,7 @@ import { renderHook } from 'vitest-browser-react';
 import { ColorSchemeProvider, useColorScheme } from './provider';
 import type { ColorSchemePreference } from './scheme';
 import { colorSchemeScriptHash, colorSchemeState, scriptFor } from './scheme';
+import { ColorSchemeScript } from './script';
 
 const root = document.documentElement;
 
@@ -118,7 +119,7 @@ const Probe = () => {
 };
 
 describe('ColorSchemeProvider under hydration', () => {
-  it('renders the script first, and never takes the class off that it put on', async () => {
+  it('writes nothing around its children, and never takes off the class the script put on', async () => {
     localStorage.setItem(
       colorSchemeState.storageKey,
       JSON.stringify({ preference: 'dark' }),
@@ -142,9 +143,8 @@ describe('ColorSchemeProvider under hydration', () => {
         <Probe />
       </ColorSchemeProvider>,
     );
-    expect(html.startsWith('<script>')).toBe(true);
+    expect(html).toBe('<span>light</span>');
     container.innerHTML = html;
-    expect(container.querySelector('span')?.textContent).toBe('light');
     document.body.append(container);
     const app = hydrateRoot(
       container,
@@ -171,24 +171,20 @@ describe('ColorSchemeProvider under hydration', () => {
   });
 });
 
-describe('ColorSchemeProvider under a Content-Security-Policy', () => {
-  it('signs its inline script with the nonce it is given, and hydrates over it', async () => {
+describe('ColorSchemeScript', () => {
+  it('signs the script with the nonce it is given, and hydrates over it without running it again', async () => {
     const container = document.createElement('div');
     container.innerHTML = renderToString(
-      <ColorSchemeProvider nonce="bm9uY2U=">
-        <Probe />
-      </ColorSchemeProvider>,
+      <ColorSchemeScript defaultPreference="dark" nonce="bm9uY2U=" />,
     );
     const script = container.querySelector('script');
     expect(script?.nonce).toBe('bm9uY2U=');
-    expect(script?.textContent).toBe(scriptFor('system'));
+    expect(script?.textContent).toBe(scriptFor('dark'));
     document.body.append(container);
     const recoverable: unknown[] = [];
     const app = hydrateRoot(
       container,
-      <ColorSchemeProvider nonce="bm9uY2U=">
-        <Probe />
-      </ColorSchemeProvider>,
+      <ColorSchemeScript defaultPreference="dark" nonce="bm9uY2U=" />,
       {
         onRecoverableError: (error) => {
           recoverable.push(error);
@@ -196,25 +192,24 @@ describe('ColorSchemeProvider under a Content-Security-Policy', () => {
       },
     );
     await vi.waitFor(() => {
-      expect(container.querySelector('span')?.textContent).toBe('light');
+      expect(container.querySelector('script')).toBe(script);
     });
 
     expect(recoverable).toStrictEqual([]);
-    expect(container.querySelector('script')).toBe(script);
+    // innerHTML の script は動かず、hydrate も動かさない
+    expect(root.classList.contains('dark')).toBe(false);
     app.unmount();
     container.remove();
   });
 });
 
 // A document of its own, under the policy its <meta> states, with the
-// provider's server render in its body — the script as React writes it.
+// script's server render in its <head> — the script as React writes it.
 const underPolicy = async (policy: string): Promise<Document> => {
   const frame = document.createElement('iframe');
-  frame.srcdoc = `<!doctype html><html><head><meta http-equiv="Content-Security-Policy" content="${policy}"></head><body>${renderToString(
-    <ColorSchemeProvider defaultPreference="dark">
-      <Probe />
-    </ColorSchemeProvider>,
-  )}</body></html>`;
+  frame.srcdoc = `<!doctype html><html><head><meta http-equiv="Content-Security-Policy" content="${policy}">${renderToString(
+    <ColorSchemeScript defaultPreference="dark" />,
+  )}</head><body></body></html>`;
   const loaded = new Promise((resolve) => {
     frame.addEventListener('load', resolve, { once: true });
   });

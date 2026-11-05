@@ -59,9 +59,14 @@ export function SchemeSelect() {
   );
 }`;
 
-const DEFAULT = `<ColorSchemeProvider defaultPreference="dark">
-  {children}
-</ColorSchemeProvider>`;
+const DEFAULT = `<head>
+  <ColorSchemeScript defaultPreference="dark" />
+</head>
+<body>
+  <ColorSchemeProvider defaultPreference="dark">
+    {children}
+  </ColorSchemeProvider>
+</body>`;
 
 const BOTH = `export function SchemeToggle() {
   const { scheme, setPreference } = useColorScheme();
@@ -172,7 +177,12 @@ export default function ColorSchemeSwitcherPage() {
       </DocSection>
 
       <DocSection id="default" title={t.defaultTitle}>
-        <CodeBlock code={DEFAULT} lang="tsx" title="layout.tsx" />
+        <CodeBlock
+          code={DEFAULT}
+          lang="tsx"
+          marks={{ 2: 'highlight', 5: 'highlight' }}
+          title="layout.tsx"
+        />
         <p>
           <Rich>{t.defaultProp()}</Rich>
         </p>

@@ -36,11 +36,11 @@ export default function guard() {
 
 ```tsx
 // src/routes/layout.tsx
-import { ColorSchemeProvider } from '@k8ordo/color-scheme';
+import { ColorSchemeScript } from '@k8ordo/color-scheme';
 import { nonce } from '@k8ordo/framework/server';
 
-// …inside <body>
-<ColorSchemeProvider nonce={nonce()}>{children}</ColorSchemeProvider>;
+// …inside <head>
+<ColorSchemeScript nonce={nonce()} />;
 ```
 
 The framework's module script carries the nonce as well, so under
@@ -111,8 +111,8 @@ every `style` attribute as well.
 
 An inline script of the application's is allowed by its hash in that policy,
 as `colorSchemeScriptHash()` gives `@k8ordo/color-scheme`'s (pass it the
-`defaultPreference` the provider is given); any other inline script on the
-page — one that reached it from content — is refused. The framework's module
+`defaultPreference` `ColorSchemeScript` is given); any other inline script
+on the page — one that reached it from content — is refused. The framework's module
 script is allowed by where it comes from (`'self'`), since nothing in a file
 can sign it, which is why the build refuses a policy with `'strict-dynamic'`.
 It refuses `frame-ancestors`, `report-uri` and `sandbox` too, which a
