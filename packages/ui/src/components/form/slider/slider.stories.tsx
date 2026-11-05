@@ -1,12 +1,21 @@
+import { formFields, parseForm } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef } from 'react';
-import { expect, fireEvent, waitFor } from 'storybook/test';
+import { expect, fireEvent, fn, waitFor } from 'storybook/test';
+import { z } from 'zod';
 
+import {
+  ActionForm,
+  fill,
+  memo,
+  MemoField,
+} from '../../../../.storybook/action-form';
 import { afterRenderingUpdate } from '../../../../.storybook/focus';
 import {
   finishPending,
   PendingForm,
 } from '../../../../.storybook/pending-form';
+import { FormControl } from '../form-control';
 import { Slider } from './slider';
 
 import styles from './slider.stories.module.css';
@@ -158,6 +167,77 @@ export const FollowsReset: Story = {
       expect(
         slider.parentElement?.style.getPropertyValue('--slider-progress'),
       ).toBe('50%'),
+    );
+  },
+};
+
+const sound = z.object({
+  volume: z.coerce.number().min(0).max(100),
+  memo,
+});
+const soundFields = formFields(sound);
+const received = fn();
+
+const SoundForm = () => (
+  <ActionForm
+    fields={soundFields}
+    onReceive={received}
+    serve={(data) => parseForm(sound, data)}
+  >
+    {(form) => {
+      const volume = form.field('volume');
+      return (
+        <>
+          <FormControl
+            errorText={volume.error}
+            invalid={volume.invalid}
+            label="音量"
+            renderInput={(props) => <Slider {...props} {...volume.input} />}
+            required={volume.required}
+          />
+          <MemoField field={form.field('memo')} />
+        </>
+      );
+    }}
+  </ActionForm>
+);
+
+// @k8ordo/form の formFields を広げるだけでつながる
+export const WithForm: Story = {
+  render: () => <SoundForm />,
+  play: async ({ canvas, userEvent }) => {
+    const volume = () => canvas.getByRole('slider');
+    // storybook/test の keyboard は range のつまみを動かさないので、値を直接動かす
+    const slide = (value: number) => {
+      fireEvent.input(volume(), { target: { value: String(value) } });
+    };
+    const memoField = () => canvas.getByLabelText('メモ', { exact: false });
+    const submit = () =>
+      userEvent.click(canvas.getByRole('button', { name: '送信' }));
+
+    // reset で描画時の値に戻り、isDirty も下りる
+    slide(30);
+    await expect(await canvas.findByText('変更あり')).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'リセット' }));
+    await expect(volume()).toHaveValue('0');
+    await expect(await canvas.findByText('変更なし')).toBeVisible();
+
+    // 送信に失敗しても、動かした値を描き直す
+    slide(30);
+    await fill(userEvent, memoField(), '却下');
+    await submit();
+    await expect(await canvas.findByText('却下されました')).toBeVisible();
+    await expect(volume()).toHaveValue('30');
+
+    // 動かした値が届く
+    slide(40);
+    await fill(userEvent, memoField(), 'よろしく');
+    await submit();
+    await waitFor(() =>
+      expect(received).toHaveBeenLastCalledWith({
+        volume: 40,
+        memo: 'よろしく',
+      }),
     );
   },
 };

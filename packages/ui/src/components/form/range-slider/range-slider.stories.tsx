@@ -1,12 +1,16 @@
+import { formFields, parseForm } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { expect, fireEvent, fn, waitFor } from 'storybook/test';
+import { z } from 'zod';
 
+import { ActionForm } from '../../../../.storybook/action-form';
 import { afterRenderingUpdate } from '../../../../.storybook/focus';
 import {
   finishPending,
   PendingForm,
 } from '../../../../.storybook/pending-form';
+import { FormControl } from '../form-control';
 import { RangeSlider } from './range-slider';
 
 import styles from './range-slider.stories.module.css';
@@ -168,5 +172,74 @@ export const Invalid: Story = {
 
     await expect(start).toHaveAttribute('aria-invalid', 'true');
     await expect(end).toHaveAttribute('aria-invalid', 'true');
+  },
+};
+
+const priceRange = z.object({
+  priceMin: z.coerce.number().int().min(0).max(100),
+  priceMax: z.coerce.number().int().min(0).max(100),
+});
+const priceRangeFields = formFields(priceRange);
+
+const PriceRangeForm = () => (
+  <ActionForm
+    fields={priceRangeFields}
+    serve={(data) => parseForm(priceRange, data)}
+  >
+    {(form) => {
+      const priceMin = form.field('priceMin');
+      const priceMax = form.field('priceMax');
+      return (
+        <FormControl
+          label="価格"
+          renderInput={(props) => (
+            <RangeSlider
+              {...props}
+              defaultValue={[20, 80]}
+              max={Number(priceMax.input.max)}
+              min={Number(priceMin.input.min)}
+              name={[priceMin.input.name, priceMax.input.name]}
+            />
+          )}
+          required
+        />
+      );
+    }}
+  </ActionForm>
+);
+
+// @k8ordo/form の formFields を広げるだけでつながる
+export const WithForm: Story = {
+  render: () => <PriceRangeForm />,
+  play: async ({ canvas, userEvent }) => {
+    const [start, end] = canvas.getAllByRole<HTMLInputElement>('slider');
+    if (start === undefined || end === undefined) {
+      throw new globalThis.Error('つまみが 2 つありません');
+    }
+    const submitted = () => new FormData(start.form ?? undefined);
+
+    // 2 つの欄を name の組で受け、それぞれ本物の input として送る
+    await expect(Object.fromEntries(submitted())).toStrictEqual({
+      priceMin: '20',
+      priceMax: '80',
+    });
+
+    // FormControl の required は、グループではなく両方のつまみに届く。
+    // jest-dom の toBeRequired は range を数えないので、プロパティで見る
+    await expect([start.required, end.required]).toStrictEqual([true, true]);
+    await expect(canvas.getByRole('group')).not.toHaveAttribute('required');
+
+    // つまみを動かすと変更ありになり、reset で値も塗りも戻る
+    slide(start, 21);
+    await expect(await canvas.findByText('変更あり')).toBeVisible();
+    await expect(submitted().get('priceMin')).toBe('21');
+    await userEvent.click(canvas.getByRole('button', { name: 'リセット' }));
+    await expect(await canvas.findByText('変更なし')).toBeVisible();
+    await expect(start).toHaveValue('20');
+    await waitFor(() =>
+      expect(
+        canvas.getByRole('group').style.getPropertyValue('--range-start'),
+      ).toBe('20%'),
+    );
   },
 };

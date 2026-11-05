@@ -11,9 +11,6 @@ import { z } from 'zod';
 
 import { Button } from '../buttons/button';
 import { FileField } from './file-field';
-import { FormControl } from './form-control';
-import { Slider } from './slider';
-import { TextField } from './text-field';
 
 // サーバーが最後に受け取った値。成功したときだけ入る
 let received: unknown;
@@ -76,95 +73,10 @@ const errorShown = (message: string) =>
     (paragraph) => paragraph.textContent === message,
   );
 
-// 送信をサーバーで落とすためだけの欄。ブラウザの検査は通るので、送信は
-// action まで届き、失敗が state で返ってくる
-const failing = z.string().refine((memo) => memo !== '却下', '却下されました');
-
-const refuseOnServer = () => userEvent.fill(labelled('メモ'), '却下');
-
-const Memo = ({ form }: { form: UseFormReturn<'memo', never> }) => {
-  const memo = form.field('memo');
-  return (
-    <FormControl
-      errorText={memo.error}
-      invalid={memo.invalid}
-      label="メモ"
-      renderInput={(props) => <TextField {...props} {...memo.input} />}
-      required={memo.required}
-    />
-  );
-};
-
 const picture = () => new File(['avatar'], 'me.png', { type: 'image/png' });
 
 beforeEach(() => {
   received = undefined;
-});
-
-describe('Slider', () => {
-  const schema = z.object({
-    volume: z.coerce.number().min(0).max(100),
-    memo: failing,
-  });
-  const fields = formFields(schema);
-
-  const Volume = () => (
-    <Harness fields={fields} serve={(data) => parseForm(schema, data)}>
-      {(form) => {
-        const volume = form.field('volume');
-        return (
-          <>
-            <FormControl
-              errorText={volume.error}
-              invalid={volume.invalid}
-              label="音量"
-              renderInput={(props) => <Slider {...props} {...volume.input} />}
-              required={volume.required}
-            />
-            <Memo form={form} />
-          </>
-        );
-      }}
-    </Harness>
-  );
-
-  // このプロジェクトは styles.css を読まず、トークンの無い溝は高さを持たないので、
-  // つまみの input も見えない。値を入れることだけを確かめたいので、見えるまで待たない
-  const slide = () => userEvent.fill(labelled('音量'), '30', { force: true });
-
-  it('動かした値が届く', async () => {
-    await render(<Volume />);
-
-    await slide();
-    await userEvent.fill(labelled('メモ'), 'よろしく');
-    submit();
-
-    await expect
-      .poll(() => received)
-      .toStrictEqual({ volume: 30, memo: 'よろしく' });
-  });
-
-  it('送信に失敗しても、動かした値を描き直す', async () => {
-    await render(<Volume />);
-
-    await slide();
-    await refuseOnServer();
-    submit();
-
-    await expect.poll(() => errorShown('却下されました')).toBe(true);
-    await expect.element(labelled('音量')).toHaveValue('30');
-  });
-
-  it('reset で描画時の値に戻り、isDirty も下りる', async () => {
-    await render(<Volume />);
-
-    await slide();
-    await expect.poll(isDirty).toBe('true');
-    reset();
-
-    await expect.element(labelled('音量')).toHaveValue('0');
-    await expect.poll(isDirty).toBe('false');
-  });
 });
 
 describe('FileField', () => {
