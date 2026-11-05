@@ -47,6 +47,16 @@ export const isConcrete = (pattern: string): boolean =>
 export const catchAllPatterns = (dir: RouteDir): string[] =>
   patternsOf(dir).filter((pattern) => pattern.endsWith('/*'));
 
+/** A table with more than one catch-all, which no static host can serve. */
+export const catchAllRefusals = (dir: RouteDir): string[] => {
+  const catchAlls = catchAllPatterns(dir);
+  return catchAlls.length > 1
+    ? [
+        `a static host answers every unknown URL from one file, so only one not-found.tsx can be represented — this table declares ${catchAlls.join(', ')}`,
+      ]
+    : [];
+};
+
 /**
  * A pathname the table can only answer with its catch-all, so the build can
  * render `not-found.tsx` without waiting for a visitor to find it.

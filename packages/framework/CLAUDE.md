@@ -258,9 +258,9 @@ pnpm check         # check:write to auto-fix
   type; `serve`, `vite preview` and every other host go by the extension.
 - **A file never carries a nonce; the policy names hashes.** The handler
   signs the framework's inline scripts with a nonce per render and says it in
-  `NONCE_HEADER`; `write` takes it off every page (`asFile`) whether or not
-  a `csp` was given — a nonce in a file everyone reads is worth nothing, and
-  a random one would make every build differ. With `csp`, what that nonce
+  `NONCE_HEADER`; `writeHtml` takes it off every page (`asFile`) whether or
+  not a `csp` was given — a nonce in a file everyone reads is worth nothing,
+  and a random one would make every build differ. With `csp`, what that nonce
   signed is hashed into `script-src` of a `<meta>` placed first in `<head>`
   after the `<meta charSet>` React writes there (a browser looks for the
   encoding only in the first 1024 bytes, which a policy naming many hashes
@@ -284,8 +284,8 @@ pnpm check         # check:write to auto-fix
 - **A static build lists each page's client files beside the pages.**
   `client-files.json` (the engine's `CLIENT_FILES_PATH` and `ClientFiles`)
   is what a client navigation links ahead of a payload
-  (`packages/framework-engine/CLAUDE.md`). `write` hands back what each HTML
-  answer's `CLIENT_DEPS_HEADER` named (`named`), and `clientFiles`
+  (`packages/framework-engine/CLAUDE.md`). `writeHtml` hands back what each
+  HTML answer's `CLIENT_DEPS_HEADER` named (`named`), and `clientFiles`
   (`documents.ts`) keeps, per page with a payload, its references' `js` and
   `css` less the files every HTML document written links — pages,
   `404.html` and shells alike, since the visitor may have arrived on any of
@@ -309,7 +309,7 @@ pnpm check         # check:write to auto-fix
   slash is the router's `normalizePathname`, and decoding a pathname for the
   filesystem is the engine's `decodePathname`, which `serve` uses too.
 - **Pages are counted in the table's terms and asked for under the base.**
-  `urlFor` puts `builder.config.base` in front of every pathname the
+  `Render.urlFor` puts `builder.config.base` in front of every pathname the
   handler is asked for (HTML, payload, `404.html`) and of every sitemap
   `<loc>`, while files go to `dirFor(pathname)` inside the client build —
   the directory a host serves at the base. The `paths` option is in the
@@ -319,7 +319,8 @@ pnpm check         # check:write to auto-fix
   `order: 'post'` — and writes into the client build's own output directory,
   which Vite may hand over as an absolute path, so resolve it rather than
   joining. The refusals that need the compiled environments (the `/server`
-  importers and Server Actions) are said there, before anything is written.
+  importers and Server Actions) are said there, before anything is written,
+  in one error with what the plan and the route files refuse.
 - **The request's URL is the `Host` header and the path, written, never
   resolved.** `urlOf` writes the request target after `http://<Host>`; resolved
   against it instead, `//evil.test/x` is a URL on evil.test, and the handler's

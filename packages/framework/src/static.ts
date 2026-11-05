@@ -49,7 +49,7 @@ import type { ContentSecurityPolicy } from './documents';
 import {
   answersOf,
   catchAllPath,
-  catchAllPatterns,
+  catchAllRefusals,
   dirFor,
   fileAt,
   patternsNeedingPaths,
@@ -58,7 +58,7 @@ import {
   routeFileRefusals,
   shadowedShells,
 } from './paths';
-import type { Shell } from './paths';
+import type { PathPlan, Shell } from './paths';
 import {
   builtRules,
   cloudflareCounts,
@@ -658,302 +658,94 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
       order: 'post',
       async handler(builder) {
         const { tree } = parseRouteTree(await scanRoutes(routesDir));
-        const supplied =
-          (await options.paths?.(patternsNeedingPaths(tree))) ?? [];
-        const plan = planPaths(tree, supplied);
-        const catchAlls = catchAllPatterns(tree);
-        const unplanned = [
+        const plan = planPaths(
+          tree,
+          (await options.paths?.(patternsNeedingPaths(tree))) ?? [],
+        );
+        const answers = answersOf(tree, plan.paths);
+        // RSC の仕組みは action とリクエストの API をどちらのモードでもコンパイル
+        // するので、static で受けないと言えるのはビルドが断るときだけ
+        const actions = serverActionModules(builder.config);
+        const importers = [...serverImporters].toSorted();
+        const refusals = [
           ...planRefusals(
             plan,
             shadowedShells(tree, plan.shells, new Set(plan.paths)),
           ),
-          ...(catchAlls.length > 1
-            ? [
-                `a static host answers every unknown URL from one file, so only one not-found.tsx can be represented — this table declares ${catchAlls.join(', ')}`,
-              ]
-            : []),
-        ];
-        if (unplanned.length > 0) throw new Error(unplanned.join('\n\n'));
-
-        // A file cannot receive a POST. The RSC pipeline compiles an action
-        // in either mode, so the mode's promise only holds if the build says
-        // no — before writing an application whose form posts into nothing.
-        // The request API compiles in either mode as well, for the same
-        // reason refused by name.
-        const actions = serverActionModules(builder.config);
-        const importers = [...serverImporters].toSorted();
-        const unanswerable = [
+          ...catchAllRefusals(tree),
           ...(actions.length > 0 ? [actionRefusal(actions)] : []),
           ...(importers.length > 0 ? [serverImportRefusal(importers)] : []),
+          ...routeFileRefusals(tree, plan, answers, {
+            site: options.site !== undefined,
+            named: fromRoot,
+          }),
         ];
-        if (unanswerable.length > 0) {
-          throw new Error(unanswerable.join('\n\n'));
-        }
+        if (refusals.length > 0) throw new Error(refusals.join('\n\n'));
 
         const rscOut = builder.environments.rsc?.config.build.outDir;
         const client = builder.environments.client?.config;
         if (rscOut === undefined || client === undefined) {
           throw new Error('static build ran without the rsc/client builds');
         }
-
         // outDir はすでに絶対パスのことがあるので resolve で受ける
         const clientDir = path.resolve(root, client.build.outDir);
-        // ページは表の pathname で数え、ハンドラには base を付けた URL で頼む。
-        // 書き出す先は client/ の中の表の pathname（client/ が base に置かれる）
-        // With `site`, what a route.ts reads off its request is where the site
-        // is served — an RSS feed's links are absolute.
         const origin =
           options.site === undefined ? ORIGIN : new URL(options.site).origin;
-        const urlFor = (pathname: string): string =>
-          `${origin}${withBase(pathname, base)}`;
-        const answers = answersOf(tree, plan.paths);
-        const unfileable = routeFileRefusals(tree, plan, answers, {
-          site: options.site !== undefined,
-          named: fromRoot,
-        });
-        if (unfileable.length > 0) throw new Error(unfileable.join('\n\n'));
-        const byRoute = new Set(
-          plan.paths.filter(
-            (pathname) => answers.get(pathname)?.kind === 'route',
-          ),
-        );
-        const entry = path.resolve(root, rscOut, 'index.js');
-        const entryModule = (await import(pathToFileURL(entry).href)) as {
-          default: Handler;
+        const render: Render = {
+          handler: (
+            (await import(
+              pathToFileURL(path.resolve(root, rscOut, 'index.js')).href
+            )) as { default: Handler }
+          ).default,
+          clientDir,
+          urlFor: (pathname) => `${origin}${withBase(pathname, base)}`,
+          csp,
         };
-        const handler = entryModule.default;
-
-        // A supplied pathname the route's params schema refuses would be
-        // written as a 404 page under a URL the site claims to have. The
-        // handler answers it the way it answers any unknown URL; here that
-        // answer is a build error naming the pathname.
-        const refused: string[] = [];
-        // The same for a page that said notFound(): the pathname was supplied
-        // for a page the application then disowned.
-        const disowned: string[] = [];
-        // A page that threw while rendering: the handler answers 500 with
-        // the message, and a build that wrote it would ship the failure.
-        const failed: string[] = [];
-        // What was written as a redirect rather than a page.
-        const redirected = new Set<string>();
-        // A route.ts whose GET did not answer with something to write.
-        const unanswered: string[] = [];
-        // The type each route.ts's GET answered with, by the file it wrote.
-        const types = new Map<string, string>();
-        // What the payload of every HTML document written names, and of each
-        // page by its payload's URL path: what CLIENT_FILES_PATH lists.
-        const documents: Array<readonly ClientDeps[]> = [];
-        const pageFiles = new Map<string, readonly ClientDeps[]>();
-        await inParallel(
-          plan.paths.flatMap((pathname) => {
-            if (byRoute.has(pathname)) {
-              return [
-                async () => {
-                  const file = path.join(clientDir, dirFor(pathname));
-                  const { status, type } = await writeBody(
-                    file,
-                    handler,
-                    urlFor(pathname),
-                  );
-                  if (status !== 200) {
-                    unanswered.push(`${pathname} (${String(status)})`);
-                  } else if (type !== null) {
-                    types.set(fileAt(pathname), type);
-                  }
-                },
-              ];
-            }
-            // The URL keeps its escapes; only the file name is decoded.
-            const dir = path.join(clientDir, dirFor(pathname));
-            return [
-              async () => {
-                const { status, notFound, named } = await write(
-                  path.join(dir, 'index.html'),
-                  handler,
-                  urlFor(pathname),
-                  csp,
-                  { notFoundIsPage: false },
-                );
-                if (named !== null) documents.push(named);
-                if (status === 404) {
-                  (notFound ? disowned : refused).push(pathname);
-                }
-                if (status === 500) failed.push(pathname);
-                if (status === 307 || status === 308) redirected.add(pathname);
-                // Only a page has a payload. A client navigation to a redirect
-                // finds nothing at index.rsc and hands the URL to the browser,
-                // which loads the HTML above and follows it.
-                if (status === 200) {
-                  const payload = urlFor(payloadPathFor(pathname));
-                  const written = await writeBody(
-                    path.join(dir, 'index.rsc'),
-                    handler,
-                    payload,
-                  );
-                  if (written.status !== 200) {
-                    failed.push(pathname);
-                  } else if (named !== null) {
-                    // The payload is the render the HTML was: it names the same.
-                    // Keyed as a browser's URL spells the path.
-                    pageFiles.set(new URL(payload).pathname, named);
-                  }
-                }
-              },
-            ];
-          }),
-        );
-        // A static host answers an unknown URL from a file, so the
-        // application's own not-found has to be one — otherwise declaring it
-        // would mean nothing in this mode.
-        const unmatched = catchAllPath(tree);
-        if (unmatched !== null) {
-          const { status, named } = await write(
-            path.join(clientDir, '404.html'),
-            handler,
-            urlFor(unmatched),
-            csp,
-            { notFoundIsPage: true },
-          );
-          if (named !== null) documents.push(named);
-          if (status === 500) failed.push('404.html');
-        }
-
-        // A value the build did not write is answered by its fallback.tsx's
-        // shell: rendered once for the shell pathname, HTML and payload,
-        // where a host's rule finds it. Only an answer that says it is this
-        // pattern's shell is written — the table walks in its own order.
+        const notFoundAt = catchAllPath(tree);
         const fallbacks = new Map(
           fallbackShapes(tree).map((shape) => [shape.pattern, shape.file]),
         );
-        const shellRefused: string[] = [];
-        const shellDisowned: string[] = [];
-        const shellTaken: string[] = [];
-        await inParallel(
-          plan.shells.map((shell) => async () => {
-            const dir = path.join(clientDir, dirFor(shell.pathname));
-            const answered = await write(
-              path.join(dir, 'index.html'),
-              handler,
-              urlFor(shell.pathname),
-              csp,
-              { notFoundIsPage: false, shell: shell.pattern },
-            );
-            const named = `${shell.location} (${fallbacks.get(shell.pattern) ?? ''})`;
-            if (answered.named !== null) documents.push(answered.named);
-            if (answered.status === 500) {
-              failed.push(shell.location);
-            } else if (answered.status === 404) {
-              (answered.notFound ? shellDisowned : shellRefused).push(
-                shell.location,
-              );
-            } else if (answered.shell === null) {
-              shellTaken.push(
-                `the shell for ${named} was answered by another route, which took "${FALLBACK_SEGMENT}" as a value`,
-              );
-            } else if (answered.shell === shell.pattern) {
-              const payload = await writeBody(
-                path.join(dir, 'index.rsc'),
-                handler,
-                urlFor(payloadPathFor(shell.pathname)),
-              );
-              if (payload.status !== 200) failed.push(shell.location);
-            } else {
-              shellTaken.push(
-                `the shell for ${named} was answered by ${fallbacks.get(answered.shell) ?? answered.shell}, which the table tries first — supply shell locations that pattern cannot match`,
-              );
-            }
-          }),
-        );
-        // Each kind is a different mistake, and fixing one should not be
-        // what reveals the next.
-        const unwritten = [
-          ...(failed.length > 0
-            ? [
-                `static build could not render ${failed.toSorted().join(', ')} — see the error above`,
-              ]
-            : []),
-          ...(unanswered.length > 0
-            ? [
-                `static build writes a route.ts from a GET that answers 200, and these did not: ${unanswered.toSorted().join(', ')}`,
-              ]
-            : []),
-          ...(refused.length > 0
-            ? [
-                `the "paths" option supplied pathnames a params schema refused: ${refused.toSorted().join(', ')}`,
-              ]
-            : []),
-          ...(disowned.length > 0
-            ? [
-                `the "paths" option supplied pathnames whose page called notFound(): ${disowned.toSorted().join(', ')}`,
-              ]
-            : []),
-          ...(shellRefused.length > 0
-            ? [
-                `the "paths" option supplied shell locations a params schema refused: ${shellRefused.toSorted().join(', ')}`,
-              ]
-            : []),
-          ...(shellDisowned.length > 0
-            ? [
-                shellDisowned
-                  .toSorted()
-                  .map(
-                    (location) =>
-                      `the shell for ${location} called notFound() while it rendered, and a shell has no value to disown — call notFound() from the client component that reads the value in the browser`,
-                  )
-                  .join('\n'),
-              ]
-            : []),
-          ...(shellTaken.length > 0 ? [shellTaken.toSorted().join('\n')] : []),
+        const rendered = [
+          ...(await inParallel(
+            plan.paths.map(
+              (pathname) => () =>
+                answers.get(pathname)?.kind === 'route'
+                  ? renderRoute(render, pathname)
+                  : renderPage(render, pathname),
+            ),
+          )),
+          ...(notFoundAt === null
+            ? []
+            : [await renderNotFound(render, notFoundAt)]),
+          ...(await inParallel(
+            plan.shells.map(
+              (shell) => () => renderShell(render, shell, fallbacks),
+            ),
+          )),
         ];
-        if (unwritten.length > 0) throw new Error(unwritten.join('\n\n'));
+        const failures = failureMessages(rendered);
+        if (failures.length > 0) throw new Error(failures.join('\n\n'));
 
-        // Every layout renders a shell with the shell pathname as `pathname`.
-        // What one wrote of it into the page is the same for every value the
-        // shell answers — a link, a canonical URL — so the build says so.
-        const leaking = await Promise.all(
-          plan.shells.map(async (shell) => {
-            const html = await readFile(
-              path.join(clientDir, dirFor(shell.pathname), 'index.html'),
-              'utf8',
-            );
-            return writtenOutsideScripts(html).some((written) =>
-              written.includes(FALLBACK_SEGMENT),
-            )
-              ? [shell.location]
-              : [];
-          }),
-        );
-        for (const location of leaking.flat()) {
+        for (const location of await leakingShells(clientDir, plan.shells)) {
           builder.config.logger.warn(
             `k8ordo: the shell for ${location} has "${FALLBACK_SEGMENT}" in its HTML — a layout wrote the shell's pathname into the page (a link, a canonical URL); derive what depends on the URL in a client component`,
           );
         }
-
-        await writeFile(
-          path.join(clientDir, CLIENT_FILES_PATH.slice(1)),
-          JSON.stringify(clientFiles(pageFiles, documents)),
+        await writeClientFiles(clientDir, rendered);
+        const notPages = rendered.flatMap((each) =>
+          each.kind === 'route' || each.kind === 'redirect'
+            ? [each.pathname]
+            : [],
         );
-
-        // The build knows every page it wrote, which is what a sitemap is.
-        // Redirects and route.ts files are not pages, a not-found is not a
-        // URL to offer, and a shell is not one either — it stands for values
-        // the build never saw.
         if (options.site !== undefined) {
-          await writeFile(
-            path.join(clientDir, 'sitemap.xml'),
-            sitemap(
-              options.site,
-              plan.paths
-                .filter(
-                  (pathname) =>
-                    !redirected.has(pathname) && !byRoute.has(pathname),
-                )
-                .map((pathname) => withBase(pathname, base)),
-            ),
+          await writeSitemap(
+            clientDir,
+            options.site,
+            plan.paths
+              .filter((pathname) => !notPages.includes(pathname))
+              .map((pathname) => withBase(pathname, base)),
           );
         }
-
-        const notPages = [...redirected, ...byRoute];
         const adapter = adapterOf(builder.config.plugins);
         if (plan.shells.length > 0) {
           const misread = await writeRedirects({
@@ -972,16 +764,15 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         }
         await adapter?.writeStatic({
           rewrites: rewritesAfterFiles(plan.shells, notPages, base),
-          notFound: unmatched !== null,
-          types,
+          notFound: notFoundAt !== null,
+          types: typesOf(rendered),
         });
 
-        const shells =
-          plan.shells.length === 0
-            ? ''
-            : `, ${String(plan.shells.length)} ${plan.shells.length === 1 ? 'shell' : 'shells'} (${plan.shells.map((shell) => shell.location).join(', ')})`;
         builder.config.logger.info(
-          `k8ordo: wrote ${String(plan.paths.length)} routes${shells}${unmatched === null ? '' : ' and 404.html'}${options.site === undefined ? '' : ' and sitemap.xml'}${plan.shells.length === 0 ? '' : ' and _redirects'}`,
+          `k8ordo: wrote ${summaryOf(plan, {
+            notFound: notFoundAt !== null,
+            sitemap: options.site !== undefined,
+          })}`,
         );
       },
     },
@@ -1047,19 +838,275 @@ const adapterOf = (
  */
 const WIDTH = 8;
 
-const inParallel = async (
-  tasks: ReadonlyArray<() => Promise<unknown>>,
-): Promise<void> => {
+const inParallel = async <T>(
+  tasks: ReadonlyArray<() => Promise<T>>,
+): Promise<T[]> => {
+  const results: T[] = [];
   let next = 0;
   const worker = async (): Promise<void> => {
-    for (let task = tasks[next++]; task !== undefined; task = tasks[next++]) {
+    for (let at = next++; at < tasks.length; at = next++) {
       // A worker is sequential on purpose — that is what bounds the width.
-      await task();
+      results[at] = await (tasks[at] as () => Promise<T>)();
     }
   };
   await Promise.all(
     Array.from({ length: Math.min(WIDTH, tasks.length) }, worker),
   );
+  return results;
+};
+
+/** What the build asks the handler with, and where it writes the answers. */
+type Render = {
+  readonly handler: Handler;
+  /** The client build, absolute. */
+  readonly clientDir: string;
+  /** A pathname in the table's terms as the URL the handler is asked for. */
+  readonly urlFor: (pathname: string) => string;
+  readonly csp: ContentSecurityPolicy | undefined;
+};
+
+/** What stops the build, by kind; `FAILURES` words each. */
+type Failure = keyof typeof FAILURES;
+
+/** What writing one pathname, `404.html` or a shell came to. */
+type Rendered =
+  | {
+      readonly kind: 'failure';
+      readonly failure: Failure;
+      /** How the message names it. */
+      readonly name: string;
+    }
+  | {
+      readonly kind: 'route';
+      readonly pathname: string;
+      /** The `Content-Type` its `GET` answered with. */
+      readonly type: string | null;
+    }
+  | { readonly kind: 'redirect'; readonly pathname: string }
+  | {
+      readonly kind: 'document';
+      /** `null` when the handler did not say. */
+      readonly named: readonly ClientDeps[] | null;
+      /** A page's payload, as a browser's URL spells its path. */
+      readonly payload: string | null;
+    };
+
+const FAILURES = {
+  render: (names: readonly string[]) =>
+    `static build could not render ${names.join(', ')} — see the error above`,
+  route: (names: readonly string[]) =>
+    `static build writes a route.ts from a GET that answers 200, and these did not: ${names.join(', ')}`,
+  refused: (names: readonly string[]) =>
+    `the "paths" option supplied pathnames a params schema refused: ${names.join(', ')}`,
+  disowned: (names: readonly string[]) =>
+    `the "paths" option supplied pathnames whose page called notFound(): ${names.join(', ')}`,
+  shellRefused: (names: readonly string[]) =>
+    `the "paths" option supplied shell locations a params schema refused: ${names.join(', ')}`,
+  shellDisowned: (names: readonly string[]) =>
+    names
+      .map(
+        (location) =>
+          `the shell for ${location} called notFound() while it rendered, and a shell has no value to disown — call notFound() from the client component that reads the value in the browser`,
+      )
+      .join('\n'),
+  shellTaken: (names: readonly string[]) => names.join('\n'),
+};
+
+const failed = (failure: Failure, name: string): Rendered => ({
+  kind: 'failure',
+  failure,
+  name,
+});
+
+/** Every kind that stopped the build, in `FAILURES`' order, each sorted. */
+const failureMessages = (rendered: readonly Rendered[]): string[] =>
+  Object.entries(FAILURES).flatMap(([failure, message]) => {
+    const names = rendered
+      .flatMap((each) =>
+        each.kind === 'failure' && each.failure === failure ? [each.name] : [],
+      )
+      .toSorted();
+    return names.length === 0 ? [] : [message(names)];
+  });
+
+const renderRoute = async (
+  { handler, clientDir, urlFor }: Render,
+  pathname: string,
+): Promise<Rendered> => {
+  const { status, type } = await writeBody(
+    path.join(clientDir, dirFor(pathname)),
+    handler,
+    urlFor(pathname),
+  );
+  return status === 200
+    ? { kind: 'route', pathname, type }
+    : failed('route', `${pathname} (${String(status)})`);
+};
+
+const renderPage = async (
+  render: Render,
+  pathname: string,
+): Promise<Rendered> => {
+  // URL はエスケープのまま頼み、ファイルの名前だけを復号する
+  const dir = path.join(render.clientDir, dirFor(pathname));
+  const { status, notFound, named } = await writeHtml(
+    path.join(dir, 'index.html'),
+    render,
+    render.urlFor(pathname),
+    { notFoundIsPage: false },
+  );
+  if (status === 500) return failed('render', pathname);
+  if (status === 404)
+    return failed(notFound ? 'disowned' : 'refused', pathname);
+  // リダイレクトにペイロードは無い。クライアントの遷移は index.rsc に何も
+  // 見つけず、URL をブラウザに渡し、上の HTML がリダイレクトする
+  if (status === 307 || status === 308) return { kind: 'redirect', pathname };
+  if (status !== 200) return { kind: 'document', named, payload: null };
+  const payload = render.urlFor(payloadPathFor(pathname));
+  const written = await writeBody(
+    path.join(dir, 'index.rsc'),
+    render.handler,
+    payload,
+  );
+  return written.status === 200
+    ? { kind: 'document', named, payload: new URL(payload).pathname }
+    : failed('render', pathname);
+};
+
+const renderNotFound = async (
+  render: Render,
+  pathname: string,
+): Promise<Rendered> => {
+  const { status, named } = await writeHtml(
+    path.join(render.clientDir, '404.html'),
+    render,
+    render.urlFor(pathname),
+    { notFoundIsPage: true },
+  );
+  return status === 500
+    ? failed('render', '404.html')
+    : { kind: 'document', named, payload: null };
+};
+
+const renderShell = async (
+  render: Render,
+  shell: Shell,
+  fallbacks: ReadonlyMap<string, string>,
+): Promise<Rendered> => {
+  const dir = path.join(render.clientDir, dirFor(shell.pathname));
+  const answered = await writeHtml(
+    path.join(dir, 'index.html'),
+    render,
+    render.urlFor(shell.pathname),
+    { notFoundIsPage: false, shell: shell.pattern },
+  );
+  const named = `${shell.location} (${fallbacks.get(shell.pattern) ?? ''})`;
+  if (answered.status === 500) return failed('render', shell.location);
+  if (answered.status === 404) {
+    return failed(
+      answered.notFound ? 'shellDisowned' : 'shellRefused',
+      shell.location,
+    );
+  }
+  if (answered.shell === null) {
+    return failed(
+      'shellTaken',
+      `the shell for ${named} was answered by another route, which took "${FALLBACK_SEGMENT}" as a value`,
+    );
+  }
+  if (answered.shell !== shell.pattern) {
+    return failed(
+      'shellTaken',
+      `the shell for ${named} was answered by ${fallbacks.get(answered.shell) ?? answered.shell}, which the table tries first — supply shell locations that pattern cannot match`,
+    );
+  }
+  const payload = await writeBody(
+    path.join(dir, 'index.rsc'),
+    render.handler,
+    render.urlFor(payloadPathFor(shell.pathname)),
+  );
+  return payload.status === 200
+    ? { kind: 'document', named: answered.named, payload: null }
+    : failed('render', shell.location);
+};
+
+/** The shells whose HTML outside its scripts holds the shell pathname. */
+const leakingShells = async (
+  clientDir: string,
+  shells: readonly Shell[],
+): Promise<string[]> =>
+  (
+    await Promise.all(
+      shells.map(async (shell) => {
+        const html = await readFile(
+          path.join(clientDir, dirFor(shell.pathname), 'index.html'),
+          'utf8',
+        );
+        return writtenOutsideScripts(html).some((written) =>
+          written.includes(FALLBACK_SEGMENT),
+        )
+          ? [shell.location]
+          : [];
+      }),
+    )
+  ).flat();
+
+const writeClientFiles = async (
+  clientDir: string,
+  rendered: readonly Rendered[],
+): Promise<void> => {
+  const documents = rendered.flatMap((each) =>
+    each.kind === 'document' && each.named !== null ? [each] : [],
+  );
+  await writeFile(
+    path.join(clientDir, CLIENT_FILES_PATH.slice(1)),
+    JSON.stringify(
+      clientFiles(
+        new Map(
+          documents.flatMap(({ payload, named }) =>
+            payload === null || named === null ? [] : [[payload, named]],
+          ),
+        ),
+        documents.map(({ named }) => named ?? []),
+      ),
+    ),
+  );
+};
+
+const writeSitemap = async (
+  clientDir: string,
+  site: string,
+  pathnames: readonly string[],
+): Promise<void> => {
+  await writeFile(
+    path.join(clientDir, 'sitemap.xml'),
+    sitemap(site, pathnames),
+  );
+};
+
+/** The type each route.ts's `GET` answered with, by the file it wrote. */
+const typesOf = (rendered: readonly Rendered[]): Map<string, string> =>
+  new Map(
+    rendered.flatMap((each) =>
+      each.kind === 'route' && each.type !== null
+        ? [[fileAt(each.pathname), each.type] as const]
+        : [],
+    ),
+  );
+
+/** What the build says it wrote, after `k8ordo: wrote `. */
+const summaryOf = (
+  plan: PathPlan,
+  {
+    notFound,
+    sitemap: listed,
+  }: { readonly notFound: boolean; readonly sitemap: boolean },
+): string => {
+  const shells =
+    plan.shells.length === 0
+      ? ''
+      : `, ${String(plan.shells.length)} ${plan.shells.length === 1 ? 'shell' : 'shells'} (${plan.shells.map((shell) => shell.location).join(', ')})`;
+  return `${String(plan.paths.length)} routes${shells}${notFound ? ' and 404.html' : ''}${listed ? ' and sitemap.xml' : ''}${plan.shells.length === 0 ? '' : ' and _redirects'}`;
 };
 
 type Written = {
@@ -1076,15 +1123,14 @@ type Written = {
 };
 
 /**
- * Writes what the handler answered, and says with which status. A page's
+ * Writes the HTML the handler answered, and says with which status. A page's
  * HTML says the nonce the framework signed its scripts with, which the file
  * says as hashes in the application's policy, if it gave one.
  */
-const write = async (
+const writeHtml = async (
   file: string,
-  handler: Handler,
+  { handler, csp }: Render,
   url: string,
-  csp: ContentSecurityPolicy | undefined,
   {
     notFoundIsPage,
     shell,
