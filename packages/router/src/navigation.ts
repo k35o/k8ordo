@@ -74,13 +74,6 @@ export type NavigationHandler<T> = {
   refresh?: (url: URL) => boolean;
 };
 
-/**
- * Where the viewport goes once the new page is on screen. Going back or
- * forward, it is where the visitor left that entry; otherwise a fragment
- * scrolls to its target, and anything else starts at the top, the way a
- * document load does — as does a traversal to an entry no page was ever
- * left from, one called off while it loaded.
- */
 type ScrollPlan =
   | { kind: 'top' }
   | { kind: 'fragment'; id: string }
@@ -260,10 +253,7 @@ export const NavigationGeneration = createContext(-1);
  * is what makes `navigation.navigate().finished` mean "the page is showing".
  * A navigation that keeps the pathname on screen — `@k8ordo/state`'s
  * `update()` — is intercepted with no handler, so its `finished` settles as
- * soon as the navigation commits. Going back or forward between two entries
- * of that page is the exception: it settles with the render the entry change
- * starts in the background, and the position that entry was left at comes
- * back onto what it renders.
+ * soon as the navigation commits.
  *
  * The new tree renders at the lane `useDeferredValue` gives it, not in a
  * transition. While any async action is pending, React holds every
@@ -405,21 +395,13 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       }
       const url = new URL(event.destination.url);
       const pathname = normalizePathname(url.pathname);
-      // Same place — only the search or the entry state moved. Nothing to
-      // remount, and no focus to disturb; nothing to load either, unless the
-      // page showing reads what moved. Only going back or forward moves the
-      // viewport, to where that entry was left.
       const inPlace = pathname === shown.current;
       const plan =
         keyless || (inPlace && !traverse)
           ? null
           : scrollPlanFor(event.navigationType, url.hash, leftAt(key));
-      // The platform would scroll "after transition" — after the handler
-      // settles — but the handler settles only once the tree is on screen,
-      // which is exactly when this hook scrolls itself. Doing it here keeps
-      // the two from disagreeing, and keeps the behaviour where a browser
-      // has not implemented the platform's half. A traversal included: the
-      // hook puts back where it saw that entry left — a load in place too.
+      // handler が解けるのは、木を画面に出して位置を置いた commit。ブラウザの
+      // after-transition も同じときに置くので、二重に置かないよう manual にする
       const scroll = keyless ? 'after-transition' : 'manual';
       if (inPlace && !refresh(url)) {
         onScreenEntry.current = keyless ? '' : null;
@@ -452,7 +434,6 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         if (latest.current === id) setPendingPathname(null);
       };
       event.intercept({
-        // A load in place moves neither the viewport nor focus.
         ...(inPlace ? { focusReset: 'manual' as const } : {}),
         scroll,
         handler: async () => {
