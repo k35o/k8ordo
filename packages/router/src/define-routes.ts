@@ -91,13 +91,16 @@ export type Routes<R extends RoutesRecord = RoutesRecord> = {
    * operation that needs the table's value: links and navigation build from
    * the pattern string alone (`href` / `navigateTo`), so only `<Router>`
    * ever holds this object.
-   *
-   * `accept` lets the caller decline a match, in which case the walk goes
-   * on to the next pattern as if this one had not fit — a param a schema
-   * refuses is a pathname the pattern does not answer, and what answers it
-   * instead is whatever the table declares next, the catch-all included.
    */
-  match: (pathname: string, accept?: (match: Match) => boolean) => Match | null;
+  match: (pathname: string) => Match | null;
+  /**
+   * Every pattern that fits a pathname, in declaration order, matched as the
+   * iteration reaches it. `match` is its first. A caller that can still turn
+   * a fit down — a param a schema refuses is a pathname the pattern does not
+   * answer — walks on to whatever the table declares next, the catch-all
+   * included.
+   */
+  matchAll: (pathname: string) => IteratorObject<Match, undefined>;
 };
 
 type Entry = {
@@ -207,10 +210,7 @@ export function defineRoutes<R extends RoutesRecord>(record: R): Routes<R> {
   };
   walk(record, '', []);
 
-  const match = (
-    pathname: string,
-    accept?: (match: Match) => boolean,
-  ): Match | null => {
+  function* matchAll(pathname: string): Generator<Match, undefined> {
     const normalized = normalizePathname(pathname);
     for (const entry of entries) {
       const result = entry.matcher.exec({ pathname: normalized });
@@ -223,11 +223,13 @@ export function defineRoutes<R extends RoutesRecord>(record: R): Routes<R> {
           params[name] = decodeOrKeep(value);
         }
       }
-      const found = { pattern: entry.pattern, params, stack: entry.stack };
-      if (accept === undefined || accept(found)) return found;
+      yield { pattern: entry.pattern, params, stack: entry.stack };
     }
-    return null;
-  };
+    return undefined;
+  }
 
-  return { kind: 'routes', record, match };
+  const match = (pathname: string): Match | null =>
+    matchAll(pathname).next().value ?? null;
+
+  return { kind: 'routes', record, match, matchAll };
 }

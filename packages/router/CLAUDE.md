@@ -233,9 +233,9 @@ pnpm check         # check:write to auto-fix
   intercept (`canIntercept`); a GET form (no `formData`) still comes through.
 - **Schemas are typed here, run elsewhere.** `ParamsSchemaFor` /
   `ParsedParams` / `RegisteredParams` describe what a Standard Schema produces
-  so `href` can take it; the framework runs the schema and hands `match` an
-  `accept` that declines a refused param, which makes the walk go on to the
-  next pattern. Nothing in this package validates anything.
+  so `href` can take it; the framework walks `matchAll` and runs the schema
+  on each fit, passing over one whose param it refused, so the next pattern
+  answers. Nothing in this package validates anything.
 - **An `error` boundary is an element of the stack, cleared by generation.**
   `boundaryFor` puts it after the layout; `RouteErrorBoundary` clears its
   class boundary's failure when `NavigationGeneration` — the id of the
@@ -294,7 +294,7 @@ pnpm check         # check:write to auto-fix
 src/
   paths.ts          type derivation (ParamsOf / PathFor / Join) + string operations
   base.ts           withBase / withoutBase (Vite's base at the edges)
-  define-routes.ts  defineRoutes / match / NavigablePath
+  define-routes.ts  defineRoutes / match / matchAll / NavigablePath
   links.ts          href / navigateTo / bindParams (the side that needs no table)
   register.ts       Register (module augmentation) + PageProps / LayoutProps / RouteContext
   navigation.ts     useInterceptedNavigation (intercept and the commit contract), usePendingPathname

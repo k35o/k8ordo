@@ -611,10 +611,11 @@ the table's `error` boundaries know when to let a failure go. `<Router>` does
 this itself; the framework's runtime does too.
 
 The table itself stays on the server, generated from `routes/`, and the
-framework matches against it with `match(pathname, accept)`. Each match that
-fits is handed to `accept` first, and one it declines — a param a
-`paramsSchema` along its stack refused — is passed over as if the pattern had
-not fit, so the walk goes on to the next pattern, the catch-all included.
+framework walks it with `matchAll(pathname)`: every pattern that fits, in
+declaration order, where `match(pathname)` is only the first. A fit whose
+params a `paramsSchema` along its stack refused is passed over as if the
+pattern had not fit, so the walk goes on to the next pattern, the catch-all
+included.
 
 A framework `route.ts` — an answer that is not a page, a feed or JSON —
 exports a function per request method, and `RouteContext<'/feed.xml'>` is

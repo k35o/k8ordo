@@ -477,8 +477,13 @@ export const routesRecord = message({
 });
 
 export const routesMatch = message({
-  ja: 'パスを照合し、合った`Match`か`null`を返します。`accept`が`false`を返した結果は飛ばして、次のパターンへ進みます。',
-  en: 'Matches a path and returns the `Match` or `null`. A result `accept` returns `false` for is skipped, and the next pattern is tried.',
+  ja: 'パスを照合し、最初に合った`Match`か`null`を返します。',
+  en: 'Matches a path and returns the first `Match` that fits, or `null`.',
+});
+
+export const routesMatchAll = message({
+  ja: 'パスに合うパターンをすべて、表に書いた順に返す反復子です。照合するのは反復が進んだところまでです。',
+  en: 'An iterator over every pattern that fits a path, in the order the table declares them. It matches only as far as the iteration goes.',
 });
 
 export const routesRecordTypeSummary = message({

@@ -287,26 +287,24 @@ describe('defineRoutes', () => {
   });
 });
 
-// 数値でない id は、その pattern が答えなかったのと同じ扱いになる
-const onlyNumericIds = (found: {
-  pattern: string;
-  params: Readonly<Record<string, string>>;
-}) =>
-  found.pattern !== '/:locale/products/:id' ||
-  /^\d+$/u.test(found.params.id ?? '');
-
-describe('match with accept', () => {
-  it('walks on to the next pattern when the caller declines a match', () => {
-    expect(routes.match('/ja/products/42', onlyNumericIds)?.pattern).toBe(
-      '/:locale/products/:id',
-    );
-    expect(routes.match('/ja/products/shoes', onlyNumericIds)?.pattern).toBe(
-      '/:locale/*',
-    );
+describe('matchAll', () => {
+  it('lists every pattern that fits, in declaration order', () => {
+    expect(
+      [...routes.matchAll('/ja/products/42')].map((found) => found.pattern),
+    ).toStrictEqual(['/:locale/products/:id', '/:locale/*']);
   });
 
-  it('returns null when every fit was declined', () => {
-    expect(routes.match('/', () => false)).toBeNull();
+  it('hands each fit its own params, decoded', () => {
+    expect(
+      [...routes.matchAll('/ja/products/caf%C3%A9')].map(
+        (found) => found.params,
+      ),
+    ).toStrictEqual([{ locale: 'ja', id: 'café' }, { locale: 'ja' }]);
+  });
+
+  it('lists nothing when no pattern fits', () => {
+    const lone = defineRoutes({ '/about': Home });
+    expect([...lone.matchAll('/elsewhere')]).toStrictEqual([]);
   });
 });
 

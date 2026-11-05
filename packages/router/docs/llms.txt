@@ -26,10 +26,10 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
 
 ## Entry point
 
-- `@k8ordo/router` — `defineRoutes(record)` returns a table whose one operation
-  is `match(pathname, accept?)` — a match `accept` declines is passed over and
-  the walk goes on to the next pattern, which is how the framework skips a
-  param a schema refused; `<Router routes>` mounts it on the Navigation API and
+- `@k8ordo/router` — `defineRoutes(record)` returns a table that answers
+  `match(pathname)`, the first pattern that fits, and `matchAll(pathname)`,
+  every one in declaration order — the framework walks the second and passes
+  over a fit whose param a schema refused; `<Router routes>` mounts it on the Navigation API and
   `<Outlet />` renders the rest of the matched stack; a branch's `error`
   component (props `ErrorProps`, `{ error, reset }`; type `ErrorComponent`)
   renders in the layout's hole when what is below throws; the next
