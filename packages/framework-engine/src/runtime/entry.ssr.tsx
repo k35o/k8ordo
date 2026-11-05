@@ -16,6 +16,7 @@ import { DocumentRoot } from './document-root';
 import { scriptsBeforeStylesheetsStream } from './head-scripts';
 import { PageShownContext } from './page-shown';
 import type { ClientDeps, Payload } from './payload';
+import { CLIENT_STYLESHEETS } from './stylesheets';
 
 type SsrOptions = NonNullable<Parameters<typeof renderToReadableStream>[1]>;
 
@@ -51,7 +52,7 @@ const linkClientDeps = (named: readonly ClientDeps[]): void => {
       preinit(href, {
         as: 'style',
         crossOrigin: 'anonymous',
-        precedence: 'vite-rsc/client-reference',
+        precedence: CLIENT_STYLESHEETS,
       });
     }
   }

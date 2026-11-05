@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import { SERVER_STYLESHEETS, STYLESHEET_ORDER_HREF } from './payload';
+import { SERVER_STYLESHEETS, STYLESHEET_ORDER_HREF } from './stylesheets';
 
 /**
  * What the HTML render and the browser both render at the root, around the

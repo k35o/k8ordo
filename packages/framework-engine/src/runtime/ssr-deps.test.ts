@@ -10,12 +10,9 @@ import { afterAll, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
 import { buildFixture, serveFixture } from '../../fixtures/build';
 import type { BuiltFixture, ServedFixture } from '../../fixtures/build';
 import type { Mode } from '../host';
-import {
-  CLIENT_DEPS_HEADER,
-  readClientDeps,
-  STYLESHEET_ORDER_HREF,
-} from './payload';
+import { CLIENT_DEPS_HEADER, readClientDeps } from './payload';
 import type { ClientDeps } from './payload';
+import { STYLESHEET_ORDER_HREF } from './stylesheets';
 
 // CI はエンジンごとにジョブを分けて並べるので、TEST_BROWSER で 1 つに絞れる
 const browserTypes = [chromium, firefox, webkit]
