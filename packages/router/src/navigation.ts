@@ -14,6 +14,8 @@ import {
 } from 'react';
 
 import { withoutBase } from './base';
+import { leftAt, rememberLeftAt, restoreLeftAt } from './left-at';
+import type { Position } from './left-at';
 import { normalizePathname } from './paths';
 
 /**
@@ -72,8 +74,6 @@ export type NavigationHandler<T> = {
   refresh?: (url: URL) => boolean;
 };
 
-export type Position = { readonly left: number; readonly top: number };
-
 /**
  * Where the viewport goes once the new page is on screen. Going back or
  * forward, it is where the visitor left that entry; otherwise a fragment
@@ -89,10 +89,10 @@ export type ScrollPlan =
 export const scrollPlanFor = (
   navigationType: NavigationType,
   hash: string,
-  leftAt: Position | undefined,
+  left: Position | undefined,
 ): ScrollPlan => {
-  if (navigationType === 'traverse' && leftAt !== undefined) {
-    return { kind: 'position', ...leftAt };
+  if (navigationType === 'traverse' && left !== undefined) {
+    return { kind: 'position', ...left };
   }
   if (hash.length > 1) {
     let id = hash.slice(1);
@@ -143,59 +143,6 @@ type Pending = {
   scroll: ScrollPlan | null;
   types: readonly string[];
   keyless: boolean;
-};
-
-// 戻る・進むの位置はブラウザに戻させず、離れたときの位置を覚えて自分で置く。
-// Chromium は intercept した traverse の URL を handler より先に確定させ、
-// handler が解けるまでに位置が変わると、それを行き先の entry の保存した位置に
-// 書いてから戻す。新しいページの描画で layout が走ると、前のページの位置が
-// 新しいページで下げられる量に切り詰められ、その下端に戻ってしまう
-const leftAt = new Map<string, Position>();
-
-// 読み直しのあとも、それより前に作った entry へは同じ文書のまま戻る。entry の
-// key は読み直しをまたいで変わらないので、タブの sessionStorage にも写す
-const LEFT_AT_KEY = '@k8ordo/router:left-at';
-
-// 間引くのは上限を超えたときだけ。entries() はその文書から続く同じ origin の
-// entry しか並べないので、そのたびに間引くと、別のサイトから入り直した文書で
-// 別のサイトより前の entry の位置まで消える。捨てられた entry の key がほかの
-// entry に付くことはなく、間引くのは大きさのためだけ。どのエンジンも 1 つの
-// タブの履歴に 100 件より多くは持たない
-const LEFT_AT_LIMIT = 100;
-
-const readLeftAt = (): void => {
-  try {
-    const saved = sessionStorage.getItem(LEFT_AT_KEY);
-    if (saved === null) return;
-    for (const [key, position] of JSON.parse(saved) as Array<
-      [string, Position]
-    >) {
-      leftAt.set(key, position);
-    }
-  } catch {
-    // 読めなければ、覚えていないのと同じ
-  }
-};
-
-const rememberLeftAt = (entry: string): void => {
-  // Map は入れた順に並ぶ。離れ直した entry を後ろへ移し、古いものを前から捨てる
-  leftAt.delete(entry);
-  leftAt.set(entry, { left: window.scrollX, top: window.scrollY });
-  if (leftAt.size > LEFT_AT_LIMIT) {
-    // 移っては戻ると、切り捨てられた entry の key が戻れる entry の間に積もる。
-    // 古さだけで捨てると、一度離れたきりの戻れる entry が先に押し出される
-    const listed = new Set(navigation.entries().map(({ key }) => key));
-    const keys = [...leftAt.keys()];
-    for (const key of [...keys.filter((k) => !listed.has(k)), ...keys]) {
-      if (leftAt.size <= LEFT_AT_LIMIT) break;
-      leftAt.delete(key);
-    }
-  }
-  try {
-    sessionStorage.setItem(LEFT_AT_KEY, JSON.stringify([...leftAt]));
-  } catch {
-    // 書けなくても、この文書のあいだは覚えている
-  }
 };
 
 // Firefox は intercept した traverse でも scroll の指定を見ず、popstate を
@@ -340,7 +287,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
 
   useEffect(() => {
     shown.current = normalizePathname(location.pathname);
-    readLeftAt();
+    restoreLeftAt();
     // 読み直しを頼んだ文書は去るところ。そのあとの遷移は横取りせずブラウザに任せる。
     // 横取りすると読み直しが止まり、currentEntry が null の文書では遷移も AbortError になる
     let reloading = false;
@@ -419,7 +366,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
             : scrollPlanFor(
                 'traverse',
                 url.hash,
-                leftAt.get(event.destination.key),
+                leftAt(event.destination.key),
               ),
           types: [],
           keyless,
@@ -457,7 +404,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
           : scrollPlanFor(
               event.navigationType,
               url.hash,
-              leftAt.get(event.destination.key),
+              leftAt(event.destination.key),
             );
       event.intercept({
         // A load in place moves neither the viewport nor focus.
