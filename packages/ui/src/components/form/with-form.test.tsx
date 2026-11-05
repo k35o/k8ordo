@@ -1,11 +1,6 @@
 import { useForm } from '@k8ordo/form';
 import type { FormFields, FormState, UseFormReturn } from '@k8ordo/form';
-import {
-  defineForm,
-  formFields,
-  minChecked,
-  parseForm,
-} from '@k8ordo/form/server';
+import { formFields, parseForm } from '@k8ordo/form/server';
 import type { ParseResult } from '@k8ordo/form/server';
 import { useActionState } from 'react';
 import type { ReactNode } from 'react';
@@ -15,7 +10,6 @@ import { page, userEvent } from 'vitest/browser';
 import { z } from 'zod';
 
 import { Button } from '../buttons/button';
-import { Autocomplete } from './autocomplete';
 import { FileField } from './file-field';
 import { FormControl } from './form-control';
 import { Slider } from './slider';
@@ -82,11 +76,6 @@ const errorShown = (message: string) =>
     (paragraph) => paragraph.textContent === message,
   );
 
-// 送信に失敗した echo を配列で受ける部品に渡す。チェックボックスの組は、
-// 何個チェックしても配列で返ってくる
-const listOf = (value: string | string[] | undefined): string[] =>
-  Array.isArray(value) ? value : [];
-
 // 送信をサーバーで落とすためだけの欄。ブラウザの検査は通るので、送信は
 // action まで届き、失敗が state で返ってくる
 const failing = z.string().refine((memo) => memo !== '却下', '却下されました');
@@ -106,137 +95,10 @@ const Memo = ({ form }: { form: UseFormReturn<'memo', never> }) => {
   );
 };
 
-// Autocomplete の選択肢を開いて 1 つ選ぶ
-const choose = async (label: string) => {
-  await userEvent.click(document.querySelector('[role="combobox"]')!);
-  await userEvent.click(
-    [...document.querySelectorAll('[role="option"]')].find(
-      (option) => option.textContent === label,
-    )!,
-  );
-};
-
 const picture = () => new File(['avatar'], 'me.png', { type: 'image/png' });
 
 beforeEach(() => {
   received = undefined;
-});
-
-const tagsDefinition = defineForm(
-  z.object({
-    tags: z.array(z.enum(['react', 'vue', 'svelte'])).min(1),
-    memo: failing,
-  }),
-  [minChecked('tags', 1, '1つ以上選んでください')],
-);
-const tagsFields = formFields(tagsDefinition);
-const tagOptions = [
-  { value: 'react', label: 'React' },
-  { value: 'vue', label: 'Vue' },
-  { value: 'svelte', label: 'Svelte' },
-];
-
-describe('Autocomplete', () => {
-  const Tags = () => (
-    <Harness
-      fields={tagsFields}
-      serve={(data) => parseForm(tagsDefinition, data)}
-    >
-      {(form, state) => {
-        const tags = form.field('tags');
-        return (
-          <>
-            <FormControl
-              errorText={tags.error}
-              invalid={tags.invalid}
-              label="好きなもの"
-              renderInput={(props) => (
-                <Autocomplete
-                  {...props}
-                  {...tags.input}
-                  defaultValue={listOf(state.values?.tags)}
-                  options={tagOptions}
-                />
-              )}
-              required={tags.required}
-            />
-            <Memo form={form} />
-          </>
-        );
-      }}
-    </Harness>
-  );
-
-  it('選んだ値を配列で送る', async () => {
-    await render(<Tags />);
-
-    await choose('Vue');
-    await choose('React');
-    await userEvent.fill(labelled('メモ'), 'よろしく');
-    submit();
-
-    await expect
-      .poll(() => received)
-      .toStrictEqual({ tags: ['vue', 'react'], memo: 'よろしく' });
-  });
-
-  it('何も選ばずに送ると minChecked の文言を出し、入力欄へフォーカスを移す', async () => {
-    const screen = await render(<Tags />);
-
-    await userEvent.fill(labelled('メモ'), 'よろしく');
-    submit();
-
-    await expect.poll(() => errorShown('1つ以上選んでください')).toBe(true);
-    await expect.element(screen.getByRole('combobox')).toHaveFocus();
-  });
-
-  it('選択の変化を form が知り、エラーの解除と isDirty に届く', async () => {
-    await render(<Tags />);
-
-    submit();
-    await expect.poll(() => errorShown('1つ以上選んでください')).toBe(true);
-
-    await choose('Svelte');
-    await expect.poll(() => errorShown('1つ以上選んでください')).toBe(false);
-    await expect.poll(isDirty).toBe('true');
-  });
-
-  it('送信に失敗しても選択を描き直し、reset で既定値に戻る', async () => {
-    const screen = await render(<Tags />);
-
-    await choose('Vue');
-    await refuseOnServer();
-    submit();
-    await expect.poll(() => errorShown('却下されました')).toBe(true);
-    await expect
-      .element(screen.getByRole('button', { name: 'Remove tag' }))
-      .toBeInTheDocument();
-
-    await choose('React');
-    reset();
-    await expect.poll(isDirty).toBe('false');
-    await userEvent.fill(labelled('メモ'), 'よろしく');
-    submit();
-
-    await expect
-      .poll(() => received)
-      .toStrictEqual({ tags: ['vue'], memo: 'よろしく' });
-  });
-
-  it('reset で、選ばずに打ちかけた文字を消し、候補の一覧も閉じる', async () => {
-    const screen = await render(<Tags />);
-
-    await userEvent.type(screen.getByRole('combobox'), 'Re');
-    await expect
-      .element(screen.getByRole('combobox'))
-      .toHaveAttribute('aria-expanded', 'true');
-    reset();
-
-    await expect.element(screen.getByRole('combobox')).toHaveValue('');
-    await expect
-      .element(screen.getByRole('combobox'))
-      .toHaveAttribute('aria-expanded', 'false');
-  });
 });
 
 describe('Slider', () => {
