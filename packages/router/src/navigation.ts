@@ -327,6 +327,8 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
   const shown = useRef<string | null>(null);
   // The navigation `usePendingPathname` names: the last one to start.
   const latest = useRef(-1);
+  // 木を当てて、その木がまだ画面に出ていない遷移。中止されても、当てた木は画面に出る
+  const applying = useRef<number | null>(null);
   // The entry whose page is on screen while a page change loads — the URL's
   // entry otherwise. Going back to it is calling the change off, not going
   // back to a place the visitor left; and it is the entry a navigation in the
@@ -373,15 +375,25 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       // 横取りすると読み直しが止まり、currentEntry が null の文書では遷移も AbortError になる
       if (steps.reloading()) return;
       const traverse = event.navigationType === 'traverse';
-      // WebKit は bfcache から戻した文書に、位置を戻す前の traverse を出す。行き先は
-      // 今の entry で、画面のページは離れていない。位置はこのあとブラウザが戻す
+      const { key } = event.destination;
+      // 画面のページの entry への traverse は、どこからも離れない。読み込み中の
+      // ページの切り替えなら、それを取り消す。読み込んだ木をもう当てていたら、
+      // 引っ込められずに戻った URL の下に出るので、取り消さずに戻った先を読み込む。
+      // どちらでもなければ、WebKit が bfcache から戻した文書に位置を戻す前に出す
+      // もので、位置はこのあとブラウザが戻す
       if (
         traverse &&
         isOurs(event) &&
-        onScreenEntry.current === null &&
-        event.destination.key === navigation.currentEntry?.key
+        key !== '' &&
+        key === (onScreenEntry.current ?? navigation.currentEntry?.key) &&
+        applying.current === null
       ) {
+        const calledOff = onScreenEntry.current !== null;
+        onScreenEntry.current = null;
         event.intercept({ scroll: 'manual', focusReset: 'manual' });
+        // bfcache から戻した文書で置き直すと、まだ 0 の位置を持ち越して、ブラウザが
+        // 戻した位置を消す
+        if (calledOff) keepPosition(key);
         return;
       }
       // ページの読み込み中に離れるのは、URL の entry でなく画面に残るページの
@@ -391,7 +403,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       // WebKit は、戻るで読み直した文書の entries() に、同じ文書のまま戻れる
       // それより前の entry を並べず、そこへの traverse の行き先に key を付けない。
       // 離れた位置を引けないので、そのときだけ戻すのをブラウザに任せる
-      const keyless = traverse && event.destination.key === '';
+      const keyless = traverse && key === '';
       if (!isOurs(event)) {
         if (keyless) onScreenEntry.current = '';
         else if (onScreenEntry.current === '') onScreenEntry.current = null;
@@ -407,11 +419,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       const plan =
         keyless || (inPlace && !traverse)
           ? null
-          : scrollPlanFor(
-              event.navigationType,
-              url.hash,
-              leftAt(event.destination.key),
-            );
+          : scrollPlanFor(event.navigationType, url.hash, leftAt(key));
       // The platform would scroll "after transition" — after the handler
       // settles — but the handler settles only once the tree is on screen,
       // which is exactly when this hook scrolls itself. Doing it here keeps
@@ -420,13 +428,9 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       // hook puts back where it saw that entry left — a load in place too.
       const scroll = keyless ? 'after-transition' : 'manual';
       if (inPlace && !refresh(url)) {
-        const calledOff =
-          event.destination.key !== '' &&
-          event.destination.key === onScreenEntry.current;
         onScreenEntry.current = keyless ? '' : null;
-        if (!traverse || calledOff) {
+        if (!traverse) {
           event.intercept({ scroll: 'manual', focusReset: 'manual' });
-          if (calledOff) keepPosition(event.destination.key);
           return;
         }
         // 表に置くのも描き直しを頼むのも、handler でなくここで。currententrychange
@@ -491,6 +495,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
           // Recorded at apply rather than at commit: a navigation that
           // arrives in between must see this page as the one showing.
           shown.current = pathname;
+          applying.current = id;
           apply(value);
           // Batched with the caller's own update, so its deferred copy
           // moves in the same background commit as the host's — and names
@@ -515,6 +520,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
   // navigation has finished, and runs passive effects only after the
   // animation — a passive resolver would be waiting on itself.
   const settle = useEffectEvent((id: number) => {
+    if (applying.current === id) applying.current = null;
     const entry = pending.current.get(id);
     if (entry === undefined) return;
     pending.current.delete(id);

@@ -143,8 +143,11 @@ describe.each(browserTypes)(
     const release = (): Promise<void> =>
       page.evaluate(() => {
         controls.hold = false;
+        controls.holdRender = false;
         controls.release();
       });
+
+    const loads = (): Promise<string[]> => page.evaluate(() => controls.loads);
 
     // 文書の読み直しの要求を、試験が放すまで返さない
     const holdDocument = async (
@@ -694,16 +697,48 @@ describe.each(browserTypes)(
 
     // リンクを押すと URL は先に進み、前のページは読み込みが終わるまで残る。
     // そこで読んでいた位置から戻るのは移るのを取り消すことで、押したときの
-    // 位置に引き戻さない
-    it('keeps the position where the visitor scrolled a page still on screen when they go back while the next one loads', async () => {
+    // 位置に引き戻さない。search を読むページでも、読み直さない
+    it.each(['/host.html', '/host.html?reload'])(
+      'loads nothing and keeps the position the visitor scrolled %s to when they go back to it while the next page loads',
+      async (pathname) => {
+        await open(pathname);
+        await expect.poll(listCount).toBe('90');
+        await scrollTo(1500);
+        await hold();
+        await commit('/elsewhere');
+        const kept = await scrollTo(500);
+
+        await commit('back');
+        await page.evaluate(
+          () =>
+            new Promise((resolve) => {
+              requestAnimationFrame(() => {
+                requestAnimationFrame(resolve);
+              });
+            }),
+        );
+
+        expect(page.url()).toBe(`${origin}${pathname}`);
+        expect(await scrollY()).toBe(kept);
+        expect(await loads()).toStrictEqual(['/elsewhere']);
+      },
+      30_000,
+    );
+
+    // 読み込んだ木は当たっても、描き終えるまで前のページが画面に残る。そこで戻るのは
+    // 取り消しではない。当てた木はもう引っ込められない
+    it('shows the page the visitor goes back to while the next one has loaded but not rendered yet', async () => {
       await open('/host.html');
-      await expect.poll(listCount).toBe('90');
-      await scrollTo(1500);
-      await hold();
-      await commit('/elsewhere');
-      const kept = await scrollTo(500);
+      await page.evaluate(() => {
+        controls.holdRender = true;
+      });
+      await commit('/p1');
+      expect(await loads()).toStrictEqual(['/p1']);
 
       await commit('back');
+      await release();
+
+      await expect.poll(loads).toStrictEqual(['/p1', '/host.html']);
       await page.evaluate(
         () =>
           new Promise((resolve) => {
@@ -712,9 +747,8 @@ describe.each(browserTypes)(
             });
           }),
       );
-
-      expect(new URL(page.url()).pathname).toBe('/host.html');
-      expect(await scrollY()).toBe(kept);
+      expect(await page.getByRole('heading').textContent()).toBe('host.html');
+      expect(page.url()).toBe(`${origin}/host.html`);
     }, 30_000);
 
     // Playwright の WebKit は bfcache を使わないので、WebKit が bfcache から戻した
