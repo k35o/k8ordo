@@ -264,18 +264,12 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
   let routesDir = '';
   let base = '/';
   let logger: Logger | undefined;
-  // The plugin list the RSC pipeline's registry is reached through, kept the
-  // way `root` is: empty until Vite resolves the config, which is before any
-  // module is compiled.
   let plugins: ResolvedConfig['plugins'] = [];
   // Who imports the request API, found while the environments build and
   // named once they have — no module graph lists an import by the specifier
   // it was written as.
   const serverImporters = new Set<string>();
 
-  // vite dev: what the routes and `paths` say, read once per change. `paths`
-  // is called only for an application with a fallback.tsx, and again only
-  // when the patterns handed to it changed.
   let routesRead: Promise<DevRoutes> | undefined;
   let shellsRead: Promise<DevShells> | undefined;
   let suppliedFor: string | undefined;
@@ -734,7 +728,8 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
                 ? builder.config.publicDir
                 : null,
           });
-          // アダプタのあるホストは _redirects を読まない。書くのは vite preview と serve のため
+          // アダプタのあるホストは _redirects を読まない。それでも書くのは
+          // vite preview と serve のため
           if (adapter === undefined) {
             for (const message of misread) builder.config.logger.warn(message);
           }
@@ -755,9 +750,6 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
     },
   };
 
-  // What only a running server can have is refused before anything is built.
-  // Server Actions are the exception: the RSC pipeline finds them only while
-  // it compiles, so the build names them once it has.
   const refuse: Plugin = {
     name: 'k8ordo:static-refuses',
     buildApp: {

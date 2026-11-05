@@ -41,17 +41,12 @@ export const redirectPage = (to: string): string => {
 const filesOf = (named: readonly ClientDeps[]): Set<string> =>
   new Set(named.flatMap(({ js, css }) => [...js, ...css]));
 
-/**
- * What a client navigation links ahead of a page (`CLIENT_FILES_PATH`):
- * each page's files — what its client components need, by its payload's
- * path — less the files every document links, which the one the visitor
- * arrived on has loaded already. Sorted, so a build writes the same bytes
- * whatever order its pages rendered in.
- */
+/** What `CLIENT_FILES_PATH` lists: each page's files, by its payload's path. */
 export const clientFiles = (
   pages: ReadonlyMap<string, readonly ClientDeps[]>,
   documents: Iterable<readonly ClientDeps[]>,
 ): ClientFiles => {
+  // どの文書も読み込むものは、訪問者が着いた文書が読み込み済み
   let everywhere: Set<string> | undefined;
   for (const named of documents) {
     const files = filesOf(named);
@@ -66,6 +61,7 @@ export const clientFiles = (
         ] as const,
     )
     .filter(([, files]) => files.length > 0)
+    // 描いた順によらず、ビルドが毎回同じバイトを書くように並べる
     .toSorted(([a], [b]) => (a < b ? -1 : 1));
   const files = [...new Set(own.flatMap(([, listed]) => listed))].toSorted();
   const indexOf = new Map(files.map((file, index) => [file, index]));
@@ -239,15 +235,8 @@ const serialize = (
 };
 
 /**
- * The page as a file. The handler signed the framework's own inline scripts
- * — the payload, React's — with a nonce, and a file cannot carry one:
- * everyone reads the same file, so the nonce is taken off. With a policy,
- * what it signed is named by hash instead, in a `<meta>` ahead of everything
- * the page loads — behind only the charset React writes first in `<head>` —
- * and so is the framework's one `<style>`, which keeps the Server
- * Components' stylesheets first; an inline script of the application's is
- * the application's to allow, by its hash in that policy, and one that
- * reached the page from content is refused.
+ * The page as a file: without the nonce, which everyone reading the same file
+ * makes worth nothing, and with a policy, what it signed named by hash.
  */
 export const asFile = (
   html: string,
