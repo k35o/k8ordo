@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { colorSchemeState, resolve, scriptFor } from './scheme';
+import {
+  colorSchemeScriptHash,
+  colorSchemeState,
+  resolve,
+  scriptFor,
+} from './scheme';
 
 describe('resolve', () => {
   it('lets a stated preference win, then the default, then the system', () => {
@@ -15,8 +20,22 @@ describe('resolve', () => {
 
 describe('scriptFor', () => {
   it('reads the same row the provider writes, and carries the default', () => {
-    expect(scriptFor('system')).toContain(colorSchemeState.storageKey);
-    expect(scriptFor('dark')).toContain('"dark"');
+    expect(scriptFor()).toContain(colorSchemeState.storageKey);
+    expect(scriptFor({ defaultPreference: 'dark' })).toContain('"dark"');
     expect(colorSchemeState.storageKey).toBe('k8ordo-state:color-scheme');
+  });
+});
+
+describe('colorSchemeScriptHash', () => {
+  it('depends on the theme colours, not on the order they are given in', async () => {
+    const lightFirst = await colorSchemeScriptHash({
+      themeColor: { light: '#fafafa', dark: '#18181b' },
+    });
+    const darkFirst = await colorSchemeScriptHash({
+      themeColor: { dark: '#18181b', light: '#fafafa' },
+    });
+
+    expect(darkFirst).toBe(lightFirst);
+    expect(lightFirst).not.toBe(await colorSchemeScriptHash());
   });
 });

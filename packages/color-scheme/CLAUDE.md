@@ -4,11 +4,12 @@
 asked for (`light`, `dark`, or nothing, which follows the provider's
 default — the system unless told otherwise), where it is kept
 (localStorage, through `@k8ordo/state`), what it resolves to, and the one
-class `@k8ordo/ui` reads on `<html>`. A script in `<head>` writes the class
-before the first paint, one provider decides and writes it after; a hook
-reads. The shared discipline (React 19 / RSC assumed, Baseline newly
-available only, no polyfills) and how a new package joins are in the
-repository root's [`CLAUDE.md`](../../CLAUDE.md).
+class `@k8ordo/ui` reads on `<html>` — and, given the application's
+colours, the theme-color `<meta>` the browser paints its own UI from. A
+script in `<head>` writes both before the first paint, one provider decides
+and writes them after; a hook reads. The shared discipline (React 19 / RSC
+assumed, Baseline newly available only, no polyfills) and how a new package
+joins are in the repository root's [`CLAUDE.md`](../../CLAUDE.md).
 
 User-facing documentation is in [`docs/GUIDE.md`](docs/GUIDE.md), shipped
 inside the npm package.
@@ -35,10 +36,22 @@ pnpm check         # check:write to auto-fix
   told otherwise — so a visitor who never chose is never pinned to what the
   system said on their first visit.
 - **One rule, two readers.** `resolve(preference, defaultPreference,
-  systemDark)` is the rule; the provider reads it after hydration and
-  `scriptFor(defaultPreference)` restates it in the inline script for the
-  first paint. The script cannot run the schema, so it checks the value by
-  hand and reads anything else as nothing chosen — keep the two in step.
+  systemDark)` is the rule, `pinnedScheme` its first half and
+  `themeColorMedia` what the theme-color `<meta>` make of it; the provider
+  reads them after hydration and `scriptFor({ defaultPreference,
+  themeColor })` restates them in the inline script for the first paint.
+  The script cannot run the schema, so it checks the value by hand and
+  reads anything else as nothing chosen — keep the two in step.
+- **The theme-color `<meta>` are the script's, and only their `media`
+  moves.** React writes every `<meta>` it renders after the stylesheets,
+  where the script — moved ahead of them — cannot reach, so the script
+  creates one per scheme (marked `data-color-scheme`) instead of the page
+  rendering them. Each sits under its own `prefers-color-scheme` while
+  nothing is pinned, so the browser follows the system without us; once a
+  scheme is pinned it is `all` and the other `not all`. The provider finds
+  them by the mark and rewrites `media` alone, which is why it takes no
+  colours: they are given once, to the script. No script, no `<meta>` —
+  the provider never creates them.
 - **The script goes in `<head>`, ahead of every stylesheet.** A script
   after a stylesheet waits for it to load, and the browser may paint in
   between — light, for a dark visitor (measured on k8o.me in Chromium: 12
@@ -55,14 +68,15 @@ pnpm check         # check:write to auto-fix
   nothing.** No storage and no system to ask on the server, so a `'system'`
   default renders `light`; the first render in the browser reads the
   server's guesses and must not put them on a document the script already
-  put right, so the class effect waits for the render that reads the store.
+  put right, so the effects wait for the render that reads the store.
   Do not add a cookie or a header to guess earlier.
 - **The script is allowed by nonce or by hash, never by being special.**
-  `nonce` goes on the script as given; `colorSchemeScriptHash` hashes
-  `scriptFor(defaultPreference)`, which is exactly what React writes between
-  the tags — the browser test renders `ColorSchemeScript` on the server into
-  a document under a `<meta>` policy and checks the hash is what lets it
-  run.
+  `nonce` goes on the script as given; `colorSchemeScriptHash` takes the
+  script's props bar `nonce` and hashes `scriptFor` of them, which is
+  exactly what React writes between the tags (the colours in a fixed order,
+  so the order of `themeColor`'s keys never changes the hash) — the browser
+  test renders `ColorSchemeScript` on the server into a document under a
+  `<meta>` policy and checks the hash is what lets it run.
   Anything that changes the script's text changes its hash, which is why the
   hash is computed, never written down.
 - **The store is `@k8ordo/state`'s.** The definition names the state key
@@ -75,7 +89,8 @@ pnpm check         # check:write to auto-fix
 
 ```
 src/
-  scheme.ts       colorSchemeState, resolve, scriptFor, colorSchemeScriptHash
+  scheme.ts       colorSchemeState, pinnedScheme, resolve, themeColorMedia,
+                  scriptFor, colorSchemeScriptHash
   script.tsx      ColorSchemeScript (no directive: rendered by the root layout)
   provider.tsx    ColorSchemeProvider + useColorScheme ('use client')
   index.ts
@@ -85,11 +100,13 @@ src/
 
 - `type`, not `interface`; comments explain why the straightforward version
   was not used.
-- Browser tests clear localStorage, the class, and the state registry
-  between cases; the test browser prefers light, which is what "system"
-  resolves to there. A client-only mount (`renderHook`) renders no script —
-  React does not execute an inline `<script>` it creates, and logs a
-  development error saying so — so the class those tests see is the
-  effect's; the script is tested on its own, appended to the document.
+- Browser tests clear localStorage, the class, the theme-color `<meta>`,
+  and the state registry between cases; the test browser prefers light,
+  which is what "system" resolves to there. A client-only mount
+  (`renderHook`) renders no script — React does not execute an inline
+  `<script>` it creates, and logs a development error saying so — so the
+  class those tests see is the effect's; the script is tested on its own,
+  appended to the document, and so are the theme-color `<meta>` a provider
+  test needs.
 - Tests state a guarantee in their name, English; comments and commits are
   Japanese except docs/ and this file.

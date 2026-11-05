@@ -11,7 +11,15 @@ import {
 } from 'react';
 import type { ReactNode } from 'react';
 
-import { colorSchemeState, DARK_CLASS, DARK_QUERY, resolve } from './scheme';
+import {
+  colorSchemeState,
+  DARK_CLASS,
+  DARK_QUERY,
+  pinnedScheme,
+  resolve,
+  THEME_COLOR_ATTRIBUTE,
+  themeColorMedia,
+} from './scheme';
 import type { ColorScheme, ColorSchemePreference } from './scheme';
 
 export type UseColorScheme = {
@@ -70,9 +78,10 @@ export type ColorSchemeProviderProps = {
 /**
  * The one place the scheme is decided and written after the first paint.
  * Goes in the root layout, inside `<body>`, around everything: it keeps the
- * class on `<html>` in step with the stored preference and the system, and
- * hands `useColorScheme` what it reads. The class before the first paint is
- * `ColorSchemeScript`'s, in `<head>`.
+ * class on `<html>` — and the theme-color `<meta>` `ColorSchemeScript`
+ * wrote, when it was given the colours — in step with the stored preference
+ * and the system, and hands `useColorScheme` what it reads. What the page
+ * shows before the first paint is `ColorSchemeScript`'s, in `<head>`.
  */
 export function ColorSchemeProvider({
   defaultPreference = 'system',
@@ -85,12 +94,23 @@ export function ColorSchemeProvider({
     serverSystemDark,
   );
   const scheme = resolve(preference, defaultPreference, systemDark);
+  const pinned = pinnedScheme(preference, defaultPreference);
   const readsStore = useReadsStore();
 
   useEffect(() => {
     if (!readsStore) return;
     document.documentElement.classList.toggle(DARK_CLASS, scheme === 'dark');
   }, [readsStore, scheme]);
+
+  useEffect(() => {
+    if (!readsStore) return;
+    for (const each of ['light', 'dark'] as const) {
+      const meta = document.querySelector<HTMLMetaElement>(
+        `meta[${THEME_COLOR_ATTRIBUTE}="${each}"]`,
+      );
+      if (meta !== null) meta.media = themeColorMedia(each, pinned);
+    }
+  }, [readsStore, pinned]);
 
   const setPreference = useCallback(
     (next: ColorSchemePreference) => {

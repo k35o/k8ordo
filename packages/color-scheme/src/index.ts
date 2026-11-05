@@ -1,5 +1,9 @@
 export { colorSchemeScriptHash, colorSchemeState } from './scheme';
-export type { ColorScheme, ColorSchemePreference } from './scheme';
+export type {
+  ColorScheme,
+  ColorSchemePreference,
+  ColorSchemeScriptOptions,
+} from './scheme';
 export { ColorSchemeProvider, useColorScheme } from './provider';
 export type { ColorSchemeProviderProps, UseColorScheme } from './provider';
 export { ColorSchemeScript } from './script';

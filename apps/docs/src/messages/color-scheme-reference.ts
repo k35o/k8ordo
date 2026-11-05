@@ -6,13 +6,18 @@ export const introduction = message({
 });
 
 export const scriptSummary = message({
-  ja: '最初の描画の前に`<html>`へ`dark`クラスを付けるインラインスクリプトです。ルートレイアウトの`<head>`に置きます。',
-  en: 'The inline script that puts `dark` on `<html>` before the first paint. It goes in the root layout’s `<head>`.',
+  ja: '最初の描画の前に`<html>`へ`dark`クラスを付けるインラインスクリプトです。`themeColor`を渡すと、`theme-color`の`meta`も書きます。ルートレイアウトの`<head>`に置きます。',
+  en: 'The inline script that puts `dark` on `<html>` before the first paint, and writes the `theme-color` `<meta>` when given `themeColor`. It goes in the root layout’s `<head>`.',
 });
 
 export const scriptDefault = message({
   ja: '何も選んでいない訪問者に、最初の描画で適用する値です。プロバイダの`defaultPreference`と同じ値を渡します。',
   en: 'What applies to a visitor who has chosen nothing, at the first paint. Pass the same value as the provider’s `defaultPreference`.',
+});
+
+export const scriptThemeColor = message({
+  ja: 'アドレスバーなど、ブラウザのUIに使うライトとダークの色です。渡すと、スクリプトが画面の配色に合った`theme-color`の`meta`を書きます。ページでは`theme-color`の`meta`を書きません。',
+  en: 'The light and dark colors for the browser’s own UI, such as the address bar. Given them, the script writes `theme-color` `<meta>` that match the scheme on screen. Render no `theme-color` `<meta>` of your own.',
 });
 
 export const scriptNonce = message({
@@ -32,8 +37,8 @@ export const scriptCaveats = [
 ] as const;
 
 export const providerSummary = message({
-  ja: 'ページ全体を包むプロバイダです。ルートレイアウトの`<body>`の中に置きます。ハイドレーションのあと、保存した選択やOSの設定が変わるたびに`<html>`の`dark`クラスを更新します。',
-  en: 'The provider that wraps the whole page. It goes in the root layout, inside `<body>`. After hydration it updates `dark` on `<html>` whenever the stored choice or the OS setting changes.',
+  ja: 'ページ全体を包むプロバイダです。ルートレイアウトの`<body>`の中に置きます。ハイドレーションのあと、保存した選択やOSの設定が変わるたびに`<html>`の`dark`クラスを更新します。スクリプトが書いた`theme-color`の`meta`も合わせて書き換えます。',
+  en: 'The provider that wraps the whole page. It goes in the root layout, inside `<body>`. After hydration it updates `dark` on `<html>` whenever the stored choice or the OS setting changes, and the `theme-color` `<meta>` the script wrote along with it.',
 });
 
 export const providerDefault = message({
@@ -166,6 +171,11 @@ export const hashDefault = message({
   en: 'The `defaultPreference` `ColorSchemeScript` is given. The default is written into the script, so the hash depends on it.',
 });
 
+export const hashThemeColor = message({
+  ja: '`ColorSchemeScript`に渡している`themeColor`です。色もスクリプトの文字列に入るので、この値でハッシュが変わります。キーを書く順はハッシュに影響しません。',
+  en: 'The `themeColor` `ColorSchemeScript` is given. The colors are written into the script too, so the hash depends on them. The order of the keys does not.',
+});
+
 export const hashReturns = message({
   ja: "`'sha256-…'`のように、前後の引用符を含んだCSPのソースです。",
   en: "A CSP source such as `'sha256-…'`, quotes included.",
@@ -205,6 +215,11 @@ export const preferenceSummary = message({
 export const providerPropsSummary = message({
   ja: '`ColorSchemeProvider`のpropsの型です。プロバイダを包むコンポーネントを自分で作るときに使います。',
   en: 'The props of `ColorSchemeProvider`. Use it for a component of your own that wraps the provider.',
+});
+
+export const scriptOptionsSummary = message({
+  ja: '`ColorSchemeScript`のpropsのうち、スクリプトの文字列に入るものの型です。`colorSchemeScriptHash()`の引数の型です。',
+  en: 'The props of `ColorSchemeScript` that are written into the script. The type of `colorSchemeScriptHash()`’s argument.',
 });
 
 export const scriptPropsSummary = message({

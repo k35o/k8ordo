@@ -80,6 +80,41 @@ export const propertyLightDark = message({
   en: 'Once `color-scheme` follows the class, the `light-dark()` function does too. It takes the light and dark values in one declaration, as in `color: light-dark(#1f1f1f, #f5f5f5)`.',
 });
 
+export const themeColorTitle = message({
+  ja: 'ブラウザのUIの色',
+  en: 'The browser’s own UI',
+});
+
+export const themeColorWhat = message({
+  ja: 'アドレスバーやステータスバーの色は、`<meta name="theme-color">`で決まります。`media`で`prefers-color-scheme`を指定した`meta`はOSの設定に従い、訪問者の選択とずれます。',
+  en: 'The address bar and the status bar take their color from `<meta name="theme-color">`. One whose `media` names a `prefers-color-scheme` follows the OS, not the visitor’s choice.',
+});
+
+export const themeColorScript = message({
+  ja: '`ColorSchemeScript`の`themeColor`にライトとダークの色を渡すと、スクリプトがクラスと同時に`theme-color`の`meta`を書きます。ハイドレーションのあとは、`ColorSchemeProvider`が選択に合わせて書き換えます。',
+  en: 'Pass the light and dark colors to `ColorSchemeScript`’s `themeColor`, and the script writes the `theme-color` `<meta>` along with the class. After hydration, `ColorSchemeProvider` updates them as the choice changes.',
+});
+
+export const themeColorPinned = message({
+  ja: "訪問者が配色を選んでいるか、既定値が`'light'`か`'dark'`なら、OSの設定にかかわらずその配色の色になります。既定値が`'system'`で何も選んでいない間は、配色ごとの`meta`がOSの設定に従います。",
+  en: "Once the visitor chooses, or with a `'light'` or `'dark'` default, that scheme’s color applies whatever the OS says. With a `'system'` default and nothing chosen, a `<meta>` per scheme follows the OS.",
+});
+
+export const themeColorHashBefore = message({
+  ja: '色はスクリプトの文字列に入ります。ハッシュで許可するときに渡す値は',
+  en: 'The colors are written into the script. What to pass when allowing it by hash is covered in ',
+});
+
+export const themeColorHashAfter = message({
+  ja: 'を見てください。',
+  en: '.',
+});
+
+export const themeColorOwn = message({
+  ja: 'ページでは`theme-color`の`meta`を書かないでください。Reactは`<meta>`をスタイルシートの後ろに書くので、スクリプトが書いた`meta`より後ろになり、使われません。',
+  en: 'Do not render a `theme-color` `<meta>` of your own. React writes `<meta>` after the stylesheets, behind the ones the script wrote, so it never applies.',
+});
+
 export const contrastTitle = message({
   ja: 'OSのコントラストの設定',
   en: 'OS contrast settings',
