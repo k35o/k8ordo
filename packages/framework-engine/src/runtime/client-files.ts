@@ -6,9 +6,6 @@ import type { ClientFiles } from './payload';
 /** Each page's files, by its payload's path; empty until the list is read. */
 let listed: ReadonlyMap<string, readonly string[]> = new Map();
 
-/** What this document has linked ahead: each file once. */
-const linked = new Set<string>();
-
 /**
  * Reads the static build's list of the files each page's client components
  * need. Without one — `vite dev`, a host that lost it — a payload names its
@@ -38,7 +35,8 @@ export const readClientFiles = async (): Promise<void> => {
  * as module preloads, its stylesheets as preloads.
  */
 export const preloadClientFiles = (payloadPath: string): void => {
-  const page = new URL(payloadPath, location.href).pathname;
+  const files = listed.get(new URL(payloadPath, location.href).pathname);
+  if (files === undefined) return;
   // この文書がもうリンクしたファイルは張らない。当てたスタイルシートを
   // preload すると、誰も使わない取得になる
   const present = new Set(
@@ -47,9 +45,7 @@ export const preloadClientFiles = (payloadPath: string): void => {
       (link) => link.href,
     ),
   );
-  for (const href of listed.get(page) ?? []) {
-    if (linked.has(href)) continue;
-    linked.add(href);
+  for (const href of files) {
     if (present.has(new URL(href, location.href).href)) continue;
     const link = document.createElement('link');
     // スタイルシートは当てずに取るだけにする。一覧はこの文書より新しいデプロイの
