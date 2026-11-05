@@ -1,8 +1,17 @@
+import { formFields, parseForm } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import type { ComponentProps } from 'react';
 import { expect, waitFor } from 'storybook/test';
+import { z } from 'zod';
 
+import {
+  ActionForm,
+  fill,
+  memo,
+  MemoField,
+} from '../../../../.storybook/action-form';
+import { FormControl } from '../form-control';
 import { RadioCard } from './radio-card';
 
 import styles from './radio-card.stories.module.css';
@@ -233,5 +242,72 @@ export const SelectionFollowsReset: Story = {
     await waitFor(async () => {
       await expect(selectionDotOf(starter)).toBeVisible();
     });
+  },
+};
+
+const planChoice = z.object({
+  plan: z.enum(['free', 'pro'], 'プランを選んでください'),
+  memo,
+});
+const planChoiceFields = formFields(planChoice);
+const PLANS = [
+  { value: 'free', label: '無料', description: 'ひとりで使う' },
+  { value: 'pro', label: 'プロ', description: 'チームで使う' },
+];
+
+const PlanForm = () => (
+  <ActionForm
+    fields={planChoiceFields}
+    serve={(data) => parseForm(planChoice, data)}
+  >
+    {(form) => {
+      const plan = form.field('plan');
+      return (
+        <>
+          <FormControl
+            errorText={plan.error}
+            invalid={plan.invalid}
+            label="プラン"
+            labelAs="legend"
+            renderInput={(props) => (
+              <RadioCard {...props} {...plan.input} options={PLANS} />
+            )}
+            required={plan.required}
+          />
+          <MemoField field={form.field('memo')} />
+        </>
+      );
+    }}
+  </ActionForm>
+);
+
+// @k8ordo/form の formFields を広げるだけでつながる
+export const WithForm: Story = {
+  render: () => <PlanForm />,
+  play: async ({ canvas, userEvent }) => {
+    const radio = (name: string) =>
+      canvas.getByRole<HTMLInputElement>('radio', { name });
+
+    // 導かれた required を各ラジオが持ち、選ばないとブラウザの検証に通らない
+    await expect(radio('無料')).toBeRequired();
+    await expect(radio('無料').validity.valueMissing).toBe(true);
+
+    // reset で選択を外し、isDirty も下りる
+    await userEvent.click(canvas.getByText('プロ'));
+    await expect(await canvas.findByText('変更あり')).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'リセット' }));
+    await expect(radio('プロ')).not.toBeChecked();
+    await expect(await canvas.findByText('変更なし')).toBeVisible();
+
+    // 送信に失敗しても、選んだ値を描き直す
+    await userEvent.click(canvas.getByText('プロ'));
+    await fill(
+      userEvent,
+      canvas.getByLabelText('メモ', { exact: false }),
+      '却下',
+    );
+    await userEvent.click(canvas.getByRole('button', { name: '送信' }));
+    await expect(await canvas.findByText('却下されました')).toBeVisible();
+    await expect(radio('プロ')).toBeChecked();
   },
 };
