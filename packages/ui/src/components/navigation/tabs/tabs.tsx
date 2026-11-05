@@ -33,13 +33,6 @@ type TabsContext = {
   setSelectedId: (id: string) => void;
 };
 
-// React の CSSProperties はまだ anchor positioning 系プロパティを型に持たない
-type AnchorCSSProperties = CSSProperties & {
-  anchorName?: string;
-  anchorScope?: string;
-  positionAnchor?: string;
-};
-
 // useId() の戻り値は CSS の dashed-ident として無効な文字を含むので無害化する
 const toAnchorName = (rootId: string): string =>
   `--ao-tab-${rootId.replaceAll(/[^a-zA-Z0-9_-]/gu, '')}`;
@@ -123,7 +116,7 @@ export const List: FC<
       style={
         // useId は React ルートを跨ぐと衝突しうるので、anchor 名の解決を
         // この tablist のサブツリーに限定する
-        { anchorScope: toAnchorName(rootId) } satisfies AnchorCSSProperties
+        { anchorScope: toAnchorName(rootId) } satisfies CSSProperties
       }
     >
       <TabsListProvider value={listContextValue}>{children}</TabsListProvider>
@@ -133,7 +126,7 @@ export const List: FC<
         style={
           {
             positionAnchor: toAnchorName(rootId),
-          } satisfies AnchorCSSProperties
+          } satisfies CSSProperties
         }
       />
     </div>
@@ -205,7 +198,7 @@ export const Tab: FC<PropsWithChildren<{ id: string }>> = ({
         // 選択中のタブをインジケータのアンカーにする
         (selectedId === id
           ? { anchorName: toAnchorName(rootId) }
-          : undefined) satisfies AnchorCSSProperties | undefined
+          : undefined) satisfies CSSProperties | undefined
       }
       tabIndex={activeIndex === index ? 0 : -1}
     >

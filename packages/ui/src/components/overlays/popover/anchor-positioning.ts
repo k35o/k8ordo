@@ -12,11 +12,7 @@ import type { Placement } from '../../../types/variables';
  * 縦書き / RTL のインライン軸補正にエンジン差（既知の interop バグ）がある。
  */
 
-// React の CSSProperties はまだ anchor positioning 系プロパティを型に持たないため拡張する。
 type AnchorCSSProperties = CSSProperties & {
-  positionAnchor?: string;
-  positionArea?: string;
-  positionTryFallbacks?: string;
   // position-anchor は継承されないため、content 内の疑似要素（Tooltip のブリッジなど)
   // が同じ anchor を参照できるよう、名前を CSS 変数としても配る。
   '--ao-anchor'?: string;
