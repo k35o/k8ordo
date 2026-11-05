@@ -173,14 +173,14 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
 
   const update = (
     patch: Patch,
-    options?: UpdateOptions,
-    tree?: string | null,
+    options: UpdateOptions | undefined,
+    tree: string | null,
   ): UpdateHandle => {
     // A tree being left shows the values it was left with, not the URL's:
     // written, they would land on the next page's URL, which never showed
     // them, and load it again. A batch that ends where it started settles
     // the same way.
-    if (tree !== undefined && tree !== null && tree !== at) {
+    if (tree !== null && tree !== at) {
       const dropped = createHandle();
       dropped.settle();
       return dropped.external;
@@ -214,7 +214,7 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
 
   const subscribe: Store['subscribe'] = (keys, notify, tree) => {
     const unsubscribe = core.subscribe(keys, notify);
-    if (tree === undefined || tree === null) return unsubscribe;
+    if (tree === null) return unsubscribe;
     bound.set(tree, (bound.get(tree) ?? 0) + 1);
     return () => {
       unsubscribe();
@@ -225,10 +225,7 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
   };
 
   const getSnapshot: Store['getSnapshot'] = (sig, keys, tree) => {
-    const held =
-      tree === undefined || tree === null || tree === at
-        ? undefined
-        : left.get(tree);
+    const held = tree === null || tree === at ? undefined : left.get(tree);
     if (held === undefined) return core.getSnapshot(sig, keys);
     if (keys === null) return held.values;
     let pick = held.picks.get(sig);
