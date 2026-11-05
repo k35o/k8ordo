@@ -336,7 +336,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       entry: Omit<Pending, 'resolve'>,
       signal: AbortSignal,
     ): Promise<undefined> => {
-      const { promise, resolve, reject } = Promise.withResolvers<undefined>();
+      const { promise, resolve } = Promise.withResolvers<undefined>();
       pending.current.set(id, {
         ...entry,
         resolve: () => {
@@ -347,7 +347,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         'abort',
         () => {
           pending.current.delete(id);
-          reject(signal.reason as Error);
+          resolve(undefined);
         },
         { once: true },
       );
@@ -414,8 +414,6 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
         // 描画の lane も 1 本を分け合う。handler の走る時機はエンジンで違う
         const id = count.current++;
         const arrived = track(id, { scroll: plan }, event.signal);
-        // handler が走る前に中止されると、誰も待たない reject になる
-        arrived.catch(() => undefined);
         setTraversed(id);
         event.intercept({
           scroll,
