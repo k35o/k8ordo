@@ -432,9 +432,9 @@ describe('redirect.ts in the emitted table', () => {
     expect(source).toContain(
       "import old_redirect from './routes/old/redirect';",
     );
-    expect(source).toContain("'/old': old_redirect satisfies Redirect,");
+    expect(source).toContain("'/old': old_redirect satisfies RedirectTarget,");
     expect(source).toContain(
-      "'/:locale/legacy': locale_legacy_redirect satisfies Redirect,",
+      "'/:locale/legacy': locale_legacy_redirect satisfies RedirectTarget,",
     );
   });
 
@@ -496,8 +496,8 @@ describe('guard.ts in the emitted table', () => {
 
   it('checks each guard against the pattern its directory puts it under', () => {
     expect(source).toContain("import admin_guard from './routes/admin/guard';");
-    expect(source).toContain("guard satisfies Guard<'/'>,");
-    expect(source).toContain("admin_guard satisfies Guard<'/admin'>,");
+    expect(source).toContain("Checked<typeof guard, Guard<'/'>>,");
+    expect(source).toContain("Checked<typeof admin_guard, Guard<'/admin'>>,");
   });
 
   it('lists, per pattern, the guards that run before it answers — outer first', () => {
@@ -523,10 +523,10 @@ describe('guard.ts in the emitted table', () => {
     expect(map).toContain("'/*': [guard],");
   });
 
-  it('emits an empty map, and no Guard type, when nothing guards', () => {
+  it('emits an empty map, and imports no Guard type, when nothing guards', () => {
     const plain = emit(['page.tsx']);
     expect(plain).toContain('export const guards = {\n} as const;');
-    expect(plain).not.toContain('type Guard<');
+    expect(plain).not.toContain('Guard');
   });
 });
 
