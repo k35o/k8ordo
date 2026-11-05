@@ -66,18 +66,32 @@ const linkClientDeps = (named: readonly ClientDeps[]): void => {
  */
 export async function renderHtml(
   rscStream: ReadableStream<Uint8Array>,
-  // The request's: every script written here carries it. What else does, the
-  // application signed, and the policy that names it is the application's.
-  nonce: string,
-  // Whether the payload holds the page, followed by `PageShown`.
-  showsPage: boolean,
-  // Whether the payload carries a `formState`: a form was posted without
-  // JavaScript, and `useActionState` finds its result in the HTML it comes
-  // back to.
-  carriesFormState: boolean,
-  // Under mode: 'static', every client component the payload names, read to
-  // its end: the HTML links each, rendered or not. None under a server.
-  named: readonly ClientDeps[],
+  {
+    nonce,
+    showsPage,
+    carriesFormState,
+    named = [],
+  }: {
+    /**
+     * The request's: every script written here carries it. What else does,
+     * the application signed, and the policy that names it is the
+     * application's.
+     */
+    readonly nonce: string;
+    /** Whether the payload holds the page, followed by `PageShown`. */
+    readonly showsPage: boolean;
+    /**
+     * Whether the payload carries a `formState`: a form was posted without
+     * JavaScript, and `useActionState` finds its result in the HTML it comes
+     * back to.
+     */
+    readonly carriesFormState: boolean;
+    /**
+     * Under mode: 'static', every client component the payload names, read
+     * to its end: the HTML links each, rendered or not.
+     */
+    readonly named?: readonly ClientDeps[];
+  },
 ): Promise<ReadableStream> {
   const [forRender, forHydration] = rscStream.tee();
   let forHtml = forRender;

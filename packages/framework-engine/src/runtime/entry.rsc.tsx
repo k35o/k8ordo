@@ -33,6 +33,7 @@ import type * as SsrEntry from './entry.ssr';
 import { runGuards } from './guard';
 import { PageShown } from './page-shown';
 import { watchPage } from './page-watch';
+import type { WatchedPage } from './page-watch';
 import { parseCatchAllParams, parseParams } from './params';
 import type { ParsedParams } from './params';
 import { FALLBACK_SEGMENT, NOT_FOUND_SEGMENT } from './pathname';
@@ -329,26 +330,15 @@ const renderFailed = (error: unknown): Response =>
  * gets the request, and whether a failed render may still stream.
  */
 export default function handler(request: Request): Promise<Response> {
-  // What answers the request may add to the response — a guard's headers —
-  // and what it adds goes on whatever the answer turns out to be. Under a
-  // build into files, what throws while answering is a file that cannot be
-  // written — a route file read as the request reached it whose module
-  // threw, say — so the build stops naming the URL, as for a page that
-  // failed to render, and the error is logged whole, as a failed render's
-  // is, for the file and line its stack names. A running server's `serve`
-  // answers it with a 500.
+  // ビルドでは、答える途中で投げたもの（読み込んで投げた route file など）も
+  // 書けないファイルなので、描けなかったページと同じく URL を名指して止める。
+  // スタックがファイルと行を名指すので、丸ごと出す
   return withRequest(request, async () =>
     answer(
       await (import.meta.env.K8ORDO_MODE === 'static'
         ? writingFile(() =>
             respond(request).catch((error: unknown) => {
-              // pathname は引数として渡す。第 1 引数はフォーマット文字列
-              // なので、`%s` を含む URL では error が食われて消える
-              console.error(
-                'k8ordo: answering %s failed',
-                new URL(request.url).pathname,
-                error,
-              );
+              reportFailed('answering', new URL(request.url).pathname, error);
               return renderFailed(error);
             }),
           )
@@ -357,93 +347,54 @@ export default function handler(request: Request): Promise<Response> {
   );
 }
 
+// pathname は引数として渡す。第 1 引数はフォーマット文字列なので、`%s` を
+// 含む URL では error が食われて消える
+const reportFailed = (
+  doing: string,
+  pathname: string,
+  error: unknown,
+): void => {
+  console.error(`k8ordo: ${doing} %s failed`, pathname, error);
+};
+
+const plainNotFound = (body: string): Response =>
+  new Response(body, {
+    status: 404,
+    headers: { 'content-type': 'text/plain;charset=utf-8' },
+  });
+
 const respond = async (request: Request): Promise<Response> => {
   const url = new URL(request.url);
   // 表は base の下の pathname で書かれている。base の外はこのアプリの URL ではない
   const own = withoutBase(url.pathname);
-  if (own === null) {
-    return new Response('not found', {
-      status: 404,
-      headers: { 'content-type': 'text/plain;charset=utf-8' },
-    });
-  }
+  if (own === null) return plainNotFound('not found');
   const wantsPayload = isPayloadPath(own);
   const pathname = wantsPayload ? pagePathFor(own) : own;
-  const { match, parsed, leaf, shell } = await find(pathname);
+  const found = await find(pathname);
+  const { match, parsed, leaf, shell } = found;
 
   // A redirect.ts holds its place in the table, so it answers only the URLs
   // the walk reached it for — a literal page beside a [slug]/redirect.ts keeps
-  // its own — and before anything renders. It answers a read and nothing
-  // else. A payload request for it is sent to the page, not the payload: the
-  // client runtime sees HTML come back, gives the navigation to the browser,
-  // and the browser follows the redirect as a document load — the URL bar
-  // ends up right.
+  // its own — and before anything renders. A payload request for it is sent
+  // to the page, not the payload: the client runtime sees HTML come back,
+  // gives the navigation to the browser, and the browser follows the redirect
+  // as a document load — the URL bar ends up right.
   const declared = match === null ? null : redirectFor(match.pattern, pathname);
-  if (declared !== null) {
-    if (request.method !== 'GET' && request.method !== 'HEAD') {
-      return new Response('method not allowed', {
-        status: 405,
-        headers: { allow: 'GET, HEAD' },
-      });
-    }
-    return redirectResponse(
-      locationOf(declared.to),
-      declared.permanent ? 308 : 307,
-    );
+  if (declared !== null) return answerRedirect(request, declared);
+
+  if (
+    match !== null &&
+    leaf !== undefined &&
+    routeModules[match.pattern] !== undefined
+  ) {
+    return answerRoute(request, match, parsed, leaf, wantsPayload);
   }
 
-  // A route.ts answers by its own methods, from anywhere: no origin check,
-  // since what posts to it — a webhook — is not a form on this site, and it
-  // checks what it needs itself.
-  const module =
-    match === null || routeModules[match.pattern] === undefined
-      ? undefined
-      : leaf;
-  if (match !== null && module !== undefined) {
-    // A route has no payload. A client navigation that asks for one gets
-    // something that is not, and loads the document instead — as it would
-    // from a static host, where no index.rsc sits beside the file.
-    if (wantsPayload) {
-      return new Response('not a page', {
-        status: 404,
-        headers: { 'content-type': 'text/plain;charset=utf-8' },
-      });
-    }
-    const found = routeAnswerFor(module, request.method);
-    if (found === null) return methodNotAllowed(module);
-    const guardedRoute = await parsed.enter(() =>
-      runGuards(guards[match.pattern] ?? [], { request, params: match.params }),
-    );
-    if (guardedRoute !== null) return guardedRoute;
-    return parsed.enter(() =>
-      runRoute(found, { request, params: parsed.params }),
-    );
-  }
+  const refused = await refusedBeforePage(request, url, found);
+  if (refused !== null) return refused;
 
-  if (!METHODS.includes(request.method)) {
-    return new Response('method not allowed', {
-      status: 405,
-      headers: { allow: METHODS.join(', ') },
-    });
-  }
   const isAction = request.method === 'POST';
   const addressed = request.headers.get(ACTION_ID_HEADER) !== null;
-  if (isAction && !sameOrigin(request, url)) {
-    return new Response('cross-origin action', { status: 403 });
-  }
-
-  // The guards along the pattern, before anything else answers — the action
-  // a POST carries included. A URL nothing answers is still below the root,
-  // so the root's run for it. They run in the context the schemas left, so a
-  // guard reads the locale the URL names.
-  const guarded = await parsed.enter(() =>
-    runGuards(guards[match?.pattern ?? '/*'] ?? [], {
-      request,
-      params: match?.params ?? {},
-    }),
-  );
-  if (guarded !== null) return guarded;
-
   const temporaryReferences = createTemporaryReferenceSet();
   // An action answers the request as much as a guard does: it reads and
   // writes the cookies, and what it writes goes on the answer. It runs in the
@@ -465,6 +416,7 @@ const respond = async (request: Request): Promise<Response> => {
   // the same code path. A form posted without JavaScript gets HTML back,
   // because that browser has nothing to apply a payload with.
   const answersPayload = wantsPayload || addressed;
+  const contentType = answersPayload ? PAYLOAD_TYPE : HTML_TYPE;
   const missing = match === null || match.pattern.endsWith('/*');
   // ページでない答え（not-found）のステータスは描く前に決まるので、HEAD は
   // ここで答える。描いてから本文を捨てると、誰も受け取らない本文のために
@@ -472,10 +424,9 @@ const respond = async (request: Request): Promise<Response> => {
   if (request.method === 'HEAD' && missing) {
     return new Response(null, {
       status: 404,
-      headers: { 'content-type': answersPayload ? PAYLOAD_TYPE : HTML_TYPE },
+      headers: { 'content-type': contentType },
     });
   }
-  // A build into files has no request to hand a page; a running server does.
   const routeRequest =
     import.meta.env.K8ORDO_MODE === 'server'
       ? routeRequestOf(request)
@@ -494,8 +445,10 @@ const respond = async (request: Request): Promise<Response> => {
       : searchReaderOf(match.pattern, leaf);
   const search = readSearch?.(url.searchParams);
 
-  // What the table answers for a URL nothing matched here — the nearest
-  // not-found.tsx — and the context its layouts' schemas leave.
+  /**
+   * What the table answers for a URL nothing matched here — the nearest
+   * not-found.tsx — and the context its layouts' schemas leave.
+   */
   const nearestNotFound = async (): Promise<{
     readonly tree: ReactNode;
     readonly enter: ParsedParams['enter'];
@@ -535,8 +488,6 @@ const respond = async (request: Request): Promise<Response> => {
       isAction ? temporaryReferences : undefined,
     );
 
-  // What answers in the page's place: the page the walk read, or the
-  // shell's fallback.tsx.
   const shown = shell === undefined ? leaf : await shell.load();
   // A page is watched, so what it says of itself can still decide the answer,
   // and followed by what tells the HTML render it has arrived. Followed in a
@@ -548,7 +499,6 @@ const respond = async (request: Request): Promise<Response> => {
     shown === undefined
       ? null
       : watchPage(componentOf(shown), <PageShown />);
-  // Whether the answer is the page, followed: the HTML render waits for it.
   let showsPage = page?.followed === true;
   let status = missing ? 404 : 200;
   let { enter } = parsed;
@@ -590,22 +540,11 @@ const respond = async (request: Request): Promise<Response> => {
   // answer: a page that says notFound() is not a 200. A payload does not
   // wait — a client navigation has no status to get right, and a page that
   // says it late is sent back to the server as a document load (PageBoundary).
-  // A build into files waits for everything, so it catches notFound() from
-  // anywhere in the page.
   if (page !== null && (!answersPayload || request.method === 'HEAD')) {
-    const [forAnswer, forWatch] = rendered.stream.tee();
-    rendered = { ...rendered, stream: forAnswer };
-    const drained = drain(forWatch);
-    // 読み終えてもページが呼ばれていないことがある（children を描かない
-    // レイアウト）。そのときは待たない
-    const threw = await (import.meta.env.K8ORDO_MODE === 'static'
-      ? drained.then(() => Promise.race([page.settled, Promise.resolve()]))
-      : Promise.race([page.settled, rendered.saidNotFound, drained]));
-    if (rendered.notFound() || isNotFound(threw)) {
+    const answered = await pageAnswer(rendered, page);
+    ({ rendered } = answered);
+    if (answered.saidNotFound) {
       rendered.abort();
-      // The page's own answer: what the table answers for a URL nothing
-      // matched here — the nearest not-found.tsx, in the context its
-      // layouts' schemas leave.
       const nearest = await nearestNotFound();
       status = 404;
       showsPage = false;
@@ -613,13 +552,6 @@ const respond = async (request: Request): Promise<Response> => {
       rendered = render(nearest.tree, enter);
     }
   }
-  // A build into files is told a page said notFound() apart from a refused
-  // param: both are a 404, and only the page's is a pathname the application
-  // named and then disowned.
-  const saidByPage: Record<string, string> =
-    import.meta.env.K8ORDO_MODE === 'static' && status === 404 && !missing
-      ? { [NOT_FOUND_HEADER]: 'page' }
-      : {};
   // ビルドは頼んだ殻のパターンと比べる。表は自分の順で歩くので、先の
   // パターンが同じ殻の pathname を取ることがある
   const shellSaid: Record<string, string> =
@@ -632,76 +564,192 @@ const respond = async (request: Request): Promise<Response> => {
     rendered.abort();
     return new Response(null, {
       status,
-      headers: {
-        'content-type': answersPayload ? PAYLOAD_TYPE : HTML_TYPE,
-        ...shellSaid,
-      },
+      headers: { 'content-type': contentType, ...shellSaid },
     });
   }
   if (answersPayload) {
     return new Response(rendered.stream, {
       status,
-      headers: { 'content-type': PAYLOAD_TYPE, ...shellSaid },
+      headers: { 'content-type': contentType, ...shellSaid },
     });
   }
-
-  if (import.meta.env.K8ORDO_MODE === 'static') {
-    // A build into files can afford to wait for the whole page, and has to:
-    // a Server Component that threw would otherwise be written as a page whose
-    // error shows only once a visitor's browser has rendered it. Under a
-    // running server the same page streams and the browser shows error.tsx;
-    // at build time it is a build that stops, naming the page.
-    // The payload is read to its end first — a not-found's too, whose rows
-    // the HTML render does not wait for — so the render is handed every
-    // client component it names.
-    const [forHtml, forNamed] = rendered.stream.tee();
-    await drain(forNamed);
-    const named = [...rendered.named.values()];
-    let body: ArrayBuffer;
-    try {
-      const html = await enter(() =>
-        ssr.renderHtml(
-          forHtml,
-          signingNonce(),
-          showsPage,
-          action.formState !== undefined,
-          named,
-        ),
-      );
-      body = await new Response(html).arrayBuffer();
-    } catch (error) {
-      // With no Suspense boundary above the throw the HTML render itself
-      // rejects, with the SSR environment's copy of a Server Component's
-      // error — React's generic production message. The original is the one
-      // `onError` recorded; a client component that threw left no record,
-      // and what rejected is its own error.
-      return renderFailed(rendered.failures[0] ?? error);
-    }
-    const failed = rendered.failures[0];
-    if (failed !== undefined) return renderFailed(failed);
-    return new Response(body, {
-      status,
-      headers: {
-        'content-type': HTML_TYPE,
-        [NONCE_HEADER]: signingNonce(),
-        [CLIENT_DEPS_HEADER]: clientDepsHeader(rendered.named.values()),
-        ...saidByPage,
-        ...shellSaid,
-      },
-    });
-  }
-  const html = await enter(() =>
-    ssr.renderHtml(
-      rendered.stream,
-      signingNonce(),
-      showsPage,
-      action.formState !== undefined,
-      [],
-    ),
-  );
-  return new Response(html, {
+  // A build into files is told a page said notFound() apart from a refused
+  // param: both are a 404, and only the page's is a pathname the application
+  // named and then disowned.
+  const saidByPage: Record<string, string> =
+    import.meta.env.K8ORDO_MODE === 'static' && status === 404 && !missing
+      ? { [NOT_FOUND_HEADER]: 'page' }
+      : {};
+  return answerHtml(ssr, rendered, enter, {
     status,
-    headers: { 'content-type': HTML_TYPE },
+    showsPage,
+    carriesFormState: action.formState !== undefined,
+    headers: { ...saidByPage, ...shellSaid },
+  });
+};
+
+/** A `redirect.ts`'s answer: it answers a read and nothing else. */
+const answerRedirect = (
+  request: Request,
+  { to, permanent }: NonNullable<ReturnType<typeof redirectFor>>,
+): Response => {
+  if (request.method !== 'GET' && request.method !== 'HEAD') {
+    return new Response('method not allowed', {
+      status: 405,
+      headers: { allow: 'GET, HEAD' },
+    });
+  }
+  return redirectResponse(locationOf(to), permanent ? 308 : 307);
+};
+
+/**
+ * A `route.ts`'s answer, by its own methods, from anywhere: no origin check,
+ * since what posts to it — a webhook — is not a form on this site, and it
+ * checks what it needs itself.
+ */
+const answerRoute = async (
+  request: Request,
+  match: Match,
+  parsed: ParsedParams,
+  module: Leaf,
+  wantsPayload: boolean,
+): Promise<Response> => {
+  // A route has no payload. A client navigation that asks for one gets
+  // something that is not, and loads the document instead — as it would
+  // from a static host, where no index.rsc sits beside the file.
+  if (wantsPayload) return plainNotFound('not a page');
+  const found = routeAnswerFor(module, request.method);
+  if (found === null) return methodNotAllowed(module);
+  const guarded = await parsed.enter(() =>
+    runGuards(guards[match.pattern] ?? [], { request, params: match.params }),
+  );
+  if (guarded !== null) return guarded;
+  return parsed.enter(() =>
+    runRoute(found, { request, params: parsed.params }),
+  );
+};
+
+/**
+ * What answers a page's request before anything renders, if anything does: a
+ * method a page does not take, a Server Action from another origin, a guard.
+ */
+const refusedBeforePage = async (
+  request: Request,
+  url: URL,
+  { match, parsed }: Found,
+): Promise<Response | null> => {
+  if (!METHODS.includes(request.method)) {
+    return new Response('method not allowed', {
+      status: 405,
+      headers: { allow: METHODS.join(', ') },
+    });
+  }
+  if (request.method === 'POST' && !sameOrigin(request, url)) {
+    return new Response('cross-origin action', { status: 403 });
+  }
+  // The guards along the pattern, before anything else answers — the action
+  // a POST carries included. A URL nothing answers is still below the root,
+  // so the root's run for it. They run in the context the schemas left, so a
+  // guard reads the locale the URL names.
+  return parsed.enter(() =>
+    runGuards(guards[match?.pattern ?? '/*'] ?? [], {
+      request,
+      params: match?.params ?? {},
+    }),
+  );
+};
+
+/**
+ * What a page said of itself, once a document can tell: the render, its
+ * stream still to be read, and whether the page said notFound().
+ */
+const pageAnswer = async (
+  rendered: Rendered,
+  page: WatchedPage,
+): Promise<{ readonly rendered: Rendered; readonly saidNotFound: boolean }> => {
+  const [forAnswer, forWatch] = rendered.stream.tee();
+  const drained = drain(forWatch);
+  // ビルドは全体を待ち、ページのどこで言われた notFound() も拾う。読み終えても
+  // ページが呼ばれていないことがある（children を描かないレイアウト）。そのとき
+  // は待たない
+  const threw = await (import.meta.env.K8ORDO_MODE === 'static'
+    ? drained.then(() => Promise.race([page.settled, Promise.resolve()]))
+    : Promise.race([page.settled, rendered.saidNotFound, drained]));
+  return {
+    rendered: { ...rendered, stream: forAnswer },
+    saidNotFound: rendered.notFound() || isNotFound(threw),
+  };
+};
+
+/** A document's HTML, rendered from its payload. */
+const answerHtml = async (
+  ssr: typeof SsrEntry,
+  rendered: Rendered,
+  enter: ParsedParams['enter'],
+  {
+    status,
+    showsPage,
+    carriesFormState,
+    headers,
+  }: {
+    readonly status: number;
+    readonly showsPage: boolean;
+    readonly carriesFormState: boolean;
+    readonly headers: Readonly<Record<string, string>>;
+  },
+): Promise<Response> => {
+  if (import.meta.env.K8ORDO_MODE !== 'static') {
+    const html = await enter(() =>
+      ssr.renderHtml(rendered.stream, {
+        nonce: signingNonce(),
+        showsPage,
+        carriesFormState,
+      }),
+    );
+    return new Response(html, {
+      status,
+      headers: { 'content-type': HTML_TYPE, ...headers },
+    });
+  }
+  // A build into files can afford to wait for the whole page, and has to: a
+  // Server Component that threw would otherwise be written as a page whose
+  // error shows only once a visitor's browser has rendered it. Under a
+  // running server the same page streams and the browser shows error.tsx; at
+  // build time it is a build that stops, naming the page. The payload is
+  // read to its end first — a not-found's too, whose rows the HTML render
+  // does not wait for — so the render is handed every client component it
+  // names.
+  const [forHtml, forNamed] = rendered.stream.tee();
+  await drain(forNamed);
+  let body: ArrayBuffer;
+  try {
+    const html = await enter(() =>
+      ssr.renderHtml(forHtml, {
+        nonce: signingNonce(),
+        showsPage,
+        carriesFormState,
+        named: [...rendered.named.values()],
+      }),
+    );
+    body = await new Response(html).arrayBuffer();
+  } catch (error) {
+    // With no Suspense boundary above the throw the HTML render itself
+    // rejects, with the SSR environment's copy of a Server Component's
+    // error — React's generic production message. The original is the one
+    // `onError` recorded; a client component that threw left no record,
+    // and what rejected is its own error.
+    return renderFailed(rendered.failures[0] ?? error);
+  }
+  const failed = rendered.failures[0];
+  if (failed !== undefined) return renderFailed(failed);
+  return new Response(body, {
+    status,
+    headers: {
+      'content-type': HTML_TYPE,
+      [NONCE_HEADER]: signingNonce(),
+      [CLIENT_DEPS_HEADER]: clientDepsHeader(rendered.named.values()),
+      ...headers,
+    },
   });
 };
 
@@ -786,9 +834,7 @@ const renderPayload = (
           // ときも同じ。どちらも失敗ではない
           if (controller.signal.aborted) return undefined;
           failures.push(error);
-          // pathname は引数として渡す。第 1 引数はフォーマット文字列なので、
-          // `%s` を含む URL を投げられると error が食われて消える
-          console.error('k8ordo: rendering %s failed', payload.pathname, error);
+          reportFailed('rendering', payload.pathname, error);
           return undefined;
         },
       },
