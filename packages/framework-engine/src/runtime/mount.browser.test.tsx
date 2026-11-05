@@ -12,7 +12,7 @@ import {
   vi,
 } from 'vite-plus/test';
 
-import { AppRouter, setDocumentClient, setPayloadReader } from './app-router';
+import { AppRouter, setPayloadReader } from './app-router';
 import { DocumentRoot } from './document-root';
 import { mount, renderedHere } from './mount';
 import type { Payload } from './payload';
@@ -121,7 +121,6 @@ const interceptEverything = (event: NavigateEvent): void => {
 beforeEach(() => {
   home = location.href;
   seen.length = 0;
-  setDocumentClient(CLIENT);
 });
 
 afterEach(async () => {

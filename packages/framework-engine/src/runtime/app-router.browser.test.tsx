@@ -11,7 +11,7 @@ import {
 } from 'vite-plus/test';
 import { cleanup, render } from 'vitest-browser-react';
 
-import { AppRouter, setDocumentClient } from './app-router';
+import { AppRouter } from './app-router';
 import { connectAppRouter } from './browser-payloads';
 import { FallbackBoundary, ShowNotFound } from './fallback-boundary';
 import { reportCaught } from './page-boundary';
@@ -184,7 +184,6 @@ let home = '';
 
 beforeEach(() => {
   home = location.href;
-  setDocumentClient(RUNNING);
   rsc.imports = Promise.resolve();
   rsc.decoding = 0;
   rsc.payloads.clear();

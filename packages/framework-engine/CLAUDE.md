@@ -495,8 +495,8 @@ pnpm check         # check:write to auto-fix
   the URL of the script the page's HTML loads (`getClientEntryUrl()`, which
   the RSC plugin exposes to the SSR environment only, so the RSC entry reads
   `clientEntry` from the SSR module for every payload, not only for HTML).
-  `entry.browser.tsx` records the hydration payload's as the document's
-  (`setDocumentClient`), and `app-router.tsx` never renders a navigation
+  The document runs the one its hydration payload names (`AppRouter`'s
+  `arrived.client`), and `app-router.tsx` never renders a navigation
   payload or a Server Action's answer that names another: that comes from a
   deploy the tab predates, its tree may hold client references the running
   script has no entry for, and rendering them fails inside the page's
