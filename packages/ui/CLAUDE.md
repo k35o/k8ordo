@@ -17,7 +17,8 @@ pnpm test --project=components               # Component tests only (Storybook +
 pnpm test --project=components-dark          # The same stories with the dark theme
 pnpm test --project=components-forced-colors # Stories tagged forced-colors, under forced colors
 pnpm test --project=components-contrast-more # Stories tagged contrast-more, under prefers-contrast: more
-pnpm test --project=forced-colors            # Screenshot comparisons under forced colors (src/styles/*.test.tsx)
+pnpm test --project=forced-colors            # Screenshot comparisons under forced colors (src/styles/forced-colors.test.tsx)
+pnpm test --project=print                    # Tokens and color-scheme under print media (src/styles/print.test.tsx)
 pnpm test --project=form                     # Fields with @k8ordo/form's derived attributes, and FormValue (Playwright)
 pnpm test --project=hooks src/internal/focus-trap.test.tsx # Single test file (needs its project)
 TEST_BROWSER=webkit pnpm test --project=hooks # One engine only (chromium / firefox / webkit)
@@ -366,6 +367,8 @@ property resolves where it is declared.
 
 Dark mode is class-based (`.dark` on `html`, put there by `@k8ordo/color-scheme`; the library never adds it). All semantic tokens remap under `.dark`, so components never branch on it. `base.css` sets `color-scheme` to follow the same class (`light` on `:root`, `dark` on `.dark`), not `light dark`, since the tokens do not follow `prefers-color-scheme`; `light-dark()` therefore follows `.dark` too.
 
+Under `@media print` a `.dark` that contains no `.print-as-shown` goes back to light: `tokens.css` repeats the `:root` value of every name `.dark` overrides (and the light `prefers-contrast: more` values), `base.css` sets `color-scheme: light`, and the bridge's `dark:` / `light:` variants split on the same condition. A color token added to `.dark` needs its light value in the print block as well; `src/styles/print.test.tsx` fails until it has one.
+
 ### High Contrast and Forced Colors
 
 The stylesheet follows `prefers-contrast: more` and `forced-colors: active`; `@k8ordo/color-scheme` is not involved, since the OS owns both settings.
@@ -395,6 +398,7 @@ The stylesheet follows `prefers-contrast: more` and `forced-colors: active`; `@k
 - `src/styles/contrast.stories.tsx` renders every pair in `docs/references/color.md`'s contrast table, AAA rows under `color-contrast-enhanced`; keep the two in step.
 - The OS color settings cannot be switched per story, so they get projects of their own: `components-forced-colors` (Playwright `forcedColors: 'active'`) runs only stories tagged `forced-colors`, `components-contrast-more` (`contrast: 'more'`) only those tagged `contrast-more`, and `components` excludes both tags. Those stories live in `src/styles/high-contrast.stories.tsx`, hidden from the sidebar (`!dev`) and from Chromatic. Browser context options go in `playwright({ contextOptions })`; Vitest 5 ignores `instances[].context`.
 - A focus mark a play function cannot read (a range thumb is a pseudo-element; WebKit emulates forced colors as the media query alone, so a transparent outline still reads as transparent) is compared as screenshots, with and without focus, in `src/styles/forced-colors.test.tsx`, run by the `forced-colors` project (plain Vitest browser tests under `forcedColors: 'active'`). WebKit keeps the `box-shadow` ring, so those tests catch a regression only in Chromium and Firefox.
+- Print media has no Playwright context option either, so `src/styles/print.test.tsx` runs in a `print` project of its own and switches the page with the `emulateMedia` command defined there (`page.emulateMedia` on the Playwright side). It reads the names `.dark` overrides from the loaded stylesheet and compares their print values with the ones measured on screen, so it never copies a token value.
 - a11y addon fails a story on violations (`test: 'error'`), `color-contrast` included. Only overlay stories that axe misreads while they fade in turn `color-contrast` off for themselves: every `Modal` story, and one story each in `Dialog` and `Popover`.
 - Mock date is set to `2023-01-02 12:34:56` in Storybook.
 

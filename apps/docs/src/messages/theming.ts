@@ -379,6 +379,21 @@ export const darkModeLibraryAfter = message({
   en: ' adds it before the first paint.',
 });
 
+export const printTitle = message({
+  ja: '印刷',
+  en: 'Printing',
+});
+
+export const printLight = message({
+  ja: '印刷では、`.dark`が付いていても、色のトークンと`color-scheme`がライトの値に戻ります。ブラウザは既定で背景を刷らないので、ダークの値のままでは白い紙に明るい文字が出ます。`tailwind.css`の`dark:`と`light:`のバリアントも、同じく切り替わります。',
+  en: 'When printing, the color tokens and `color-scheme` go back to the light values even under `.dark`. Browsers leave backgrounds out by default, so the dark values would print light text on white paper. The `dark:` and `light:` variants of `tailwind.css` switch the same way.',
+});
+
+export const printAsShown = message({
+  ja: '背景ごと刷るスライドのように、画面の配色のまま刷りたいときは、`print-as-shown`クラスを付けた要素を置きます。この要素を含む`.dark`は、印刷でもダークの値のままです。`<html>`に`dark`が付いていればページ全体がダークのままになるので、刷らない部分は隠します。背景を刷るには、`print-color-adjust: exact`も指定します。',
+  en: 'To print in the scheme on screen, such as a slide deck printed with its backgrounds, add an element with the `print-as-shown` class. A `.dark` that contains it keeps the dark values in print. With `dark` on `<html>`, that is the whole page, so hide what you do not print. To print the backgrounds, set `print-color-adjust: exact` as well.',
+});
+
 export const highContrastTitle = message({
   ja: 'ハイコントラスト',
   en: 'High contrast',
