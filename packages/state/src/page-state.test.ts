@@ -424,6 +424,47 @@ describe('a schema written with zod/mini', () => {
     });
     expect(miniState.href('/items', { page: 4, q: '' })).toBe('/items?page=4');
   });
+
+  it('collects repeated params into a wrapped array of stringbool', () => {
+    const flags = definePageState('mini-flags', {
+      url: zm.object({
+        on: zm._default(zm.stringbool(), false),
+        picks: zm._default(zm.array(zm.stringbool()), []),
+      }),
+    });
+
+    expect(
+      flags.parseUrl(new URLSearchParams('on=true&picks=true&picks=false')),
+    ).toStrictEqual({ on: true, picks: [true, false] });
+  });
+
+  it('reads every value of a param whose array is piped into a transform', () => {
+    const sorted = definePageState('mini-sorted', {
+      url: zm.object({
+        tags: zm.pipe(
+          zm._default(zm.array(zm.string()), []),
+          zm.transform((tags) => tags.toSorted()),
+        ),
+      }),
+    });
+
+    expect(sorted.parseUrl(new URLSearchParams('tags=b&tags=a'))).toStrictEqual(
+      { tags: ['a', 'b'] },
+    );
+  });
+
+  it('refuses the same spellings a URL cannot round-trip', () => {
+    expect(() =>
+      definePageState('mini-boolean', {
+        url: zm.object({ on: zm._default(zm.boolean(), false) }),
+      }),
+    ).toThrow(/z\.stringbool\(\)/u);
+    expect(() =>
+      definePageState('mini-array', {
+        url: zm.object({ tags: zm._default(zm.array(zm.string()), ['a']) }),
+      }),
+    ).toThrow(/default to \[\]/u);
+  });
 });
 
 describe('parseUrl type', () => {

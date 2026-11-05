@@ -55,6 +55,50 @@ describe('a schema written with zod/mini', () => {
     expect(result.data?.tags).toStrictEqual(['a', 'b']);
   });
 
+  it('pairs a wrapped object and a wrapped array with their JSON nodes', () => {
+    const { fields, arrays } = formFields(
+      zm.object({
+        profile: zm.optional(zm.object({ bio: zm.string() })),
+        links: zm._default(zm.array(zm.object({ url: zm.string() })), []),
+      }),
+    );
+
+    expect(fields['profile.bio'].input.name).toBe('profile.bio');
+    expect(arrays.links.item.url?.input.name).toBe('links[{index}].url');
+  });
+
+  it('reads the format and the regex flags behind a wrapper', () => {
+    const { fields, dropped } = formFields(
+      zm.object({
+        at: zm.optional(zm.iso.time()),
+        email: zm.email().check(zm.regex(/^[a-z@.]+$/u)),
+        flagged: zm.optional(zm.string().check(zm.regex(/^foo$/iu))),
+      }),
+    );
+
+    expect(fields.at.input.type).toBe('time');
+    expect(fields.email.input.type).toBe('email');
+    expect(
+      dropped.find((entry) => entry.field === 'flagged')?.reason,
+    ).toContain("'iu'");
+  });
+
+  it('reports an object-level check here too', () => {
+    const { dropped } = formFields(
+      zm
+        .object({ password: zm.string(), confirm: zm.string() })
+        .check(zm.refine((v) => v.password === v.confirm)),
+    );
+
+    expect(dropped.map((entry) => entry.field)).toStrictEqual(['(schema)']);
+  });
+
+  it('requires a bigint field whose schema rejects a blank here too', () => {
+    const { fields } = formFields(zm.object({ id: zm.coerce.bigint() }));
+
+    expect(fields.id.input.required).toBe(true);
+  });
+
   it('parses a submission the same way', () => {
     const formData = new FormData();
     formData.append('title', 'k8ordo');

@@ -203,17 +203,20 @@ fixtures/
   traversal/           a page on useAppState, for going back
 ```
 
-## Where zod's public API runs out
+## Reading a schema through zod's core
 
-Wrapper peeling (`default`, `optional`, `catch`, pipes) reads `_zod.def` to
-decide whether a url field takes one param value or `getAll`, and an array's
-`element` there to hold its items to the boolean rule — same coupling
-and same justification as `@k8ordo/form`'s walk. Everything else goes through
-the public core: `safeParse`, and `safeEncode` from `zod/v4/core` for a url
-boolean, which is written in its schema's own spelling (a custom
-`z.stringbool({ truthy: ['yes'] })` cannot read back `String(true)`). That is
-why `zod` and `zod/mini` both work, and why `@k8ordo/form`'s checkbox for the
-same field submits the same string.
+Everything goes through `zod/v4/core`, which `zod` and `zod/mini` share.
+Wrapper peeling (`default`, `optional`, `catch`, pipes) matches the core's
+schema classes (`$ZodOptional`, `$ZodPipe`, …) with `instanceof` and reads
+their typed `_zod.def` to decide whether a url field takes one param value or
+`getAll`, and an array's `element` (`$ZodArray`) to hold its items to the
+boolean rule — the same reading as `@k8ordo/form`'s walk. zod answers
+`instanceof` by the traits a schema was built with, not by its prototype, so a
+`zod/mini` schema matches the same classes; `page-state.test.ts` holds it for
+both entries. Parsing is `safeParse`, and a url boolean is written with
+`safeEncode`, in its schema's own spelling (a custom
+`z.stringbool({ truthy: ['yes'] })` cannot read back `String(true)`) — which
+is why `@k8ordo/form`'s checkbox for the same field submits the same string.
 
 ## Conventions
 
