@@ -81,7 +81,7 @@ export type NavigationHandler<T> = {
  * document load does — as does a traversal to an entry no page was ever
  * left from, one called off while it loaded.
  */
-export type ScrollPlan =
+type ScrollPlan =
   | { kind: 'top' }
   | { kind: 'fragment'; id: string }
   | ({ kind: 'position' } & Position);

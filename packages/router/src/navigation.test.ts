@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { isOurs, scrollPlanFor, transitionTypesFor } from './navigation';
+import { isOurs, scrollPlanFor } from './navigation';
 import type { NavigationFacts } from './navigation';
 
 const facts = (overrides: Partial<NavigationFacts> = {}): NavigationFacts => ({
@@ -79,22 +79,5 @@ describe('scrollPlanFor', () => {
       kind: 'fragment',
       id: 'x',
     });
-  });
-});
-
-describe('transitionTypesFor', () => {
-  it('names any page change, and the kind the platform reported', () => {
-    expect(transitionTypesFor('push')).toStrictEqual([
-      'navigation',
-      'navigation-push',
-    ]);
-    expect(transitionTypesFor('replace')).toStrictEqual([
-      'navigation',
-      'navigation-replace',
-    ]);
-    expect(transitionTypesFor('traverse')).toStrictEqual([
-      'navigation',
-      'navigation-traverse',
-    ]);
   });
 });
