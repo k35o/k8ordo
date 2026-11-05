@@ -113,7 +113,7 @@ every `style` attribute as well.
 
 An inline script of the application's is allowed by its hash in that policy,
 as `colorSchemeScriptHash()` gives `@k8ordo/color-scheme`'s (pass it the
-`defaultPreference` `ColorSchemeScript` is given); any other inline script
+props `ColorSchemeScript` is given, `nonce` aside); any other inline script
 on the page — one that reached it from content — is refused. The framework's module
 script is allowed by where it comes from (`'self'`), since nothing in a file
 can sign it, which is why the build refuses a policy with `'strict-dynamic'`.
