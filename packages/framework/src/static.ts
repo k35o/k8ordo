@@ -416,8 +416,8 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
     if (ownFile !== null) {
       try {
         own = await readFile(ownFile, 'utf8');
-      } catch {
-        own = null;
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
       }
     }
     const ownRules = own === null ? [] : rulesOf(own);

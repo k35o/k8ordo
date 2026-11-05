@@ -749,6 +749,15 @@ describe('the _redirects a build writes', () => {
     );
   });
 
+  it('stops when public/_redirects is there and cannot be read, rather than writing one without its rules', async () => {
+    await routeFiles(POSTS);
+    await handlerAnswering(site());
+    await mkdir(path.join(root, 'public', '_redirects'), { recursive: true });
+    const { build } = hooks({ paths: () => ['/posts/1'] });
+
+    await expect(build()).rejects.toThrow(/EISDIR/u);
+  });
+
   it('warns about a rule of the application’s own that hides a shell', async () => {
     await routeFiles(POSTS);
     await handlerAnswering(site());
