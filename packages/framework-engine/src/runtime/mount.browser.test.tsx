@@ -75,7 +75,7 @@ const serverHtml = (rendered: string, at: string): HTMLElement => {
   const container = document.createElement('div');
   container.innerHTML = renderToString(
     <DocumentRoot>
-      <AppRouter pathname={rendered} tree={treeOf()} />
+      <AppRouter arrived={payloadOf(treeOf(), rendered)} />
     </DocumentRoot>,
   );
   document.body.append(container);

@@ -25,9 +25,18 @@ import { doneHydrating } from './hydrating-pathname';
 import { isPayload } from './is-payload';
 import type { Payload } from './payload';
 import { payloadPathFor } from './payload-path';
-import { createPageCache, prefetchInView, prefetchTargetOf } from './prefetch';
+import {
+  createPageCache,
+  prefetchInViewUnderTouch,
+  prefetchOnIntent,
+} from './prefetch';
 import type { PageCache } from './prefetch';
-import { markNavigated, Recover, reloadInstead } from './recover';
+import {
+  markNavigated,
+  navigationsApplied,
+  Recover,
+  reloadInstead,
+} from './recover';
 import { TreePathname } from './tree-pathname';
 
 /**
@@ -84,16 +93,6 @@ const payloadsAreFiles = (): boolean =>
   import.meta.env.K8ORDO_MODE === 'static' && !import.meta.env.DEV;
 
 /**
- * How many trees navigations have applied — the router's, and `vite dev`'s
- * reload of the page on screen. A Server Action's answer is not counted:
- * answers to actions called in a row apply one after another.
- */
-let navigations = 0;
-
-/** Taken before a Server Action is sent, and handed to `answerAction`. */
-export const navigationsApplied = (): number => navigations;
-
-/**
  * What a Server Action's answer does to the document, once it is read.
  * `sent` is `navigationsApplied()` as the action was sent, and `url` where
  * it was posted: the answer is that page.
@@ -118,7 +117,7 @@ export const answerAction = async (
   // A navigation applied another page while the action ran or its answer
   // loaded: the answer is the page the visitor left, and would put it back
   // under the URL they are at. The caller still gets its value.
-  if (navigations === sent) {
+  if (navigationsApplied() === sent) {
     mounted?.apply(payload, normalizePathname(new URL(url).pathname));
   }
   return payload.returnValue;
@@ -241,24 +240,26 @@ let applies = 0;
 const Hydrating = createContext(false);
 
 /**
- * Takes over the request of a payload whose tree is being applied, and
- * returns what applying it puts in state.
+ * Takes over the request of a payload whose tree is being applied, records
+ * the search it was rendered with, and returns what applying it puts in state.
  */
 const hold = (
-  streaming: Streaming[],
+  streaming: RefObject<Streaming[]>,
+  searchApplied: RefObject<string | undefined>,
   payload: Payload,
   pathname: string,
 ): Applied => {
   // HTML の hydrate を待たずに来た遷移の木は、行き先の URL で描く
   doneHydrating();
   applies += 1;
+  searchApplied.current = payload.search;
   const stream = streams.get(payload);
   if (stream !== undefined) {
     stream.keep();
     // ファイルは最後まで読ませる。ページは置き場に残って次の訪問に渡るので、
     // 途中で切ると、戻ったときに欠けたページを出す
     if (!payloadsAreFiles()) {
-      streaming.push({
+      streaming.current.push({
         trees:
           payload.notFound === undefined
             ? [payload.tree]
@@ -294,9 +295,6 @@ const cacheIn = (
 const payloadUrlFor = (url: URL): string =>
   `${payloadPathFor(url.pathname)}${url.search}`;
 
-/** What starts a prefetch: a pointer onto a link, focus on one, a press. */
-const INTENTS = ['pointerover', 'focusin', 'pointerdown'] as const;
-
 /**
  * The client half under the framework: the tree comes from the server, so
  * there is no route table in the browser at all — only navigation. The
@@ -308,18 +306,11 @@ const INTENTS = ['pointerover', 'focusin', 'pointerdown'] as const;
  * renders `not-found.tsx` and this renders whatever came back.
  */
 export function AppRouter({
-  pathname,
-  search,
-  tree,
-  notFound,
+  arrived,
   reread,
 }: {
-  pathname: string;
-  /** The search the page was rendered with, when it reads the search. */
-  search?: string | undefined;
-  tree: ReactNode;
-  /** A shell's not-found, when the tree is a shell. */
-  notFound?: ReactNode | undefined;
+  /** The payload the document's HTML was rendered from. */
+  arrived: Payload;
   /**
    * The same payload read again, when the HTML was rendered for another
    * pathname than the browser's: hydration keeps what the server wrote, and
@@ -329,8 +320,8 @@ export function AppRouter({
   reread?: Promise<Payload> | undefined;
 }): ReactNode {
   const [latest, setLatest] = useState<Applied>(() => ({
-    tree,
-    notFound,
+    tree: arrived.tree,
+    notFound: arrived.notFound,
     order: 0,
     // payload の pathname は表の語で、殻では殻の pathname なので使わない
     pathname:
@@ -340,12 +331,11 @@ export function AppRouter({
   }));
   const current = useDeferredValue(latest);
   const [hydrating, setHydrating] = useState(reread !== undefined);
-  const arrived = useRef({ tree, pathname, search, notFound });
   const prefetched = useRef<PageCache<Payload | null>>(null);
   // The search the tree last applied was rendered with — `undefined` when its
   // page does not read the search, which is every page that did not declare
   // it. Only for such a page does a navigation that keeps the pathname load.
-  const searchApplied = useRef(search);
+  const searchApplied = useRef(arrived.search);
   // The trees applied whose requests may still be streaming.
   const streaming = useRef<Streaming[]>([]);
   // Navigations whose page has not arrived. The URL commits before the next
@@ -382,7 +372,7 @@ export function AppRouter({
           // 遷移が当てた木は、その URL のために描かれている
           if (previous.order !== 0) return previous;
           // 殻は fallback.tsx の notFound() で not-found に替わっていることがある
-          return previous.tree === tree
+          return previous.tree === arrived.tree
             ? { ...previous, tree: again.tree, notFound: again.notFound }
             : { ...previous, tree: again.notFound };
         });
@@ -391,7 +381,7 @@ export function AppRouter({
     return () => {
       unmounted.abort();
     };
-  }, [hydrating, reread, tree]);
+  }, [hydrating, reread, arrived.tree]);
 
   // A tree neither asked for nor on screen will never render again, so what
   // it is still receiving is cancelled.
@@ -415,8 +405,7 @@ export function AppRouter({
   useEffect(() => {
     mounted = {
       apply: (payload, postedTo) => {
-        searchApplied.current = payload.search;
-        const next = hold(streaming.current, payload, postedTo);
+        const next = hold(streaming, searchApplied, payload, postedTo);
         startTransition(() => {
           setLatest(next);
         });
@@ -464,13 +453,12 @@ export function AppRouter({
       if (payload === null || location.href !== url) return;
       if (!canRender(payload)) return reloadInstead();
       markNavigated();
-      navigations += 1;
       const next = hold(
-        streaming.current,
+        streaming,
+        searchApplied,
         payload,
         normalizePathname(new URL(url).pathname),
       );
-      searchApplied.current = payload.search;
       startTransition(() => {
         setLatest(next);
       });
@@ -489,55 +477,23 @@ export function AppRouter({
   // きたときに取り直さない
   useEffect(() => {
     if (!payloadsAreFiles()) return;
-    cacheIn(prefetched).keep(payloadUrlFor(new URL(location.href)), {
-      ...arrived.current,
-      client: documentClient ?? '',
-    });
+    cacheIn(prefetched).keep(payloadUrlFor(new URL(location.href)), arrived);
     void readClientFiles();
-  }, []);
-
-  // 粗いポインタにはホバーが無く、タップは押し始めとクリックがほぼ同時に
-  // 来るので、先に取る間が無い。代わりに画面のリンクを取る。ファイルに限る
-  // のは、リクエストごとに描くページでは、通り過ぎたリンクの数だけサーバーが
-  // 描き、30 秒で捨てることになるから
-  useEffect(() => {
-    if (!payloadsAreFiles()) return undefined;
-    const coarse = matchMedia('(pointer: coarse)');
-    let stop: (() => void) | undefined;
-    const follow = (): void => {
-      stop?.();
-      stop = coarse.matches
-        ? prefetchInView((url) =>
-            cacheIn(prefetched).prefetch(payloadUrlFor(url), 'low'),
-          )
-        : undefined;
-    };
-    follow();
-    coarse.addEventListener('change', follow);
-    return () => {
-      coarse.removeEventListener('change', follow);
-      stop?.();
-    };
-  }, []);
+  }, [arrived]);
 
   useEffect(() => {
-    const onIntent = (event: Event): void => {
-      const url = prefetchTargetOf(event.target);
-      if (url !== null) {
-        void cacheIn(prefetched).prefetch(payloadUrlFor(url), 'auto');
-      }
-    };
-    // 捕捉段で聞く。途中の要素が伝播を止めても、押し始めは見逃さない
-    for (const type of INTENTS) {
-      document.addEventListener(type, onIntent, {
-        capture: true,
-        passive: true,
-      });
-    }
+    const prefetch =
+      (priority: RequestPriority) =>
+      (url: URL): Promise<Payload | null> =>
+        cacheIn(prefetched).prefetch(payloadUrlFor(url), priority);
+    // 画面のリンクを取るのはファイルに限る。リクエストごとに描くページでは、
+    // 通り過ぎたリンクの数だけサーバーが描き、30 秒で捨てることになる
+    const stops = payloadsAreFiles()
+      ? [prefetchInViewUnderTouch(prefetch('low'))]
+      : [];
+    stops.push(prefetchOnIntent(prefetch('auto')));
     return () => {
-      for (const type of INTENTS) {
-        document.removeEventListener(type, onIntent, { capture: true });
-      }
+      for (const stop of stops) stop();
     };
   }, []);
 
@@ -580,9 +536,9 @@ export function AppRouter({
     },
     apply: (loaded) => {
       markNavigated();
-      navigations += 1;
-      searchApplied.current = loaded.payload.search;
-      setLatest(hold(streaming.current, loaded.payload, loaded.pathname));
+      setLatest(
+        hold(streaming, searchApplied, loaded.payload, loaded.pathname),
+      );
     },
     // A page that reads the search is rendered for the one it was given, so
     // a navigation that moves it loads the page again; a page that does not
@@ -613,7 +569,7 @@ export function AppRouter({
   // `usePathname` until the browser can answer for itself.
   return (
     <Hydrating value={hydrating}>
-      <PathnameProvider pathname={pathname}>
+      <PathnameProvider pathname={arrived.pathname}>
         <NavigationGeneration value={generation}>
           <TreePathname value={current.pathname}>
             <Recover>

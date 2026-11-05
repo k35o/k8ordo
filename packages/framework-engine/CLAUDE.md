@@ -793,6 +793,7 @@ src/
   runtime/tree-pathname.ts   the router's TreePathname context, reached by its shared name
   runtime/browser-payloads.ts  the browser's Flight client, wired into app-router: payloads read, Server Actions called
   runtime/payload.ts         what a page is on the wire (tree, pathname, client, action result), and the headers a static build reads
+  runtime/stylesheets.ts     the RSC plugin's two precedences, and the <style> that keeps the Server Components' first
   runtime/payload-path.ts    where a payload lives: /x → /x/index.rsc
   runtime/is-payload.ts      whether an answer is a payload or a document load
   runtime/prefetch.ts        which link to fetch ahead (on intent, and on screen), and how long a fetched page stays usable

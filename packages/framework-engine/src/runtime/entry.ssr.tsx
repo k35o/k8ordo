@@ -16,6 +16,7 @@ import { DocumentRoot } from './document-root';
 import { scriptsBeforeStylesheetsStream } from './head-scripts';
 import { PageShownContext } from './page-shown';
 import type { ClientDeps, Payload } from './payload';
+import { CLIENT_STYLESHEETS } from './stylesheets';
 
 type SsrOptions = NonNullable<Parameters<typeof renderToReadableStream>[1]>;
 
@@ -51,7 +52,7 @@ const linkClientDeps = (named: readonly ClientDeps[]): void => {
       preinit(href, {
         as: 'style',
         crossOrigin: 'anonymous',
-        precedence: 'vite-rsc/client-reference',
+        precedence: CLIENT_STYLESHEETS,
       });
     }
   }
@@ -66,18 +67,32 @@ const linkClientDeps = (named: readonly ClientDeps[]): void => {
  */
 export async function renderHtml(
   rscStream: ReadableStream<Uint8Array>,
-  // The request's: every script written here carries it. What else does, the
-  // application signed, and the policy that names it is the application's.
-  nonce: string,
-  // Whether the payload holds the page, followed by `PageShown`.
-  showsPage: boolean,
-  // Whether the payload carries a `formState`: a form was posted without
-  // JavaScript, and `useActionState` finds its result in the HTML it comes
-  // back to.
-  carriesFormState: boolean,
-  // Under mode: 'static', every client component the payload names, read to
-  // its end: the HTML links each, rendered or not. None under a server.
-  named: readonly ClientDeps[],
+  {
+    nonce,
+    showsPage,
+    carriesFormState,
+    named = [],
+  }: {
+    /**
+     * The request's: every script written here carries it. What else does,
+     * the application signed, and the policy that names it is the
+     * application's.
+     */
+    readonly nonce: string;
+    /** Whether the payload holds the page, followed by `PageShown`. */
+    readonly showsPage: boolean;
+    /**
+     * Whether the payload carries a `formState`: a form was posted without
+     * JavaScript, and `useActionState` finds its result in the HTML it comes
+     * back to.
+     */
+    readonly carriesFormState: boolean;
+    /**
+     * Under mode: 'static', every client component the payload names, read
+     * to its end: the HTML links each, rendered or not.
+     */
+    readonly named?: readonly ClientDeps[];
+  },
 ): Promise<ReadableStream> {
   const [forRender, forHydration] = rscStream.tee();
   let forHtml = forRender;
@@ -92,37 +107,23 @@ export async function renderHtml(
       nonce,
     }));
   }
-  let payload: Promise<Payload> | undefined;
+  let reading: Promise<Payload> | undefined;
   let ready: Promise<void> | undefined;
   // 描く前に読むと、client 参照の preinit と preloadModule が Fizz の要求の外で
   // 出て捨てられる。描画の中で読み始めれば、その続きが要求の
-  // AsyncLocalStorage を引き継ぐ。読んだ木を描く前に歩くのは、props で渡す
-  // だけで描かない要素の参照を、モジュールを読み終えたあとのページでも誰かが
-  // 読むようにするため。ブラウザの最初の mount はその JS も待つ。server では
-  // 届いていない行を待たない。歩きには client コンポーネントが描く Suspense が
-  // 見えないので、待つと殻がその中身を待ってしまう。届いたときに続きで歩く。
-  // static では、RSC の描画が名指した部品をすべて、読み始める前に自分で link
-  // する。歩きは props の Map・Set・Promise・iterator・async iterable・stream
-  // の中を見ないので、その中にしかない要素は、モジュールを初めて読むページで
-  // しか link されない。歩きを広げないのは、iterator と stream は一度しか
-  // 読めず、歩けば部品より先に使い切るため。RSC プラグインより先に頼めば、
-  // モジュールを読んでいたかで head が変わらない
+  // AsyncLocalStorage を引き継ぐ。描く前に歩くのは、props で渡すだけで描かない
+  // 要素の参照も読ませるため。server では、client コンポーネントが描く
+  // Suspense が歩きに見えず、待つと殻がその中身を待つので、届いていない行は
+  // 届いたときに続きで歩く。static は名指された部品を、読む前に自分で link する
   function Root(): ReactNode {
     linkClientDeps(named);
-    payload ??= createFromReadableStream<Payload>(forHtml, { nonce });
-    const { notFound, pathname, search, tree } = use(payload);
-    ready ??= whenClientReady([tree, notFound], {
+    reading ??= createFromReadableStream<Payload>(forHtml, { nonce });
+    const payload = use(reading);
+    ready ??= whenClientReady([payload.tree, payload.notFound], {
       rows: import.meta.env.K8ORDO_MODE === 'static' ? 'wait' : 'follow',
     });
     use(ready);
-    return (
-      <AppRouter
-        notFound={notFound}
-        pathname={pathname}
-        search={search}
-        tree={tree}
-      />
-    );
+    return <AppRouter arrived={payload} />;
   }
   const shown = Promise.withResolvers<undefined>();
   let readerLeft = false;

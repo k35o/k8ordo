@@ -1,63 +1,24 @@
-import { readFile } from 'node:fs/promises';
-import { createServer } from 'node:http';
-import type { Server } from 'node:http';
-import type { AddressInfo } from 'node:net';
-import path from 'node:path';
-
-import { chromium, firefox, webkit } from 'playwright';
 import type { Browser, Page } from 'playwright';
 import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
-import { buildFixture } from '../../fixtures/build';
-import type { BuiltFixture } from '../../fixtures/build';
-
-// CI はエンジンごとにジョブを分けて並べるので、TEST_BROWSER で 1 つに絞れる
-const browserTypes = [chromium, firefox, webkit]
-  .filter(
-    (type) =>
-      process.env.TEST_BROWSER === undefined ||
-      process.env.TEST_BROWSER === type.name(),
-  )
-  .map((type) => ({ name: type.name(), type }));
+import { browserTypes, buildFixture, serveBuilt } from '../../fixtures/build';
+import type { BuiltFixture, ServedBuild } from '../../fixtures/build';
 
 let built: BuiltFixture | undefined;
-let server: Server;
+let served: ServedBuild | undefined;
 let browser: Browser;
 let origin = '';
 
 // 素の NotFound はビルドされたアプリの中にしか現れないので、テストが
 // not-found.tsx を持たないアプリを実際にビルドする
 beforeAll(async () => {
-  const { handler, out } = (built = await buildFixture('bare-not-found'));
-
-  // ハッシュ付きの資産はファイルから、それ以外はハンドラが答える。
-  // @k8ordo/framework/serve と同じ分担
-  const answer = async (url: URL): Promise<Response> => {
-    if (!url.pathname.startsWith('/assets/')) return handler(new Request(url));
-    try {
-      const body = await readFile(path.join(out, 'client', url.pathname));
-      return new Response(body, {
-        headers: { 'content-type': 'text/javascript' },
-      });
-    } catch {
-      return new Response(null, { status: 404 });
-    }
-  };
-  server = createServer((incoming, outgoing) => {
-    void (async () => {
-      const response = await answer(new URL(incoming.url ?? '/', origin));
-      outgoing.writeHead(response.status, Object.fromEntries(response.headers));
-      outgoing.end(Buffer.from(await response.arrayBuffer()));
-    })();
-  });
-  await new Promise<void>((resolve) => {
-    server.listen(0, '127.0.0.1', resolve);
-  });
-  origin = `http://127.0.0.1:${String((server.address() as AddressInfo).port)}`;
+  built = await buildFixture('bare-not-found');
+  served = await serveBuilt(built);
+  ({ origin } = served);
 }, 120_000);
 
 afterAll(async () => {
-  server.close();
+  served?.close();
   await built?.dispose();
 });
 
