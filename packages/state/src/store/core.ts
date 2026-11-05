@@ -18,26 +18,21 @@ export type UpdateHandle = {
 
 export type Patch = StateValues | ((current: StateValues) => StateValues);
 
-/**
- * `tree` is the pathname the tree a caller renders in was applied for, which
- * an intercepting router provides (`tree-pathname.ts`) — only a page store
- * reads it.
- */
 export type Store = {
   subscribe: (
     keys: readonly string[] | null,
     notify: () => void,
-    tree?: string | null,
+    tree: string | null,
   ) => () => void;
   getSnapshot: (
     sig: string,
     keys: readonly string[] | null,
-    tree?: string | null,
+    tree: string | null,
   ) => StateValues;
   update: (
     patch: Patch,
-    options?: { history?: 'push' | 'replace' },
-    tree?: string | null,
+    options: { history?: 'push' | 'replace' } | undefined,
+    tree: string | null,
   ) => UpdateHandle;
   dispose: () => void;
 };
@@ -90,6 +85,11 @@ export const createHandle = (): Handle => {
   };
 };
 
+export const settledHandle = (): UpdateHandle => ({
+  committed: Promise.resolve(),
+  finished: Promise.resolve(),
+});
+
 /** A snapshot held still, with the picks already handed out for it. */
 export type Frozen = {
   readonly values: StateValues;
@@ -102,8 +102,8 @@ export type StoreCore = {
   /** Notifies every listener, whatever moved. */
   touch: () => void;
   applyNext: (next: StateValues) => void;
-  subscribe: Store['subscribe'];
-  getSnapshot: Store['getSnapshot'];
+  subscribe: (keys: readonly string[] | null, notify: () => void) => () => void;
+  getSnapshot: (sig: string, keys: readonly string[] | null) => StateValues;
   clear: () => void;
 };
 

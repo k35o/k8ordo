@@ -3,7 +3,12 @@ import type { ComponentType, ReactNode } from 'react';
 
 import { RouteErrorBoundary } from './boundary';
 import type { ErrorComponent } from './boundary';
-import { isGroupKey, joinPattern, normalizePathname } from './paths';
+import {
+  decodeOrKeep,
+  isGroupKey,
+  joinPattern,
+  normalizePathname,
+} from './paths';
 import type { Join, PathMatching } from './paths';
 
 /**
@@ -144,14 +149,6 @@ const loadingFor = (
   return Loading;
 };
 
-const decode = (value: string): string => {
-  try {
-    return decodeURIComponent(value);
-  } catch {
-    return value;
-  }
-};
-
 /**
  * What a boundary renders when a renderer hands it no children. Set once by
  * the client router, which is the one renderer that nests by context rather
@@ -233,7 +230,7 @@ export function defineRoutes<R extends RoutesRecord>(record: R): Routes<R> {
         // Numeric keys are URLPattern's anonymous wildcard captures — the
         // table only names params, so only named ones surface.
         if (!/^\d+$/u.test(name) && value !== undefined) {
-          params[name] = decode(value);
+          params[name] = decodeOrKeep(value);
         }
       }
       const found = { pattern: entry.pattern, params, stack: entry.stack };

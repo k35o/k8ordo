@@ -69,7 +69,10 @@ pnpm check         # check:write to auto-fix
   under the new URL (regression test in `router.browser.test.tsx`). Going
   back or forward is the exception, below — unless it goes back to the
   entry whose page is on screen while a page change loads
-  (`onScreenEntry`): that calls the change off, and keeps the position.
+  (`onScreenEntry`): that calls the change off, and keeps the position,
+  whatever `refresh(url)` says — but only until the loaded tree is applied
+  (`applying`): an applied tree cannot be taken back, so going back then
+  loads that entry again.
 - **A tree knows the pathname it was applied for.** `<Router>` applies the
   match together with the pathname it was loaded for, so the deferred value
   that puts a tree on screen moves both in one commit, and provides that
@@ -295,6 +298,7 @@ src/
   links.ts          href / navigateTo / bindParams (the side that needs no table)
   register.ts       Register (module augmentation) + PageProps / LayoutProps / RouteContext
   navigation.ts     useInterceptedNavigation (intercept and the commit contract), usePendingPathname
+  left-at.ts        the position each entry was left at (kept to 100, mirrored into sessionStorage)
   location.tsx      usePathname / PathnameProvider / BrowserPathname (where you are, without the table)
   match.ts          matchPath / useMatch ("which section am I in", without the table)
   boundary.tsx      RouteErrorBoundary (the boundary that renders the table's error)

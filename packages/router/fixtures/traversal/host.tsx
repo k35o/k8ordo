@@ -1,30 +1,51 @@
-import { useDeferredValue, useLayoutEffect, useRef, useState } from 'react';
+import { use, useDeferredValue, useState } from 'react';
 import type { FC } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { useInterceptedNavigation } from '../../src/navigation';
+import { List } from './list';
 
 // フレームワークのランタイムのように、読み込みを待ってから木を当てるホスト。
 // 試験が hold を立てると、読み込みは release まで終わらず、前のページが画面に
-// 残る。?reload の付いた URL は search を読むページで、同じ pathname でも
-// 読み直す
-const ITEMS = Array.from({ length: 90 }, (_, index) => index);
+// 残る。holdRender を立てると、読み込んだ木は当たっても release まで描き終わらず、
+// 前のページが画面に残る。?reload の付いた URL は search を読むページで、同じ
+// pathname でも読み直す
+declare global {
+  var controls: {
+    hold: boolean;
+    holdRender: boolean;
+    /** The pathname and search of every load, in order. */
+    loads: string[];
+    release: () => void;
+  };
+}
+
+type Loaded = { href: string; rendered: Promise<void> | null };
 
 const waiting: Array<() => void> = [];
-const controls = {
+const held = (): Promise<void> =>
+  new Promise((resolve) => {
+    waiting.push(resolve);
+  });
+globalThis.controls = {
   hold: false,
+  holdRender: false,
+  loads: [],
   release: (): void => {
     for (const go of waiting.splice(0)) go();
   },
 };
-Object.assign(globalThis, { controls });
 
 const Host: FC = () => {
-  const [latest, setLatest] = useState(location.href);
-  useInterceptedNavigation<string>({
+  const [latest, setLatest] = useState<Loaded>({
+    href: location.href,
+    rendered: null,
+  });
+  useInterceptedNavigation<Loaded>({
     claim: () => true,
-    load: (url, signal) =>
-      new Promise<string>((resolve, reject) => {
+    load: (url, signal) => {
+      controls.loads.push(`${url.pathname}${url.search}`);
+      return new Promise<Loaded>((resolve, reject) => {
         signal.addEventListener(
           'abort',
           () => {
@@ -33,38 +54,25 @@ const Host: FC = () => {
           { once: true },
         );
         const go = (): void => {
-          resolve(url.href);
+          resolve({
+            href: url.href,
+            rendered: controls.holdRender ? held() : null,
+          });
         };
         if (controls.hold) waiting.push(go);
         else go();
-      }),
+      });
+    },
     apply: setLatest,
     refresh: (url) => url.searchParams.has('reload'),
   });
-  const shown = new URL(useDeferredValue(latest));
-  const items =
-    shown.searchParams.get('q') === 'few'
-      ? ITEMS.filter((i) => i % 3 === 0)
-      : ITEMS;
-  // 描くたびに一覧の高さを測り、画面に出す commit の中で layout を強制する
-  const list = useRef<HTMLUListElement>(null);
-  useLayoutEffect(() => {
-    const element = list.current;
-    if (element !== null) {
-      element.dataset.height = String(element.getBoundingClientRect().height);
-    }
-  });
+  const loaded = useDeferredValue(latest);
+  if (loaded.rendered !== null) use(loaded.rendered);
+  const shown = new URL(loaded.href);
   return (
     <>
       <h1>{shown.pathname.slice(1)}</h1>
-      <p data-testid="count">{items.length}</p>
-      <ul ref={list} style={{ margin: 0, padding: 0 }}>
-        {items.map((i) => (
-          <li key={i} style={{ height: '100px', listStyle: 'none' }}>
-            {i}
-          </li>
-        ))}
-      </ul>
+      <List few={shown.searchParams.get('q') === 'few'} />
     </>
   );
 };

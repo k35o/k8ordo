@@ -13,8 +13,10 @@ import {
   useSyncExternalStore,
 } from 'react';
 
-import { withoutBase } from './base';
-import { normalizePathname } from './paths';
+import { leftAt, rememberLeftAt, restoreLeftAt } from './left-at';
+import type { Position } from './left-at';
+import { appPathname } from './location';
+import { decodeOrKeep, normalizePathname } from './paths';
 
 /**
  * What the decision below reads. Spelled out rather than taking the event,
@@ -72,16 +74,7 @@ export type NavigationHandler<T> = {
   refresh?: (url: URL) => boolean;
 };
 
-export type Position = { readonly left: number; readonly top: number };
-
-/**
- * Where the viewport goes once the new page is on screen. Going back or
- * forward, it is where the visitor left that entry; otherwise a fragment
- * scrolls to its target, and anything else starts at the top, the way a
- * document load does — as does a traversal to an entry no page was ever
- * left from, one called off while it loaded.
- */
-export type ScrollPlan =
+type ScrollPlan =
   | { kind: 'top' }
   | { kind: 'fragment'; id: string }
   | ({ kind: 'position' } & Position);
@@ -89,19 +82,13 @@ export type ScrollPlan =
 export const scrollPlanFor = (
   navigationType: NavigationType,
   hash: string,
-  leftAt: Position | undefined,
+  left: Position | undefined,
 ): ScrollPlan => {
-  if (navigationType === 'traverse' && leftAt !== undefined) {
-    return { kind: 'position', ...leftAt };
+  if (navigationType === 'traverse' && left !== undefined) {
+    return { kind: 'position', ...left };
   }
   if (hash.length > 1) {
-    let id = hash.slice(1);
-    try {
-      id = decodeURIComponent(id);
-    } catch {
-      // 復号できない fragment は書かれたままの綴りで探す
-    }
-    return { kind: 'fragment', id };
+    return { kind: 'fragment', id: decodeOrKeep(hash.slice(1)) };
   }
   return { kind: 'top' };
 };
@@ -141,61 +128,9 @@ const applyScroll = (plan: ScrollPlan): void => {
 type Pending = {
   resolve: () => void;
   scroll: ScrollPlan | null;
-  types: readonly string[];
-  keyless: boolean;
-};
-
-// 戻る・進むの位置はブラウザに戻させず、離れたときの位置を覚えて自分で置く。
-// Chromium は intercept した traverse の URL を handler より先に確定させ、
-// handler が解けるまでに位置が変わると、それを行き先の entry の保存した位置に
-// 書いてから戻す。新しいページの描画で layout が走ると、前のページの位置が
-// 新しいページで下げられる量に切り詰められ、その下端に戻ってしまう
-const leftAt = new Map<string, Position>();
-
-// 読み直しのあとも、それより前に作った entry へは同じ文書のまま戻る。entry の
-// key は読み直しをまたいで変わらないので、タブの sessionStorage にも写す
-const LEFT_AT_KEY = '@k8ordo/router:left-at';
-
-// 間引くのは上限を超えたときだけ。entries() はその文書から続く同じ origin の
-// entry しか並べないので、そのたびに間引くと、別のサイトから入り直した文書で
-// 別のサイトより前の entry の位置まで消える。捨てられた entry の key がほかの
-// entry に付くことはなく、間引くのは大きさのためだけ。どのエンジンも 1 つの
-// タブの履歴に 100 件より多くは持たない
-const LEFT_AT_LIMIT = 100;
-
-const readLeftAt = (): void => {
-  try {
-    const saved = sessionStorage.getItem(LEFT_AT_KEY);
-    if (saved === null) return;
-    for (const [key, position] of JSON.parse(saved) as Array<
-      [string, Position]
-    >) {
-      leftAt.set(key, position);
-    }
-  } catch {
-    // 読めなければ、覚えていないのと同じ
-  }
-};
-
-const rememberLeftAt = (entry: string): void => {
-  // Map は入れた順に並ぶ。離れ直した entry を後ろへ移し、古いものを前から捨てる
-  leftAt.delete(entry);
-  leftAt.set(entry, { left: window.scrollX, top: window.scrollY });
-  if (leftAt.size > LEFT_AT_LIMIT) {
-    // 移っては戻ると、切り捨てられた entry の key が戻れる entry の間に積もる。
-    // 古さだけで捨てると、一度離れたきりの戻れる entry が先に押し出される
-    const listed = new Set(navigation.entries().map(({ key }) => key));
-    const keys = [...leftAt.keys()];
-    for (const key of [...keys.filter((k) => !listed.has(k)), ...keys]) {
-      if (leftAt.size <= LEFT_AT_LIMIT) break;
-      leftAt.delete(key);
-    }
-  }
-  try {
-    sessionStorage.setItem(LEFT_AT_KEY, JSON.stringify([...leftAt]));
-  } catch {
-    // 書けなくても、この文書のあいだは覚えている
-  }
+  // 同じページの戻る・進むは持たない。画面の entry は navigate のときに決まり、
+  // ページの切り替えではないので型も付けない
+  change?: { types: readonly string[]; keyless: boolean };
 };
 
 // Firefox は intercept した traverse でも scroll の指定を見ず、popstate を
@@ -211,6 +146,56 @@ const keepPosition = (entry: string): void => {
       window.scrollTo({ left, top });
     }
   }, 0);
+};
+
+// WebKit は、別のサイトを挟んで読み直した文書からそれより前の entry へ戻ると、
+// navigate を出さずに popstate だけを出し、currentEntry を null にする。URL だけが
+// 動いて画面は残り、この文書ではもう navigation.navigate() が AbortError になる。
+// その文書の中で移ってから、文書の最初の entry へ戻るときも navigate を出さない。
+// currentEntry は null にならないが、URL だけが動いて画面は残る。次のページの
+// 読み込みの途中なら、その読み込みも止まらず、戻った URL の下に着く
+const reloadOnUnannouncedSteps = (
+  followsInPlace: (url: URL) => boolean,
+): {
+  heard: (destination: string) => void;
+  reloading: () => boolean;
+  stop: () => void;
+} => {
+  let reloading = false;
+  const reload = (): void => {
+    reloading = true;
+    location.reload();
+  };
+  // 最後の navigate の行き先。popstate がそれを指していなければ、その一歩は知らされていない。
+  // popstate では消さない。Firefox は iframe の中で横取りした traverse を 2 回 commit し、
+  // 行き先を指す popstate を 2 回出す
+  let announced: string | null = null;
+  // WebKit で popstate を聞く前（hydrate の前や、描いてから effect までの間）に戻るが
+  // 届くと、currentEntry は null のまま残る。entries() が空なのは Navigation API を持たない
+  // 文書（opaque な origin）で、読み直しても同じなので読み直さない
+  if (navigation.currentEntry === null && navigation.entries().length > 0) {
+    reload();
+  }
+  const onPopState = (): void => {
+    // 読み直しの途中の一歩は、頼んだ読み直しが前の URL のまま着いて消すので、頼み直す
+    if (reloading || navigation.currentEntry === null) {
+      reload();
+      return;
+    }
+    if (announced === location.href) return;
+    // 画面のページが自分で URL を読み直せるなら、読み直さない
+    if (!followsInPlace(new URL(location.href))) reload();
+  };
+  window.addEventListener('popstate', onPopState);
+  return {
+    heard: (destination) => {
+      announced = destination;
+    },
+    reloading: () => reloading,
+    stop: () => {
+      window.removeEventListener('popstate', onPopState);
+    },
+  };
 };
 
 /**
@@ -268,10 +253,7 @@ export const NavigationGeneration = createContext(-1);
  * is what makes `navigation.navigate().finished` mean "the page is showing".
  * A navigation that keeps the pathname on screen — `@k8ordo/state`'s
  * `update()` — is intercepted with no handler, so its `finished` settles as
- * soon as the navigation commits. Going back or forward between two entries
- * of that page is the exception: it settles with the render the entry change
- * starts in the background, and the position that entry was left at comes
- * back onto what it renders.
+ * soon as the navigation commits.
  *
  * The new tree renders at the lane `useDeferredValue` gives it, not in a
  * transition. While any async action is pending, React holds every
@@ -329,6 +311,8 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
   const shown = useRef<string | null>(null);
   // The navigation `usePendingPathname` names: the last one to start.
   const latest = useRef(-1);
+  // 木を当てて、その木がまだ画面に出ていない遷移。中止されても、当てた木は画面に出る
+  const applying = useRef<number | null>(null);
   // The entry whose page is on screen while a page change loads — the URL's
   // entry otherwise. Going back to it is calling the change off, not going
   // back to a place the visitor left; and it is the entry a navigation in the
@@ -340,37 +324,60 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
 
   useEffect(() => {
     shown.current = normalizePathname(location.pathname);
-    readLeftAt();
-    // 読み直しを頼んだ文書は去るところ。そのあとの遷移は横取りせずブラウザに任せる。
-    // 横取りすると読み直しが止まり、currentEntry が null の文書では遷移も AbortError になる
-    let reloading = false;
-    const reload = (): void => {
-      reloading = true;
-      location.reload();
+    restoreLeftAt();
+    const steps = reloadOnUnannouncedSteps(
+      (url) =>
+        normalizePathname(url.pathname) === shown.current &&
+        pendingPathname === null &&
+        !refresh(url),
+    );
+    const track = (
+      id: number,
+      entry: Omit<Pending, 'resolve'>,
+      signal: AbortSignal,
+    ): Promise<undefined> => {
+      const { promise, resolve, reject } = Promise.withResolvers<undefined>();
+      pending.current.set(id, {
+        ...entry,
+        resolve: () => {
+          resolve(undefined);
+        },
+      });
+      signal.addEventListener(
+        'abort',
+        () => {
+          pending.current.delete(id);
+          reject(signal.reason as Error);
+        },
+        { once: true },
+      );
+      return promise;
     };
-    // 最後の navigate の行き先。popstate がそれを指していなければ、その一歩は知らされていない。
-    // popstate では消さない。Firefox は iframe の中で横取りした traverse を 2 回 commit し、
-    // 行き先を指す popstate を 2 回出す
-    let announced: string | null = null;
-    // WebKit で popstate を聞く前（hydrate の前や、描いてから effect までの間）に下の戻るが
-    // 届くと、currentEntry は null のまま残る。entries() が空なのは Navigation API を持たない
-    // 文書（opaque な origin）で、読み直しても同じなので読み直さない
-    if (navigation.currentEntry === null && navigation.entries().length > 0) {
-      reload();
-    }
     const onNavigate = (event: NavigateEvent): void => {
-      announced = event.destination.url;
-      if (reloading) return;
+      steps.heard(event.destination.url);
+      // 読み直しを頼んだ文書は去るところ。そのあとの遷移は横取りせずブラウザに任せる。
+      // 横取りすると読み直しが止まり、currentEntry が null の文書では遷移も AbortError になる
+      if (steps.reloading()) return;
       const traverse = event.navigationType === 'traverse';
-      // WebKit は bfcache から戻した文書に、位置を戻す前の traverse を出す。行き先は
-      // 今の entry で、画面のページは離れていない。位置はこのあとブラウザが戻す
+      const { key } = event.destination;
+      // 画面のページの entry への traverse は、どこからも離れない。読み込み中の
+      // ページの切り替えなら、それを取り消す。読み込んだ木をもう当てていたら、
+      // 引っ込められずに戻った URL の下に出るので、取り消さずに戻った先を読み込む。
+      // どちらでもなければ、WebKit が bfcache から戻した文書に位置を戻す前に出す
+      // もので、位置はこのあとブラウザが戻す
       if (
         traverse &&
         isOurs(event) &&
-        onScreenEntry.current === null &&
-        event.destination.key === navigation.currentEntry?.key
+        key !== '' &&
+        key === (onScreenEntry.current ?? navigation.currentEntry?.key) &&
+        applying.current === null
       ) {
+        const calledOff = onScreenEntry.current !== null;
+        onScreenEntry.current = null;
         event.intercept({ scroll: 'manual', focusReset: 'manual' });
+        // bfcache から戻した文書で置き直すと、まだ 0 の位置を持ち越して、ブラウザが
+        // 戻した位置を消す
+        if (calledOff) keepPosition(key);
         return;
       }
       // ページの読み込み中に離れるのは、URL の entry でなく画面に残るページの
@@ -380,7 +387,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       // WebKit は、戻るで読み直した文書の entries() に、同じ文書のまま戻れる
       // それより前の entry を並べず、そこへの traverse の行き先に key を付けない。
       // 離れた位置を引けないので、そのときだけ戻すのをブラウザに任せる
-      const keyless = traverse && event.destination.key === '';
+      const keyless = traverse && key === '';
       if (!isOurs(event)) {
         if (keyless) onScreenEntry.current = '';
         else if (onScreenEntry.current === '') onScreenEntry.current = null;
@@ -388,55 +395,32 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
       }
       const url = new URL(event.destination.url);
       const pathname = normalizePathname(url.pathname);
-      // Same place — only the search or the entry state moved. Nothing to
-      // remount, and no focus to disturb; nothing to load either, unless the
-      // page showing reads what moved. Only going back or forward moves the
-      // viewport, to where that entry was left.
       const inPlace = pathname === shown.current;
+      const plan =
+        keyless || (inPlace && !traverse)
+          ? null
+          : scrollPlanFor(event.navigationType, url.hash, leftAt(key));
+      // handler が解けるのは、木を画面に出して位置を置いた commit。ブラウザの
+      // after-transition も同じときに置くので、二重に置かないよう manual にする
+      const scroll = keyless ? 'after-transition' : 'manual';
       if (inPlace && !refresh(url)) {
-        const calledOff =
-          event.destination.key !== '' &&
-          event.destination.key === onScreenEntry.current;
         onScreenEntry.current = keyless ? '' : null;
-        if (!traverse || calledOff) {
+        if (!traverse) {
           event.intercept({ scroll: 'manual', focusReset: 'manual' });
-          if (calledOff) keepPosition(event.destination.key);
           return;
         }
         // 表に置くのも描き直しを頼むのも、handler でなくここで。currententrychange
         // より前なので、ページが同じタスクで出す更新と同じ描画にまとまり、遅らせた
         // 描画の lane も 1 本を分け合う。handler の走る時機はエンジンで違う
         const id = count.current++;
-        const { promise, resolve, reject } = Promise.withResolvers<undefined>();
+        const arrived = track(id, { scroll: plan }, event.signal);
         // handler が走る前に中止されると、誰も待たない reject になる
-        promise.catch(() => undefined);
-        pending.current.set(id, {
-          resolve: () => {
-            resolve(undefined);
-          },
-          scroll: keyless
-            ? null
-            : scrollPlanFor(
-                'traverse',
-                url.hash,
-                leftAt.get(event.destination.key),
-              ),
-          types: [],
-          keyless,
-        });
-        event.signal.addEventListener(
-          'abort',
-          () => {
-            pending.current.delete(id);
-            reject(event.signal.reason as Error);
-          },
-          { once: true },
-        );
+        arrived.catch(() => undefined);
         setTraversed(id);
         event.intercept({
-          scroll: keyless ? 'after-transition' : 'manual',
+          scroll,
           focusReset: 'manual',
-          handler: () => promise,
+          handler: () => arrived,
         });
         return;
       }
@@ -445,30 +429,13 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
 
       const id = count.current++;
       latest.current = id;
-      setPendingPathname(
-        normalizePathname(withoutBase(url.pathname) ?? url.pathname),
-      );
+      setPendingPathname(appPathname(url.pathname));
       const settled = (): void => {
         if (latest.current === id) setPendingPathname(null);
       };
-      const scroll =
-        (inPlace && !traverse) || keyless
-          ? null
-          : scrollPlanFor(
-              event.navigationType,
-              url.hash,
-              leftAt.get(event.destination.key),
-            );
       event.intercept({
-        // A load in place moves neither the viewport nor focus.
         ...(inPlace ? { focusReset: 'manual' as const } : {}),
-        // The platform would scroll "after transition" — after the handler
-        // settles — but the handler settles only once the tree is on screen,
-        // which is exactly when this hook scrolls itself. Doing it here keeps
-        // the two from disagreeing, and keeps the behaviour where a browser
-        // has not implemented the platform's half. A traversal included: the
-        // hook puts back where it saw that entry left — a load in place too.
-        scroll: keyless ? 'after-transition' : 'manual',
+        scroll,
         handler: async () => {
           // 失敗も中止も、名指していた遷移が終わったということ。新しい遷移が
           // 始まっていれば、それがもう自分の行き先を名指している
@@ -482,67 +449,40 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
           }
           // A load that ignores the signal can come back after a second
           // navigation has already taken over. Applying it then would put the
-          // page the visitor left back on screen, and the listener below would
-          // never fire — an abort that already happened does not fire again.
+          // page the visitor left back on screen, and the listener `track`
+          // adds would never fire — an abort that already happened does not
+          // fire again.
           if (event.signal.aborted) throw event.signal.reason as Error;
-          await new Promise<void>((resolve, reject) => {
-            pending.current.set(id, {
-              resolve,
-              scroll,
-              // 同じページの読み直しはページの切り替えではない。
-              // ViewTransition が切り替えとして動かさないよう、型を付けない
-              types: inPlace ? [] : transitionTypesFor(event.navigationType),
-              keyless,
-            });
-            event.signal.addEventListener(
-              'abort',
-              () => {
-                pending.current.delete(id);
-                reject(event.signal.reason as Error);
+          const committed = track(
+            id,
+            {
+              scroll: plan,
+              change: {
+                // 同じページの読み直しはページの切り替えではない。
+                // ViewTransition が切り替えとして動かさないよう、型を付けない
+                types: inPlace ? [] : transitionTypesFor(event.navigationType),
+                keyless,
               },
-              { once: true },
-            );
-            // Recorded at apply rather than at commit: a navigation that
-            // arrives in between must see this page as the one showing.
-            shown.current = pathname;
-            apply(value);
-            // Batched with the caller's own update, so its deferred copy
-            // moves in the same background commit as the host's — and names
-            // which navigation that commit belongs to.
-            setApplied(id);
-          });
+            },
+            event.signal,
+          );
+          // Recorded at apply rather than at commit: a navigation that
+          // arrives in between must see this page as the one showing.
+          shown.current = pathname;
+          applying.current = id;
+          apply(value);
+          // Batched with the caller's own update, so its deferred copy
+          // moves in the same background commit as the host's — and names
+          // which navigation that commit belongs to.
+          setApplied(id);
+          await committed;
         },
       });
     };
     navigation.addEventListener('navigate', onNavigate);
-    // WebKit は、別のサイトを挟んで読み直した文書からそれより前の entry へ戻ると、
-    // navigate を出さずに popstate だけを出し、currentEntry を null にする。URL だけが
-    // 動いて画面は残り、この文書ではもう navigation.navigate() が AbortError になる。
-    // その文書の中で移ってから、文書の最初の entry へ戻るときも navigate を出さない。
-    // currentEntry は null にならないが、URL だけが動いて画面は残る。次のページの
-    // 読み込みの途中なら、その読み込みも止まらず、戻った URL の下に着く
-    const onPopState = (): void => {
-      // 読み直しの途中の一歩は、頼んだ読み直しが前の URL のまま着いて消すので、頼み直す
-      if (reloading || navigation.currentEntry === null) {
-        reload();
-        return;
-      }
-      if (announced === location.href) return;
-      // 画面のページが自分で URL を読み直せるなら、読み直さない
-      const url = new URL(location.href);
-      if (
-        normalizePathname(url.pathname) === shown.current &&
-        pendingPathname === null &&
-        !refresh(url)
-      ) {
-        return;
-      }
-      reload();
-    };
-    window.addEventListener('popstate', onPopState);
     return () => {
       navigation.removeEventListener('navigate', onNavigate);
-      window.removeEventListener('popstate', onPopState);
+      steps.stop();
     };
   }, []);
 
@@ -554,10 +494,13 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
   // navigation has finished, and runs passive effects only after the
   // animation — a passive resolver would be waiting on itself.
   const settle = useEffectEvent((id: number) => {
+    if (applying.current === id) applying.current = null;
     const entry = pending.current.get(id);
     if (entry === undefined) return;
     pending.current.delete(id);
-    onScreenEntry.current = entry.keyless ? '' : null;
+    if (entry.change !== undefined) {
+      onScreenEntry.current = entry.change.keyless ? '' : null;
+    }
     if (entry.scroll !== null) applyScroll(entry.scroll);
     if (latest.current === id) setPendingPathname(null);
     entry.resolve();
@@ -577,7 +520,7 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
   // are said here, and the background commit is the one that claims them.
   useLayoutEffect(() => {
     if (applied === onScreen) return;
-    const types = pending.current.get(applied)?.types ?? [];
+    const types = pending.current.get(applied)?.change?.types ?? [];
     startTransition(() => {
       for (const type of types) addTransitionType(type);
     });

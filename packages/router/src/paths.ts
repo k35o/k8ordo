@@ -181,6 +181,15 @@ export const normalizePathname = (pathname: string): string => {
   return pathname.slice(0, end);
 };
 
+/** A URL part decoded, or as written when it does not decode. */
+export const decodeOrKeep = (value: string): string => {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+};
+
 /** What a param value may be on the way into a link: anything with one spelling. */
 export type ParamValue = string | number | bigint | boolean;
 

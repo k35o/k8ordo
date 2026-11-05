@@ -55,12 +55,12 @@ const subscribe = (onChange: () => void): (() => void) => {
 };
 
 /**
- * The document's pathname in the table's terms — Vite's `base` removed. A
- * document outside its own base is a deployment that went wrong, and the
+ * A pathname of the document's in the table's terms — Vite's `base` removed.
+ * A document outside its own base is a deployment that went wrong, and the
  * pathname is shown as it is rather than failing the render over it.
  */
-export const appPathname = (): string =>
-  normalizePathname(withoutBase(location.pathname) ?? location.pathname);
+export const appPathname = (pathname = location.pathname): string =>
+  normalizePathname(withoutBase(pathname) ?? pathname);
 
 /**
  * Where the browser currently is, as a pathname in the table's terms — the
