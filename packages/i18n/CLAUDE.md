@@ -66,9 +66,10 @@ pnpm check         # check:write to auto-fix
   so `message()` can tell an unknown segment (`/fr/…` on a 404 page) from a
   locale, and can render the default when nothing names one. An application
   has one set; a test that defines others re-defines the one its messages
-  read. Before any set registers (a client graph that never imports the
-  module defining it), a segment no message has text for counts as no
-  locale, so a 404 page does not throw.
+  read. Before any set registers, no segment is a locale and a message
+  renders its first variant: there is nothing to tell a locale from a path
+  by. `@k8ordo/framework`'s browser entry imports `src/i18n.ts`
+  (`virtual:k8ordo/locales`) so the set is there before anything renders.
 - **Refuse where it is read, name what is missing.** A message lacking the
   named locale throws from the call, listing the variants present. An empty
   set, a tag that is not BCP 47, a default outside the list, a time zone

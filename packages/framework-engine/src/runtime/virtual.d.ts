@@ -1,6 +1,12 @@
 /// <reference types="vite/client" />
 /// <reference types="@vitejs/plugin-rsc/types" />
 
+/**
+ * The application's `src/i18n.ts`, for its locale set to register itself in
+ * the browser; nothing for an application without one.
+ */
+declare module 'virtual:k8ordo/locales' {}
+
 declare module 'virtual:k8ordo/routes' {
   import type { Routes } from '@k8ordo/router';
 

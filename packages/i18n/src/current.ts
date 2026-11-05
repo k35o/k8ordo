@@ -101,19 +101,16 @@ export const browserPathname = (): string => {
 /** The first segment of the browser's URL below the base, whatever it spells. */
 const browserSegment = (): string => browserPathname().split('/')[1] ?? '';
 
-/** Whether a set has registered in this environment yet. */
-export const setRegistered = (): boolean => global[SET_KEY] !== undefined;
-
 /**
  * The locale named where this runs, or `null` when nothing names one: no
- * segment in the URL, no request in progress. A registered set makes an
- * unknown segment `null` too, so `/fr/…` does not read as a locale.
+ * segment in the URL, no request in progress, a segment that is not one of
+ * the set's (`/fr/…`), or no set defined in this environment to tell.
  */
 export const namedLocale = (): string | null => {
   const set = global[SET_KEY];
+  if (set === undefined) return null;
   const named = inBrowser ? browserSegment() : localeStorage()?.getStore();
-  if (named === undefined || named === '') return null;
-  if (set !== undefined && !set.is(named)) return null;
+  if (named === undefined || !set.is(named)) return null;
   return named;
 };
 

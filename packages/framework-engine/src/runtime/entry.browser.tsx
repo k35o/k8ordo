@@ -1,5 +1,8 @@
 import { createFromReadableStream } from '@vitejs/plugin-rsc/browser';
 import { rscStream } from 'rsc-html-stream/client';
+// locale の集合は評価されたときに自分を登録する。どの client コンポーネントも
+// import しないアプリでは、ブラウザの文言が集合を知らないまま読まれる
+import 'virtual:k8ordo/locales';
 
 import { connectAppRouter } from './browser-payloads';
 import { whenClientReady } from './client-ready';

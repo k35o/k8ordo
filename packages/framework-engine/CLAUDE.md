@@ -80,6 +80,12 @@ pnpm check         # check:write to auto-fix
   alone then, since only the type-only `register.gen.ts` can change. A
   hand-written augmentation left in an application still compiles:
   TypeScript accepts a property declared twice with one type.
+- **The browser loads `src/i18n.ts` before anything renders.** A locale set
+  registers itself as it is evaluated, and `@k8ordo/i18n` reads no locale
+  where none has (`packages/i18n/CLAUDE.md`), so `entry.browser.tsx`
+  imports `virtual:k8ordo/locales`: the file when the root has one, an
+  empty module when not. The server needs nothing of the kind: the route
+  files that take a locale import the set.
 - **Declaration order is load-bearing.** `not-found.tsx` is emitted last in
   its branch because the router matches in declaration order; every route the
   app actually declared has to out-rank the catch-all. Literal directories are
