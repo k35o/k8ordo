@@ -85,6 +85,11 @@ export const createHandle = (): Handle => {
   };
 };
 
+export const settledHandle = (): UpdateHandle => ({
+  committed: Promise.resolve(),
+  finished: Promise.resolve(),
+});
+
 /** A snapshot held still, with the picks already handed out for it. */
 export type Frozen = {
   readonly values: StateValues;

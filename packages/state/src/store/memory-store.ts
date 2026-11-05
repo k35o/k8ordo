@@ -1,6 +1,6 @@
 import type { MemoryState } from '../memory-state';
 import type { StateValues } from '../schema/object';
-import { createHandle, createStoreCore, resolvePatch } from './core';
+import { createStoreCore, resolvePatch, settledHandle } from './core';
 import type { Patch, Store, UpdateHandle } from './core';
 import { getOrCreateStore } from './registry';
 
@@ -13,9 +13,7 @@ const createMemoryStore = (def: MemoryState): Store => {
   const update = (patch: Patch): UpdateHandle => {
     const resolved = resolvePatch(patch, core.snapshot(), keys, def.key);
     core.applyNext({ ...core.snapshot(), ...resolved });
-    const handle = createHandle();
-    handle.settle();
-    return handle.external;
+    return settledHandle();
   };
 
   return {

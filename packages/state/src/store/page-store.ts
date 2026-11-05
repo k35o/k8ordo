@@ -1,7 +1,12 @@
 import type { PageInternals, PageState } from '../page-state';
 import { isRecord, sameValue } from '../schema/object';
 import type { StateValues } from '../schema/object';
-import { createHandle, createStoreCore, resolvePatch } from './core';
+import {
+  createHandle,
+  createStoreCore,
+  resolvePatch,
+  settledHandle,
+} from './core';
 import type { Frozen, Handle, Patch, Store, UpdateHandle } from './core';
 import { getOrCreateStore } from './registry';
 
@@ -180,11 +185,7 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
     // written, they would land on the next page's URL, which never showed
     // them, and load it again. A batch that ends where it started settles
     // the same way.
-    if (tree !== null && tree !== at) {
-      const dropped = createHandle();
-      dropped.settle();
-      return dropped.external;
-    }
+    if (tree !== null && tree !== at) return settledHandle();
     const resolved = resolvePatch(patch, core.snapshot(), page.keys, def.key);
     // The echo is synchronous AND canonical: the merged state goes through
     // the schema right here, by the same road a URL arrival takes, so the
