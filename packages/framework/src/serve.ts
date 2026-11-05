@@ -43,6 +43,7 @@ export type ServeOptions = {
 /** What `serve` hands back: where it listens, and how to stop it. */
 export type Server = {
   readonly port: number;
+  /** The address it listens on, which `localhost` may have made `[::1]`. */
   readonly url: string;
   readonly close: () => Promise<void>;
 };
@@ -427,8 +428,10 @@ export const serve = async (options: ServeOptions = {}): Promise<Server> => {
   await new Promise<void>((resolve) => {
     server.listen(options.port ?? 3000, host, resolve);
   });
-  const { port } = server.address() as AddressInfo;
-  const url = `http://${host}:${String(port)}`;
+  const { address, family, port } = server.address() as AddressInfo;
+  // localhost で待ち受けても、Node が選ぶのはその名前の指す番地の 1 つだけで、
+  // 名前でつなぐ側は別の番地に向かうことがある。待ち受けた番地を名指す
+  const url = `http://${family === 'IPv6' ? `[${address}]` : address}:${String(port)}`;
   console.warn(`k8ordo: serving ${dist} on ${url}`);
   return {
     port,

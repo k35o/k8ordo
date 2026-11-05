@@ -32,9 +32,6 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.63.0-resolute
       options: --user 1001 --ipc=host
-      env:
-        # /etc/hosts が localhost を ::1 にも向け、listen と fetch で食い違う
-        NODE_OPTIONS: --dns-result-order=ipv4first
     strategy:
       fail-fast: false
       matrix:
@@ -166,8 +163,6 @@ jobs:
     container:
       image: mcr.microsoft.com/playwright:v1.63.0-resolute
       options: --user 1001 --ipc=host
-      env:
-        NODE_OPTIONS: --dns-result-order=ipv4first
     strategy:
       fail-fast: false
       matrix:

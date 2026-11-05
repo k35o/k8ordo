@@ -338,8 +338,10 @@ const server = await serve({ port: 3000 });
 `serve` takes three options (`ServeOptions`): `dist`, the build output
 holding `client/` and `rsc/` (default `dist`, resolved against the working
 directory); `port` (default `3000`); and `host` (default `localhost` —
-inside a container, `'0.0.0.0'`). Stopping it on a signal is up to the
-server that calls it: `await server.close()`.
+inside a container, `'0.0.0.0'`). `server.url` names the address it listens
+on, so under the default it is `http://[::1]:3000` wherever `localhost`
+gave Node `::1`. Stopping it on a signal is up to the server that calls it:
+`await server.close()`.
 
 For a server build, `serve` hands out the client build's files as they are
 and passes everything else to the request handler: HTML for a page, its RSC
