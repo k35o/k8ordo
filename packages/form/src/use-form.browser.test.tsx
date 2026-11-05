@@ -1,4 +1,4 @@
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useLayoutEffect, useState } from 'react';
 import type { FC } from 'react';
 import { describe, expect, it, vi } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
@@ -146,6 +146,28 @@ const SubmittedList: FC = () => {
 const Inline: FC = () => {
   const form = useForm(derived, { errors: {} });
   const email = form.field('email');
+
+  return (
+    <form {...form.props}>
+      <input aria-label="email" {...email.input} />
+      <input aria-label="password" {...form.field('password').input} />
+      <p data-testid="email-error">{email.error ?? ''}</p>
+    </form>
+  );
+};
+
+// コミットごとに、画面に出した email の文言を state の token と組で残す
+let emailCommits: Array<{
+  token: string | undefined;
+  error: string | undefined;
+}> = [];
+
+const RecordedSignup: FC<{ state: FormState }> = ({ state }) => {
+  const form = useForm(derived, state);
+  const email = form.field('email');
+  useLayoutEffect(() => {
+    emailCommits.push({ token: state.token, error: email.error });
+  });
 
   return (
     <form {...form.props}>
@@ -859,6 +881,36 @@ describe('useForm in a browser', () => {
     await expect
       .element(screen.getByTestId('confirm-error'))
       .toHaveTextContent('');
+  });
+
+  it('never commits what the client worked out before a new result beside that result', async () => {
+    emailCommits = [];
+    const screen = await render(
+      <RecordedSignup state={{ errors: {}, token: '1' }} />,
+    );
+    await screen.getByLabelText('email').fill('not-an-email');
+    await screen.getByLabelText('password').click();
+    await expect
+      .element(screen.getByTestId('email-error'))
+      .toHaveTextContent('メールアドレスの形式で入力してください');
+
+    await screen.rerender(
+      <RecordedSignup
+        state={{ errors: { email: 'すでに登録されています' }, token: '2' }}
+      />,
+    );
+
+    await expect
+      .element(screen.getByTestId('email-error'))
+      .toHaveTextContent('すでに登録されています');
+    // フォーカスが移る blur でもう一度描くので、コミットの数は数えない
+    expect(
+      new Set(
+        emailCommits
+          .filter((commit) => commit.token === '2')
+          .map((commit) => commit.error),
+      ),
+    ).toStrictEqual(new Set(['すでに登録されています']));
   });
 
   it('re-shows the errors of an identical second failed submit via the token', async () => {
