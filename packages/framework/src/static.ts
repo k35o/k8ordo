@@ -1,6 +1,5 @@
 import { mkdir, readdir, writeFile, readFile } from 'node:fs/promises';
 import type { ServerResponse } from 'node:http';
-import { createRequire } from 'node:module';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -45,8 +44,6 @@ import {
   policyProblems,
   redirectPage,
   sitemap,
-  unlinkedDeps,
-  unlinkedMessage,
   writtenOutsideScripts,
 } from './documents';
 import type { ContentSecurityPolicy } from './documents';
@@ -888,14 +885,6 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         const redirected = new Set<string>();
         // A route.ts whose GET did not answer with something to write.
         const unanswered: string[] = [];
-        // What a page's HTML does not link of the client components its
-        // payload names, by page.
-        const unlinkedPages = new Map<string, Written['unlinked']>();
-        const unlinks = (page: string, missing: Written['unlinked']): void => {
-          if (missing === null || missing.length > 0) {
-            unlinkedPages.set(page, missing);
-          }
-        };
         // The type each route.ts's GET answered with, by the file it wrote.
         const types = new Map<string, string>();
         // What the payload of every HTML document written names, and of each
@@ -928,14 +917,13 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
             const dir = path.join(clientDir, dirFor(pathname));
             return [
               async () => {
-                const { status, notFound, unlinked, named } = await write(
+                const { status, notFound, named } = await write(
                   path.join(dir, 'index.html'),
                   handler,
                   urlFor(pathname),
                   csp,
                   { notFoundIsPage: false },
                 );
-                unlinks(pathname, unlinked);
                 if (named !== null) documents.push(named);
                 if (status === 404) {
                   (notFound ? disowned : refused).push(pathname);
@@ -971,14 +959,13 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         // would mean nothing in this mode.
         const unmatched = catchAllPath(tree);
         if (unmatched !== null) {
-          const { status, unlinked, named } = await write(
+          const { status, named } = await write(
             path.join(clientDir, '404.html'),
             handler,
             urlFor(unmatched),
             csp,
             { notFoundIsPage: true },
           );
-          unlinks('404.html', unlinked);
           if (named !== null) documents.push(named);
           if (status === 500) failed.push('404.html');
         }
@@ -1004,7 +991,6 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
               { notFoundIsPage: false, shell: shell.pattern },
             );
             const named = `${shell.location} (${fallbacks.get(shell.pattern) ?? ''})`;
-            unlinks(shell.location, answered.unlinked);
             if (answered.named !== null) documents.push(answered.named);
             if (answered.status === 500) {
               failed.push(shell.location);
@@ -1038,9 +1024,6 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
             ? [
                 `static build could not render ${failed.toSorted().join(', ')} — see the error above`,
               ]
-            : []),
-          ...(unlinkedPages.size > 0
-            ? [unlinkedMessage(unlinkedPages, bugReport())]
             : []),
           ...(unanswered.length > 0
             ? [
@@ -1212,24 +1195,6 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
 };
 
 /**
- * Where a bug in the HTML is reported, and what the report names: this
- * package, and the React that rendered the HTML — a peer, whichever version
- * the application installed.
- */
-const bugReport = (): string => {
-  const required = createRequire(import.meta.url);
-  const manifestOf = (name: string): Record<string, unknown> =>
-    required(`${name}/package.json`) as Record<string, unknown>;
-  const { bugs } = manifestOf('@k8ordo/framework') as {
-    readonly bugs: { readonly url: string };
-  };
-  const versions = ['@k8ordo/framework', 'react', 'react-dom'].map(
-    (name) => `${name} ${String(manifestOf(name).version)}`,
-  );
-  return `This is a bug in @k8ordo/framework, not in this application: report it at ${bugs.url} with this message (${versions.join(', ')})`;
-};
-
-/**
  * A render is a whole page: components, their data, and whatever the app's
  * own highlighting or markdown does. Starting every one of them at once ties
  * peak memory to the size of the site, which is the number that grows. A
@@ -1259,12 +1224,6 @@ type Written = {
   readonly notFound: boolean;
   /** The pattern whose shell the handler said it rendered, if any. */
   readonly shell: string | null;
-  /**
-   * What of the client components its payload names the HTML written does
-   * not link, by component; none for what was not written as HTML, and
-   * `null` for HTML whose handler did not say what its payload names.
-   */
-  readonly unlinked: readonly ClientDeps[] | null;
   /**
    * The client components the payload of the HTML written names; `null`
    * for what was not written as HTML, or whose handler did not say.
@@ -1298,7 +1257,6 @@ const write = async (
     status: response.status,
     notFound,
     shell: answered,
-    unlinked: [],
     named: null,
   };
   // A page that failed to render is not a page, and neither is a 404 anywhere
@@ -1326,15 +1284,9 @@ const write = async (
     await writeFile(file, Buffer.from(await response.arrayBuffer()));
     return written;
   }
-  const html = asFile(await response.text(), nonce, csp);
-  await writeFile(file, html);
+  await writeFile(file, asFile(await response.text(), nonce, csp));
   const said = response.headers.get(CLIENT_DEPS_HEADER);
-  const named = said === null ? null : readClientDeps(said);
-  return {
-    ...written,
-    unlinked: named === null ? null : unlinkedDeps(html, named),
-    named,
-  };
+  return { ...written, named: said === null ? null : readClientDeps(said) };
 };
 
 /**
