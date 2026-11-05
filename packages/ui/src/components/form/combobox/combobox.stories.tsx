@@ -1,14 +1,18 @@
+import { formFields, parseForm } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import type { FC } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
+import { z } from 'zod';
 
+import { ActionForm } from '../../../../.storybook/action-form';
 import { afterRenderingUpdate } from '../../../../.storybook/focus';
 import {
   finishPending,
   PendingForm,
 } from '../../../../.storybook/pending-form';
 import type { Option } from '../../../types/variables';
+import { FormControl } from '../form-control';
 import { Combobox } from './combobox';
 import type { ComboboxSearch } from './combobox';
 
@@ -323,5 +327,77 @@ export const Invalid: Story = {
     await expect(
       canvas.getByRole('combobox', { name: '都道府県' }),
     ).toHaveAttribute('aria-invalid', 'true');
+  },
+};
+
+const address = z.object({
+  prefecture: z.enum(
+    ['hokkaido', 'tokyo', 'kanagawa', 'aichi', 'kyoto', 'osaka', 'fukuoka'],
+    '都道府県を選んでください',
+  ),
+});
+const addressFields = formFields(address);
+const received = fn();
+
+const AddressForm = () => (
+  <ActionForm
+    fields={addressFields}
+    onReceive={received}
+    serve={(data) => parseForm(address, data)}
+  >
+    {(form) => {
+      const prefecture = form.field('prefecture');
+      return (
+        <FormControl
+          errorText={prefecture.error}
+          invalid={prefecture.invalid}
+          label="都道府県"
+          renderInput={(props) => (
+            <Combobox {...props} {...prefecture.input} options={PREFECTURES} />
+          )}
+          required={prefecture.required}
+        />
+      );
+    }}
+  </ActionForm>
+);
+
+// @k8ordo/form の formFields を広げるだけでつながる
+export const WithForm: Story = {
+  render: () => <AddressForm />,
+  play: async ({ canvas, userEvent }) => {
+    const combobox = () => canvas.getByRole<HTMLInputElement>('combobox');
+    const choose = async (label: string) => {
+      await userEvent.click(combobox());
+      await userEvent.click(canvas.getByRole('option', { name: label }));
+    };
+    const submit = () =>
+      userEvent.click(canvas.getByRole('button', { name: '送信' }));
+
+    // 選ばずに送ると zod の文言を出し、見えている欄へフォーカスを移す
+    await submit();
+    await expect(
+      await canvas.findByText('都道府県を選んでください'),
+    ).toBeVisible();
+    await waitFor(() => expect(combobox()).toHaveFocus());
+
+    // 導かれた属性を、type を抜かずにそのまま受け、選んだ値を name で送る
+    await choose('大阪府');
+    await submit();
+    await waitFor(() =>
+      expect(received).toHaveBeenLastCalledWith({ prefecture: 'osaka' }),
+    );
+    // 名前を持つのは送るための要素で、見えている欄ではない
+    await expect(combobox()).not.toHaveAttribute('name');
+
+    // 選択の変化をフォームが知り、reset で既定の値と表示名に戻る。送った値は
+    // form の state に返り、次の既定値になる
+    await expect(combobox()).toHaveValue('大阪府');
+    await expect(await canvas.findByText('変更なし')).toBeVisible();
+    await choose('東京都');
+    await expect(await canvas.findByText('変更あり')).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'リセット' }));
+    await expect(await canvas.findByText('変更なし')).toBeVisible();
+    await waitFor(() => expect(combobox()).toHaveValue('大阪府'));
   },
 };

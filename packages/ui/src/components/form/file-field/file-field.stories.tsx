@@ -1,10 +1,14 @@
+import { formFields, parseForm } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
 import type { ComponentProps } from 'react';
 import { expect, fireEvent, fn, mocked, waitFor } from 'storybook/test';
+import { z } from 'zod';
 
 import { FileField } from '.';
+import { ActionForm } from '../../../../.storybook/action-form';
 import { Button } from '../../buttons/button';
+import { FormControl } from '../form-control';
 
 const meta: Meta<typeof FileField.Root> = {
   title: 'components/form/file-field',
@@ -608,5 +612,103 @@ export const DropOfRejectedFilesKeepsTheSelection: Story = {
     await expect(onInput).not.toHaveBeenCalled();
     await expect(submittedNames(input)).toEqual(['photo.png']);
     await expect(canvas.getByText('photo.png')).toBeInTheDocument();
+  },
+};
+
+// ブラウザが選んだときと同じく、files を置いて input と change を出す。上の pick は
+// change しか出さないが、form は input で変更を知る
+const pickInForm = (input: HTMLInputElement, file: File) => {
+  const dataTransfer = new DataTransfer();
+  dataTransfer.items.add(file);
+  input.files = dataTransfer.files;
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+  input.dispatchEvent(new Event('change', { bubbles: true }));
+};
+
+const report = z.object({ attachment: z.file('ファイルを選んでください') });
+const reportFields = formFields(report);
+const received = fn();
+
+const ReportForm = () => (
+  <ActionForm
+    fields={reportFields}
+    onReceive={received}
+    serve={(data) => parseForm(report, data)}
+  >
+    {(form) => {
+      const attachment = form.field('attachment');
+      return (
+        <FormControl
+          errorText={attachment.error}
+          invalid={attachment.invalid}
+          label="添付ファイル"
+          renderInput={(props) => (
+            <FileField.Root {...props} {...attachment.input}>
+              <FileField.Dropzone />
+              <FileField.ItemList clearable />
+            </FileField.Root>
+          )}
+          required={attachment.required}
+        />
+      );
+    }}
+  </ActionForm>
+);
+
+// @k8ordo/form の formFields を広げるだけでつながる
+export const WithForm: Story = {
+  render: () => <ReportForm />,
+  play: async ({ canvas, canvasElement, userEvent }) => {
+    const input = fileInputOf(canvasElement);
+    const submit = () =>
+      userEvent.click(canvas.getByRole('button', { name: '送信' }));
+
+    // z.file() から導いた属性をそのまま広げて受ける
+    await expect(input).toHaveAttribute('name', 'attachment');
+    await expect(input).toBeRequired();
+
+    // ドロップしたファイルも、選んだときと同じくエラーを消し、変更ありにする
+    input.focus();
+    await userEvent.tab();
+    await expect(
+      await canvas.findByText('ファイルを選んでください'),
+    ).toBeVisible();
+    drag(dropzoneOf(canvasElement), [textFile('report.txt')]).drop();
+    await expect(await canvas.findByText('report.txt')).toBeVisible();
+    await expect(input.files).toHaveLength(1);
+    await waitFor(() =>
+      expect(
+        canvas.queryByText('ファイルを選んでください'),
+      ).not.toBeInTheDocument(),
+    );
+    await expect(await canvas.findByText('変更あり')).toBeVisible();
+
+    // reset で一覧も空になる
+    await userEvent.click(canvas.getByRole('button', { name: 'リセット' }));
+    await waitFor(() =>
+      expect(canvas.queryByText('report.txt')).not.toBeInTheDocument(),
+    );
+    await expect(await canvas.findByText('変更なし')).toBeVisible();
+
+    // 一覧から外したファイルは送らない
+    pickInForm(input, textFile('notes.txt'));
+    await expect(await canvas.findByText('変更あり')).toBeVisible();
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'ファイルを削除' }),
+    );
+    await expect(await canvas.findByText('変更なし')).toBeVisible();
+    await submit();
+    await expect(
+      await canvas.findByText('ファイルを選んでください'),
+    ).toBeVisible();
+
+    // 選んだファイルを送る
+    pickInForm(input, textFile('notes.txt'));
+    await submit();
+    await waitFor(() =>
+      expect(received).toHaveBeenLastCalledWith({
+        attachment: expect.objectContaining({ name: 'notes.txt' }),
+      }),
+    );
   },
 };

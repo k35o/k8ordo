@@ -1,6 +1,10 @@
+import { formFields, parseForm } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect } from 'storybook/test';
+import { expect, waitFor } from 'storybook/test';
+import { z } from 'zod';
 
+import { ActionForm, fill } from '../../../../.storybook/action-form';
+import { FormControl } from '../form-control';
 import { DateField } from './date-field';
 
 import styles from './date-field.stories.module.css';
@@ -80,5 +84,54 @@ export const WithMinAndMax: Story = {
 
     // 範囲の判定はブラウザが持つ
     await expect(input.validity.rangeOverflow).toBe(true);
+  },
+};
+
+const meeting = z.object({ eventDate: z.iso.date('日付を入力してください') });
+const meetingFields = formFields(meeting);
+
+const MeetingForm = () => (
+  <ActionForm fields={meetingFields} serve={(data) => parseForm(meeting, data)}>
+    {(form) => {
+      const eventDate = form.field('eventDate');
+      return (
+        <FormControl
+          errorText={eventDate.error}
+          invalid={eventDate.invalid}
+          label="開催日"
+          renderInput={(props) => <DateField {...props} {...eventDate.input} />}
+          required={eventDate.required}
+        />
+      );
+    }}
+  </ActionForm>
+);
+
+// @k8ordo/form の formFields を広げるだけでつながる
+export const WithForm: Story = {
+  render: () => <MeetingForm />,
+  play: async ({ canvas, userEvent }) => {
+    const input = () => canvas.getByLabelText('開催日', { exact: false });
+
+    // z.iso.date() から導いた属性を、type を抜かずにそのまま受ける
+    await expect(input()).toHaveAttribute('name', 'eventDate');
+    await expect(input()).toHaveAttribute('type', 'date');
+    await expect(input()).toBeRequired();
+
+    // 触れて離れると zod の文言でエラーを出し、日付を入れると消す
+    await userEvent.click(input());
+    await userEvent.tab();
+    await expect(
+      await canvas.findByText('日付を入力してください'),
+    ).toBeVisible();
+    await expect(input()).toHaveAttribute('aria-invalid', 'true');
+
+    await fill(userEvent, input(), '2023-01-20');
+    await expect(input()).toHaveValue('2023-01-20');
+    await waitFor(() =>
+      expect(
+        canvas.queryByText('日付を入力してください'),
+      ).not.toBeInTheDocument(),
+    );
   },
 };

@@ -1,7 +1,11 @@
+import { formFields, parseForm } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
-import { expect, fireEvent, fn } from 'storybook/test';
+import { expect, fireEvent, fn, waitFor } from 'storybook/test';
+import { z } from 'zod';
 
+import { ActionForm, fill } from '../../../../.storybook/action-form';
+import { FormControl } from '../form-control';
 import { ColorPicker } from './color-picker';
 
 import styles from './color-picker.stories.module.css';
@@ -250,5 +254,102 @@ export const Invalid: Story = {
     await expect(
       canvas.getByRole('textbox', { name: 'テーマの色' }),
     ).toHaveAttribute('aria-invalid', 'true');
+  },
+};
+
+const theme = z.object({
+  accent: z
+    .string()
+    .regex(/^#[0-9a-f]{6}$/u, '色を #rrggbb で入力してください'),
+});
+const themeFields = formFields(theme);
+const received = fn();
+
+const ThemeForm = () => (
+  <ActionForm
+    fields={themeFields}
+    onReceive={received}
+    serve={(data) => parseForm(theme, data)}
+  >
+    {(form) => {
+      const accent = form.field('accent');
+      return (
+        <FormControl
+          errorText={accent.error}
+          invalid={accent.invalid}
+          label="テーマの色"
+          renderInput={(props) => (
+            <ColorPicker
+              {...props}
+              {...accent.input}
+              defaultValue={accent.input.defaultValue ?? '#0d9488'}
+              swatches={SWATCHES}
+            />
+          )}
+          required={accent.required}
+        />
+      );
+    }}
+  </ActionForm>
+);
+
+// @k8ordo/form の formFields を広げるだけでつながる
+export const WithForm: Story = {
+  render: () => <ThemeForm />,
+  play: async ({ canvas, userEvent }) => {
+    const field = () =>
+      canvas.getByLabelText<HTMLInputElement>('テーマの色', { exact: false });
+    const reset = () =>
+      userEvent.click(canvas.getByRole('button', { name: 'リセット' }));
+
+    // 導かれた属性を、type を抜かずにそのまま受ける
+    await expect(field()).toHaveAttribute('name', 'accent');
+    await expect(field()).toHaveAttribute('type', 'text');
+    await expect(field()).toHaveAttribute('pattern');
+    await expect(field()).toBeRequired();
+
+    // 見本を押すと値が欄に入り、フォームは変更として受け取る
+    await userEvent.click(canvas.getByRole('button', { name: 'オレンジ' }));
+    await expect(field()).toHaveValue('#f97316');
+    await expect(await canvas.findByText('変更あり')).toBeVisible();
+
+    // reset で描画時の色に戻り、つまみと見本も追いつく
+    await reset();
+    await waitFor(() => expect(field()).toHaveValue('#0d9488'));
+    await expect(await canvas.findByText('変更なし')).toBeVisible();
+    await waitFor(() =>
+      expect(canvas.getByRole('slider', { name: '色相' })).toHaveValue('175'),
+    );
+    await expect(
+      canvas.getByRole('button', { name: 'ティール' }),
+    ).toHaveAttribute('aria-pressed', 'true');
+
+    // つまみを動かしてもフォームに届く
+    slide(canvas.getByRole('slider', { name: '色相' }), 0);
+    await expect(field()).toHaveValue('#960d0d');
+    await expect(await canvas.findByText('変更あり')).toBeVisible();
+
+    // ブラウザの色選びで選んだ色はフォームに届き、送られるのは欄の値だけ
+    await reset();
+    await expect(await canvas.findByText('変更なし')).toBeVisible();
+    pick(canvas.getByLabelText('パレットから選ぶ'), '#2563eb');
+    await expect(field()).toHaveValue('#2563eb');
+    await expect(await canvas.findByText('変更あり')).toBeVisible();
+    await expect([...new FormData(field().form ?? undefined)]).toStrictEqual([
+      ['accent', '#2563eb'],
+    ]);
+
+    // 色でないまま離れると zod の文言を出す
+    await fill(userEvent, field(), '#12');
+    await userEvent.tab();
+    await expect(
+      await canvas.findByText('色を #rrggbb で入力してください'),
+    ).toBeVisible();
+
+    // 大文字や # なしで打っても、Enter で送る前に #rrggbb にそろえて届く
+    await fill(userEvent, field(), 'F97316{Enter}');
+    await waitFor(() =>
+      expect(received).toHaveBeenLastCalledWith({ accent: '#f97316' }),
+    );
   },
 };

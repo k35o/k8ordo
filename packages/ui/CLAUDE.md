@@ -19,7 +19,7 @@ pnpm test --project=components-forced-colors # Stories tagged forced-colors, und
 pnpm test --project=components-contrast-more # Stories tagged contrast-more, under prefers-contrast: more
 pnpm test --project=forced-colors            # Screenshot comparisons under forced colors (src/styles/forced-colors.test.tsx)
 pnpm test --project=print                    # Tokens and color-scheme under print media (src/styles/print.test.tsx)
-pnpm test --project=form                     # Fields with @k8ordo/form's derived attributes, and FormValue (Playwright)
+pnpm test --project=form                     # Form checks a story's play cannot make, and FormValue (Playwright)
 pnpm test --project=hooks src/internal/focus-trap.test.tsx # Single test file (needs its project)
 TEST_BROWSER=webkit pnpm test --project=hooks # One engine only (chromium / firefox / webkit)
 pnpm build                                   # vp pack + the DTCG tokens
@@ -274,8 +274,7 @@ export const MyComponent = { Root, Part } as const;
 ### Form fields
 
 A field must work when `@k8ordo/form`'s `formFields` output is spread onto it
-unchanged (`src/components/form/with-form.test.tsx` holds each component to
-that). Four rules follow:
+unchanged (each field's `WithForm` story holds it to that). Four rules follow:
 
 - **Accept the derived attribute types.** `input` carries `type` as a string,
   `min` / `max` as `number | string`, `step` as `number | 'any'`, and the
@@ -389,7 +388,8 @@ The stylesheet follows `prefers-contrast: more` and `forced-colors: active`; `@k
 
 - **Component tests** rely on Storybook stories as test fixtures via `@storybook/addon-vitest`. Writing a story IS writing a test.
 - **Hook tests** use `vitest-browser-react` for rendering hooks in a real browser.
-- **Form tests** (`src/components/form/**/*.test.tsx`, `src/components/_internal/**/*.test.tsx`) render fields under `@k8ordo/form`'s `useForm` with an action that calls `parseForm`, in a real browser. Each field brings its own CSS module, but `styles.css` is not loaded, so the tokens are undefined: a visually hidden input (`srOnly`) cannot be clicked, so press its label, as a user does. `@k8ordo/form` is a devDependency and resolves from its `dist/`, so build it first on a fresh checkout.
+- **Form wiring** is a story too: every form field has a `WithForm` story that spreads `@k8ordo/form`'s `formFields` output onto it inside `ActionForm` (`.storybook/action-form.tsx`), whose action calls `parseForm` the way a Server Action would. Its play submits, fails on the server (`MemoField` refuses `却下`), resets, and reads `isDirty` from the `変更あり` / `変更なし` line. `parseForm` echoes the submitted values on success as well, so after any submission they are the fields' defaults and a reset goes back to them. `storybook/test`'s `userEvent` remembers what it typed and a form reset restores only the DOM, so type into a field with `fill` from the same file, which clears it first. `@k8ordo/form` is a devDependency and resolves from its `dist/`, so build it first on a fresh checkout.
+- A play's typing is a script's assignment, not a user edit, and the browser flags `tooShort` / `tooLong` only for a user edit. That check, and `FormValue`'s own tests, live in the `form` project (`src/components/form/**/*.test.tsx`, `src/components/_internal/**/*.test.tsx`): plain Vitest browser tests with Playwright's real input, one file at a time (`fileParallelism: false`), since Firefox hands focus between pages that run side by side. `styles.css` is not loaded there, so a visually hidden input (`srOnly`) cannot be clicked: press its label, as a user does.
 - **Helper tests** are standard unit tests, no browser needed.
 - **There is no jsdom project, and components are not written to survive one.** They call `ResizeObserver`, `matchMedia`, `dialog.showModal`, and the Popover API directly — no support checks, no null branches. Consumers are told to test in a real browser (`docs/GUIDE.md`); do not reintroduce a guard layer to make a synthetic DOM work.
 - Storybook preview wraps all stories in `UIProvider` with light/dark theme toggle, and defines a `@k8ordo/i18n` locale set (`.storybook/locales.ts`, default `ja`) so the built-in wording is Japanese; a story renders in English with `beforeEach: inEnglish` from the same file.

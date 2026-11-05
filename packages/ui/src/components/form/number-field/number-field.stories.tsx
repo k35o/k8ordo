@@ -1,7 +1,16 @@
+import { formFields, parseForm } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
+import { z } from 'zod';
 
+import {
+  ActionForm,
+  fill,
+  memo,
+  MemoField,
+} from '../../../../.storybook/action-form';
+import { FormControl } from '../form-control';
 import { NumberField } from './number-field';
 
 import styles from './number-field.stories.module.css';
@@ -595,5 +604,112 @@ export const AnnouncesSteppedValueToTheForm: Story = {
     await expect(input).toHaveValue('0');
     await expect(onFormInput).toHaveBeenCalledOnce();
     await expect(args.onChange).toHaveBeenCalledOnce();
+  },
+};
+
+const order = z.object({
+  count: z.coerce
+    .number('数値を入力してください')
+    .int('整数で入力してください')
+    .min(1, '1以上で入力してください')
+    .max(10, '10以下で入力してください'),
+  ratio: z.coerce.number('数値を入力してください'),
+  memo,
+});
+const orderFields = formFields(order);
+const received = fn();
+
+const OrderForm = () => (
+  <ActionForm
+    fields={orderFields}
+    onReceive={received}
+    serve={(data) => parseForm(order, data)}
+  >
+    {(form) => {
+      const count = form.field('count');
+      const ratio = form.field('ratio');
+      return (
+        <>
+          <FormControl
+            errorText={count.error}
+            invalid={count.invalid}
+            label="個数"
+            renderInput={(props) => <NumberField {...props} {...count.input} />}
+            required={count.required}
+          />
+          <FormControl
+            errorText={ratio.error}
+            invalid={ratio.invalid}
+            label="比率"
+            renderInput={(props) => <NumberField {...props} {...ratio.input} />}
+            required={ratio.required}
+          />
+          <MemoField field={form.field('memo')} />
+        </>
+      );
+    }}
+  </ActionForm>
+);
+
+// @k8ordo/form の formFields を広げるだけでつながる
+export const WithForm: Story = {
+  render: () => <OrderForm />,
+  play: async ({ canvas, userEvent }) => {
+    const field = (label: string) =>
+      canvas.getByLabelText<HTMLInputElement>(label, { exact: false });
+    const submit = () =>
+      userEvent.click(canvas.getByRole('button', { name: '送信' }));
+
+    // 範囲外の値をブラウザの検証に載せる
+    await fill(userEvent, field('個数'), '15');
+    await expect(field('個数').validity.valid).toBe(false);
+    await expect(field('個数').validationMessage).toBe(
+      '10 以下で入力してください',
+    );
+    await expect(field('個数').form?.checkValidity()).toBe(false);
+
+    // 範囲外の値は、エラーが出ているあいだ入力のたびにその文言へ変わる
+    await userEvent.clear(field('個数'));
+    await userEvent.tab();
+    await expect(
+      await canvas.findByText('数値を入力してください'),
+    ).toBeVisible();
+    await userEvent.type(field('個数'), '0');
+    await expect(
+      await canvas.findByText('1 以上で入力してください'),
+    ).toBeVisible();
+
+    // 矢印キーで変えた値を form が知り、reset で描画時の値に戻って isDirty も下りる
+    await userEvent.click(canvas.getByRole('button', { name: 'リセット' }));
+    await expect(await canvas.findByText('変更なし')).toBeVisible();
+    await userEvent.click(field('個数'));
+    await userEvent.keyboard('{ArrowUp}');
+    await expect(field('個数')).toHaveValue('1');
+    await expect(await canvas.findByText('変更あり')).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'リセット' }));
+    await expect(field('個数')).toHaveValue('');
+    await expect(await canvas.findByText('変更なし')).toBeVisible();
+
+    // 送信に失敗したら、文字列で返る値を描き直す
+    await fill(userEvent, field('個数'), '3');
+    await fill(userEvent, field('比率'), '0.25');
+    await fill(userEvent, field('メモ'), '却下');
+    await submit();
+    await expect(await canvas.findByText('却下されました')).toBeVisible();
+    await expect(field('個数')).toHaveValue('3');
+    await expect(field('比率')).toHaveValue('0.25');
+
+    // step="any" の欄は小数を丸めずに送る
+    await fill(userEvent, field('個数'), '2');
+    await fill(userEvent, field('比率'), '1.5');
+    await fill(userEvent, field('メモ'), 'よろしく');
+    await submit();
+    await waitFor(() =>
+      expect(received).toHaveBeenLastCalledWith({
+        count: 2,
+        ratio: 1.5,
+        memo: 'よろしく',
+      }),
+    );
   },
 };

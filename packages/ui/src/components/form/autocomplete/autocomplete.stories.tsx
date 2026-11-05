@@ -1,14 +1,29 @@
+import {
+  defineForm,
+  formFields,
+  minChecked,
+  parseForm,
+} from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { clsx } from 'clsx';
 import { useRef, useState } from 'react';
 import type { ComponentProps, FC } from 'react';
-import { expect, fireEvent, waitFor } from 'storybook/test';
+import { expect, fireEvent, fn, waitFor } from 'storybook/test';
+import { z } from 'zod';
 
+import {
+  ActionForm,
+  fill,
+  listOf,
+  memo,
+  MemoField,
+} from '../../../../.storybook/action-form';
 import { afterRenderingUpdate } from '../../../../.storybook/focus';
 import {
   finishPending,
   PendingForm,
 } from '../../../../.storybook/pending-form';
+import { FormControl } from '../form-control';
 import { Autocomplete } from './autocomplete';
 
 import styles from './autocomplete.stories.module.css';
@@ -446,5 +461,147 @@ export const VerticalWritingMode: Story = {
         'anchor-size(height)',
       );
     });
+  },
+};
+
+const favorites = defineForm(
+  z.object({
+    tags: z.array(z.enum(['react', 'vue', 'svelte'])).min(1),
+    memo,
+  }),
+  [minChecked('tags', 1, '1つ以上選んでください')],
+);
+const favoritesFields = formFields(favorites);
+const received = fn();
+const TAGS = [
+  { value: 'react', label: 'React' },
+  { value: 'vue', label: 'Vue' },
+  { value: 'svelte', label: 'Svelte' },
+];
+
+const FavoritesForm = () => (
+  <ActionForm
+    fields={favoritesFields}
+    onReceive={received}
+    serve={(data) => parseForm(favorites, data)}
+  >
+    {(form, state) => {
+      const tags = form.field('tags');
+      return (
+        <>
+          <FormControl
+            errorText={tags.error}
+            invalid={tags.invalid}
+            label="好きなもの"
+            renderInput={(props) => (
+              <Autocomplete
+                {...props}
+                {...tags.input}
+                defaultValue={listOf(state.values?.tags)}
+                options={TAGS}
+              />
+            )}
+            required={tags.required}
+          />
+          <MemoField field={form.field('memo')} />
+        </>
+      );
+    }}
+  </ActionForm>
+);
+
+// @k8ordo/form の formFields を広げるだけでつながる
+export const WithForm: Story = {
+  render: () => <FavoritesForm />,
+  play: async ({ canvas, userEvent }) => {
+    const combobox = () => canvas.getByRole('combobox');
+    const choose = async (label: string) => {
+      await userEvent.click(combobox());
+      await userEvent.click(canvas.getByRole('option', { name: label }));
+    };
+    const memoField = () => canvas.getByLabelText('メモ', { exact: false });
+    const submit = () =>
+      userEvent.click(canvas.getByRole('button', { name: '送信' }));
+    const reset = () =>
+      userEvent.click(canvas.getByRole('button', { name: 'リセット' }));
+
+    // reset で、選ばずに打ちかけた文字を消し、候補の一覧も閉じる
+    await userEvent.type(combobox(), 'Re');
+    await expect(combobox()).toHaveAttribute('aria-expanded', 'true');
+    await reset();
+    await expect(combobox()).toHaveValue('');
+    await expect(combobox()).toHaveAttribute('aria-expanded', 'false');
+
+    // 何も選ばずに送ると minChecked の文言を出し、入力欄へフォーカスを移す
+    await fill(userEvent, memoField(), 'よろしく');
+    await submit();
+    await expect(
+      await canvas.findByText('1つ以上選んでください'),
+    ).toBeVisible();
+    await waitFor(() => expect(combobox()).toHaveFocus());
+
+    // 選択の変化を form が知り、エラーの解除と isDirty に届く
+    await reset();
+    await expect(await canvas.findByText('変更なし')).toBeVisible();
+    await submit();
+    await expect(
+      await canvas.findByText('1つ以上選んでください'),
+    ).toBeVisible();
+    await choose('Svelte');
+    await waitFor(() =>
+      expect(
+        canvas.queryByText('1つ以上選んでください'),
+      ).not.toBeInTheDocument(),
+    );
+    await expect(await canvas.findByText('変更あり')).toBeVisible();
+
+    // 選んだ値を配列で送る
+    await reset();
+    await choose('Vue');
+    await choose('React');
+    await fill(userEvent, memoField(), 'よろしく');
+    await submit();
+    await waitFor(() =>
+      expect(received).toHaveBeenLastCalledWith({
+        tags: ['vue', 'react'],
+        memo: 'よろしく',
+      }),
+    );
+  },
+};
+
+// 送った値は次の既定値として残る。WithForm の終わりの選択を引き継がないよう、
+// 何も選んでいない状態から別に始める
+export const WithFormRedrawsOnFailure: Story = {
+  render: () => <FavoritesForm />,
+  play: async ({ canvas, userEvent }) => {
+    const choose = async (label: string) => {
+      await userEvent.click(canvas.getByRole('combobox'));
+      await userEvent.click(canvas.getByRole('option', { name: label }));
+    };
+    const memoField = () => canvas.getByLabelText('メモ', { exact: false });
+    const submit = () =>
+      userEvent.click(canvas.getByRole('button', { name: '送信' }));
+
+    // 送信に失敗しても選択を描き直し、reset で既定値に戻る
+    await choose('Vue');
+    await fill(userEvent, memoField(), '却下');
+    await submit();
+    await expect(await canvas.findByText('却下されました')).toBeVisible();
+    await expect(
+      canvas.getByRole('button', { name: 'タグを削除' }),
+    ).toBeInTheDocument();
+
+    await choose('React');
+    await userEvent.click(canvas.getByRole('button', { name: 'リセット' }));
+    await expect(await canvas.findByText('変更なし')).toBeVisible();
+    await fill(userEvent, memoField(), 'よろしく');
+    await submit();
+    await waitFor(() =>
+      expect(received).toHaveBeenLastCalledWith({
+        tags: ['vue'],
+        memo: 'よろしく',
+      }),
+    );
   },
 };

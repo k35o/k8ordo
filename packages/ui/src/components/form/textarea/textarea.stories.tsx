@@ -1,7 +1,11 @@
+import { formFields, parseForm } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
 import { expect, waitFor } from 'storybook/test';
+import { z } from 'zod';
 
+import { ActionForm, fill } from '../../../../.storybook/action-form';
+import { FormControl } from '../form-control';
 import { Textarea } from './textarea';
 
 import styles from './textarea.stories.module.css';
@@ -138,5 +142,57 @@ export const AutoResizeWithRef: Story = {
     await userEvent.click(canvas.getByRole('button', { name: 'focus' }));
 
     await expect(textarea).toHaveFocus();
+  },
+};
+
+const introduction = z.object({
+  bio: z
+    .string()
+    .min(1, '自己紹介を入力してください')
+    .regex(/^[^<>]*$/u, '山括弧は使えません'),
+});
+const introductionFields = formFields(introduction);
+
+const IntroductionForm = () => (
+  <ActionForm
+    fields={introductionFields}
+    serve={(data) => parseForm(introduction, data)}
+  >
+    {(form) => {
+      const bio = form.field('bio');
+      return (
+        <FormControl
+          errorText={bio.error}
+          invalid={bio.invalid}
+          label="自己紹介"
+          renderInput={(props) => <Textarea {...props} {...bio.input} />}
+          required={bio.required}
+        />
+      );
+    }}
+  </ActionForm>
+);
+
+// @k8ordo/form の formFields を広げるだけでつながる
+export const WithForm: Story = {
+  render: () => <IntroductionForm />,
+  play: async ({ canvas, userEvent }) => {
+    const bio = () => canvas.getByLabelText('自己紹介', { exact: false });
+
+    // <textarea> に無い type 属性を描かない
+    await expect(bio()).not.toHaveAttribute('type');
+
+    // 空のまま離れると zod の文言を出す
+    await userEvent.click(bio());
+    await userEvent.tab();
+    await expect(
+      await canvas.findByText('自己紹介を入力してください'),
+    ).toBeVisible();
+
+    // 正規表現はサーバーで検査され、失敗しても入力を描き直す
+    await fill(userEvent, bio(), '<b>やあ</b>');
+    await userEvent.click(canvas.getByRole('button', { name: '送信' }));
+    await expect(await canvas.findByText('山括弧は使えません')).toBeVisible();
+    await expect(bio()).toHaveValue('<b>やあ</b>');
   },
 };

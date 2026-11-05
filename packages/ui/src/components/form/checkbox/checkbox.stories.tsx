@@ -1,8 +1,11 @@
+import { formFields, parseForm } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
 import type { ComponentProps } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
+import { z } from 'zod';
 
+import { ActionForm } from '../../../../.storybook/action-form';
 import { afterRenderingUpdate } from '../../../../.storybook/focus';
 import {
   finishPending,
@@ -267,5 +270,59 @@ export const LabelHidden: Story = {
       overflow: 'hidden',
       clipPath: 'inset(50%)',
     });
+  },
+};
+
+const consent = z.object({ agree: z.literal(true, '同意してください') });
+const consentFields = formFields(consent);
+const received = fn();
+
+const ConsentForm = () => (
+  <ActionForm
+    fields={consentFields}
+    onReceive={received}
+    serve={(data) => parseForm(consent, data)}
+  >
+    {(form) => {
+      const agree = form.field('agree');
+      return (
+        <>
+          <Checkbox
+            {...agree.input}
+            invalid={agree.invalid}
+            label="規約に同意する"
+          />
+          <p>{agree.error}</p>
+        </>
+      );
+    }}
+  </ActionForm>
+);
+
+// @k8ordo/form の formFields を広げるだけでつながる
+export const WithForm: Story = {
+  render: () => <ConsentForm />,
+  play: async ({ canvas, userEvent }) => {
+    const submit = () =>
+      userEvent.click(canvas.getByRole('button', { name: '送信' }));
+
+    // チェックせずに送ると zod の文言を出し、チェックボックスへフォーカスを移す
+    await submit();
+    await expect(await canvas.findByText('同意してください')).toBeVisible();
+    await waitFor(() => expect(canvas.getByRole('checkbox')).toHaveFocus());
+
+    // reset でチェックが外れ、isDirty も下りる
+    await userEvent.click(canvas.getByText('規約に同意する'));
+    await expect(await canvas.findByText('変更あり')).toBeVisible();
+    await userEvent.click(canvas.getByRole('button', { name: 'リセット' }));
+    await expect(canvas.getByRole('checkbox')).not.toBeChecked();
+    await expect(await canvas.findByText('変更なし')).toBeVisible();
+
+    // チェックして送ると true が届く
+    await userEvent.click(canvas.getByText('規約に同意する'));
+    await submit();
+    await waitFor(() =>
+      expect(received).toHaveBeenLastCalledWith({ agree: true }),
+    );
   },
 };

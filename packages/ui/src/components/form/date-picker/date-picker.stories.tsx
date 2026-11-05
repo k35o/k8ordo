@@ -1,8 +1,12 @@
+import { formFields, parseForm } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
+import { z } from 'zod';
 
+import { ActionForm } from '../../../../.storybook/action-form';
 import { inEnglish } from '../../../../.storybook/locales';
+import { FormControl } from '../form-control';
 import { DatePicker } from './date-picker';
 
 import styles from './date-picker.stories.module.css';
@@ -195,5 +199,68 @@ export const Controlled: Story = {
     );
     await expect(canvas.getByTestId('value')).toHaveTextContent('2023-02-28');
     await expect(input).toHaveValue('2023-02-28');
+  },
+};
+
+const booking = z.object({ checkIn: z.iso.date('日付を入力してください') });
+const bookingFields = formFields(booking);
+
+const BookingForm = () => (
+  <ActionForm fields={bookingFields} serve={(data) => parseForm(booking, data)}>
+    {(form) => {
+      const checkIn = form.field('checkIn');
+      return (
+        <FormControl
+          errorText={checkIn.error}
+          invalid={checkIn.invalid}
+          label="チェックイン"
+          renderInput={(props) => <DatePicker {...props} {...checkIn.input} />}
+          required={checkIn.required}
+        />
+      );
+    }}
+  </ActionForm>
+);
+
+// @k8ordo/form の formFields を広げるだけでつながる
+export const WithForm: Story = {
+  render: () => <BookingForm />,
+  play: async ({ canvas, userEvent }) => {
+    const input = () =>
+      canvas.getByLabelText('チェックイン', {
+        exact: false,
+        selector: 'input',
+      });
+
+    // z.iso.date() から導いた属性を、そのまま内側の日付入力が受ける
+    await expect(input()).toHaveAttribute('name', 'checkIn');
+    await expect(input()).toHaveAttribute('type', 'date');
+    await expect(input()).toBeRequired();
+
+    // カレンダーで選んだ日付も、打ち込んだのと同じくエラーを消し、変更ありにする
+    await userEvent.click(input());
+    await userEvent.tab();
+    await expect(
+      await canvas.findByText('日付を入力してください'),
+    ).toBeVisible();
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'Choose from calendar' }),
+    );
+    // 開くと、未入力なら今日にフォーカスがある。そのまま選ぶ
+    await waitFor(() =>
+      expect(document.activeElement).toHaveAttribute('aria-current', 'date'),
+    );
+    if (!(document.activeElement instanceof HTMLElement)) {
+      throw new globalThis.Error('今日の日付にフォーカスがありません');
+    }
+    await userEvent.click(document.activeElement);
+    // Storybook は今日を 2023-01-02 に固定している
+    await expect(input()).toHaveValue('2023-01-02');
+    await waitFor(() =>
+      expect(
+        canvas.queryByText('日付を入力してください'),
+      ).not.toBeInTheDocument(),
+    );
+    await expect(await canvas.findByText('変更あり')).toBeVisible();
   },
 };
