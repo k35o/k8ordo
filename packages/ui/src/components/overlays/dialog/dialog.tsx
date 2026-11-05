@@ -83,8 +83,7 @@ export const Header: FC<{
       <div className={styles.close}>
         <IconButton
           label={messages.close}
-          onClick={(e) => {
-            e.stopPropagation();
+          onClick={() => {
             onClose();
           }}
           tooltipDisabled
@@ -99,18 +98,8 @@ export const Header: FC<{
 export const Content: FC<PropsWithChildren> = ({ children }) => {
   const { rootId } = useDialogContext();
   return (
-    // バックドロップクリックでの閉じる挙動を内側で止めるためだけの onClick
-    // (キーボード操作は Modal の Escape ハンドラが担う)
-    /* oxlint-disable eslint-plugin-jsx-a11y/click-events-have-key-events, eslint-plugin-jsx-a11y/no-static-element-interactions */
-    <div
-      className={styles.content}
-      id={`${rootId}-content`}
-      onClick={(e) => {
-        e.stopPropagation();
-      }}
-    >
+    <div className={styles.content} id={`${rootId}-content`}>
       {children}
     </div>
-    /* oxlint-enable eslint-plugin-jsx-a11y/click-events-have-key-events, eslint-plugin-jsx-a11y/no-static-element-interactions */
   );
 };
