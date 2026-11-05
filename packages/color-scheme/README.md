@@ -89,6 +89,14 @@ the provider's default applies again. That default is the system unless told
 otherwise: `defaultPreference="dark"` on both `<ColorSchemeScript>` and
 `<ColorSchemeProvider>` starts every visitor dark until they choose.
 
+The browser's own UI — the address bar, the status bar — follows the same
+scheme once the script is given the colours: it writes the
+`<meta name="theme-color">` itself, and the provider keeps them in step.
+
+```tsx
+<ColorSchemeScript themeColor={{ light: '#ffffff', dark: '#18181b' }} />
+```
+
 ## AI Agent Documentation
 
 The docs ship **inside the package**, so an agent always reads the exact

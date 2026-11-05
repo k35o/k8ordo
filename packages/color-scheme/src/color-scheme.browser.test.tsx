@@ -1,4 +1,5 @@
 import { resetStateRegistry } from '@k8ordo/state';
+import { useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
@@ -13,11 +14,35 @@ import {
 import { renderHook } from 'vitest-browser-react';
 
 import { ColorSchemeProvider, useColorScheme } from './provider';
-import type { ColorSchemePreference } from './scheme';
+import type { ColorSchemeScriptOptions } from './scheme';
 import { colorSchemeScriptHash, colorSchemeState, scriptFor } from './scheme';
 import { ColorSchemeScript } from './script';
+import type { ColorSchemeScriptProps } from './script';
 
 const root = document.documentElement;
+
+const themeColor = { light: '#fafafa', dark: '#18181b' } as const;
+
+// What the browser paints its own UI in: the first theme-color <meta>, in
+// tree order, whose media matches.
+const themeColorOf = (doc: Document): string | undefined =>
+  [...doc.querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')].find(
+    (meta) =>
+      meta.media === '' || doc.defaultView?.matchMedia(meta.media).matches,
+  )?.content;
+
+const mediaOf = (scheme: 'light' | 'dark'): string | undefined =>
+  document.querySelector<HTMLMetaElement>(
+    `meta[name="theme-color"][content="${themeColor[scheme]}"]`,
+  )?.media;
+
+// The way it runs in production: an inline script in the document.
+const run = (options: ColorSchemeScriptOptions = {}): void => {
+  const script = document.createElement('script');
+  script.textContent = scriptFor(options);
+  document.head.append(script);
+  script.remove();
+};
 
 const SystemByDefault = ({ children }: { children: ReactNode }) => (
   <ColorSchemeProvider>{children}</ColorSchemeProvider>
@@ -30,6 +55,9 @@ const DarkByDefault = ({ children }: { children: ReactNode }) => (
 beforeEach(() => {
   localStorage.clear();
   root.classList.remove('dark');
+  for (const meta of document.querySelectorAll('meta[name="theme-color"]')) {
+    meta.remove();
+  }
   resetStateRegistry();
 });
 
@@ -111,11 +139,69 @@ describe('useColorScheme', () => {
       'preference',
     );
   });
+
+  it('keeps the theme colour with what the visitor picks, and hands it back to the system on system', async () => {
+    run({ themeColor });
+    const { result } = await renderHook(() => useColorScheme(), {
+      wrapper: SystemByDefault,
+    });
+
+    result.current.setPreference('dark');
+    await vi.waitFor(() => {
+      expect(themeColorOf(document)).toBe(themeColor.dark);
+    });
+
+    result.current.setPreference('light');
+    await vi.waitFor(() => {
+      expect(mediaOf('dark')).toBe('not all');
+    });
+    expect(themeColorOf(document)).toBe(themeColor.light);
+
+    result.current.setPreference('system');
+    await vi.waitFor(() => {
+      expect(mediaOf('dark')).toBe('(prefers-color-scheme: dark)');
+    });
+    expect(mediaOf('light')).toBe('(prefers-color-scheme: light)');
+  });
 });
 
-const Probe = () => {
+const Probe = ({ onCommit }: { onCommit?: (scheme: string) => void }) => {
   const { scheme } = useColorScheme();
+  useEffect(() => {
+    onCommit?.(scheme);
+  }, [onCommit, scheme]);
   return <span>{scheme}</span>;
+};
+
+// The provider's server render, hydrated over, for a visitor who stored
+// dark — resolved once the provider's effects for the stored scheme have run.
+const hydrateStoredDark = async (): Promise<string> => {
+  const committed: string[] = [];
+  const app = (
+    <ColorSchemeProvider>
+      <Probe
+        onCommit={(scheme) => {
+          committed.push(scheme);
+        }}
+      />
+    </ColorSchemeProvider>
+  );
+  const container = document.createElement('div');
+  // The server's answer: it has no store to read, so it says light.
+  const html = renderToString(app);
+  container.innerHTML = html;
+  document.body.append(container);
+  const hydrated = hydrateRoot(container, app);
+  onTestFinished(() => {
+    hydrated.unmount();
+    container.remove();
+  });
+  // 子の effect は親の effect と同じ流れで先に走るので、子が dark を見た時点で
+  // Provider の effect も済んでいる
+  await vi.waitFor(() => {
+    expect(committed).toContain('dark');
+  });
+  return html;
 };
 
 describe('ColorSchemeProvider under hydration', () => {
@@ -136,38 +222,48 @@ describe('ColorSchemeProvider under hydration', () => {
       attributeOldValue: true,
     });
 
-    const container = document.createElement('div');
-    // The server's answer: it has no store to read, so it says light.
-    const html = renderToString(
-      <ColorSchemeProvider>
-        <Probe />
-      </ColorSchemeProvider>,
-    );
-    expect(html).toBe('<span>light</span>');
-    container.innerHTML = html;
-    document.body.append(container);
-    const app = hydrateRoot(
-      container,
-      <ColorSchemeProvider>
-        <Probe />
-      </ColorSchemeProvider>,
-    );
-    await vi.waitFor(() => {
-      expect(container.querySelector('span')?.textContent).toBe('dark');
-    });
-    // The effect that would write runs after the commit; give it its turn.
-    await vi.waitFor(() => {
-      expect(seen.length).toBeGreaterThanOrEqual(0);
-    });
+    const html = await hydrateStoredDark();
+    for (const record of observer.takeRecords()) seen.push(record.oldValue);
     observer.disconnect();
 
+    expect(html).toBe('<span>light</span>');
     // A record whose old value lacks the class is a moment it was off.
     expect(
       seen.filter((value) => !String(value).includes('dark')),
     ).toStrictEqual([]);
     expect(root.classList.contains('dark')).toBe(true);
-    app.unmount();
-    container.remove();
+  });
+
+  it('never moves the theme colour off the one the script chose', async () => {
+    localStorage.setItem(
+      colorSchemeState.storageKey,
+      JSON.stringify({ preference: 'dark' }),
+    );
+    run({ themeColor });
+    const changed: MutationRecord[] = [];
+    const observer = new MutationObserver((records) => {
+      changed.push(...records);
+    });
+    observer.observe(document.head, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['media'],
+      attributeOldValue: true,
+    });
+
+    await hydrateStoredDark();
+    changed.push(...observer.takeRecords());
+    observer.disconnect();
+
+    // 同じ値を書き直すのは構わない。別の値を経て戻ってくると、その次の記録の
+    // 古い値が今の値と食い違う
+    expect(
+      changed.filter(
+        ({ target, oldValue }) =>
+          (target as HTMLMetaElement).media !== oldValue,
+      ),
+    ).toStrictEqual([]);
+    expect(themeColorOf(document)).toBe(themeColor.dark);
   });
 });
 
@@ -179,7 +275,7 @@ describe('ColorSchemeScript', () => {
     );
     const script = container.querySelector('script');
     expect(script?.nonce).toBe('bm9uY2U=');
-    expect(script?.textContent).toBe(scriptFor('dark'));
+    expect(script?.textContent).toBe(scriptFor({ defaultPreference: 'dark' }));
     document.body.append(container);
     const recoverable: unknown[] = [];
     const app = hydrateRoot(
@@ -205,10 +301,13 @@ describe('ColorSchemeScript', () => {
 
 // A document of its own, under the policy its <meta> states, with the
 // script's server render in its <head> — the script as React writes it.
-const underPolicy = async (policy: string): Promise<Document> => {
+const underPolicy = async (
+  policy: string,
+  props: ColorSchemeScriptProps,
+): Promise<Document> => {
   const frame = document.createElement('iframe');
   frame.srcdoc = `<!doctype html><html><head><meta http-equiv="Content-Security-Policy" content="${policy}">${renderToString(
-    <ColorSchemeScript defaultPreference="dark" />,
+    <ColorSchemeScript {...props} />,
   )}</head><body></body></html>`;
   const loaded = new Promise((resolve) => {
     frame.addEventListener('load', resolve, { once: true });
@@ -223,26 +322,37 @@ const underPolicy = async (policy: string): Promise<Document> => {
 
 describe('colorSchemeScriptHash', () => {
   it('lets the inline script run under a policy that names it', async () => {
-    const hash = await colorSchemeScriptHash('dark');
-    const framed = await underPolicy(`script-src ${hash}`);
+    const hash = await colorSchemeScriptHash({ defaultPreference: 'dark' });
+    const framed = await underPolicy(`script-src ${hash}`, {
+      defaultPreference: 'dark',
+    });
     expect(framed.documentElement.classList.contains('dark')).toBe(true);
   });
 
   it('is what a policy has to name: without it the script is refused', async () => {
     const framed = await underPolicy(
-      `script-src ${await colorSchemeScriptHash('light')}`,
+      `script-src ${await colorSchemeScriptHash({ defaultPreference: 'light' })}`,
+      { defaultPreference: 'dark' },
     );
     expect(framed.documentElement.classList.contains('dark')).toBe(false);
   });
-});
 
-// The way it runs in production: an inline script in the document.
-const run = (defaultPreference: ColorSchemePreference = 'system'): void => {
-  const script = document.createElement('script');
-  script.textContent = scriptFor(defaultPreference);
-  document.head.append(script);
-  script.remove();
-};
+  it('carries the theme colour, so the hash of a script without it is refused', async () => {
+    const options = { defaultPreference: 'dark', themeColor } as const;
+    const allowed = await underPolicy(
+      `script-src ${await colorSchemeScriptHash(options)}`,
+      options,
+    );
+    expect(themeColorOf(allowed)).toBe(themeColor.dark);
+
+    const refused = await underPolicy(
+      `script-src ${await colorSchemeScriptHash({ defaultPreference: 'dark' })}`,
+      options,
+    );
+    expect(refused.documentElement.classList.contains('dark')).toBe(false);
+    expect(themeColorOf(refused)).toBeUndefined();
+  });
+});
 
 describe('the inline script', () => {
   it('puts the class on before hydration when dark is stored', () => {
@@ -255,7 +365,7 @@ describe('the inline script', () => {
   });
 
   it('starts from the default when nothing is stored', () => {
-    run('dark');
+    run({ defaultPreference: 'dark' });
     expect(root.classList.contains('dark')).toBe(true);
   });
 
@@ -264,7 +374,7 @@ describe('the inline script', () => {
       colorSchemeState.storageKey,
       JSON.stringify({ preference: 'light' }),
     );
-    run('dark');
+    run({ defaultPreference: 'dark' });
     expect(root.classList.contains('dark')).toBe(false);
 
     // A row the schema would refuse is nothing chosen — the system, light here.
@@ -275,5 +385,44 @@ describe('the inline script', () => {
     localStorage.setItem(colorSchemeState.storageKey, 'not json');
     run();
     expect(root.classList.contains('dark')).toBe(false);
+  });
+});
+
+describe('the theme colour the inline script writes', () => {
+  it('is the colour of the scheme the visitor chose, whatever the system says', () => {
+    localStorage.setItem(
+      colorSchemeState.storageKey,
+      JSON.stringify({ preference: 'dark' }),
+    );
+    run({ themeColor });
+    // The test browser prefers light.
+    expect(themeColorOf(document)).toBe(themeColor.dark);
+  });
+
+  it('is the default’s colour when nothing is stored, and the choice’s over it', () => {
+    run({ defaultPreference: 'dark', themeColor });
+    expect(themeColorOf(document)).toBe(themeColor.dark);
+
+    for (const meta of document.querySelectorAll('meta[name="theme-color"]')) {
+      meta.remove();
+    }
+    localStorage.setItem(
+      colorSchemeState.storageKey,
+      JSON.stringify({ preference: 'light' }),
+    );
+    run({ defaultPreference: 'dark', themeColor });
+    expect(themeColorOf(document)).toBe(themeColor.light);
+  });
+
+  it('is left to the system while nothing is chosen: each colour under its own prefers-color-scheme', () => {
+    run({ themeColor });
+    expect(mediaOf('light')).toBe('(prefers-color-scheme: light)');
+    expect(mediaOf('dark')).toBe('(prefers-color-scheme: dark)');
+    expect(themeColorOf(document)).toBe(themeColor.light);
+  });
+
+  it('is not written without the colours', () => {
+    run({ defaultPreference: 'dark' });
+    expect(document.querySelector('meta[name="theme-color"]')).toBeNull();
   });
 });

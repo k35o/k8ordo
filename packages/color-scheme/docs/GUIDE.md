@@ -11,7 +11,9 @@ once the stylesheet declares `@custom-variant dark (&:where(.dark, .dark *));`
 (`@k8ordo/ui/tailwind.css` already does). Two pieces do it:
 `<ColorSchemeScript>`, an inline script in `<head>`, puts the class there
 before the first paint, and `<ColorSchemeProvider>` keeps it right after
-hydration and hands a hook what it reads.
+hydration and hands a hook what it reads. Given the application's colours,
+the two keep the browser's own UI — `<meta name="theme-color">` — on the
+same scheme.
 
 Like every k8ordo package it assumes React 19 and Server Components, uses
 only what has reached Baseline newly available, and ships no polyfills or
@@ -20,8 +22,10 @@ legacy fallbacks.
 ## What it does not own
 
 - **The colours.** Which colour `dark` means is the stylesheet's business —
-  `@k8ordo/ui`'s tokens, or any other that reads the class. So is the CSS
-  `color-scheme` property (form controls, scrollbars): this package never
+  `@k8ordo/ui`'s tokens, or any other that reads the class — and the
+  browser's own UI is painted in colours the application gives (see "The
+  browser's own UI"). The CSS `color-scheme` property (form controls,
+  scrollbars) is the stylesheet's too: this package never
   sets it; `@k8ordo/ui`'s stylesheet does, next to its tokens (`light`, and
   `dark` under `.dark`), and a stylesheet of your own declares it beside its
   colours. Declare it by the class, not as `light dark`: that lets the
@@ -45,9 +49,9 @@ legacy fallbacks.
 
 ```
 routes/layout.tsx   <head><ColorSchemeScript /></head>
-                        │ runs before the stylesheets → class on <html> before the first paint
+                        │ runs before the stylesheets → class on <html> (+ theme-color <meta>) before the first paint
                     <body><ColorSchemeProvider>{children}</ColorSchemeProvider></body>
-                        │ reads the store + the system → keeps the class in step
+                        │ reads the store + the system → keeps the class (+ the <meta>) in step
 components          useColorScheme() → { scheme, preference, setPreference }
 ```
 
@@ -96,14 +100,45 @@ before the first paint and the provider after hydration; told different
 defaults, a visitor who never chose sees the scheme change as the page
 hydrates.
 
+### The browser's own UI
+
+The address bar and the status bar are painted in the colour of
+`<meta name="theme-color">`. A pair of them under
+`media="(prefers-color-scheme: …)"` follows the system, not the visitor:
+with the system on light and dark chosen, the browser's UI stays light
+around a dark page. Give `ColorSchemeScript` the colours instead — the
+page's background in each scheme, usually — and write no theme-color
+`<meta>` of your own:
+
+```tsx
+<ColorSchemeScript themeColor={{ light: '#ffffff', dark: '#18181b' }} />
+```
+
+The script writes one `<meta name="theme-color">` for each scheme, at the
+same moment it puts the class on. While the scheme is the system's — the
+visitor chose nothing and the default is `'system'` — each sits under its
+own `prefers-color-scheme`, so the browser follows the system by itself, as
+it changes. Once something pins the scheme — a choice, or a default of
+`'light'` or `'dark'` — that scheme's colour applies whatever the system
+says. The provider keeps the two in step after hydration
+(`setPreference('system')` hands them back to the system) and takes no
+colours of its own: it changes their `media`, never their `content`.
+
+The script writes them, rather than the page, because React writes every
+`<meta>` it renders after the stylesheets, where the script, which runs
+ahead of them, cannot reach. A theme-color `<meta>` of the page's own comes
+after the script's and never applies, so leave it out. Without the script —
+blocked by a policy, or never rendered — there is no theme colour at all.
+
 ### Under a Content-Security-Policy
 
 `ColorSchemeScript` is an inline script, so a policy that restricts scripts
 has to allow it, by nonce or by hash. Blocked, it costs the first paint and
-nothing else: the provider's effect still writes the class after hydration,
-but until then `<html>` has no `dark` class and the page is painted light,
-so a visitor who gets dark — by choice or by a `'dark'` default — sees the
-flash the script exists to prevent. Do not reach for `'unsafe-inline'`,
+the theme colour: the provider's effect still writes the class after
+hydration, but until then `<html>` has no `dark` class and the page is
+painted light, so a visitor who gets dark — by choice or by a `'dark'`
+default — sees the flash the script exists to prevent; and the theme-color
+`<meta>` are never written. Do not reach for `'unsafe-inline'`,
 which allows every inline script that reaches the page; name this one.
 
 `nonce` puts the answer's nonce on it — in `@k8ordo/framework`'s server
@@ -114,17 +149,23 @@ mode, `nonce()` from `@k8ordo/framework/server`, which the render may read
 <ColorSchemeScript nonce={nonce()} />
 ```
 
-`colorSchemeScriptHash(defaultPreference?)` resolves to its hash as a CSP
-source, `'sha256-…'`, for a policy that allows it by what it is — the
-`csp` option of its static mode, whose files cannot carry a nonce, or a
-header that names none. Pass it the `defaultPreference` the script is
-given: the script carries it, so the hash depends on it.
+`colorSchemeScriptHash(options?)` resolves to its hash as a CSP source,
+`'sha256-…'`, for a policy that allows it by what it is — the `csp` option
+of its static mode, whose files cannot carry a nonce, or a header that names
+none. Pass it what the script is given, its nonce aside —
+`{ defaultPreference, themeColor }`: the script carries both, so the hash
+depends on them. Keep them in one module the layout and the config both
+import, and the two cannot drift apart:
 
 ```ts
 // vite.config.ts
+import { themeColor } from './src/lib/theme-color';
+
 framework({
   mode: 'static',
-  csp: { 'script-src': ["'self'", await colorSchemeScriptHash()] },
+  csp: {
+    'script-src': ["'self'", await colorSchemeScriptHash({ themeColor })],
+  },
 });
 ```
 
@@ -210,6 +251,11 @@ every visitor who never chose.
   `@k8ordo/framework` ensures for a script in the root layout's `<head>`
   (see "Setup"). It is an inline script, so a Content-Security-Policy that
   restricts scripts has to allow it (see "Under a Content-Security-Policy").
+- **The browser's UI agrees.** Given `themeColor`, the theme-color
+  `<meta>` are written with the class and show the scheme on screen: the
+  pinned scheme's colour once a choice or a default pins it, the system's
+  while nothing does. The hydration render leaves them as the script wrote
+  them, as it does the class.
 - **Nothing chosen follows the default, and a `'system'` default follows
   the system.** A visitor who never chose is never pinned to what the
   system said on their first visit, and a row that is not a JSON object, or
@@ -242,4 +288,5 @@ between tests; render the hook under `<ColorSchemeProvider>` (a `wrapper`),
 and leave `ColorSchemeScript` out: React never executes an inline
 `<script>` it creates in the browser (in development it logs an error
 saying so), so the class a test sees is the one the provider's effect
-wrote.
+wrote. Without the script there is no theme-color `<meta>` either, and the
+provider writes none.

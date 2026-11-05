@@ -8,8 +8,9 @@
 > class-based `@custom-variant dark`). `<ColorSchemeScript>` in the root
 > layout's `<head>` is the inline script that puts the class on before the
 > first paint, and `<ColorSchemeProvider>` in its `<body>` keeps it in step
-> afterwards; `useColorScheme()` reads it. The server renders the default
-> (`light` when that default is `'system'`).
+> afterwards; `useColorScheme()` reads it. Given the application's colours,
+> the two keep `<meta name="theme-color">` on the same scheme. The server
+> renders the default (`light` when that default is `'system'`).
 >
 > Like every k8ordo package it assumes React 19 and Server Components, uses
 > only what has reached Baseline newly available, and ships no polyfills or
@@ -24,7 +25,9 @@ When installed via npm, these docs live under `node_modules/@k8ordo/color-scheme
   no contrast preference — `prefers-contrast` and `forced-colors` are the
   OS's, which `@k8ordo/ui` follows in either scheme), placing the script in
   the root layout's `<head>` (ahead of every stylesheet, which
-  `@k8ordo/framework` ensures) and the provider in its `<body>`, allowing
+  `@k8ordo/framework` ensures) and the provider in its `<body>`, the
+  browser's own UI (the theme-color `<meta>` the script writes from the
+  colours it is given), allowing
   the inline script under a Content-Security-Policy (by nonce or by hash,
   and what a blocked script costs), reading and changing the preference
   with the hook, the stored row and reading it without the hook, what it
@@ -32,23 +35,29 @@ When installed via npm, these docs live under `node_modules/@k8ordo/color-scheme
 
 ## Entry point
 
-- `@k8ordo/color-scheme` — `<ColorSchemeScript defaultPreference? nonce?>`
-  (goes in the root layout's `<head>`, ahead of every stylesheet, which
+- `@k8ordo/color-scheme` —
+  `<ColorSchemeScript defaultPreference? themeColor? nonce?>` (goes in the
+  root layout's `<head>`, ahead of every stylesheet, which
   `@k8ordo/framework` ensures) is the inline `<script>` that puts `dark` on
   `<html>` before the first paint from the stored preference, the default
-  (`'system'` unless told otherwise), or the system; `nonce` signs it for a
+  (`'system'` unless told otherwise), or the system; `themeColor`
+  (`{ light, dark }`) makes it write a `<meta name="theme-color">` per
+  scheme, the pinned scheme's applying once a choice or a default pins one
+  and each under its own `prefers-color-scheme` otherwise (write no
+  theme-color `<meta>` of your own); `nonce` signs it for a
   Content-Security-Policy (in `@k8ordo/framework`'s server mode, `nonce()`
   from `@k8ordo/framework/server`).
   `<ColorSchemeProvider defaultPreference?>` (client; goes inside `<body>`
-  around everything) keeps the class in step after hydration; give it the
-  same `defaultPreference` as the script.
-  `colorSchemeScriptHash(defaultPreference?)` resolves to the script's hash
-  as a CSP source (`'sha256-…'`), for a policy that allows it by hash —
-  the `csp` option of `@k8ordo/framework`'s static mode. `useColorScheme()` returns
-  `{ scheme, preference, setPreference }`: `scheme` is `'light' | 'dark'`
+  around everything) keeps the class and the theme-color `<meta>` in step
+  after hydration; give it the same `defaultPreference` as the script.
+  `colorSchemeScriptHash({ defaultPreference?, themeColor? }?)` resolves to
+  the script's hash as a CSP source (`'sha256-…'`), for a policy that
+  allows it by hash — the `csp` option of `@k8ordo/framework`'s static
+  mode; pass what the script is given, its nonce aside. `useColorScheme()`
+  returns `{ scheme, preference, setPreference }`: `scheme` is `'light' | 'dark'`
   on screen, `preference` is `'light' | 'dark' | 'system'`, and
   `setPreference('system')` clears the stored preference, so the default
   applies again. `colorSchemeState` is the `@k8ordo/state` local definition
   itself (`k8ordo-state:color-scheme`).
   Types: `ColorScheme`, `ColorSchemePreference`, `ColorSchemeProviderProps`,
-  `ColorSchemeScriptProps`, `UseColorScheme`.
+  `ColorSchemeScriptOptions`, `ColorSchemeScriptProps`, `UseColorScheme`.
