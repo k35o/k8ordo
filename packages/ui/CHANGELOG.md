@@ -1,5 +1,35 @@
 # @k8ordo/ui
 
+## 2.3.0
+
+### Minor Changes
+
+- 印刷では、`.dark`が付いていても、色のトークンと`color-scheme`をライトの値に戻すようにしました。ブラウザは既定で背景を刷らないので、ダークのまま刷ると、白い紙に明るい文字が出ていました。
+
+  - `@media print`のとき、`.dark`が上書きする色のトークンは`:root`の値になり、`color-scheme`は`light`になります。`prefers-contrast: more`のときは、ライトのハイコントラストの値になります。
+  - `tailwind.css`の`dark:`と`light:`のバリアントも、印刷ではトークンと同じく切り替わります。
+  - 背景ごと刷るスライドのように、画面の配色のまま刷りたいときは、`print-as-shown`クラスを付けた要素を置きます。この要素を含む`.dark`は、印刷でもダークの値のままです。背景を刷るには、`print-color-adjust: exact`も指定します。
+  - `@k8ordo/ui/tokens`には、印刷の2つのモードが修飾子として加わります。
+
+### Patch Changes
+
+- 強制カラーで、`Prose`の本文のリンクにフォーカスがあっても、見た目が変わらなかったのを直しました。フォーカスリングを`box-shadow`だけで描いていたため、強制カラーでは影と一緒に消えていました。強制カラーのときは、リンクの周りにシステムカラーで2pxの線を引きます。
+
+- 強制カラーで、`Slider`と`RangeSlider`と`ColorPicker`のつまみにフォーカスがあっても、見た目が変わらなかったのを直しました。フォーカスリングを`box-shadow`だけで描いていたため、強制カラーでは影と一緒に消えていました。強制カラーのときは、フォーカスのあるつまみの周りに、システムカラーで2pxの線を引きます。線はつまみの周りに引くので、`RangeSlider`ではどちらのつまみにフォーカスがあるかも分かります。
+
+- `Select`・`PasswordInput`・`DatePicker`で、`invalid`の赤い枠線がフォーカス中に消えていたのを直しました。フォーカスの輪は、不正な値の欄（`aria-invalid="true"`の要素か、それを中に持つ枠）の枠線を消さなくなりました。
+
+  `TextField`・`Textarea`・`DateField`・`ColorPicker`・`Autocomplete`・`Combobox`の見た目は変わりません。`NumberField`は、読み取り専用や送信中にフォーカスしたとき、ほかの欄と同じく輪の内側の枠線が消えるようになりました。これまでは無効のときの色の枠線が残っていました。
+
+- `Dialog.Content`・`Dialog.Header`の閉じるボタン・`Drawer`の中身と閉じるボタンで、クリックの伝わりを止めないようにしました。中のクリックが祖先の`onClick`や`document`のリスナーに届きます。モーダルが閉じるのはこれまでどおり枠外（`<dialog>`自身）を押したときだけです。
+
+- `Textarea`で、キー入力の伝わりを止めないようにしました。これまでは`keydown`をすべて止めていたので、`Popover`の中の`Textarea`ではEscapeで`Popover`が閉じませんでした（`TextField`なら閉じます）。祖先の`onKeyDown`や`window`のリスナーにもキー入力が届きます。
+
+- 閉じた`Toast`を、畳むtransitionが終わったところでDOMから外すようにしました。これまでは`--duration-moderate`と手で合わせた200msのタイマーで外していたので、トークンを変えると演出の途中で消えたり、終わってから残ったりしました。動きを減らす設定ではtransitionが無いので、閉じるとすぐに外れます。
+
+- Updated dependencies:
+  - @k8ordo/i18n@2.0.0
+
 ## 2.2.0
 
 ### Minor Changes

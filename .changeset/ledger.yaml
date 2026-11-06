@@ -16,6 +16,11 @@
   dir: packages/color-scheme
   intents:
     - state-storage-blocked
+"@k8ordo/color-scheme@2.0.0":
+  dir: packages/color-scheme
+  intents:
+    - color-scheme-script-in-head
+    - color-scheme-theme-color
 "@k8ordo/form@0.1.1":
   dir: packages/form
   intents:
@@ -46,6 +51,11 @@
   dir: packages/form
   intents:
     - zod-peer-floor
+"@k8ordo/form@2.0.0":
+  dir: packages/form
+  intents:
+    - form-async-check-revalidate
+    - form-notes-with-result
 "@k8ordo/framework@1.0.0":
   dir: packages/framework
   intents:
@@ -89,6 +99,22 @@
   dir: packages/framework
   intents:
     - framework-site-route-conflict
+"@k8ordo/framework@2.0.0":
+  dir: packages/framework
+  intents:
+    - framework-browser-loads-locales
+    - framework-csp-after-charset
+    - framework-fewer-guesses
+    - framework-head-scripts-first
+    - framework-navigate-while-hydrating
+    - framework-no-link-check
+    - framework-payload-status
+    - framework-request-api-once
+    - framework-serve-url-address
+    - framework-static-prefetch
+    - framework-unreadable-redirects
+    - framework-vercel-static-output
+    - sharp-dolphins-complain
 "@k8ordo/i18n@1.0.0":
   dir: packages/i18n
   intents:
@@ -109,6 +135,11 @@
     - tough-snails-start
     - typescript-7-peer-floor
     - wide-jars-compete
+"@k8ordo/i18n@2.0.0":
+  dir: packages/i18n
+  intents:
+    - i18n-no-guess-without-set
+    - sharp-dolphins-complain
 "@k8ordo/router@0.1.0":
   dir: packages/router
   intents:
@@ -161,6 +192,12 @@
   dir: packages/router
   intents:
     - router-unannounced-traverse-webkit
+"@k8ordo/router@2.0.0":
+  dir: packages/router
+  intents:
+    - router-call-off-refresh
+    - router-export-tree-pathname
+    - router-match-all
 "@k8ordo/state@0.2.0":
   dir: packages/state
   intents:
@@ -295,6 +332,16 @@
     - openui-1
     - tree-flat-items
     - zod-peer-floor
+"@k8ordo/ui@2.3.0":
+  dir: packages/ui
+  intents:
+    - ui-forced-colors-prose-link-focus
+    - ui-forced-colors-thumb-focus
+    - ui-invalid-border-while-focused
+    - ui-overlay-clicks-propagate
+    - ui-print-light-tokens
+    - ui-textarea-keydown-propagates
+    - ui-toast-exit-follows-transition
 docs@0.0.11:
   dir: apps/docs
   intents:
