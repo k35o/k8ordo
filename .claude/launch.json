@@ -17,8 +17,8 @@
     },
     {
       "name": "docs-prod",
-      "runtimeExecutable": "node",
-      "runtimeArgs": ["apps/docs/scripts/serve-static.mjs"],
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "docs", "exec", "vp", "preview"],
       "port": 4173
     },
     {
