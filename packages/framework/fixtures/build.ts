@@ -100,12 +100,18 @@ export const compiledBuild = async (
   };
 };
 
-/** A dev server for the application under `fixtures/<name>/`, not listening. */
-export const devServer = (name: string): Promise<ViteDevServer> =>
+/**
+ * A dev server for the application under `fixtures/<name>/` in `mode`,
+ * `'static'` unless told, not listening.
+ */
+export const devServer = (
+  name: string,
+  mode: 'static' | 'server' = 'static',
+): Promise<ViteDevServer> =>
   createServer({
     root: rootOf(name),
     configFile: false,
     logLevel: 'silent',
-    plugins: [framework({ mode: 'static' })],
+    plugins: [framework({ mode })],
     server: { port: 0 },
   });

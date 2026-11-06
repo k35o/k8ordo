@@ -1,8 +1,10 @@
 /**
  * What `@k8ordo/framework` and its tests need from the engine, and nothing
- * else, apart from the request API its `./server` entry re-exports, which is
- * this package's `./server`. This is internal and never published: an application installs
- * `@k8ordo/framework`, which bundles this package at pack time.
+ * else, apart from the request API, which is this package's `./server`
+ * (`runtime/server.ts`): the framework hands it to an application as a file
+ * of the runtime it copies. This is internal and never published: an
+ * application installs `@k8ordo/framework`, which bundles this package at
+ * pack time.
  */
 export { fallbackShapes, parseRouteTree, slotOf } from './grammar/tree';
 export type { FallbackShape, RouteDir } from './grammar/tree';

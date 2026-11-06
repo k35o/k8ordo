@@ -4,7 +4,9 @@
 modes are built on. **Private**: it is never published. `@k8ordo/framework`
 bundles it into its own entries at pack time (`deps.alwaysBundle` in its
 `vite.config.ts`) and copies `dist/runtime/` — the three environment
-entries — beside it, then tells the engine where they landed
+entries, and `runtime/server.ts`, which its `./server` entry points at
+rather than bundling, so an application's import and the handler are one
+module — beside it, then tells the engine where they landed
 (`EngineHost.runtimeDir`) and which mode the application chose
 (`EngineHost.mode`). Nothing outside this repository can resolve the name.
 
@@ -585,9 +587,8 @@ pnpm check         # check:write to auto-fix
   else with a `405`; it reads the params again from the pathname
   (`resolveRedirects`), because the router hands them decoded and a target
   moves a segment as the URL spelled it. A Server Action's
-  `redirect()` throws a `Symbol.for`-branded `Redirect` — never checked by
-  `instanceof`, because `@k8ordo/framework` holds two copies of this module —
-  and the handler answers 303 (no JavaScript) or a payload with `redirect`.
+  `redirect()` throws a `Redirect`, and the handler answers 303 (no
+  JavaScript) or a payload with `redirect`.
 - **A guard answers or adds, never rewrites.** `guard.ts` is a slot of the
   grammar but not of the router's table: the generator lists, per pattern,
   the guards along its directories (`guards`, outer first; `/*` always
@@ -595,11 +596,7 @@ pnpm check         # check:write to auto-fix
   after the params schemas matched — inside the answering pattern's `enter`
   — and before the Server Action and the render (`runtime/guard.ts`). A
   `redirect.ts` is answered before them. The request in progress lives in
-  an `AsyncLocalStorage` on `globalThis` under
-  `Symbol.for('k8ordo.request')` (`runtime/request-scope.ts`), because
-  `@k8ordo/framework` holds two copies of this module — the runtime the handler is
-  built from and the `./server` entry the application imports
-  `responseHeaders()` from — and both must see the one request. Its phase
+  an `AsyncLocalStorage` (`runtime/request-scope.ts`). Its phase
   says what is running — `guard`, `action`, or the `render` — and the
   response API (`cookies()`, `responseHeaders()`, `requestHeaders()`) throws
   in the render and outside a request, because a page is a render. What a
@@ -819,10 +816,10 @@ src/
   runtime/mount.tsx          hydrate the HTML as rendered; renderedHere, whether it was rendered where the browser is
   runtime/hydrating-pathname.ts  the pathname @k8ordo/i18n reads while HTML rendered elsewhere is hydrated, and when it is
   runtime/pathname.ts        decodePathname, before a pathname may name a file
-  runtime/redirect.ts        redirect(), what a Server Action throws — bundled into the ./server entry
-  runtime/redirect-file.ts   where a redirect.ts sends a pathname the table matched to it
+  runtime/redirect.ts        redirect(), what a Server Action throws; where a redirect.ts sends a pathname the table matched to it
   runtime/request.ts         the read-only request a page receives
   runtime/request-scope.ts   the request in progress: phases, cookies() / responseHeaders() / requestHeaders(), nonce(), answer()
+  runtime/server.ts          the request API, which is @k8ordo/framework/server: the framework points that entry here
   runtime/cookies.ts         the per-request cookie jar and its Set-Cookie lines
   runtime/guard.ts           Guard / GuardContext, runGuards (outer first, first Response ends it)
   runtime/route.ts           ROUTE_METHODS, which export answers a method, 405, running it in the route phase
@@ -837,8 +834,6 @@ src/
   runtime/virtual.d.ts       types of virtual:k8ordo/routes and K8ORDO_MODE
   host.ts                    Mode, EngineOptions and FRAMEWORK, the package the engine is bundled into
   index.ts
-  server.ts                  the request API @k8ordo/framework/server re-exports, kept off index.ts,
-                             whose types reach vite and React
 fixtures/
   build.ts                   builds an application below as the mode does —
                              'server' unless told, a static one into

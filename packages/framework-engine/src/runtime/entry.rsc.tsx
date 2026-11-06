@@ -48,8 +48,7 @@ import {
 } from './payload';
 import type { ClientDeps, Payload } from './payload';
 import { isPayloadPath, pagePathFor } from './payload-path';
-import { isRedirect } from './redirect';
-import { resolveRedirects } from './redirect-file';
+import { Redirect, resolveRedirects } from './redirect';
 import { renderMatch, renderNotFound } from './render';
 import { fileRequest, routeRequestOf } from './request';
 import {
@@ -234,7 +233,7 @@ const runAction = async (
     return await invokeAction(request, temporaryReferences);
   } catch (error) {
     // A redirect is how an action ends, not how it fails.
-    if (isRedirect(error)) return { redirect: error.to };
+    if (error instanceof Redirect) return { redirect: error.to };
     throw error;
   }
 };

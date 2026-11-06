@@ -30,22 +30,7 @@ type Scope = {
   readonly file?: boolean;
 };
 
-/**
- * The framework bundles this module twice — into the runtime the handler
- * is built from, and into the entry an application imports the response API
- * from — and both copies have to find the one request in progress. So the
- * storage lives on `globalThis` under a registry symbol, as `@k8ordo/i18n`'s
- * locale storage does, rather than in either copy.
- */
-const KEY = Symbol.for('k8ordo.request');
-
-type Global = { [KEY]?: AsyncLocalStorage<Scope> };
-
-const storage = (): AsyncLocalStorage<Scope> => {
-  const global = globalThis as Global;
-  global[KEY] ??= new AsyncLocalStorage<Scope>();
-  return global[KEY];
-};
+const storage = new AsyncLocalStorage<Scope>();
 
 // CSP は nonce に 128 ビット以上の乱数を求める
 const freshNonce = (): string =>
@@ -57,7 +42,7 @@ export const withRequest = <T>(request: Request, fn: () => T): T => {
     parseCookies(request.headers.get('cookie')),
     new URL(request.url),
   );
-  return storage().run(
+  return storage.run(
     {
       request,
       phase: 'render',
@@ -71,9 +56,9 @@ export const withRequest = <T>(request: Request, fn: () => T): T => {
 
 /** Runs `fn` as `phase` of the request in progress. */
 export const inPhase = <T>(phase: Phase, fn: () => T): T => {
-  const current = storage().getStore();
+  const current = storage.getStore();
   if (current === undefined) return fn();
-  return storage().run({ ...current, phase }, fn);
+  return storage.run({ ...current, phase }, fn);
 };
 
 /**
@@ -83,9 +68,9 @@ export const inPhase = <T>(phase: Phase, fn: () => T): T => {
  * never compiles is only seen here, when it is called.
  */
 export const writingFile = <T>(fn: () => T): T => {
-  const current = storage().getStore();
+  const current = storage.getStore();
   if (current === undefined) return fn();
-  return storage().run({ ...current, file: true }, fn);
+  return storage.run({ ...current, file: true }, fn);
 };
 
 const fileRefusal = (caller: string): Error =>
@@ -99,7 +84,7 @@ const fileRefusal = (caller: string): Error =>
  * and a fetched response hand out headers that cannot be written.
  */
 export const answer = (response: Response): Response => {
-  const outgoing = storage().getStore()?.outgoing;
+  const outgoing = storage.getStore()?.outgoing;
   const cookies = outgoing?.cookies() ?? [];
   if (
     outgoing === undefined ||
@@ -127,7 +112,7 @@ export const answer = (response: Response): Response => {
  * something that answers it runs.
  */
 const answering = (caller: string): Scope => {
-  const scope = storage().getStore();
+  const scope = storage.getStore();
   if (scope === undefined) {
     throw new Error(
       `${caller} needs a request — call it from a guard.ts, a route.ts or a Server Action, while the request is being answered`,
@@ -179,7 +164,7 @@ export const requestHeaders = (): Headers =>
  * carries it into hashes.
  */
 export const nonce = (): string => {
-  const scope = storage().getStore();
+  const scope = storage.getStore();
   if (scope === undefined) {
     throw new Error(
       'nonce() needs a request — call it while one is answered: from a guard.ts, a layout or page, or a Server Action',
@@ -194,7 +179,7 @@ export const nonce = (): string => {
  * build into files turns what it signed into hashes.
  */
 export const signingNonce = (): string => {
-  const scope = storage().getStore();
+  const scope = storage.getStore();
   if (scope === undefined) {
     throw new Error(
       'the handler signs its scripts while a request is answered',
