@@ -597,11 +597,7 @@ pnpm check         # check:write to auto-fix
   after the params schemas matched — inside the answering pattern's `enter`
   — and before the Server Action and the render (`runtime/guard.ts`). A
   `redirect.ts` is answered before them. The request in progress lives in
-  an `AsyncLocalStorage` on `globalThis` under
-  `Symbol.for('k8ordo.request')` (`runtime/request-scope.ts`), because
-  `@k8ordo/framework` holds two copies of this module — the runtime the handler is
-  built from and the `./server` entry the application imports
-  `responseHeaders()` from — and both must see the one request. Its phase
+  an `AsyncLocalStorage` (`runtime/request-scope.ts`). Its phase
   says what is running — `guard`, `action`, or the `render` — and the
   response API (`cookies()`, `responseHeaders()`, `requestHeaders()`) throws
   in the render and outside a request, because a page is a render. What a
