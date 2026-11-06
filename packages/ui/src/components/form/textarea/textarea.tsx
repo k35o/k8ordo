@@ -26,7 +26,6 @@ export const Textarea: FC<Props> = ({
   type: _type,
   value,
   onInput,
-  onKeyDown,
   ...rest
 }) => {
   const { pending } = useFormStatus();
@@ -41,10 +40,6 @@ export const Textarea: FC<Props> = ({
         autoResize && styles.autoResize,
       )}
       onInput={onInput}
-      onKeyDown={(e) => {
-        e.stopPropagation();
-        onKeyDown?.(e);
-      }}
       readOnly={pending || readOnly}
       ref={ref}
       value={value}
