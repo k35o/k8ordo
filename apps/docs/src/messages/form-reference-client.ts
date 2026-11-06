@@ -50,6 +50,11 @@ export const formHookIsDirty = message({
   en: '`true` once any control differs from the value it was rendered with. Adding or removing a row counts too.',
 });
 
+export const formHookRevalidate = message({
+  ja: '入力欄の検証の結果を読み直し、入力欄から離れたときと同じように文言を表示します。`useAsyncCheck`に渡します。',
+  en: 'Reads a control’s validity again and shows its message, as leaving the control does. Pass it to `useAsyncCheck`.',
+});
+
 export const formHookCaveats = [
   message({
     ja: '入力された値はReactのstateに保存せず、DOMから読みます。キー入力のたびに再描画されることはありません。',
@@ -212,6 +217,11 @@ export const asyncCheckCheck = message({
   en: 'A function that takes the value and resolves to the message to show, or to `undefined` when the value is fine. A Server Action can be passed as it is.',
 });
 
+export const asyncCheckRevalidate = message({
+  ja: '`useForm`が返す`revalidate`。結果を受け取ったら、これで入力欄の文言を表示します。',
+  en: 'The `revalidate` that `useForm` returns. Once the result is in, it shows the control’s message through it.',
+});
+
 export const asyncCheckReturns = message({
   ja: '入力欄に展開する`props`と、問い合わせの途中かどうか。',
   en: 'The `props` to spread onto the control, and whether a check is in progress.',
@@ -237,8 +247,8 @@ export const asyncCheckCaveats = [
     en: 'When results arrive out of order, only the result for the latest value is used. Leaving the control with the value of the last result does not ask again.',
   }),
   message({
-    ja: '入力欄を空にして離れると、前の結果は消えます。関数が失敗したときは何も付けず、送信後のサーバーの検証に任せます。',
-    en: 'Emptying the control and leaving it clears the last result. When the function rejects, nothing is applied, and the server checks the submission.',
+    ja: '入力欄を空にして離れると、前の結果は消えます。関数が失敗したときは何も付けず、送信後のサーバーの検証に任せます。失敗したときのエラーは`reportError`でブラウザに報告します。',
+    en: 'Emptying the control and leaving it clears the last result. When the function rejects, nothing is applied, and the server checks the submission. What it rejected with is reported to the browser with `reportError`.',
   }),
 ] as const;
 

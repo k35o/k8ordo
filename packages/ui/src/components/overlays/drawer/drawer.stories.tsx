@@ -103,3 +103,32 @@ export const Uncontrolled: Story = {
     ),
   },
 };
+
+// 閉じるのは <dialog> 自身（枠外）を押したときだけ。中身のクリックでは閉じず、
+// document まで届く
+export const ClickInside: Story = {
+  args: {
+    defaultOpen: true,
+    onClose: fn(),
+    title: 'メニュー',
+    children: <p>中身</p>,
+  },
+  play: async ({ args, canvas, canvasElement, userEvent }) => {
+    const dialog = canvas.getByRole('dialog', { name: 'メニュー' });
+    const onDocumentClick = fn();
+    canvasElement.ownerDocument.addEventListener('click', onDocumentClick);
+
+    await userEvent.click(canvas.getByText('中身'));
+
+    canvasElement.ownerDocument.removeEventListener('click', onDocumentClick);
+    await expect(onDocumentClick).toHaveBeenCalledOnce();
+    await expect(dialog).toHaveAttribute('open');
+
+    await userEvent.click(canvas.getByRole('button', { name: '閉じる' }));
+
+    await expect(dialog).not.toHaveAttribute('open');
+    await waitFor(() => {
+      expect(args.onClose).toHaveBeenCalledOnce();
+    });
+  },
+};

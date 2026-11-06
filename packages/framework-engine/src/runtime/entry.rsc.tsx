@@ -124,17 +124,11 @@ const NO_PARAMS: ParsedParams = { params: {}, enter: (fn) => fn() };
  * wrote to the async context, and nothing a refused pattern's did.
  *
  * A page's schema is an export of the page, and the table reads a page only
- * when a request reaches it; `routes.match` decides synchronously, so it is
- * asked for every pattern that fits, and the walk reads each file before
- * running the schemas along its stack, in the table's order.
+ * when a request reaches it, so the walk reads each file before running the
+ * schemas along its stack, in the table's order.
  */
 const find = async (pathname: string): Promise<Found> => {
-  const fits: Match[] = [];
-  routes.match(pathname, (fit) => {
-    fits.push(fit);
-    return false;
-  });
-  for (const fit of fits) {
+  for (const fit of routes.matchAll(pathname)) {
     if (fit.pattern.endsWith('/*')) {
       return {
         match: fit,
@@ -763,25 +757,25 @@ const matchNotFound = (
   pathname: string,
   forShell: boolean,
 ): { match: Match | null; parsed: ParsedParams } => {
-  let parsed = NO_PARAMS;
   const page = normalizePathname(pathname);
-  const match = routes.match(
+  for (const found of routes.matchAll(
     `${page === '/' ? '' : page}/${NOT_FOUND_SEGMENT}`,
-    (found) => {
-      if (!found.pattern.endsWith('/*')) return false;
-      // 殻の pathname では、開いたパラメータに !fallback が入っている。それを
-      // 受け取る not-found は、訪問者の値の代わりに !fallback を描いてしまう
-      if (forShell && Object.values(found.params).includes(FALLBACK_SEGMENT)) {
-        return false;
-      }
-      parsed = parseCatchAllParams(
+  )) {
+    if (!found.pattern.endsWith('/*')) continue;
+    // 殻の pathname では、開いたパラメータに !fallback が入っている。それを
+    // 受け取る not-found は、訪問者の値の代わりに !fallback を描いてしまう
+    if (forShell && Object.values(found.params).includes(FALLBACK_SEGMENT)) {
+      continue;
+    }
+    return {
+      match: found,
+      parsed: parseCatchAllParams(
         catchAllSchemas[found.pattern] ?? [],
         found.params,
-      );
-      return true;
-    },
-  );
-  return { match, parsed };
+      ),
+    };
+  }
+  return { match: null, parsed: NO_PARAMS };
 };
 
 type Rendered = {

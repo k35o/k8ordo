@@ -5,6 +5,7 @@ import type { FC } from 'react';
 import { expect, waitFor } from 'storybook/test';
 
 import { Tabs } from '.';
+import { afterRenderingUpdate } from '../../../../.storybook/rendering';
 
 import styles from './tabs.stories.module.css';
 
@@ -81,21 +82,6 @@ export const DefaultSelected: Story = {
   },
 };
 
-// ResizeObserver の通知はレンダリング更新のあとのタスクで届く。切り替えの前に
-// 2 フレーム待ち、観測を始めた時点の通知を出し切らせてから切り替える。
-const settle = async (): Promise<void> => {
-  await new Promise<void>((resolve) => {
-    requestAnimationFrame(() => {
-      resolve();
-    });
-  });
-  await new Promise<void>((resolve) => {
-    requestAnimationFrame(() => {
-      resolve();
-    });
-  });
-};
-
 const SwitchableWritingModeTabs: FC = () => {
   const [isVertical, setIsVertical] = useState(false);
   return (
@@ -135,7 +121,7 @@ export const FollowsWritingMode: Story = {
     await waitFor(() => {
       expect(tablist).toHaveAttribute('aria-orientation', 'horizontal');
     });
-    await settle();
+    await afterRenderingUpdate();
 
     await userEvent.click(canvas.getByRole('button', { name: '縦書きにする' }));
     await waitFor(() => {

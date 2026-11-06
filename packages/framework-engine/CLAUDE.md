@@ -528,7 +528,7 @@ pnpm check         # check:write to auto-fix
   a type off the module it reads), lists per page pattern the schemas along
   its stack in `paramSchemas` — a function of the page's module, which reads
   the page's own off it — and types the page by them (`ParamSchemas`). The
-  handler's `find` asks `routes.match` for every pattern that fits, and for
+  handler's `find` walks `routes.matchAll`, every pattern that fits, and for
   each in turn reads the page (or `route.ts`) and runs the stack through
   `runtime/params.ts`, synchronously, so a refused value is a pattern that
   did not match and the catch-all answers under 404.

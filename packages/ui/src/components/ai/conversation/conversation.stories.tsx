@@ -4,6 +4,7 @@ import type { FC } from 'react';
 import { expect, waitFor } from 'storybook/test';
 
 import { Conversation } from '.';
+import { afterRenderingUpdate } from '../../../../.storybook/rendering';
 import { Message } from '../message';
 
 import styles from './conversation.stories.module.css';
@@ -68,21 +69,6 @@ export const StickToBottom: Story = {
   },
 };
 
-// IntersectionObserver / ResizeObserver の通知はレンダリング更新のあとのタスクで届く。
-// 「動かないこと」を確かめる前に 2 フレーム待ち、届くはずの通知を出し切らせる。
-const settle = async (): Promise<void> => {
-  await new Promise<void>((resolve) => {
-    requestAnimationFrame(() => {
-      resolve();
-    });
-  });
-  await new Promise<void>((resolve) => {
-    requestAnimationFrame(() => {
-      resolve();
-    });
-  });
-};
-
 const isAtBottom = (log: HTMLElement): boolean =>
   log.scrollHeight - log.scrollTop - log.clientHeight < 1;
 
@@ -126,7 +112,7 @@ export const ScrollButtonWhenScrolledUp: Story = {
 
     // マウント直後は Resize の初回通知が残っていて、最下部にいる前提のまま
     // 引き戻されてしまう。通知が出し切られてから上へスクロールする。
-    await settle();
+    await afterRenderingUpdate();
     log.scrollTop = 0;
     const button = await canvas.findByRole('button', {
       name: '最新のメッセージへ移動',
@@ -172,13 +158,13 @@ export const KeepPositionWhenScrolledUp: Story = {
 
     // マウント直後は Resize の初回通知が残っていて、最下部にいる前提のまま
     // 引き戻されてしまう。通知が出し切られてから上へスクロールする。
-    await settle();
+    await afterRenderingUpdate();
     log.scrollTop = 0;
     await canvas.findByRole('button', { name: '最新のメッセージへ移動' });
 
     await userEvent.click(canvas.getByRole('button', { name: '追加する' }));
     await canvas.findByText(`メッセージ ${String(items.length + 1)}`);
-    await settle();
+    await afterRenderingUpdate();
     await expect(log.scrollTop).toBe(0);
   },
 };

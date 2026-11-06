@@ -1,7 +1,19 @@
 // From core rather than the classic entry, so a schema written with `zod/mini`
 // works too — same conversion, and the caller is not forced to pull in an API
 // seven times the size of the one they chose.
-import { safeEncode, toJSONSchema } from 'zod/v4/core';
+import {
+  $ZodArray,
+  $ZodCatch,
+  $ZodDefault,
+  $ZodNonOptional,
+  $ZodNullable,
+  $ZodObject,
+  $ZodOptional,
+  $ZodPrefault,
+  $ZodReadonly,
+  safeEncode,
+  toJSONSchema,
+} from 'zod/v4/core';
 import type { $ZodType } from 'zod/v4/core';
 
 import { controlKindOf, emptySubmissionOf } from '../derive/attributes';
@@ -57,40 +69,30 @@ type Node = {
   anyOf?: Node[];
 } & LeafSchema & { input?: string };
 
-/* Wrappers (`optional`, `nullable`, `default`, …) and `zod/mini` arrays expose
-   neither `shape` nor `element` publicly; the shared core definition is the
-   only route that works for both entries, and it is the same internal surface
-   the check list already requires. */
-type Wrapped = {
-  _zod?: {
-    def?: { type?: string; innerType?: $ZodType; element?: $ZodType };
-  };
-};
-
 /**
  * Peel wrapper schemas until the node that owns the structure is reached.
  * `toJSONSchema` flattens `.optional()` / `.default()` into the plain node, so
  * pairing the two trees requires flattening the zod side the same way.
  */
-export const unwrap = ($schema: $ZodType): $ZodType => {
-  let current = $schema;
-  let inner = (current as Wrapped)._zod?.def?.innerType;
-  while (inner !== undefined) {
-    current = inner;
-    inner = (current as Wrapped)._zod?.def?.innerType;
-  }
-  return current;
+export const unwrap = ($schema: $ZodType): $ZodType =>
+  $schema instanceof $ZodOptional ||
+  $schema instanceof $ZodNullable ||
+  $schema instanceof $ZodDefault ||
+  $schema instanceof $ZodPrefault ||
+  $schema instanceof $ZodNonOptional ||
+  $schema instanceof $ZodCatch ||
+  $schema instanceof $ZodReadonly
+    ? unwrap($schema._zod.def.innerType)
+    : $schema;
+
+const shapeOf = ($schema: $ZodType): Record<string, $ZodType> | undefined => {
+  const node = unwrap($schema);
+  return node instanceof $ZodObject ? node._zod.def.shape : undefined;
 };
 
-const shapeOf = ($schema: $ZodType): Record<string, $ZodType> | undefined =>
-  (unwrap($schema) as unknown as { shape?: Record<string, $ZodType> }).shape;
-
 const elementOf = ($schema: $ZodType): $ZodType | undefined => {
-  const candidate = unwrap($schema) as unknown as {
-    element?: $ZodType;
-    _zod?: { def?: { element?: $ZodType } };
-  };
-  return candidate.element ?? candidate._zod?.def?.element;
+  const node = unwrap($schema);
+  return node instanceof $ZodArray ? node._zod.def.element : undefined;
 };
 
 /**
@@ -101,8 +103,7 @@ const elementOf = ($schema: $ZodType): $ZodType | undefined => {
  */
 const kindOf = (json: Node, $schema: $ZodType): ControlKind => {
   const kind = controlKindOf(json);
-  return kind === 'text' &&
-    (unwrap($schema) as Wrapped)._zod?.def?.type === 'bigint'
+  return kind === 'text' && unwrap($schema)._zod.def.type === 'bigint'
     ? 'number'
     : kind;
 };

@@ -159,18 +159,7 @@ export const Combobox: FC<Props> = ({
   const [anchor, setAnchor] = useState<HTMLDivElement | null>(null);
   const writingMode = useWritingMode(anchor);
   const anchorName = `--ao-combobox-${baseId.replaceAll(/[^a-zA-Z0-9_-]/gu, '')}`;
-  const anchorRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      setAnchor(node);
-      node?.style.setProperty('anchor-name', anchorName);
-    },
-    [anchorName],
-  );
-  const listStyle: CSSProperties & {
-    positionAnchor?: string;
-    positionArea?: string;
-    positionTryFallbacks?: string;
-  } = {
+  const listStyle: CSSProperties = {
     position: 'fixed',
     inset: 'auto',
     margin: 0,
@@ -315,7 +304,8 @@ export const Combobox: FC<Props> = ({
         (disabled || pending) && styles.disabled,
         readOnly && styles.readOnly,
       )}
-      ref={anchorRef}
+      ref={setAnchor}
+      style={{ anchorName }}
     >
       <FormValue
         defaultValues={

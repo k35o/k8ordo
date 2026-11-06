@@ -453,8 +453,13 @@ export default function RouterReferencePage() {
           { name: 'record', type: 'R', description: t.routesRecord },
           {
             name: 'match',
-            type: '(pathname, accept?) => Match | null',
+            type: '(pathname) => Match | null',
             description: t.routesMatch,
+          },
+          {
+            name: 'matchAll',
+            type: '(pathname) => IteratorObject<Match, undefined>',
+            description: t.routesMatchAll,
           },
         ]}
         from={FROM}
@@ -463,10 +468,8 @@ export default function RouterReferencePage() {
         signature={`type Routes<R extends RoutesRecord = RoutesRecord> = {
   kind: 'routes';
   record: R;
-  match: (
-    pathname: string,
-    accept?: (match: Match) => boolean,
-  ) => Match | null;
+  match: (pathname: string) => Match | null;
+  matchAll: (pathname: string) => IteratorObject<Match, undefined>;
 };`}
         summary={t.routesSummary}
       />

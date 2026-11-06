@@ -38,7 +38,7 @@ const ARRAY_EXAMPLE = `const items = form.array('items');
 )}`;
 
 const ASYNC_EXAMPLE = `const slug = form.field('slug');
-const taken = useAsyncCheck(checkSlugAvailable);
+const taken = useAsyncCheck(checkSlugAvailable, form.revalidate);
 
 <input {...slug.input} {...taken.props} />
 <button disabled={taken.isChecking} type="submit">Save</button>`;
@@ -76,6 +76,11 @@ export default function FormReferenceClientPage() {
             description: t.formHookFormError,
           },
           { name: 'isDirty', type: 'boolean', description: t.formHookIsDirty },
+          {
+            name: 'revalidate',
+            type: '(control) => void',
+            description: t.formHookRevalidate,
+          },
         ]}
         from={FROM}
         id="use-form"
@@ -237,10 +242,16 @@ export default function FormReferenceClientPage() {
             type: '(value: string) => Promise<string | undefined>',
             description: t.asyncCheckCheck,
           },
+          {
+            name: 'revalidate',
+            type: "UseFormReturn['revalidate']",
+            description: t.asyncCheckRevalidate,
+          },
         ]}
         returns={{ type: 'AsyncCheck', description: t.asyncCheckReturns }}
         signature={`useAsyncCheck(
   check: (value: string) => Promise<string | undefined>,
+  revalidate: UseFormReturn['revalidate'],
 ): AsyncCheck`}
         summary={t.asyncCheckSummary}
       >

@@ -116,11 +116,7 @@ export const Autocomplete: FC<Props> = ({
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const writingMode = useWritingMode(container);
   const anchorName = `--ao-ac-${id.replaceAll(/[^a-zA-Z0-9_-]/gu, '')}`;
-  const listboxStyle: CSSProperties & {
-    positionAnchor?: string;
-    positionArea?: string;
-    positionTryFallbacks?: string;
-  } = {
+  const listboxStyle: CSSProperties = {
     position: 'fixed',
     inset: 'auto',
     margin: 0,
@@ -160,16 +156,10 @@ export const Autocomplete: FC<Props> = ({
     node?.scrollIntoView({ block: 'nearest' });
   }, []);
 
-  const setReferenceRef = useCallback(
-    (node: HTMLDivElement | null) => {
-      containerRef.current = node;
-      setContainer(node);
-      if (node) {
-        node.style.setProperty('anchor-name', anchorName);
-      }
-    },
-    [anchorName],
-  );
+  const setReferenceRef = useCallback((node: HTMLDivElement | null) => {
+    containerRef.current = node;
+    setContainer(node);
+  }, []);
 
   const handleBlur: FocusEventHandler<HTMLInputElement> = (e) => {
     if (e.relatedTarget?.closest('[role="listbox"]')?.id === listboxId) {
@@ -260,6 +250,7 @@ export const Autocomplete: FC<Props> = ({
         readOnly && styles.readOnly,
       )}
       ref={setReferenceRef}
+      style={{ anchorName }}
     >
       <FormValue
         defaultValues={value === undefined ? (defaultValue ?? []) : undefined}

@@ -3,6 +3,7 @@ import type { MouseEvent, MouseEventHandler } from 'react';
 import { useRef, useState } from 'react';
 import { expect, fn, screen, waitFor } from 'storybook/test';
 
+import { afterRenderingUpdate } from '../../../../.storybook/rendering';
 import { CopyIcon } from '../../icons';
 import { IconButton } from './icon-button';
 
@@ -53,21 +54,6 @@ const actionUntilFinished = (): Promise<void> =>
   new Promise<void>((resolve) => {
     finishAction = resolve;
   });
-
-// Chromium は無効になった要素のフォーカスを描画の更新で外す。2 フレーム待って
-// 最初のフレームの更新を越えてからフォーカスを確かめる
-const afterRenderingUpdate = async (): Promise<void> => {
-  await new Promise<void>((resolve) => {
-    requestAnimationFrame(() => {
-      resolve();
-    });
-  });
-  await new Promise<void>((resolve) => {
-    requestAnimationFrame(() => {
-      resolve();
-    });
-  });
-};
 
 /**
  * `onAction` の保留中も、押したボタンはフォーカスを持ち続ける。押せないことは

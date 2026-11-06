@@ -18,8 +18,8 @@
 
 /*
  * 退出は data-closing で高さ(0fr)・間隔(padding)・不透明度を同時に畳み、
- * 後続トーストの詰めも 1 つの transition で表現する（JS 側は EXIT_MS 経過後に
- * DOM から除去）。
+ * 後続トーストの詰めも 1 つの transition で表現する（JS 側はこの transition が
+ * 終わってから DOM から除去）。
  */
 .item {
   display: grid;

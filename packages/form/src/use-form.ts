@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useEffectEvent,
   useId,
   useLayoutEffect,
   useMemo,
@@ -140,6 +141,12 @@ export type UseFormReturn<
   formError: FormErrorView;
   /** True once any field differs from the value it was rendered with. */
   isDirty: boolean;
+  /**
+   * Reads a control's validity again and shows what it says, as leaving the
+   * control does — for a verdict that lands after the blur, such as
+   * `useAsyncCheck`'s answer.
+   */
+  revalidate: (control: Control) => void;
 };
 
 const rowCountsFor = (
@@ -172,6 +179,47 @@ const rowKeysFor = (
           );
   }
   return rows;
+};
+
+/**
+ * What the hook worked out on the client since one server result: which
+ * message to show for a field the browser judged invalid, which server errors
+ * the person has edited past, whether the DOM differs from what was rendered,
+ * and the rows. A new result supersedes all of it, and so does a reset.
+ */
+type Notes = {
+  /** The result these notes belong to — its content plus its token. */
+  readonly result: string;
+  /** Whether that result arrived after the form was rendered. */
+  readonly arrived: boolean;
+  readonly clientErrors: Record<string, string>;
+  readonly edited: ReadonlySet<string>;
+  readonly domDirty: boolean;
+  /**
+   * The row counts the result rendered with; more or fewer rows than this is
+   * a structural edit even while every control is pristine.
+   */
+  readonly baselineRows: Record<string, number>;
+  readonly rowKeys: Record<string, string[]>;
+};
+
+const blankNotes = (
+  result: string,
+  arrived: boolean,
+  fields: FormFields,
+  state: FormState,
+  rowKeys?: Record<string, string[]>,
+): Notes => {
+  const baselineRows = rowCountsFor(fields, state);
+  return {
+    result,
+    arrived,
+    clientErrors: {},
+    edited: new Set(),
+    domDirty: false,
+    baselineRows,
+    rowKeys: rowKeysFor(baselineRows, rowKeys),
+  };
 };
 
 /**
@@ -256,46 +304,31 @@ export const useForm = <
   // Messages applyRules wrote, so it never erases one it does not own — an
   // async check shares the same customValidity slot.
   const ownedRuleMessages = useRef(new Map<string, string>());
-  const [clientErrors, setClientErrors] = useState<Record<string, string>>({});
-  const [edited, setEdited] = useState<ReadonlySet<string>>(new Set());
-  const [domDirty, setDomDirty] = useState(false);
-  // The row counts the current server state rendered with; more or fewer rows
-  // than this is a structural edit even while every control is pristine. It is
-  // state rather than a ref because `isDirty` is read during render.
-  const [baselineRows, setBaselineRows] = useState(() =>
-    rowCountsFor(lookup, state),
-  );
-  const [rowKeys, setRowKeys] = useState(() => rowKeysFor(baselineRows));
   // The messages no control owns — the form's, each array's — are found by id,
   // not by a ref: they are usually drawn by an alert component that passes
   // HTML attributes through but not a ref.
   const formErrorId = useId();
   const arrayErrorIdBase = useId();
 
-  // Compared by content plus the parse token, not identity. A caller writing
-  // `useForm(fields, {})` hands over a new object on every render, and
-  // resetting on identity would wipe the message the blur just produced. The
-  // token is what keeps two identical failed submissions distinguishable.
-  const stateKey = JSON.stringify(state);
-  const lastKey = useRef(stateKey);
-
+  // A result is told apart by content plus the parse token, not identity: a
+  // caller writing `useForm(fields, {})` hands over a new object on every
+  // render, and the token keeps two identical failed submissions apart.
+  const result = JSON.stringify(state);
+  const [notes, setNotes] = useState(() =>
+    blankNotes(result, false, lookup, state),
+  );
   // A fresh result from the server supersedes everything the client worked out
   // before the submit, including which fields the person had already fixed and
-  // how many rows there are.
-  useEffect(() => {
-    if (lastKey.current === stateKey) {
-      return;
-    }
-    lastKey.current = stateKey;
-    setClientErrors({});
-    setEdited(new Set());
-    setDomDirty(false);
-    const counts = rowCountsFor(lookup, state);
-    setBaselineRows(counts);
-    setRowKeys((previous) => rowKeysFor(counts, previous));
+  // how many rows there are — in the render that brings it, so no commit shows
+  // the old notes beside the new result.
+  if (notes.result !== result) {
+    setNotes(blankNotes(result, true, lookup, state, notes.rowKeys));
+  }
+  const { clientErrors, edited, domDirty, baselineRows, rowKeys } = notes;
 
-    // Moving focus to the first failure is the only way someone using a
-    // screen reader learns the submit failed and where.
+  // Moving focus to the first failure is the only way someone using a screen
+  // reader learns the submit failed and where.
+  const focusFirstFailure = useEffectEvent(() => {
     const messageIds = [
       ...(state.formError === undefined ? [] : [formErrorId]),
       ...Object.keys(lookup.arrays)
@@ -303,7 +336,13 @@ export const useForm = <
         .map((path) => arrayErrorId(arrayErrorIdBase, path)),
     ];
     firstFailure(formRef.current, state.errors ?? {}, messageIds)?.focus();
-  }, [stateKey, state, lookup, formErrorId, arrayErrorIdBase]);
+  });
+  const { arrived } = notes;
+  useEffect(() => {
+    if (arrived) {
+      focusFirstFailure();
+    }
+  }, [result, arrived]);
 
   // React は select の defaultValue をマウント時にしか反映しないので、あとから
   // 返ったエコーは option の defaultSelected へ直接書く。action の後の自動リセット
@@ -331,8 +370,8 @@ export const useForm = <
         names.add(rule.field);
       }
 
-      setClientErrors((previous) => {
-        let next = previous;
+      setNotes((previous) => {
+        let next = previous.clientErrors;
         for (const name of names) {
           const field = fieldFor(lookup, name);
           if (field === undefined) {
@@ -364,7 +403,9 @@ export const useForm = <
             next = { ...next, [name]: message };
           }
         }
-        return next;
+        return next === previous.clientErrors
+          ? previous
+          : { ...previous, clientErrors: next };
       });
     },
     [lookup],
@@ -377,18 +418,31 @@ export const useForm = <
     [evaluate],
   );
 
+  const revalidate = useCallback(
+    (control: Control) => {
+      evaluate(control, false);
+    },
+    [evaluate],
+  );
+
   const onInput = useCallback(
     (event: SyntheticEvent<HTMLFormElement>) => {
       const { target } = event;
       if (isControl(target)) {
-        setEdited((previous) =>
-          previous.has(target.name)
-            ? previous
-            : new Set(previous).add(target.name),
-        );
         // Read back from the DOM rather than tracking values: one boolean that
         // flips at most twice, so this cannot become a per-keystroke re-render.
-        setDomDirty(isFormDirty(formRef.current));
+        const dirty = isFormDirty(formRef.current);
+        setNotes((previous) =>
+          previous.edited.has(target.name) && previous.domDirty === dirty
+            ? previous
+            : {
+                ...previous,
+                edited: previous.edited.has(target.name)
+                  ? previous.edited
+                  : new Set(previous.edited).add(target.name),
+                domDirty: dirty,
+              },
+        );
       }
       evaluate(target, true);
     },
@@ -422,7 +476,7 @@ export const useForm = <
       }
       event.preventDefault();
       const messages = messagesIn(form, lookup);
-      setClientErrors(messages);
+      setNotes((previous) => ({ ...previous, clientErrors: messages }));
       failed.focus();
       // 文言を出せない欄（スキーマにない欄など）は、止めたうえに何も見せない
       // ことになる。noValidate が外すのは送信時の検査だけで、要素の
@@ -438,11 +492,15 @@ export const useForm = <
   // `form.reset()`, or React itself after every form action — so what the
   // hook remembered about the old values goes with them.
   const onReset = useCallback(() => {
-    setClientErrors({});
-    setEdited(new Set());
-    const counts = rowCountsFor(lookup, state);
-    setBaselineRows(counts);
-    setRowKeys((previous) => rowKeysFor(counts, previous));
+    setNotes((previous) =>
+      blankNotes(
+        previous.result,
+        previous.arrived,
+        lookup,
+        state,
+        previous.rowKeys,
+      ),
+    );
     // A rule's message is not a value, so a reset leaves it on the control.
     const form = formRef.current;
     for (const [name, message] of ownedRuleMessages.current) {
@@ -457,7 +515,12 @@ export const useForm = <
     // caller's state, which React writes straight back. A task later the
     // reset is through, and the DOM says what is still different.
     setTimeout(() => {
-      setDomDirty(isFormDirty(formRef.current));
+      const dirty = isFormDirty(formRef.current);
+      setNotes((previous) =>
+        previous.domDirty === dirty
+          ? previous
+          : { ...previous, domDirty: dirty },
+      );
     }, 0);
   }, [lookup, state]);
 
@@ -521,16 +584,19 @@ export const useForm = <
         if (index === -1) {
           return;
         }
-        setRowKeys((previous) => ({
-          ...previous,
-          [path]: (previous[path] ?? []).filter(
-            (candidate) => candidate !== key,
-          ),
-        }));
         // Client bookkeeping is keyed by concrete indexed names, which have
         // just shifted under it.
-        setClientErrors((previous) => shiftRecord(previous, path, index));
-        setEdited((previous) => shiftSet(previous, path, index));
+        setNotes((previous) => ({
+          ...previous,
+          rowKeys: {
+            ...previous.rowKeys,
+            [path]: (previous.rowKeys[path] ?? []).filter(
+              (candidate) => candidate !== key,
+            ),
+          },
+          clientErrors: shiftRecord(previous.clientErrors, path, index),
+          edited: shiftSet(previous.edited, path, index),
+        }));
       };
 
       return {
@@ -553,9 +619,12 @@ export const useForm = <
         add: () => {
           nextKey.current += 1;
           const key = `${path}-new-${String(nextKey.current)}`;
-          setRowKeys((previous) => ({
+          setNotes((previous) => ({
             ...previous,
-            [path]: [...(previous[path] ?? []), key],
+            rowKeys: {
+              ...previous.rowKeys,
+              [path]: [...(previous.rowKeys[path] ?? []), key],
+            },
           }));
         },
         canAdd:
@@ -601,6 +670,7 @@ export const useForm = <
     array,
     formError,
     isDirty: domDirty || structuralDirty,
+    revalidate,
   };
 };
 

@@ -1,4 +1,4 @@
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useLayoutEffect, useState } from 'react';
 import type { FC } from 'react';
 import { describe, expect, it, vi } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
@@ -156,6 +156,28 @@ const Inline: FC = () => {
   );
 };
 
+// コミットごとに、画面に出した email の文言を state の token と組で残す
+let emailCommits: Array<{
+  token: string | undefined;
+  error: string | undefined;
+}> = [];
+
+const RecordedSignup: FC<{ state: FormState }> = ({ state }) => {
+  const form = useForm(derived, state);
+  const email = form.field('email');
+  useLayoutEffect(() => {
+    emailCommits.push({ token: state.token, error: email.error });
+  });
+
+  return (
+    <form {...form.props}>
+      <input aria-label="email" {...email.input} />
+      <input aria-label="password" {...form.field('password').input} />
+      <p data-testid="email-error">{email.error ?? ''}</p>
+    </form>
+  );
+};
+
 const choiceSchema = z.object({
   color: z.enum(['red', 'blue']),
   agree: z.boolean(),
@@ -284,12 +306,13 @@ const AsyncSlug: FC<{
 }> = ({ check = checkTaken }) => {
   const form = useForm(asyncFields, NO_STATE);
   const slug = form.field('slug');
-  const taken = useAsyncCheck(check);
+  const taken = useAsyncCheck(check, form.revalidate);
 
   return (
     <form {...form.props}>
       <input aria-label="slug" {...slug.input} {...taken.props} />
       <p data-testid="slug-error">{slug.error ?? ''}</p>
+      <p data-testid="slug-checking">{String(taken.isChecking)}</p>
       <button type="button">away</button>
     </form>
   );
@@ -861,6 +884,36 @@ describe('useForm in a browser', () => {
       .toHaveTextContent('');
   });
 
+  it('never commits what the client worked out before a new result beside that result', async () => {
+    emailCommits = [];
+    const screen = await render(
+      <RecordedSignup state={{ errors: {}, token: '1' }} />,
+    );
+    await screen.getByLabelText('email').fill('not-an-email');
+    await screen.getByLabelText('password').click();
+    await expect
+      .element(screen.getByTestId('email-error'))
+      .toHaveTextContent('メールアドレスの形式で入力してください');
+
+    await screen.rerender(
+      <RecordedSignup
+        state={{ errors: { email: 'すでに登録されています' }, token: '2' }}
+      />,
+    );
+
+    await expect
+      .element(screen.getByTestId('email-error'))
+      .toHaveTextContent('すでに登録されています');
+    // フォーカスが移る blur でもう一度描くので、コミットの数は数えない
+    expect(
+      new Set(
+        emailCommits
+          .filter((commit) => commit.token === '2')
+          .map((commit) => commit.error),
+      ),
+    ).toStrictEqual(new Set(['すでに登録されています']));
+  });
+
   it('re-shows the errors of an identical second failed submit via the token', async () => {
     const screen = await render(
       <Signup
@@ -1274,6 +1327,52 @@ describe('useForm in a browser', () => {
     await expect
       .element(screen.getByTestId('slug-error'))
       .toHaveTextContent('');
+  });
+
+  it('shows an answer without telling the form of a blur that never happened', async () => {
+    const onBlur = vi.fn();
+    const { answers, check } = checkByHand();
+    const screen = await render(<AsyncSlug check={check} />);
+    document.querySelector('form')?.addEventListener('focusout', onBlur);
+
+    await screen.getByLabelText('slug').fill('taken');
+    await screen.getByRole('button', { name: 'away' }).click();
+    expect(onBlur).toHaveBeenCalledTimes(1);
+
+    answers[0]?.resolve('使われています');
+    await expect
+      .element(screen.getByTestId('slug-error'))
+      .toHaveTextContent('使われています');
+    expect(onBlur).toHaveBeenCalledTimes(1);
+    expect(answers).toHaveLength(1);
+  });
+
+  it('applies no verdict for a check that fails, and reports what it threw', async () => {
+    const failure = new Error('問い合わせに失敗しました');
+    const reported: unknown[] = [];
+    // 試験の失敗として数えられないよう、報告を受け取って止める
+    const onError = (event: ErrorEvent): void => {
+      event.preventDefault();
+      reported.push(event.error);
+    };
+    window.addEventListener('error', onError);
+    try {
+      const screen = await render(
+        <AsyncSlug check={() => Promise.reject(failure)} />,
+      );
+      const slug = screen.getByLabelText('slug');
+
+      await slug.fill('k8o');
+      await screen.getByRole('button', { name: 'away' }).click();
+
+      await expect.poll(() => reported).toStrictEqual([failure]);
+      await expect
+        .element(screen.getByTestId('slug-checking'))
+        .toHaveTextContent('false');
+      expect((slug.element() as HTMLInputElement).validationMessage).toBe('');
+    } finally {
+      window.removeEventListener('error', onError);
+    }
   });
 
   it('lets an async message go when the field is emptied', async () => {

@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef } from 'react';
 import { expect, userEvent, waitFor, within } from 'storybook/test';
 
+import { afterRenderingUpdate } from '../../../../.storybook/rendering';
 import { Button } from '../../buttons/button';
 import { Anchor } from '../../navigation/anchor';
 import type { Status } from './../../../types/variables';
@@ -114,6 +115,33 @@ export const CloseButton: Story = {
     await waitFor(() => {
       expect(body.queryByRole('status')).not.toBeInTheDocument();
     });
+  },
+};
+
+// 閉じたトーストは、畳む transition を終えたところで外れる。動きを減らす
+// 設定（試験はこちらで走る）では transition が無いので、待たずに外れる
+export const RemovedOnceCollapsed: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(
+      canvas.getByRole('button', { name: 'トーストを呼ぶ' }),
+    );
+    const body = within(canvasElement.ownerDocument.body);
+    const toast = await body.findByRole('status');
+    const item = toast.closest('[data-toast-id]');
+    await userEvent.click(
+      within(toast).getByRole('button', { name: '閉じる' }),
+    );
+
+    await waitFor(() => {
+      expect(item).toHaveAttribute('data-closing');
+    });
+    await Promise.allSettled(
+      item?.getAnimations().map(async (exit) => exit.finished) ?? [],
+    );
+    await afterRenderingUpdate();
+
+    await expect(item).not.toBeInTheDocument();
   },
 };
 

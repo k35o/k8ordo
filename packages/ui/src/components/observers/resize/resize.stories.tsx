@@ -4,6 +4,7 @@ import type { FC } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
 
 import { Resize } from '.';
+import { afterRenderingUpdate } from '../../../../.storybook/rendering';
 
 const meta: Meta<typeof Resize> = {
   title: 'components/observers/resize',
@@ -14,21 +15,6 @@ const meta: Meta<typeof Resize> = {
 
 export default meta;
 type Story = StoryObj<typeof Resize>;
-
-// ResizeObserver の通知はレンダリング更新のあとのタスクで届く。
-// 回数を確かめる前に 2 フレーム待ち、届くはずの通知を出し切らせる。
-const settle = async (): Promise<void> => {
-  await new Promise<void>((resolve) => {
-    requestAnimationFrame(() => {
-      resolve();
-    });
-  });
-  await new Promise<void>((resolve) => {
-    requestAnimationFrame(() => {
-      resolve();
-    });
-  });
-};
 
 const Growable: FC<{ onChange: () => void }> = ({ onChange }) => {
   const [isWide, setIsWide] = useState(false);
@@ -61,7 +47,7 @@ export const Default: Story = {
       },
       { timeout: 5000 },
     );
-    await settle();
+    await afterRenderingUpdate();
     await expect(args.onChange).toHaveBeenCalledTimes(1);
 
     await userEvent.click(canvas.getByRole('button', { name: '広げる' }));
@@ -95,7 +81,7 @@ export const AddedLater: Story = {
   args: { onChange: fn() },
   render: ({ onChange }) => <Added onChange={onChange} />,
   play: async ({ args, canvas, userEvent }) => {
-    await settle();
+    await afterRenderingUpdate();
     await expect(args.onChange).not.toHaveBeenCalled();
 
     await userEvent.click(canvas.getByRole('button', { name: '表示する' }));

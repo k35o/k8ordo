@@ -1,4 +1,15 @@
-import { safeEncode } from 'zod/v4/core';
+import {
+  $ZodArray,
+  $ZodCatch,
+  $ZodDefault,
+  $ZodNonOptional,
+  $ZodNullable,
+  $ZodOptional,
+  $ZodPipe,
+  $ZodPrefault,
+  $ZodReadonly,
+  safeEncode,
+} from 'zod/v4/core';
 import type { $ZodType } from 'zod/v4/core';
 
 import { analyzeSchema, parseWithSalvage, sameValue } from '../schema/object';
@@ -18,32 +29,25 @@ export type UrlCodec = {
   salvage: (values: Readonly<StateValues>) => StateValues;
 };
 
-type Def = {
-  type: string;
-  innerType?: $ZodType;
-  in?: $ZodType;
-  element?: $ZodType;
-};
-
-/* `_zod` is where the shared core keeps the def; there is no public spelling of
-   it */
-const defOf = (schema: $ZodType): Def =>
-  (schema as unknown as { _zod: { def: Def } })._zod.def;
-
 /**
  * Peels wrappers (`default`, `optional`, `catch`, …) and pipes down to the
  * type that decides how many values a param carries. Only the input side of a
  * pipe matters here — that is the side the URL string enters through.
  */
-const baseDef = (schema: $ZodType): Def => {
-  let def = defOf(schema);
-  while (
-    def.innerType !== undefined ||
-    (def.type === 'pipe' && def.in !== undefined)
+const baseOf = (schema: $ZodType): $ZodType => {
+  if (
+    schema instanceof $ZodOptional ||
+    schema instanceof $ZodNullable ||
+    schema instanceof $ZodDefault ||
+    schema instanceof $ZodPrefault ||
+    schema instanceof $ZodNonOptional ||
+    schema instanceof $ZodCatch ||
+    schema instanceof $ZodReadonly
   ) {
-    def = defOf(def.innerType ?? (def.in as $ZodType));
+    return baseOf(schema._zod.def.innerType);
   }
-  return def;
+  if (schema instanceof $ZodPipe) return baseOf(schema._zod.def.in);
+  return schema;
 };
 
 const readAll = (input: UrlInput, key: string): readonly string[] => {
@@ -86,7 +90,7 @@ const serializeValue = (
 };
 
 const refuseBoolean = (schema: $ZodType, name: string): void => {
-  if (baseDef(schema).type === 'boolean') {
+  if (baseOf(schema)._zod.def.type === 'boolean') {
     throw new TypeError(
       `url boolean fields must use z.stringbool() — a URL carries strings, and "false" is not false to z.boolean() or z.coerce.boolean(): ${name}`,
     );
@@ -98,7 +102,7 @@ export const createUrlCodec = (schema: StateSchema): UrlCodec => {
   const { keys, defaults } = info;
   const items = new Map<string, $ZodType>();
   for (const key of keys) {
-    const base = baseDef(info.shape[key] as $ZodType);
+    const base = baseOf(info.shape[key] as $ZodType);
     // A URL can only say "absent": an empty list and a missing param are the
     // same string, so a non-empty default would silently take the place of
     // every [] the app writes. A boolean has the mirror problem — every
@@ -106,13 +110,13 @@ export const createUrlCodec = (schema: StateSchema): UrlCodec => {
     // string-shaped `z.stringbool()` is the only spelling that round-trips,
     // as a field or as an array's item. Both are guaranteed surprises, so
     // both fail at define time.
-    if (base.type === 'array') {
+    if (base instanceof $ZodArray) {
       if (!sameValue(defaults[key], [])) {
         throw new TypeError(
           `url array fields must default to [] — an absent param and an empty list are the same URL: ${key}`,
         );
       }
-      const item = base.element as $ZodType;
+      const item = base._zod.def.element;
       refuseBoolean(item, `${key}[]`);
       items.set(key, item);
     } else {

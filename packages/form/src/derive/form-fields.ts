@@ -1,4 +1,5 @@
-import type { $ZodType } from 'zod/v4/core';
+import { $ZodCheckStringFormat } from 'zod/v4/core';
+import type { $ZodCheckStringFormatDef, $ZodType } from 'zod/v4/core';
 
 import type {
   ArrayPathsOf,
@@ -23,27 +24,12 @@ import { messagesFor } from './messages';
 
 /**
  * Object-level checks — `.refine()` and friends — vanish from the JSON Schema
- * without a trace, so the public conversion cannot tell us they existed. Only
- * the internal check list can, and knowing is the whole point: a check the
- * client never runs has to be reported, not silently skipped.
+ * without a trace, so the conversion cannot tell us they existed. Only the
+ * schema's check list can, and knowing is the whole point: a check the client
+ * never runs has to be reported, not silently skipped.
  */
-/* Zod exposes no public route to its check list or to the source RegExp behind
-   a JSON Schema pattern string, and reporting what the client will not verify
-   is worth the coupling. If zod moves them the report goes quiet, the control
-   falls back to whatever `format` the JSON Schema kept, and a regex whose flags
-   can no longer be read reaches `pattern` as if it had none. */
-type StringFormat = { format: string; pattern?: RegExp };
-
-type ZodInternals = {
-  _zod?: {
-    def?: Partial<StringFormat> & {
-      checks?: Array<{ _zod?: { def?: Partial<StringFormat> } }>;
-    };
-  };
-};
-
 const objectLevelCheckCount = (schema: $ZodType): number =>
-  (schema as unknown as ZodInternals)._zod?.def?.checks?.length ?? 0;
+  schema._zod.def.checks?.length ?? 0;
 
 /**
  * The string formats a leaf declares — its own (`z.email()`) first, then the
@@ -53,11 +39,11 @@ const objectLevelCheckCount = (schema: $ZodType): number =>
  * the `format` keyword (`z.url().lowercase()` says `lowercase`) or erases it
  * (`.regex()`).
  */
-const stringFormatsOf = (schema: $ZodType): StringFormat[] => {
-  const def = (unwrap(schema) as unknown as ZodInternals)._zod?.def;
-  return [def, ...(def?.checks ?? []).map((check) => check._zod?.def)].filter(
-    (entry): entry is StringFormat => entry?.format !== undefined,
-  );
+const stringFormatsOf = (schema: $ZodType): $ZodCheckStringFormatDef[] => {
+  const leaf = unwrap(schema);
+  return [leaf, ...(leaf._zod.def.checks ?? [])]
+    .filter((entry) => entry instanceof $ZodCheckStringFormat)
+    .map((entry) => entry._zod.def);
 };
 
 /** zod's own name for a format is not always the JSON Schema one. */

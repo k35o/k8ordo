@@ -75,22 +75,20 @@ checks (`refine`) vanish from its output without a trace.
   boolean with, so the box submits the string state writes. A schema that
   cannot be encoded (a one-way `.transform()` throws) names no string, and the
   box is read as a plain boolean checkbox.
-- **The internal surface** is `_zod.def`, read in six places: `checks` (the
-  object-level count), `format` / `pattern` on the leaf and on each of its
-  checks (which format picks the control once a stacked check has overwritten
-  or erased the JSON `format`, which regex is the format's own, and the flags
-  the JSON `pattern` string has lost), `innerType` (peeling `.optional()` /
-  `.default()` wrappers so a wrapped leaf or object pairs with its JSON node),
-  `element` (`zod/mini` arrays), `type` (a bigint, which JSON Schema cannot
-  represent, submits a blank the way a number does), and `entries`-shaped enum
-  detection at the type level. Reporting what the client will not check is
-  worth the coupling. If zod moves them, the failures differ: without `checks`
-  the object-level report goes quiet; without `format` / `pattern` the control
-  falls back to whatever `format` the JSON kept (`z.iso.time()` and a local
-  `z.iso.datetime()` to `type="text"`) and a flagged regex reaches `pattern`
-  as if it had no flags; without `innerType` or `element` the walk throws on a
-  wrapped object or array, or on any `zod/mini` array; without `type` a blank
-  bigint reads as 0n again.
+- **The structure** is read through `zod/v4/core`'s typed surface: the
+  schema classes matched with `instanceof` — wrappers (`$ZodOptional`,
+  `$ZodDefault`, …) peeled to their `innerType` so a wrapped leaf or object
+  pairs with its JSON node, `$ZodObject`'s `shape`, `$ZodArray`'s `element`,
+  `$ZodCheckStringFormat` for the format and regex on the leaf and on each of
+  its checks (which format picks the control once a stacked check has
+  overwritten or erased the JSON `format`, which regex is the format's own,
+  and the flags the JSON `pattern` string has lost) — and `_zod.def`'s
+  `checks` (the object-level count) and `type` (a bigint, which JSON Schema
+  cannot represent, submits a blank the way a number does). zod answers
+  `instanceof` by the traits a schema was built with, so a `zod/mini` schema
+  matches the same classes; `zod-mini.test.ts` holds each of these for it.
+  At the type level, `paths.ts` reads the same `_zod.def` shapes
+  (`innerType`, `element`, `entries` for an enum) off the schema's type.
 - **A pairing the walk cannot make is a throw, not a skip.** A JSON node with
   no matching zod node (records, tuples, nullable objects, nested repeats,
   dotted keys) would parse to silently discarded input, which is the one
@@ -99,6 +97,10 @@ checks (`refine`) vanish from its output without a trace.
 ## Conventions
 
 - `type`, not `interface`; no `@ts-ignore`; no skipped tests.
+- A verdict that lands outside an event — `useAsyncCheck`'s answer — reaches
+  the hook through `revalidate(control)`, never a dispatched event: a
+  synthetic `focusout` re-enters the control's own `onBlur` and tells every
+  blur listener of a blur that never happened.
 - Comments explain why the straightforward version was not used — not what the
   code does.
 - Tests state a guarantee in their name ("marks a field required only when the
