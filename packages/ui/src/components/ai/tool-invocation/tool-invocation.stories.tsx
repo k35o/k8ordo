@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
 
+import { afterRenderingUpdate } from '../../../../.storybook/rendering';
 import type { ToolState } from '../types';
 import { ToolInvocation } from './tool-invocation';
 
@@ -133,14 +134,6 @@ export const ApprovalWithRequestReason: Story = {
   },
 };
 
-// Chromium は、フォーカスを持った要素が disabled になると、描画を更新した
-// あとのタスクでフォーカスを外す。1 フレームだけでは、そのタスクより先に
-// React の描画が走ることがあるので 2 フレーム待つ
-const waitTwoFrames = async () => {
-  await new Promise(requestAnimationFrame);
-  await new Promise(requestAnimationFrame);
-};
-
 let finishAnswering = () => {};
 
 export const ApprovalWhileAnswering: Story = {
@@ -159,7 +152,7 @@ export const ApprovalWhileAnswering: Story = {
     const deny = canvas.getByRole('button', { name: '拒否' });
     try {
       await userEvent.click(approve);
-      await waitTwoFrames();
+      await afterRenderingUpdate();
 
       // 答えている間も、押したボタンはフォーカスを持ったまま
       await expect(approve).toHaveFocus();
@@ -185,7 +178,7 @@ const AnsweredInPlace = () => {
       name="delete_file"
       onApprovalResponse={async ({ approved }) => {
         // 答えが届くのは描画の更新をまたいだ後。実際の送信もそうなる
-        await waitTwoFrames();
+        await afterRenderingUpdate();
         setState(approved ? 'output-available' : 'output-denied');
       }}
       output="削除しました"

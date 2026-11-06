@@ -6,11 +6,11 @@ import { expect, fn, waitFor } from 'storybook/test';
 import { z } from 'zod';
 
 import { ActionForm } from '../../../../.storybook/action-form';
-import { afterRenderingUpdate } from '../../../../.storybook/focus';
 import {
   finishPending,
   PendingForm,
 } from '../../../../.storybook/pending-form';
+import { afterRenderingUpdate } from '../../../../.storybook/rendering';
 import type { Option } from '../../../types/variables';
 import { FormControl } from '../form-control';
 import { Combobox } from './combobox';

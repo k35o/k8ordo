@@ -4,6 +4,7 @@ import type { FC } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
 
 import { InView } from '.';
+import { afterRenderingUpdate } from '../../../../.storybook/rendering';
 
 const meta: Meta<typeof InView> = {
   title: 'components/observers/in-view',
@@ -14,21 +15,6 @@ const meta: Meta<typeof InView> = {
 
 export default meta;
 type Story = StoryObj<typeof InView>;
-
-// IntersectionObserver の通知はレンダリング更新のあとのタスクで届く。
-// 「呼ばれないこと」を確かめる前に 2 フレーム待ち、届くはずの通知を出し切らせる。
-const settle = async (): Promise<void> => {
-  await new Promise<void>((resolve) => {
-    requestAnimationFrame(() => {
-      resolve();
-    });
-  });
-  await new Promise<void>((resolve) => {
-    requestAnimationFrame(() => {
-      resolve();
-    });
-  });
-};
 
 // 高さ 160px のスクロール領域。上下に 400px の余白を置き、対象を
 // scrollTop で出し入れする。ページのビューポートに左右されないよう root に渡す。
@@ -70,7 +56,7 @@ export const Default: Story = {
     await waitFor(() => {
       expect(args.onChange).toHaveBeenCalledWith(false);
     });
-    await settle();
+    await afterRenderingUpdate();
     await expect(args.onChange).toHaveBeenCalledTimes(1);
 
     scroller.scrollTop = SPACER - BOX;
@@ -104,7 +90,7 @@ export const Once: Story = {
     await expect(args.onChange).toHaveBeenCalledTimes(2);
 
     scroller.scrollTop = 0;
-    await settle();
+    await afterRenderingUpdate();
     await expect(args.onChange).toHaveBeenCalledTimes(2);
   },
 };
@@ -159,7 +145,7 @@ export const ReobservedWhileInView: Story = {
     });
 
     await userEvent.click(canvas.getByRole('button', { name: '余白を広げる' }));
-    await settle();
+    await afterRenderingUpdate();
     await expect(args.onChange).toHaveBeenCalledTimes(2);
   },
 };
@@ -289,7 +275,7 @@ export const Empty: Story = {
   args: { onChange: fn() },
   render: ({ onChange }) => <InView onChange={onChange}>{null}</InView>,
   play: async ({ args }) => {
-    await settle();
+    await afterRenderingUpdate();
     await expect(args.onChange).not.toHaveBeenCalled();
   },
 };
@@ -320,7 +306,7 @@ export const AddedLater: Story = {
   args: { onChange: fn() },
   render: ({ onChange }) => <Added onChange={onChange} />,
   play: async ({ args, canvas, userEvent }) => {
-    await settle();
+    await afterRenderingUpdate();
     await expect(args.onChange).not.toHaveBeenCalled();
 
     await userEvent.click(canvas.getByRole('button', { name: '表示する' }));

@@ -10,11 +10,11 @@ import {
   memo,
   MemoField,
 } from '../../../../.storybook/action-form';
-import { afterRenderingUpdate } from '../../../../.storybook/focus';
 import {
   finishPending,
   PendingForm,
 } from '../../../../.storybook/pending-form';
+import { afterRenderingUpdate } from '../../../../.storybook/rendering';
 import { FormControl } from '../form-control';
 import { Select } from './select';
 
