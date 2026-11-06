@@ -73,13 +73,7 @@ catalog:
 
 minimumReleaseAge: 10080
 
-# vite (rolldown 経由) と vite-plus はそれぞれ @oxc-project/types を exact pin しており、
-# 両者の pin がずれると同一内容の型が 2 コピーになり、vite の Plugin 型の比較で
-# tsc が "Excessive stack depth" を起こして typecheck が落ちる。単一バージョンに
-# 強制して型グラフのコピーを 1 つに保つ (types のみのパッケージでランタイム影響なし)。
 overrides:
-  '@oxc-project/types': 0.156.0
-
   # vitest は vite-plus が exact pin (1.0.0 は 5.0.1) で連れてくる依存で、
   # `vp test` が起動するのは常に vite-plus 側の 1 本。catalog の vitest が
   # その pin とずれると、そこへ catalog 版の @vitest/browser-playwright が刺さり、
