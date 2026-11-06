@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useEffectEvent, useRef } from 'react';
 import type { FC } from 'react';
 
 import { Alert } from '../alert';
@@ -24,10 +24,7 @@ export const Toast: FC<ToastProps> = ({
   isPaused = false,
   onClose,
 }) => {
-  const onCloseRef = useRef(onClose);
-  useEffect(() => {
-    onCloseRef.current = onClose;
-  });
+  const close = useEffectEvent(onClose);
 
   // 一時停止をまたいで残り時間を持ち越すため、経過分を都度差し引く
   const remainingRef = useRef(duration);
@@ -39,7 +36,7 @@ export const Toast: FC<ToastProps> = ({
     // Storybook が Date をモックするため、経過時間は monotonic な performance.now で測る
     const startedAt = performance.now();
     const timeoutId = window.setTimeout(() => {
-      onCloseRef.current();
+      close();
     }, remainingRef.current);
 
     return () => {

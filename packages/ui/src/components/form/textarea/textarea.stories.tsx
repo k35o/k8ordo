@@ -5,6 +5,8 @@ import { expect, waitFor } from 'storybook/test';
 import { z } from 'zod';
 
 import { ActionForm, fill } from '../../../../.storybook/action-form';
+import { Button } from '../../buttons/button';
+import { Popover } from '../../overlays/popover';
 import { FormControl } from '../form-control';
 import { Textarea } from './textarea';
 
@@ -79,6 +81,42 @@ export const Invalid: Story = {
     disabled: false,
     invalid: true,
     required: false,
+  },
+};
+
+// キー入力を止めないので、Popover の中でも Escape で Popover が閉じる
+export const EscapeInPopover: Story = {
+  render: (args) => (
+    <Popover.Root role="dialog">
+      <Popover.Trigger
+        renderItem={(props) => (
+          <Button {...props} size="md" type="button">
+            メモ
+          </Button>
+        )}
+      />
+      <Popover.Content
+        renderItem={(props) => (
+          <div aria-label="メモ" className={styles.panel} {...props}>
+            <Textarea {...args} />
+          </div>
+        )}
+      />
+    </Popover.Root>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    const trigger = canvas.getByRole('button', { name: 'メモ' });
+    await userEvent.click(trigger);
+    const field = await canvas.findByRole('textbox', { name: '本文' });
+    await waitFor(() => {
+      expect(field).toHaveFocus();
+    });
+
+    await userEvent.keyboard('{Escape}');
+
+    await waitFor(() => {
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    });
   },
 };
 

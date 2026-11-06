@@ -4,11 +4,15 @@
  * 透明な outline を引き、システムの色で塗らせる。
  */
 
-/* 枠線のある部品。輪と重ならないよう、フォーカス中は枠線を消す */
+/* 枠線のある部品。輪と重ならないよう、フォーカス中は枠線を消す。
+   不正な値の枠線は、フォーカス中も見せたいので残す */
 .ring:focus-visible {
-  border-color: transparent;
   outline-style: none;
   box-shadow: var(--shadow-ring-info);
+
+  &:not([aria-invalid='true']) {
+    border-color: transparent;
+  }
 
   @media (forced-colors: active) {
     outline: 2px solid transparent;
@@ -26,11 +30,15 @@
   }
 }
 
-/* 中の入力欄がフォーカスを持つあいだ、枠ごと輪で囲む */
+/* 中の入力欄がフォーカスを持つあいだ、枠ごと輪で囲む。中の入力欄が
+   不正な値のときは、.ring と同じ理由で枠線を残す */
 .ringWithin:focus-within {
-  border-color: transparent;
   outline-style: none;
   box-shadow: var(--shadow-ring-info);
+
+  &:not(:has([aria-invalid='true'])) {
+    border-color: transparent;
+  }
 
   @media (forced-colors: active) {
     outline: 2px solid transparent;

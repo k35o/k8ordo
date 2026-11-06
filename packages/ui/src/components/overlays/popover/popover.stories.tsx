@@ -5,6 +5,7 @@ import type { FC } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
 
 import { Popover } from '.';
+import { afterRenderingUpdate } from '../../../../.storybook/rendering';
 import type { Placement } from '../../../types/variables';
 import { Button } from '../../buttons/button';
 import { Modal } from '../modal';
@@ -491,21 +492,6 @@ export const Right = placementStory('right');
 export const RightStart = placementStory('right-start');
 export const RightEnd = placementStory('right-end');
 
-// 描画直後の通知はレンダリング更新のあとのタスクで届く。切り替えの前に
-// 2 フレーム待ち、マウント直後の処理を出し切らせてから切り替える。
-const settle = async (): Promise<void> => {
-  await new Promise<void>((resolve) => {
-    requestAnimationFrame(() => {
-      resolve();
-    });
-  });
-  await new Promise<void>((resolve) => {
-    requestAnimationFrame(() => {
-      resolve();
-    });
-  });
-};
-
 const SwitchableWritingModePopover: FC = () => {
   const [isVertical, setIsVertical] = useState(false);
   return (
@@ -547,7 +533,7 @@ export const FollowsWritingMode: Story = {
   play: async ({ canvas, canvasElement, userEvent }) => {
     // trigger のボタンは中身に合わせて縮むので、書字方向が変わってもサイズは
     // 変わらない。落ち着いてから切り替え、サイズの変化に頼らず追従することを確かめる。
-    await settle();
+    await afterRenderingUpdate();
     await userEvent.click(canvas.getByRole('button', { name: '縦書きにする' }));
     await userEvent.click(canvas.getByRole('button', { name: 'メニュー' }));
 

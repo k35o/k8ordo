@@ -80,9 +80,7 @@
     background-color: var(--color-bg-mute);
   }
 
-  /* 共有の輪の枠線（透明）より詳細度を上げ、CSS の読み込み順に頼らない */
-  &[aria-invalid='true'],
-  &[aria-invalid='true']:focus-visible {
+  &[aria-invalid='true'] {
     border-color: var(--color-border-error);
   }
 }

@@ -4,6 +4,7 @@ import { clsx } from 'clsx';
 import type { FC, Ref, TextareaHTMLAttributes } from 'react';
 import { useFormStatus } from 'react-dom';
 
+import focusRing from '../../_internal/focus-ring.module.css';
 import styles from './textarea.module.css';
 
 type Props = {
@@ -25,7 +26,6 @@ export const Textarea: FC<Props> = ({
   type: _type,
   value,
   onInput,
-  onKeyDown,
   ...rest
 }) => {
   const { pending } = useFormStatus();
@@ -35,14 +35,11 @@ export const Textarea: FC<Props> = ({
       aria-invalid={invalid}
       className={clsx(
         styles.root,
+        focusRing.ring,
         fullHeight && styles.fullHeight,
         autoResize && styles.autoResize,
       )}
       onInput={onInput}
-      onKeyDown={(e) => {
-        e.stopPropagation();
-        onKeyDown?.(e);
-      }}
       readOnly={pending || readOnly}
       ref={ref}
       value={value}

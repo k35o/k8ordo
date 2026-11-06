@@ -58,11 +58,8 @@ export const Drawer: FC<
           >
             <IconButton
               label={messages.close}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (dialogRef.current) {
-                  dialogRef.current.close();
-                }
+              onClick={() => {
+                dialogRef.current?.close();
               }}
               tooltipDisabled
             >
@@ -70,19 +67,9 @@ export const Drawer: FC<
             </IconButton>
           </div>
         </div>
-        {/* バックドロップクリックでの閉じる挙動を内側で止めるためだけの onClick */}
-        {/* (キーボード操作は Drawer の Escape ハンドラが担う) */}
-        {/* oxlint-disable eslint-plugin-jsx-a11y/click-events-have-key-events, eslint-plugin-jsx-a11y/no-static-element-interactions */}
-        <div
-          className={styles.content}
-          id={`${rootId}-content`}
-          onClick={(e) => {
-            e.stopPropagation();
-          }}
-        >
+        <div className={styles.content} id={`${rootId}-content`}>
           {children}
         </div>
-        {/* oxlint-enable eslint-plugin-jsx-a11y/click-events-have-key-events, eslint-plugin-jsx-a11y/no-static-element-interactions */}
       </div>
     </Modal>
   );

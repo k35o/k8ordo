@@ -10,6 +10,7 @@ import {
   memo,
   MemoField,
 } from '../../../../.storybook/action-form';
+import { tokenColor } from '../../../../.storybook/tokens';
 import { FormControl } from '../form-control';
 import { TextField } from './text-field';
 
@@ -93,6 +94,24 @@ export const Invalid: Story = {
     disabled: false,
     invalid: true,
     required: false,
+  },
+};
+
+// フォーカスの輪が付いても、不正な値の枠線は消えない
+export const InvalidWhileFocused: Story = {
+  args: {
+    disabled: false,
+    invalid: true,
+    required: false,
+  },
+  play: async ({ canvas }) => {
+    const field = canvas.getByRole('textbox');
+    field.focus();
+
+    await expect(field).toHaveFocus();
+    await expect(getComputedStyle(field).borderColor).toBe(
+      tokenColor('--color-border-error'),
+    );
   },
 };
 
