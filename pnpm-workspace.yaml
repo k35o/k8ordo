@@ -124,36 +124,6 @@ minimumReleaseAgeExclude:
   - 'storybook-addon-determinism'
   - 'storybook-addon-vrt'
   - 'vite-plus-inspector'
-  # Renovate security update: next@16.3.8 || 16.4.1
-  - next@16.3.8 || 16.4.1
-  # better-css-modules 0.4.1 の security update が exact pin する版
-  - postcss@8.5.31
-  # Renovate security update: vitest@5.0.5 と、それを exact pin する vite-plus@1.3.0。
-  # 名前のパターンには版を付けられないので 1 つずつ並べる
-  - vitest@5.0.5
-  - '@vitest/browser@5.0.5'
-  - '@vitest/browser-playwright@5.0.5'
-  - '@vitest/browser-preview@5.0.5'
-  - '@vitest/coverage-v8@5.0.5'
-  - '@vitest/expect@5.0.5'
-  - '@vitest/mocker@5.0.5'
-  - '@vitest/pretty-format@5.0.5'
-  - '@vitest/snapshot@5.0.5'
-  - '@vitest/spy@5.0.5'
-  - '@vitest/ui@5.0.5'
-  - '@vitest/utils@5.0.5'
-  - vite-plus@1.3.0
-  - '@voidzero-dev/vite-plus-core@1.3.0'
-  - '@voidzero-dev/vite-plus-darwin-arm64@1.3.0'
-  - '@voidzero-dev/vite-plus-darwin-x64@1.3.0'
-  - '@voidzero-dev/vite-plus-linux-arm64-gnu@1.3.0'
-  - '@voidzero-dev/vite-plus-linux-arm64-musl@1.3.0'
-  - '@voidzero-dev/vite-plus-linux-x64-gnu@1.3.0'
-  - '@voidzero-dev/vite-plus-linux-x64-musl@1.3.0'
-  - '@voidzero-dev/vite-plus-win32-arm64-msvc@1.3.0'
-  - '@voidzero-dev/vite-plus-win32-x64-msvc@1.3.0'
-  # Renovate security update: zod@4.6.6
-  - zod@4.6.6
 
 verifyDepsBeforeRun: install
 
