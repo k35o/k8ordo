@@ -546,11 +546,17 @@ answer.
 
 `check` receives the field's value and resolves to the message to show, or to
 `undefined` when the value is fine. A rejected promise applies no verdict
-either way; the server still checks the submission.
+either way; the server still checks the submission, and what it rejected with
+goes to `reportError`, which reports it the way an uncaught error is.
+
+The answer lands after the blur, so `useAsyncCheck` is handed
+`form.revalidate`, which reads a control's validity again and shows what it
+says, as leaving the control does. Anything else that changes a control's
+validity outside an event can call it the same way.
 
 ```tsx
 const slug = form.field('slug');
-const taken = useAsyncCheck(checkSlugAvailable); // a Server Action
+const taken = useAsyncCheck(checkSlugAvailable, form.revalidate); // a Server Action
 
 <input {...slug.input} {...taken.props} />;
 <button disabled={taken.isChecking} type="submit">

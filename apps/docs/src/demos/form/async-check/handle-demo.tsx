@@ -28,7 +28,7 @@ const checkHandle = async (value: string): Promise<string | undefined> => {
 export function HandleDemo({ fields }: Props) {
   const form = useForm(fields);
   const handle = form.field('handle');
-  const taken = useAsyncCheck(checkHandle);
+  const taken = useAsyncCheck(checkHandle, form.revalidate);
   const [sent, setSent] = useState(false);
 
   return (

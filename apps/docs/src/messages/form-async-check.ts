@@ -16,8 +16,8 @@ export const attachFunction = message({
 });
 
 export const attachProps = message({
-  ja: '返ってきた`props`を、`input`と並べて入力欄に展開します。',
-  en: 'Spread the returned `props` onto the field, next to `input`.',
+  ja: '2つ目の引数には、`useForm`が返す`revalidate`を渡します。返ってきた`props`は、`input`と並べて入力欄に展開します。',
+  en: 'The second argument is the `revalidate` that `useForm` returns. Spread the returned `props` onto the field, next to `input`.',
 });
 
 export const pathTitle = message({
@@ -26,8 +26,8 @@ export const pathTitle = message({
 });
 
 export const pathValidity = message({
-  ja: '`useAsyncCheck`は、サーバーの結果を`setCustomValidity`で入力欄に設定します。組み込みの検証と同じように扱われ、文言は`field()`の`error`から読めます。',
-  en: '`useAsyncCheck` applies the result to the field with `setCustomValidity`. It is treated like a built-in check, and the message is read from `field()`’s `error`.',
+  ja: '`useAsyncCheck`は、サーバーの結果を`setCustomValidity`で入力欄に設定し、`revalidate`で文言を表示します。組み込みの検証と同じように扱われ、文言は`field()`の`error`から読めます。',
+  en: '`useAsyncCheck` applies the result to the field with `setCustomValidity` and shows it through `revalidate`. It is treated like a built-in check, and the message is read from `field()`’s `error`.',
 });
 
 export const pathSubmit = message({
@@ -66,8 +66,8 @@ export const timingEmpty = message({
 });
 
 export const timingFailure = message({
-  ja: '問い合わせが失敗したときは、使えるとも使えないとも判定しません。',
-  en: 'When the request itself fails, it applies no verdict either way.',
+  ja: '問い合わせが失敗したときは、使えるとも使えないとも判定しません。失敗したときのエラーは`reportError`でブラウザに報告します。',
+  en: 'When the request itself fails, it applies no verdict either way, and the error is reported to the browser with `reportError`.',
 });
 
 export const serverNote = message({

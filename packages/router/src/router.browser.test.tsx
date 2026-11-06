@@ -24,7 +24,8 @@ import { bindParams, href, navigateTo } from './links';
 import { usePathname } from './location';
 import { useMatch } from './match';
 import { useInterceptedNavigation, usePendingPathname } from './navigation';
-import { Outlet, Router, useParams, useRoute } from './router';
+import { Outlet } from './outlet';
+import { Router, useParams, useRoute } from './router';
 
 let listMounts = 0;
 

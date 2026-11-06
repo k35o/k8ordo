@@ -233,9 +233,9 @@ pnpm check         # check:write to auto-fix
   intercept (`canIntercept`); a GET form (no `formData`) still comes through.
 - **Schemas are typed here, run elsewhere.** `ParamsSchemaFor` /
   `ParsedParams` / `RegisteredParams` describe what a Standard Schema produces
-  so `href` can take it; the framework runs the schema and hands `match` an
-  `accept` that declines a refused param, which makes the walk go on to the
-  next pattern. Nothing in this package validates anything.
+  so `href` can take it; the framework walks `matchAll` and runs the schema
+  on each fit, passing over one whose param it refused, so the next pattern
+  answers. Nothing in this package validates anything.
 - **An `error` boundary is an element of the stack, cleared by generation.**
   `boundaryFor` puts it after the layout; `RouteErrorBoundary` clears its
   class boundary's failure when `NavigationGeneration` — the id of the
@@ -294,7 +294,7 @@ pnpm check         # check:write to auto-fix
 src/
   paths.ts          type derivation (ParamsOf / PathFor / Join) + string operations
   base.ts           withBase / withoutBase (Vite's base at the edges)
-  define-routes.ts  defineRoutes / match / NavigablePath
+  define-routes.ts  defineRoutes / match / matchAll / NavigablePath
   links.ts          href / navigateTo / bindParams (the side that needs no table)
   register.ts       Register (module augmentation) + PageProps / LayoutProps / RouteContext
   navigation.ts     useInterceptedNavigation (intercept and the commit contract), usePendingPathname
@@ -302,7 +302,8 @@ src/
   location.tsx      usePathname / PathnameProvider / BrowserPathname (where you are, without the table)
   match.ts          matchPath / useMatch ("which section am I in", without the table)
   boundary.tsx      RouteErrorBoundary (the boundary that renders the table's error)
-  router.tsx        Router / Outlet / useRoute / useParams
+  outlet.tsx        Outlet (a layout's hole, nested by context; the table's boundaries render it too)
+  router.tsx        Router / useRoute / useParams
   tree-pathname.ts  TreePathname, the pathname each tree was applied for (not exported)
   not-found.ts      notFound / isNotFound (the framework answers it; branded, not a class)
   traversal.test.ts serves fixtures/traversal with Vite and opens it top-level
