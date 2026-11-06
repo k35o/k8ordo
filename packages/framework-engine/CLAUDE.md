@@ -485,16 +485,26 @@ pnpm check         # check:write to auto-fix
   browser is idle, and says nowhere that it is done, so `AppRouter` first
   changes `Hydrating`, a context no component reads: a context changing
   above a boundary not yet hydrated makes React hydrate it before that
-  transition commits, and the commit's layout effect hands the URL back.
+  transition commits, and the commit's layout effect hands the URL back —
+  there and nowhere else. A navigation, a Server Action's answer and `vite
+  dev`'s reload that arrive before that commit wait for it (`whenHydrated`)
+  before applying their tree: applied earlier, the tree would render at the
+  pathname the HTML was rendered for, and with the URL handed back earlier,
+  a boundary whose hydration the applying update interrupted would be
+  hydrated again at the URL, against HTML rendered for another.
   The second transition renders `reread`, the payload read again from a
   `tee()` of the HTML's stream: React does not render an element it was
   handed before again, so only a tree whose every element is new reaches
   every component below. It is applied only over the tree hydrated (or the
-  not-found its shell swapped in): a navigation applied first, which hands
-  the URL back as it applies, keeps its page. `runtime/mount.browser.test.tsx`
-  hydrates a 404 with nested boundaries and sees its nodes kept, no error,
-  and the text and the router at the URL — and fails with the context
-  change or that check taken out; `examples/static-basic`'s `build.test.ts`
+  not-found its shell swapped in): a navigation applied first keeps its
+  page. `runtime/mount.browser.test.tsx` hydrates a 404 with nested
+  boundaries and sees its nodes kept, no error, and the text and the router
+  at the URL — and fails with the context change or that check taken out —
+  and has a navigation and an action's answer arrive between two boundaries'
+  hydration, which leaves the HTML hydrated as written and the new tree at
+  the URL, and fails for the navigation without its wait (the answer's
+  transition renders after the hydrating one in React 19.3's lane order
+  either way); `examples/static-basic`'s `build.test.ts`
   opens a built `404.html`, a shell and pages behind a trailing slash and a
   redirect in every engine, with Trusted Types enforced.
 - **A payload names the client it was rendered for.** `Payload.client` is
@@ -807,7 +817,7 @@ src/
   runtime/reload.ts          location.reload, the one seam a test can watch
   runtime/params.ts          runs the paramsSchema exports along a matched stack, and above a not-found
   runtime/mount.tsx          hydrate the HTML as rendered; renderedHere, whether it was rendered where the browser is
-  runtime/hydrating-pathname.ts  the pathname @k8ordo/i18n reads while HTML rendered elsewhere is hydrated
+  runtime/hydrating-pathname.ts  the pathname @k8ordo/i18n reads while HTML rendered elsewhere is hydrated, and when it is
   runtime/pathname.ts        decodePathname, before a pathname may name a file
   runtime/redirect.ts        redirect(), what a Server Action throws — bundled into the ./server entry
   runtime/redirect-file.ts   where a redirect.ts sends a pathname the table matched to it

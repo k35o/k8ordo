@@ -22,7 +22,7 @@ import type { ReactNode, RefObject } from 'react';
 import { preloadClientFiles, readClientFiles } from './client-files';
 import { whenClientReady } from './client-ready';
 import { ShowNotFound } from './fallback-boundary';
-import { doneHydrating } from './hydrating-pathname';
+import { doneHydrating, whenHydrated } from './hydrating-pathname';
 import { isPayload } from './is-payload';
 import type { Payload } from './payload';
 import { payloadPathFor } from './payload-path';
@@ -104,6 +104,7 @@ export const answerAction = async (
   // is up to date by the time the caller has its value — once the client
   // components it renders have loaded, as for a navigation.
   await whenClientReady([payload.tree, payload.notFound], WHEN_APPLIED);
+  await whenHydrated();
   // A navigation applied another page while the action ran or its answer
   // loaded: the answer is the page the visitor left, and would put it back
   // under the URL they are at. The caller still gets its value.
@@ -239,8 +240,6 @@ const hold = (
   payload: Payload,
   pathname: string,
 ): Applied => {
-  // HTML の hydrate を待たずに来た遷移の木は、行き先の URL で描く
-  doneHydrating();
   applies += 1;
   searchApplied.current = payload.search;
   const stream = streams.get(payload);
@@ -427,6 +426,7 @@ export function AppRouter({
       inFlight = controller;
       // What was fetched ahead was rendered from the old code too.
       cacheIn(prefetched).clear();
+      await whenHydrated();
       const url = location.href;
       let payload: Payload | null;
       try {
@@ -520,6 +520,7 @@ export function AppRouter({
         if (!canRender(payload, arrived.client)) {
           return await reloadInstead<Loaded>();
         }
+        await whenHydrated();
         return { payload, pathname: normalizePathname(url.pathname) };
       } finally {
         // The router applies what this returned right after it settles, so
