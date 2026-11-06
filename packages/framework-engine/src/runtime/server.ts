@@ -11,7 +11,7 @@
  * mode: 'static' the build refuses any module importing it.
  */
 export { redirect } from './redirect';
-export type { RedirectTarget } from './redirect-file';
+export type { RedirectTarget } from './redirect';
 export type { RouteRequest } from './request';
 export type { Guard, GuardContext } from './guard';
 export {

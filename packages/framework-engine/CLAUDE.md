@@ -816,8 +816,7 @@ src/
   runtime/mount.tsx          hydrate the HTML as rendered; renderedHere, whether it was rendered where the browser is
   runtime/hydrating-pathname.ts  the pathname @k8ordo/i18n reads while HTML rendered elsewhere is hydrated, and when it is
   runtime/pathname.ts        decodePathname, before a pathname may name a file
-  runtime/redirect.ts        redirect(), what a Server Action throws
-  runtime/redirect-file.ts   where a redirect.ts sends a pathname the table matched to it
+  runtime/redirect.ts        redirect(), what a Server Action throws; where a redirect.ts sends a pathname the table matched to it
   runtime/request.ts         the read-only request a page receives
   runtime/request-scope.ts   the request in progress: phases, cookies() / responseHeaders() / requestHeaders(), nonce(), answer()
   runtime/server.ts          the request API, which is @k8ordo/framework/server: the framework points that entry here

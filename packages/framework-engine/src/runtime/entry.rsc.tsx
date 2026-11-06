@@ -48,8 +48,7 @@ import {
 } from './payload';
 import type { ClientDeps, Payload } from './payload';
 import { isPayloadPath, pagePathFor } from './payload-path';
-import { Redirect } from './redirect';
-import { resolveRedirects } from './redirect-file';
+import { Redirect, resolveRedirects } from './redirect';
 import { renderMatch, renderNotFound } from './render';
 import { fileRequest, routeRequestOf } from './request';
 import {
