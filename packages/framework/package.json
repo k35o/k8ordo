@@ -42,8 +42,8 @@
       "default": "./dist/vite.mjs"
     },
     "./server": {
-      "types": "./dist/server.d.mts",
-      "default": "./dist/server.mjs"
+      "types": "./dist/runtime/server.d.mts",
+      "default": "./dist/runtime/server.mjs"
     },
     "./serve": {
       "types": "./dist/serve.d.mts",

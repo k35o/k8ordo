@@ -8,7 +8,6 @@ export default defineConfig({
     entry: [
       'src/index.ts',
       'src/vite.ts',
-      'src/server.ts',
       'src/serve.ts',
       'src/vercel.ts',
       'src/generated.ts',
@@ -18,8 +17,10 @@ export default defineConfig({
     dts: true,
     outDir: 'dist',
     // The engine is a private workspace package: it is bundled into this
-    // file rather than published, and its runtime entries — the three
-    // environments Vite is pointed at — are copied beside it.
+    // file rather than published, and its runtime is copied beside it — the
+    // three environments Vite is pointed at, and the request API `./server`
+    // names, which is not bundled here so that an application's import of it
+    // is the module the handler imports.
     deps: { alwaysBundle: ['@k8ordo/framework-engine'] },
     copy: [{ from: '../framework-engine/dist/runtime', to: 'dist' }],
   },

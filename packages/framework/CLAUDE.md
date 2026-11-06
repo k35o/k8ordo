@@ -127,27 +127,33 @@ pnpm check         # check:write to auto-fix
   built `dist/cli.mjs` in temporary applications with this package linked
   into their `node_modules`.
 - **Entries by where the code runs.** `./vite` is the plugin and loads Vite,
-  which a deployed application does not have installed. `./server`
-  (`src/server.ts`) is what code inside the handler imports — `redirect`,
-  `cookies`, `responseHeaders`, `requestHeaders`, `nonce` and the types,
-  `Guard` among them. `./serve` (`src/serve.ts`) is the Node server, and
+  which a deployed application does not have installed. `./server` is what
+  code inside the handler imports — `redirect`, `cookies`,
+  `responseHeaders`, `requestHeaders`, `nonce` and the types, `Guard` among
+  them — and it is not built here: it points at the engine's
+  `runtime/server.ts` in the copied `dist/runtime/`, the directory the
+  handler is built from, so an application's import of it and the handler
+  are one module, with one request in progress and one `Redirect` class.
+  Bundling it here would give an application's handler a second copy of
+  both. `request-api.test.ts` holds that in `vite dev`, where Vite resolves
+  both imports; the built handler is `examples/server-basic`'s to hold. A
+  dependency that `vite dev` or a static build leaves external is loaded by
+  Node instead, with a copy of its own that no request reaches.
+  `./serve` (`src/serve.ts`) is the Node server, and
   `./vercel` the Vercel plugin. The root and `./generated` are the router's
   names and nothing else. `examples/server-basic`'s handler test runs
   `./serve` with Vite unresolvable, as a server of your own would, to hold
   the split. The types are split too:
   every server-mode `register.gen.ts` imports `./server`, so its `.d.mts`
   reaches `@k8ordo/router` and nothing else — no Vite, whose types need
-  `@types/node`. It re-exports the engine's `./server`, not its index, and
-  `entry-types.test.ts` reads the built types for it.
+  `@types/node`. `entry-types.test.ts` reads the built types for it.
 - **The handler is the exit, and it runs wherever `AsyncLocalStorage`
   does.** Whatever `./server` imports is bundled into every handler that
   imports `redirect`, so it takes nothing from Node, and `serve`'s
   dependencies (CommonJS, `node:http`) stay behind `./serve`. The handler's
   only Node API is `node:async_hooks`. `examples/server-basic` reads the
   built handler's imports for that, and runs it under Deno from a copy of
-  `dist/` with nothing installed (`deno` is in `mise.toml` for CI). Adding
-  an import to an engine module that `./server` bundles can leave a
-  side-effect import of it in `dist/server.mjs`; build and read its head.
+  `dist/` with nothing installed (`deno` is in `mise.toml` for CI).
 - **A server mode `dist/` runs on its own.** `node dist/server.js` with
   nothing installed is the deploy, so `@k8ordo/framework` is a dev
   dependency in both modes. `serverMode` (`src/server-mode.ts`) builds the
@@ -427,7 +433,6 @@ src/
                     nonce off, its Content-Security-Policy <meta> with the
                     framework's hashes; writtenOutsideScripts — what a
                     layout wrote into a shell, outside its scripts
-  server.ts         ./server: the engine's redirect, response API, nonce and types — no Vite, no Node
   static-file.ts    safeJoin — request pathname → path inside the build output
                     (pure); isFile
   encoding.ts       which content coding a request gets, what is worth compressing

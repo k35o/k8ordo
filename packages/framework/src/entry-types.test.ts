@@ -48,7 +48,7 @@ describe('the types of the entries a route file reads', () => {
   // サーバーモードの .k8ordo/register.gen.ts は ./server を必ず import する。
   // そこから vite の型に届くと、@types/node の無いアプリが skipLibCheck: false
   // で型検査に落ちる
-  it.each(['server.d.mts', 'index.d.mts', 'generated.d.mts'])(
+  it.each(['runtime/server.d.mts', 'index.d.mts', 'generated.d.mts'])(
     '%s reaches the router and nothing else',
     async (entry) => {
       expect(await packagesReachedBy(entry)).toStrictEqual(['@k8ordo/router']);
