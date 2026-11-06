@@ -21,6 +21,10 @@
   intents:
     - color-scheme-script-in-head
     - color-scheme-theme-color
+"@k8ordo/color-scheme@2.3.1":
+  dir: packages/color-scheme
+  intents:
+    - nice-pots-own
 "@k8ordo/form@0.1.1":
   dir: packages/form
   intents:
@@ -56,6 +60,10 @@
   intents:
     - form-async-check-revalidate
     - form-notes-with-result
+"@k8ordo/form@2.3.1":
+  dir: packages/form
+  intents:
+    - nice-pots-own
 "@k8ordo/framework@1.0.0":
   dir: packages/framework
   intents:
@@ -115,6 +123,10 @@
     - framework-unreadable-redirects
     - framework-vercel-static-output
     - sharp-dolphins-complain
+"@k8ordo/framework@2.3.1":
+  dir: packages/framework
+  intents:
+    - nice-pots-own
 "@k8ordo/i18n@1.0.0":
   dir: packages/i18n
   intents:
@@ -140,6 +152,10 @@
   intents:
     - i18n-no-guess-without-set
     - sharp-dolphins-complain
+"@k8ordo/i18n@2.3.1":
+  dir: packages/i18n
+  intents:
+    - nice-pots-own
 "@k8ordo/router@0.1.0":
   dir: packages/router
   intents:
@@ -198,6 +214,10 @@
     - router-call-off-refresh
     - router-export-tree-pathname
     - router-match-all
+"@k8ordo/router@2.3.1":
+  dir: packages/router
+  intents:
+    - nice-pots-own
 "@k8ordo/state@0.2.0":
   dir: packages/state
   intents:
@@ -236,6 +256,10 @@
   intents:
     - router-state-keyless-popstate
     - state-storage-blocked
+"@k8ordo/state@2.3.1":
+  dir: packages/state
+  intents:
+    - nice-pots-own
 "@k8ordo/ui@2.0.0":
   dir: packages/ui
   intents:
@@ -342,6 +366,10 @@
     - ui-print-light-tokens
     - ui-textarea-keydown-propagates
     - ui-toast-exit-follows-transition
+"@k8ordo/ui@2.3.1":
+  dir: packages/ui
+  intents:
+    - nice-pots-own
 docs@0.0.11:
   dir: apps/docs
   intents:
