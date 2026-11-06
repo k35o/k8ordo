@@ -12,10 +12,12 @@ import {
   vi,
 } from 'vite-plus/test';
 
-import { AppRouter, setPayloadReader } from './app-router';
+import { answerAction, AppRouter, setPayloadReader } from './app-router';
 import { DocumentRoot } from './document-root';
+import { doneHydrating } from './hydrating-pathname';
 import { mount, renderedHere } from './mount';
 import type { Payload } from './payload';
+import { navigationsApplied } from './recover';
 
 const CLIENT = '/assets/index-running.js';
 
@@ -24,11 +26,17 @@ const CLIENT = '/assets/index-running.js';
 const HYDRATING = Symbol.for('@k8ordo/i18n/hydrating-pathname');
 const hydrating = globalThis as { [HYDRATING]?: string | undefined };
 
-const Segment = ({ name }: { name: string }) => (
-  <p data-name={name}>
-    {(hydrating[HYDRATING] ?? location.pathname).split('/')[1]}
-  </p>
-);
+// 描くたびに呼ぶ。境界の hydrate の途中で何かを起こす試験が置く
+let whileRendering: ((name: string) => void) | undefined;
+
+const Segment = ({ name }: { name: string }) => {
+  whileRendering?.(name);
+  return (
+    <p data-name={name}>
+      {(hydrating[HYDRATING] ?? location.pathname).split('/')[1]}
+    </p>
+  );
+};
 
 // ルーターがいまどこを指しているか。HTML には何も書かない（木の pathname は
 // サーバーの描画には無い）
@@ -55,6 +63,24 @@ const treeOf = (): ReactNode => (
     <Router />
   </main>
 );
+
+// 外側の境界をスケジューラの 1 回の持ち時間より長くかけて描く。React は内側の
+// 境界の前で手を離し、その隙に arrive が始まる
+const whileHydrating = (arrive: () => Promise<unknown>): Promise<unknown> => {
+  const arrived = Promise.withResolvers<unknown>();
+  whileRendering = (name) => {
+    if (name !== 'outer') return;
+    whileRendering = undefined;
+    setTimeout(() => {
+      arrive().then(arrived.resolve, arrived.reject);
+    }, 0);
+    const until = performance.now() + 30;
+    while (performance.now() < until) {
+      // 描くのに時間のかかる部品
+    }
+  };
+  return arrived.promise;
+};
 
 const payloadOf = (tree: ReactNode, pathname: string): Payload => ({
   tree,
@@ -124,9 +150,10 @@ beforeEach(() => {
 });
 
 afterEach(async () => {
+  whileRendering = undefined;
   for (const root of roots.splice(0)) root.unmount();
   for (const container of placed.splice(0)) container.remove();
-  hydrating[HYDRATING] = undefined;
+  doneHydrating();
   vi.unstubAllGlobals();
   // AppRouter は同一オリジンの URL をすべて引き受けるので、外してから戻る
   navigation.addEventListener('navigate', interceptEverything);
@@ -233,5 +260,60 @@ describe('mount', () => {
     });
 
     expect(texts(container)).toStrictEqual(['next page']);
+  });
+
+  it('hydrates the rest of the HTML as it was written when a navigation arrives while it hydrates, then renders the page at its URL', async () => {
+    const next = payloadOf(<Segment name="next" />, '/en/next');
+    setPayloadReader(() => Promise.resolve(next));
+    answerPayloads();
+    const container = serverHtml(NOT_FOUND, '/en/missing');
+    const errors: unknown[] = [];
+    const arrived = whileHydrating(async () => {
+      await navigation.navigate('/en/next').finished;
+    });
+
+    mounted(
+      container,
+      payloadOf(treeOf(), NOT_FOUND),
+      Promise.resolve(payloadOf(treeOf(), NOT_FOUND)),
+      {
+        onRecoverableError: (error) => {
+          errors.push(error);
+        },
+      },
+    );
+    await arrived;
+
+    expect(errors).toStrictEqual([]);
+    expect(texts(container)).toStrictEqual(['en']);
+  });
+
+  it('hydrates the rest of the HTML as it was written when a Server Action’s answer arrives while it hydrates, then renders the answer at the URL', async () => {
+    const container = serverHtml(NOT_FOUND, '/en/missing');
+    const errors: unknown[] = [];
+    const answered = whileHydrating(() =>
+      answerAction(
+        payloadOf(<Segment name="answer" />, '/en/missing'),
+        navigationsApplied(),
+        location.href,
+      ),
+    );
+
+    mounted(
+      container,
+      payloadOf(treeOf(), NOT_FOUND),
+      Promise.resolve(payloadOf(treeOf(), NOT_FOUND)),
+      {
+        onRecoverableError: (error) => {
+          errors.push(error);
+        },
+      },
+    );
+    await answered;
+
+    await vi.waitFor(() => {
+      expect(texts(container)).toStrictEqual(['en']);
+    });
+    expect(errors).toStrictEqual([]);
   });
 });
