@@ -3,6 +3,7 @@
 import { clsx } from 'clsx';
 import {
   useEffect,
+  useEffectEvent,
   useMemo,
   useRef,
   useState,
@@ -21,10 +22,6 @@ import styles from './provider.module.css';
 
 const MAX_TOAST_COUNT = 5;
 const DEFAULT_DURATION_MS = 5000;
-// provider.module.css の .item の transition（--duration-moderate）と同じ長さ。
-// transitionend には依存しない(reduced motion で transition が無効でも確実に
-// 取り除くため)
-const EXIT_MS = 200;
 
 const POSITION = { fixed: styles.fixed, absolute: styles.absolute } as const;
 
@@ -38,7 +35,7 @@ const FOCUSABLE_SELECTOR =
 
 type ToastState = {
   toasts: ToastType[];
-  // 閉じ演出中(高さ 0 へ畳む transition 中)のトースト。EXIT_MS 後に除去する
+  // 閉じ演出中(高さ 0 へ畳む transition 中)のトースト。畳み終えたら除去する
   closingIds: string[];
   isHovered: boolean;
   isFocused: boolean;
@@ -67,6 +64,47 @@ const enforceLimit = (state: ToastState): ToastState => {
   };
 };
 
+const ToastItem: FC<
+  PropsWithChildren<{
+    id: string;
+    isClosing: boolean;
+    onExited: () => void;
+  }>
+> = ({ id, isClosing, onExited, children }) => {
+  const ref = useRef<HTMLDivElement>(null);
+  const exited = useEffectEvent(onExited);
+
+  // 取り消された transition の finished は reject される。そのときも畳む途中の
+  // 見た目はもう残らないので、all でなく allSettled で待って外す
+  useEffect(() => {
+    const item = ref.current;
+    if (!isClosing || item === null) {
+      return;
+    }
+    void Promise.allSettled(
+      item.getAnimations().map((animation) => animation.finished),
+    ).then(() => {
+      exited();
+    });
+  }, [isClosing]);
+
+  return (
+    <div
+      className={styles.item}
+      data-closing={isClosing || undefined}
+      data-toast-id={id}
+      // 閉じ演出中は不可視のままフォーカス可能な要素が残らないようにする
+      inert={isClosing || undefined}
+      ref={ref}
+    >
+      <div className={styles.itemContent}>
+        {/* 読み上げは Alert 自身の role(status / alert)に一本化する */}
+        <div className={styles.enter}>{children}</div>
+      </div>
+    </div>
+  );
+};
+
 export const ToastProvider: FC<
   PropsWithChildren<{
     portalRef?: RefObject<HTMLElement | null>;
@@ -84,36 +122,6 @@ export const ToastProvider: FC<
   // 閉じ演出中のトーストは祖先が inert になり、ブラウザが強制的に blur するため
   // activeElement からは追えない。focusin の時点でどのトーストにいたかを控える
   const focusedToastIdRef = useRef<string | null>(null);
-
-  // 閉じ演出を終えたエントリを id ごとの独立したタイマーで取り除く。
-  // 全体で 1 本のタイマーだと、EXIT_MS 未満の間隔で閉じ始めが続いたとき
-  // 先行エントリの除去が際限なく先送りされてしまう
-  const exitTimersRef = useRef(new Map<string, number>());
-  useEffect(() => {
-    for (const id of state.closingIds) {
-      if (exitTimersRef.current.has(id)) {
-        continue;
-      }
-      const timerId = window.setTimeout(() => {
-        exitTimersRef.current.delete(id);
-        setState((prev) => ({
-          ...prev,
-          toasts: prev.toasts.filter((toast) => toast.id !== id),
-          closingIds: prev.closingIds.filter((closingId) => closingId !== id),
-        }));
-      }, EXIT_MS);
-      exitTimersRef.current.set(id, timerId);
-    }
-  }, [state.closingIds]);
-  useEffect(() => {
-    const timers = exitTimersRef.current;
-    return () => {
-      for (const timerId of timers.values()) {
-        window.clearTimeout(timerId);
-      }
-      timers.clear();
-    };
-  }, []);
 
   // フォーカスを持っていたトーストが閉じ始めたら、フォーカスを返す
   useEffect(() => {
@@ -200,6 +208,13 @@ export const ToastProvider: FC<
     [],
   );
 
+  const remove = (id: string) => {
+    setState((prev) => ({
+      ...prev,
+      toasts: prev.toasts.filter((toast) => toast.id !== id),
+      closingIds: prev.closingIds.filter((closingId) => closingId !== id),
+    }));
+  };
   const setHovered = (isHovered: boolean) => {
     setState((prev) =>
       prev.isHovered === isHovered
@@ -266,35 +281,27 @@ export const ToastProvider: FC<
               ref={viewportRef}
               tabIndex={-1}
             >
-              {state.toasts.map((toast) => {
-                const isClosing = state.closingIds.includes(toast.id);
-                return (
-                  <div
-                    className={styles.item}
-                    data-closing={isClosing || undefined}
-                    data-toast-id={toast.id}
-                    // 閉じ演出中は不可視のままフォーカス可能な要素が残らないようにする
-                    inert={isClosing || undefined}
-                    key={toast.id}
-                  >
-                    <div className={styles.itemContent}>
-                      {/* 読み上げは Alert 自身の role(status / alert)に一本化する */}
-                      <div className={styles.enter}>
-                        <Toast
-                          action={toast.action}
-                          duration={toast.duration}
-                          isPaused={isPaused}
-                          message={toast.message}
-                          onClose={() => {
-                            store.close(toast.id);
-                          }}
-                          tone={toast.tone}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
+              {state.toasts.map((toast) => (
+                <ToastItem
+                  id={toast.id}
+                  isClosing={state.closingIds.includes(toast.id)}
+                  key={toast.id}
+                  onExited={() => {
+                    remove(toast.id);
+                  }}
+                >
+                  <Toast
+                    action={toast.action}
+                    duration={toast.duration}
+                    isPaused={isPaused}
+                    message={toast.message}
+                    onClose={() => {
+                      store.close(toast.id);
+                    }}
+                    tone={toast.tone}
+                  />
+                </ToastItem>
+              ))}
             </section>,
             container,
           )
