@@ -1,5 +1,12 @@
 # @k8ordo/state
 
+## 2.0.0
+
+### Patch Changes
+
+- Updated dependencies:
+  - @k8ordo/router@2.0.0
+
 ## 1.4.4
 
 ## 1.4.3

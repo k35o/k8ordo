@@ -1,5 +1,36 @@
 # @k8ordo/router
 
+## 2.0.0
+
+### Major Changes
+
+- ルート表の`match(pathname, accept)`から`accept`をなくし、合うパターンをすべて表の順に返す`matchAll(pathname)`を足しました。
+
+  `accept`は、合った結果を呼び出し側が断ると次のパターンへ進む口でした。断るかどうかは`accept`の中で決めなければならず、`await`できません。合うものをすべて受け取ってから自分で選ぶには、`accept`で`false`を返し続けて集める必要がありました。
+
+  ```ts
+  for (const fit of routes.matchAll(pathname)) {
+    if (await answers(fit)) return fit;
+  }
+  ```
+
+  - `matchAll`は反復子で、照合するのは反復が進んだところまでです。
+  - `match(pathname)`は`matchAll(pathname)`の最初の結果です。`accept`を渡していたなら、`matchAll`を回して断る結果を飛ばします。
+  - `@k8ordo/framework`は`matchAll`を使うようになりました。frameworkの上での動きは変わりません。
+
+### Minor Changes
+
+- ツリーごとに当てたpathnameを持つcontextの`TreePathname`をexportしました。`<Router>`を使わずに木を当てるランタイム（`@k8ordo/framework`のもの）が、同じcontextを自分で用意せずにimportできます。アプリが使うものではありません。
+
+### Patch Changes
+
+- 次のページの読み込み中に、画面に残っているページのentryへ戻ったときは、`refresh(url)`がそのURLに`true`を返すホストでも、ページの切り替えを取り消すようにしました。
+
+  これまでは、searchを読むページ（`refresh(url)`が`true`を返すURL）へ戻ると、画面に出ているページを同じURLでもう一度読み込んでいました。ほかのページと同じく、何も読み込まず、訪問者がスクロールした位置もそのままにします。
+
+  - 読み込みが終わり、次のページを描いている途中で戻ったときは、これまでどおり戻った先のページを読み込みます。
+  - `@k8ordo/framework`の`refresh`は、画面のページのURLには`true`を返さないので、frameworkの上での動きは変わりません。
+
 ## 1.4.4
 
 ### Patch Changes
