@@ -65,8 +65,6 @@ const policyOf = (html: string): string | undefined =>
 
 // 1 つの client コンポーネントが要るファイル。入口のスクリプトはどれも要る
 const needing = (js: string[], css: string[] = []) => ({
-  id: '/src/components/x.tsx',
-  name: 'default',
   js: ['/assets/entry.js', ...js],
   css,
 });

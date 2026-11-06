@@ -4,6 +4,7 @@ import {
   NavigationGeneration,
   normalizePathname,
   PathnameProvider,
+  TreePathname,
   useInterceptedNavigation,
   withoutBase,
 } from '@k8ordo/router';
@@ -37,7 +38,6 @@ import {
   Recover,
   reloadInstead,
 } from './recover';
-import { TreePathname } from './tree-pathname';
 
 /**
  * Where a Server Action's answer lands. The callback has to be registered
@@ -47,31 +47,21 @@ import { TreePathname } from './tree-pathname';
  * pages it fetched ahead, which the action may have changed.
  */
 let mounted: {
+  /** The client the document runs: `client` of the payload it arrived with. */
+  readonly client: string;
   readonly apply: (payload: Payload, pathname: string) => void;
   readonly forgetPrefetched: () => void;
 } | null = null;
 
 /**
- * The client this document runs, as named by the payload its HTML was
- * rendered from — the same render that told the HTML which script to load.
- * A fact about the document, not about a component, which is why it is not
- * a prop.
+ * A payload rendered for another client than the document runs comes from a
+ * deploy the document predates, and may name client components its script
+ * has no entry for. That fails only once the tree renders, where the page's
+ * `error.tsx` catches it before `Recover` can — so it is decided before
+ * anything renders, and a document load brings the script that can.
  */
-let documentClient: string | undefined;
-
-export const setDocumentClient = (client: string): void => {
-  documentClient = client;
-};
-
-/**
- * A payload rendered for another client comes from a deploy this document
- * predates, and may name client components its script has no entry for.
- * That fails only once the tree renders, where the page's `error.tsx` catches
- * it before `Recover` can — so it is decided before anything renders, and a
- * document load brings the script that can.
- */
-const canRender = (payload: Payload): boolean =>
-  payload.client === documentClient;
+const canRender = (payload: Payload, client: string | undefined): boolean =>
+  payload.client === client;
 
 /**
  * How a payload is waited for before its tree is applied: until the client
@@ -109,7 +99,7 @@ export const answerAction = async (
     await navigation.navigate(payload.redirect).finished;
     return undefined;
   }
-  if (!canRender(payload)) return reloadInstead();
+  if (!canRender(payload, mounted?.client)) return reloadInstead();
   // The action's answer arrives with the page it re-rendered, so the screen
   // is up to date by the time the caller has its value — once the client
   // components it renders have loaded, as for a navigation.
@@ -404,6 +394,7 @@ export function AppRouter({
 
   useEffect(() => {
     mounted = {
+      client: arrived.client,
       apply: (payload, postedTo) => {
         const next = hold(streaming, searchApplied, payload, postedTo);
         startTransition(() => {
@@ -417,7 +408,7 @@ export function AppRouter({
     return () => {
       mounted = null;
     };
-  }, []);
+  }, [arrived.client]);
 
   // `vite dev` only: a server module changed, so the page on screen was
   // rendered from code that is gone. The RSC plugin says so and leaves
@@ -451,7 +442,7 @@ export function AppRouter({
       // The visitor navigated meanwhile, and that navigation loaded the page
       // from the new code already.
       if (payload === null || location.href !== url) return;
-      if (!canRender(payload)) return reloadInstead();
+      if (!canRender(payload, arrived.client)) return reloadInstead();
       markNavigated();
       const next = hold(
         streaming,
@@ -471,7 +462,7 @@ export function AppRouter({
       inFlight?.abort();
       import.meta.hot?.off('rsc:update', listener);
     };
-  }, []);
+  }, [arrived.client]);
 
   // static のビルドでは文書のページもファイルなので、置き場に持つ。戻って
   // きたときに取り直さない
@@ -526,7 +517,9 @@ export function AppRouter({
         // would have asked for had this never been claimed — its real status
         // included.
         if (payload === null) return await reloadInstead<Loaded>();
-        if (!canRender(payload)) return await reloadInstead<Loaded>();
+        if (!canRender(payload, arrived.client)) {
+          return await reloadInstead<Loaded>();
+        }
         return { payload, pathname: normalizePathname(url.pathname) };
       } finally {
         // The router applies what this returned right after it settles, so

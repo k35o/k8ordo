@@ -33,7 +33,8 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.63.0-resolute
       options: --user 1001 --ipc=host
       env:
-        # /etc/hosts が localhost を ::1 にも向け、listen と fetch で食い違う
+        # /etc/hosts が localhost を ::1 にも向け、試験の立てる Vite の dev・
+        # preview のサーバーが待ち受ける番地と、fetch がつなぐ番地が食い違う
         NODE_OPTIONS: --dns-result-order=ipv4first
     strategy:
       fail-fast: false

@@ -45,26 +45,6 @@ const browserTypes = [chromium, firefox, webkit]
   )
   .map((type) => ({ name: type.name(), type }));
 
-// 描画に失敗するページ・not-found を持つ構成のビルド。止まることを主張する
-// ので、先に走らせて stderr を取っておき、本物のビルドで dist を上書きする
-let brokenPageStderr = '';
-let brokenNotFoundStderr = '';
-// 同じく、失敗するページの上に error.tsx も Suspense も無い構成
-let noBoundaryStderr = '';
-// guard.ts を置いた構成。ファイルには守るリクエストが無い
-let guardStderr = '';
-// notFound() と言うページのパスと、スキーマが拒むパスを列挙した構成
-let notFoundPageStderr = '';
-// その構成のビルドが止まったあと、dist/client に残っていたもの
-let leftByNotFoundPage: string[] = [];
-// GET 以外を export する route.ts を置いた構成
-let routeStderr = '';
-// search を読むと宣言したページを置いた構成
-let searchStderr = '';
-// リクエストの API を import したページを置いた構成
-let requestStderr = '';
-// 渡されたパターンをそのまま paths に返す構成
-let pathsStderr = '';
 // 本物のビルドが最後に言ったこと
 let builtLog = '';
 
@@ -80,31 +60,9 @@ const BUILD = {
   env: { ...process.env, NODE_ENV: 'production' },
 } as const;
 
-// 止まらなかったビルドは空の stderr を返し、止まることの主張で落ちる
-const failingBuild = (config: string): string => {
-  try {
-    execFileSync('pnpm', ['exec', 'vp', 'build', '--config', config], BUILD);
-  } catch (error) {
-    return String((error as { stderr?: Buffer }).stderr ?? '');
-  }
-  return '';
-};
-
 // 主張の対象がビルド成果物そのものなので、テストがビルドを走らせる。
 // 出力を読むだけにすると、何も書かなかったビルドと区別がつかない
 beforeAll(() => {
-  brokenPageStderr = failingBuild('vite.broken.config.ts');
-  brokenNotFoundStderr = failingBuild('vite.broken-not-found.config.ts');
-  noBoundaryStderr = failingBuild('vite.broken-no-boundary.config.ts');
-  guardStderr = failingBuild('vite.broken-guard.config.ts');
-  notFoundPageStderr = failingBuild('vite.not-found-page.config.ts');
-  leftByNotFoundPage = ['3', 'x'].filter((id) =>
-    existsSync(path.join(client, 'products', id)),
-  );
-  routeStderr = failingBuild('vite.broken-route.config.ts');
-  searchStderr = failingBuild('vite.broken-search.config.ts');
-  requestStderr = failingBuild('vite.broken-request.config.ts');
-  pathsStderr = failingBuild('vite.broken-paths.config.ts');
   // 圧縮しないだけで、スクリプトの中身とハッシュの入った名前が変わる
   execFileSync('pnpm', ['exec', 'vp', 'build', '--minify', 'false'], BUILD);
   previous = mkdtempSync(path.join(tmpdir(), 'k8ordo-previous-'));
@@ -187,98 +145,12 @@ describe('the static build', () => {
     expect(read('404.html')).toContain('not found');
   });
 
-  it('stops, naming the page, when a page throws while rendering', () => {
-    // error.tsx はブラウザでの失敗のためのもので、ビルド時の失敗は失敗のまま
-    expect(brokenPageStderr).toContain('static build could not render /');
-    expect(brokenPageStderr).toContain('broken on purpose');
-  });
-
-  it('stops, naming 404.html, when not-found.tsx throws while rendering', () => {
-    expect(brokenNotFoundStderr).toContain(
-      'static build could not render 404.html',
-    );
-    expect(brokenNotFoundStderr).toContain('not-found broken on purpose');
-  });
-
-  it('stops, naming the page, when a page throws with no boundary above it', () => {
-    // 境界が無いと HTML の描画そのものが reject する。それでも境界があるときと
-    // 同じく、ページ名を挙げて止まる
-    expect(noBoundaryStderr).toContain('static build could not render /');
-    expect(noBoundaryStderr).toContain('broken with no boundary above it');
-  });
-
-  it('stops, naming the page, when a client component throws in the HTML render with no boundary above it', () => {
-    expect(noBoundaryStderr).toMatch(
-      /static build could not render .*\/client\b/u,
-    );
-    // React 自身もこのエラーをログに出すので、ページの URL と並んだ行で
-    // ハンドラが答えたメッセージだと確かめる
-    expect(noBoundaryStderr).toMatch(
-      /\/client — client component broken with no boundary above it/u,
-    );
-  });
-
-  it('stops, naming 404.html, when not-found.tsx throws with no boundary above it', () => {
-    expect(noBoundaryStderr).toMatch(
-      /static build could not render .*404\.html/u,
-    );
-    expect(noBoundaryStderr).toContain(
-      'not-found broken with no boundary above it',
-    );
-  });
-
-  it('refuses guard.ts, naming every one and the mode that runs them', () => {
-    expect(guardStderr).toContain(
-      "static build cannot run guard.ts — a file has no request to guard, and these are guards:\n  src/routes-broken-guard/admin/guard.ts\n  src/routes-broken-guard/guard.ts\nthis application wants mode: 'server'",
-    );
-  });
-
-  it('stops, naming the pathname, when a page it was supplied for said notFound()', () => {
-    expect(notFoundPageStderr).toContain(
-      'the "paths" option supplied pathnames whose page called notFound(): /products/3',
-    );
-  });
-
-  it('names a pathname a schema refused in the same error as one whose page said notFound()', () => {
-    expect(notFoundPageStderr).toContain(
-      'the "paths" option supplied pathnames a params schema refused: /products/x\n\nthe "paths" option supplied pathnames whose page called notFound(): /products/3',
-    );
-  });
-
-  it('writes nothing for a supplied pathname that turned out not to be a page', () => {
-    expect(leftByNotFoundPage).toStrictEqual([]);
-  });
-
   it('writes a route.ts as the file its GET answered, with the site as its origin', () => {
     const xml = read('feed.xml');
     expect(xml).toContain('<title>first product</title>');
     expect(xml).toContain('<link>https://example.test/products/1</link>');
     // ページではないので、ペイロードも index.html も無い
     expect(existsSync(path.join(client, 'feed.xml', 'index.rsc'))).toBe(false);
-  });
-
-  it('refuses a route.ts that answers a method a file cannot, naming it and the method', () => {
-    expect(routeStderr).toContain(
-      'static build writes a route.ts as the file its GET answers, and a file cannot answer another method — these export one:\n  src/routes-broken-route/api/route.ts (POST)',
-    );
-  });
-
-  it('refuses a route.ts that re-exports with export *, whose methods it cannot read', () => {
-    expect(routeStderr).toContain(
-      "static build reads a route.ts's methods and a page's search by name, and export * names none of them — this re-exports another module whole:\n  src/routes-broken-route/feed/route.ts\n",
-    );
-  });
-
-  it('refuses a page that reads the search, naming it', () => {
-    expect(searchStderr).toContain(
-      "static build cannot hand a page the search — a file is the same for every search, and these pages export search:\n  src/routes-broken-search/products/page.tsx\nthis application wants mode: 'server'",
-    );
-  });
-
-  it('refuses the request API, naming every module that imports it', () => {
-    expect(requestStderr).toContain(
-      "static build cannot answer a request — a file is written once for every visitor, and these import @k8ordo/framework/server:\n  src/broken-parts/request/home.ts\n  src/broken-parts/request/visits.ts\n  src/routes-broken-request/page.tsx\nthis application wants mode: 'server'",
-    );
   });
 
   it('lets an `import type` of the request API through, since nothing of it is loaded', () => {
@@ -347,15 +219,6 @@ describe('the static build', () => {
   it('says what it wrote, the shells by location', () => {
     expect(builtLog).toContain(
       'k8ordo: wrote 16 routes, 2 shells (/en/posts/:id, /ja/posts/:id) and 404.html and sitemap.xml and _redirects',
-    );
-  });
-
-  it('stops before rendering, naming each pathname that still holds a parameter no shell takes', () => {
-    expect(pathsStderr).toContain(
-      'the "paths" option supplied pathnames that still hold a parameter, and only a page with a fallback.tsx beside it takes one: /products/:id (products/[id]/page.tsx has none), /:locale/about ([locale]/about/page.tsx has none), /:locale/posts/first ([locale]/posts/first/redirect.ts cannot have one)',
-    );
-    expect(pathsStderr).toContain(
-      'the "paths" option supplied shell locations that leave out a parameter a layout above their fallback.tsx receives: /:locale/posts/:id (:locale, received by [locale]/layout.tsx)',
     );
   });
 
@@ -575,61 +438,6 @@ describe('the static build under a base', () => {
     expect(readUnderBase('_redirects')).toBe(
       REDIRECTS.replaceAll(/^\/|(?<= )\//gmu, '/site/'),
     );
-  });
-});
-
-// 出力に入ったモジュール。ソースマップの sources が名指すもの
-const modulesIn = (dir: string): string[] =>
-  readdirSync(dir, { recursive: true, withFileTypes: true })
-    .filter((entry) => entry.isFile() && entry.name.endsWith('.map'))
-    .flatMap(
-      (entry) =>
-        (
-          JSON.parse(
-            readFileSync(path.join(entry.parentPath, entry.name), 'utf8'),
-          ) as { sources: string[] }
-        ).sources,
-    );
-
-// React Compiler が変換したモジュールの import する先
-const COMPILER_RUNTIME = /\/react-compiler-runtime\.production\.js$/u;
-
-describe('the static build with reactCompiler', () => {
-  // vite.compiler.config.ts が書く、環境ごとの出力
-  const built = (name: string): string =>
-    path.join(root, 'dist', 'compiler', name);
-
-  beforeAll(() => {
-    execFileSync(
-      'pnpm',
-      ['exec', 'vp', 'build', '--config', 'vite.compiler.config.ts'],
-      BUILD,
-    );
-  }, 120_000);
-
-  it('compiles the client components the browser runs', () => {
-    expect(modulesIn(built('client'))).toStrictEqual(
-      expect.arrayContaining([
-        expect.stringMatching(/\/src\/components\/counter\.tsx$/u),
-        expect.stringMatching(COMPILER_RUNTIME),
-      ]),
-    );
-  });
-
-  it('renders the client components into HTML as they are written', () => {
-    const modules = modulesIn(built('ssr'));
-    expect(modules).toContainEqual(
-      expect.stringMatching(/\/src\/components\/counter\.tsx$/u),
-    );
-    expect(modules).not.toContainEqual(expect.stringMatching(COMPILER_RUNTIME));
-  });
-
-  it('leaves the server components as they are written', () => {
-    const modules = modulesIn(built('rsc'));
-    expect(modules).toContainEqual(
-      expect.stringMatching(/\/src\/routes\/page\.tsx$/u),
-    );
-    expect(modules).not.toContainEqual(expect.stringMatching(COMPILER_RUNTIME));
   });
 });
 

@@ -47,9 +47,18 @@ export default defineConfig({
       'react/no-unstable-nested-components': ['error', { allowAsProps: true }],
       // `server-only` / `client-only` は値を持たない印で、副作用 import で
       // あることそのものが意味 (RSC の実行境界を宣言する)。
+      // `virtual:k8ordo/locales` も、アプリの locale の集合を評価させて登録
+      // させるためだけに読む。
       'import/no-unassigned-import': [
         'error',
-        { allow: ['server-only', 'client-only', '**/*.css'] },
+        {
+          allow: [
+            'server-only',
+            'client-only',
+            '**/*.css',
+            'virtual:k8ordo/locales',
+          ],
+        },
       ],
     },
     settings: {

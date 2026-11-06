@@ -1,7 +1,9 @@
 import { createFromReadableStream } from '@vitejs/plugin-rsc/browser';
 import { rscStream } from 'rsc-html-stream/client';
+// locale の集合は評価されたときに自分を登録する。どの client コンポーネントも
+// import しないアプリでは、ブラウザの文言が集合を知らないまま読まれる
+import 'virtual:k8ordo/locales';
 
-import { setDocumentClient } from './app-router';
 import { connectAppRouter } from './browser-payloads';
 import { whenClientReady } from './client-ready';
 import { mount, renderedHere } from './mount';
@@ -23,7 +25,6 @@ const start = async (): Promise<void> => {
   // application does not have (its prerendered 404) come alive at all.
   const [stream, copy] = (rscStream as ReadableStream<Uint8Array>).tee();
   const payload = await createFromReadableStream<Payload>(stream);
-  setDocumentClient(payload.client);
   // HTML rendered for another pathname is rendered again where the browser
   // is, once it is hydrated. Its own tree would not do: React does not render
   // an element it was handed before again, so the payload is read once more,

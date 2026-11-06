@@ -80,6 +80,12 @@ pnpm check         # check:write to auto-fix
   alone then, since only the type-only `register.gen.ts` can change. A
   hand-written augmentation left in an application still compiles:
   TypeScript accepts a property declared twice with one type.
+- **The browser loads `src/i18n.ts` before anything renders.** A locale set
+  registers itself as it is evaluated, and `@k8ordo/i18n` reads no locale
+  where none has (`packages/i18n/CLAUDE.md`), so `entry.browser.tsx`
+  imports `virtual:k8ordo/locales`: the file when the root has one, an
+  empty module when not. The server needs nothing of the kind: the route
+  files that take a locale import the set.
 - **Declaration order is load-bearing.** `not-found.tsx` is emitted last in
   its branch because the router matches in declaration order; every route the
   app actually declared has to out-rank the catch-all. Literal directories are
@@ -107,7 +113,7 @@ pnpm check         # check:write to auto-fix
   `./server` declarations, which share `EngineOptions`'s chunk (`host.ts`).
   The plugin compiles only the environments whose consumer is the client,
   so Server Components and the HTML render of client components stay as
-  written; `examples/static-basic`'s `build.test.ts` reads that from a
+  written; `@k8ordo/framework`'s `refusals.test.ts` reads that from a
   build's source maps. `oxc-transform-react` is `@k8ordo/framework`'s
   optional peer, not this package's.
 - **The browser holds no route table.** `runtime/app-router.tsx` claims every
@@ -189,13 +195,12 @@ pnpm check         # check:write to auto-fix
 - **A tree carries the pathname it is the page of.** `Applied` holds it
   beside the tree (normalized, in the URL's terms; `null` in the HTML
   render), and `AppRouter` provides the deferred one under the router's
-  `TreePathname` context — reached by the name the router, `@k8ordo/state`
-  and `runtime/tree-pathname.ts` share, since the router does not export
-  it — for a page state to read the values of its own page while the URL
-  already names the next. Every road that applies a tree sets it: a
-  navigation with the URL it loaded, a Server Action's answer with the URL
-  it was posted to (`answerAction`'s `url`), `vite dev`'s reload with the
-  URL it fetched, and a shell's not-found with the shell's. Not
+  `TreePathname` context for a page state to read the values of its own
+  page while the URL already names the next. Every road that applies a
+  tree sets it: a navigation with the URL it loaded, a Server Action's
+  answer with the URL it was posted to (`answerAction`'s `url`), `vite
+  dev`'s reload with the URL it fetched, and a shell's not-found with the
+  shell's. Not
   `Payload.pathname`, which is in the table's terms and, for a shell, the
   shell's. `app-router.browser.test.tsx` holds the navigation and the
   action.
@@ -440,21 +445,19 @@ pnpm check         # check:write to auto-fix
   the reading on strings and split streams, and builds
   `fixtures/head-scripts/`, whose layout's script runs in every engine
   while the stylesheet is held back, and hydrates with nothing reported.
-- **A static page's HTML says which client components its payload named.**
+- **A static page's HTML says which client modules its payload named.**
   What the RSC render kept for the HTML render to link (above), the HTML
-  answer says in `CLIENT_DEPS_HEADER`, and the framework's build checks the
-  HTML links every file (`packages/framework/CLAUDE.md`): exactly one entry
-  per reference — the id the manifest keys its module with, its export's
-  name and that reference's `deps`, so two default exports are two entries
-  named `default`. The last render's only — a page that said `notFound()`
+  answer says in `CLIENT_DEPS_HEADER`, and the framework's build lists it in
+  `CLIENT_FILES_PATH` (below): one entry per module, its `deps` as the
+  manifest has them. The last render's only — a page that said `notFound()`
   is rendered again — and only on HTML: a payload and a server say
   nothing. It is made once the body is read: the HTML carries the payload
   whole, so every reference has been named by then. The value is
   URI-encoded JSON: a header is bytes, and a chunk two client components
   share is named after a module whose name need not be ASCII.
   `runtime/ssr-deps.test.ts` holds that the header says, cold and loaded,
-  one entry for each reference the Flight rows written into the HTML name,
-  with its id, name and files in the manifest — two default exports, a
+  one entry for each module the Flight rows written into the HTML name,
+  with its files in the manifest — two default exports, a
   component passed as a value, ones in a prop's containers, and one in a
   row a not-found receives late, included — and that a server says
   nothing; `runtime/payload.test.ts` carries a name that is not ASCII
@@ -498,8 +501,8 @@ pnpm check         # check:write to auto-fix
   the URL of the script the page's HTML loads (`getClientEntryUrl()`, which
   the RSC plugin exposes to the SSR environment only, so the RSC entry reads
   `clientEntry` from the SSR module for every payload, not only for HTML).
-  `entry.browser.tsx` records the hydration payload's as the document's
-  (`setDocumentClient`), and `app-router.tsx` never renders a navigation
+  The document runs the one its hydration payload names (`AppRouter`'s
+  `arrived.client`), and `app-router.tsx` never renders a navigation
   payload or a Server Action's answer that names another: that comes from a
   deploy the tab predates, its tree may hold client references the running
   script has no entry for, and rendering them fails inside the page's
@@ -790,7 +793,6 @@ src/
   plugin/server-actions.ts   which modules declared 'use server'
   runtime/entry.{rsc,ssr,browser}.tsx  the three environments
   runtime/app-router.tsx     the client half: navigation + payloads, and whether this document can render one
-  runtime/tree-pathname.ts   the router's TreePathname context, reached by its shared name
   runtime/browser-payloads.ts  the browser's Flight client, wired into app-router: payloads read, Server Actions called
   runtime/payload.ts         what a page is on the wire (tree, pathname, client, action result), and the headers a static build reads
   runtime/stylesheets.ts     the RSC plugin's two precedences, and the <style> that keeps the Server Components' first

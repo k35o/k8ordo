@@ -47,3 +47,4 @@ export type {
 } from './register';
 export { Outlet } from './outlet';
 export { Router, useParams, useRoute } from './router';
+export { TreePathname } from './tree-pathname';

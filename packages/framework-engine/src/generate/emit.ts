@@ -152,8 +152,6 @@ export const declaredPatterns = (
   return found;
 };
 
-const declared = declaredPatterns;
-
 /** Every `redirect.ts`, with the pattern its directory puts it under. */
 export const declaredRedirects = (dir: RouteDir): DeclaredPattern[] =>
   declaredPatterns(dir).filter((each) => each.kind === 'redirect');
@@ -171,7 +169,7 @@ export const declaredRouteFiles = (dir: RouteDir): DeclaredPattern[] =>
  * never served, with nothing to see in the directory tree.
  */
 export const unreachableRoutes = (tree: RouteDir): Problem[] => {
-  const all = declared(tree);
+  const all = declaredPatterns(tree);
   const problems: Problem[] = [];
   for (const [index, route] of all.entries()) {
     if (route.pattern.includes(':') || route.pattern.includes('*')) continue;
@@ -488,7 +486,7 @@ export const emitRoutesModule = (
   );
   const guardChecks = [...guarded.own].map(
     ([file, pattern]) =>
-      `${pad(1)}${namer.take(file)} satisfies Guard<'${pattern}'>,`,
+      `${pad(1)}Checked<typeof ${namer.take(file)}, Guard<'${pattern}'>>,`,
   );
   const hasGuards = guardChecks.length > 0;
   const withParams = options.withParams ?? new Set<string>();
@@ -585,7 +583,11 @@ export const emitRoutesModule = (
       `${pad(1)}Checked<Loaded<typeof ${namer.take(file)}>['default'], ComponentType>,`,
   );
   const hasChecks =
-    schemaChecks.length + routeChecks.length + fallbackChecks.length > 0;
+    schemaChecks.length +
+      routeChecks.length +
+      fallbackChecks.length +
+      guardChecks.length >
+    0;
   const readsLate =
     routeFiles.length > 0 ||
     shells.length > 0 ||
@@ -620,9 +622,11 @@ export const emitRoutesModule = (
     [...map].map(([pattern, made]) => `${pad(1)}'${pattern}': ${made},`);
   const typeImports = [
     ...(hasError ? ['ErrorComponent'] : []),
-    ...(hasLayout || hasGuards ? ['ParamsOf'] : []),
+    ...(hasGuards ? ['Guard'] : []),
+    ...(hasLayout ? ['ParamsOf'] : []),
     ...(schemaChecks.length > 0 ? ['ParamsSchemaFor'] : []),
     'ParsedParams',
+    ...(redirects.length > 0 ? ['RedirectTarget'] : []),
   ];
 
   return [
@@ -678,14 +682,6 @@ export const emitRoutesModule = (
           '}>;',
         ]
       : []),
-    ...(redirects.length > 0
-      ? [
-          '',
-          '// What a redirect.ts default-exports: where to, as a pattern the matched',
-          '// params fill in, and whether the move is permanent.',
-          'type Redirect = string | { readonly to: string; readonly permanent?: boolean };',
-        ]
-      : []),
     ...(readsLate
       ? [
           '',
@@ -714,19 +710,11 @@ export const emitRoutesModule = (
       : []),
     ...(hasGuards
       ? [
-          '// What a guard.ts default-exports: run before whatever answers below it,',
-          '// outer first. A Response ends the request there; nothing lets it through.',
-          'type Guard<P extends string> = (context: {',
-          '  readonly request: Request;',
-          '  readonly params: ParamsOf<P>;',
-          '}) => Response | void | Promise<Response | void>;',
-          '',
           '// The guard.ts exports, each checked against the pattern its directory',
           '// puts it under.',
-          'const guardChecks = [',
+          'export type GuardChecks = [',
           ...guardChecks,
-          '] as const;',
-          'void guardChecks;',
+          '];',
           '',
         ]
       : []),
@@ -825,7 +813,7 @@ export const emitRoutesModule = (
     'export const redirects = {',
     ...redirects.map(
       ({ pattern, name }) =>
-        `${pad(1)}'${pattern}': ${name} satisfies Redirect,`,
+        `${pad(1)}'${pattern}': ${name} satisfies RedirectTarget,`,
     ),
     '} as const;',
     '',

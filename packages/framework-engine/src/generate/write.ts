@@ -95,14 +95,6 @@ export const exportsOf = (
   );
 };
 
-/**
- * Whether a route file exports a `paramsSchema` — named so rather than
- * `params` because the page's own prop is `params`, and a module-level
- * binding of the same name is a shadow every linter flags.
- */
-export const declaresParams = (source: string): boolean =>
-  exportsOf(source, 'page.tsx').has('paramsSchema');
-
 /** The route files whose exports say something: pages, layouts, route.ts. */
 const READS_EXPORTS = new Set(['page', 'layout', 'route']);
 

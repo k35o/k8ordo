@@ -77,14 +77,13 @@ pnpm check         # check:write to auto-fix
   match together with the pathname it was loaded for, so the deferred value
   that puts a tree on screen moves both in one commit, and provides that
   pathname (normalized, in the URL's terms) under `TreePathname`
-  (`tree-pathname.ts`). The context is not exported: `@k8ordo/state` reads
-  it to keep a page state's values with the tree on screen while the URL
-  already names the next page, and `@k8ordo/framework`'s runtime provides
-  it as `<Router>` does. All three reach it through
-  `Symbol.for('@k8ordo/router/tree-pathname')` on `globalThis` — state
-  never loads the router, and the framework cannot import a module the
-  router does not export — so the name is a promise between them, changed
-  in all three in one release. `router.browser.test.tsx` holds that a tree
+  (`tree-pathname.ts`). `@k8ordo/framework`'s runtime imports it and
+  provides it as `<Router>` does; `@k8ordo/state`, which never loads the
+  router, reads it to keep a page state's values with the tree on screen
+  while the URL already names the next page. The router and state both
+  reach it through `Symbol.for('@k8ordo/router/tree-pathname')` on
+  `globalThis`, so the name is a promise between the two, changed in both
+  in one release. `router.browser.test.tsx` holds that a tree
   being left names its own pathname until the next one is on screen.
 - **A new page starts where a document load would; back and forward go
   where the entry was left.** The commit effect that resolves `finished`
@@ -304,7 +303,7 @@ src/
   boundary.tsx      RouteErrorBoundary (the boundary that renders the table's error)
   outlet.tsx        Outlet (a layout's hole, nested by context; the table's boundaries render it too)
   router.tsx        Router / useRoute / useParams
-  tree-pathname.ts  TreePathname, the pathname each tree was applied for (not exported)
+  tree-pathname.ts  TreePathname, the pathname each tree was applied for
   not-found.ts      notFound / isNotFound (the framework answers it; branded, not a class)
   traversal.test.ts serves fixtures/traversal with Vite and opens it top-level
 fixtures/

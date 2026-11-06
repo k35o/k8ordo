@@ -106,7 +106,9 @@ afterAll(async () => {
 // 304 を封じるのも、パスでない要求対象や Host の無い要求を送れないのも fetch
 const send = (request: string): Promise<string> =>
   new Promise((resolve, reject) => {
-    const socket = connect(server.port, 'localhost');
+    // URL の IPv6 の番地は角括弧つきで、connect はそれを受けない
+    const { hostname } = new URL(server.url);
+    const socket = connect(server.port, hostname.replace(/^\[(.*)\]$/u, '$1'));
     let received = '';
     socket.setEncoding('utf8');
     socket.on('data', (chunk: string) => {
@@ -137,9 +139,14 @@ const exchange = (
 };
 
 describe('serve', () => {
-  it('listens on the port the system gave it and says so', () => {
+  it('listens on the port the system gave it, and names the address it listens on', () => {
     expect(server.port).toBeGreaterThan(0);
-    expect(server.url).toBe(`http://localhost:${String(server.port)}`);
+    expect(server.url).toMatch(
+      new RegExp(
+        `^http://(?:127\\.0\\.0\\.1|\\[::1\\]):${String(server.port)}$`,
+        'u',
+      ),
+    );
   });
 
   it('answers a file from the client build as it is, with its type', async () => {
@@ -202,7 +209,7 @@ describe('serve', () => {
       method: 'POST',
       pathname: '/products/1',
       body: 'hello',
-      host: `localhost:${String(server.port)}`,
+      host: new URL(server.url).host,
     });
   });
 

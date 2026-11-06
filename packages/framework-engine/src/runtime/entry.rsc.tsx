@@ -662,13 +662,11 @@ const pageAnswer = async (
   page: WatchedPage,
 ): Promise<{ readonly rendered: Rendered; readonly saidNotFound: boolean }> => {
   const [forAnswer, forWatch] = rendered.stream.tee();
-  const drained = drain(forWatch);
-  // ビルドは全体を待ち、ページのどこで言われた notFound() も拾う。読み終えても
-  // ページが呼ばれていないことがある（children を描かないレイアウト）。そのとき
-  // は待たない
+  // A build into files reads the whole payload, by the end of which the
+  // render has heard every notFound() said in it.
   const threw = await (import.meta.env.K8ORDO_MODE === 'static'
-    ? drained.then(() => Promise.race([page.settled, Promise.resolve()]))
-    : Promise.race([page.settled, rendered.saidNotFound, drained]));
+    ? drain(forWatch)
+    : Promise.race([page.settled, rendered.saidNotFound, drain(forWatch)]));
   return {
     rendered: { ...rendered, stream: forAnswer },
     saidNotFound: rendered.notFound() || isNotFound(threw),
@@ -783,8 +781,7 @@ const matchNotFound = (
 type Rendered = {
   readonly stream: ReadableStream<Uint8Array>;
   /**
-   * Under mode: 'static', the client components it has named so far, by
-   * reference.
+   * Under mode: 'static', the client modules it has named so far, by id.
    */
   readonly named: ReadonlyMap<string, ClientDeps>;
   /** What threw while rendering — notFound() aside, which is an answer. */
@@ -834,13 +831,8 @@ const renderPayload = (
       },
       import.meta.env.K8ORDO_MODE === 'static'
         ? {
-            onClientReference: ({ id, name, deps }) => {
-              named.set(`${id}#${name}`, {
-                id,
-                name,
-                js: deps.js,
-                css: deps.css,
-              });
+            onClientReference: ({ id, deps }) => {
+              named.set(id, { js: deps.js, css: deps.css });
             },
           }
         : undefined,

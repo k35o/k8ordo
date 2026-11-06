@@ -46,8 +46,11 @@ pnpm check         # check:write to auto-fix
   nothing in production is the worst of the two. `import type` is erased
   before it resolves and passes; `import { type X }` is kept as a bare import
   under `verbatimModuleSyntax` and is refused, as it should be, since it
-  loads the module. A route.ts's methods and a page's `search` are read by
-  name, so a route.ts or page with `export * from` is refused as well (the
+  loads the module. `src/refusals.test.ts` builds and serves an application
+  under `fixtures/` for each refusal, one root apiece, and also holds that a
+  page or a not-found that fails to render stops the build naming it. A
+  route.ts's methods and a page's `search` are read by name, so a route.ts
+  or page with `export * from` is refused as well (the
   engine's `exportsOf` lists it as `REEXPORTS_ALL`). The build only compiles
   the application's own modules — a dependency left external imports
   `/server` unseen — so the handler compiled for `mode: 'static'` runs every
@@ -286,7 +289,7 @@ pnpm check         # check:write to auto-fix
   is what a client navigation links ahead of a payload
   (`packages/framework-engine/CLAUDE.md`). `writeHtml` hands back what each
   HTML answer's `CLIENT_DEPS_HEADER` named (`named`), and `clientFiles`
-  (`documents.ts`) keeps, per page with a payload, its references' `js` and
+  (`documents.ts`) keeps, per page with a payload, its modules' `js` and
   `css` less the files every HTML document written links — pages,
   `404.html` and shells alike, since the visitor may have arrived on any of
   them — keyed by the payload's path as `new URL` spells it, so a pathname
@@ -438,6 +441,10 @@ src/
   vercel.ts         ./vercel: the plugin that writes it
   cli.ts            bin k8ordo: `k8ordo generate`, .k8ordo/ from the resolved
                     config through the engine plugin's api, building nothing
+fixtures/
+  build.ts          failedBuild / compiledBuild / devServer — a fixture built or
+                    served with the built dist/vite.mjs, in this process
+  <name>/           one application each, src/routes/ and what it imports
 ```
 
 ## Conventions

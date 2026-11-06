@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -38,6 +39,8 @@ export type EngineApi = {
 };
 
 const VIRTUAL_ROUTES = 'virtual:k8ordo/routes';
+const VIRTUAL_LOCALES = 'virtual:k8ordo/locales';
+const NO_LOCALES = `\0${VIRTUAL_LOCALES}`;
 
 /**
  * The warning a module gets when the RSC plugin's list of Server Actions is
@@ -396,7 +399,14 @@ export const engine = (
         // check, and HMR can invalidate like any other source.
         return routesModule();
       }
+      if (source === VIRTUAL_LOCALES) {
+        return existsSync(localesModule) ? localesModule : NO_LOCALES;
+      }
       return null;
+    },
+
+    load(id) {
+      return id === NO_LOCALES ? 'export {};' : null;
     },
   };
 

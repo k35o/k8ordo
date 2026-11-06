@@ -362,9 +362,11 @@ base back from the router's `withBase` (imported from `@k8ordo/framework` in
 a framework application).
 
 A first segment that is not one of the set's locales is no locale, and the
-default applies; before the set has been defined in that environment, a
-segment no message has text for is read the same way, so a 404 page never
-throws on `/fr/…`.
+default applies, so a 404 page never throws on `/fr/…`. Until the set is
+defined in the browser, no segment is a locale and every message is in its
+first variant: the module that defines it has to run there too.
+`@k8ordo/framework` loads `src/i18n.ts` in the browser before anything
+renders; anywhere else, import it from a client module that runs first.
 
 `locales.getLocale()` reads the same source for code that needs the tag
 itself: `<html lang>`, a language switcher, an `Intl` API the set does not

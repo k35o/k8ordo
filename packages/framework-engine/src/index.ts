@@ -5,7 +5,7 @@
  * `@k8ordo/framework`, which bundles this package at pack time.
  */
 export { fallbackShapes, parseRouteTree, slotOf } from './grammar/tree';
-export type { FallbackShape, RouteDir, Slot } from './grammar/tree';
+export type { FallbackShape, RouteDir } from './grammar/tree';
 export { buildTable, declaredPatterns } from './generate/emit';
 export type { DeclaredPattern } from './generate/emit';
 export {
