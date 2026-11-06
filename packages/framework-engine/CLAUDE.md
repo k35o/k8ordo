@@ -587,9 +587,8 @@ pnpm check         # check:write to auto-fix
   else with a `405`; it reads the params again from the pathname
   (`resolveRedirects`), because the router hands them decoded and a target
   moves a segment as the URL spelled it. A Server Action's
-  `redirect()` throws a `Symbol.for`-branded `Redirect` — never checked by
-  `instanceof`, because `@k8ordo/framework` holds two copies of this module —
-  and the handler answers 303 (no JavaScript) or a payload with `redirect`.
+  `redirect()` throws a `Redirect`, and the handler answers 303 (no
+  JavaScript) or a payload with `redirect`.
 - **A guard answers or adds, never rewrites.** `guard.ts` is a slot of the
   grammar but not of the router's table: the generator lists, per pattern,
   the guards along its directories (`guards`, outer first; `/*` always

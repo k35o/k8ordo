@@ -1,18 +1,16 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { isRedirect, redirect } from './redirect';
+import { Redirect, redirect } from './redirect';
 
 describe('redirect', () => {
-  it('throws something the handler can tell apart from any other error', () => {
+  it('throws a Redirect carrying where it sends the visitor', () => {
     let caught: unknown;
     try {
       redirect('/talks');
     } catch (error) {
       caught = error;
     }
-    expect(isRedirect(caught)).toBe(true);
+    expect(caught).toBeInstanceOf(Redirect);
     expect(caught).toMatchObject({ to: '/talks' });
-    expect(isRedirect(new Error('/talks'))).toBe(false);
-    expect(isRedirect(null)).toBe(false);
   });
 });

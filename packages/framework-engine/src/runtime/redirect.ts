@@ -1,19 +1,5 @@
-/**
- * A redirect thrown from a Server Action. Branded with a registry symbol
- * rather than a class: the framework bundles this module once into the
- * entry an application imports `redirect()` from and once into the runtime
- * it copies beside it (where the handler catches it), and two copies of a
- * class are two classes. `Symbol.for` is the one identity both share.
- */
-const BRAND = Symbol.for('k8ordo.redirect');
-
-/**
- * An `Error` for the linter's and the stack's sake, recognised by the brand
- * and never by `instanceof`.
- */
+/** A redirect thrown from a Server Action. */
 export class Redirect extends Error {
-  readonly [BRAND] = true;
-
   constructor(readonly to: string) {
     super(`redirect to ${to}`);
     this.name = 'Redirect';
@@ -30,8 +16,3 @@ export class Redirect extends Error {
 export const redirect = (to: string): never => {
   throw new Redirect(to);
 };
-
-export const isRedirect = (value: unknown): value is Redirect =>
-  typeof value === 'object' &&
-  value !== null &&
-  (value as { [BRAND]?: unknown })[BRAND] === true;
