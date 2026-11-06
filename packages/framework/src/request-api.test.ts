@@ -20,11 +20,13 @@ describe('the request API an application imports, in vite dev', () => {
     await server.close();
   });
 
+  // 最初のリクエストが rsc と ssr のグラフをまとめて変換する。CI の負荷の
+  // 下ではそれだけで 5 秒を超える
   it('reads and writes the request the handler is answering', async () => {
     const response = await fetch(new URL('/', origin), {
       headers: { cookie: 'visits=3' },
     });
     expect(response.status).toBe(200);
     expect(response.headers.get('x-visits')).toBe('3');
-  });
+  }, 30_000);
 });
