@@ -98,6 +98,11 @@ jobs:
       - name: Check shared peers resolve to a single copy
         run: pnpm check:peer-copies
 
+      # fixed グループは次のリリースで最高版にそろえるだけなので、manifest の
+      # ずれは公開されるまで誰も気づかない。ずれを入れた PR で止める。
+      - name: Check the fixed group is in lockstep
+        run: pnpm change check
+
   types:
     name: TypeScript
     runs-on: ubuntu-latest
