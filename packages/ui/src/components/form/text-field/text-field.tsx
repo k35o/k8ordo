@@ -1,5 +1,6 @@
 'use client';
 
+import { clsx } from 'clsx';
 import type {
   FC,
   HTMLInputTypeAttribute,
@@ -8,6 +9,7 @@ import type {
 } from 'react';
 import { useFormStatus } from 'react-dom';
 
+import focusRing from '../../_internal/focus-ring.module.css';
 import styles from './text-field.module.css';
 
 // 1 行の入力欄として描けるものを並べる。number は NumberField、password は
@@ -46,7 +48,7 @@ export const TextField: FC<Props> = ({
   return (
     <input
       aria-invalid={invalid}
-      className={styles.root}
+      className={clsx(styles.root, focusRing.ring)}
       readOnly={pending || readOnly}
       ref={ref}
       type={type}

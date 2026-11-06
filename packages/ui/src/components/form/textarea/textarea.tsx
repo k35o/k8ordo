@@ -4,6 +4,7 @@ import { clsx } from 'clsx';
 import type { FC, Ref, TextareaHTMLAttributes } from 'react';
 import { useFormStatus } from 'react-dom';
 
+import focusRing from '../../_internal/focus-ring.module.css';
 import styles from './textarea.module.css';
 
 type Props = {
@@ -35,6 +36,7 @@ export const Textarea: FC<Props> = ({
       aria-invalid={invalid}
       className={clsx(
         styles.root,
+        focusRing.ring,
         fullHeight && styles.fullHeight,
         autoResize && styles.autoResize,
       )}

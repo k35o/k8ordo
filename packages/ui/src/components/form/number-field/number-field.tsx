@@ -1,5 +1,6 @@
 'use client';
 
+import { clsx } from 'clsx';
 import {
   useEffect,
   useEffectEvent,
@@ -20,6 +21,7 @@ import { clamp } from './../../../internal/clamp';
 import { toPrecision } from './../../../internal/to-precision';
 import { cast } from './cast';
 
+import focusRing from '../../_internal/focus-ring.module.css';
 import srOnly from '../../_internal/sr-only.module.css';
 import styles from './number-field.module.css';
 
@@ -253,7 +255,7 @@ export const NumberField: FC<Props> = ({
   };
 
   return (
-    <div className={styles.root}>
+    <div className={clsx(styles.root, focusRing.ringWithin)}>
       <input
         autoComplete="off"
         autoCorrect="off"

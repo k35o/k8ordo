@@ -15,6 +15,7 @@ import {
   PendingForm,
 } from '../../../../.storybook/pending-form';
 import { afterRenderingUpdate } from '../../../../.storybook/rendering';
+import { tokenColor } from '../../../../.storybook/tokens';
 import { FormControl } from '../form-control';
 import { Select } from './select';
 
@@ -53,6 +54,26 @@ export const Invalid: Story = {
     disabled: false,
     invalid: true,
     required: false,
+  },
+};
+
+// フォーカスの輪が付いても、不正な値の枠線は消えない。枠を描くのは
+// <select> を包む要素
+export const InvalidWhileFocused: Story = {
+  args: {
+    disabled: false,
+    invalid: true,
+    required: false,
+  },
+  play: async ({ canvas }) => {
+    const select = canvas.getByRole('combobox');
+    const frame = select.parentElement;
+    select.focus();
+
+    await expect(select).toHaveFocus();
+    await expect(frame && getComputedStyle(frame).borderColor).toBe(
+      tokenColor('--color-border-error'),
+    );
   },
 };
 

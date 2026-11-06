@@ -17,19 +17,6 @@
   }
 }
 
-/* 共有の輪（.ringWithin）ではなくここに書くのは、無効と不正な値の枠線を
-   フォーカス中も残すため。後に書いた規則が輪の透明な枠線に勝つ */
-.root:focus-within {
-  border-color: transparent;
-  outline-style: none;
-  box-shadow: var(--shadow-ring-info);
-
-  @media (forced-colors: active) {
-    outline: 2px solid transparent;
-    outline-offset: 2px;
-  }
-}
-
 .root:has(:disabled) {
   cursor: not-allowed;
   border-color: var(--color-border-mute);
