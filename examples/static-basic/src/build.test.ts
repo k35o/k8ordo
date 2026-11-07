@@ -928,6 +928,75 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
     await page.close();
   });
 
+  it('shows a page only once the stylesheets its Server Components link have loaded, though they were linked ahead', async () => {
+    const stylesheets = filesListedFor(client, '/products/index.rsc').filter(
+      (file) => file.endsWith('.css'),
+    );
+    const page = await browser.newPage();
+    // 文書が変わるたびに、見出しと、そのページのスタイルシートが読み込み済みかを残す
+    await page.addInitScript((hrefs) => {
+      const shown: Array<{ title: string; loaded: boolean[] }> = [];
+      Object.assign(window, { shown });
+      new MutationObserver(() => {
+        shown.push({
+          title: String(
+            document.querySelector('[data-testid="title"]')?.textContent,
+          ),
+          loaded: hrefs.map(
+            (href) =>
+              document.querySelector<HTMLLinkElement>(
+                `link[rel="stylesheet"][href="${href}"]`,
+              )?.sheet != null,
+          ),
+        });
+      }).observe(document, {
+        subtree: true,
+        childList: true,
+        characterData: true,
+      });
+    }, stylesheets);
+    const listRead = page.waitForResponse('**/client-files.json');
+    const { promise: released, resolve: release } =
+      Promise.withResolvers<undefined>();
+    for (const href of stylesheets) {
+      await page.route(`**${href}`, async (route) => {
+        await released;
+        await route.continue();
+      });
+    }
+    await page.goto(origin);
+    await page.getByText(/time zone: (?!not yet)/u).waitFor();
+    await (await listRead).finished();
+    const payload = page.waitForResponse('**/products/index.rsc');
+
+    await page.getByRole('link', { name: 'products', exact: true }).click();
+    await (await payload).finished();
+    // ページを切り替えられるだけのものが揃ってから、しばらくスタイルシートを
+    // 止めておく。待たずに切り替えるなら、この間に見出しが出る
+    await page.evaluate(
+      () =>
+        new Promise((resolve) => {
+          setTimeout(resolve, 500);
+        }),
+    );
+    release(undefined);
+
+    await page.getByTestId('title').getByText('products').waitFor();
+    const shown = await page.evaluate(
+      () =>
+        (
+          window as unknown as {
+            shown: Array<{ title: string; loaded: boolean[] }>;
+          }
+        ).shown,
+    );
+    expect(stylesheets.length).toBeGreaterThan(0);
+    expect(
+      shown.find(({ title }) => title === 'products')?.loaded,
+    ).toStrictEqual(stylesheets.map(() => true));
+    await page.close();
+  });
+
   it('filters the product list by the search once it runs in the browser', async () => {
     const page = await browser.newPage();
 

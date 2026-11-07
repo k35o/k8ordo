@@ -190,14 +190,16 @@ pnpm check         # check:write to auto-fix
   dwell; `app-router.browser.test.tsx` the wiring in either mode.
 - **A static build's client files are linked as the payload is asked for.**
   The static build writes `CLIENT_FILES_PATH` (`/client-files.json`, under
-  the base; `ClientFiles` in `payload.ts`) from the `CLIENT_DEPS_HEADER` of
-  every HTML it wrote (`packages/framework/CLAUDE.md`). Under files
+  the base; `ClientFiles` in `payload.ts`) from the `CLIENT_DEPS_HEADER` and
+  `SERVER_STYLESHEETS_HEADER` of every HTML it wrote
+  (`packages/framework/CLAUDE.md`). Under files
   `AppRouter` reads it once (`readClientFiles`, `priority: 'low'`; a list
   that cannot be read leaves nothing behind), and `fetchPage` links the
   page's files before its request leaves (`preloadClientFiles`, looked up
   by the payload's path without its search): a script as
   `<link rel="modulepreload">`, a stylesheet as `<link rel="preload"
-  as="style">`, each once per document and none the document links already
+  as="style">` through react-dom's `preload`, each once per document and
+  none the document links already
   (a stylesheet it applied, preloaded again, is a fetch nobody uses), with
   `crossOrigin=''` as Vite's preload helper asks, so its later request is
   served from the preload, and at the payload's priority (`fetchPriority`):
@@ -206,18 +208,28 @@ pnpm check         # check:write to auto-fix
   `low`, Chromium fetches the scripts at Low and takes a stylesheet down
   one step only, to High). A
   prefetch's client stylesheets are used as it loads the page's client
-  components. The Server Components' stylesheets are not listed: React
-  preloads them from the payload's hints as it is read (the Flight server
-  emits one for every `<link rel="stylesheet">` it renders), at the default
-  priority, and those of a page fetched ahead stay unused until it is
-  visited, which Chromium warns about once per file. `<link rel="prefetch">`
-  would not warn, and is not in Safari.
+  components. A Server Component's stylesheet is listed too: unlisted,
+  React preloads it from the payload's hints as the payload is read (the
+  Flight server emits one for every `<link rel="stylesheet">` it renders),
+  at the default priority, a round trip after the request — and a page
+  change commits only once its stylesheets with a precedence have loaded,
+  so a navigation nothing was prefetched for waited on that round trip.
+  React's `preload` and nothing else: React takes a
+  `<link rel="preload" as="style">` it did not insert itself for one
+  already loaded (`preloadStylesheet` in react-dom 19.3), and commits the
+  page without waiting, its stylesheet still on its way; its own it marks
+  pending until `load`, and waits on. Its key is the `href`, so the hint
+  for one the list linked adds nothing. Those of a page fetched ahead stay
+  unused until it is visited, which Chromium warns about once per file.
+  `<link rel="prefetch">` would not warn, and is not in Safari.
   A stylesheet is preloaded, not applied: the list may come from a newer
   deploy than the document, and its CSS would restyle the page on screen.
-  The client component's own import applies it, as without the list.
+  The client component's own import applies a client one, and React a
+  Server Component's as the page commits, as without the list.
   `client-files.browser.test.tsx` holds the reading and linking, and
   `examples/static-basic`'s `build.test.ts` that the built site links a
-  page's files while its payload is held back.
+  page's files while its payload is held back, and shows a page only once
+  its Server Component's stylesheet, held back, has loaded.
 - **A tree carries the pathname it is the page of.** `Applied` holds it
   beside the tree (normalized, in the URL's terms; `null` in the HTML
   render), and `AppRouter` provides the deferred one under the router's
@@ -471,16 +483,24 @@ pnpm check         # check:write to auto-fix
   the reading on strings and split streams, and builds
   `fixtures/head-scripts/`, whose layout's script runs in every engine
   while the stylesheet is held back, and hydrates with nothing reported.
-- **A static page's HTML says which client modules its payload named.**
-  What the RSC render kept for the HTML render to link (above), the HTML
-  answer says in `CLIENT_DEPS_HEADER`, and the framework's build lists it in
-  `CLIENT_FILES_PATH` (below): one entry per module, its `deps` as the
-  manifest has them. The last render's only — a page that said `notFound()`
-  is rendered again — and only on HTML: a payload and a server say
-  nothing. It is made once the body is read: the HTML carries the payload
-  whole, so every reference has been named by then. The value is
-  URI-encoded JSON: a header is bytes, and a chunk two client components
-  share is named after a module whose name need not be ASCII.
+- **A static page's HTML says which client modules its payload named, and
+  which stylesheets its Server Components link.** What the RSC render kept
+  for the HTML render to link (above), the HTML answer says in
+  `CLIENT_DEPS_HEADER`, and the framework's build lists it in
+  `CLIENT_FILES_PATH` (above): one entry per module, its `deps` as the
+  manifest has them. A Server Component's stylesheet is the RSC plugin's
+  `<link rel="stylesheet" precedence="vite-rsc/importer-resources">`
+  (`SERVER_STYLESHEETS`), an element of the payload with nothing on the
+  RSC side to report it, so the HTML render's walk does (`whenClientReady`'s
+  `element`, handed every element it walks; `renderHtml`'s `linked`, given
+  under static mode only, where the walk waits for every row), and the
+  answer says them in `SERVER_STYLESHEETS_HEADER`. The last render's only —
+  a page that said `notFound()` is rendered again — and only on HTML: a
+  payload and a server say nothing. Both are made once the body is read:
+  the HTML carries the payload whole, so every reference has been named and
+  every element walked by then. Each value is URI-encoded JSON: a header is
+  bytes, and a chunk two client components share is named after a module
+  whose name need not be ASCII.
   `runtime/ssr-deps.test.ts` holds that the header says, cold and loaded,
   one entry for each module the Flight rows written into the HTML name,
   with its files in the manifest — two default exports, a
@@ -830,10 +850,10 @@ src/
   runtime/payload-path.ts    where a payload lives: /x → /x/index.rsc
   runtime/is-payload.ts      whether an answer is a payload or a document load
   runtime/prefetch.ts        which link to fetch ahead (on intent, and on screen), and how long a fetched page stays usable
-  runtime/client-files.ts    a static build's list of each page's client files, linked ahead of its payload
+  runtime/client-files.ts    a static build's list of the files each page loads beyond its payload, linked ahead of it
   runtime/revealed.ts        when every streamed boundary is on screen
   runtime/head-scripts.ts    the head's inline scripts, moved ahead of its stylesheets
-  runtime/client-ready.ts    when the client components a payload's trees name have loaded
+  runtime/client-ready.ts    when the client components a payload's trees name have loaded, each element walked handed on
   runtime/recover.tsx        a failed client render falls back to a document load
   runtime/reload.ts          location.reload, the one seam a test can watch
   runtime/params.ts          runs the paramsSchema exports along a matched stack, and above a not-found

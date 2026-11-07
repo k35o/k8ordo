@@ -657,27 +657,29 @@ navigation when another overtakes it, unless a later navigation is waiting
 for it too — the same as a fetch the navigation had started itself.
 
 Under `mode: 'static'` the build also writes `client-files.json`: for each
-page, the scripts and stylesheets its client components need, less those
-every page loads. The runtime reads it at low priority once the document
-runs, and whenever it asks for a page's payload — a prefetch or a
-navigation — it links that page's files at the same moment and at the
-payload's priority (`<link rel="modulepreload">` for a script,
-`<link rel="preload" as="style">` for a stylesheet) instead of waiting for
-the payload to name them, a round trip later. The links on screen are
-fetched only once the list has been read. A stylesheet still applies only
-once the client component that needs it loads. A page the list leaves out —
-a shell's value, or a host that lost the file — loads as it would without
-one.
+page, the scripts and stylesheets its client components need and the
+stylesheets its Server Components link, less those every page loads. The
+runtime reads it at low priority once the document runs, and whenever it
+asks for a page's payload — a prefetch or a navigation — it links that
+page's files at the same moment and at the payload's priority
+(`<link rel="modulepreload">` for a script, `<link rel="preload"
+as="style">` for a stylesheet) instead of waiting for the payload to name
+them, a round trip later. The links on screen are fetched only once the
+list has been read. A stylesheet still applies only once the page that
+needs it is shown, and the page waits for it: a client component's once
+that component loads, a Server Component's once it has arrived. A page the
+list leaves out — a shell's value, or a host that lost the file — loads as
+it would without one, its Server Components' stylesheets fetched as its
+payload names them.
 
-A payload fetched ahead names the Server Components' stylesheets of its
-page too, and React fetches each with `<link rel="preload" as="style">` as
-the payload is read; they apply once the page is visited. Until then
-Chromium logs that the file "was preloaded using link preload but not used
-within a few seconds", once per file — more of them under a touch screen,
-where the links on screen are fetched ahead. The warning is harmless: a
-visit uses what was fetched. `<link rel="prefetch">`, which would not
-warn, is not in Safari, so it is not used. Mark a long list
-`data-k8ordo-prefetch="false"` to fetch, and warn, less.
+A page fetched ahead has its stylesheets fetched too, and they apply only
+once the page is visited. Until then Chromium logs that the file "was
+preloaded using link preload but not used within a few seconds", once per
+file — more of them under a touch screen, where the links on screen are
+fetched ahead. The warning is harmless: a visit uses what was fetched.
+`<link rel="prefetch">`, which would not warn, is not in Safari, so it is
+not used. Mark a long list `data-k8ordo-prefetch="false"` to fetch, and
+warn, less.
 
 Under `mode: 'server'` a prefetch is a render, as a navigation is — the
 reason to mark a link to an expensive page. The platform's Speculation
