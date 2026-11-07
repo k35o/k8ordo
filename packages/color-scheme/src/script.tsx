@@ -1,3 +1,11 @@
+'use client';
+
+// state も effect も持たないが client の部品にする。Server Component だと
+// 描いた本文が Flight のペイロードに入り、全ページの .rsc と HTML の中の
+// flight data に同じ数百バイトが載る。遷移で届く script は動かないので本文は
+// HTML にだけあればよく、client の部品ならペイロードには props だけが載って、
+// SSR と hydrate がそれぞれ scriptFor から同じ本文を作る
+
 import type { ReactNode } from 'react';
 
 import { scriptFor } from './scheme';
@@ -24,9 +32,5 @@ export function ColorSchemeScript({
   nonce,
   ...options
 }: ColorSchemeScriptProps): ReactNode {
-  // nonce={undefined} と書くと、Server Component の props としてペイロードに
-  // "nonce" の名前が残る。静的ビルドのファイルには nonce を一切残さないので、
-  // 渡されないときは属性ごと書かない
-  const signed = nonce === undefined ? {} : { nonce };
-  return <script {...signed}>{scriptFor(options)}</script>;
+  return <script nonce={nonce}>{scriptFor(options)}</script>;
 }

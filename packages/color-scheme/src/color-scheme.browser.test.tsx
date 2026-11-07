@@ -267,36 +267,62 @@ describe('ColorSchemeProvider under hydration', () => {
   });
 });
 
-describe('ColorSchemeScript', () => {
-  it('signs the script with the nonce it is given, and hydrates over it without running it again', async () => {
-    const container = document.createElement('div');
-    container.innerHTML = renderToString(
-      <ColorSchemeScript defaultPreference="dark" nonce="bm9uY2U=" />,
-    );
-    const script = container.querySelector('script');
-    expect(script?.nonce).toBe('bm9uY2U=');
-    expect(script?.textContent).toBe(scriptFor({ defaultPreference: 'dark' }));
-    document.body.append(container);
-    const recoverable: unknown[] = [];
-    const app = hydrateRoot(
-      container,
-      <ColorSchemeScript defaultPreference="dark" nonce="bm9uY2U=" />,
-      {
-        onRecoverableError: (error) => {
-          recoverable.push(error);
-        },
-      },
-    );
-    await vi.waitFor(() => {
-      expect(container.querySelector('script')).toBe(script);
-    });
+// Calls back once the tree it sits in has committed.
+const Committed = ({ onCommit }: { onCommit: () => void }) => {
+  useEffect(onCommit, [onCommit]);
+  return null;
+};
 
-    expect(recoverable).toStrictEqual([]);
-    // innerHTML の script は動かず、hydrate も動かさない
-    expect(root.classList.contains('dark')).toBe(false);
-    app.unmount();
-    container.remove();
-  });
+describe('ColorSchemeScript', () => {
+  it.each([
+    ['without', { defaultPreference: 'dark' }],
+    ['with', { defaultPreference: 'dark', themeColor }],
+  ] as const)(
+    'signs the script with the nonce it is given, and hydrates over it %s the colours: the same node, not run again',
+    async (_, options) => {
+      const app = (onCommit: () => void) => (
+        <>
+          <ColorSchemeScript {...options} nonce="bm9uY2U=" />
+          <Committed onCommit={onCommit} />
+        </>
+      );
+      const container = document.createElement('div');
+      container.innerHTML = renderToString(
+        app(() => {
+          // the server commits nothing
+        }),
+      );
+      const script = container.querySelector('script');
+      expect(script?.nonce).toBe('bm9uY2U=');
+      expect(script?.textContent).toBe(scriptFor(options));
+      document.body.append(container);
+      const hydrated = Promise.withResolvers<undefined>();
+      const recoverable: unknown[] = [];
+      const mounted = hydrateRoot(
+        container,
+        app(() => {
+          hydrated.resolve(undefined);
+        }),
+        {
+          onRecoverableError: (error) => {
+            recoverable.push(error);
+          },
+        },
+      );
+      onTestFinished(() => {
+        mounted.unmount();
+        container.remove();
+      });
+      await hydrated.promise;
+
+      // 本文が食い違えば、React は回復できるエラーを報告して描き直す
+      expect(recoverable).toStrictEqual([]);
+      expect(container.querySelector('script')).toBe(script);
+      // innerHTML の script は動かず、hydrate も動かさない
+      expect(root.classList.contains('dark')).toBe(false);
+      expect(themeColorOf(document)).toBeUndefined();
+    },
+  );
 });
 
 // A document of its own, under the policy its <meta> states, with the

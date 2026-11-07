@@ -194,8 +194,9 @@ Such a script runs before any of the page's CSS has loaded: it can set a
 class or an attribute on `<html>`, but a style it computes reads none of
 that CSS. A script with a `src` or a `type` stays where React wrote it, and
 so does one inside a `<noscript>` or a `<template>`, and every script in
-`<body>`. Under `mode: 'static'` the policy's `<meta>` stays first in
-`<head>`, so the policy covers the scripts moved after it
+`<body>`. Under `mode: 'static'` the policy's `<meta>` comes right after
+the `<meta charSet>` that opens `<head>` (first in `<head>` when there is
+none), ahead of the moved scripts, so the policy covers them
 ([Content Security Policy](csp.md#static-mode-hashes-in-a-meta)).
 
 ## What the build refuses

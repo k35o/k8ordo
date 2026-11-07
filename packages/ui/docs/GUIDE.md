@@ -167,9 +167,9 @@ export const locales = defineLocales({
 
 The module that defines the set has to be loaded in the browser too, not
 only by the server render: where no set is defined the components speak
-English, and would disagree with the HTML. In a k8ordo app a client component
-that links (`bindParams`) or switches language already imports it; elsewhere,
-import it from a client module the root renders.
+English, and would disagree with the HTML. `@k8ordo/framework` loads
+`src/i18n.ts` in the browser before anything renders; elsewhere, import it
+from a client module the root renders.
 
 `ja` and `en` ship with the library. Any other locale is registered next to
 the set, and a regional tag without a dictionary of its own (`en-US`) reads
