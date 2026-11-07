@@ -168,13 +168,26 @@ pnpm check         # check:write to auto-fix
   unobserves the ones it removes, which an observer would otherwise keep
   alive), one at a time in the order they came into view, a link that left
   before its turn passed over, at `priority: 'low'` (intents fetch at
-  `'auto'`). One at a time, so a tap shares the connection with one
-  prefetch at most. No `requestIdleCallback` (not in Safari), no
-  Speculation Rules (Chromium only), no Network Information (not Baseline),
-  and no viewport prefetch under renders, where each link would be a
-  server render. `prefetch.test.ts` holds both kinds;
-  `prefetch.browser.test.tsx` the watching;
-  `app-router.browser.test.tsx` the wiring in either mode.
+  `'auto'`). A link waits its turn only once it has stayed on screen
+  `IN_VIEW_DWELL` (1 s: a link scrolled past, or one just come into view,
+  is rarely the one tapped next), and nothing is fetched before the
+  document's `load` event — a page hydrated earlier would share the
+  connection with its own fonts and images — nor, under files, before
+  `readClientFiles` has read the list (`AppRouter`'s callback awaits it),
+  which would leave a page's files waiting for its payload to name them.
+  One at a time, so a tap shares the connection with one prefetch at most,
+  and with none once the router names the page change: `AppRouter` hands
+  `usePendingPathname()` to `InView.pending`, and while it names a pathname
+  nothing more starts and a prefetch on its way to another pathname is
+  called off — its signal makes `PageCache.prefetch` forget the load that
+  call started, unless a navigation already waits for it — and its link
+  is put first in line for when the page is on screen. No
+  `requestIdleCallback` (not in Safari), no Speculation Rules (Chromium
+  only), no Network Information (not Baseline), and no viewport prefetch
+  under renders, where each link would be a server render.
+  `prefetch.test.ts` holds both kinds and the called-off prefetch;
+  `prefetch.browser.test.tsx` the watching, on fake `setTimeout` for the
+  dwell; `app-router.browser.test.tsx` the wiring in either mode.
 - **A static build's client files are linked as the payload is asked for.**
   The static build writes `CLIENT_FILES_PATH` (`/client-files.json`, under
   the base; `ClientFiles` in `payload.ts`) from the `CLIENT_DEPS_HEADER` of
