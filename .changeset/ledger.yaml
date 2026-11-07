@@ -25,6 +25,10 @@
   dir: packages/color-scheme
   intents:
     - nice-pots-own
+"@k8ordo/color-scheme@2.3.2":
+  dir: packages/color-scheme
+  intents:
+    - color-scheme-script-out-of-payload
 "@k8ordo/form@0.1.1":
   dir: packages/form
   intents:
@@ -127,6 +131,11 @@
   dir: packages/framework
   intents:
     - nice-pots-own
+"@k8ordo/framework@2.3.2":
+  dir: packages/framework
+  intents:
+    - framework-in-view-prefetch-yields
+    - framework-server-stylesheets-listed
 "@k8ordo/i18n@1.0.0":
   dir: packages/i18n
   intents:
@@ -218,6 +227,10 @@
   dir: packages/router
   intents:
     - nice-pots-own
+"@k8ordo/router@2.3.2":
+  dir: packages/router
+  intents:
+    - router-intercept-from-first-commit
 "@k8ordo/state@0.2.0":
   dir: packages/state
   intents:
