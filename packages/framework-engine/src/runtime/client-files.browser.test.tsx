@@ -1,3 +1,7 @@
+// react-dom の preload が link を張るのは、react-dom/client が読み込まれてから。
+// アプリでは入口が読み込んでいる
+// oxlint-disable-next-line import/no-unassigned-import
+import 'react-dom/client';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { preloadClientFiles, readClientFiles } from './client-files';

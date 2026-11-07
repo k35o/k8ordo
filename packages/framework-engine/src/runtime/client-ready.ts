@@ -56,6 +56,8 @@ type ClientReadyOptions = {
    * walk it once it arrives, as an HTML render streaming it does.
    */
   readonly rows: 'wait' | 'leave' | 'follow';
+  /** Handed every element walked, a row's once it arrives. */
+  readonly element?: (element: Element) => void;
 };
 
 /**
@@ -78,7 +80,7 @@ type ClientReadyOptions = {
  */
 export const whenClientReady = async (
   trees: readonly unknown[],
-  { rows }: ClientReadyOptions,
+  { rows, element }: ClientReadyOptions,
 ): Promise<void> => {
   const seen = new WeakSet<object>();
   let waiting: Array<{
@@ -132,6 +134,7 @@ export const whenClientReady = async (
       return;
     }
     if (isElement(value)) {
+      element?.(value);
       if (isLazy(value.type)) read(value.type, inside, true);
       const below = inside || value.type === SUSPENSE;
       for (const [key, prop] of Object.entries(value.props)) {

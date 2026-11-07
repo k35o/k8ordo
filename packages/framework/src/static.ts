@@ -20,15 +20,16 @@ import {
   payloadPathFor,
   readClientDeps,
   readExports,
+  readServerStylesheets,
   REEXPORTS_ALL,
   ROUTE_METHODS,
   scanRoutes,
+  SERVER_STYLESHEETS_HEADER,
   serverActionModules,
   SHELL_HEADER,
   slotOf,
 } from '@k8ordo/framework-engine';
 import type {
-  ClientDeps,
   EngineOptions,
   FallbackShape,
   RouteDir,
@@ -879,7 +880,7 @@ type Rendered =
   | {
       readonly kind: 'document';
       /** `null` when the handler did not say. */
-      readonly named: readonly ClientDeps[] | null;
+      readonly files: readonly string[] | null;
       /** A page's payload, as a browser's URL spells its path. */
       readonly payload: string | null;
     };
@@ -942,7 +943,7 @@ const renderPage = async (
 ): Promise<Rendered> => {
   // URL はエスケープのまま頼み、ファイルの名前だけを復号する
   const dir = path.join(render.clientDir, dirFor(pathname));
-  const { status, notFound, named } = await writeHtml(
+  const { status, notFound, files } = await writeHtml(
     path.join(dir, 'index.html'),
     render,
     render.urlFor(pathname),
@@ -954,7 +955,7 @@ const renderPage = async (
   // リダイレクトにペイロードは無い。クライアントの遷移は index.rsc に何も
   // 見つけず、URL をブラウザに渡し、上の HTML がリダイレクトする
   if (status === 307 || status === 308) return { kind: 'redirect', pathname };
-  if (status !== 200) return { kind: 'document', named, payload: null };
+  if (status !== 200) return { kind: 'document', files, payload: null };
   const payload = render.urlFor(payloadPathFor(pathname));
   const written = await writeBody(
     path.join(dir, 'index.rsc'),
@@ -962,7 +963,7 @@ const renderPage = async (
     payload,
   );
   return written.status === 200
-    ? { kind: 'document', named, payload: new URL(payload).pathname }
+    ? { kind: 'document', files, payload: new URL(payload).pathname }
     : failed('render', pathname);
 };
 
@@ -970,7 +971,7 @@ const renderNotFound = async (
   render: Render,
   pathname: string,
 ): Promise<Rendered> => {
-  const { status, named } = await writeHtml(
+  const { status, files } = await writeHtml(
     path.join(render.clientDir, '404.html'),
     render,
     render.urlFor(pathname),
@@ -978,7 +979,7 @@ const renderNotFound = async (
   );
   return status === 500
     ? failed('render', '404.html')
-    : { kind: 'document', named, payload: null };
+    : { kind: 'document', files, payload: null };
 };
 
 const renderShell = async (
@@ -1019,7 +1020,7 @@ const renderShell = async (
     render.urlFor(payloadPathFor(shell.pathname)),
   );
   return payload.status === 200
-    ? { kind: 'document', named: answered.named, payload: null }
+    ? { kind: 'document', files: answered.files, payload: null }
     : failed('render', shell.location);
 };
 
@@ -1049,18 +1050,18 @@ const writeClientFiles = async (
   rendered: readonly Rendered[],
 ): Promise<void> => {
   const documents = rendered.flatMap((each) =>
-    each.kind === 'document' && each.named !== null ? [each] : [],
+    each.kind === 'document' && each.files !== null ? [each] : [],
   );
   await writeFile(
     path.join(clientDir, CLIENT_FILES_PATH.slice(1)),
     JSON.stringify(
       clientFiles(
         new Map(
-          documents.flatMap(({ payload, named }) =>
-            payload === null || named === null ? [] : [[payload, named]],
+          documents.flatMap(({ payload, files }) =>
+            payload === null || files === null ? [] : [[payload, files]],
           ),
         ),
-        documents.map(({ named }) => named ?? []),
+        documents.map(({ files }) => files ?? []),
       ),
     ),
   );
@@ -1109,10 +1110,11 @@ type Written = {
   /** The pattern whose shell the handler said it rendered, if any. */
   readonly shell: string | null;
   /**
-   * The client components the payload of the HTML written names; `null`
-   * for what was not written as HTML, or whose handler did not say.
+   * What the payload of the HTML written needs: the files of the client
+   * components it names, and the stylesheets its Server Components link;
+   * `null` for what was not written as HTML, or whose handler did not say.
    */
-  readonly named: readonly ClientDeps[] | null;
+  readonly files: readonly string[] | null;
 };
 
 /**
@@ -1140,7 +1142,7 @@ const writeHtml = async (
     status: response.status,
     notFound,
     shell: answered,
-    named: null,
+    files: null,
   };
   // A page that failed to render is not a page, and neither is a 404 anywhere
   // but the not-found's own file: nothing is written, and the caller stops
@@ -1168,8 +1170,18 @@ const writeHtml = async (
     return written;
   }
   await writeFile(file, asFile(await response.text(), nonce, csp));
-  const said = response.headers.get(CLIENT_DEPS_HEADER);
-  return { ...written, named: said === null ? null : readClientDeps(said) };
+  const named = response.headers.get(CLIENT_DEPS_HEADER);
+  const linked = response.headers.get(SERVER_STYLESHEETS_HEADER);
+  return {
+    ...written,
+    files:
+      named === null
+        ? null
+        : [
+            ...readClientDeps(named).flatMap(({ js, css }) => js.concat(css)),
+            ...(linked === null ? [] : readServerStylesheets(linked)),
+          ],
+  };
 };
 
 /**

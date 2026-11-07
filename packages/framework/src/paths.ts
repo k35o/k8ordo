@@ -574,7 +574,7 @@ export const routeFileRefusals = (
   if (site) written.set('sitemap.xml', 'the "site" option writes it');
   written.set(
     CLIENT_FILES_PATH.slice(1),
-    'the build lists there what each page’s client components need',
+    'the build lists there what each page loads beyond its payload',
   );
   if (plan.shells.length > 0) {
     const fallbacks = fallbackShapes(tree)

@@ -16,7 +16,7 @@ import { DocumentRoot } from './document-root';
 import { scriptsBeforeStylesheetsStream } from './head-scripts';
 import { PageShownContext } from './page-shown';
 import type { ClientDeps, Payload } from './payload';
-import { CLIENT_STYLESHEETS } from './stylesheets';
+import { CLIENT_STYLESHEETS, SERVER_STYLESHEETS } from './stylesheets';
 
 type SsrOptions = NonNullable<Parameters<typeof renderToReadableStream>[1]>;
 
@@ -72,6 +72,7 @@ export async function renderHtml(
     showsPage,
     carriesFormState,
     named = [],
+    linked,
   }: {
     /**
      * The request's: every script written here carries it. What else does,
@@ -92,6 +93,11 @@ export async function renderHtml(
      * to its end: the HTML links each, rendered or not.
      */
     readonly named?: readonly ClientDeps[];
+    /**
+     * Under mode: 'static', handed each stylesheet a Server Component of the
+     * payload links, as the walk meets it: every one before the HTML is read.
+     */
+    readonly linked?: (href: string) => void;
   },
 ): Promise<ReadableStream> {
   const [forRender, forHydration] = rscStream.tee();
@@ -121,6 +127,18 @@ export async function renderHtml(
     const payload = use(reading);
     ready ??= whenClientReady([payload.tree, payload.notFound], {
       rows: import.meta.env.K8ORDO_MODE === 'static' ? 'wait' : 'follow',
+      element:
+        linked === undefined
+          ? undefined
+          : ({ type, props }) => {
+              if (
+                type === 'link' &&
+                props.precedence === SERVER_STYLESHEETS &&
+                typeof props.href === 'string'
+              ) {
+                linked(props.href);
+              }
+            },
     });
     use(ready);
     return <AppRouter arrived={payload} />;
