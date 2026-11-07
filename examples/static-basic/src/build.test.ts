@@ -303,6 +303,14 @@ describe('the static build', () => {
     expect(imported).toStrictEqual([]);
   });
 
+  // 遷移で届いた <script> は動かないので、本文は HTML の要素にだけあればよい
+  it('writes the colour-scheme script into the HTML alone: neither the payload file nor the payload in the HTML carries it', () => {
+    expect([
+      ...read('index.html').matchAll(/k8ordo-state:color-scheme/gu),
+    ]).toHaveLength(1);
+    expect(read('index.rsc')).not.toContain('k8ordo-state:color-scheme');
+  });
+
   it('leaves no nonce in what it writes: a file everyone reads cannot keep one', () => {
     for (const file of ['index.html', 'index.rsc', '404.html']) {
       expect(read(file)).not.toContain('nonce');

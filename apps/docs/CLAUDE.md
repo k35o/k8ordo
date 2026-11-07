@@ -180,8 +180,8 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
 - **Root provider**: `UIProvider` wraps each locale subtree in
   `src/components/locale-shell.tsx`, for toasts. Component
   built-in strings follow the site locale on their own: `@k8ordo/ui` reads
-  `@k8ordo/i18n`'s current locale, and the shell importing `locales` is what
-  defines the set in the browser
+  `@k8ordo/i18n`'s current locale, and the framework loads `src/i18n.ts` in
+  the browser before anything renders, which defines the set there
 - **Where the browser is**: `usePathname()` from `@k8ordo/framework`. Under the
   framework the browser holds no route table, so `useRoute` / `useParams` have
   no match to read — a page receives `params` as a prop, and anything else asks

@@ -16,8 +16,8 @@ export const localeSet = message({
 });
 
 export const clientGraph = message({
-  ja: '一覧を定義したモジュールは、ブラウザでも読み込まれている必要があります。ブラウザに一覧が無いとコンポーネントが英語で表示するので、ハイドレーションでサーバーのHTMLと食い違います。`bindParams`のリンクや言語の切り替えのために`locales`をimportするClient Componentがあれば、それで足ります。',
-  en: 'The module that defines the set has to load in the browser too. Without the set in the browser, the components render in English and no longer match the server’s HTML during hydration. A Client Component that imports `locales` for `bindParams` links or a language switcher is enough.',
+  ja: '一覧を定義したモジュールは、ブラウザでも読み込まれている必要があります。ブラウザに一覧が無いとコンポーネントが英語で表示するので、ハイドレーションでサーバーのHTMLと食い違います。`@k8ordo/framework`は、何かを描く前にブラウザで`src/i18n.ts`を読み込みます。ほかのフレームワークでは、ルートが描くClient Componentからimportします。',
+  en: 'The module that defines the set has to load in the browser too. Without the set in the browser, the components render in English and no longer match the server’s HTML during hydration. `@k8ordo/framework` loads `src/i18n.ts` in the browser before anything renders; elsewhere, import it from a Client Component the root renders.',
 });
 
 export const englishTitle = message({

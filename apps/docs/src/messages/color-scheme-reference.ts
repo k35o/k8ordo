@@ -27,8 +27,8 @@ export const scriptNonce = message({
 
 export const scriptCaveats = [
   message({
-    ja: 'ディレクティブの無いモジュールからexportしているので、Server Componentのルートレイアウトでそのまま描画します。',
-    en: 'It is exported from a module with no directive, so a root layout that is a Server Component renders it as it is.',
+    ja: "`'use client'`のモジュールからexportしているので、Server Componentのルートレイアウトからそのまま描画できます。スクリプトの中身はHTMLにだけ書かれ、ペイロードには載りません。",
+    en: "It is exported from a `'use client'` module, so a root layout that is a Server Component can render it directly. The script's text is written into the HTML only, never into the payload.",
   }),
   message({
     ja: 'どのスタイルシートよりも前に置きます。`@k8ordo/framework`は、`<head>`に書いたインラインスクリプトをスタイルシートより前へ移します。',
