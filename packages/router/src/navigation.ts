@@ -5,7 +5,6 @@ import {
   createContext,
   startTransition,
   useDeferredValue,
-  useEffect,
   useEffectEvent,
   useLayoutEffect,
   useRef,
@@ -170,8 +169,8 @@ const reloadOnUnannouncedSteps = (
   // popstate では消さない。Firefox は iframe の中で横取りした traverse を 2 回 commit し、
   // 行き先を指す popstate を 2 回出す
   let announced: string | null = null;
-  // WebKit で popstate を聞く前（hydrate の前や、描いてから effect までの間）に戻るが
-  // 届くと、currentEntry は null のまま残る。entries() が空なのは Navigation API を持たない
+  // WebKit で popstate を聞く前（hydrate の前や、最初に描く前）に戻るが届くと、
+  // currentEntry は null のまま残る。entries() が空なのは Navigation API を持たない
   // 文書（opaque な origin）で、読み直しても同じなので読み直さない
   if (navigation.currentEntry === null && navigation.entries().length > 0) {
     reload();
@@ -322,7 +321,10 @@ export function useInterceptedNavigation<T>(handler: NavigationHandler<T>): {
   // anything can read, and there is no key to record a position under.
   const onScreenEntry = useRef<string | null>(null);
 
-  useEffect(() => {
+  // passive effect でなく layout effect で聞く。React はページを画面に出した commit の
+  // あと、passive effect を回す前にブラウザへ譲るので、その隙にたどったリンクは横取り
+  // されずに文書の読み込みになる
+  useLayoutEffect(() => {
     shown.current = normalizePathname(location.pathname);
     restoreLeftAt();
     const steps = reloadOnUnannouncedSteps(

@@ -41,6 +41,13 @@ pnpm check         # check:write to auto-fix
   behind it — state's GUIDE promises that, so keep the shortcut
   handler-free (`traversal.test.ts` holds it). A same-pathname traversal is
   the one with a handler, below.
+- **A page on screen already intercepts.** The `navigate` listener is
+  attached in a layout effect too, in the task of the commit that puts the
+  page on screen. React yields to the browser after that commit and runs
+  passive effects in a later task, so a passive listener let a link followed
+  in between load the document — in CI, a test's `navigation.navigate()`
+  right after it saw the page. `traversal.test.ts` holds it, following a
+  link from a `MutationObserver`, which runs in that gap.
 - **A page change never joins an async action.** `apply` is an urgent
   update and the host renders it through `useDeferredValue`; the hook's own
   `generation` is deferred beside it, so `finished` resolves in the deferred
@@ -207,7 +214,7 @@ pnpm check         # check:write to auto-fix
   cannot follow by itself — a pathname other than the tree's, a page change
   still loading, or `refresh(url)` — so a search the page reads from
   `popstate` costs no document load. A step that lands before the listener
-  exists (before hydration, or between the commit and the effect) leaves
+  exists (before hydration, or before the first render) leaves
   `currentEntry` null with nothing to hear it, so the effect reloads when it
   finds that — unless `entries()` is empty too, which is a document with no
   Navigation API (an opaque origin), where a reload would loop. Once a reload
