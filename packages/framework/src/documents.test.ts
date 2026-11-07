@@ -63,16 +63,17 @@ const policyOf = (html: string): string | undefined =>
     html,
   )?.[1];
 
-// 1 つの client コンポーネントが要るファイル。入口のスクリプトはどれも要る
-const needing = (js: string[], css: string[] = []) => ({
-  js: ['/assets/entry.js', ...js],
-  css,
-});
+// 1 つのページが要るファイル。入口のスクリプトとルートのスタイルシートはどれも要る
+const needing = (...files: string[]) => [
+  '/assets/entry.js',
+  '/assets/root.css',
+  ...files,
+];
 
 describe('clientFiles', () => {
   it('lists each page’s files by its payload’s path, leaving out what every document links', () => {
-    const home = [needing(['/assets/home.js'])];
-    const about = [needing(['/assets/about.js'], ['/assets/about.css'])];
+    const home = needing('/assets/home.js');
+    const about = needing('/assets/about.js', '/assets/about.css');
 
     expect(
       clientFiles(
@@ -89,8 +90,8 @@ describe('clientFiles', () => {
   });
 
   it('leaves out a page whose files every document links', () => {
-    const shared = [needing(['/assets/shared.js'])];
-    const about = [needing(['/assets/shared.js', '/assets/about.js'])];
+    const shared = needing('/assets/shared.js');
+    const about = needing('/assets/shared.js', '/assets/about.js');
 
     expect(
       clientFiles(
@@ -107,8 +108,8 @@ describe('clientFiles', () => {
   });
 
   it('keeps a file a document that is no page does not link — a 404.html, a shell', () => {
-    const home = [needing(['/assets/layout.js'])];
-    const notFound = [needing([])];
+    const home = needing('/assets/layout.js');
+    const notFound = needing();
 
     expect(
       clientFiles(new Map([['/index.rsc', home]]), [home, notFound]),
@@ -119,8 +120,8 @@ describe('clientFiles', () => {
   });
 
   it('writes the same list whatever order the pages rendered in', () => {
-    const a = [needing(['/assets/b.js', '/assets/a.js'])];
-    const b = [needing(['/assets/c.js'])];
+    const a = needing('/assets/b.js', '/assets/a.js');
+    const b = needing('/assets/c.js');
     const pages = (order: Array<[string, typeof a]>) =>
       clientFiles(
         new Map(order),

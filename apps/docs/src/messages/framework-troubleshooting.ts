@@ -471,8 +471,8 @@ export const unusedPreloadTitle = message({
 });
 
 export const unusedPreloadCause = message({
-  ja: 'リンクを先読みしたあと、そのページに移らずにいると出るChromiumの警告です。先読みでペイロードを読むと、ReactはそのページのServer ComponentのCSSを`<link rel="preload" as="style">`で取得します。このCSSが当たるのは、そのページに移ったときです。staticモードのタッチの端末は画面のリンクを先読みするので、警告が増えます。',
-  en: 'Chromium says this when a link was fetched ahead and its page was not visited. Reading a prefetched payload makes React fetch that page’s Server Component CSS with `<link rel="preload" as="style">`, and that CSS applies only once the page is visited. Under static mode a touch screen fetches the links on screen ahead, so the warnings add up there.',
+  ja: 'リンクを先読みしたあと、そのページに移らずにいると出るChromiumの警告です。先読みでは、そのページのServer ComponentのCSSも`<link rel="preload" as="style">`で取得します。このCSSが当たるのは、そのページに移ったときです。staticモードのタッチの端末は画面のリンクを先読みするので、警告が増えます。',
+  en: 'Chromium says this when a link was fetched ahead and its page was not visited. A prefetch also fetches that page’s Server Component CSS with `<link rel="preload" as="style">`, and that CSS applies only once the page is visited. Under static mode a touch screen fetches the links on screen ahead, so the warnings add up there.',
 });
 
 export const unusedPreloadFix = message({

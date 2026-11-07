@@ -293,10 +293,12 @@ pnpm check         # check:write to auto-fix
 - **A static build lists each page's client files beside the pages.**
   `client-files.json` (the engine's `CLIENT_FILES_PATH` and `ClientFiles`)
   is what a client navigation links ahead of a payload
-  (`packages/framework-engine/CLAUDE.md`). `writeHtml` hands back what each
-  HTML answer's `CLIENT_DEPS_HEADER` named (`named`), and `clientFiles`
-  (`documents.ts`) keeps, per page with a payload, its modules' `js` and
-  `css` less the files every HTML document written links — pages,
+  (`packages/framework-engine/CLAUDE.md`). `writeHtml` hands back the files
+  each HTML answer says (`files`): the `js` and `css` of the modules its
+  `CLIENT_DEPS_HEADER` names, and the stylesheets its
+  `SERVER_STYLESHEETS_HEADER` names. `clientFiles` (`documents.ts`) keeps,
+  per page with a payload, those files less the ones every HTML document
+  written links — pages,
   `404.html` and shells alike, since the visitor may have arrived on any of
   them — keyed by the payload's path as `new URL` spells it, so a pathname
   that is not ASCII is the key a browser looks up. Each file is listed once

@@ -44,6 +44,8 @@ import {
   NOT_FOUND_DIGEST,
   NONCE_HEADER,
   NOT_FOUND_HEADER,
+  SERVER_STYLESHEETS_HEADER,
+  serverStylesheetsHeader,
   SHELL_HEADER,
 } from './payload';
 import type { ClientDeps, Payload } from './payload';
@@ -712,6 +714,7 @@ const answerHtml = async (
   // names.
   const [forHtml, forNamed] = rendered.stream.tee();
   await drain(forNamed);
+  const linked = new Set<string>();
   let body: ArrayBuffer;
   try {
     const html = await enter(() =>
@@ -720,6 +723,9 @@ const answerHtml = async (
         showsPage,
         carriesFormState,
         named: [...rendered.named.values()],
+        linked: (href) => {
+          linked.add(href);
+        },
       }),
     );
     body = await new Response(html).arrayBuffer();
@@ -739,6 +745,7 @@ const answerHtml = async (
       'content-type': HTML_TYPE,
       [NONCE_HEADER]: signingNonce(),
       [CLIENT_DEPS_HEADER]: clientDepsHeader(rendered.named.values()),
+      [SERVER_STYLESHEETS_HEADER]: serverStylesheetsHeader(linked),
       ...headers,
     },
   });

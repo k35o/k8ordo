@@ -106,10 +106,30 @@ export const readClientDeps = (value: string): ClientDeps[] =>
   JSON.parse(decodeURIComponent(value)) as ClientDeps[];
 
 /**
- * Where a static build lists the files each page's client components need,
- * at the root of the site under Vite's `base`. A navigation links them as it
- * asks for the payload, instead of once the payload has named them — a
- * round trip sooner.
+ * Said by the handler under mode: 'static' alone, on a page's HTML: every
+ * stylesheet the Server Components of the payload it rendered link
+ * (`serverStylesheetsHeader`), which the build lists in `CLIENT_FILES_PATH`
+ * beside the client modules' files.
+ */
+export const SERVER_STYLESHEETS_HEADER = 'x-k8ordo-server-stylesheets';
+
+/**
+ * The value of `SERVER_STYLESHEETS_HEADER`, encoded as `clientDepsHeader`
+ * is, for a stylesheet is named after a module too.
+ */
+export const serverStylesheetsHeader = (hrefs: Iterable<string>): string =>
+  encodeURIComponent(JSON.stringify([...hrefs]));
+
+/** What `serverStylesheetsHeader` said. */
+export const readServerStylesheets = (value: string): string[] =>
+  JSON.parse(decodeURIComponent(value)) as string[];
+
+/**
+ * Where a static build lists the files each page needs beyond its payload —
+ * its client components' scripts and stylesheets, and its Server Components'
+ * stylesheets — at the root of the site under Vite's `base`. A navigation
+ * links them as it asks for the payload, instead of once the payload has
+ * named them — a round trip sooner.
  */
 export const CLIENT_FILES_PATH = '/client-files.json';
 

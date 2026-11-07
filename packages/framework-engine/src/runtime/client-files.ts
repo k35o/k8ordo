@@ -1,4 +1,5 @@
 import { withBase } from '@k8ordo/router';
+import { preload } from 'react-dom';
 
 import { CLIENT_FILES_PATH } from './payload';
 import type { ClientFiles } from './payload';
@@ -7,9 +8,9 @@ import type { ClientFiles } from './payload';
 let listed: ReadonlyMap<string, readonly string[]> = new Map();
 
 /**
- * Reads the static build's list of the files each page's client components
- * need. Without one — `vite dev`, a host that lost it — a payload names its
- * files as it is read, as it always does.
+ * Reads the static build's list of the files each page needs beyond its
+ * payload. Without one — `vite dev`, a host that lost it — a payload names
+ * its files as it is read, as it always does.
  */
 export const readClientFiles = async (): Promise<void> => {
   let read: ClientFiles;
@@ -51,20 +52,20 @@ export const preloadClientFiles = (
   );
   for (const href of files) {
     if (present.has(new URL(href, location.href).href)) continue;
-    const link = document.createElement('link');
-    // スタイルシートは当てずに取るだけにする。一覧はこの文書より新しいデプロイの
-    // ものかもしれず、当てると画面のページの見た目まで変わる。当てるのは、
-    // そのページの client コンポーネントを読み込むとき（取ったものを使う）
+    // どちらも Vite の読み込み口と同じ要求（crossOrigin=''）にして、取ったものを
+    // 使い回させる。優先度を渡さずに張ると、スクリプトが High、スタイルシートが
+    // VeryHigh で取られ、先読みのものが遷移のペイロードと回線を分け合う
     if (new URL(href, location.href).pathname.endsWith('.css')) {
-      link.rel = 'preload';
-      link.as = 'style';
-    } else {
-      link.rel = 'modulepreload';
+      // スタイルシートは当てずに取るだけにする。一覧はこの文書より新しいデプロイの
+      // ものかもしれず、当てると画面のページの見た目まで変わる。React に張らせる
+      // のは、React が自分の張ったものでない preload を読み込み済みと見なし、
+      // Server Component のスタイルシートが届く前にページを切り替えるため
+      preload(href, { as: 'style', crossOrigin: '', fetchPriority: priority });
+      continue;
     }
-    // Vite の読み込み口と同じ要求にして、取ったものを使い回させる
+    const link = document.createElement('link');
+    link.rel = 'modulepreload';
     link.crossOrigin = '';
-    // 張っただけのリンクは、スクリプトが High、スタイルシートが VeryHigh で
-    // 取られる。先読みのものが、遷移のペイロードと回線を分け合う
     link.fetchPriority = priority;
     link.href = href;
     document.head.append(link);

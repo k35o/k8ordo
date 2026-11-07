@@ -23,7 +23,7 @@ dist/
         index.html
         index.rsc
     404.html              not-found.tsx, rendered
-    client-files.json     what each page's client components load, for a navigation to link ahead
+    client-files.json     what each page loads beyond its payload, for a navigation to link ahead
     sitemap.xml           every page above, when `site` is set
     _redirects            how a host reaches the shells, when there are any
     assets/…              the client bundle

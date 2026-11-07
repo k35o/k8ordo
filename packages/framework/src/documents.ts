@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import { STYLESHEET_ORDER_HREF } from '@k8ordo/framework-engine';
-import type { ClientDeps, ClientFiles } from '@k8ordo/framework-engine';
+import type { ClientFiles } from '@k8ordo/framework-engine';
 
 const escapeMarkup = (value: string): string =>
   value
@@ -38,26 +38,26 @@ export const redirectPage = (to: string): string => {
   return `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="refresh" content="0;url=${escaped}"><link rel="canonical" href="${escaped}"><title>Redirecting</title></head><body><a href="${escaped}">${escaped}</a></body></html>\n`;
 };
 
-const filesOf = (named: readonly ClientDeps[]): Set<string> =>
-  new Set(named.flatMap(({ js, css }) => [...js, ...css]));
-
-/** What `CLIENT_FILES_PATH` lists: each page's files, by its payload's path. */
+/**
+ * What `CLIENT_FILES_PATH` lists: each page's files, by its payload's path —
+ * what its client components need and what its Server Components link.
+ */
 export const clientFiles = (
-  pages: ReadonlyMap<string, readonly ClientDeps[]>,
-  documents: Iterable<readonly ClientDeps[]>,
+  pages: ReadonlyMap<string, readonly string[]>,
+  documents: Iterable<readonly string[]>,
 ): ClientFiles => {
   // どの文書も読み込むものは、訪問者が着いた文書が読み込み済み
   let everywhere: Set<string> | undefined;
-  for (const named of documents) {
-    const files = filesOf(named);
+  for (const linked of documents) {
+    const files = new Set(linked);
     everywhere = everywhere?.intersection(files) ?? files;
   }
   const own = [...pages]
     .map(
-      ([page, named]) =>
+      ([page, linked]) =>
         [
           page,
-          [...filesOf(named)].filter((file) => everywhere?.has(file) !== true),
+          [...new Set(linked)].filter((file) => everywhere?.has(file) !== true),
         ] as const,
     )
     .filter(([, files]) => files.length > 0)

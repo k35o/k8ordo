@@ -2,7 +2,10 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-import { clientDepsHeader } from '@k8ordo/framework-engine';
+import {
+  clientDepsHeader,
+  serverStylesheetsHeader,
+} from '@k8ordo/framework-engine';
 import type { ClientDeps } from '@k8ordo/framework-engine';
 import {
   afterEach,
@@ -604,12 +607,12 @@ describe('a route.ts at a file the build writes itself', () => {
       );
     });
 
-    it('names a route.ts at client-files.json, where the build lists what each page’s client components need', async () => {
+    it('names a route.ts at client-files.json, where the build lists what each page loads beyond its payload', async () => {
       await routeFiles(['client-files.json/route.ts']);
       await handlerAnswering(home({ '/client-files.json': { body: '{}' } }));
 
       await expect(hooks().build()).rejects.toThrow(
-        `${TAKEN}\n  client-files.json: src/routes/client-files.json/route.ts, and the build lists there what each page’s client components need`,
+        `${TAKEN}\n  client-files.json: src/routes/client-files.json/route.ts, and the build lists there what each page loads beyond its payload`,
       );
     });
   });
@@ -689,6 +692,41 @@ describe('the client files a build lists', () => {
     expect(JSON.parse(await clientFile('client-files.json'))).toStrictEqual({
       files: ['/assets/card-B2.js', '/assets/card-C3.css'],
       pages: { '/%C3%BCber/index.rsc': [0, 1] },
+    });
+  });
+
+  it('lists the stylesheets a page’s Server Components link beside its client components’ files, leaving out what every document links', async () => {
+    const linking = (stylesheets: readonly string[]): Answer => ({
+      headers: {
+        'x-k8ordo-server-stylesheets': serverStylesheetsHeader(stylesheets),
+      },
+    });
+    await routeFiles(['about/page.tsx']);
+    await handlerAnswering({
+      '/': htmlNaming(
+        [ICON],
+        ['/assets/icon-A1.js'],
+        linking(['/assets/layout-D4.css']),
+      ),
+      '/index.rsc': { body: 'home payload' },
+      '/about': htmlNaming(
+        [CARD],
+        ['/assets/card-B2.js', '/assets/card-C3.css'],
+        linking(['/assets/layout-D4.css', '/assets/about-E5.css']),
+      ),
+      '/about/index.rsc': { body: 'about payload' },
+    });
+
+    await hooks().build();
+
+    expect(JSON.parse(await clientFile('client-files.json'))).toStrictEqual({
+      files: [
+        '/assets/about-E5.css',
+        '/assets/card-B2.js',
+        '/assets/card-C3.css',
+        '/assets/icon-A1.js',
+      ],
+      pages: { '/about/index.rsc': [0, 1, 2], '/index.rsc': [3] },
     });
   });
 
