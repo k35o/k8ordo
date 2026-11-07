@@ -187,7 +187,18 @@ pnpm check         # check:write to auto-fix
   as="style">`, each once per document and none the document links already
   (a stylesheet it applied, preloaded again, is a fetch nobody uses), with
   `crossOrigin=''` as Vite's preload helper asks, so its later request is
-  served from the preload.
+  served from the preload, and at the payload's priority (`fetchPriority`):
+  left to the default, a prefetch's scripts go at High and its stylesheets
+  at VeryHigh, beside the navigation they were meant to speed up (with
+  `low`, Chromium fetches the scripts at Low and takes a stylesheet down
+  one step only, to High). A
+  prefetch's client stylesheets are used as it loads the page's client
+  components. The Server Components' stylesheets are not listed: React
+  preloads them from the payload's hints as it is read (the Flight server
+  emits one for every `<link rel="stylesheet">` it renders), at the default
+  priority, and those of a page fetched ahead stay unused until it is
+  visited, which Chromium warns about once per file. `<link rel="prefetch">`
+  would not warn, and is not in Safari.
   A stylesheet is preloaded, not applied: the list may come from a newer
   deploy than the document, and its CSS would restyle the page on screen.
   The client component's own import applies it, as without the list.

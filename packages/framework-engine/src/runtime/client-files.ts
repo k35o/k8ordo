@@ -32,9 +32,13 @@ export const readClientFiles = async (): Promise<void> => {
 
 /**
  * Links what the page whose payload is at `payloadPath` needs: its scripts
- * as module preloads, its stylesheets as preloads.
+ * as module preloads, its stylesheets as preloads, each at the priority its
+ * payload is asked for at.
  */
-export const preloadClientFiles = (payloadPath: string): void => {
+export const preloadClientFiles = (
+  payloadPath: string,
+  priority: RequestPriority,
+): void => {
   const files = listed.get(new URL(payloadPath, location.href).pathname);
   if (files === undefined) return;
   // この文書がもうリンクしたファイルは張らない。当てたスタイルシートを
@@ -59,6 +63,9 @@ export const preloadClientFiles = (payloadPath: string): void => {
     }
     // Vite の読み込み口と同じ要求にして、取ったものを使い回させる
     link.crossOrigin = '';
+    // 張っただけのリンクは、スクリプトが High、スタイルシートが VeryHigh で
+    // 取られる。先読みのものが、遷移のペイロードと回線を分け合う
+    link.fetchPriority = priority;
     link.href = href;
     document.head.append(link);
   }

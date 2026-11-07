@@ -161,7 +161,7 @@ const fetchPage = async (
   priority: RequestPriority = 'auto',
 ): Promise<Payload | null> => {
   signal.throwIfAborted();
-  preloadClientFiles(payloadPath);
+  preloadClientFiles(payloadPath, priority);
   const request = new AbortController();
   const cancel = (): void => {
     request.abort(signal.reason);
