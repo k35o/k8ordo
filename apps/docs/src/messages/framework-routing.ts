@@ -529,8 +529,8 @@ export const prefetchSkipped = [
 ] as const;
 
 export const prefetchTouch = message({
-  ja: 'staticモードでは、主なポインターが粗い端末（`(pointer: coarse)`）のとき、画面に入ったリンクも先読みします。入った順に1つずつ、低い優先度で取得します。番が来る前に画面から出たリンクは飛ばします。',
-  en: 'Under static mode, where the primary pointer is coarse (`(pointer: coarse)`), the links on screen are prefetched too. They are fetched one at a time in the order they came into view, at low priority, and a link that leaves the screen before its turn is passed over.',
+  ja: 'staticモードでは、主なポインターが粗い端末（`(pointer: coarse)`）のとき、画面に入ったリンクも先読みします。文書の`load`イベントのあと、画面に1秒とどまったリンクを、入った順に1つずつ低い優先度で取得します。番が来る前に画面から出たリンクは飛ばします。ページの切り替えを読み込んでいるあいだは新しく取得せず、ほかのページへの先読みは取り消します。取り消したリンクは、次のページが表示されてから最初に取得し直します。',
+  en: 'Under static mode, where the primary pointer is coarse (`(pointer: coarse)`), the links on screen are prefetched too. Once the document’s `load` event has fired, each link that has stayed on screen for a second is fetched, one at a time in the order they came into view, at low priority. A link that leaves the screen before its turn is passed over. While a page change loads, nothing more is fetched, and a prefetch on its way to another page is cancelled. That link is fetched first once the next page shows.',
 });
 
 export const prefetchStop = message({
@@ -549,8 +549,8 @@ export const prefetchKept = message({
 });
 
 export const prefetchClientFiles = message({
-  ja: 'staticモードでは、ビルドが`client-files.json`も書きます。ページごとに、そのClient Componentが読み込むスクリプトとスタイルシートを並べたもので、どのページも読み込むものは除きます。ランタイムは文書が動き始めたら、これを低い優先度で1回読みます。ページのペイロードを頼むと同時に、そのページのファイルも取り始めます。スクリプトは`<link rel="modulepreload">`で、スタイルシートは`<link rel="preload" as="style">`で取ります。ペイロードがファイルを名指すのを待たないので、1往復早く取り始められます。スタイルシートが当たるのは、これまでどおりそれを使うClient Componentを読み込んだときです。シェルが答える値のように一覧に無いページは、一覧が無いときと同じように読み込みます。',
-  en: 'A static build also writes `client-files.json`: for each page, the scripts and stylesheets its Client Components load, less those every page loads. The runtime reads it once, at low priority, after the document starts. Whenever it asks for a page’s payload, it starts fetching that page’s files at the same moment — scripts with `<link rel="modulepreload">`, stylesheets with `<link rel="preload" as="style">` — instead of waiting a round trip for the payload to name them. A stylesheet still applies only once the Client Component that uses it loads. A page the list leaves out, such as a value a shell answers, loads as it would without the list.',
+  ja: 'staticモードでは、ビルドが`client-files.json`も書きます。ページごとに、そのClient Componentが読み込むスクリプトとスタイルシートを並べたもので、どのページも読み込むものは除きます。ランタイムは文書が動き始めたら、これを低い優先度で1回読みます。ページのペイロードを頼むと同時に、そのページのファイルもペイロードと同じ優先度で取り始めます。スクリプトは`<link rel="modulepreload">`で、スタイルシートは`<link rel="preload" as="style">`で取ります。ペイロードがファイルを名指すのを待たないので、1往復早く取り始められます。画面に入ったリンクの先読みは、この一覧を読み終えてから始めます。スタイルシートが当たるのは、これまでどおりそれを使うClient Componentを読み込んだときです。シェルが答える値のように一覧に無いページは、一覧が無いときと同じように読み込みます。',
+  en: 'A static build also writes `client-files.json`: for each page, the scripts and stylesheets its Client Components load, less those every page loads. The runtime reads it once, at low priority, after the document starts. Whenever it asks for a page’s payload, it starts fetching that page’s files at the same moment and at the same priority — scripts with `<link rel="modulepreload">`, stylesheets with `<link rel="preload" as="style">` — instead of waiting a round trip for the payload to name them. The links on screen are prefetched only once the list has been read. A stylesheet still applies only once the Client Component that uses it loads. A page the list leaves out, such as a value a shell answers, loads as it would without the list.',
 });
 
 export const prefetchSpeculation = message({
