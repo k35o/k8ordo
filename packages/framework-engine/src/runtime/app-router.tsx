@@ -6,6 +6,7 @@ import {
   PathnameProvider,
   TreePathname,
   useInterceptedNavigation,
+  usePendingPathname,
   withoutBase,
 } from '@k8ordo/router';
 import {
@@ -31,7 +32,7 @@ import {
   prefetchInViewUnderTouch,
   prefetchOnIntent,
 } from './prefetch';
-import type { PageCache } from './prefetch';
+import type { InView, PageCache } from './prefetch';
 import {
   markNavigated,
   navigationsApplied,
@@ -161,7 +162,7 @@ const fetchPage = async (
   priority: RequestPriority = 'auto',
 ): Promise<Payload | null> => {
   signal.throwIfAborted();
-  preloadClientFiles(payloadPath);
+  preloadClientFiles(payloadPath, priority);
   const request = new AbortController();
   const cancel = (): void => {
     request.abort(signal.reason);
@@ -335,6 +336,9 @@ export function AppRouter({
   // `componentDidCatch` in the same commit, which would refuse the swap the
   // applied shell asks for.
   const loading = useRef(0);
+  // static のビルドで、画面のリンクを先に取るもの
+  const inView = useRef<InView | null>(null);
+  const pendingPathname = usePendingPathname();
 
   // 別の pathname の HTML は、境界がすべて hydrate を終えてから描き直す。
   // その前に i18n が今の URL を読むと、まだ hydrate していない境界が HTML と
@@ -469,24 +473,35 @@ export function AppRouter({
   useEffect(() => {
     if (!payloadsAreFiles()) return;
     cacheIn(prefetched).keep(payloadUrlFor(new URL(location.href)), arrived);
-    void readClientFiles();
   }, [arrived]);
 
   useEffect(() => {
-    const prefetch =
-      (priority: RequestPriority) =>
-      (url: URL): Promise<Payload | null> =>
-        cacheIn(prefetched).prefetch(payloadUrlFor(url), priority);
+    const cache = cacheIn(prefetched);
+    const stopIntents = prefetchOnIntent((url) =>
+      cache.prefetch(payloadUrlFor(url), 'auto'),
+    );
     // 画面のリンクを取るのはファイルに限る。リクエストごとに描くページでは、
     // 通り過ぎたリンクの数だけサーバーが描き、30 秒で捨てることになる
-    const stops = payloadsAreFiles()
-      ? [prefetchInViewUnderTouch(prefetch('low'))]
-      : [];
-    stops.push(prefetchOnIntent(prefetch('auto')));
+    if (!payloadsAreFiles()) return stopIntents;
+    const listed = readClientFiles();
+    // 一覧より先に取ると、部品はペイロードが名指してから、もう 1 往復あとになる
+    const watching = prefetchInViewUnderTouch(async (url, signal) => {
+      await listed;
+      signal.throwIfAborted();
+      return cache.prefetch(payloadUrlFor(url), 'low', signal);
+    });
+    inView.current = watching;
     return () => {
-      for (const stop of stops) stop();
+      stopIntents();
+      watching.stop();
+      inView.current = null;
     };
   }, []);
+
+  // ページの切り替えを読み込むあいだ、画面のリンクの先読みは回線を譲る
+  useEffect(() => {
+    inView.current?.pending(pendingPathname);
+  }, [pendingPathname]);
 
   const { generation } = useInterceptedNavigation<Loaded>({
     // The browser holds no route table, so this cannot answer "is it mine?"

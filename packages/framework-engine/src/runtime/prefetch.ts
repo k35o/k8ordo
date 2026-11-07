@@ -75,61 +75,127 @@ export const prefetchOnIntent = (
 };
 
 /**
- * Prefetches the links on screen (`prefetchInView`) while the primary pointer
- * is coarse, and returns what stops it.
+ * How long a link stays on screen before it is fetched ahead, in
+ * milliseconds. A link scrolled past is not one the visitor stopped at, and a
+ * link that just came into view may not be the one they tap.
  */
-export const prefetchInViewUnderTouch = (
-  prefetch: (url: URL) => Promise<unknown>,
-): (() => void) => {
-  // 粗いポインタにはホバーが無く、タップは押し始めとクリックがほぼ同時に
-  // 来るので、先に取る間が無い。代わりに画面のリンクを取る
-  const coarse = matchMedia('(pointer: coarse)');
-  let stop: (() => void) | undefined;
-  const follow = (): void => {
-    stop?.();
-    stop = coarse.matches ? prefetchInView(prefetch) : undefined;
-  };
-  follow();
-  coarse.addEventListener('change', follow);
-  return () => {
-    coarse.removeEventListener('change', follow);
-    stop?.();
-  };
+export const IN_VIEW_DWELL = 1000;
+
+/** What watches the links on screen. */
+export type InView = {
+  /** Stops watching: nothing more is fetched. */
+  readonly stop: () => void;
+  /**
+   * Says where a page change is loading — a pathname in the table's terms,
+   * as `usePendingPathname` names it — or that none is (`null`). While one
+   * loads nothing more is fetched, and a prefetch on its way to another page
+   * is called off, its link put first in line again.
+   */
+  readonly pending: (pathname: string | null) => void;
 };
 
 /**
+ * Prefetches the links on screen (`prefetchInView`) while the primary pointer
+ * is coarse.
+ */
+export const prefetchInViewUnderTouch = (
+  prefetch: (url: URL, signal: AbortSignal) => Promise<unknown>,
+): InView => {
+  // 粗いポインタにはホバーが無く、タップは押し始めとクリックがほぼ同時に
+  // 来るので、先に取る間が無い。代わりに画面のリンクを取る
+  const coarse = matchMedia('(pointer: coarse)');
+  let inView: InView | undefined;
+  let pending: string | null = null;
+  const follow = (): void => {
+    inView?.stop();
+    inView = coarse.matches ? prefetchInView(prefetch) : undefined;
+    inView?.pending(pending);
+  };
+  follow();
+  coarse.addEventListener('change', follow);
+  return {
+    stop: () => {
+      coarse.removeEventListener('change', follow);
+      inView?.stop();
+    },
+    pending: (pathname) => {
+      pending = pathname;
+      inView?.pending(pathname);
+    },
+  };
+};
+
+/** Resolves once the document has loaded, at once if it has. */
+const documentLoaded = (): Promise<void> =>
+  new Promise((resolve) => {
+    if (document.readyState === 'complete') resolve();
+    else addEventListener('load', () => resolve(), { once: true });
+  });
+
+/**
  * Prefetches the links on screen, one at a time, in the order they came into
- * view, and returns what stops it. A link that leaves before its turn is
- * passed over, so a fast scroll fetches little; one at a time, so a page
- * visited while they load shares the connection with one prefetch at most.
+ * view, once each has stayed there `IN_VIEW_DWELL` and the document has
+ * loaded. A link that leaves before its turn is passed over, so a fast
+ * scroll fetches little; one at a time, so a page visited while they load
+ * shares the connection with one prefetch at most, and with none once the
+ * page change is known (`pending`).
  */
 export const prefetchInView = (
-  prefetch: (url: URL) => Promise<unknown>,
-): (() => void) => {
-  // 画面に入って、まだ番の来ていないリンク。Set は入れた順に回る
+  prefetch: (url: URL, signal: AbortSignal) => Promise<unknown>,
+): InView => {
+  // 画面にあるリンクと、留まり終えるまでのタイマー（留まり終えたら undefined）
+  const onScreen = new Map<
+    Element,
+    ReturnType<typeof setTimeout> | undefined
+  >();
+  // 画面に留まって、まだ番の来ていないリンク。Set は入れた順に回る
   const waiting = new Set<Element>();
+  // 文書のフォントや画像と回線を分け合うと、load が遅れる
+  const loaded = documentLoaded();
+  let fetching:
+    | {
+        readonly link: Element;
+        readonly url: URL;
+        readonly controller: AbortController;
+      }
+    | undefined;
+  let pending: string | null = null;
   let draining = false;
   let stopped = false;
   const drain = async (): Promise<void> => {
     if (draining) return;
     draining = true;
+    await loaded;
     for (const link of waiting) {
+      if (stopped || pending !== null) break;
       waiting.delete(link);
       const url = prefetchTargetOf(link);
-      if (url !== null) {
-        // 失敗した先読みは置き場が忘れ、遷移が取り直す。ここは次へ進むだけ
-        await prefetch(url).catch(() => undefined);
-      }
-      if (stopped) break;
+      if (url === null) continue;
+      const controller = new AbortController();
+      fetching = { link, url, controller };
+      // 失敗した先読みは置き場が忘れ、遷移が取り直す。ここは次へ進むだけ
+      await prefetch(url, controller.signal).catch(() => undefined);
+      fetching = undefined;
     }
     draining = false;
   };
+  const leave = (link: Element): void => {
+    clearTimeout(onScreen.get(link));
+    onScreen.delete(link);
+    waiting.delete(link);
+  };
   const view = new IntersectionObserver((entries) => {
     for (const { isIntersecting, target } of entries) {
-      if (isIntersecting) waiting.add(target);
-      else waiting.delete(target);
+      if (!isIntersecting) leave(target);
+      else if (!onScreen.has(target)) {
+        const stayed = setTimeout(() => {
+          onScreen.set(target, undefined);
+          waiting.add(target);
+          void drain();
+        }, IN_VIEW_DWELL);
+        onScreen.set(target, stayed);
+      }
     }
-    void drain();
   });
   const linksIn = (node: Node): Element[] =>
     node instanceof Element
@@ -145,7 +211,7 @@ export const prefetchInView = (
       for (const node of removedNodes) {
         for (const link of linksIn(node)) {
           view.unobserve(link);
-          waiting.delete(link);
+          leave(link);
         }
       }
       for (const node of addedNodes) {
@@ -155,11 +221,32 @@ export const prefetchInView = (
   });
   tree.observe(document.documentElement, { childList: true, subtree: true });
   for (const link of document.querySelectorAll('a[href]')) view.observe(link);
-  return () => {
-    stopped = true;
-    tree.disconnect();
-    view.disconnect();
-    waiting.clear();
+  return {
+    stop: () => {
+      stopped = true;
+      tree.disconnect();
+      view.disconnect();
+      for (const link of onScreen.keys()) leave(link);
+    },
+    pending: (pathname) => {
+      pending = pathname;
+      if (pathname === null) {
+        void drain();
+        return;
+      }
+      if (fetching === undefined) return;
+      // 行き先の先読みは、遷移がそのまま受け取る
+      const { pathname: fetched } = fetching.url;
+      if (normalizePathname(withoutBase(fetched) ?? fetched) === pathname) {
+        return;
+      }
+      if (onScreen.has(fetching.link)) {
+        const behind = [...waiting];
+        waiting.clear();
+        for (const link of [fetching.link, ...behind]) waiting.add(link);
+      }
+      fetching.controller.abort();
+    },
   };
 };
 
@@ -194,9 +281,14 @@ type Entry<T> = {
 export type PageCache<T> = {
   /**
    * Starts loading `key` unless a usable load of it is held, and returns the
-   * held load.
+   * held load. `signal` aborting forgets a load this call started, while it
+   * is on its way and no navigation waits for it.
    */
-  readonly prefetch: (key: string, priority: RequestPriority) => Promise<T>;
+  readonly prefetch: (
+    key: string,
+    priority: RequestPriority,
+    signal?: AbortSignal,
+  ) => Promise<T>;
   /**
    * What a navigation to `key` renders: a usable load held, or one started
    * for it. While it is on its way, `signal` aborting aborts it, as it would
@@ -276,9 +368,21 @@ export const createPageCache = <T>(
     }
   };
   return {
-    prefetch: (key, priority) => {
+    prefetch: (key, priority, signal) => {
       sweep();
-      const entry = held(key) ?? start(key, priority);
+      let entry = held(key);
+      if (entry === undefined) {
+        const started = start(key, priority);
+        signal?.addEventListener(
+          'abort',
+          () => {
+            if (started.settled || started.waiting > 0) return;
+            if (entries.get(key) === started) forget(key, started);
+          },
+          { once: true },
+        );
+        entry = started;
+      }
       hold(key, entry);
       return entry.value;
     },

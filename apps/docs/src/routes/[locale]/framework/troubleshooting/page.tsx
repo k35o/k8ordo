@@ -181,6 +181,12 @@ const SYMPTOMS: readonly Symptom[] = [
     fix: t.cssOrderFix,
   },
   {
+    id: 'unused-preload',
+    title: t.unusedPreloadTitle,
+    cause: t.unusedPreloadCause,
+    fix: t.unusedPreloadFix,
+  },
+  {
     id: 'hydration',
     title: t.hydrationTitle,
     cause: t.hydrationCause,

@@ -41,7 +41,7 @@ describe('the files a static build listed for each page', () => {
     );
     await readClientFiles();
 
-    preloadClientFiles('/next/index.rsc');
+    preloadClientFiles('/next/index.rsc', 'auto');
 
     expect(linksTo('/listed/page.js')).toStrictEqual([
       { rel: 'modulepreload', as: '' },
@@ -49,6 +49,27 @@ describe('the files a static build listed for each page', () => {
     expect(linksTo('/listed/page.css')).toStrictEqual([
       { rel: 'preload', as: 'style' },
     ]);
+  });
+
+  it('links them at the priority its payload is asked for at', async () => {
+    listing(() =>
+      listed({
+        files: ['/listed/ahead.js', '/listed/ahead.css'],
+        pages: { '/ahead/index.rsc': [0, 1] },
+      }),
+    );
+    await readClientFiles();
+
+    preloadClientFiles('/ahead/index.rsc', 'low');
+
+    expect(
+      Array.from(
+        document.head.querySelectorAll<HTMLLinkElement>(
+          'link[href^="/listed/ahead."]',
+        ),
+        (link) => link.fetchPriority,
+      ),
+    ).toStrictEqual(['low', 'low']);
   });
 
   it('finds a page by its payload’s path, whatever the search', async () => {
@@ -60,7 +81,7 @@ describe('the files a static build listed for each page', () => {
     );
     await readClientFiles();
 
-    preloadClientFiles('/search/index.rsc?q=shoes');
+    preloadClientFiles('/search/index.rsc?q=shoes', 'auto');
 
     expect(linksTo('/listed/search.js')).toHaveLength(1);
   });
@@ -74,8 +95,8 @@ describe('the files a static build listed for each page', () => {
     );
     await readClientFiles();
 
-    preloadClientFiles('/a/index.rsc');
-    preloadClientFiles('/b/index.rsc');
+    preloadClientFiles('/a/index.rsc', 'auto');
+    preloadClientFiles('/b/index.rsc', 'auto');
 
     expect(linksTo('/listed/shared.js')).toHaveLength(1);
   });
@@ -93,7 +114,7 @@ describe('the files a static build listed for each page', () => {
     );
     await readClientFiles();
 
-    preloadClientFiles('/applied/index.rsc');
+    preloadClientFiles('/applied/index.rsc', 'auto');
 
     expect(linksTo('/listed/applied.css')).toStrictEqual([
       { rel: 'stylesheet', as: '' },
@@ -112,7 +133,7 @@ describe('the files a static build listed for each page', () => {
     );
     await readClientFiles();
 
-    preloadClientFiles('/unlisted/index.rsc');
+    preloadClientFiles('/unlisted/index.rsc', 'auto');
 
     expect(
       document.head.querySelectorAll('link[href^="/listed/"]'),

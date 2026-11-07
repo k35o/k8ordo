@@ -168,13 +168,26 @@ pnpm check         # check:write to auto-fix
   unobserves the ones it removes, which an observer would otherwise keep
   alive), one at a time in the order they came into view, a link that left
   before its turn passed over, at `priority: 'low'` (intents fetch at
-  `'auto'`). One at a time, so a tap shares the connection with one
-  prefetch at most. No `requestIdleCallback` (not in Safari), no
-  Speculation Rules (Chromium only), no Network Information (not Baseline),
-  and no viewport prefetch under renders, where each link would be a
-  server render. `prefetch.test.ts` holds both kinds;
-  `prefetch.browser.test.tsx` the watching;
-  `app-router.browser.test.tsx` the wiring in either mode.
+  `'auto'`). A link waits its turn only once it has stayed on screen
+  `IN_VIEW_DWELL` (1 s: a link scrolled past, or one just come into view,
+  is rarely the one tapped next), and nothing is fetched before the
+  document's `load` event — a page hydrated earlier would share the
+  connection with its own fonts and images — nor, under files, before
+  `readClientFiles` has read the list (`AppRouter`'s callback awaits it),
+  which would leave a page's files waiting for its payload to name them.
+  One at a time, so a tap shares the connection with one prefetch at most,
+  and with none once the router names the page change: `AppRouter` hands
+  `usePendingPathname()` to `InView.pending`, and while it names a pathname
+  nothing more starts and a prefetch on its way to another pathname is
+  called off — its signal makes `PageCache.prefetch` forget the load that
+  call started, unless a navigation already waits for it — and its link
+  is put first in line for when the page is on screen. No
+  `requestIdleCallback` (not in Safari), no Speculation Rules (Chromium
+  only), no Network Information (not Baseline), and no viewport prefetch
+  under renders, where each link would be a server render.
+  `prefetch.test.ts` holds both kinds and the called-off prefetch;
+  `prefetch.browser.test.tsx` the watching, on fake `setTimeout` for the
+  dwell; `app-router.browser.test.tsx` the wiring in either mode.
 - **A static build's client files are linked as the payload is asked for.**
   The static build writes `CLIENT_FILES_PATH` (`/client-files.json`, under
   the base; `ClientFiles` in `payload.ts`) from the `CLIENT_DEPS_HEADER` of
@@ -187,7 +200,18 @@ pnpm check         # check:write to auto-fix
   as="style">`, each once per document and none the document links already
   (a stylesheet it applied, preloaded again, is a fetch nobody uses), with
   `crossOrigin=''` as Vite's preload helper asks, so its later request is
-  served from the preload.
+  served from the preload, and at the payload's priority (`fetchPriority`):
+  left to the default, a prefetch's scripts go at High and its stylesheets
+  at VeryHigh, beside the navigation they were meant to speed up (with
+  `low`, Chromium fetches the scripts at Low and takes a stylesheet down
+  one step only, to High). A
+  prefetch's client stylesheets are used as it loads the page's client
+  components. The Server Components' stylesheets are not listed: React
+  preloads them from the payload's hints as it is read (the Flight server
+  emits one for every `<link rel="stylesheet">` it renders), at the default
+  priority, and those of a page fetched ahead stay unused until it is
+  visited, which Chromium warns about once per file. `<link rel="prefetch">`
+  would not warn, and is not in Safari.
   A stylesheet is preloaded, not applied: the list may come from a newer
   deploy than the document, and its CSS would restyle the page on screen.
   The client component's own import applies it, as without the list.

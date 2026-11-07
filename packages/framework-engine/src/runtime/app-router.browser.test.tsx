@@ -16,6 +16,7 @@ import { connectAppRouter } from './browser-payloads';
 import { FallbackBoundary, ShowNotFound } from './fallback-boundary';
 import { reportCaught } from './page-boundary';
 import type { Payload } from './payload';
+import { IN_VIEW_DWELL } from './prefetch';
 import { reloadDocument } from './reload';
 
 type ServerCallback = (id: string, args: unknown[]) => Promise<unknown>;
@@ -1369,6 +1370,64 @@ const answerListing = (
   return host;
 };
 
+// 部品の一覧を release まで返さず、ペイロードを頼まれたときに file の link が
+// どの優先度で張られていたかを集めるホスト。ペイロードには NEXT で答える
+const answerListingLater = (
+  listed: { files: string[]; pages: Record<string, number[]> },
+  file: string,
+): { priorities: Array<string | undefined>; release: () => void } => {
+  const listing = Promise.withResolvers<undefined>();
+  const priorities: Array<string | undefined> = [];
+  vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
+    if (urlOf(input).pathname === '/client-files.json') {
+      return listing.promise.then(() => Response.json(listed));
+    }
+    if (!asksForPayload(input)) return passThrough(input, init);
+    priorities.push(
+      document.head.querySelector<HTMLLinkElement>(`link[href="${file}"]`)
+        ?.fetchPriority,
+    );
+    return Promise.resolve(payloadResponse(NEXT));
+  });
+  return {
+    priorities,
+    release: () => {
+      listing.resolve(undefined);
+    },
+  };
+};
+
+// pathname のペイロードの要求を、中止されるまで開けておくホスト。要求の
+// signal を集め、ほかのページには NEXT で答える
+const holdOpen = (pathname: string): AbortSignal[] => {
+  const signals: AbortSignal[] = [];
+  vi.stubGlobal('fetch', (input: RequestInfo | URL, init?: RequestInit) => {
+    const signal = init?.signal;
+    if (urlOf(input).pathname !== pathname || !signal) {
+      return asksForPayload(input)
+        ? Promise.resolve(payloadResponse(NEXT))
+        : passThrough(input, init);
+    }
+    signals.push(signal);
+    return new Promise<Response>((_resolve, reject) => {
+      signal.addEventListener('abort', () => {
+        reject(signal.reason as Error);
+      });
+    });
+  });
+  return signals;
+};
+
+// AppRouter の外に置くリンク。ページが替わっても画面に残る
+const linkOutsideTheTree = (href: string): HTMLAnchorElement => {
+  const link = document.createElement('a');
+  link.href = href;
+  link.textContent = href;
+  link.style.pointerEvents = 'none';
+  document.body.prepend(link);
+  return link;
+};
+
 describe('under a static build', () => {
   beforeEach(() => {
     vi.stubEnv('K8ORDO_MODE', 'static');
@@ -1456,9 +1515,64 @@ describe('under a static build', () => {
       />,
     );
 
-    await vi.waitFor(() => {
-      expect(priorities).toStrictEqual(['low']);
+    await vi.waitFor(
+      () => {
+        expect(priorities).toStrictEqual(['low']);
+      },
+      { timeout: IN_VIEW_DWELL + 2000 },
+    );
+  });
+
+  it('fetches a page on screen ahead once its files are listed, and links them at low priority', async () => {
+    pointer('coarse');
+    const host = answerListingLater(
+      { files: ['/listed-app/next.js'], pages: { '/next/index.rsc': [0] } },
+      '/listed-app/next.js',
+    );
+    await render(
+      <AppRouter
+        arrived={documentPayload(
+          <a href="/next" style={{ pointerEvents: 'none' }}>
+            next
+          </a>,
+        )}
+      />,
+    );
+    await new Promise((resolve) => {
+      setTimeout(resolve, IN_VIEW_DWELL + 200);
     });
+    const beforeTheList = [...host.priorities];
+
+    host.release();
+
+    expect(beforeTheList).toStrictEqual([]);
+    await vi.waitFor(() => {
+      expect(host.priorities).toStrictEqual(['low']);
+    });
+  });
+
+  it('gives the connection over to a navigation, asking again for the page on screen it called off once the next page shows', async () => {
+    pointer('coarse');
+    const signals = holdOpen('/elsewhere/index.rsc');
+    const kept = linkOutsideTheTree('/elsewhere');
+    try {
+      await render(<AppRouter arrived={documentPayload('first page')} />);
+      await vi.waitFor(
+        () => {
+          expect(signals).toHaveLength(1);
+        },
+        { timeout: IN_VIEW_DWELL + 2000 },
+      );
+
+      await navigation.navigate('/next').finished;
+
+      expect(signals[0]?.aborted).toBe(true);
+      await vi.waitFor(() => {
+        expect(signals).toHaveLength(2);
+      });
+    } finally {
+      kept.remove();
+    }
   });
 
   it('leaves the links on screen to a pointer’s intent under a fine pointer', async () => {

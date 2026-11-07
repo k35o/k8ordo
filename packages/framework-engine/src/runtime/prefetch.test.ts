@@ -373,4 +373,52 @@ describe('a cache of pages written into files', () => {
 
     expect(priorities).toStrictEqual(['auto']);
   });
+
+  it('aborts and forgets a prefetch called off on its way, so the navigation asks again', () => {
+    const { cache, loaded, signals } = setup(true, () => pending());
+    const calledOff = new AbortController();
+    cache
+      .prefetch('/next/index.rsc', 'low', calledOff.signal)
+      .catch(() => undefined);
+
+    calledOff.abort();
+    void cache.load('/next/index.rsc', navigating());
+
+    expect(signals[0]?.aborted).toBe(true);
+    expect(loaded).toStrictEqual(['/next/index.rsc', '/next/index.rsc']);
+  });
+
+  it('keeps a prefetch called off once a navigation waits for it', () => {
+    const { cache, loaded, signals } = setup(true, () => pending());
+    const calledOff = new AbortController();
+    void cache.prefetch('/next/index.rsc', 'low', calledOff.signal);
+    void cache.load('/next/index.rsc', navigating());
+
+    calledOff.abort();
+
+    expect(signals[0]?.aborted).toBe(false);
+    expect(loaded).toStrictEqual(['/next/index.rsc']);
+  });
+
+  it('keeps a page another prefetch started when a later one is called off', () => {
+    const { cache, signals } = setup(true, () => pending());
+    void cache.prefetch('/next/index.rsc', 'auto');
+    const calledOff = new AbortController();
+    void cache.prefetch('/next/index.rsc', 'low', calledOff.signal);
+
+    calledOff.abort();
+
+    expect(signals[0]?.aborted).toBe(false);
+  });
+
+  it('keeps a page that has arrived when its prefetch is called off', async () => {
+    const { cache, loaded } = setup(true);
+    const calledOff = new AbortController();
+    await cache.prefetch('/next/index.rsc', 'low', calledOff.signal);
+
+    calledOff.abort();
+    void cache.load('/next/index.rsc', navigating());
+
+    expect(loaded).toStrictEqual(['/next/index.rsc']);
+  });
 });

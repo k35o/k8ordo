@@ -606,10 +606,14 @@ with them their stylesheets, which apply to the page on screen from then on
 A touch screen has no hover, and a tap's press and click come together,
 leaving nothing to fetch ahead in. So under `mode: 'static'`, where the
 primary pointer is coarse (`(pointer: coarse)`), the runtime fetches the
-links on screen instead: each link as it comes into view, one at a time in
-the order they appeared, at low fetch priority, passing over a link that
-left the screen before its turn. Under `mode: 'server'` it does not — every
-link a visitor scrolls past would be a render on the server.
+links on screen instead: once the document's `load` event has fired, each
+link that has stayed on screen for a second, one at a time in the order
+they appeared, at low fetch priority, passing over a link that left the
+screen before its turn. While a page change loads it fetches nothing more,
+and cancels a prefetch on its way to another page, so the page being
+loaded has the connection to itself; that link is fetched first once the
+new page shows. Under `mode: 'server'` it does not — every link a visitor
+scrolls past would be a render on the server.
 
 Only a link a click would load in place is fetched: the same origin and below
 Vite's `base`, no `download`, no `target` other than `_self`, and not the
@@ -656,12 +660,24 @@ Under `mode: 'static'` the build also writes `client-files.json`: for each
 page, the scripts and stylesheets its client components need, less those
 every page loads. The runtime reads it at low priority once the document
 runs, and whenever it asks for a page's payload — a prefetch or a
-navigation — it links that page's files at the same moment
-(`<link rel="modulepreload">` for a script, `<link rel="preload" as="style">`
-for a stylesheet) instead of waiting for the payload to name them, a round
-trip later. A stylesheet still applies only once the client component that
-needs it loads. A page the list leaves out — a shell's value, or a host that
-lost the file — loads as it would without one.
+navigation — it links that page's files at the same moment and at the
+payload's priority (`<link rel="modulepreload">` for a script,
+`<link rel="preload" as="style">` for a stylesheet) instead of waiting for
+the payload to name them, a round trip later. The links on screen are
+fetched only once the list has been read. A stylesheet still applies only
+once the client component that needs it loads. A page the list leaves out —
+a shell's value, or a host that lost the file — loads as it would without
+one.
+
+A payload fetched ahead names the Server Components' stylesheets of its
+page too, and React fetches each with `<link rel="preload" as="style">` as
+the payload is read; they apply once the page is visited. Until then
+Chromium logs that the file "was preloaded using link preload but not used
+within a few seconds", once per file — more of them under a touch screen,
+where the links on screen are fetched ahead. The warning is harmless: a
+visit uses what was fetched. `<link rel="prefetch">`, which would not
+warn, is not in Safari, so it is not used. Mark a long list
+`data-k8ordo-prefetch="false"` to fetch, and warn, less.
 
 Under `mode: 'server'` a prefetch is a render, as a navigation is — the
 reason to mark a link to an expensive page. The platform's Speculation
