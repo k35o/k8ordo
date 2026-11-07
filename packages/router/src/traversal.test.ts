@@ -561,6 +561,35 @@ describe.each(browserTypes)(
       await page.unroute(entry);
     }, 30_000);
 
+    // React はページを画面に出した commit のあと、passive effect を回す前にブラウザへ
+    // 譲る。描いたタスクの直後に届く MutationObserver で、その隙にリンクをたどる。
+    // 聞き始めるのはスクリプトを走らせる前の、文書を読み終えたときなので、最初に届く
+    // 変化はページを描いた commit
+    it('follows a link the visitor follows as soon as the page shows, without loading the document', async () => {
+      await page.addInitScript(() => {
+        document.addEventListener(
+          'readystatechange',
+          () => {
+            const observer = new MutationObserver(() => {
+              observer.disconnect();
+              navigation.navigate('/about').finished?.catch(() => undefined);
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+          },
+          { once: true },
+        );
+      });
+
+      await page.goto(`${origin}/tall`);
+
+      await heading('about');
+      expect(
+        await page.evaluate(
+          () => performance.getEntriesByType('navigation')[0]?.name,
+        ),
+      ).toBe(`${origin}/tall`);
+    }, 30_000);
+
     // WebKit では、読み直しの要求が返る前にリンクを押せる。横取りすると読み直しが止まり、
     // currentEntry が null の文書ではその遷移も AbortError になる
     it('follows a link the visitor clicks as soon as they go back past another site', async () => {
