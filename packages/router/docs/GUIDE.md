@@ -138,9 +138,11 @@ in the browser; the rest is left alone, so a real document load — and a real
 nothing rather than guessing.
 
 Four kinds of navigation are never the application's, whatever the table says:
-a reload, a form submitted with a body (POST), a download, and a fragment-only
-change — nor is any navigation the platform does not let a page intercept,
-such as one to another origin. Intercepting any of the four would silently do
+a reload, a form submitted with a body (POST), a download, and a move to a
+fragment within the document — nor is any navigation the platform does not
+let a page intercept, such as one to another origin. A move that drops the
+fragment (`/docs#api` to `/docs`) is not a move to a fragment: the platform
+loads a document for it, so it is the application's like any other. Intercepting any of the four would silently do
 nothing where the platform would have done the obvious thing — a POST body
 only the server can act on, an `F5` that stops reloading. A GET form carries
 no body, so the search-shaped submissions `@k8ordo/state` builds still come

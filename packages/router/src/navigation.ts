@@ -26,7 +26,10 @@ import { decodeOrKeep, normalizePathname } from './paths';
 export type NavigationFacts = Pick<
   NavigateEvent,
   'canIntercept' | 'hashChange' | 'downloadRequest' | 'navigationType'
-> & { readonly formData: FormData | null };
+> & {
+  readonly formData: FormData | null;
+  readonly destination: Pick<NavigationDestination, 'sameDocument'>;
+};
 
 /**
  * Whether this navigation is the application's to handle at all.
@@ -39,7 +42,10 @@ export type NavigationFacts = Pick<
  */
 export const isOurs = (event: NavigationFacts): boolean =>
   event.canIntercept &&
-  !event.hashChange &&
+  // WebKit は fragment を外す移動（/p#a から /p）にも hashChange を立てるが、行き先を
+  // 同じ文書とは言わず、横取りしなければ文書を読み込み直す。ブラウザに任せるのは
+  // 文書の中の fragment への移動だけ
+  !(event.hashChange && event.destination.sameDocument) &&
   event.downloadRequest === null &&
   event.navigationType !== 'reload' &&
   event.formData === null;

@@ -9,6 +9,7 @@ const facts = (overrides: Partial<NavigationFacts> = {}): NavigationFacts => ({
   downloadRequest: null,
   navigationType: 'push',
   formData: null,
+  destination: { sameDocument: false },
   ...overrides,
 });
 
@@ -31,8 +32,19 @@ describe('isOurs', () => {
 
   it('leaves what the platform says it cannot have', () => {
     expect(isOurs(facts({ canIntercept: false }))).toBe(false);
-    expect(isOurs(facts({ hashChange: true }))).toBe(false);
     expect(isOurs(facts({ downloadRequest: '' }))).toBe(false);
+  });
+
+  it('leaves a move within the document to a fragment to the browser', () => {
+    expect(
+      isOurs(facts({ hashChange: true, destination: { sameDocument: true } })),
+    ).toBe(false);
+  });
+
+  it('takes a move that drops the fragment, which WebKit announces as a hash change that loads a document', () => {
+    expect(
+      isOurs(facts({ hashChange: true, destination: { sameDocument: false } })),
+    ).toBe(true);
   });
 });
 

@@ -334,6 +334,22 @@ it('scrolls to the fragment the new URL names', async () => {
   expect(window.scrollY).toBeGreaterThan(1000);
 });
 
+it('stays in the document, where it was, when the fragment is dropped from the URL', async () => {
+  const screen = await render(<Router routes={routes} />);
+  await navigateTo('/about', { history: 'replace' }).finished;
+  await navigation.navigate(`${location.origin}/tall#target`).finished;
+  await expect.element(screen.getByTestId('tall')).toBeInTheDocument();
+  const tall = screen.getByTestId('tall').element();
+  const reading = window.scrollY;
+
+  await navigation.navigate(`${location.origin}/tall`, { history: 'replace' })
+    .finished;
+
+  expect(location.hash).toBe('');
+  expect(screen.getByTestId('tall').element()).toBe(tall);
+  expect(window.scrollY).toBe(reading);
+});
+
 it('keeps the scroll position when only the search moves', async () => {
   const screen = await render(<Router routes={routes} />);
   await navigateTo('/tall', { history: 'replace' }).finished;
