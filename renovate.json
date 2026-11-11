@@ -84,6 +84,15 @@
       "automerge": false
     },
     {
+      "description": "actions.lock がコミットを固定するので、ワークフローと composite action の uses はタグ表記のままにする",
+      "matchDepTypes": ["action"],
+      "matchFileNames": [
+        ".github/workflows/**",
+        ".github/composite-actions/**"
+      ],
+      "pinDigests": false
+    },
+    {
       "description": "customManagers が上げるので、docker としては拾わない",
       "matchManagers": ["github-actions"],
       "matchDepNames": ["mcr.microsoft.com/playwright"],
