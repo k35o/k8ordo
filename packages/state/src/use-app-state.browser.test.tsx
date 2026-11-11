@@ -285,6 +285,95 @@ it('collapses several updates in one handler into one navigation', async () => {
   expect(navigations - before).toBe(1);
 });
 
+let turn:
+  | ((page: number, options?: { history: 'push' }) => UpdateHandle)
+  | undefined;
+
+// スライダーのように、ハンドラをまたいで続けて書く部品
+const Dial: FC = () => {
+  const [{ page }, update] = useAppState(listState, ['page']);
+  useLayoutEffect(() => {
+    turn = (next, options) => update({ page: next }, options);
+  }, [update]);
+  return <p data-testid="page">{page}</p>;
+};
+
+const turnTo = async (
+  page: number,
+  options?: { history: 'push' },
+): Promise<UpdateHandle> => {
+  const handle = (turn as NonNullable<typeof turn>)(page, options);
+  // update() が積んだ書き込みのマイクロタスクを先に通す
+  await Promise.resolve();
+  return handle;
+};
+
+const pageInUrl = (): string | null =>
+  new URL(location.href).searchParams.get('page');
+
+it('a run of updates writes the first at once and the rest as one later navigation', async () => {
+  const screen = await render(<Dial />);
+  const before = navigations;
+
+  await turnTo(2);
+  await turnTo(3);
+  const last = await turnTo(4);
+
+  expect(pageInUrl()).toBe('2');
+  expect(navigations - before).toBe(1);
+  await expect.element(screen.getByTestId('page')).toHaveTextContent('4');
+
+  await last.finished;
+  expect(pageInUrl()).toBe('4');
+  expect(navigations - before).toBe(2);
+});
+
+it('three hundred updates in a row all settle, under the limit WebKit puts on navigations', async () => {
+  await render(<Dial />);
+  const before = navigations;
+
+  let last: UpdateHandle | undefined;
+  for (let page = 2; page <= 301; page += 1) {
+    last = await turnTo(page);
+  }
+
+  await expect((last as UpdateHandle).finished).resolves.toBeUndefined();
+  expect(pageInUrl()).toBe('301');
+  expect(navigations - before).toBe(2);
+});
+
+it('a push is written at once, together with the updates that were waiting', async () => {
+  await render(<Dial />);
+  const entries = navigation.entries().length;
+  const before = navigations;
+
+  await turnTo(2);
+  await turnTo(3);
+  await turnTo(4, { history: 'push' });
+
+  expect(pageInUrl()).toBe('4');
+  expect(navigations - before).toBe(2);
+  expect(navigation.entries()).toHaveLength(entries + 1);
+});
+
+it('an update still waiting when the page is left is not written onto the next page', async () => {
+  await render(<Dial />);
+  await turnTo(2);
+  const waiting = await turnTo(3);
+
+  const next = new URL(home);
+  next.pathname = `${next.pathname.replace(/\/$/u, '')}/elsewhere`;
+  await navigation.navigate(next.href).finished;
+
+  await expect(waiting.committed).rejects.toMatchObject({ name: 'AbortError' });
+  // 待たせていた書き込みが、間隔を過ぎても来ないこと
+  await new Promise((resolve) => {
+    setTimeout(resolve, 200);
+  });
+  expect(location.pathname).toBe(next.pathname);
+  expect(pageInUrl()).toBeNull();
+});
+
 it('validates the patch on the spot — the echo never shows a rejected value', async () => {
   const screen = await render(<Pager />);
   const before = navigations;

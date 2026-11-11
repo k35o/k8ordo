@@ -20,6 +20,12 @@ export type UpdateOptions = {
   history?: 'push' | 'replace';
 };
 
+// WebKit は同じ文書への navigate を 10 秒に 200 回までしか通さず、超えた分を
+// QuotaExceededError で断る。入力ごとに書くスライダーは数秒で届くので、replace の
+// 書き込みは間をあける。枠は文書に 1 つなので、どの page store も同じ時刻を見る
+const URL_WRITE_INTERVAL = 100;
+let lastUrlWrite = Number.NEGATIVE_INFINITY;
+
 const storedEntryState = (): unknown => navigation.currentEntry?.getState();
 
 const readLive = (
@@ -68,11 +74,32 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
   let pending: StateValues | null = null;
   let pendingPush = false;
   let handle: Handle | null = null;
+  let waiting: ReturnType<typeof setTimeout> | undefined;
+
+  const takeBatch = (): void => {
+    clearTimeout(waiting);
+    waiting = undefined;
+    pending = null;
+    pendingPush = false;
+    handle = null;
+  };
 
   const sync = (): void => {
     const pathname = livePathname();
     let returned = false;
     if (pathname !== at) {
+      // まだ書いていないバッチは離れたページのもので、書けば次のページの URL に
+      // 載り、そのページをもう一度読み込ませる
+      if (handle !== null) {
+        const dropped = handle;
+        takeBatch();
+        dropped.fail(
+          new DOMException(
+            'The page was left before the update was written',
+            'AbortError',
+          ),
+        );
+      }
       if ((bound.get(at) ?? 0) > 0) left.set(at, core.freeze());
       returned = left.delete(pathname);
       at = pathname;
@@ -115,12 +142,11 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
   };
 
   const flush = (): void => {
-    const patch = pending as StateValues;
+    // 積んだあとでページを離れると、バッチはもう無い
+    if (pending === null) return;
+    const patch = pending;
     const push = pendingPush;
     const current = handle as Handle;
-    pending = null;
-    pendingPush = false;
-    handle = null;
 
     // 目標の組み立てから書き込みまでを 1 つの try に入れる。ここから先の
     // 失敗はこのバッチのもので、マイクロタスクの外に投げても誰も受け取れない
@@ -138,6 +164,22 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
         page.entry?.keys.some(
           (key) => !sameValue(live.entry[key], target[key]),
         ) ?? false;
+
+      // A push is an entry of its own and is never held back; a replace only
+      // refines the entry, so the ones in between can go unwritten. The batch
+      // stays open meanwhile: later updates join it and share its handle.
+      if (urlChanged && !push) {
+        const wait = lastUrlWrite + URL_WRITE_INTERVAL - performance.now();
+        if (wait > 0) {
+          waiting ??= setTimeout(() => {
+            waiting = undefined;
+            flush();
+          }, wait);
+          return;
+        }
+      }
+
+      takeBatch();
 
       if (!urlChanged && !entryChanged) {
         core.applyNext(target);
@@ -165,6 +207,7 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
           url.searchParams.append(key, value);
         }
       }
+      lastUrlWrite = performance.now();
       current.adopt(
         navigation.navigate(url.href, {
           history: push ? 'push' : 'replace',
@@ -172,6 +215,8 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
         }),
       );
     } catch (error) {
+      // navigate の中で走った listener が次のバッチを積んでいたら、それは残す
+      if (handle === current) takeBatch();
       current.fail(error);
     }
   };
@@ -206,7 +251,14 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
       queueMicrotask(flush);
     }
     Object.assign(pending, resolved);
-    if (options?.history === 'push') pendingPush = true;
+    if (options?.history === 'push') {
+      pendingPush = true;
+      if (waiting !== undefined) {
+        clearTimeout(waiting);
+        waiting = undefined;
+        queueMicrotask(flush);
+      }
+    }
     for (const key of Object.keys(pending)) pending[key] = echoed[key];
     core.applyNext(echoed);
     return (handle as Handle).external;
@@ -244,6 +296,8 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
     dispose: () => {
       navigation.removeEventListener('currententrychange', sync);
       window.removeEventListener('popstate', sync);
+      takeBatch();
+      lastUrlWrite = Number.NEGATIVE_INFINITY;
       left.clear();
       bound.clear();
       core.clear();

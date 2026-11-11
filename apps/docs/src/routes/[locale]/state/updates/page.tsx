@@ -131,6 +131,9 @@ export default function StateUpdatesPage() {
           ))}
         </ul>
         <p>
+          <Rich>{t.batchThin()}</Rich>
+        </p>
+        <p>
           <Rich>{t.batchSame()}</Rich>
           <LocaleAnchor path="/:locale/state/how-it-works">
             {m.state.navHowItWorks()}
