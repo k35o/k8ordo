@@ -510,6 +510,19 @@ with that error while the rendered value stays.
   cookie state still write their row (creating one if none was stored).
   Memory has nothing to batch: each call applies on the spot and returns its
   own settled handle.
+- **A run of url writes is thinned out.** A slider that updates a url field
+  on every input would navigate on every input, and WebKit refuses a
+  document's navigations past 200 in ten seconds, rejecting the rest with a
+  `QuotaExceededError`. So a `replace` that changes a url value within 100 ms
+  of the last url write waits for the rest of that time, and the updates made
+  meanwhile join it: one navigation carries the latest values, and they all
+  share its handle, whose `committed` settles when that navigation is in the
+  URL. The value on screen never waits — every `update()` still applies
+  synchronously. A `push` is an entry of its own and is never held back; it
+  takes what was waiting with it. An update still waiting when the page is
+  left — the URL's pathname moves — is not written, since it would land on
+  the next page's URL, and its handle rejects with an `AbortError`. Entry,
+  local, session, cookie and memory writes are not thinned.
 - **Functional form.** `update((current) => ({ page: current.page + 1 }))`
   reads the batched state, not the committed one.
 - **Shared ground stays shared.** A page state rewrites only its own params

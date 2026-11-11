@@ -120,6 +120,11 @@ export const batchMemory = message({
   en: 'Memory: nothing is batched. Each call applies on the spot and returns a handle of its own, already settled.',
 });
 
+export const batchThin = message({
+  ja: "スライダーのようにハンドラをまたいで続けて書くときは、URLへの書き込みが間引かれます。URLの値を変える`replace`の書き込みは、前の書き込みから100msたつまで待ち、そのあいだの`update()`を1回の遷移にまとめます。画面の値は`update()`のたびにすぐ変わります。WebKitが同じ文書への遷移を10秒に200回までしか通さないためです。`{ history: 'push' }`の書き込みは待ちません。",
+  en: "Writes that follow one another across handlers, as a slider's do, are thinned out on their way to the URL. A `replace` that changes a url value waits until 100 ms have passed since the last url write, and the `update()` calls made meanwhile become one navigation. The value on screen still changes on every `update()`. This is because WebKit lets a document navigate only 200 times in ten seconds. A `{ history: 'push' }` write never waits.",
+});
+
 export const batchSame = message({
   ja: 'ページの状態のバッチの結果が今の値と同じなら、遷移も履歴エントリの書き換えも起きません。localStorageとsessionStorage、Cookieは、値が変わらなくても保存した値を書き直します。ほかの定義やルーターのパラメータが残る仕組みは',
   en: 'A page state batch whose result equals the current values neither navigates nor rewrites the history entry. localStorage, sessionStorage and cookies rewrite their stored value even when nothing changed. How parameters of other definitions and of the router are kept is explained on ',
@@ -156,8 +161,8 @@ export const handleSettle = message({
 });
 
 export const handleAbort = message({
-  ja: 'あとから来た遷移に追い越された遷移：`AbortError`。たとえば同じハンドラで別のページの状態も書いたときです。ハンドルを待たなければ気づくことはありません。',
-  en: 'A navigation overtaken by a later one: an `AbortError`, for example when the same handler also writes another page state. A caller that never awaits the handle never sees it.',
+  ja: 'あとから来た遷移に追い越された遷移：`AbortError`。たとえば同じハンドラで別のページの状態も書いたときです。間引かれて待っているあいだにページを離れた書き込みも、書かれずに`AbortError`になります。ハンドルを待たなければ気づくことはありません。',
+  en: 'A navigation overtaken by a later one: an `AbortError`, for example when the same handler also writes another page state. A thinned write still waiting when the page is left is not written, and rejects with an `AbortError` too. A caller that never awaits the handle never sees it.',
 });
 
 export const handleFail = message({

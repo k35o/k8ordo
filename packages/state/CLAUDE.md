@@ -60,6 +60,20 @@ pnpm check         # check:write to auto-fix
   promise settles
   the handle. Memory has neither schema nor write to batch: each call swaps
   the snapshot and returns its own handle, settled on the spot.
+- **A `replace` that changes the URL keeps 100 ms from the last url write.**
+  WebKit rejects a document's navigations past 200 in ten seconds
+  (`QuotaExceededError: Navigation rate limit exceeded`, measured: the 201st
+  fails, and the budget is back ten seconds after the first), and a slider
+  writing on every input reaches that in seconds. `flush` leaves such a
+  batch open and comes back on a timer; updates made meanwhile join it and
+  share its handle. `lastUrlWrite` is module-level because the budget is the
+  document's, not a store's; `dispose` resets it so a test starts with a
+  free write. A `push` is never held back, and one arriving on a waiting
+  batch flushes it in a microtask. When the URL's pathname moves, `sync`
+  drops whatever batch is still open and rejects its handle with an
+  `AbortError`: a navigation cannot be started from inside the `navigate`
+  event that leaves the page (it aborts that one), so the write cannot be
+  finished first, and written later it would land on the next page.
 - **A pending batch survives concurrent events.** `sync`/`onStorage` overlay
   the unflushed patch on the fresh platform values, and `flush` rebuilds its
   target from live values + patch — never from the snapshot. Without both, a
