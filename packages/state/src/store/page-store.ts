@@ -28,19 +28,21 @@ let lastUrlWrite = Number.NEGATIVE_INFINITY;
 
 const storedEntryState = (): unknown => navigation.currentEntry?.getState();
 
-const readLive = (
-  def: PageState,
-  page: PageInternals,
-): { url: StateValues; entry: StateValues } => {
+type Live = { url: StateValues; entry: StateValues; hash: StateValues };
+
+const readLive = (def: PageState, page: PageInternals): Live => {
   const url =
     page.url === null
       ? {}
       : page.url.parse(new URL(location.href).searchParams);
-  if (page.entry === null) return { url, entry: {} };
+  const hash =
+    page.hash === null ? {} : { hash: page.hash.parse(location.hash) };
+  if (page.entry === null) return { url, entry: {}, hash };
   const stored = storedEntryState();
   return {
     url,
     entry: page.entry.parse(isRecord(stored) ? stored[def.key] : undefined),
+    hash,
   };
 };
 
@@ -61,6 +63,7 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
   const core = createStoreCore(page.keys, {
     ...initial.url,
     ...initial.entry,
+    ...initial.hash,
   });
 
   // An intercepting router commits the URL before the next tree arrives, and
@@ -113,7 +116,7 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
     // A concurrent platform event (another store's write landing, a
     // traversal) must not roll back a batch that has not flushed yet: the
     // pending patch stays on top of whatever became true.
-    core.applyNext({ ...live.url, ...live.entry, ...pending });
+    core.applyNext({ ...live.url, ...live.entry, ...live.hash, ...pending });
     // 戻った木は取っておいた値を読んでいた。URL の値が行き先のものと同じなら
     // applyNext は誰にも知らせないので、ここで読み直させる
     if (returned) core.touch();
@@ -130,6 +133,7 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
   const canonical = (values: StateValues): StateValues => ({
     ...(page.url === null ? {} : page.url.salvage(values)),
     ...(page.entry === null ? {} : page.entry.salvage(values)),
+    ...(page.hash === null ? {} : { hash: page.hash.salvage(values.hash) }),
   });
 
   const carryState = (stored: unknown, target: StateValues): unknown => {
@@ -156,10 +160,20 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
       // Parse-level comparison, not string comparison: a batch that ends back
       // where it started must not navigate at all.
       const live = readLive(def, page);
-      const target = canonical({ ...live.url, ...live.entry, ...patch });
+      const target = canonical({
+        ...live.url,
+        ...live.entry,
+        ...live.hash,
+        ...patch,
+      });
+      const hashChanged =
+        page.hash !== null && !sameValue(live.hash.hash, target.hash);
+      // The fragment is part of the URL: a write to it is a navigation too,
+      // and counts against the same budget.
       const urlChanged =
-        page.url?.keys.some((key) => !sameValue(live.url[key], target[key])) ??
-        false;
+        hashChanged ||
+        (page.url?.keys.some((key) => !sameValue(live.url[key], target[key])) ??
+          false);
       const entryChanged =
         page.entry?.keys.some(
           (key) => !sameValue(live.entry[key], target[key]),
@@ -206,6 +220,11 @@ const createPageStore = (def: PageState, page: PageInternals): Store => {
         )) {
           url.searchParams.append(key, value);
         }
+      }
+      // A fragment the schema rejects reads as the default, so writing the
+      // default over it changes nothing and never gets here: an anchor stays.
+      if (page.hash !== null && hashChanged) {
+        url.hash = page.hash.fragment(target.hash);
       }
       lastUrlWrite = performance.now();
       current.adopt(
@@ -324,6 +343,7 @@ export const pageInitialSnapshot = (
       for (const key of codec.keys) base[key] = codec.defaults[key];
     }
   }
+  if (page.hash !== null) base.hash = page.hash.fallback;
   if (page.url !== null && initialUrl !== undefined) {
     for (const key of page.url.keys) {
       if (key in initialUrl) base[key] = initialUrl[key];

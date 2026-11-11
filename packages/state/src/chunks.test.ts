@@ -7,7 +7,7 @@ import { beforeAll, expect, it } from 'vite-plus/test';
 const root = fileURLToPath(new URL('../fixtures/chunks/', import.meta.url));
 
 // definePageState、ページの store、Cookie の store だけが持つ文字
-const PAGE_DEFINITION = 'declares neither url nor entry';
+const PAGE_DEFINITION = 'declares neither url, entry nor hash';
 const PAGE_STORE = 'currententrychange';
 const COOKIE_STORE = 'cookieStore';
 

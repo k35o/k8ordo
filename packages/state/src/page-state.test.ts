@@ -376,6 +376,76 @@ describe('href and search', () => {
   });
 });
 
+const deckState = definePageState('deck', {
+  url: z.object({ mode: z.enum(['view', 'present']).default('view') }),
+  hash: z.coerce.number().int().min(1).default(1),
+});
+
+describe('the hash slot', () => {
+  it('builds a link whose fragment is the value', () => {
+    expect(deckState.href('/items', { hash: 3 })).toBe('/items#3');
+    expect(deckState.href('/items', { mode: 'present', hash: 3 })).toBe(
+      '/items?mode=present#3',
+    );
+  });
+
+  it('writes no fragment for the default', () => {
+    expect(deckState.href('/items', { hash: 1 })).toBe('/items');
+    expect(deckState.href('/items')).toBe('/items');
+  });
+
+  it('percent-encodes a fragment, so any string is one value', () => {
+    const noteState = definePageState('note', {
+      hash: z.string().default(''),
+    });
+    expect(noteState.href('/items', { hash: 'a b%41#c' })).toBe(
+      '/items#a%20b%2541%23c',
+    );
+  });
+
+  it('keeps the path literal in the type, with or without a fragment', () => {
+    expectTypeOf(deckState.href('/items', { hash: 2 })).toEqualTypeOf<
+      '/items' | `/items?${string}` | `/items#${string}`
+    >();
+  });
+
+  it('can be the only slot', () => {
+    const tabState = definePageState('tab', {
+      hash: z.enum(['a', 'b']).default('a'),
+    });
+    expect(tabState.href('/items', { hash: 'b' })).toBe('/items#b');
+  });
+
+  it('rejects a hash that cannot parse from absence', () => {
+    expect(() => definePageState('bare', { hash: z.string() })).toThrow(
+      /hash must tolerate absence/u,
+    );
+  });
+
+  it('rejects a boolean that is not stringbool — "false" would read as true', () => {
+    expect(() =>
+      definePageState('flag', { hash: z.coerce.boolean().default(false) }),
+    ).toThrow(/z\.stringbool\(\)/u);
+  });
+
+  it('rejects a url or entry field named hash beside it, the name the value takes in the state', () => {
+    expect(() =>
+      definePageState('clash', {
+        url: z.object({ hash: z.string().default('') }),
+        // @ts-expect-error hash is the name the fragment's value takes
+        hash: z.string().default(''),
+      }),
+    ).toThrow(/"clash" declares hash beside a url or entry field named hash/u);
+  });
+
+  it('reads a zod/mini schema the same way', () => {
+    const miniState = definePageState('mini-deck', {
+      hash: zm._default(zm.coerce.number().check(zm.int(), zm.gte(1)), 1),
+    });
+    expect(miniState.href('/items', { hash: 4 })).toBe('/items#4');
+  });
+});
+
 describe('the entry slot', () => {
   it('rejects a field declared in both url and entry, naming it', () => {
     expect(() =>

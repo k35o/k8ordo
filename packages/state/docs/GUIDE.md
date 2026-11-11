@@ -18,6 +18,7 @@ treats it as simply present.
 | --------------------------- | ------------------- | ------------------------ | --------------------- | ---------------------------------------------- |
 | `definePageState` — `url`   | searchParams        | back/forward, sharing    | anyone given the URL  | reads, where the router passes the search      |
 | `definePageState` — `entry` | history entry state | back/forward, reload     | that tab's entry      | —                                              |
+| `definePageState` — `hash`  | the URL's fragment  | back/forward, sharing    | anyone given the URL  | —                                              |
 | `defineLocalState`          | localStorage        | until deleted            | every tab, one device | —                                              |
 | `defineSessionState`        | sessionStorage      | reload, until tab closes | that tab              | —                                              |
 | `defineCookieState`         | a cookie            | 400 days from last write | every tab, one device | reads, where the page receives request cookies |
@@ -25,7 +26,7 @@ treats it as simply present.
 
 `url` and `entry` are the two faces of one history entry — one visible and
 shareable, one hidden — which is why they share a definition and update
-atomically. Web Storage, cookies and memory are app-scope, not page-scope,
+atomically. `hash` is the rest of that entry's URL, and travels with them. Web Storage, cookies and memory are app-scope, not page-scope,
 which is why they are their own kinds: the grouping difference is real, so
 the API makes it visible. sessionStorage is localStorage's per-tab twin,
 built the same way: it survives a reload of the tab — unlike memory — and
@@ -129,6 +130,47 @@ typed values they are, so there the schema must accept its own output: a
 Web Storage and the cookie hold, so keep those fields to what JSON
 represents: a `z.date()` shows its `Date` after the write and falls back to
 its default on the next load.
+
+## The fragment — one value
+
+A fragment is one string, so `hash` takes one schema for one value, not an
+object of fields, and that value is the field `hash` of the state:
+
+```tsx
+export const deckState = definePageState('deck', {
+  url: z.object({ mode: z._default(z.enum(['view', 'present']), 'view') }),
+  hash: z._default(z.coerce.number().check(z.int(), z.gte(1)), 1),
+});
+
+const [{ hash, mode }, update] = useAppState(deckState);
+// /slides/intro#3        → hash === 3
+update({ hash: 4 }); //    → /slides/intro#4
+deckState.href('/slides/intro', { hash: 4 }); // '/slides/intro#4'
+```
+
+It follows the url slot's rules: the schema must tolerate absence, a boolean
+is `z.stringbool()`, the default is written as no fragment at all, `replace`
+is the default and `{ history: 'push' }` adds an entry, and a run of writes is
+thinned out. The value is percent-encoded on the way out, so any string is one
+value. What differs:
+
+- **A fragment the schema rejects is not this state's.** The browser gives a
+  fragment a meaning of its own — the element with that id — so `#main`
+  under the schema above reads as the default, `1`, and stays in the URL:
+  writing the default changes nothing, and a write to `url` or `entry` keeps
+  it. A visitor following an in-page link moves the value back to its
+  default the same way. Only a value other than the default replaces it.
+- **The name is taken.** A `url` or `entry` field named `hash` beside a
+  `hash` slot is refused when the definition is made, and by the types.
+- **The server never sees it.** A fragment is not sent, so the server render
+  and the hydration render show the default, in every mode; there is no
+  `parseHash`.
+- **Setting a fragment needs no router.** It is a move within the document,
+  which the browser makes on its own, without scrolling unless an element
+  has that id. Going back to the default drops the fragment, and that is a
+  navigation the platform loads a document for unless something intercepts
+  it — `@k8ordo/router` does. A router that leaves every `hashChange` to the
+  browser reloads the page there in WebKit, which flags that move too.
 
 ## When a stored shape changes
 
@@ -499,7 +541,7 @@ with that error while the rendered value stays.
 - **`replace` by default.** An update refines the current entry. Pass
   `{ history: 'push' }` only for updates the back button should undo — the
   option exists only on page state, the one kind with a navigation behind it,
-  and takes effect only when a url value changes: an entry-only write
+  and takes effect only when a url or hash value changes: an entry-only write
   rewrites the current entry in place.
 - **One handler, one write.** Several `update()` calls on a page, local,
   session or cookie state made synchronously in one event handler collapse
@@ -522,7 +564,8 @@ with that error while the rendered value stays.
   takes what was waiting with it. An update still waiting when the page is
   left — the URL's pathname moves — is not written, since it would land on
   the next page's URL, and its handle rejects with an `AbortError`. Entry,
-  local, session, cookie and memory writes are not thinned.
+  local, session, cookie and memory writes are not thinned; a hash write is a
+  navigation and is.
 - **Functional form.** `update((current) => ({ page: current.page + 1 }))`
   reads the batched state, not the committed one.
 - **Shared ground stays shared.** A page state rewrites only its own params
