@@ -29,13 +29,13 @@ jobs:
     steps:
       - name: Generate token
         id: app-token
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        uses: actions/create-github-app-token@v3.3.0
         with:
           client-id: ${{ secrets.K35O_BOT_CLIENT_ID }}
           private-key: ${{ secrets.K35O_BOT_PRIVATE_KEY }}
 
       - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
@@ -43,12 +43,12 @@ jobs:
       # ビルドは publish 直前に release action の build 入力が回す。ここで
       # 先に組んでも捨てられるだけなので install だけにする。
       - name: Install
-        uses: ./.github/composite-actions/install
+        uses: $/.github/composite-actions/install
         with:
           build: none
 
       - name: Release
-        uses: k35o/pnpm-release-action@5e009384bf5b1d2501f8405817b5d5578a90624e # v0.2.2
+        uses: k35o/pnpm-release-action@v0.2.2
         with:
           # ルートの `pnpm build` は docs サイトまで組むので、サイトだけの失敗で
           # npm への公開が止まる。公開するパッケージだけを組む。

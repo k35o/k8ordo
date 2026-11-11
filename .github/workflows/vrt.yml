@@ -25,14 +25,14 @@ jobs:
       options: --user 1001 --ipc=host
     steps:
       - name: Checkout branch
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
 
       # Storybook は packages/ui の src から組むが、ui が読む @k8ordo/i18n は
       # その dist から解決されるので、build: none にはできない。
       - name: Install
-        uses: ./.github/composite-actions/install
+        uses: $/.github/composite-actions/install
 
       # headless shell の総称 monospace は、はじめ fontconfig の monospace
       # （WenQuanYi Zen Hei Mono）を指すが、画面より背の高いストーリーを撮ると
@@ -60,7 +60,7 @@ jobs:
       # main: 撮影結果を次回のPR比較用ベースラインとして保存する
       - name: Upload baseline
         if: github.event_name == 'push'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: vrt-baseline
           path: packages/ui/.vrt/actual
@@ -70,7 +70,7 @@ jobs:
       - name: Find baseline from main
         if: github.event_name == 'pull_request'
         id: baseline
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        uses: actions/github-script@v9.0.0
         with:
           script: |
             const { owner, repo } = context.repo;
@@ -99,7 +99,7 @@ jobs:
 
       - name: Download baseline from main
         if: steps.baseline.outputs.found == 'true'
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        uses: actions/download-artifact@v8.0.2
         with:
           name: vrt-baseline
           path: packages/ui/.vrt/expected
@@ -123,7 +123,7 @@ jobs:
 
       - name: Upload report
         if: github.event_name == 'pull_request' && steps.baseline.outputs.found == 'true'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        uses: actions/upload-artifact@v7.0.2
         with:
           name: vrt-report
           path: packages/ui/.vrt

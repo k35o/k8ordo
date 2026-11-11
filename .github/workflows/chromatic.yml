@@ -20,16 +20,16 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout branch
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false
       # Storybook は packages/ui の src から組むが、ui が読む @k8ordo/i18n は
       # その dist から解決されるので、build: none にはできない。
       - name: Install
-        uses: ./.github/composite-actions/install
+        uses: $/.github/composite-actions/install
       - name: Publish to Chromatic
-        uses: chromaui/action@f305ef908327aee3b80b0e6b3bbb60a742eaa049 # v18.13.6
+        uses: chromaui/action@v18.13.6
         with:
           projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           onlyChanged: true

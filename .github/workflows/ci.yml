@@ -51,12 +51,12 @@ jobs:
       SHARD: ${{ matrix.shard }}
     steps:
       - name: Checkout branch
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
 
       - name: Install
-        uses: ./.github/composite-actions/install
+        uses: $/.github/composite-actions/install
 
       # 最初の失敗で打ち切ると、走っていた他のパッケージも止まり、そのエンジンで
       # どこが落ちるのかが 1 つずつしか見えない。全部回してから落とす。
@@ -72,12 +72,12 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout branch
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
 
       - name: Install
-        uses: ./.github/composite-actions/install
+        uses: $/.github/composite-actions/install
 
       # 型を使う lint も typecheck と同じ .k8ordo/ を読む。表が無いと
       # PageProps の params が文字列に落ち、String(params.id) を余計な変換と
@@ -109,12 +109,12 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout branch
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
 
       - name: Install
-        uses: ./.github/composite-actions/install
+        uses: $/.github/composite-actions/install
 
       # route ファイルの型は生成される .k8ordo/ から来る (server-basic の
       # PageProps は Register の request を読む)。docs も同じ表で SitePath を
@@ -131,13 +131,13 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout branch
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
 
       # composite install が packages をビルド済み。
       - name: Install
-        uses: ./.github/composite-actions/install
+        uses: $/.github/composite-actions/install
 
       # Validate the publishable artifact: publint checks packaging metadata,
       # attw checks that types resolve under every module-resolution mode.
@@ -153,12 +153,12 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout branch
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
 
       - name: Install
-        uses: ./.github/composite-actions/install
+        uses: $/.github/composite-actions/install
 
       - name: Build docs site
         run: pnpm --filter './apps/*' build
@@ -182,12 +182,12 @@ jobs:
       TEST_BROWSER: ${{ matrix.browser }}
     steps:
       - name: Checkout branch
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
 
       - name: Install
-        uses: ./.github/composite-actions/install
+        uses: $/.github/composite-actions/install
 
       # ビルドが通るだけでは「生成 UI のデモが実は何も描画しない」
       # 「フレームワークが 1 枚も書き出していない」を検出できないため、
@@ -205,14 +205,14 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout branch
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
 
       # このチェックは packages/ui の src と docs しか読まないので dist は要らない。
       # トークンは CSS から組むときに書き出すので、ここで突き合わせるものは無い。
       - name: Install
-        uses: ./.github/composite-actions/install
+        uses: $/.github/composite-actions/install
         with:
           build: none
 
