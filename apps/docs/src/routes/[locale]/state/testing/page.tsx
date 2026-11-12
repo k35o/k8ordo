@@ -37,21 +37,11 @@ afterEach(async () => {
   await cookieStore.delete(density.cookieName);
 });`;
 
-const ROUTER = `const interceptAsRouter = (event: NavigateEvent) => {
-  if (event.canIntercept) event.intercept();
-};
+const ROUTER = `import { mountPageUrl } from '@k8ordo/state/testing';
 
-let home: string;
+beforeEach(() => mountPageUrl());`;
 
-beforeEach(() => {
-  home = location.href;
-  navigation.addEventListener('navigate', interceptAsRouter);
-});
-
-afterEach(async () => {
-  await navigation.navigate(home, { history: 'replace' }).finished;
-  navigation.removeEventListener('navigate', interceptAsRouter);
-});`;
+const ROUTER_URL = `beforeEach(() => mountPageUrl({ search: 'q=css', hash: '3' }));`;
 
 const STORAGE_EVENT = `localStorage.setItem(
   prefs.storageKey,
@@ -111,16 +101,16 @@ export default function StateTestingPage() {
       </DocSection>
 
       <DocSection id="router" title={t.routerTitle}>
-        <CodeBlock
-          code={ROUTER}
-          lang="ts"
-          marks={{ 2: 'highlight', 13: 'highlight', 14: 'highlight' }}
-        />
+        <CodeBlock code={ROUTER} lang="ts" marks={{ 3: 'highlight' }} />
         <p>
           <Rich>{t.routerIntercept()}</Rich>
         </p>
         <p>
           <Rich>{t.routerHome()}</Rich>
+        </p>
+        <CodeBlock code={ROUTER_URL} lang="ts" />
+        <p>
+          <Rich>{t.routerUrl()}</Rich>
         </p>
       </DocSection>
 

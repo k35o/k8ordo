@@ -34,8 +34,10 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
 
 ## Entry point
 
-- `@k8ordo/state` — `definePageState(key, { url?, entry? })` returns a pure
-  definition usable from server and client: `parseUrl(searchParams)` reads
+- `@k8ordo/state` — `definePageState(key, { url?, entry?, hash? })` returns a pure
+  definition usable from server and client (`hash` is one schema for one
+  value, the URL's fragment, read as the field `hash`; a fragment it rejects
+  is an anchor and is left alone): `parseUrl(searchParams)` reads
   the url slot typed with defaults applied and invalid values salvaged
   (wherever the router hands a page its search — in `@k8ordo/framework`'s
   server mode a page that exports `search = listState.url` receives the slot parsed as
@@ -87,7 +89,8 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   it — rejects them with its error;
   `{ history: 'push' }` exists only on page state and takes effect only when
   a url value changes).
-  `resetStateRegistry()` clears stores between tests. Augment
+  `resetStateRegistry()` clears stores between tests, and `mountPageUrl()`
+  from `@k8ordo/state/testing` stands in for a router there. Augment
   `interface Register { routes: typeof routes }` — the same line as for
   `@k8ordo/router` — to check each `href` path against the route table's
   linkable patterns segment by segment (`NavigablePath`, so a `/:locale`

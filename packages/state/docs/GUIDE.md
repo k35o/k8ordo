@@ -805,6 +805,23 @@ Clear stored rows by the definition's `storageKey` (in its own storage area)
 or `cookieName` (`await cookieStore.delete(def.cookieName)`); the Cookie
 Store API's `change` event fires in the same tab too, so a test that writes
 the cookie itself stands in for another tab.
-When testing url updates, intercept the `navigate` event in the test itself
-(as a router would); an unintercepted `navigation.navigate()` is a
-cross-document load.
+A test of url or hash updates needs a router: an unintercepted
+`navigation.navigate()` is a cross-document load that takes the test runner
+with it. `mountPageUrl()` from `@k8ordo/state/testing` stands in for one and
+gives the page the URL the test starts from:
+
+```ts
+import { mountPageUrl } from '@k8ordo/state/testing';
+
+// Vitest runs what beforeEach returns after the test; so does Storybook
+beforeEach(() => mountPageUrl({ search: 'q=css', hash: '3' }));
+```
+
+It intercepts as `@k8ordo/router` does — a move to a fragment within the
+document is left to the browser, and neither the viewport nor the focus is
+moved — and adds `search` to the params the page already has, in the spelling
+given (a test runner and Storybook keep params of their own there). The
+function it returns is the cleanup: it calls `resetStateRegistry()`, which
+also drops a thinned write still waiting, then puts back the URL and the
+entry state it found. It is not part of the main entry, so nothing of it
+reaches an application's bundle.

@@ -225,6 +225,7 @@ src/
   store/cookie-store.ts Cookie Store API wiring, change-event sync, in-flight guard
   store/memory-store.ts
   use-app-state.ts     the client hook ('use client'); the store its definition bound
+  testing.ts           mountPageUrl(): the ./testing entry, a router stand-in for tests
   register.ts          Register interface for typed-route path constraint;
                        AcceptedPath checks a path (routes → path → any)
   traversal.test.ts    serves fixtures/traversal with Vite and opens it top-level
@@ -281,9 +282,15 @@ is why `@k8ordo/form`'s checkbox for the same field submits the same string.
   HMR re-evaluation legitimately re-registers the same key, so a warning
   would cry wolf on every edit. The GUIDE tells users to treat keys as
   global names; revisit only with a schema-fingerprint comparison.
-- Browser tests play the router themselves: a `navigate` listener that calls
-  `event.intercept()`. Without it, `navigation.navigate()` in the test iframe
-  would be a cross-document load and kill the runner.
+- Browser tests play the router with `mountPageUrl()` (`src/testing.ts`, the
+  `./testing` entry users get): a `navigate` listener that intercepts as
+  `@k8ordo/router`'s `isOurs` does, placing neither viewport nor focus.
+  Without it, `navigation.navigate()` in the test iframe would be a
+  cross-document load and kill the runner. Its cleanup resets the registry
+  before it puts the URL back — a store disposed first cannot write a
+  waiting batch onto the restored URL — and restores with `navigate`, not
+  `updateCurrentEntry`, which refuses an `undefined` state. The entry holds
+  nothing of Storybook's: reading `parameters` is the application's.
 - Going back is asserted in `traversal.test.ts`, never in the browser tests:
   inside Vitest's iframe, Firefox runs a traversal's handler twice and then
   loses `currentEntry`, which stops every test after it.
