@@ -1,13 +1,13 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '状態をどこに置くかで、保存される期間と共有される範囲が決まります。6つの置き場所の違いを知り、選べるようになります。',
-  en: 'Where a state lives decides how long it lasts and who shares it. Knowing the six places lets you choose where each state belongs.',
+  ja: '状態をどこに置くかで、保存される期間と共有される範囲が決まります。7つの置き場所の違いを知り、選べるようになります。',
+  en: 'Where a state lives decides how long it lasts and who shares it. Knowing the seven places lets you choose where each state belongs.',
 });
 
 export const sixTitle = message({
-  ja: '6つの置き場所',
-  en: 'Six places',
+  ja: '7つの置き場所',
+  en: 'Seven places',
 });
 
 export const sixFunction = message({
@@ -23,6 +23,11 @@ export const sixUrl = message({
 export const sixEntry = message({
   ja: '`definePageState`の`entry`：履歴エントリの状態に置きます。戻る/進むと再読み込みでは残ります。URLには出ないので、共有したリンクには含まれません。',
   en: '`entry` of `definePageState`: the state of the history entry. It survives back, forward and reload. It never shows in the URL, so a shared link does not carry it.',
+});
+
+export const sixHash = message({
+  ja: '`definePageState`の`hash`：URLのフラグメント（`#`の後ろ）に置きます。値は1つだけで、戻る/進むで元に戻り、リンクを受け取った人も同じ値で開きます。サーバーには送られません。',
+  en: '`hash` of `definePageState`: the fragment of the URL, after the `#`. It holds one value. Back and forward restore it, and anyone given the link opens the same value. It is never sent to the server.',
 });
 
 export const sixLocal = message({

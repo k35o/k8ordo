@@ -74,6 +74,20 @@ pnpm check         # check:write to auto-fix
   `AbortError`: a navigation cannot be started from inside the `navigate`
   event that leaves the page (it aborts that one), so the write cannot be
   finished first, and written later it would land on the next page.
+- **The hash slot is one value, and a fragment the schema rejects is left
+  alone.** `hash/codec.ts` reads `location.hash` through one schema (not an
+  object: a fragment is one string) and the value is the field `hash` of the
+  flat state, so a `url` or `entry` field of that name is refused. A
+  rejected fragment is an anchor: it reads as the default, and because
+  `flush` compares live values, writing the default over it changes nothing
+  and it stays. `urlChanged` includes the hash, so a hash write is thinned
+  and pushed like a url write. Setting a fragment is a `hashChange` the
+  router leaves to the browser (same document, no scroll without an element
+  of that id, entry state carried by `navigate`'s `state`); dropping it is
+  not a fragment navigation, and WebKit announces it with `hashChange` true
+  and `destination.sameDocument` false, loading a document unless it is
+  intercepted — which is why `@k8ordo/router`'s `isOurs` reads both, and why
+  the browser tests' `interceptAsRouter` does.
 - **A pending batch survives concurrent events.** `sync`/`onStorage` overlay
   the unflushed patch on the fresh platform values, and `flush` rebuilds its
   target from live values + patch — never from the snapshot. Without both, a
@@ -195,6 +209,7 @@ pnpm check         # check:write to auto-fix
 src/
   schema/object.ts     StateSchema, absence rule, per-field salvage parse
   url/codec.ts         schema ⇄ URLSearchParams: parse + canonical search
+  hash/codec.ts        HashCodec: one schema ⇄ the URL's fragment
   entry/codec.ts       StoredCodec: read typed stored values (entry, local, session, cookie)
   page-state.ts        definePageState(); slot disjointness; urlReader (a url schema's reader, for the framework)
   base.ts              withBase: Vite's base in front of a link

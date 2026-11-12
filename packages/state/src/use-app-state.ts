@@ -5,7 +5,7 @@ import type { output } from 'zod/v4/core';
 
 import type { CookieState } from './cookie-state';
 import type { MemoryState } from './memory-state';
-import type { OutputOf, PageState } from './page-state';
+import type { HashOf, OutputOf, PageState } from './page-state';
 import type { StateSchema, StateValues } from './schema/object';
 import type { LocalState, SessionState } from './storage-state';
 import type { Patch, Store, UpdateHandle } from './store/core';
@@ -21,8 +21,8 @@ export type AnyState =
   | MemoryState;
 
 type StateOf<Def> =
-  Def extends PageState<infer Url, infer Entry>
-    ? OutputOf<Url> & OutputOf<Entry>
+  Def extends PageState<infer Url, infer Entry, infer Hash>
+    ? OutputOf<Url> & OutputOf<Entry> & HashOf<Hash>
     : Def extends LocalState<infer Schema>
       ? output<Schema>
       : Def extends SessionState<infer Schema>

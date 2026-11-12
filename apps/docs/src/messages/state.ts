@@ -92,6 +92,11 @@ export const navEntry = message({
   en: 'History entry',
 });
 
+export const navHash = message({
+  ja: 'フラグメント',
+  en: 'Fragment',
+});
+
 export const navStorage = message({
   ja: 'ストレージとメモリ',
   en: 'Storage and memory',

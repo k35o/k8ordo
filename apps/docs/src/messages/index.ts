@@ -48,6 +48,7 @@ export * as stateGetStarted from './state-get-started';
 export * as statePlaces from './state-places';
 export * as stateUrl from './state-url';
 export * as stateEntry from './state-entry';
+export * as stateHash from './state-hash';
 export * as stateStorage from './state-storage';
 export * as stateCookie from './state-cookie';
 export * as stateUpdates from './state-updates';

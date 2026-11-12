@@ -22,9 +22,13 @@ const listState = definePageState('list', {
 });
 
 // The library assumes a router that intercepts the Navigation API; the tests
-// play that router with the smallest possible handler.
+// play that router with the smallest possible handler. Like `@k8ordo/router`,
+// it leaves a move to a fragment within the document to the browser, and
+// places neither the viewport nor the focus for a write to the page on screen.
 const interceptAsRouter = (event: NavigateEvent) => {
-  if (event.canIntercept) event.intercept();
+  if (!event.canIntercept) return;
+  if (event.hashChange && event.destination.sameDocument) return;
+  event.intercept({ scroll: 'manual', focusReset: 'manual' });
 };
 
 let home: string;
@@ -372,6 +376,158 @@ it('an update still waiting when the page is left is not written onto the next p
   });
   expect(location.pathname).toBe(next.pathname);
   expect(pageInUrl()).toBeNull();
+});
+
+const deckState = definePageState('deck', {
+  url: z.object({ mode: z.enum(['view', 'present']).default('view') }),
+  entry: z.object({ notes: z.boolean().default(false) }),
+  hash: z.coerce.number().int().min(1).default(1),
+});
+
+let deck: ReturnType<typeof useAppState<typeof deckState>>[1] | undefined;
+
+const Deck: FC = () => {
+  const [{ hash, mode, notes }, update] = useAppState(deckState);
+  useLayoutEffect(() => {
+    deck = update;
+  }, [update]);
+  return (
+    <div style={{ height: '5000px' }}>
+      <p data-testid="slide">{hash}</p>
+      <p data-testid="mode">{mode}</p>
+      <p data-testid="notes">{String(notes)}</p>
+    </div>
+  );
+};
+
+const updateDeck: NonNullable<typeof deck> = (...args) =>
+  (deck as NonNullable<typeof deck>)(...args);
+
+const moveToFragment = async (fragment: string): Promise<void> => {
+  const url = new URL(location.href);
+  url.hash = fragment;
+  await navigation.navigate(url.href, { history: 'replace' }).finished;
+};
+
+it('reads the fragment it mounts into as the hash value', async () => {
+  await moveToFragment('3');
+
+  const screen = await render(<Deck />);
+
+  await expect.element(screen.getByTestId('slide')).toHaveTextContent('3');
+});
+
+it('writes the hash value as the fragment, without moving the viewport', async () => {
+  const screen = await render(<Deck />);
+  window.scrollTo(0, 800);
+
+  await updateDeck({ hash: 4 }).finished;
+
+  expect(location.hash).toBe('#4');
+  expect(window.scrollY).toBe(800);
+  await expect.element(screen.getByTestId('slide')).toHaveTextContent('4');
+});
+
+it('drops the fragment when the hash value goes back to its default', async () => {
+  await moveToFragment('3');
+  await render(<Deck />);
+
+  await updateDeck({ hash: 1 }).finished;
+
+  expect(location.href).not.toContain('#');
+});
+
+it('a fragment the schema rejects reads as the default and stays in the URL', async () => {
+  await moveToFragment('main');
+  const screen = await render(<Deck />);
+
+  await expect.element(screen.getByTestId('slide')).toHaveTextContent('1');
+  await updateDeck({ mode: 'present' }).finished;
+  await updateDeck({ hash: 1 }).finished;
+
+  expect(location.hash).toBe('#main');
+  expect(new URL(location.href).searchParams.get('mode')).toBe('present');
+});
+
+it('follows a fragment the visitor moves to', async () => {
+  const screen = await render(<Deck />);
+
+  await moveToFragment('5');
+  await expect.element(screen.getByTestId('slide')).toHaveTextContent('5');
+
+  await moveToFragment('main');
+  await expect.element(screen.getByTestId('slide')).toHaveTextContent('1');
+});
+
+it('a hash write carries the entry state and the search it did not change', async () => {
+  const screen = await render(<Deck />);
+  await updateDeck({ mode: 'present', notes: true }).finished;
+
+  await updateDeck({ hash: 2 }).finished;
+
+  expect(location.hash).toBe('#2');
+  expect(new URL(location.href).searchParams.get('mode')).toBe('present');
+  expect(navigation.currentEntry?.getState()).toStrictEqual({
+    deck: { notes: true },
+  });
+  await expect.element(screen.getByTestId('notes')).toHaveTextContent('true');
+});
+
+it('a batch that moves the search, the entry and the hash is one navigation', async () => {
+  await render(<Deck />);
+  const before = navigations;
+
+  await updateDeck({ mode: 'present', notes: true, hash: 7 }).finished;
+
+  expect(navigations - before).toBe(1);
+  expect(location.hash).toBe('#7');
+  expect(new URL(location.href).searchParams.get('mode')).toBe('present');
+});
+
+it('a hash write pushes an entry only on request', async () => {
+  await render(<Deck />);
+  const entries = navigation.entries().length;
+
+  await updateDeck({ hash: 2 }).finished;
+  expect(navigation.entries()).toHaveLength(entries);
+
+  await updateDeck({ hash: 3 }, { history: 'push' }).finished;
+  expect(navigation.entries()).toHaveLength(entries + 1);
+});
+
+it('a run of hash writes is thinned like any other url write', async () => {
+  await render(<Deck />);
+  const before = navigations;
+
+  let last: UpdateHandle | undefined;
+  for (let slide = 2; slide <= 301; slide += 1) {
+    last = updateDeck({ hash: slide });
+    await Promise.resolve();
+  }
+
+  await expect((last as UpdateHandle).finished).resolves.toBeUndefined();
+  expect(location.hash).toBe('#301');
+  expect(navigations - before).toBe(2);
+});
+
+it('the server render shows the default and hydration takes the fragment', async () => {
+  await moveToFragment('6');
+  const host = document.createElement('div');
+  document.body.append(host);
+  host.innerHTML = renderToString(<Deck />);
+  expect(host.querySelector('[data-testid="slide"]')?.textContent).toBe('1');
+
+  const root = hydrateRoot(host, <Deck />);
+  try {
+    await vi.waitFor(() => {
+      expect(host.querySelector('[data-testid="slide"]')?.textContent).toBe(
+        '6',
+      );
+    });
+  } finally {
+    root.unmount();
+    host.remove();
+  }
 });
 
 it('validates the patch on the spot — the echo never shows a rejected value', async () => {

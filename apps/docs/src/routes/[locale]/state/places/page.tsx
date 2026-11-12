@@ -80,6 +80,7 @@ export default function StatePlacesPage() {
           {[
             t.sixUrl,
             t.sixEntry,
+            t.sixHash,
             t.sixLocal,
             t.sixSession,
             t.sixCookie,

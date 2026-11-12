@@ -74,7 +74,7 @@ const spellBoolean = (schema: $ZodType, value: boolean): string => {
   return String(value);
 };
 
-const serializeValue = (
+export const serializeValue = (
   schema: $ZodType,
   key: string,
   value: unknown,
@@ -89,7 +89,7 @@ const serializeValue = (
   );
 };
 
-const refuseBoolean = (schema: $ZodType, name: string): void => {
+export const refuseBoolean = (schema: $ZodType, name: string): void => {
   if (baseOf(schema)._zod.def.type === 'boolean') {
     throw new TypeError(
       `url boolean fields must use z.stringbool() — a URL carries strings, and "false" is not false to z.boolean() or z.coerce.boolean(): ${name}`,
