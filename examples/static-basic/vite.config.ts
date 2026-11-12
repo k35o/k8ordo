@@ -2,13 +2,11 @@ import { colorSchemeScriptHash } from '@k8ordo/color-scheme';
 import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
 
-import { paths } from './src/paths';
 
 export default defineConfig({
   plugins: [
     framework({
       mode: 'static',
-      paths,
       // origin が分かれば sitemap.xml も書ける
       site: 'https://example.test',
       // ポリシーはアプリが決める。フレームワークは自分のインラインスクリプトと

@@ -16,7 +16,7 @@ export type ServerOptions = EngineOptions & {
   readonly mode: 'server';
 };
 
-/** `paths`, `site` and `csp` describe files, so only `mode: 'static'` takes them. */
+/** `site` and `csp` describe files, so only `mode: 'static'` takes them. */
 export type FrameworkOptions = StaticOptions | ServerOptions;
 
 export type { ContentSecurityPolicy } from './documents';
@@ -26,7 +26,7 @@ export type { StaticOptions } from './static';
 // beside this file — `dist/runtime/` — which is where Vite is pointed.
 const RUNTIME_DIR = fileURLToPath(new URL('./runtime/', import.meta.url));
 
-const STATIC_ONLY = ['paths', 'site', 'csp'] as const;
+const STATIC_ONLY = ['site', 'csp'] as const;
 
 const shown = (value: unknown): string =>
   typeof value === 'string' ? `'${value}'` : String(value);
@@ -44,6 +44,12 @@ const checked = (options: unknown): FrameworkOptions => {
   if (mode !== 'static' && mode !== 'server') {
     throw new Error(
       `framework() needs mode: 'static' or 'server', and got ${shown(mode)}`,
+    );
+  }
+  // 型の無い設定では、消えたオプションは黙って無視され、値のあるページが 1 つも書かれない
+  if (given.paths !== undefined) {
+    throw new Error(
+      "framework() takes no paths — a parameter's values come from a paths.ts in its directory under routes/",
     );
   }
   const staticOnly = STATIC_ONLY.filter((name) => given[name] !== undefined);

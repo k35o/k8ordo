@@ -77,6 +77,8 @@ type Previewed =
 let root: string;
 
 beforeEach(async () => {
+  listed = {};
+  asked = 0;
   root = await mkdtemp(path.join(tmpdir(), 'k8ordo-static-'));
   await mkdir(path.join(root, 'src', 'routes'), { recursive: true });
   await writeFile(
@@ -88,6 +90,34 @@ beforeEach(async () => {
 afterEach(async () => {
   await rm(root, { recursive: true, force: true });
 });
+
+/** What each paths.ts of the test's application returns, or throws. */
+let listed: Record<string, readonly string[] | Error> = {};
+/** How many times `vite dev` asked a paths.ts for its values. */
+let asked = 0;
+
+/**
+ * Gives the application paths.ts files returning these values: the files
+ * themselves, for the grammar to find, and what they return — read by the
+ * handler the build imports (`pathValues`) and by `vite dev`'s runner.
+ */
+const listing = async (
+  values: Record<string, readonly string[] | Error>,
+): Promise<void> => {
+  listed = values;
+  await routeFiles(Object.keys(values));
+  await writeFile(
+    path.join(root, 'listed.json'),
+    JSON.stringify(
+      Object.fromEntries(
+        Object.entries(values).filter(([, value]) => Array.isArray(value)),
+      ),
+    ),
+  );
+};
+
+/** The one paths.ts most tests need: `/posts/1`. */
+const POST_1 = { 'posts/[id]/paths.ts': ['1'] };
 
 const routeFiles = async (files: readonly string[]): Promise<void> => {
   await Promise.all(
@@ -144,6 +174,9 @@ const hooks = (
     plugin.configureServer as unknown as {
       handler: (server: {
         middlewares: { use: (middleware: Middleware) => void };
+        environments: {
+          rsc: { runner: { import: (file: string) => Promise<unknown> } };
+        };
       }) => () => void;
     }
   ).handler;
@@ -165,7 +198,6 @@ const hooks = (
         '@k8ordo/framework/server',
         importer,
       ),
-    finish: () => buildApp({ config: { plugins: [] } }),
     build: (plugins: readonly unknown[] = []) =>
       buildApp({
         config: {
@@ -189,6 +221,29 @@ const hooks = (
             installed = middleware;
           },
         },
+        // RSC の環境の runner の代わり。paths.ts を読むと、テストが決めた値を返す
+        environments: {
+          rsc: {
+            runner: {
+              import: (file) => {
+                const values =
+                  listed[
+                    path
+                      .relative(path.join(root, 'src', 'routes'), file)
+                      .split(path.sep)
+                      .join('/')
+                  ];
+                return Promise.resolve({
+                  default: () => {
+                    asked += 1;
+                    if (values instanceof Error) throw values;
+                    return values;
+                  },
+                });
+              },
+            },
+          },
+        },
       });
       install();
       if (installed === undefined) throw new Error('no middleware installed');
@@ -196,7 +251,17 @@ const hooks = (
       return (url: string): Promise<string> =>
         new Promise((resolve, reject) => {
           const request: Request = { method: 'GET', url, originalUrl: url };
-          middleware(request, {}, (error) => {
+          let status = 0;
+          const response = {
+            writeHead(code: number) {
+              status = code;
+              return response;
+            },
+            end() {
+              resolve(`answered ${String(status)}`);
+            },
+          };
+          middleware(request, response, (error) => {
             if (error === undefined) resolve(request.originalUrl ?? '');
             else
               reject(
@@ -259,11 +324,14 @@ const hooks = (
 
 describe('the build’s refusal of the request API', () => {
   it('names the module that imports it, and not the index.html the RSC plugin resolves an installed package from again', async () => {
-    const { resolveFrom, finish } = hooks();
+    const { resolveFrom, build: finish } = hooks();
     resolveFrom(path.join(root, 'src', 'routes', 'page.tsx'));
     // @vitejs/plugin-rsc は node_modules に解決した bare import を、
     // <root>/index.html からもう一度解決して同じパッケージかを確かめる
     resolveFrom(path.join(root, 'index.html'));
+
+    // paths.ts を読むために、断る前にビルドされたハンドラを読む
+    await handlerAnswering({});
 
     await expect(finish()).rejects.toThrow(
       "static build cannot answer a request — a file is written once for every visitor, and these import @k8ordo/framework/server:\n  src/routes/page.tsx\nthis application wants mode: 'server'",
@@ -290,6 +358,13 @@ const handlerAnswering = async (
   await writeFile(
     path.join(dir, 'index.js'),
     `const answers = ${JSON.stringify(answers)};
+export const pathValues = async (file) =>
+  JSON.parse(
+    await (await import('node:fs/promises')).readFile(
+      new URL('../../listed.json', import.meta.url),
+      'utf8',
+    ),
+  )[file];
 export default async function handler(request) {
   const { pathname } = new URL(request.url);
   const answer = answers[pathname] ?? answers['*'];
@@ -331,10 +406,8 @@ describe('the shells a build writes', () => {
   it('writes each shell’s HTML and payload under its shell pathname, and leaves it out of the sitemap', async () => {
     await routeFiles(POSTS);
     await handlerAnswering(site());
-    const { build, said } = hooks({
-      paths: () => ['/posts/1'],
-      site: 'https://example.com',
-    });
+    await listing(POST_1);
+    const { build, said } = hooks({ site: 'https://example.com' });
 
     await build();
 
@@ -353,7 +426,7 @@ describe('the shells a build writes', () => {
     await handlerAnswering(answers);
 
     await expect(hooks().build()).rejects.toThrow(
-      'the "paths" option supplied shell locations a params schema refused: /posts/:id',
+      'the shells stand where a params schema refuses the values above them: /posts/:id',
     );
   });
 
@@ -409,7 +482,8 @@ describe('the shells a build writes', () => {
       // 描けなかったことは throw の文言で確かめる
     });
 
-    await expect(hooks({ paths: () => ['/posts/1'] }).build()).rejects.toThrow(
+    await listing(POST_1);
+    await expect(hooks().build()).rejects.toThrow(
       'static build could not render /posts/1, /posts/:id — see the error above',
     );
     expect(logged).toHaveBeenCalledWith(
@@ -568,9 +642,8 @@ describe('a route.ts at a file the build writes itself', () => {
       ]);
       await handlerAnswering(site());
 
-      await expect(
-        hooks({ paths: () => ['/posts/1', '/404.html'] }).build(),
-      ).rejects.toThrow(
+      await listing({ ...POST_1, '[file]/paths.ts': ['404.html'] });
+      await expect(hooks().build()).rejects.toThrow(
         `${TAKEN}\n  404.html: src/routes/[file]/route.ts, and src/routes/not-found.tsx is written there\n  _redirects: src/routes/_redirects/route.ts, and the shells of src/routes/posts/[id]/fallback.tsx are reached through it — rules of your own go in public/_redirects, which the build adds to its own`,
       );
     });
@@ -767,7 +840,8 @@ describe('the _redirects a build writes', () => {
       path.join(root, 'dist', 'client', '_redirects'),
       '/old /new 301\n',
     );
-    const { build } = hooks({ paths: () => ['/posts/1'] });
+    await listing(POST_1);
+    const { build } = hooks();
 
     await build();
     // emptyOutDir: false のビルドは、前のビルドが重ねたファイルを残している
@@ -791,7 +865,8 @@ describe('the _redirects a build writes', () => {
     await routeFiles(POSTS);
     await handlerAnswering(site());
     await mkdir(path.join(root, 'public', '_redirects'), { recursive: true });
-    const { build } = hooks({ paths: () => ['/posts/1'] });
+    await listing(POST_1);
+    const { build } = hooks();
 
     await expect(build()).rejects.toThrow(/EISDIR/u);
   });
@@ -817,15 +892,14 @@ describe('the _redirects a build writes', () => {
     await routeFiles(POSTS);
     await handlerAnswering(
       site({
-        '/posts/a:b': { body: '<p>a:b</p>' },
-        '/posts/a:b/index.rsc': { body: 'a:b payload' },
+        '/posts/a%3Ab': { body: '<p>a:b</p>' },
+        '/posts/a%3Ab/index.rsc': { body: 'a:b payload' },
         '/posts/a%2Ab': { body: '<p>a*b</p>' },
         '/posts/a%2Ab/index.rsc': { body: 'a*b payload' },
       }),
     );
-    const { build, said } = hooks({
-      paths: () => ['/posts/a:b', '/posts/a%2Ab'],
-    });
+    await listing({ 'posts/[id]/paths.ts': ['a:b', 'a*b'] });
+    const { build, said } = hooks();
 
     await build();
 
@@ -858,7 +932,8 @@ describe('the _redirects a build writes', () => {
     };
     await routeFiles(POSTS);
     await handlerAnswering(site());
-    const { build, said } = hooks({ paths: () => ['/posts/1'] });
+    await listing(POST_1);
+    const { build, said } = hooks();
 
     await ownRules(1998, 98);
     await build();
@@ -875,7 +950,8 @@ describe('the _redirects a build writes', () => {
   it('writes none for a site without shells', async () => {
     await routeFiles(['posts/[id]/page.tsx']);
     await handlerAnswering(site());
-    const { build, said } = hooks({ paths: () => ['/posts/1'] });
+    await listing(POST_1);
+    const { build, said } = hooks();
 
     await build();
 
@@ -906,12 +982,13 @@ describe('a build with a host adapter', () => {
     await handlerAnswering(
       site({
         '/posts/old': { status: 308, headers: { location: '/posts/1' } },
-        '/posts/a:b': { body: '<p>a:b</p>' },
-        '/posts/a:b/index.rsc': { body: 'a:b payload' },
+        '/posts/a%3Ab': { body: '<p>a:b</p>' },
+        '/posts/a%3Ab/index.rsc': { body: 'a:b payload' },
       }),
     );
     const { handed, plugin } = adapter();
-    const { build, said } = hooks({ paths: () => ['/posts/1', '/posts/a:b'] });
+    await listing({ 'posts/[id]/paths.ts': ['1', 'a:b'] });
+    const { build, said } = hooks();
 
     await build([plugin]);
 
@@ -954,7 +1031,8 @@ describe('a build with a host adapter', () => {
       },
     });
     const { handed, plugin } = adapter();
-    const { build } = hooks({ paths: () => ['/docs/a%20b/article.md'] });
+    await listing({ 'docs/[slug]/paths.ts': ['a b'] });
+    const { build } = hooks();
 
     await build([plugin]);
 
@@ -969,20 +1047,29 @@ describe('a build with a host adapter', () => {
 });
 
 describe('vite dev', () => {
-  it('never asks paths for anything in an application without a fallback.tsx', async () => {
-    await routeFiles(['posts/[id]/page.tsx']);
-    const paths = vi.fn<() => string[]>(() => ['/posts/1']);
-    const { serve } = hooks({ paths });
-    const request = serve();
+  it('asks no paths.ts for a URL no parameter could answer', async () => {
+    await routeFiles([...POSTS, 'about/page.tsx']);
+    await listing(POST_1);
+    const request = hooks().serve();
 
-    expect(await request('/posts/3')).toBe('/posts/3');
-    expect(paths).not.toHaveBeenCalled();
+    expect(await request('/favicon.ico')).toBe('/favicon.ico');
+    expect(await request('/about')).toBe('/about');
+    expect(asked).toBe(0);
   });
 
-  it('answers a value paths does not list with its shell, and one it lists with the page', async () => {
+  it('leaves a URL a literal declared first answers to its page', async () => {
+    await routeFiles(['posts/[id]/page.tsx', 'posts/new/page.tsx']);
+    await listing(POST_1);
+    const request = hooks().serve();
+
+    expect(await request('/posts/new')).toBe('/posts/new');
+    expect(asked).toBe(0);
+  });
+
+  it('answers a value no paths.ts returns with its shell, and one returned with the page', async () => {
     await routeFiles(POSTS);
-    const paths = vi.fn<() => string[]>(() => ['/posts/1']);
-    const { serve, said } = hooks({ paths });
+    await listing(POST_1);
+    const { serve, said } = hooks();
     const request = serve();
 
     expect(await request('/posts/3?from=x')).toBe('/posts/!fallback?from=x');
@@ -991,15 +1078,15 @@ describe('vite dev', () => {
     );
     expect(await request('/posts/1')).toBe('/posts/1');
     expect(await request('/posts/!fallback')).toBe('/posts/!fallback');
-    expect(paths).toHaveBeenCalledTimes(1);
     expect(said.info).toStrictEqual([
-      'k8ordo: /posts/3 is not in "paths", so vite dev answers it with posts/[id]/fallback.tsx\'s shell — list it in "paths" to render page.tsx',
+      "k8ordo: no paths.ts returns /posts/3, so vite dev answers it with posts/[id]/fallback.tsx's shell, as the build's host will",
     ]);
   });
 
   it('answers under the base, and hands on the shell’s URL with the base put back', async () => {
     await routeFiles(POSTS);
-    const { serve } = hooks({ paths: () => ['/posts/1'] }, '/site/');
+    await listing(POST_1);
+    const { serve } = hooks({}, '/site/');
     const request = serve();
 
     expect(await request('/site/posts/3?from=x')).toBe(
@@ -1012,65 +1099,77 @@ describe('vite dev', () => {
     expect(await request('/posts/3')).toBe('/posts/3');
   });
 
-  it('keeps a URL no shell could answer from waiting on paths', async () => {
-    await routeFiles(POSTS);
-    // 遅い CMS: 答えが返らない
-    const paths = vi.fn<() => Promise<readonly string[]>>(
-      () =>
-        new Promise(() => {
-          // 答えない
-        }),
-    );
-    const { serve } = hooks({ paths });
+  it('answers a value no paths.ts returns, of a page with no fallback.tsx, as a host without the file would: the not-found for a document, a 404 for a payload', async () => {
+    await routeFiles(['posts/[id]/page.tsx', 'not-found.tsx']);
+    await listing(POST_1);
+    const { serve, said } = hooks();
     const request = serve();
 
-    expect(await request('/favicon.ico')).toBe('/favicon.ico');
+    expect(await request('/posts/3?from=x')).toBe(
+      '/__k8ordo-not-found__/__k8ordo-not-found__/__k8ordo-not-found__?from=x',
+    );
+    expect(await request('/posts/3/index.rsc')).toBe('answered 404');
+    expect(await request('/posts/1')).toBe('/posts/1');
+    expect(said.info).toStrictEqual([
+      "k8ordo: no paths.ts returns /posts/3, so vite dev answers it with the not-found, as the build's host will — return its value from the paths.ts of /posts/:id to render it",
+    ]);
   });
 
-  it('says once that paths failed, and renders every value with its page', async () => {
+  it('answers such a document with a bare 404 where the application has no not-found.tsx', async () => {
+    await routeFiles(['posts/[id]/page.tsx']);
+    await listing(POST_1);
+    const request = hooks().serve();
+
+    expect(await request('/posts/3')).toBe('answered 404');
+  });
+
+  it('asks again for a value it was not given, so one the data gained since is rendered', async () => {
+    await routeFiles(['posts/[id]/page.tsx']);
+    await listing(POST_1);
+    const request = hooks().serve();
+    expect(await request('/posts/3')).toBe('answered 404');
+
+    await listing({ 'posts/[id]/paths.ts': ['1', '3'] });
+
+    expect(await request('/posts/3')).toBe('/posts/3');
+  });
+
+  it('says once that a paths.ts failed, and renders every value with its page', async () => {
     await routeFiles(POSTS);
-    const { serve, said } = hooks({
-      paths: () => {
-        throw new Error('the CMS is down');
-      },
-    });
+    await listing({ 'posts/[id]/paths.ts': new Error('the CMS is down') });
+    const { serve, said } = hooks();
     const request = serve();
 
     expect(await request('/posts/3')).toBe('/posts/3');
     expect(await request('/posts/4')).toBe('/posts/4');
     expect(said.error).toStrictEqual([
-      'k8ordo: the "paths" option failed, so vite dev renders every value with page.tsx: the CMS is down',
+      'k8ordo: a paths.ts failed, so vite dev renders every value with page.tsx: the CMS is down',
     ]);
   });
 
   it('warns once of what the build will refuse, and goes on', async () => {
-    await routeFiles(POSTS);
-    const { serve, said } = hooks({ paths: () => ['/produtcs/2'] });
+    await routeFiles([...POSTS, 'tags/[tag]/page.tsx']);
+    const { serve, said } = hooks();
     const request = serve();
 
     expect(await request('/posts/3')).toBe('/posts/!fallback');
     expect(await request('/posts/4')).toBe('/posts/!fallback');
     expect(said.warn).toStrictEqual([
-      'k8ordo: the build will refuse "paths": the "paths" option supplied pathnames no route wants: /produtcs/2',
+      "k8ordo: the build will refuse this: static build needs the values of /tags/:tag — a paths.ts in each parameter's directory returns them, and a fallback.tsx beside a page answers the ones the build does not write",
     ]);
   });
 
-  it('reads the routes again after one changed, and paths only when its patterns did', async () => {
-    await routeFiles(POSTS);
-    const paths = vi.fn<() => string[]>(() => ['/posts/1']);
-    const { serve, watchChange } = hooks({ paths });
+  it('reads the routes again after one changed', async () => {
+    await routeFiles(['posts/[id]/page.tsx']);
+    await listing(POST_1);
+    const { serve, watchChange } = hooks();
     const request = serve();
-    expect(await request('/posts/3')).toBe('/posts/!fallback');
+    expect(await request('/posts/3')).toBe('answered 404');
 
-    await routeFiles(['about/page.tsx']);
-    watchChange('about/page.tsx');
-    expect(await request('/posts/3')).toBe('/posts/!fallback');
-    expect(paths).toHaveBeenCalledTimes(1);
+    await routeFiles(['posts/[id]/fallback.tsx']);
+    watchChange('posts/[id]/fallback.tsx');
 
-    await routeFiles(['tags/[tag]/page.tsx']);
-    watchChange('tags/[tag]/page.tsx');
-    await request('/posts/3');
-    expect(paths).toHaveBeenCalledTimes(2);
+    expect(await request('/posts/3')).toBe('/posts/!fallback');
   });
 });
 

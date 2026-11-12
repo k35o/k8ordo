@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { fallbackShapes, parseRouteTree, slotOf } from './tree';
+import { fallbackShapes, parseRouteTree, pathsFiles, slotOf } from './tree';
 import type { RouteDir } from './tree';
 
 const childOf = (dir: RouteDir, name: string): RouteDir => {
@@ -10,7 +10,7 @@ const childOf = (dir: RouteDir, name: string): RouteDir => {
 };
 
 const stray = (basename: string): string =>
-  `routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts, route.ts, loading.tsx, fallback.tsx — move "${basename}" out of routes/`;
+  `routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts, route.ts, loading.tsx, fallback.tsx, paths.ts — move "${basename}" out of routes/`;
 
 describe('the directory tree becomes the pathname space', () => {
   const { tree, problems } = parseRouteTree([
@@ -304,6 +304,64 @@ describe('loading.tsx', () => {
   it('declares no route of its own', () => {
     const { problems } = parseRouteTree(['page.tsx', 'empty/loading.tsx']);
     expect(problems.map((problem) => problem.path)).toStrictEqual(['empty']);
+  });
+});
+
+describe('paths.ts', () => {
+  it('fills the paths slot of the parameter directory it sits in, and declares no URL of its own', () => {
+    const { tree, problems } = parseRouteTree([
+      'page.tsx',
+      'posts/[id]/page.tsx',
+      'posts/[id]/paths.ts',
+    ]);
+    expect(problems).toStrictEqual([]);
+    expect(childOf(childOf(tree, 'posts'), '[id]').paths).toBe(
+      'posts/[id]/paths.ts',
+    );
+  });
+
+  it('is refused in a directory that is no parameter, which has no values to give', () => {
+    const { problems } = parseRouteTree([
+      'page.tsx',
+      'paths.ts',
+      'posts/paths.ts',
+      'posts/[id]/page.tsx',
+      '(docs)/guide/page.tsx',
+      '(docs)/paths.ts',
+    ]);
+    expect(problems).toStrictEqual([
+      {
+        path: 'paths.ts',
+        message:
+          'paths.ts gives the values of its directory\'s parameter, and "/" is not a [param] directory — move it into the parameter\'s directory',
+      },
+      {
+        path: 'posts/paths.ts',
+        message:
+          'paths.ts gives the values of its directory\'s parameter, and "posts" is not a [param] directory — move it into the parameter\'s directory',
+      },
+      {
+        path: '(docs)/paths.ts',
+        message:
+          'paths.ts gives the values of its directory\'s parameter, and "(docs)" is not a [param] directory — move it into the parameter\'s directory',
+      },
+    ]);
+  });
+
+  it('is listed with the pattern of its directory, outermost first, a group giving no segment', () => {
+    const { tree } = parseRouteTree([
+      'page.tsx',
+      '[locale]/paths.ts',
+      '[locale]/(docs)/posts/[id]/page.tsx',
+      '[locale]/(docs)/posts/[id]/paths.ts',
+    ]);
+    expect(pathsFiles(tree)).toStrictEqual([
+      { file: '[locale]/paths.ts', pattern: '/:locale' },
+      {
+        file: '[locale]/(docs)/posts/[id]/paths.ts',
+        pattern: '/:locale/posts/:id',
+      },
+    ]);
   });
 });
 
