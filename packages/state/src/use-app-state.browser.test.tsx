@@ -11,7 +11,7 @@ import { defineMemoryState } from './memory-state';
 import { definePageState } from './page-state';
 import { defineLocalState, defineSessionState } from './storage-state';
 import type { UpdateHandle } from './store/core';
-import { resetStateRegistry } from './store/registry';
+import { mountPageUrl } from './testing';
 import { useAppState } from './use-app-state';
 
 const listState = definePageState('list', {
@@ -21,17 +21,8 @@ const listState = definePageState('list', {
   }),
 });
 
-// The library assumes a router that intercepts the Navigation API; the tests
-// play that router with the smallest possible handler. Like `@k8ordo/router`,
-// it leaves a move to a fragment within the document to the browser, and
-// places neither the viewport nor the focus for a write to the page on screen.
-const interceptAsRouter = (event: NavigateEvent) => {
-  if (!event.canIntercept) return;
-  if (event.hashChange && event.destination.sameDocument) return;
-  event.intercept({ scroll: 'manual', focusReset: 'manual' });
-};
-
 let home: string;
+let restore: () => void;
 let navigations = 0;
 const countNavigations = () => {
   navigations += 1;
@@ -43,15 +34,15 @@ beforeEach(() => {
   renders.pager = 0;
   renders.query = 0;
   lastHandle = undefined;
-  navigation.addEventListener('navigate', interceptAsRouter);
+  // The library assumes a router that intercepts the Navigation API; the
+  // tests play that router with what the package hands its users for it.
+  restore = mountPageUrl();
   navigation.addEventListener('navigate', countNavigations);
 });
 
 afterEach(async () => {
   navigation.removeEventListener('navigate', countNavigations);
-  await navigation.navigate(home, { history: 'replace' }).finished;
-  navigation.removeEventListener('navigate', interceptAsRouter);
-  resetStateRegistry();
+  restore();
   localStorage.removeItem('k8ordo-state:prefs');
   localStorage.removeItem('k8ordo-state:escaped');
   sessionStorage.removeItem('k8ordo-state:prefs');

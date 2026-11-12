@@ -66,13 +66,18 @@ export const routerTitle = message({
 });
 
 export const routerIntercept = message({
-  ja: 'URLを変える`update()`は`navigation.navigate()`を呼びます。どのリスナーも`intercept()`を呼ばなければ、別のドキュメントの読み込みになります。テストを動かしているページごと移動してしまいます。そこで、ルーターの代わりにテスト自身が`navigate`イベントを`intercept()`します。',
-  en: 'An `update()` that changes the URL calls `navigation.navigate()`. Without an `intercept()`, that is a cross-document load, and the page running the tests navigates away. So the test intercepts the `navigate` event itself, as a router would.',
+  ja: 'URLを変える`update()`は`navigation.navigate()`を呼びます。どのリスナーも`intercept()`を呼ばなければ、別のドキュメントの読み込みになります。テストを動かしているページごと移動してしまいます。`@k8ordo/state/testing`の`mountPageUrl()`は、ルーターの代わりに`navigate`イベントを`intercept()`します。',
+  en: 'An `update()` that changes the URL calls `navigation.navigate()`. Without an `intercept()`, that is a cross-document load, and the page running the tests navigates away. `mountPageUrl()` from `@k8ordo/state/testing` intercepts the `navigate` event in a router’s place.',
 });
 
 export const routerHome = message({
-  ja: 'テストが書き換えたURLは、次のテストの前に元に戻します。戻す`navigate()`にも`intercept()`が要るので、リスナーはURLを戻したあとに外します。',
-  en: 'Put back the URL a test rewrote before the next one runs. The `navigate()` that restores it needs an `intercept()` too, so remove the listener only after the URL is back.',
+  ja: '`mountPageUrl()`は後始末の関数を返します。この関数は`resetStateRegistry()`を呼び、URLと履歴エントリの状態を呼ぶ前のものに戻します。VitestとStorybookは`beforeEach`が返した関数をテストのあとに呼ぶので、そのまま返せば足ります。',
+  en: '`mountPageUrl()` returns the cleanup. It calls `resetStateRegistry()` and puts back the URL and the history entry’s state as they were. Vitest and Storybook call what `beforeEach` returns after the test, so returning it is enough.',
+});
+
+export const routerUrl = message({
+  ja: 'テストを始めるURLは引数で決めます。`search`は、ページに元からあるパラメーターの後ろに、渡した綴りのまま足されます。`hash`はフラグメントになります。',
+  en: 'The arguments set the URL a test starts from. `search` is added after the params the page already has, in the spelling given. `hash` becomes the fragment.',
 });
 
 export const tabsTitle = message({
