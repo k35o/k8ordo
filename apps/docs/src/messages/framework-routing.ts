@@ -503,6 +503,31 @@ export const titlesOne = message({
   en: 'Keep one `<title>` on screen at a time. The root layout renders none, and each page and `not-found.tsx` renders its own. Render two and both are output; the later one does not replace the earlier.',
 });
 
+export const mdxTitle = message({
+  ja: 'MDX',
+  en: 'MDX',
+});
+
+export const mdxPlugin = message({
+  ja: "frameworkはMDXをコンパイルしません。`@mdx-js/rollup`のようなコンパイラを、`framework()`より前にViteのプラグインとして足します。frameworkの変換より先に走るよう、`enforce: 'pre'`を付けます。",
+  en: "The framework compiles no MDX. Add a compiler such as `@mdx-js/rollup` as a Vite plugin ahead of `framework()`, with `enforce: 'pre'` so it runs before the framework's transforms.",
+});
+
+export const mdxModule = message({
+  ja: '`.mdx`のファイルは、defaultがServer Componentのモジュールになります。ページから静的にimportすることも、`import.meta.glob`で遅れて読むこともできます。遅れて読めば、各ページは自分の記事だけを読みます。',
+  en: 'An `.mdx` file is a module whose default export is a Server Component. A page imports it statically, or reads it late through `import.meta.glob`, so each page reads only its own article.',
+});
+
+export const mdxCss = message({
+  ja: '`.mdx`のファイルがimportしたCSSは、`.tsx`のモジュールと同じく、そのファイルを描くページのHTMLにだけ載ります。importにクエリを付ける必要はありません。',
+  en: 'CSS an `.mdx` file imports is linked in the HTML of the pages that render the file and of no other, as a `.tsx` module’s is. The import needs no query.',
+});
+
+export const mdxComponents = message({
+  ja: 'CSSは、モジュールがexportした部品に載って運ばれます。CSSをimportして部品の表（`components`）だけをexportするモジュールは、ほかのモジュールがその表で描いても、CSSをページに届けません。表を使って描く部品を、CSSをimportするモジュールからexportします。',
+  en: 'The CSS rides on the components a module exports. A module that imports CSS and exports only a table of components (`components`) carries none of it to a page that another module renders with the table. Export a component that renders with the table from the module that imports the CSS.',
+});
+
 export const prefetchTitle = message({
   ja: 'リンク先の先読み',
   en: 'Prefetching links',

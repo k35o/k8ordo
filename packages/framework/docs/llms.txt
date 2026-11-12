@@ -74,7 +74,9 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   writes them before `tsc` without a build, titles,
   and fetching the next page ahead (`data-k8ordo-prefetch`; under static
   mode also the links on screen for a coarse pointer, every page kept for
-  going back and forward, and `client-files.json` linked with a payload).
+  going back and forward, and `client-files.json` linked with a payload),
+  and MDX (the application's own compiler plugin, `enforce: 'pre'`; the CSS
+  an `.mdx` file imports reaches the pages rendering it, with no query).
 - [Parameters](references/params.md): `paramsSchema` — a refused value is a
   pathname the pattern does not answer — and, under static mode, the `paths`
   option: supplying pathnames, expanding a parameter every page shares, and
