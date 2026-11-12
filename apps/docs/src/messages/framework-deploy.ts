@@ -142,8 +142,8 @@ export const sitemapTitle = message({
 });
 
 export const sitemapWrite = message({
-  ja: '`framework()`の`site`にサイトの配信元を渡すと、ビルドは書いたページをすべて並べた`sitemap.xml`も書きます。リダイレクトと`route.ts`の応答、`404.html`はページではないので載りません。`sitemap.xml`を自分の`route.ts`で書くときは`site`を渡しません。両方あると、ビルドが両方の名前を挙げて止まります。',
-  en: 'Give `site` the origin the site is served from, and the build also writes `sitemap.xml`, listing every page it wrote. Redirects, `route.ts` responses and `404.html` are not pages, and are left out. To write `sitemap.xml` from a `route.ts` of your own, leave `site` out: with both, the build stops naming each.',
+  ja: '`framework()`の`site`にサイトの配信元を渡すと、ビルドは書いたページをすべて並べた`sitemap.xml`も書きます。リダイレクトと`route.ts`の応答、`404.html`はページではないので載りません。`sitemap.xml`を自分の`route.ts`で書くと、ビルドは`sitemap.xml`を書かず、そのファイルを使います。`site`は渡したままで構いません。',
+  en: 'Give `site` the origin the site is served from, and the build also writes `sitemap.xml`, listing every page it wrote. Redirects, `route.ts` responses and `404.html` are not pages, and are left out. Write `sitemap.xml` from a `route.ts` of your own, and the build writes none and uses that file. `site` can stay.',
 });
 
 export const sitemapNone = message({

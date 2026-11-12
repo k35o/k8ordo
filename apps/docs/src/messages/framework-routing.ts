@@ -418,8 +418,8 @@ export const routeRefused = [
     en: 'A `route.ts` with pages below it',
   }),
   message({
-    ja: 'ビルドが自分で書くファイルと同じ場所に書く`route.ts`（`site`を渡したときの`sitemap.xml`、`not-found.tsx`があるときの`404.html`、シェルがあるときの`_redirects`、`client-files.json`、ページの`index.html`と`index.rsc`）。エラー文が`route.ts`ともう一方の両方を挙げるので、どちらかを外します。`vite dev`は止まりません',
-    en: 'A `route.ts` writing a file the build writes itself (`sitemap.xml` when `site` is given, `404.html` beside a `not-found.tsx`, `_redirects` when there are shells, `client-files.json`, a page’s `index.html` and `index.rsc`). The error names the `route.ts` and the other side; remove one of them. `vite dev` does not stop',
+    ja: 'ビルドが自分で書くファイルと同じ場所に書く`route.ts`（`not-found.tsx`があるときの`404.html`、シェルがあるときの`_redirects`、`client-files.json`、ページの`index.html`と`index.rsc`）。エラー文が`route.ts`ともう一方の両方を挙げるので、どちらかを外します。`vite dev`は止まりません',
+    en: 'A `route.ts` writing a file the build writes itself (`404.html` beside a `not-found.tsx`, `_redirects` when there are shells, `client-files.json`, a page’s `index.html` and `index.rsc`). The error names the `route.ts` and the other side; remove one of them. `vite dev` does not stop',
   }),
 ] as const;
 

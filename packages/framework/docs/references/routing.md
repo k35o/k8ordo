@@ -389,20 +389,22 @@ A `route.ts` at `/` cannot be a file (the host serves `/` from `index.html`),
 nor one with pages written below it, which would need a directory of the same
 name. What it writes is not a page, so `sitemap.xml` leaves it out.
 
-Nor can a `route.ts` write a file the build writes itself — `sitemap.xml`
-when `site` is given, `404.html` beside a `not-found.tsx`, `_redirects` when
-there are shells, `client-files.json`, a page's `index.html` or `index.rsc`
-— since one would replace the other. It stops before it renders anything,
-naming every such `route.ts` in one error, each beside what is in its way:
+Nor can a `route.ts` write a file the build writes itself — `404.html`
+beside a `not-found.tsx`, `_redirects` when there are shells,
+`client-files.json`, a page's `index.html` or `index.rsc` — since one would
+replace the other. It stops before it renders anything, naming every such
+`route.ts` in one error, each beside what is in its way:
 
 ```
 static build writes a route.ts as the file its GET answers, and these cannot be written — remove the route.ts, or what else is written there:
-  sitemap.xml: src/routes/sitemap.xml/route.ts, and the "site" option writes it
+  client-files.json: src/routes/client-files.json/route.ts, and the build lists there what each page loads beyond its payload
 ```
 
-For a sitemap of your own, keep the `route.ts` and drop `site`; the requests
-the build hands every `route.ts` then carry no origin of the site's, so write
-its absolute URLs from one of your own. Rules of your own for a host go in
+`sitemap.xml` is the exception: a `route.ts` there is the application's own
+list of the site, with the dates and priorities only it knows, so the build
+writes none of its own and leaves the file to it — `site` given or not. Keep
+`site` all the same: it is the origin of the `request.url` every `route.ts`
+is handed, which a sitemap's absolute URLs are built from. Rules of your own for a host go in
 `public/_redirects`, which the build adds to its own. `vite dev` does not
 stop: only the build writes the files.
 
