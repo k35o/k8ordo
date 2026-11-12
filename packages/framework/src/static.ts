@@ -1089,7 +1089,7 @@ const renderShell = async (
   if (answered.shell !== shell.pattern) {
     return failed(
       'shellTaken',
-      `the shell for ${named} was answered by ${fallbacks.get(answered.shell) ?? answered.shell}, which the table tries first — supply shell locations that pattern cannot match`,
+      `the shell for ${named} was answered by ${fallbacks.get(answered.shell) ?? answered.shell}, which the table tries first — put the shell where that pattern cannot match, with a paths.ts above it`,
     );
   }
   const payload = await writeBody(

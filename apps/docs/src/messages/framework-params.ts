@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: '`[id]`のようなディレクトリの下のページは、URLの一部をパラメータとして受け取ります。スキーマで型を付け、staticモードでは`paths`でURLの一覧を、serverモードでは`search`でクエリを宣言します。',
-  en: 'A page under a directory such as `[id]` receives part of its URL as a parameter. A schema types the value. Under static mode `paths` lists the URLs, and under server mode `search` declares the query.',
+  ja: '`[id]`のようなディレクトリの下のページは、URLの一部をパラメータとして受け取ります。スキーマで型を付け、staticモードでは`paths.ts`で書き出す値を、serverモードでは`search`でクエリを宣言します。',
+  en: 'A page under a directory such as `[id]` receives part of its URL as a parameter. A schema types the value. Under static mode a `paths.ts` returns the values to write, and under server mode `search` declares the query.',
 });
 
 export const stringsTitle = message({
@@ -111,8 +111,8 @@ export const existTitle = message({
 });
 
 export const existSchema = message({
-  ja: 'スキーマが確かめるのは値の形だけです。serverモードでは、データに無い`/products/999`をページが`notFound()`で404にします。staticモードでは、`paths`に無い値のページは書き出されず、`404.html`が返ります。横に`fallback.tsx`を置けば、ブラウザで描くページがその値に答えます（「ビルドしていない値」の節）。`paths`に入れた値のページが`notFound()`を呼ぶと、ビルドできません（「`paths`のエラー」の節）。`notFound()`の動きは',
-  en: 'A schema checks only the shape of the value. Under server mode, for `/products/999`, which your data does not have, the page gives a 404 with `notFound()`. Under static mode a value missing from `paths` is never written, and `404.html` answers it, unless a `fallback.tsx` beside the page answers it with a page rendered in the browser (see “Values the build did not write”). A page that calls `notFound()` for a value in `paths` stops the build (see “`paths` errors”). What `notFound()` does is covered in ',
+  ja: 'スキーマが確かめるのは値の形だけです。serverモードでは、データに無い`/products/999`をページが`notFound()`で404にします。staticモードでは、`paths.ts`が返さなかった値のページは書き出されず、`404.html`が返ります。横に`fallback.tsx`を置けば、ブラウザで描くページがその値に答えます（「ビルドしていない値」の節）。`paths.ts`が返した値のページが`notFound()`を呼ぶと、ビルドできません（「`paths.ts`のエラー」の節）。`notFound()`の動きは',
+  en: 'A schema checks only the shape of the value. Under server mode, for `/products/999`, which your data does not have, the page gives a 404 with `notFound()`. Under static mode a value no `paths.ts` returned is never written, and `404.html` answers it, unless a `fallback.tsx` beside the page answers it with a page rendered in the browser (see “Values the build did not write”). A page that calls `notFound()` for a value a `paths.ts` returned stops the build (see “`paths.ts` errors”). What `notFound()` does is covered in ',
 });
 
 export const see = message({
@@ -151,88 +151,111 @@ export const layoutValue = message({
 });
 
 export const pathsTitle = message({
-  ja: '`paths`で渡すURL',
-  en: 'URLs for `paths`',
+  ja: '`paths.ts`が返す値',
+  en: 'Values from `paths.ts`',
 });
 
 export const pathsRole = message({
-  ja: 'staticモードだけで使えます。ビルドはパラメータの値を自分では決められないので、パラメータを持つルートのURLは`framework()`の`paths`で渡します。serverモードでは値をリクエストから受け取ります。データが増えても再ビルドは要りません。',
-  en: 'Static mode only. A build cannot invent parameter values, so the URLs of routes with parameters are passed through the `paths` option of `framework()`. Under server mode the value comes from the request, and growing data needs no rebuild.',
+  ja: 'staticモードだけで使えます。ビルドはパラメータの値を自分では決められないので、パラメータのディレクトリに`paths.ts`を置きます。default exportの関数が、そのパラメータの値を配列かそのPromiseで返します。パラメータの無いルートはルート表から分かるので、何も書く必要はありません。',
+  en: 'Static mode only. A build cannot invent parameter values, so the parameter’s directory holds a `paths.ts`. Its default export is a function that returns the values of that parameter, as an array or a promise of one. Routes without parameters come from the route table and need nothing.',
 });
 
 export const pathsFunction = message({
-  ja: '`paths`は値の要るパターンの一覧を受け取り、URLの配列かそのPromiseを返す関数です。パラメータの無いルートはルート表から分かるので、渡す必要はありません。`paths`が返すURLに誤りがあるとビルドできません。エラー文は「`paths`のエラー」の節にまとめています。',
-  en: '`paths` is a function that receives the patterns needing values and returns an array of URLs, or a promise of one. Routes without parameters come from the route table and need nothing. A mistake in the URLs it returns stops the build. The messages are listed under “`paths` errors”.',
+  ja: '型は`@k8ordo/framework`の`Paths`で付けます。型引数は、そのディレクトリまでのパターンです。`paths.ts`はページと同じ環境で実行されるので、`server-only`のモジュールもアプリのエイリアスもimportできます。ページと同じモジュールを読むため、キャッシュしたデータも共有します。',
+  en: 'Type it with `Paths` from `@k8ordo/framework`; its type argument is the pattern down to that directory. A `paths.ts` runs in the same environment as the pages, so it can import a `server-only` module and use the application’s aliases. It reads the same module instances as the pages, so data one of them cached is shared.',
 });
 
 export const pathsForm = message({
-  ja: 'URLは`href()`が返すエスケープ済みの形でも受け付けます。Viteの`base`を設定しているときは、`href()`の返す値にも`base`が付いているので、それを除いて渡します。パラメータの下にある`redirect.ts`と`route.ts`も、ファイルとして書き出すので`paths`で値を渡します。',
-  en: 'A URL may be escaped the way `href()` returns it. Under a Vite `base`, `href()` puts the base in front, so strip it before passing the URL. A `redirect.ts` or `route.ts` under a parameter is written as a file too, so it takes its values from `paths` as well.',
+  ja: '値は、エスケープする前の文字列で返します。`café`や`a b`もそのまま返せば、URLにするときにビルドがエスケープします。空文字列と文字列でない値は返せないので、数値のidは`String()`で文字列にします。',
+  en: 'Return each value as the unescaped string: `café` or `a b` as it is, and the build escapes it for the URL. An empty string or a value that is not a string is refused, so turn a numeric id into a string with `String()`.',
+});
+
+export const pathsBelow = message({
+  ja: '`paths.ts`の値は、そのディレクトリより下のすべてに使われます。横の`page.tsx`のほか、下のディレクトリのページと`route.ts`、`redirect.ts`も値ごとに書き出されます。`blog/[slug]/paths.ts`があれば、`blog/[slug]/og.png/route.ts`の値を別に並べる必要はありません。',
+  en: 'The values apply to everything below the directory. The `page.tsx` beside it, and every page, `route.ts` and `redirect.ts` in the directories below, are written once per value. With `blog/[slug]/paths.ts`, `blog/[slug]/og.png/route.ts` needs no list of its own.',
+});
+
+export const pathsServer = message({
+  ja: 'serverモードは`paths.ts`を読みません。値はリクエストから受け取るので、データが増えても再ビルドは要りません。同じ`routes/`をどちらのモードでも使えます。',
+  en: 'Server mode does not read a `paths.ts`. Values come from the request, so growing data needs no rebuild, and the same `routes/` works under either mode.',
 });
 
 export const expandTitle = message({
-  ja: 'ロケールのパス',
-  en: 'Locale paths',
+  ja: 'ロケールの値',
+  en: 'Locale values',
 });
 
 export const expandLocales = message({
-  ja: '`@k8ordo/i18n`の`locales.paths`は、`/:locale`を持つパターンをロケールの数だけ展開する関数です。`locales`の定義は',
-  en: '`locales.paths` from `@k8ordo/i18n` expands every pattern with `/:locale` once per locale. How `locales` is defined is described on ',
+  ja: 'ロケールのディレクトリでは、`@k8ordo/i18n`の`locales.all`を返します。`[locale]`より下のページは、どれもロケールの数だけ書き出されます。`locales`の定義は',
+  en: 'In the locale directory, return `locales.all` from `@k8ordo/i18n`. Every page below `[locale]` is then written once per locale. How `locales` is defined is described on ',
 });
 
 export const expandSite = message({
-  ja: 'このサイトの`vite.config.ts`も、`locales.paths`をそのまま渡しています。書き出すURLは1つずつ別のリクエストとして描画されるので、文言はそのURLのロケールになります。',
-  en: 'This site’s `vite.config.ts` passes `locales.paths` as it is. Each URL is rendered as a request of its own, so its messages use that URL’s locale.',
+  ja: 'このサイトの`src/routes/[locale]/paths.ts`も同じ内容です。書き出すURLは1つずつ別のリクエストとして描画されるので、文言はそのURLのロケールになります。',
+  en: 'This site’s `src/routes/[locale]/paths.ts` is the same file. Each URL is rendered as a request of its own, so its messages use that URL’s locale.',
 });
 
-export const partialTitle = message({
-  ja: '一部だけの展開',
-  en: 'Partial expansion',
+export const aboveTitle = message({
+  ja: '上のパラメータ',
+  en: 'Parameters above',
 });
 
-export const expandPartial = message({
-  ja: 'パラメータを2つ持つパターンで片方だけを展開すると、`/ja/blog/:slug`のようなパスが残ります。これはURLではないので、ビルドがエラーになります。残ったパラメータも、同じ関数の中で展開してから返します。ただし、横に`fallback.tsx`のあるページなら、このパスはシェルの場所になります（「ビルドしていない値」の節）。',
-  en: 'Expanding only one of two parameters leaves paths such as `/ja/blog/:slug`. That is not a URL, so the build stops. Expand the remaining parameter in the same function before returning. For a page with a `fallback.tsx` beside it, though, such a path is where its shell goes (see “Values the build did not write”).',
+export const aboveParams = message({
+  ja: '`paths.ts`の関数は、上のディレクトリのパラメータを引数として受け取ります。ビルドは、上の値の組み合わせごとに関数を1回呼びます。この例では、`ja`と`en`のそれぞれについて記事のidを返します。',
+  en: 'The function receives the parameters of the directories above it, and the build calls it once per combination of their values. Here it returns the post ids for `ja`, and again for `en`.',
+});
+
+export const aboveMissing = message({
+  ja: '上のパラメータのディレクトリに`paths.ts`が無いと、ビルドは下の`paths.ts`を呼べず、エラーになります。上のディレクトリにも`paths.ts`を置きます。',
+  en: 'When the directory of a parameter above has no `paths.ts`, the build cannot call the one below and stops. Give that directory a `paths.ts` too.',
 });
 
 export const stopsTitle = message({
-  ja: '`paths`のエラー',
-  en: '`paths` errors',
+  ja: '`paths.ts`のエラー',
+  en: '`paths.ts` errors',
 });
 
 export const stopsIntro = message({
-  ja: '`paths`が次のどれかに当たると、ビルドできません。エラー文には、原因のパターンかURLが入ります。',
-  en: 'The build stops when `paths` hits any of these. Each error message includes the pattern or URL at fault.',
+  ja: '`paths.ts`が次のどれかに当たると、ビルドできません。エラー文には、原因のファイルかパターン、URLが入ります。',
+  en: 'The build stops when a `paths.ts` hits any of these. Each error message names the file, pattern or URL at fault.',
 });
 
 export const stopsList = [
   message({
-    ja: '当てはまるURLが無いルート：`static build needs pathnames for /products/:id — supply them with the "paths" option`',
-    en: 'A route no URL covers: `static build needs pathnames for /products/:id — supply them with the "paths" option`',
+    ja: "値を返す`paths.ts`が無いパラメータ：`static build needs the values of /tags/:tag — a paths.ts in each parameter's directory returns them, …`",
+    en: "A parameter no `paths.ts` returns values for: `static build needs the values of /tags/:tag — a paths.ts in each parameter's directory returns them, …`",
   }),
   message({
-    ja: 'どのルートとも一致しないURL：`the "paths" option supplied pathnames no route wants: /produtcs/2`',
-    en: 'A URL no route matches: `the "paths" option supplied pathnames no route wants: /produtcs/2`',
+    ja: '空でない文字列の配列でない戻り値：`tags/[tag]/paths.ts has to return an array of non-empty strings, the values of :tag`',
+    en: 'A return value that is not an array of non-empty strings: `tags/[tag]/paths.ts has to return an array of non-empty strings, the values of :tag`',
   }),
   message({
-    ja: 'パラメータの残ったパス：`the "paths" option supplied pathnames that still hold a parameter, and only a page with a fallback.tsx beside it takes one: /ja/blog/:slug ([locale]/blog/[slug]/page.tsx has none)`',
-    en: 'A path with a parameter left in it: `the "paths" option supplied pathnames that still hold a parameter, and only a page with a fallback.tsx beside it takes one: /ja/blog/:slug ([locale]/blog/[slug]/page.tsx has none)`',
+    ja: '`paths.ts`の無いパラメータの下にある`paths.ts`：`[locale]/posts/[id]/paths.ts is asked for its values once per value of the parameters above it, and /:locale/posts still holds one — …`',
+    en: 'A `paths.ts` below a parameter that has none: `[locale]/posts/[id]/paths.ts is asked for its values once per value of the parameters above it, and /:locale/posts still holds one — …`',
   }),
   message({
-    ja: 'スキーマに合わないURL：`the "paths" option supplied pathnames a params schema refused: /products/shoes`',
-    en: 'A URL the schema rejects: `the "paths" option supplied pathnames a params schema refused: /products/shoes`',
+    ja: 'スキーマに合わない値：`a paths.ts returned values a params schema refused: /products/shoes`',
+    en: 'A value the schema rejects: `a paths.ts returned values a params schema refused: /products/shoes`',
   }),
   message({
-    ja: 'ページが`notFound()`を呼ぶURL：`the "paths" option supplied pathnames whose page called notFound(): /products/3`',
-    en: 'A URL whose page calls `notFound()`: `the "paths" option supplied pathnames whose page called notFound(): /products/3`',
+    ja: 'ページが`notFound()`を呼ぶ値：`a paths.ts returned values whose page called notFound(): /products/3`',
+    en: 'A value whose page calls `notFound()`: `a paths.ts returned values whose page called notFound(): /products/3`',
   }),
   message({
-    ja: 'デコードできないエスケープを含むURL：`the "paths" option supplied a pathname with a malformed escape: /products/%zz`',
-    en: 'A URL with an escape that does not decode: `the "paths" option supplied a pathname with a malformed escape: /products/%zz`',
+    ja: '`!fallback`という値：`a paths.ts returned !fallback, which the build keeps for shells: /posts/!fallback`',
+    en: 'A value of `!fallback`: `a paths.ts returned !fallback, which the build keeps for shells: /posts/!fallback`',
   }),
   message({
-    ja: 'デコードすると出力の外を指すURL：`the "paths" option supplied a pathname that leaves the output: /products/..%2F..`',
-    en: 'A URL that, decoded, points outside the output: `the "paths" option supplied a pathname that leaves the output: /products/..%2F..`',
+    ja: '`..`という値：`a pathname to write leaves the output: /products/..`',
+    en: 'A value of `..`: `a pathname to write leaves the output: /products/..`',
+  }),
+  message({
+    ja: '`[param]`でないディレクトリに置いた`paths.ts`：`paths.ts gives the values of its directory\'s parameter, and "posts" is not a [param] directory — …`',
+    en: 'A `paths.ts` in a directory that is not a `[param]` one: `paths.ts gives the values of its directory\'s parameter, and "posts" is not a [param] directory — …`',
+  }),
+  message({
+    ja: "`framework()`に渡した`paths`：`framework() takes no paths — a parameter's values come from a paths.ts in its directory under routes/`",
+    en: "A `paths` passed to `framework()`: `framework() takes no paths — a parameter's values come from a paths.ts in its directory under routes/`",
   }),
 ] as const;
 
@@ -242,8 +265,8 @@ export const fallbackTitle = message({
 });
 
 export const fallbackStatic = message({
-  ja: 'staticモードだけで使えます。`page.tsx`の横に`fallback.tsx`を置くと、`paths`に無い値のURLにはこれが答えます。ビルドの後に増えた記事のように、ビルドの時点で並べられない値に使います。serverモードでは描かれず、`page.tsx`がどの値もリクエストごとに描きます。置き場所の検査は、どちらのモードでも行います。',
-  en: 'Static mode only. Put a `fallback.tsx` beside a `page.tsx`, and it answers every URL whose value `paths` did not list. It is for values the build cannot know, such as posts published after it ran. Server mode never renders it: there `page.tsx` renders every value per request. Its placement is checked in both modes.',
+  ja: 'staticモードだけで使えます。`page.tsx`の横に`fallback.tsx`を置くと、どの`paths.ts`も返さなかった値のURLにはこれが答えます。ビルドの後に増えた記事のように、ビルドの時点で並べられない値に使います。serverモードでは描かれず、`page.tsx`がどの値もリクエストごとに描きます。置き場所の検査は、どちらのモードでも行います。',
+  en: 'Static mode only. Put a `fallback.tsx` beside a `page.tsx`, and it answers every URL whose value no `paths.ts` returned. It is for values the build cannot know, such as posts published after it ran. Server mode never renders it: there `page.tsx` renders every value per request. Its placement is checked in both modes.',
 });
 
 export const fallbackShell = message({
@@ -286,29 +309,34 @@ export const shellPathsTitle = message({
   en: 'Where shells go',
 });
 
-export const shellPathsCallout = message({
-  ja: 'このパスをシェルの場所として残す',
-  en: 'Keeps this path as a shell’s location',
+export const shellPathsLayout = message({
+  ja: 'ビルドは、上の`paths.ts`が返す値ごとにシェルを書きます。この例では`[locale]/paths.ts`が`ja`と`en`を返すので、シェルは`/ja/posts/:id`と`/en/posts/:id`の2つです。`/fr/posts/1`にはどのシェルも答えません。',
+  en: 'The build writes one shell per value the `paths.ts` files above return. Here `[locale]/paths.ts` returns `ja` and `en`, so there are two shells, at `/ja/posts/:id` and `/en/posts/:id`. No shell answers `/fr/posts/1`.',
+});
+
+export const shellPathsBoth = message({
+  ja: '`fallback.tsx`と同じディレクトリに`paths.ts`も置けます。返した値はページとして書き出され、それ以外の値にシェルが答えます。`paths.ts`を置かなければ、どの値にもシェルが答えます。',
+  en: 'A `paths.ts` may sit in the same directory as the `fallback.tsx`. The values it returns are written as pages, and the shell answers the rest. Without it, the shell answers every value.',
 });
 
 export const shellPathsBare = message({
-  ja: '上にパラメータを受け取るレイアウトが無ければ、`paths`は書き出す値だけを返せば足ります。シェルはビルドがパターンから作り、`/posts/!fallback/`に書きます。',
-  en: 'When no layout above the page receives a parameter, `paths` returns just the values to write. The build makes the shell from the pattern and writes it at `/posts/!fallback/`.',
+  ja: '上にパラメータが無ければ、シェルは1つです。ビルドがパターンから作り、`/posts/!fallback/`に書きます。',
+  en: 'With no parameter above, there is one shell. The build makes it from the pattern and writes it at `/posts/!fallback/`.',
 });
 
-export const shellPathsLayout = message({
-  ja: '`[locale]/layout.tsx`のようにパラメータを受け取るレイアウトがあると、シェルでもその値が要ります。レイアウトをHTMLとして書くためです。この例のように、`:id`だけを残した`/ja/posts/:id`の形のパスも返します。これがシェルの場所になり、ロケールごとにシェルが書かれます。',
-  en: 'When a layout such as `[locale]/layout.tsx` receives a parameter, the shell needs that value too, since the layout is written as HTML. Return the path with only `:id` left as well, `/ja/posts/:id`, as this example does. Each such path is where a shell goes, one per locale.',
+export const shellPathsRequired = message({
+  ja: '`[locale]/layout.tsx`のようにパラメータを受け取るレイアウトが上にあると、シェルでもその値が要ります。レイアウトをHTMLとして書くためです。そのパラメータのディレクトリに`paths.ts`が無いと、ビルドできません。',
+  en: 'When a layout above, such as `[locale]/layout.tsx`, receives a parameter, the shell needs that value too, since the layout is written as HTML. Without a `paths.ts` in that parameter’s directory, the build stops.',
 });
 
 export const shellPathsBelow = message({
-  ja: '`fallback.tsx`が答えるのは、横の`page.tsx`のURLだけです。`/posts/:id/comments`のように下にあるルートは、これまでどおり値を`paths`に並べます。下のページにも`fallback.tsx`を置けば、そのページのシェルが書かれます。',
-  en: 'A `fallback.tsx` answers only for the `page.tsx` beside it. A route below it, such as `/posts/:id/comments`, still takes every value from `paths`, unless it is a page with a `fallback.tsx` of its own.',
+  ja: '`fallback.tsx`が答えるのは、横の`page.tsx`のURLだけです。`/posts/:id/comments`のように下にあるルートは、`posts/[id]/paths.ts`が返した値の分だけ書き出されます。下のページにも`fallback.tsx`を置けば、そのページのシェルが書かれます。',
+  en: 'A `fallback.tsx` answers only for the `page.tsx` beside it. A route below it, such as `/posts/:id/comments`, is written for the values `posts/[id]/paths.ts` returns and no others, unless it is a page with a `fallback.tsx` of its own.',
 });
 
 export const shellPathsDev = message({
-  ja: '`vite dev`も、`paths`に無い値にはシェルで答えます。ビルドしなくても、手元で試せます。`vite dev`が`paths`を呼ぶのは`fallback.tsx`のあるアプリだけで、パターンが変わったときに読み直します。',
-  en: '`vite dev` answers a value `paths` does not list with the shell too, so you can try it without building. It calls `paths` only when the application has a `fallback.tsx`, and again only when the patterns change.',
+  ja: '`vite dev`も、ビルドしたサイトと同じように答えます。どの`paths.ts`も返さなかった値には、`fallback.tsx`があればシェルで、無ければ404で答えます。知らない値のリクエストを受け取ると`paths.ts`を呼び直すので、データに増えた値は再起動しなくても描画されます。',
+  en: '`vite dev` answers as the built site will. A value no `paths.ts` returned gets the shell where there is a `fallback.tsx`, and a 404 otherwise. A request for a value it does not know makes it call the `paths.ts` files again, so a value added to the data renders without a restart.',
 });
 
 export const shellNotFoundTitle = message({
@@ -338,24 +366,12 @@ export const shellErrorsIntro = message({
 
 export const shellErrorsList = [
   message({
-    ja: '上のレイアウトがパラメータを受け取るのに、シェルの場所が無いパターン：`static build needs shell locations for /:locale/posts/:id — [locale]/layout.tsx receives :locale, …`',
-    en: 'A pattern with no shell location while a layout above receives a parameter: `static build needs shell locations for /:locale/posts/:id — [locale]/layout.tsx receives :locale, …`',
+    ja: '上のレイアウトが受け取るパラメータに`paths.ts`が無いシェル：`these shells leave out a parameter a layout above their fallback.tsx receives, so its directory needs a paths.ts: /:locale/posts/:id (…)`',
+    en: 'A shell under a parameter that a layout above receives and no `paths.ts` gives values for: `these shells leave out a parameter a layout above their fallback.tsx receives, so its directory needs a paths.ts: /:locale/posts/:id (…)`',
   }),
   message({
-    ja: '上のレイアウトが受け取るパラメータを残した場所：`the "paths" option supplied shell locations that leave out a parameter a layout above their fallback.tsx receives: /:locale/posts/:id (…)`',
-    en: 'A location that leaves out a parameter a layout above receives: `the "paths" option supplied shell locations that leave out a parameter a layout above their fallback.tsx receives: /:locale/posts/:id (…)`',
-  }),
-  message({
-    ja: 'パターンと名前の違うパラメータ：`the "paths" option supplied shell locations whose parameter names are not their pattern\'s: /en/posts/:slug (/:locale/posts/:id)`',
-    en: 'A parameter named differently from the pattern’s: `the "paths" option supplied shell locations whose parameter names are not their pattern\'s: /en/posts/:slug (/:locale/posts/:id)`',
-  }),
-  message({
-    ja: 'レイアウトのスキーマが拒んだ場所：`the "paths" option supplied shell locations a params schema refused: /xx/posts/:id`',
-    en: 'A location a layout’s schema rejects: `the "paths" option supplied shell locations a params schema refused: /xx/posts/:id`',
-  }),
-  message({
-    ja: '`!fallback`という区間を含むパス：`the "paths" option supplied pathnames with a segment named !fallback, …`',
-    en: 'A path with a segment named `!fallback`: `the "paths" option supplied pathnames with a segment named !fallback, …`',
+    ja: 'レイアウトのスキーマが拒んだ値の下のシェル：`the shells stand where a params schema refuses the values above them: /xx/posts/:id`',
+    en: 'A shell below a value a layout’s schema rejects: `the shells stand where a params schema refuses the values above them: /xx/posts/:id`',
   }),
   message({
     ja: '先に宣言したルートのURLにも答えるシェル：`the shell for /ja/posts/:id ([locale]/posts/[id]/fallback.tsx) would also answer …`',

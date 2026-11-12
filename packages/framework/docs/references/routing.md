@@ -29,11 +29,12 @@ src/lib/                every other module, flat
 ```
 
 - `page.tsx`, `layout.tsx`, `not-found.tsx`, `error.tsx`, `loading.tsx`,
-  `fallback.tsx`, `redirect.ts`, `guard.ts` and `route.ts` are the only
-  filenames the grammar accepts. `mode: 'static'` refuses `guard.ts`
-  ([Choosing a mode](../GUIDE.md#what-static-mode-refuses)), and
-  `mode: 'server'` never renders `fallback.tsx`, though it checks where one
-  sits ([Values the build did not write](#values-the-build-did-not-write)). Any
+  `fallback.tsx`, `paths.ts`, `redirect.ts`, `guard.ts` and `route.ts` are
+  the only filenames the grammar accepts. `mode: 'static'` refuses
+  `guard.ts` ([Choosing a mode](../GUIDE.md#what-static-mode-refuses)), and
+  `mode: 'server'` never renders `fallback.tsx` and never reads `paths.ts`,
+  though it checks where each sits
+  ([Values the build did not write](#values-the-build-did-not-write)). Any
   other file is refused: components live outside `routes/` in
   `src/components/` and every other module — Server Actions, schemas, state
   definitions, data, helpers — in `src/lib/`, and a route file imports them
@@ -53,9 +54,10 @@ src/lib/                every other module, flat
   receive `request` ([Reading the request](guards.md#reading-the-request)).
 - A parameter's values arrive with the request under `mode: 'server'`, and
   need no list. Under `mode: 'static'` the build has no request to take them
-  from, and the `paths` option lists them
+  from, and a `paths.ts` in the parameter's directory returns them, for
+  every route below it
   ([Routes with parameters](params.md#routes-with-parameters)); a
-  `fallback.tsx` beside the page answers the ones it does not list.
+  `fallback.tsx` beside the page answers the ones it does not return.
 
 ```tsx
 // src/routes/products/[id]/page.tsx
@@ -205,7 +207,7 @@ Every problem is reported, not just the first, and each names the file:
 
 | routes/ contains                                                          | error                                                                                                                                                                                                               |
 | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `products/helper.ts`                                                      | `routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts, route.ts, loading.tsx, fallback.tsx — move "helper.ts" out of routes/`                                                   |
+| `products/helper.ts`                                                      | `routes/ holds only page.tsx, layout.tsx, not-found.tsx, error.tsx, redirect.ts, guard.ts, route.ts, loading.tsx, fallback.tsx, paths.ts — move "helper.ts" out of routes/`                                         |
 | `[123]/page.tsx`                                                          | `"[123]" is not a valid param directory — use [name] with a letter or underscore first`                                                                                                                             |
 | `pro ducts/page.tsx`                                                      | `"pro ducts" cannot be a URL segment — use letters, digits, . _ ~ or -`                                                                                                                                             |
 | `[id]/things/[id]/page.tsx`                                               | `":id" is already taken by an ancestor — params must be unique within a path`                                                                                                                                       |
@@ -222,7 +224,8 @@ Every problem is reported, not just the first, and each names the file:
 | `feed/[id]/route.ts` and `feed/[id]/fallback.tsx`                         | `fallback.tsx stands in for the page.tsx beside it, and "feed/[id]" has none`                                                                                                                                       |
 | `posts/[id]/layout.tsx` beside `posts/[id]/fallback.tsx`                  | `fallback.tsx cannot sit beside layout.tsx — that layout receives every parameter of "posts/[id]", so no shell could leave one to the browser; move the layout one directory up, or into page.tsx and fallback.tsx` |
 | `about/page.tsx` and `about/fallback.tsx`                                 | `fallback.tsx stands in for values the build did not write, and "/about" has no parameter; remove it`                                                                                                               |
-| `[locale]/layout.tsx` above `[locale]/about/fallback.tsx`                 | `fallback.tsx has nothing to leave to the browser — [locale]/layout.tsx receives every parameter of "/:locale/about"; remove fallback.tsx and list the values in paths`                                             |
+| `[locale]/layout.tsx` above `[locale]/about/fallback.tsx`                 | `fallback.tsx has nothing to leave to the browser — [locale]/layout.tsx receives every parameter of "/:locale/about"; remove fallback.tsx and return the values from a paths.ts`                                    |
+| `posts/paths.ts`                                                          | `paths.ts gives the values of its directory's parameter, and "posts" is not a [param] directory — move it into the parameter's directory`                                                                           |
 
 The generated table lists literal segments before parameters, so `about/`
 beside `[slug]/` is reachable without saying anything. A route group holds
@@ -230,16 +233,39 @@ both kinds under one key and the table cannot interleave across it, which is
 the one shape where a declared route can still be shadowed — so it is reported
 rather than shipped.
 
-The `fallback.tsx` rows hold in both modes, so switching modes needs no
-change to the files. `mode: 'static'` refuses more on top of these: whatever
-needs a request ([What static mode refuses](../GUIDE.md#what-static-mode-refuses)),
-and the `paths` its shells are placed by
+The `fallback.tsx` and `paths.ts` rows hold in both modes, so switching
+modes needs no change to the files. `mode: 'static'` refuses more on top of
+these: whatever needs a request
+([What static mode refuses](../GUIDE.md#what-static-mode-refuses)), a
+parameter no `paths.ts` gives values to
+([Routes with parameters](params.md#routes-with-parameters)), and a shell
+standing where it cannot
 ([What else stops the build](params.md#what-else-stops-the-build)).
+
+## The values of a parameter
+
+Under `mode: 'static'`, a `paths.ts` is what the build asks for the values
+a parameter takes: its default export, a function typed `Paths<Pattern>`,
+returns them, and every page, `route.ts` and `redirect.ts` below its
+directory is written once per value. What it is handed, what a value is and
+where it runs are in
+[Routes with parameters](params.md#routes-with-parameters); the grammar's
+part is where it may sit.
+
+- **In a `[param]` directory**, whose parameter it gives values to. In the
+  root, a literal directory or a group it is refused.
+- **With or without a `page.tsx` beside it.** The values are for whatever
+  sits below: `[locale]/paths.ts` beside only a `layout.tsx` gives the
+  locale of every page under it.
+- **With or without a `fallback.tsx` beside it.** With both, the values
+  returned are written as pages and the shell answers the rest.
+
+Under `mode: 'server'` it is not read, and nothing of it is built.
 
 ## Values the build did not write
 
 Under `mode: 'static'`, a `fallback.tsx` beside a `page.tsx` is what the
-values `paths` does not list are answered with: a shell, the layouts above
+values no `paths.ts` returns are answered with: a shell, the layouts above
 written as HTML with the `fallback.tsx` in the page's place, which a host
 serves for any such value and the browser fills in from the URL. What it
 renders, how it reads the value and what it costs are in
@@ -251,7 +277,8 @@ the grammar's part is where it may sit.
 - **Under a pattern with a parameter**, at least one of which no layout
   above it receives. A layout above is written into the shell once, as
   HTML, for every value the shell answers, so a parameter it receives is one
-  the shell has to know — supplied by `paths`, in a shell location
+  the shell has to know — given by a `paths.ts` in that parameter's
+  directory, which puts a shell below each of its values
   (`/ja/posts/:id`). The parameters left to the browser are the rest.
 - **With no `layout.tsx` beside it.** That layout would receive every
   parameter, and leave the browser none. Move it one directory up, where it
@@ -260,9 +287,9 @@ the grammar's part is where it may sit.
 
 It receives no props, and an `error.tsx` or `loading.tsx` beside it or above
 wraps it as it wraps the page. It answers its own page's pattern and nothing
-below it: `posts/[id]/comments/page.tsx` needs its own values in `paths`, or
-a `fallback.tsx` of its own, and a `redirect.ts` or `route.ts` there can only
-have its values listed.
+below it: `posts/[id]/comments/page.tsx` is written for the values
+`posts/[id]/paths.ts` returns, or keeps a `fallback.tsx` of its own, and a
+`redirect.ts` or `route.ts` there answers only the values returned.
 
 Under `mode: 'server'` every value is rendered by its page, per request, and
 nothing of a `fallback.tsx` is built.
@@ -362,8 +389,8 @@ as much as a guard does: [`cookies()`](guards.md#cookies),
 ### Under static mode
 
 The build calls its `GET` once for each pathname the site has — a pattern
-with params needs `paths`, as a page's does
-([Parameters](params.md#routes-with-parameters)) — with a request whose
+with params takes its values from the `paths.ts` files above it, as a
+page's does ([Parameters](params.md#routes-with-parameters)) — with a request whose
 origin is `site` when that option is given (an RSS feed's links are
 absolute), and writes what it answered as the file at that pathname:
 `dist/client/feed.xml`. A file keeps no type of its own, so a static host
@@ -458,6 +485,8 @@ export const redirects = {} as const;
 
 export const fallbacks = {} as const;
 
+export const paths = {} as const;
+
 export const routes = defineRoutes({
   '/': {
     layout: layout satisfies Layout<'/'>,
@@ -492,8 +521,11 @@ page once the walk has imported it — `routeModules` what imports the
 `searchReaders` what reads the search for a page that exports `search`, and
 `fallbacks`, under `mode: 'static'`, what imports the `fallback.tsx` beside a
 page and the parameters its shell may leave to the browser (under
-`mode: 'server'` it is always empty, and no `fallback.tsx` is imported); all
-six are empty here because no route file declares any.
+`mode: 'server'` it is always empty, and no `fallback.tsx` is imported), and
+`paths`, under `mode: 'static'`, what imports each `paths.ts`, by its file,
+each checked against `Paths` of its directory's pattern in a `PathsChecks`
+type (under `mode: 'server'` it too is empty); all seven are empty here
+because no route file declares any.
 
 `.k8ordo/register.gen.ts` registers that table with the framework — and with
 `@k8ordo/state` when the application depends on it — so typed paths work
@@ -546,16 +578,16 @@ clone — a CI checkout among them — has neither until something writes them.
 `k8ordo generate`, the package's command, writes them and stops there: it
 reads the Vite config in the working directory as `vite build` does, so the
 `mode` and `routesDir` given to `framework()` are the ones it uses, then
-builds nothing and renders no page — `paths` is never called, and nothing a
+builds nothing and renders no page — no `paths.ts` is read, and nothing a
 page reads is touched. A `routes/` with the problems of
 [What the build refuses](#what-the-build-refuses) fails it as it fails the
 build, with `routes/ is not a valid pathname space:` and every problem
 named, and nothing is written. What `mode: 'static'` refuses on top of
 those — a `guard.ts`, a `route.ts` answering more than `GET`, a page
-reading `search`, an `export *`, a Server Action, whatever `paths`
+reading `search`, an `export *`, a Server Action, whatever a `paths.ts`
 returns — it does not check, so its success is not the build's. Run it
 before `tsc`; it is also how a CI job without the data a build reads — the
-database behind `paths`, say — has the types:
+database behind a `paths.ts`, say — has the types:
 
 ```yaml
 # .github/workflows/ci.yml, in the application's directory

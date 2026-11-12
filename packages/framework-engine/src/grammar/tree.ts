@@ -348,7 +348,7 @@ const checkFallback = (
   const open = params.filter((name) => !(above?.params ?? []).includes(name));
   if (open.length === 0 && above !== null) {
     return refuse(
-      `fallback.tsx has nothing to leave to the browser — ${above.file} receives every parameter of "${pattern}"; remove fallback.tsx and list the values in paths`,
+      `fallback.tsx has nothing to leave to the browser — ${above.file} receives every parameter of "${pattern}"; remove fallback.tsx and return the values from a paths.ts`,
     );
   }
   return {

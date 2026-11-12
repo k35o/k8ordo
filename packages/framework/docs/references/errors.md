@@ -102,8 +102,8 @@ its response has started, `notFound()` is an error like any other, and the
 nearest `error.tsx` answers it.
 
 **Under `mode: 'static'` a build waits for the whole page**, so `notFound()`
-counts from anywhere in it. A pathname the `paths` option supplied whose page
-says it fails the build, naming the pathname — it would otherwise be written
+counts from anywhere in it. A value a `paths.ts` returned whose page says
+it fails the build, naming the pathname — it would otherwise be written
 as a 404 page under a URL the site claims to have (see
 [Routes with parameters](params.md#routes-with-parameters)). The 404 itself
 is the host's to send: `not-found.tsx` is written as `404.html`

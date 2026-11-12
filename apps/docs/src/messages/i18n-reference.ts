@@ -85,11 +85,6 @@ export const localesDelocalize = message({
   en: 'Takes the leading locale segment off and returns a `Delocalized`.',
 });
 
-export const localesPaths = message({
-  ja: '`/:locale`の区間を持つパターンを、ロケールの数だけ展開する関数。`@k8ordo/framework`では、staticモードの`paths`オプションに渡します。',
-  en: 'Expands every pattern with a `/:locale` segment once per locale. In `@k8ordo/framework`, it is what static mode’s `paths` option takes.',
-});
-
 export const localesParamsSchema = message({
   ja: '`{ locale }`を検証するStandard Schema。サーバーでは、受け付けたロケールを、検証を呼んだ非同期コンテキストの残りに設定します。',
   en: 'A Standard Schema that validates `{ locale }`. On the server, an accepted locale is set for the rest of the async context that called it.',

@@ -524,7 +524,7 @@ describe('the shells a build writes', () => {
     );
 
     await expect(hooks().build()).rejects.toThrow(
-      'the shell for /posts/:id (posts/[id]/fallback.tsx) was answered by [a]/[b]/fallback.tsx, which the table tries first — supply shell locations that pattern cannot match',
+      'the shell for /posts/:id (posts/[id]/fallback.tsx) was answered by [a]/[b]/fallback.tsx, which the table tries first — put the shell where that pattern cannot match, with a paths.ts above it',
     );
   });
 

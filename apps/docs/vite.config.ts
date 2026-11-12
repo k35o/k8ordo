@@ -2,7 +2,6 @@ import betterCssModules from '@better-css-modules/vite';
 import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
 
-
 export default defineConfig({
   server: {
     // プレビューツール等がポートを割り当てられるよう PORT を尊重する

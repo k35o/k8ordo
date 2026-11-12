@@ -2,7 +2,6 @@ import { colorSchemeScriptHash } from '@k8ordo/color-scheme';
 import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
 
-
 export default defineConfig({
   plugins: [
     framework({

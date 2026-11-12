@@ -35,7 +35,7 @@ dependencies in either mode: the build bundles what the application runs.
 
 | Package               | Version  | Required | Needed for                                 |
 | --------------------- | -------- | -------- | ------------------------------------------ |
-| `@k8ordo/router`      | ^2.4.0   | yes      | routing, re-exported by the framework      |
+| `@k8ordo/router`      | ^3.0.0   | yes      | routing, re-exported by the framework      |
 | `react`               | ≥19.3.0  | yes      | rendering                                  |
 | `react-dom`           | ≥19.3.0  | yes      | rendering                                  |
 | `vite`                | ≥8.1.0   | yes      | the build (`framework()` is a Vite plugin) |
@@ -54,8 +54,7 @@ export default defineConfig({
   plugins: [
     framework({
       mode: 'static',
-      paths: () => ['/products/1', '/products/2'], // for routes with parameters
-      site: 'https://example.com', // and a sitemap.xml
+      site: 'https://example.com', // writes a sitemap.xml too
     }),
   ],
 });
@@ -70,7 +69,8 @@ src/routes/
   error.tsx             shown in place of what is below when it throws
   products/[id]/
     page.tsx            /products/:id — `export const paramsSchema` types :id
-    fallback.tsx        static: the shell for the ids paths does not list
+    paths.ts            static: the ids the build writes
+    fallback.tsx        static: the shell for the ids paths.ts does not return
   old/redirect.ts       /old sends the visitor elsewhere
   feed.xml/route.ts     /feed.xml answered by its GET — a Response, not a page
   admin/guard.ts        server mode: runs before everything under /admin
@@ -88,6 +88,16 @@ export default async function ProductPage({
   if (product === undefined) notFound();
   return <h1>{product.name}</h1>;
 }
+```
+
+```ts
+// src/routes/products/[id]/paths.ts — static mode: the ids to write
+import type { Paths } from '@k8ordo/framework';
+
+const paths: Paths<'/products/:id'> = async () =>
+  (await listProducts()).map((product) => String(product.id));
+
+export default paths;
 ```
 
 ```bash
@@ -132,8 +142,11 @@ whatever needs one — a `'use server'` module, a `guard.ts`, an import of
 `@k8ordo/framework/server` — in `vite dev` as well: `this application wants
 mode: 'server'`.
 
-A value `paths` does not list — a product added after the build — is
-answered by a `fallback.tsx` beside the page: the build writes it once as a
+A parameter's values come from a `paths.ts` in its own directory: a function
+that returns them, run with the modules the pages read their data through,
+and applied to every page, `route.ts` and `redirect.ts` below it. A value it
+does not return — a product added after the build — is answered by a
+`fallback.tsx` beside the page: the build writes it once as a
 shell, the layouts in HTML, and the browser draws the page from the URL.
 The build also writes the `_redirects` through which Netlify and Cloudflare
 reach the shell, and `vercel()` the same rewrites for Vercel — around them,

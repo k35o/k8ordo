@@ -446,7 +446,7 @@ describe('fallback.tsx', () => {
       {
         path: '[locale]/about/(x)/fallback.tsx',
         message:
-          'fallback.tsx has nothing to leave to the browser — [locale]/about/layout.tsx receives every parameter of "/:locale/about"; remove fallback.tsx and list the values in paths',
+          'fallback.tsx has nothing to leave to the browser — [locale]/about/layout.tsx receives every parameter of "/:locale/about"; remove fallback.tsx and return the values from a paths.ts',
       },
     ]);
   });

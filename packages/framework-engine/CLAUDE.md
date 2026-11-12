@@ -765,7 +765,8 @@ pnpm check         # check:write to auto-fix
   Under `'static'` the generated table lists `fallbacks`, per page pattern
   with one: what reads the component, the params a shell may leave to the browser
   (`open`, those no layout above it receives — `fallbackShapes`, the one
-  walk the grammar, the emitter and the framework's `paths.ts` all read),
+  walk the grammar, the emitter and `@k8ordo/framework`'s `src/paths.ts` all
+  read),
   and the layouts' schemas. Under `'server'` it is `{}` and nothing of a
   fallback.tsx is imported. A request is a shell request when its pattern
   has an entry and only open params hold `FALLBACK_SEGMENT` (`!fallback`):
@@ -780,6 +781,22 @@ pnpm check         # check:write to auto-fix
   `SHELL_HEADER` (the pattern that rendered it), which the build compares
   with the one it asked for; a `notFound()` while it renders is a page's
   404 (`NOT_FOUND_HEADER`), which the build refuses.
+- **A `paths.ts` is a parameter's values, and only a build into files asks.**
+  The grammar finds one as the `paths` slot and takes it only in a `[param]`
+  directory — anywhere else is a problem, in both modes — and
+  `pathsFiles(tree)` lists them, outermost first, each with its directory's
+  pattern. Under `'static'` the generated table lists `paths`, keyed by the
+  file, each a late `() => import()`, and checks every default export
+  against `Paths<pattern>` in a `PathsChecks` type; under `'server'` it is
+  `{}` and no paths.ts is compiled in. `entry.rsc` exports
+  `pathValues(file, params)`, which loads the file through that table and
+  calls its default export with the params above it, handing back whatever
+  it returned: the static build calls it from the built bundle, so a
+  paths.ts runs in the pages' module graph (the application's aliases,
+  `server-only` modules, the instances the pages read through), and what
+  counts as a value is the framework's to say (`suppliedFrom`). `vite dev`
+  reads the same files through the RSC environment's runner, in
+  `@k8ordo/framework`.
 - **A shell carries its not-found, and shows it in place.** The nearest
   not-found is rendered into `Payload.notFound`, in the shell's render and
   context — the nearest that takes none of the params the shell leaves
@@ -806,14 +823,15 @@ pnpm check         # check:write to auto-fix
   name is a type error without any route file importing a helper — the
   layout's pattern is the prefix every route below it shares. What the table
   holds no value of (a page's `paramsSchema`, a `route.ts`, a
-  `fallback.tsx`) is checked as a type, `Checked<T, U>`. `tsc` reports it in
+  `fallback.tsx`, a `paths.ts`) is checked as a type, `Checked<T, U>`. `tsc` reports it in
   the generated file; `vite build` does not type-check, so the build itself
   still passes.
 - **The table reads a page when a request reaches it, and imports the frame.**
-  `page.tsx`, `not-found.tsx`, `route.ts` and `fallback.tsx` are
-  `() => import()` in `routes.gen.ts` (`isLate` in `emit.ts`); a page and a
-  not-found stand in the table as `lazy()` over it, and `pageModules`,
-  `routeModules` and `fallbacks` list it per pattern. Imported with the
+  `page.tsx`, `not-found.tsx`, `route.ts`, `fallback.tsx` and `paths.ts`
+  are `() => import()` in `routes.gen.ts` (`isLate` in `emit.ts`); a page
+  and a not-found stand in the table as `lazy()` over it, `pageModules`,
+  `routeModules` and `fallbacks` list it per pattern, and `paths` per
+  file. Imported with the
   table, a route file is in the RSC entry's chunk, and the RSC plugin
   groups client components, and attaches a server component's CSS, by the
   RSC chunk a module is in — so every page loaded every page's. Read late,
