@@ -57,6 +57,43 @@ above it, and the file is written; with none, it stops the build the same
 way. `error.tsx` under this mode is for what fails in the browser: a client
 component, after hydration.
 
+### Reporting, and what no `error.tsx` catches
+
+An `error.tsx` is handed the `error` beside `reset`, so that is where a
+failure it caught is reported from:
+
+```tsx
+'use client';
+
+import type { ErrorProps } from '@k8ordo/framework';
+import { useEffect } from 'react';
+
+export default function RouteError({ error, reset }: ErrorProps) {
+  useEffect(() => {
+    void fetch('/reports', { method: 'POST', body: String(error) });
+  }, [error]);
+  return (
+    <button onClick={reset} type="button">
+      try again
+    </button>
+  );
+}
+```
+
+The root `error.tsx` sits inside the root layout, so it catches everything
+below that layout and nothing of the layout itself: a client component the
+layout renders — a header's menu, a theme switch — that throws has no
+`error.tsx` above it. The framework then does what it does for a page with
+none: after a client navigation it loads the document again, and on the
+document's first render it lets the error through, React takes the tree
+down, and the browser's `error` event carries it
+(`window.addEventListener('error', …)` is where to report it). There is no
+`global-error.tsx`: what could replace the layout would have to render
+`<html>` itself, with none of the layout's providers. Put an error boundary
+of your own inside the layout instead, around the parts that can fail — a
+dozen lines of a class component with `getDerivedStateFromError`, which is
+what an `error.tsx` is — and the rest of the frame stays up.
+
 ## A page that is not there
 
 A params schema decides what a URL's params look like; whether the thing they

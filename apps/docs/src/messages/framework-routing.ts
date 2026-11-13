@@ -508,6 +508,26 @@ export const titlesOne = message({
   en: 'Keep one `<title>` on screen at a time. The root layout renders none, and each page and `not-found.tsx` renders its own. Render two and both are output; the later one does not replace the earlier.',
 });
 
+export const viewsTitle = message({
+  ja: 'ページビューの計測',
+  en: 'Counting page views',
+});
+
+export const viewsWhen = message({
+  ja: 'ページの切り替えは文書の読み込みではなく、`pushState`でもありません。ルーターはNavigation APIで切り替えるので、読み込みだけを数える計測や、History APIを見張る計測には数えられません。切り替えが終わった時点は、ブラウザの`navigatesuccess`イベントでわかります。新しいページが画面に出て、`<title>`も替わったあとに発火します。',
+  en: 'A page change is not a document load, and it is not `pushState` either. The router changes pages through the Navigation API, so a tool that counts only loads, or that watches the History API, misses it. The browser’s `navigatesuccess` event says when a change is done: it fires once the new page is on screen with its `<title>` in place.',
+});
+
+export const viewsWhere = message({
+  ja: 'この部品はルートレイアウトから描きます。同じリスナーは、Reactを使わない素のスクリプトにも書けます。クエリやフラグメントだけの変更も`navigatesuccess`を発火するので、pathnameが変わったときだけ数えます。',
+  en: 'Render this component from the root layout. The same listener works in a plain script with no React. A change of only the search or the fragment fires `navigatesuccess` too, so count only when the pathname moved.',
+});
+
+export const viewsNot = message({
+  ja: '`usePathname()`が変わった時点では数えません。`usePathname()`はURLに従い、ルーターは次のページが届く前にURLを書き換えるので、その時点の`<title>`はまだ離れるページのものです。計測ツール自身の「履歴の変更を数える」設定も切ります。戻る/進むは`popstate`も発火するので、切らないと2回数えられます。',
+  en: 'Do not count when `usePathname()` changes. It follows the URL, which the router commits before the next page arrives, so the `<title>` at that moment is still the page being left. Turn off the tool’s own counting of history changes as well: going back and forward still fires `popstate`, and those views would be counted twice.',
+});
+
 export const mdxTitle = message({
   ja: 'MDX',
   en: 'MDX',
