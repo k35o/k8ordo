@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { cp, mkdtemp, readdir, rm } from 'node:fs/promises';
+import { cp, mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
@@ -55,6 +55,24 @@ describe('the application built for Vercel', () => {
     } finally {
       await rm(isolated, { recursive: true, force: true });
     }
+  });
+
+  it('adds the headers framework() declared ahead of the files and the function', async () => {
+    const { routes } = JSON.parse(
+      await readFile(path.join(output, 'config.json'), 'utf8'),
+    ) as { routes: readonly unknown[] };
+
+    expect(routes.slice(0, 2)).toStrictEqual([
+      {
+        src: '^/.*$',
+        headers: {
+          'Referrer-Policy': 'strict-origin-when-cross-origin',
+          'Content-Security-Policy': "default-src 'none'",
+        },
+        continue: true,
+      },
+      { handle: 'filesystem' },
+    ]);
   });
 
   it('puts every script of the client build on the CDN', async () => {

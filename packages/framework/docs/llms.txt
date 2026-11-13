@@ -117,7 +117,9 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   `client-files.json`, `sitemap.xml`, `_redirects`), the rewrites that reach a shell on Netlify,
   Cloudflare Workers static assets (`html_handling`, the 2,000/100 rule
   limits) and Pages, Vercel and any other host, and `serve` and
-  `vite preview` serving a static build as a static host;
+  `vite preview` serving a static build as a static host; `headers`, the
+  headers every response carries in either mode (`vite dev`,
+  `vite preview`, `serve`, the handler, Vercel's routes, `_headers`);
   under server mode, a `dist/` that runs on its own with
   `node dist/server.js` (`PORT`, `HOST`, every dependency bundled in, and
   `resolve.external` for one that cannot be), `serve` (compression, `ETag`,

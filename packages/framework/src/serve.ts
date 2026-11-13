@@ -58,6 +58,7 @@ type Entry = {
   readonly default: Handler;
   readonly base: string;
   readonly mode: 'static' | 'server';
+  readonly headers: Readonly<Record<string, string>>;
 };
 
 /**
@@ -241,7 +242,13 @@ export const serve = async (options: ServeOptions = {}): Promise<Server> => {
   const dist = path.resolve(process.cwd(), options.dist ?? 'dist');
   const clientDir = path.join(dist, 'client');
   const entry = pathToFileURL(path.join(dist, 'rsc', 'index.js')).href;
-  const { default: handler, base, mode } = (await import(entry)) as Entry;
+  const {
+    default: handler,
+    base,
+    mode,
+    headers: declared,
+  } = (await import(entry)) as Entry;
+  const everywhere = Object.entries(declared);
   // server ビルドにも public/_redirects が写るが、その 200 はこのサーバーが
   // 当てるものではない。静的ビルドのものだけを読む
   const rules = mode === 'static' ? await readRules(clientDir) : null;
@@ -378,6 +385,8 @@ export const serve = async (options: ServeOptions = {}): Promise<Server> => {
 
   const server = createServer(
     (incoming: IncomingMessage, response: ServerResponse) => {
+      // 何が答えても付く。答えが同じ名前を書けば、writeHead がそちらを取る
+      for (const [name, value] of everywhere) response.setHeader(name, value);
       void (async () => {
         const url = urlOf(incoming);
         if (url === null) {

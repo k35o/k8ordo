@@ -54,6 +54,7 @@ import {
   writtenOutsideScripts,
 } from './documents';
 import type { ContentSecurityPolicy } from './documents';
+import { formatHeaders } from './headers';
 import {
   answersOf,
   catchAllPath,
@@ -797,6 +798,19 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
           );
         }
         const adapter = adapterOf(builder.config.plugins);
+        const declared = options.headers ?? {};
+        if (Object.keys(declared).length > 0) {
+          await writeFile(
+            path.join(clientDir, '_headers'),
+            formatHeaders(
+              declared,
+              await ownPublicFile(
+                client.build.copyPublicDir ? builder.config.publicDir : '',
+                '_headers',
+              ),
+            ),
+          );
+        }
         if (plan.shells.length > 0) {
           const misread = await writeRedirects({
             clientDir,
@@ -889,6 +903,20 @@ const middlewareOf =
       if (!done) next();
     })();
   };
+
+/** The application's own file of that name in `public/`, if there is one. */
+const ownPublicFile = async (
+  publicDir: string,
+  name: string,
+): Promise<string | null> => {
+  if (publicDir === '') return null;
+  try {
+    return await readFile(path.join(publicDir, name), 'utf8');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null;
+    throw error;
+  }
+};
 
 /** The host adapter among the plugins, if any. */
 const adapterOf = (

@@ -14,6 +14,15 @@ export type EngineOptions = {
    * `oxc-transform-react` installed. Server components are left as they are.
    */
   readonly reactCompiler?: boolean;
+  /**
+   * Headers every response carries, whatever answered — a page, a file of
+   * the build, a `404`, a redirect. Sent by `vite dev`, `vite preview` and
+   * `serve`, added by the request handler to its own answers under
+   * `mode: 'server'`, and written for the hosts that read them from the
+   * build. A header the answer already has under the same name — one a
+   * `guard.ts` or a `route.ts` set — is left as it is.
+   */
+  readonly headers?: Readonly<Record<string, string>>;
 };
 
 /**

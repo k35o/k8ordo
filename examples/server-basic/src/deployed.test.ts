@@ -142,6 +142,21 @@ describe('the build, copied alone to where nothing is installed', () => {
     expect(response.headers.get('location')).toBe('/products');
   });
 
+  it('sends a file of the build the headers framework() declared, which no guard reaches', async () => {
+    const html = await (await fetch(`${origin}/`)).text();
+    const script = /src="(\/assets\/[^"]+\.js)"/u.exec(html)?.[1];
+
+    const response = await fetch(`${origin}${String(script)}`);
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('referrer-policy')).toBe(
+      'strict-origin-when-cross-origin',
+    );
+    expect(response.headers.get('content-security-policy')).toBe(
+      "default-src 'none'",
+    );
+  });
+
   it('runs the guards, and answers what one ends', async () => {
     const response = await fetch(`${origin}/members`);
     expect(response.status).toBe(401);

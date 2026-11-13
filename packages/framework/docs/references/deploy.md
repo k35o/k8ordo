@@ -537,6 +537,10 @@ expression for the pathname, with `dest`, `status`, `headers`, `continue`,
 assets/ sent immutable
 ```
 
+The headers `framework()` declared
+([Headers on every response](#headers-on-every-response)) are a route ahead
+of `beforeFiles`, which may write the same name over for the paths it names.
+
 `beforeFiles` is tried before any file, so it is where headers for every
 answer go, and a redirect or a rewrite that has to win over a file that is
 there. `beforeNotFound` is tried once neither a file nor a shell answered,
@@ -636,7 +640,8 @@ What to keep in mind:
   query: `^/posts/` does not match `/posts/first`, and `^/posts/.+$` does.
 - **Only Vercel applies them.** `vite dev`, `vite preview` and `serve`
   answer as if they were not there — no header, no redirect, nothing decided
-  by `Accept` — since an imitation of Vercel's routing that differed from it
+  by `Accept` (the headers every response carries go in `framework()`'s
+  `headers`, which all of them send) — since an imitation of Vercel's routing that differed from it
   would pass locally and fail once deployed. A URL only a route of yours
   answers is a 404 there.
 - **No `Cache-Control` in a route every path takes.** It reaches every file
@@ -658,6 +663,61 @@ What to keep in mind:
   ```text
   vercel() takes beforeFiles and beforeNotFound under mode: 'static' only — under mode: 'server' the handler answers every URL no file names
   ```
+
+## Headers on every response
+
+Either mode. `framework()` takes the headers every response carries —
+whatever answered: a page, a file of the build, a `404`, a redirect:
+
+```ts
+// vite.config.ts
+export default defineConfig({
+  plugins: [
+    framework({
+      mode: 'static',
+      headers: {
+        'X-Content-Type-Options': 'nosniff',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+      },
+    }),
+  ],
+});
+```
+
+Declared once, they are sent wherever the application runs:
+
+| Where                                  | How                                                                                 |
+| -------------------------------------- | ----------------------------------------------------------------------------------- |
+| `vite dev`, `vite preview`             | set before anything answers                                                         |
+| `serve`, `node dist/server.js`         | set before anything answers, read from the build                                    |
+| the request handler, under server mode | added to its own answers, so a runtime that calls the handler itself sends them too |
+| Vercel, with `vercel()`                | a route ahead of every other, in either mode                                        |
+| Netlify, Cloudflare, under static mode | `dist/client/_headers`, a rule for `/*`, your own `public/_headers` kept after it   |
+
+A value that differs between `vite dev` and the build — a
+`Content-Security-Policy` that allows `'unsafe-eval'` only in development —
+is the config's to decide: `defineConfig(({ command }) => …)` says which of
+the two is running.
+
+- **An answer's own header wins.** Under server mode a header a `guard.ts`
+  or a `route.ts` set under the same name is left as it was set: declare a
+  `Content-Security-Policy` for the files, and the pages keep the one their
+  guard writes with a `nonce()`. Vercel is the one place not to rely on
+  that — which of a route's header and a function's it sends is Vercel's to
+  decide — so do not declare a name there that a guard also writes.
+- **No `Cache-Control`.** It would reach every file, those under `assets/`
+  among them, and every page.
+- **Every path, or the host's own means.** A header for some paths only is
+  written where the host reads it: a route of `vercel()`'s
+  ([Routes of your own](#routes-of-your-own)), a rule in `public/_headers`.
+  On Netlify and Cloudflare a response is sent the headers of every rule
+  that matches it, so a name both `headers` and your `public/_headers` give
+  is sent with both values.
+- A name or a value HTTP could not send — a space in a name, a line break
+  in a value — is refused when the config loads.
+- A server-mode `dist/` whose files a host of your own serves sends those
+  files however that host does: the handler adds the headers to what it
+  answers, and a file never passes through it.
 
 ## A tab opened before a deploy
 

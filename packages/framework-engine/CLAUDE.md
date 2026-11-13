@@ -105,6 +105,10 @@ pnpm check         # check:write to auto-fix
   a person what to install say `@k8ordo/framework`, never this package.
   `EngineHost.mode` (`'static' | 'server'`) is what differs between the two
   modes, and reaches the runtime as `import.meta.env.K8ORDO_MODE`.
+  `EngineOptions.headers` reaches it the same way, as
+  `import.meta.env.K8ORDO_HEADERS`: the handler's entry exports it as
+  `headers`, for whatever serves the build's files, and under `'server'`
+  adds each to an answer that has no header of that name (`withDeclared`).
 - **React's plugin comes with the engine, and only `reactCompiler` reaches
   it.** `engine()` returns `@vitejs/plugin-react` beside the RSC plugin, so
   an application never adds one and Fast Refresh is wired either way.

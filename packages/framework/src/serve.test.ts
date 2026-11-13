@@ -48,8 +48,17 @@ beforeAll(async () => {
     path.join(dist, 'rsc', 'index.js'),
     `export const base = '/';
     export const mode = 'server';
+    export const headers = {
+      'X-Content-Type-Options': 'nosniff',
+      'Referrer-Policy': 'no-referrer',
+    };
     export default async (request) => {
       const url = new URL(request.url);
+      if (url.pathname === '/own-policy') {
+        return new Response('own', {
+          headers: { 'referrer-policy': 'same-origin' },
+        });
+      }
       if (url.pathname === '/throws') {
         throw new Error('postgres://admin:hunter2@db refused the connection');
       }
@@ -486,6 +495,41 @@ describe('serve', () => {
   });
 });
 
+describe('the headers framework() declared', () => {
+  it('sends them with a file of the client build', async () => {
+    const response = await fetch(`${server.url}/stable.txt`);
+
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+    expect(response.headers.get('referrer-policy')).toBe('no-referrer');
+  });
+
+  it("sends them with the handler's answer, whatever its status", async () => {
+    const response = await fetch(`${server.url}/missing`);
+
+    expect(response.status).toBe(404);
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+  });
+
+  it('sends them with the 500 of a handler that threw', async () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {
+      // 投げたことは status で確かめる
+    });
+
+    const response = await fetch(`${server.url}/throws`);
+    log.mockRestore();
+
+    expect(response.status).toBe(500);
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+  });
+
+  it('leaves a header the answer set itself as the answer set it', async () => {
+    const response = await fetch(`${server.url}/own-policy`);
+
+    expect(response.headers.get('referrer-policy')).toBe('same-origin');
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+  });
+});
+
 describe('serve under a base', () => {
   let under: string;
   let served: Server;
@@ -504,6 +548,7 @@ describe('serve under a base', () => {
       path.join(under, 'rsc', 'index.js'),
       `export const base = '/site/';
       export const mode = 'server';
+      export const headers = {};
       export default async (request) =>
         new Response(new URL(request.url).pathname, {
           headers: { 'content-type': 'text/plain' },
@@ -577,6 +622,7 @@ describe('serve a static build', () => {
       'rsc/index.js',
       `export const base = '/';
       export const mode = 'static';
+      export const headers = { 'X-Content-Type-Options': 'nosniff' };
       export default async () => {
         throw new Error('a static build is never rendered while it is served');
       };`,
@@ -622,6 +668,18 @@ describe('serve a static build', () => {
     expect(await response.text()).toBe('<p>not found</p>');
   });
 
+  it('sends the headers framework() declared with a page, and with 404.html', async () => {
+    const page = await fetch(`${served.url}/`);
+    const missing = await fetch(`${served.url}/nope`);
+
+    expect(missing.status).toBe(404);
+    expect(
+      [page, missing].map((response) =>
+        response.headers.get('x-content-type-options'),
+      ),
+    ).toStrictEqual(['nosniff', 'nosniff']);
+  });
+
   it('never makes a missing asset a rule answered immutable', async () => {
     const response = await fetch(`${served.url}/assets/gone-123.js`);
     expect(await response.text()).toBe(SHELL);
@@ -659,6 +717,7 @@ describe('serve a static build under a base', () => {
       'rsc/index.js',
       `export const base = '/site/';
       export const mode = 'static';
+      export const headers = {};
       export default async () => {
         throw new Error('a static build is never rendered while it is served');
       };`,
