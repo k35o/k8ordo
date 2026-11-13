@@ -6,7 +6,8 @@ import type { FC, InputHTMLAttributes, Ref } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import { getMessages } from '../../../i18n/current';
-import { ViewIcon, ViewOffIcon } from '../../icons';
+import { EyeIcon } from '../../icons/eye';
+import { EyeClosedIcon } from '../../icons/eye-closed';
 
 import focusRing from '../../_internal/focus-ring.module.css';
 import styles from './password-input.module.css';
@@ -70,7 +71,7 @@ export const PasswordInput: FC<Props> = ({
         }}
         type="button"
       >
-        {isVisible ? <ViewOffIcon size="sm" /> : <ViewIcon size="sm" />}
+        {isVisible ? <EyeClosedIcon size="sm" /> : <EyeIcon size="sm" />}
       </button>
     </div>
   );

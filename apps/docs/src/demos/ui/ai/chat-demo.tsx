@@ -1,6 +1,6 @@
 'use client';
 
-import { Avatar, AssistantIcon } from '@k8ordo/ui';
+import { Avatar } from '@k8ordo/ui';
 import {
   Attachment,
   Conversation,
@@ -12,6 +12,7 @@ import {
   ToolInvocation,
 } from '@k8ordo/ui/ai';
 import type { ToolState } from '@k8ordo/ui/ai';
+import { BotMessageIcon } from '@k8ordo/ui/icons';
 import { useRef, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 
@@ -25,7 +26,7 @@ const AssistantRow: FC<{ answer?: string; children: ReactNode }> = ({
 }) => (
   <Message.Root
     avatar={
-      <Avatar color="primary" icon={<AssistantIcon />} name="AI" size="sm" />
+      <Avatar color="primary" icon={<BotMessageIcon />} name="AI" size="sm" />
     }
     from="assistant"
   >

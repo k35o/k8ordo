@@ -195,7 +195,7 @@ UI では必ず以下のトークンを使う（\`var(--color-fg-base)\` のよ�
     `#### Group（データ可視化）`,
     semanticTable(GROUP_TOKENS),
 
-    `その他: \`--color-back-drop\`（\`${cssValueOf('color-back-drop')}\` オーバーレイ）, \`--color-logo-*\`（ロゴ）, \`--color-system-*\`（強制カラーで塗るシステムの色）。`,
+    `その他: \`--color-back-drop\`（\`${cssValueOf('color-back-drop')}\` オーバーレイ）, \`--color-system-*\`（強制カラーで塗るシステムの色）。`,
 
     `### ダークモード
 
@@ -425,7 +425,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 
 ### Icons
 
-アイコンは \`size\` prop を受け取る（\`'xs'|'sm'|'md'|'lg'|'xl'|'2xl'|'3xl'\`、デフォルト \`md\`）。\`xs\`=12px, \`sm\`=16px, \`md\`=24px, \`lg\`=32px, \`xl\`=40px, \`2xl\`=48px, \`3xl\`=56px。特殊: \`ChevronIcon\`（\`direction\` 必須）, \`AlertIcon\`（\`status\` 必須）。\`Logo\` だけは \`size\` を持たない SVG 本体で、大きさは \`className\` で決める（\`size\` で揃えるなら \`LogoIcon\`）。
+アイコンは \`size\` prop を受け取る（\`'xs'|'sm'|'md'|'lg'|'xl'|'2xl'|'3xl'\`、デフォルト \`md\`）。\`xs\`=12px, \`sm\`=16px, \`md\`=24px, \`lg\`=32px, \`xl\`=40px, \`2xl\`=48px, \`3xl\`=56px。特殊: \`ChevronIcon\`（\`direction\` 必須）, \`AlertIcon\`（\`status\` 必須）。\`@k8ordo/ui/icons\` から import する（root には無い）。名前は用途でなく形で付く（\`XIcon\`, \`BookmarkIcon\`）。ロゴは持たないので、自分の絵は \`BaseIcon\` の上に描く。
 
 ### Providers
 

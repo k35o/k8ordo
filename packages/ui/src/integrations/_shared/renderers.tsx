@@ -49,61 +49,8 @@ import { Slider } from '../../components/form/slider';
 import { Switch } from '../../components/form/switch';
 import { TextField } from '../../components/form/text-field';
 import { Textarea } from '../../components/form/textarea';
-import {
-  AccessibilityIcon,
-  AIIcon,
-  AlertIcon,
-  AtomIcon,
-  BadIcon,
-  BlogIcon,
-  BoringIcon,
-  CheckIcon,
-  ChevronIcon,
-  CloseIcon,
-  ColorContrastIcon,
-  ColorInfoIcon,
-  CopyIcon,
-  DarkModeIcon,
-  DifficultIcon,
-  EasyIcon,
-  ExternalLinkIcon,
-  FormIcon,
-  GitHubIcon,
-  GoodIcon,
-  HistoryIcon,
-  HorizontalWritingIcon,
-  InformativeIcon,
-  InterestingIcon,
-  LightModeIcon,
-  LinkIcon,
-  ListIcon,
-  LocationIcon,
-  LogoIcon,
-  MailIcon,
-  MinusIcon,
-  MixedColorIcon,
-  NavigationMenuIcon,
-  NewsIcon,
-  PaletteIcon,
-  PlusIcon,
-  PrepareIcon,
-  PublishDateIcon,
-  QiitaIcon,
-  RSSIcon,
-  SendIcon,
-  ShallowIcon,
-  ShieldCheckIcon,
-  SlideIcon,
-  SparklesIcon,
-  SubscribeIcon,
-  TableIcon,
-  TagIcon,
-  TwitterIcon,
-  UpdateDateIcon,
-  VerticalWritingIcon,
-  ViewIcon,
-  ViewOffIcon,
-} from '../../components/icons';
+import { AlertIcon } from '../../components/icons/alert';
+import { ChevronIcon } from '../../components/icons/chevron';
 import { Grid } from '../../components/layout/grid';
 import { Separator } from '../../components/layout/separator';
 import { Stack } from '../../components/layout/stack';
@@ -121,6 +68,7 @@ import { Modal } from '../../components/overlays/modal';
 import { Popover } from '../../components/overlays/popover';
 import { Tooltip } from '../../components/overlays/tooltip';
 import { getMessages } from '../../i18n/current';
+import { iconMap } from './icon-map';
 import type {
   AccordionProps,
   AlertProps,
@@ -155,7 +103,6 @@ import type {
   HeadingProps,
   IconButtonProps,
   CopyButtonProps,
-  IconName,
   IconProps,
   KbdProps,
   ListBoxProps,
@@ -189,61 +136,6 @@ import type {
 } from './schemas';
 
 import styles from './renderers.module.css';
-
-// 生成 UI で使えるアイコン（schemas.ts の iconName と対応）。
-const iconMap = {
-  plus: PlusIcon,
-  minus: MinusIcon,
-  check: CheckIcon,
-  close: CloseIcon,
-  copy: CopyIcon,
-  send: SendIcon,
-  mail: MailIcon,
-  subscribe: SubscribeIcon,
-  rss: RSSIcon,
-  history: HistoryIcon,
-  'update-date': UpdateDateIcon,
-  'publish-date': PublishDateIcon,
-  link: LinkIcon,
-  'external-link': ExternalLinkIcon,
-  location: LocationIcon,
-  'navigation-menu': NavigationMenuIcon,
-  list: ListIcon,
-  table: TableIcon,
-  form: FormIcon,
-  view: ViewIcon,
-  'view-off': ViewOffIcon,
-  'light-mode': LightModeIcon,
-  'dark-mode': DarkModeIcon,
-  palette: PaletteIcon,
-  'color-contrast': ColorContrastIcon,
-  'color-info': ColorInfoIcon,
-  'mixed-color': MixedColorIcon,
-  'horizontal-writing': HorizontalWritingIcon,
-  'vertical-writing': VerticalWritingIcon,
-  tag: TagIcon,
-  blog: BlogIcon,
-  news: NewsIcon,
-  slide: SlideIcon,
-  sparkles: SparklesIcon,
-  ai: AIIcon,
-  atom: AtomIcon,
-  accessibility: AccessibilityIcon,
-  'shield-check': ShieldCheckIcon,
-  prepare: PrepareIcon,
-  informative: InformativeIcon,
-  good: GoodIcon,
-  bad: BadIcon,
-  easy: EasyIcon,
-  difficult: DifficultIcon,
-  interesting: InterestingIcon,
-  boring: BoringIcon,
-  shallow: ShallowIcon,
-  logo: LogoIcon,
-  github: GitHubIcon,
-  twitter: TwitterIcon,
-  qiita: QiitaIcon,
-} satisfies Record<IconName, FC<{ size?: 'sm' | 'md' | 'lg' }>>;
 
 /**
  * Generative UI 統合の描画関数（'use client'）。

@@ -22,7 +22,7 @@
   display: grid;
   grid-template-columns: repeat(
     auto-fit,
-    minmax(min(calc(var(--spacing) * 28), 100%), 1fr)
+    minmax(min(calc(var(--spacing) * 40), 100%), 1fr)
   );
   gap: calc(var(--spacing) * 4);
 }
@@ -42,9 +42,4 @@
   color: var(--color-fg-mute);
   font-size: var(--font-size-xs);
   line-height: var(--line-height-xs);
-}
-
-.logo {
-  width: calc(var(--spacing) * 6);
-  height: calc(var(--spacing) * 6);
 }

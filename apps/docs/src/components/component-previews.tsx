@@ -4,7 +4,6 @@ import {
   Accordion,
   Alert,
   Anchor,
-  AtomIcon,
   Autocomplete,
   Avatar,
   Badge,
@@ -17,13 +16,11 @@ import {
   Checkbox,
   CheckboxCard,
   CheckboxGroup,
-  CloseIcon,
   Code,
   ColorPicker,
   Combobox,
   ContextMenu,
   CopyButton,
-  CopyIcon,
   DataTable,
   DateField,
   DatePicker,
@@ -38,11 +35,9 @@ import {
   IconButton,
   InView,
   Kbd,
-  LinkIcon,
   ListBox,
   NumberField,
   Pagination,
-  PaletteIcon,
   PasswordInput,
   Popover,
   Prose,
@@ -57,13 +52,11 @@ import {
   SideNav,
   Skeleton,
   Slider,
-  SparklesIcon,
   Spinner,
   Stack,
   Stepper,
   Switch,
   Table,
-  TableIcon,
   TableOfContents,
   Tabs,
   TextField,
@@ -72,6 +65,15 @@ import {
   Tooltip,
   Tree,
 } from '@k8ordo/ui';
+import {
+  StarIcon,
+  XIcon,
+  CopyIcon,
+  LinkIcon,
+  PaletteIcon,
+  SparklesIcon,
+  TableIcon,
+} from '@k8ordo/ui/icons';
 import type { ReactNode } from 'react';
 import { useRef, useState } from 'react';
 
@@ -132,7 +134,7 @@ export const componentPreviews = {
   Button: <Button color="primary">Button</Button>,
   IconButton: (
     <IconButton label="Close">
-      <CloseIcon size="sm" />
+      <XIcon size="sm" />
     </IconButton>
   ),
   CopyButton: <CopyButton size="sm" value="pnpm add @k8ordo/ui" />,
@@ -617,7 +619,7 @@ export const componentPreviews = {
     <div className={styles.icons}>
       <SparklesIcon size="lg" />
       <PaletteIcon size="lg" />
-      <AtomIcon size="lg" />
+      <StarIcon size="lg" />
     </div>
   ),
 } satisfies Record<Exclude<ComponentNavName, ServerPreviewName>, ReactNode>;

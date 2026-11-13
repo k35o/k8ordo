@@ -3,7 +3,7 @@ import { expect, fn } from 'storybook/test';
 
 import { Button } from '../../buttons/button';
 import { Card } from '../../data-display/card';
-import { TableIcon } from '../../icons';
+import { TableIcon } from '../../icons/table';
 import { EmptyState } from './empty-state';
 
 const meta: Meta<typeof EmptyState> = {

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { expect, waitFor, within } from 'storybook/test';
 
 import { ListBox } from '.';
-import { ListIcon } from '../../icons';
+import { ListIcon } from '../../icons/list';
 import type { Option } from './../../../types/variables';
 
 import styles from './list-box.stories.module.css';

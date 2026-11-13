@@ -7,7 +7,8 @@ import { useFormStatus } from 'react-dom';
 
 import { mergeRefs } from '../../../helpers/merge-refs';
 import { ignoreClick } from '../../_internal/ignore-changes';
-import { CheckIcon, MinusIcon } from '../../icons';
+import { CheckIcon } from '../../icons/check';
+import { MinusIcon } from '../../icons/minus';
 import { useCheckboxGroupContext } from '../checkbox-group/checkbox-group';
 
 import srOnly from '../../_internal/sr-only.module.css';

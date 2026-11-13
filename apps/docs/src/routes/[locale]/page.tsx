@@ -1,8 +1,9 @@
 'use client';
 
 import type { Message } from '@k8ordo/i18n';
-import { Button, GitHubIcon, Heading } from '@k8ordo/ui';
+import { Button, Heading } from '@k8ordo/ui';
 
+import { GitHubIcon } from '../../components/github-icon';
 import { Rich } from '../../components/rich';
 import { PACKAGES } from '../../data/packages';
 import { href } from '../../links';

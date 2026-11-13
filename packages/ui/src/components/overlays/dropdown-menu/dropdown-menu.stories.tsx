@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { expect, screen, waitFor } from 'storybook/test';
 
 import { DropdownMenu } from '.';
-import { DarkModeIcon } from '../../icons';
+import { MoonIcon } from '../../icons/moon';
 
 const meta: Meta<typeof DropdownMenu.Root> = {
   title: 'components/overlays/dropdown-menu',
@@ -51,7 +51,7 @@ export const TriggerByIcon: Story = {
   render: () => (
     <DropdownMenu.Root>
       <DropdownMenu.IconTrigger
-        icon={<DarkModeIcon size="lg" />}
+        icon={<MoonIcon size="lg" />}
         label="テーマ切替"
       />
       <DropdownMenu.Content>

@@ -12,7 +12,7 @@ import {
   NAV_TITLE_CLASS_NAME,
   navLinkClassName,
 } from '../../_internal/nav-link';
-import { ChevronIcon } from '../../icons';
+import { ChevronIcon } from '../../icons/chevron';
 
 import styles from './side-nav.module.css';
 

@@ -4,7 +4,7 @@ import type { FC, HTMLAttributes, Ref } from 'react';
 
 import { getMessages } from '../../../i18n/current';
 import { Button } from '../../buttons/button';
-import { ChevronIcon } from '../../icons';
+import { ChevronIcon } from '../../icons/chevron';
 
 import styles from './pagination.module.css';
 

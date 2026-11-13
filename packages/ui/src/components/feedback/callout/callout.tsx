@@ -7,7 +7,7 @@ import {
   STATUS_MESSAGE_KEY,
   STATUS_SURFACE,
 } from '../../_internal/status-tone';
-import { AlertIcon } from '../../icons';
+import { AlertIcon } from '../../icons/alert';
 import type { Status } from './../../../types/variables';
 
 import highContrast from '../../_internal/high-contrast.module.css';

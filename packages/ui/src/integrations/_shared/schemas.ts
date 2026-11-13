@@ -18,7 +18,8 @@ import type { Spinner } from '../../components/feedback/spinner';
 import type { ColorPicker } from '../../components/form/color-picker';
 import type { FormControl } from '../../components/form/form-control';
 import type { Textarea } from '../../components/form/textarea';
-import type { AlertIcon, ChevronIcon } from '../../components/icons';
+import type { AlertIcon } from '../../components/icons/alert';
+import type { ChevronIcon } from '../../components/icons/chevron';
 import type { Grid } from '../../components/layout/grid';
 import type { Separator } from '../../components/layout/separator';
 import type { Stack } from '../../components/layout/stack';
@@ -27,6 +28,7 @@ import type { Stepper } from '../../components/navigation/stepper';
 import type { Drawer } from '../../components/overlays/drawer';
 import type { ListBox } from '../../components/overlays/list-box';
 import type { Modal } from '../../components/overlays/modal';
+import { ICON_NAMES } from './icon-names';
 
 /**
  * Generative UI 統合の props スキーマ（純データ）。
@@ -101,60 +103,8 @@ export const buttonProps = z.object({
   href: safeUrl.optional(),
 }) satisfies z.ZodType<ButtonIntegrationProps>;
 
-// 生成 UI で使えるアイコン名（サイズのみで描画できる安全な集合）。
-export const iconName = z.enum([
-  'plus',
-  'minus',
-  'check',
-  'close',
-  'copy',
-  'send',
-  'mail',
-  'subscribe',
-  'rss',
-  'history',
-  'update-date',
-  'publish-date',
-  'link',
-  'external-link',
-  'location',
-  'navigation-menu',
-  'list',
-  'table',
-  'form',
-  'view',
-  'view-off',
-  'light-mode',
-  'dark-mode',
-  'palette',
-  'color-contrast',
-  'color-info',
-  'mixed-color',
-  'horizontal-writing',
-  'vertical-writing',
-  'tag',
-  'blog',
-  'news',
-  'slide',
-  'sparkles',
-  'ai',
-  'atom',
-  'accessibility',
-  'shield-check',
-  'prepare',
-  'informative',
-  'good',
-  'bad',
-  'easy',
-  'difficult',
-  'interesting',
-  'boring',
-  'shallow',
-  'logo',
-  'github',
-  'twitter',
-  'qiita',
-]);
+// 生成 UI で使えるアイコン名。size だけで描けるアイコンの全部
+export const iconName = z.enum(ICON_NAMES);
 
 type IconIntegrationProps = {
   name: z.infer<typeof iconName>;

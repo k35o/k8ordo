@@ -1,6 +1,7 @@
 'use client';
 
-import { Code, DropdownMenu, IconButton, MailIcon } from '@k8ordo/ui';
+import { Code, DropdownMenu, IconButton } from '@k8ordo/ui';
+import { MailIcon } from '@k8ordo/ui/icons';
 import { useState } from 'react';
 
 import * as m from '../../messages';

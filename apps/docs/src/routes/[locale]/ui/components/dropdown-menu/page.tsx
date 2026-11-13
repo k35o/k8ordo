@@ -72,11 +72,11 @@ export default function DropdownMenuPage() {
             <Rich>{m.components.dropdownMenu.iconTriggerTitle()}</Rich>
           </Heading>
           <ComponentPreview
-            code={`import { DarkModeIcon } from '@k8ordo/ui';
+            code={`import { MoonIcon } from '@k8ordo/ui/icons';
 
 <DropdownMenu.Root>
   <DropdownMenu.IconTrigger
-    icon={<DarkModeIcon size="lg" />}
+    icon={<MoonIcon size="lg" />}
     label="Theme"
   />
   <DropdownMenu.Content>

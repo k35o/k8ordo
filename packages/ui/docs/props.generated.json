@@ -1,20 +1,6 @@
 {
   "components": [
     {
-      "name": "AccessibilityIcon",
-      "category": "icons",
-      "props": [
-        {
-          "name": "size",
-          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
-          "defaultValue": "'md'",
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
       "name": "Accordion.Button",
       "category": "data-display",
       "props": [
@@ -82,20 +68,6 @@
           "name": "children",
           "types": ["ReactNode"],
           "defaultValue": null,
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
-      "name": "AIIcon",
-      "category": "icons",
-      "props": [
-        {
-          "name": "size",
-          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
-          "defaultValue": "'md'",
           "required": false
         }
       ],
@@ -193,7 +165,7 @@
       "omitted": ["target", "rel", "className", "style"]
     },
     {
-      "name": "AssistantIcon",
+      "name": "ArrowDownIcon",
       "category": "icons",
       "props": [
         {
@@ -207,7 +179,35 @@
       "omitted": []
     },
     {
-      "name": "AtomIcon",
+      "name": "ArrowLeftIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "ArrowRightIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "ArrowUpIcon",
       "category": "icons",
       "props": [
         {
@@ -422,7 +422,27 @@
       "omitted": ["children", "className", "style", "type"]
     },
     {
-      "name": "BadIcon",
+      "name": "BaseIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "renderItem",
+          "types": ["(arg: IconRenderProps) => ReactNode"],
+          "defaultValue": null,
+          "required": true
+        },
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": null,
+          "required": true
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "BellIcon",
       "category": "icons",
       "props": [
         {
@@ -436,7 +456,7 @@
       "omitted": []
     },
     {
-      "name": "BlogIcon",
+      "name": "BlendIcon",
       "category": "icons",
       "props": [
         {
@@ -450,7 +470,49 @@
       "omitted": []
     },
     {
-      "name": "BoringIcon",
+      "name": "BookmarkIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "BookTextIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "BotIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "BotMessageIcon",
       "category": "icons",
       "props": [
         {
@@ -642,6 +704,20 @@
           "name": "value",
           "types": ["string", "null"],
           "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "CalendarIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
           "required": false
         }
       ],
@@ -1001,6 +1077,20 @@
       "omitted": []
     },
     {
+      "name": "ChevronDownIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "ChevronIcon",
       "category": "icons",
       "props": [
@@ -1021,7 +1111,7 @@
       "omitted": []
     },
     {
-      "name": "ChromeIcon",
+      "name": "ChevronLeftIcon",
       "category": "icons",
       "props": [
         {
@@ -1035,7 +1125,105 @@
       "omitted": []
     },
     {
-      "name": "CloseIcon",
+      "name": "ChevronRightIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "ChevronsUpDownIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "ChevronUpIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "CircleAlertIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "CircleCheckIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "CircleHelpIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "CircleXIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "ClockIcon",
       "category": "icons",
       "props": [
         {
@@ -1101,35 +1289,7 @@
       "omitted": ["children", "className", "style"]
     },
     {
-      "name": "CodeXmlIcon",
-      "category": "icons",
-      "props": [
-        {
-          "name": "size",
-          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
-          "defaultValue": "'md'",
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
-      "name": "ColorContrastIcon",
-      "category": "icons",
-      "props": [
-        {
-          "name": "size",
-          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
-          "defaultValue": "'md'",
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
-      "name": "ColorInfoIcon",
+      "name": "CodeIcon",
       "category": "icons",
       "props": [
         {
@@ -1425,6 +1585,20 @@
       "omitted": []
     },
     {
+      "name": "ContrastIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "Conversation.Messages",
       "category": "ai",
       "props": [
@@ -1518,20 +1692,6 @@
     },
     {
       "name": "CopyIcon",
-      "category": "icons",
-      "props": [
-        {
-          "name": "size",
-          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
-          "defaultValue": "'md'",
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
-      "name": "DarkModeIcon",
       "category": "icons",
       "props": [
         {
@@ -1749,7 +1909,7 @@
       "omitted": []
     },
     {
-      "name": "DifficultIcon",
+      "name": "DownloadIcon",
       "category": "icons",
       "props": [
         {
@@ -1945,7 +2105,7 @@
       "omitted": []
     },
     {
-      "name": "EasyIcon",
+      "name": "EllipsisIcon",
       "category": "icons",
       "props": [
         {
@@ -1959,7 +2119,7 @@
       "omitted": []
     },
     {
-      "name": "EdgeIcon",
+      "name": "EllipsisVerticalIcon",
       "category": "icons",
       "props": [
         {
@@ -2006,6 +2166,34 @@
     },
     {
       "name": "ExternalLinkIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "EyeClosedIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "EyeIcon",
       "category": "icons",
       "props": [
         {
@@ -2121,7 +2309,35 @@
       "omitted": []
     },
     {
-      "name": "FirefoxIcon",
+      "name": "FileIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "FileTextIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "FilterIcon",
       "category": "icons",
       "props": [
         {
@@ -2149,7 +2365,21 @@
       "omitted": []
     },
     {
-      "name": "ForkIcon",
+      "name": "FolderIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "FolderOpenIcon",
       "category": "icons",
       "props": [
         {
@@ -2253,7 +2483,7 @@
       "omitted": ["className", "style", "children"]
     },
     {
-      "name": "FormIcon",
+      "name": "GitForkIcon",
       "category": "icons",
       "props": [
         {
@@ -2267,35 +2497,7 @@
       "omitted": []
     },
     {
-      "name": "FullscreenIcon",
-      "category": "icons",
-      "props": [
-        {
-          "name": "size",
-          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
-          "defaultValue": "'md'",
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
-      "name": "GitHubIcon",
-      "category": "icons",
-      "props": [
-        {
-          "name": "size",
-          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
-          "defaultValue": "'md'",
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
-      "name": "GoodIcon",
+      "name": "GlobeIcon",
       "category": "icons",
       "props": [
         {
@@ -2341,6 +2543,34 @@
       "omitted": ["className", "style"]
     },
     {
+      "name": "GridIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "GripVerticalIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "Heading",
       "category": "data-display",
       "props": [
@@ -2367,6 +2597,20 @@
       "omitted": ["className", "style"]
     },
     {
+      "name": "HeartIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "HistoryIcon",
       "category": "icons",
       "props": [
@@ -2381,7 +2625,7 @@
       "omitted": []
     },
     {
-      "name": "HorizontalWritingIcon",
+      "name": "HomeIcon",
       "category": "icons",
       "props": [
         {
@@ -2451,7 +2695,7 @@
       "omitted": ["type", "className", "style"]
     },
     {
-      "name": "InformativeIcon",
+      "name": "ImageIcon",
       "category": "icons",
       "props": [
         {
@@ -2465,7 +2709,7 @@
       "omitted": []
     },
     {
-      "name": "InterestingIcon",
+      "name": "InfoIcon",
       "category": "icons",
       "props": [
         {
@@ -2543,7 +2787,7 @@
       "omitted": ["className", "style"]
     },
     {
-      "name": "LightModeIcon",
+      "name": "LightbulbIcon",
       "category": "icons",
       "props": [
         {
@@ -2689,20 +2933,6 @@
       "omitted": []
     },
     {
-      "name": "LocationIcon",
-      "category": "icons",
-      "props": [
-        {
-          "name": "size",
-          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
-          "defaultValue": "'md'",
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
       "name": "LockIcon",
       "category": "icons",
       "props": [
@@ -2731,25 +2961,13 @@
       "omitted": []
     },
     {
-      "name": "Logo",
+      "name": "LogInIcon",
       "category": "icons",
       "props": [
         {
-          "name": "aria-hidden",
-          "types": ["true"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "className",
-          "types": ["string"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "focusable",
-          "types": ["'false'"],
-          "defaultValue": null,
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
           "required": false
         }
       ],
@@ -2757,7 +2975,7 @@
       "omitted": []
     },
     {
-      "name": "LogoIcon",
+      "name": "LogOutIcon",
       "category": "icons",
       "props": [
         {
@@ -2772,6 +2990,48 @@
     },
     {
       "name": "MailIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "MapPinIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "MaximizeIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "MenuIcon",
       "category": "icons",
       "props": [
         {
@@ -2955,7 +3215,7 @@
       "omitted": ["className", "style"]
     },
     {
-      "name": "MinusIcon",
+      "name": "MessageCircleIcon",
       "category": "icons",
       "props": [
         {
@@ -2969,7 +3229,21 @@
       "omitted": []
     },
     {
-      "name": "MixedColorIcon",
+      "name": "MinimizeIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "MinusIcon",
       "category": "icons",
       "props": [
         {
@@ -3045,7 +3319,7 @@
       "omitted": []
     },
     {
-      "name": "NavigationMenuIcon",
+      "name": "MonitorIcon",
       "category": "icons",
       "props": [
         {
@@ -3059,7 +3333,7 @@
       "omitted": []
     },
     {
-      "name": "NewsIcon",
+      "name": "MoonIcon",
       "category": "icons",
       "props": [
         {
@@ -3205,7 +3479,49 @@
       "omitted": ["className", "style", "children"]
     },
     {
+      "name": "PaintBucketIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "PaletteIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "PanelLeftIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "PaperclipIcon",
       "category": "icons",
       "props": [
         {
@@ -3255,6 +3571,62 @@
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
       "omitted": ["type", "className", "style"]
+    },
+    {
+      "name": "PauseIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "PencilIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "PinIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "PlayIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "PlusIcon",
@@ -3387,7 +3759,7 @@
       "omitted": []
     },
     {
-      "name": "PrepareIcon",
+      "name": "PresentationIcon",
       "category": "icons",
       "props": [
         {
@@ -3588,34 +3960,6 @@
       ],
       "inherits": "HTMLAttributes<HTMLDivElement>",
       "omitted": ["className", "style"]
-    },
-    {
-      "name": "PublishDateIcon",
-      "category": "icons",
-      "props": [
-        {
-          "name": "size",
-          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
-          "defaultValue": "'md'",
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
-      "name": "QiitaIcon",
-      "category": "icons",
-      "props": [
-        {
-          "name": "size",
-          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
-          "defaultValue": "'md'",
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
     },
     {
       "name": "Radio",
@@ -3856,6 +4200,20 @@
       "omitted": []
     },
     {
+      "name": "RedoIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "RefreshIcon",
       "category": "icons",
       "props": [
@@ -4010,7 +4368,7 @@
       "omitted": ["className", "mode"]
     },
     {
-      "name": "RSSIcon",
+      "name": "RocketIcon",
       "category": "icons",
       "props": [
         {
@@ -4024,7 +4382,21 @@
       "omitted": []
     },
     {
-      "name": "SafariIcon",
+      "name": "RssIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "SearchIcon",
       "category": "icons",
       "props": [
         {
@@ -4104,7 +4476,21 @@
       "omitted": ["children", "role", "aria-orientation", "className", "style"]
     },
     {
-      "name": "ShallowIcon",
+      "name": "SettingsIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "ShareIcon",
       "category": "icons",
       "props": [
         {
@@ -4256,20 +4642,6 @@
       "omitted": ["children", "className", "style"]
     },
     {
-      "name": "SlideIcon",
-      "category": "icons",
-      "props": [
-        {
-          "name": "size",
-          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
-          "defaultValue": "'md'",
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
       "name": "Slider",
       "category": "form",
       "props": [
@@ -4324,6 +4696,20 @@
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
       "omitted": ["type", "className", "style", "children"]
+    },
+    {
+      "name": "SmileIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
     },
     {
       "name": "Source.Item",
@@ -4400,6 +4786,20 @@
       "omitted": ["children", "aria-label", "className", "style"]
     },
     {
+      "name": "SquareIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "SquircleIcon",
       "category": "icons",
       "props": [
@@ -4458,6 +4858,20 @@
       "omitted": ["className", "style"]
     },
     {
+      "name": "StarIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "Stepper",
       "category": "navigation",
       "props": [
@@ -4508,20 +4922,6 @@
       "omitted": ["className", "style", "children"]
     },
     {
-      "name": "SubscribeIcon",
-      "category": "icons",
-      "props": [
-        {
-          "name": "size",
-          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
-          "defaultValue": "'md'",
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
       "name": "Suggestion.Item",
       "category": "ai",
       "props": [
@@ -4561,6 +4961,20 @@
           "name": "label",
           "types": ["string"],
           "defaultValue": null,
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "SunIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
           "required": false
         }
       ],
@@ -5020,6 +5434,62 @@
       "omitted": ["className", "style"]
     },
     {
+      "name": "TextHorizontalIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "TextVerticalIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "ThumbsDownIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "ThumbsUpIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "ToastProvider",
       "category": "feedback",
       "props": [
@@ -5241,6 +5711,20 @@
       "omitted": []
     },
     {
+      "name": "TrashIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "Tree",
       "category": "data-display",
       "props": [
@@ -5297,7 +5781,7 @@
       "omitted": ["children", "className", "style", "role", "aria-label"]
     },
     {
-      "name": "TwitterIcon",
+      "name": "TriangleAlertIcon",
       "category": "icons",
       "props": [
         {
@@ -5325,7 +5809,7 @@
       "omitted": []
     },
     {
-      "name": "UpdateDateIcon",
+      "name": "UndoIcon",
       "category": "icons",
       "props": [
         {
@@ -5339,7 +5823,7 @@
       "omitted": []
     },
     {
-      "name": "VerticalWritingIcon",
+      "name": "UploadIcon",
       "category": "icons",
       "props": [
         {
@@ -5353,7 +5837,7 @@
       "omitted": []
     },
     {
-      "name": "ViewIcon",
+      "name": "UserIcon",
       "category": "icons",
       "props": [
         {
@@ -5367,7 +5851,21 @@
       "omitted": []
     },
     {
-      "name": "ViewOffIcon",
+      "name": "UsersIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "XIcon",
       "category": "icons",
       "props": [
         {

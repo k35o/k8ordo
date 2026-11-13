@@ -70,7 +70,7 @@ const categoryOfTopLevel = new Map(
 );
 
 /** Icons are covered as a group, not one section each. */
-const iconish = (name: string) => name.endsWith('Icon') || name === 'Logo';
+const iconish = (name: string) => name.endsWith('Icon');
 
 const unknownCategories = [
   ...new Set(components.map((c) => c.category)),
@@ -185,7 +185,8 @@ for (let i = 0; i < lines.length; i++) {
 
 const renderIcons = (): string => {
   const icons = components
-    .filter((c) => c.category === 'icons' && c.name.endsWith('Icon'))
+    // `BaseIcon` draws nothing of its own; the prose above the list covers it.
+    .filter((c) => c.category === 'icons' && c.name !== 'BaseIcon')
     .map(
       (c, index, all) => `\`${c.name}\`${index === all.length - 1 ? '.' : ','}`,
     );
@@ -227,7 +228,7 @@ const renderReadmeCategories = (): string =>
       const bullets =
         category === 'icons'
           ? [
-              '- [Icons](docs/references/components.md#icons) — decorative icon components (`CloseIcon`, `ChevronIcon`, …)',
+              '- [Icons](docs/references/components.md#icons) — decorative icons from `@k8ordo/ui/icons` (`XIcon`, `ChevronIcon`, …)',
             ]
           : names.map(
               (name) =>
