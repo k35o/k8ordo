@@ -3,8 +3,8 @@ import type { FC, ReactNode } from 'react';
 
 import { getMessages } from '../../../i18n/current';
 import { IconButton } from '../../buttons/icon-button';
-import { CloseIcon } from '../../icons';
-import { FileIcon } from './icons';
+import { FileIcon } from '../../icons/file';
+import { XIcon } from '../../icons/x';
 
 import styles from './attachment-preview.module.css';
 
@@ -60,7 +60,7 @@ export const AttachmentPreview: FC<Props> = ({
             onClick={onRemove}
             size="sm"
           >
-            <CloseIcon size="xs" />
+            <XIcon size="xs" />
           </IconButton>
         </span>
       )}

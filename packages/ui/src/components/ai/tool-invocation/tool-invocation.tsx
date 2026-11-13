@@ -4,7 +4,8 @@ import type { FC, ReactNode } from 'react';
 
 import { getMessages } from '../../../i18n/current';
 import { Spinner } from '../../feedback/spinner';
-import { AlertIcon, CheckIcon } from '../../icons';
+import { AlertIcon } from '../../icons/alert';
+import { CheckIcon } from '../../icons/check';
 import { Collapsible } from '../_internal/collapsible';
 import type { ToolApproval, ToolApprovalResponse, ToolState } from '../types';
 import { ApprovalBar } from './approval-bar';

@@ -241,6 +241,29 @@ wrapped into `@layer components` by its plugin, in Vite and in `vp pack` alike.
   `focus-ring.module.css` (`ring`, `ringNoBorder`, `ringWithin`),
   `high-contrast.module.css` (`edge`), `sr-only.module.css` (`srOnly`).
 
+### Icons
+
+One file is one icon. `src/components/icons/eye-closed.tsx` exports
+`EyeClosedIcon`, drawn inside `LineIcon` (`line-icon.tsx`), which holds the
+grammar every icon shares: a 16×16 grid, `stroke-width` 1.25, round caps and
+joins, no fill, `currentColor`. Keep 2px of padding, round corners by 1.25–2.75,
+and fill a shape only where a line would not read (a dot, a half).
+
+- **Name the shape, not a use**: `BookmarkIcon`, not `SubscribeIcon`. Only
+  `AlertIcon` (`status`) and `ChevronIcon` (`direction`) pick a shape from a
+  meaning. No logos: a brand mark belongs to the application.
+- **Each icon declares `size = 'md'` itself** and passes it to `LineIcon`.
+  `scripts/extract-props.ts` reads a default only from the component's own
+  parameter.
+- **A component imports the icon's module** (`'../../icons/check'`), never the
+  `icons` index, so its output depends only on the icons it draws.
+- **Run `pnpm generate:props` after adding a file.** `scripts/generate-icons.ts`
+  writes the `@k8ordo/ui/icons` entry (`icons/index.ts`) and the generative-UI
+  catalog's icon list (`integrations/_shared/icon-names.ts`, `icon-map.ts`)
+  from the files; `check:props` fails in CI while any of them is stale. The
+  catalog must not import a component, so its names live in a module of their
+  own.
+
 ### Compound Component (Dialog, Tabs, FileField pattern)
 
 The parts live in the `'use client'` module and are exported one by one; the
@@ -417,7 +440,8 @@ The types of the CSS modules are written by `better-css-modules generate` into `
 The authoritative list is the `exports` map in `package.json`.
 
 ```
-@k8ordo/ui                     core UI components and public types (AI chat is under /ai)
+@k8ordo/ui                     core UI components and public types (AI chat is under /ai, icons under /icons)
+@k8ordo/ui/icons               line icons (one module each) and BaseIcon
 @k8ordo/ui/i18n                ja / en, registerMessages, getMessages, messageUsage, and the Messages type
 @k8ordo/ui/ai                  AI chat components
 @k8ordo/ui/ai/response         Response renderer only

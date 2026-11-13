@@ -1,7 +1,8 @@
 'use client';
 
 import { matchPath, usePathname } from '@k8ordo/framework';
-import { DropdownMenu, NavigationMenuIcon } from '@k8ordo/ui';
+import { DropdownMenu } from '@k8ordo/ui';
+import { MenuIcon } from '@k8ordo/ui/icons';
 
 import { PACKAGES } from '../data/packages';
 import type { PackageEntry } from '../data/packages';
@@ -65,7 +66,7 @@ export function Navigation() {
           <div className={styles.menu}>
             <DropdownMenu.Root>
               <DropdownMenu.IconTrigger
-                icon={<NavigationMenuIcon />}
+                icon={<MenuIcon />}
                 label={m.nav.openMenu()}
               />
               <DropdownMenu.Content>

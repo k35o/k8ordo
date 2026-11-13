@@ -3,7 +3,7 @@
 import { clsx } from 'clsx';
 import type { FC, PropsWithChildren } from 'react';
 
-import { ChevronIcon } from '../../icons';
+import { ChevronIcon } from '../../icons/chevron';
 import { useItemId, useOpen, useToggleOpen } from './context';
 
 import focusRing from '../../_internal/focus-ring.module.css';

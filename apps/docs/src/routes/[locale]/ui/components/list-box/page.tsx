@@ -102,7 +102,7 @@ const [selected, setSelected] = useState<string>();
             <Rich>{m.components.listBox.iconTriggerTitle()}</Rich>
           </Heading>
           <ComponentPreview
-            code={`import { ListIcon } from '@k8ordo/ui';
+            code={`import { ListIcon } from '@k8ordo/ui/icons';
 
 <ListBox.Root onChange={onChange} options={OPTIONS} value={value}>
   <ListBox.IconTrigger icon={<ListIcon />} label="Fruit" />

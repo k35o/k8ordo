@@ -1,6 +1,7 @@
 'use client';
 
-import { AlertIcon, Button, Heading } from '@k8ordo/ui';
+import { Button, Heading } from '@k8ordo/ui';
+import { AlertIcon } from '@k8ordo/ui/icons';
 import type { FC } from 'react';
 
 import * as m from '../messages';

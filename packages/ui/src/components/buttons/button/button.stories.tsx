@@ -5,7 +5,7 @@ import { expect, fn, waitFor } from 'storybook/test';
 
 import { afterRenderingUpdate } from '../../../../.storybook/rendering';
 import { tokenColor } from '../../../../.storybook/tokens';
-import { CopyIcon } from '../../icons';
+import { CopyIcon } from '../../icons/copy';
 import { Button } from './button';
 
 const meta: Meta<typeof Button> = {

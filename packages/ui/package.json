@@ -67,6 +67,10 @@
       "types": "./dist/components/ai/response/index.d.mts",
       "default": "./dist/components/ai/response/index.mjs"
     },
+    "./icons": {
+      "types": "./dist/components/icons/index.d.mts",
+      "default": "./dist/components/icons/index.mjs"
+    },
     "./code-block": {
       "types": "./dist/components/data-display/code-block/index.d.mts",
       "default": "./dist/components/data-display/code-block/index.mjs"
@@ -88,8 +92,8 @@
   },
   "scripts": {
     "build": "vp pack && node scripts/build-tokens.ts",
-    "generate:props": "node scripts/extract-props.ts && node scripts/generate-component-docs.ts",
-    "check:props": "node scripts/extract-props.ts --check && node scripts/generate-component-docs.ts --check",
+    "generate:props": "node scripts/generate-icons.ts && node scripts/extract-props.ts && node scripts/generate-component-docs.ts",
+    "check:props": "node scripts/generate-icons.ts --check && node scripts/extract-props.ts --check && node scripts/generate-component-docs.ts --check",
     "check:dist": "node scripts/check-dist-tests.ts",
     "check:package": "publint && attw --pack . --profile esm-only --exclude-entrypoints ./styles.css ./tailwind.css && pnpm check:dist",
     "storybook": "storybook dev -p 6006 --no-open",
@@ -104,7 +108,6 @@
   },
   "dependencies": {
     "clsx": "2.1.1",
-    "lucide-react": "1.66.0",
     "server-only": "catalog:",
     "shiki": "4.5.0"
   },

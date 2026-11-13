@@ -23,7 +23,7 @@ import { useControllableState, useWritingMode } from '../../../hooks';
 import { getMessages } from '../../../i18n/current';
 import type { Option } from '../../../types/variables';
 import { FormValue } from '../../_internal/form-value';
-import { ChevronIcon } from '../../icons';
+import { ChevronIcon } from '../../icons/chevron';
 
 import focusRing from '../../_internal/focus-ring.module.css';
 import srOnly from '../../_internal/sr-only.module.css';

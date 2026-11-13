@@ -1,7 +1,7 @@
 import type { FC, ReactNode } from 'react';
 
 import { getMessages } from '../../../i18n/current';
-import { SparklesIcon } from '../../icons';
+import { SparklesIcon } from '../../icons/sparkles';
 import { Collapsible } from '../_internal/collapsible';
 
 import styles from './reasoning.module.css';

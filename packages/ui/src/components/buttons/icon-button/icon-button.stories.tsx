@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import { expect, fn, screen, waitFor } from 'storybook/test';
 
 import { afterRenderingUpdate } from '../../../../.storybook/rendering';
-import { CopyIcon } from '../../icons';
+import { CopyIcon } from '../../icons/copy';
 import { IconButton } from './icon-button';
 
 const meta: Meta<typeof IconButton> = {

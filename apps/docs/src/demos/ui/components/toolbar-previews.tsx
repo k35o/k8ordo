@@ -1,14 +1,7 @@
 'use client';
 
-import {
-  Button,
-  CopyIcon,
-  IconButton,
-  LinkIcon,
-  ListIcon,
-  TableIcon,
-  Toolbar,
-} from '@k8ordo/ui';
+import { Button, IconButton, Toolbar } from '@k8ordo/ui';
+import { CopyIcon, LinkIcon, ListIcon, TableIcon } from '@k8ordo/ui/icons';
 import type { ComponentProps } from 'react';
 import { useState } from 'react';
 

@@ -1,11 +1,5 @@
-import {
-  Anchor,
-  Button,
-  ChevronIcon,
-  Heading,
-  MailIcon,
-  Separator,
-} from '@k8ordo/ui';
+import { Anchor, Button, Heading, Separator } from '@k8ordo/ui';
+import { ChevronIcon, MailIcon } from '@k8ordo/ui/icons';
 
 import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
@@ -114,7 +108,7 @@ export default function ButtonPage() {
             <Rich>{m.components.button.iconsTitle()}</Rich>
           </Heading>
           <ComponentPreview
-            code={`import { MailIcon, ChevronIcon } from '@k8ordo/ui';
+            code={`import { MailIcon, ChevronIcon } from '@k8ordo/ui/icons';
 
 <Button startIcon={<MailIcon size="sm" />}>
   Send Email

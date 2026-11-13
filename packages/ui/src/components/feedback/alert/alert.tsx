@@ -8,7 +8,8 @@ import {
   STATUS_SURFACE,
 } from '../../_internal/status-tone';
 import { IconButton } from '../../buttons/icon-button';
-import { AlertIcon, CloseIcon } from '../../icons';
+import { AlertIcon } from '../../icons/alert';
+import { XIcon } from '../../icons/x';
 import type { Status } from './../../../types/variables';
 
 import highContrast from '../../_internal/high-contrast.module.css';
@@ -97,7 +98,7 @@ export const Alert: FC<Props> = ({
             size="sm"
             tooltipDisabled
           >
-            <CloseIcon size="sm" />
+            <XIcon size="sm" />
           </IconButton>
         </span>
       ) : null}

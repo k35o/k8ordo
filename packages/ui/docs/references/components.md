@@ -10,8 +10,10 @@ import '@k8ordo/ui/styles.css';
 import { UIProvider } from '@k8ordo/ui';
 // Components (all from the root entry)
 import { Button, Card, TextField } from '@k8ordo/ui';
-// Except CodeBlock, which highlights on the server and has its own entry
+// And CodeBlock, which highlights on the server and has its own entry
 import { CodeBlock } from '@k8ordo/ui/code-block';
+// Except the icons, which have their own entry
+import { CheckIcon } from '@k8ordo/ui/icons';
 ```
 
 Every component can be rendered from a Server Component, compound ones
@@ -144,7 +146,7 @@ An icon-only button. Styling is controlled by the `color` prop.
 import { IconButton } from '@k8ordo/ui';
 
 <IconButton label="Close" color="transparent" size="md">
-  <CloseIcon />
+  <XIcon />
 </IconButton>;
 ```
 
@@ -1489,7 +1491,7 @@ import { Avatar } from '@k8ordo/ui';
 
 <Avatar src="/avatar.jpg" alt="User name" size="md" />
 <Avatar name="Ada Lovelace" fallback="A" size="lg" />
-<Avatar color="primary" icon={<AssistantIcon />} name="AI" size="sm" />
+<Avatar color="primary" icon={<BotMessageIcon />} name="AI" size="sm" />
 ```
 
 Props:
@@ -1998,7 +2000,8 @@ an optional description and icon, and an optional action. Inside a table, use
 `Table.EmptyState`, which puts the same content in a row spanning the columns.
 
 ```tsx
-import { Button, EmptyState, TableIcon } from '@k8ordo/ui';
+import { Button, EmptyState } from '@k8ordo/ui';
+import { TableIcon } from '@k8ordo/ui/icons';
 
 <EmptyState
   action={<Button onClick={clearFilters}>Clear filters</Button>}
@@ -2692,17 +2695,23 @@ Props:
 
 ## Icons
 
-Decorative icons, all from the root entry. Each renders an `<svg>` with
-`aria-hidden` and `focusable="false"`, so the accessible name belongs to the
-control around it — an `IconButton`'s `label`, for example.
+Decorative icons, from `@k8ordo/ui/icons` (the root entry does not export
+them). Each renders an `<svg>` with `aria-hidden` and `focusable="false"`, so
+the accessible name belongs to the control around it — an `IconButton`'s
+`label`, for example. They are drawn as lines in `currentColor`, so an icon
+takes the text color of where it sits.
 
 ```tsx
-import { AlertIcon, ChevronIcon, CloseIcon } from '@k8ordo/ui';
+import { AlertIcon, ChevronIcon, XIcon } from '@k8ordo/ui/icons';
 
-<CloseIcon />
+<XIcon />
 <ChevronIcon direction="down" size="sm" />
 <AlertIcon status="warning" />
 ```
+
+An icon is named for what it draws, not for what it means in one application:
+`BookmarkIcon`, not "subscribe"; `EyeIcon`, not "show". Each one is a module of
+its own, so a bundler ships only the icons a page draws.
 
 Every icon takes one optional prop and nothing else:
 
@@ -2715,28 +2724,53 @@ Two of them also require a prop that picks the glyph:
 
 <!-- generated:icons -->
 
-The icons: `AccessibilityIcon`, `AIIcon`, `AlertIcon`, `AssistantIcon`,
-`AtomIcon`, `BadIcon`, `BlogIcon`, `BoringIcon`, `CheckIcon`, `ChevronIcon`,
-`ChromeIcon`, `CloseIcon`, `CodeXmlIcon`, `ColorContrastIcon`, `ColorInfoIcon`,
-`ColorScaleIcon`, `CopyIcon`, `DarkModeIcon`, `DifficultIcon`, `EasyIcon`,
-`EdgeIcon`, `ExternalLinkIcon`, `FirefoxIcon`, `FlaskIcon`, `ForkIcon`,
-`FormIcon`, `FullscreenIcon`, `GitHubIcon`, `GoodIcon`, `HistoryIcon`,
-`HorizontalWritingIcon`, `InformativeIcon`, `InterestingIcon`, `LightModeIcon`,
-`LinkIcon`, `ListIcon`, `LocationIcon`, `LockIcon`, `LockOpenIcon`, `LogoIcon`,
-`MailIcon`, `MinusIcon`, `MixedColorIcon`, `NavigationMenuIcon`, `NewsIcon`,
-`PackageIcon`, `PaletteIcon`, `PlusIcon`, `PrepareIcon`, `PublishDateIcon`,
-`QiitaIcon`, `RefreshIcon`, `RSSIcon`, `SafariIcon`, `SendIcon`, `ShallowIcon`,
-`ShieldCheckIcon`, `SlideIcon`, `SparklesIcon`, `SquircleIcon`, `SubscribeIcon`,
-`TableIcon`, `TagIcon`, `TwitterIcon`, `UpdateDateIcon`, `VerticalWritingIcon`,
-`ViewIcon`, `ViewOffIcon`.
+The icons: `AlertIcon`, `ArrowDownIcon`, `ArrowLeftIcon`, `ArrowRightIcon`,
+`ArrowUpIcon`, `BellIcon`, `BlendIcon`, `BookmarkIcon`, `BookTextIcon`,
+`BotIcon`, `BotMessageIcon`, `CalendarIcon`, `CheckIcon`, `ChevronDownIcon`,
+`ChevronIcon`, `ChevronLeftIcon`, `ChevronRightIcon`, `ChevronsUpDownIcon`,
+`ChevronUpIcon`, `CircleAlertIcon`, `CircleCheckIcon`, `CircleHelpIcon`,
+`CircleXIcon`, `ClockIcon`, `CodeIcon`, `ColorScaleIcon`, `ContrastIcon`,
+`CopyIcon`, `DownloadIcon`, `EllipsisIcon`, `EllipsisVerticalIcon`,
+`ExternalLinkIcon`, `EyeClosedIcon`, `EyeIcon`, `FileIcon`, `FileTextIcon`,
+`FilterIcon`, `FlaskIcon`, `FolderIcon`, `FolderOpenIcon`, `GitForkIcon`,
+`GlobeIcon`, `GridIcon`, `GripVerticalIcon`, `HeartIcon`, `HistoryIcon`,
+`HomeIcon`, `ImageIcon`, `InfoIcon`, `LightbulbIcon`, `LinkIcon`, `ListIcon`,
+`LockIcon`, `LockOpenIcon`, `LogInIcon`, `LogOutIcon`, `MailIcon`, `MapPinIcon`,
+`MaximizeIcon`, `MenuIcon`, `MessageCircleIcon`, `MinimizeIcon`, `MinusIcon`,
+`MonitorIcon`, `MoonIcon`, `PackageIcon`, `PaintBucketIcon`, `PaletteIcon`,
+`PanelLeftIcon`, `PaperclipIcon`, `PauseIcon`, `PencilIcon`, `PinIcon`,
+`PlayIcon`, `PlusIcon`, `PresentationIcon`, `RedoIcon`, `RefreshIcon`,
+`RocketIcon`, `RssIcon`, `SearchIcon`, `SendIcon`, `SettingsIcon`, `ShareIcon`,
+`ShieldCheckIcon`, `SmileIcon`, `SparklesIcon`, `SquareIcon`, `SquircleIcon`,
+`StarIcon`, `SunIcon`, `TableIcon`, `TagIcon`, `TextHorizontalIcon`,
+`TextVerticalIcon`, `ThumbsDownIcon`, `ThumbsUpIcon`, `TrashIcon`,
+`TriangleAlertIcon`, `UndoIcon`, `UploadIcon`, `UserIcon`, `UsersIcon`, `XIcon`.
 
 <!-- /generated:icons -->
 
-`Logo` is the mark `LogoIcon` draws, as a bare `<svg>` without the sizing: it
-takes `className`, `aria-hidden`, and `focusable` (`Partial<IconRenderProps>`)
-instead of `size`. The types `BaseIconProps` (`{ size }`) and
-`IconRenderProps` (`{ className: string; 'aria-hidden': true; focusable: 'false' }`)
-are exported as well.
+There are no logos here: a brand mark belongs to the application that shows
+it. Draw one, or any icon this set lacks, on `BaseIcon`, which gives an `<svg>`
+of your own the same sizes and the same decorative attributes:
+
+```tsx
+import { BaseIcon } from '@k8ordo/ui/icons';
+import type { BaseIconProps } from '@k8ordo/ui/icons';
+
+export const BrandIcon = ({ size = 'md' }: Partial<BaseIconProps>) => (
+  <BaseIcon
+    renderItem={(props) => (
+      <svg {...props} fill="currentColor" viewBox="0 0 16 16">
+        <path d="…" />
+      </svg>
+    )}
+    size={size}
+  />
+);
+```
+
+`renderItem` receives `IconRenderProps`
+(`{ className: string; 'aria-hidden': true; focusable: 'false' }`); the types
+`BaseIconProps` (`{ size }`) and `IconRenderProps` are exported as well.
 
 ## Providers
 
