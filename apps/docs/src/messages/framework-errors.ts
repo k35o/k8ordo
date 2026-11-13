@@ -116,6 +116,26 @@ export const renderNoBoundary = message({
   en: 'An error with no Suspense boundary above it leaves no HTML to send, and `serve()` answers that request with a `500`.',
 });
 
+export const reportTitle = message({
+  ja: 'エラーの報告と、`error.tsx`が受けない失敗',
+  en: 'Reporting, and what no `error.tsx` catches',
+});
+
+export const reportFrom = message({
+  ja: '`error.tsx`は`reset`と一緒に`error`を受け取ります。受けた失敗は、ここから報告します。',
+  en: 'An `error.tsx` is handed the `error` beside `reset`. Report a failure it caught from there.',
+});
+
+export const reportLayout = message({
+  ja: "ルートの`error.tsx`はルートレイアウトの内側にあるので、レイアウト自身が描くクライアントコンポーネント（ヘッダーのメニューやテーマの切り替え）の失敗は受けません。その失敗は、クライアントのナビゲーションのあとなら文書の読み込み直しになります。文書の最初の描画ならReactが木を外し、ブラウザの`error`イベントに届きます。報告は`window.addEventListener('error', …)`で受けます。",
+  en: "The root `error.tsx` sits inside the root layout, so it does not catch a failure in a client component the layout itself renders, such as a header menu or a theme switch. After a client navigation such a failure reloads the document. On the first render of a document React takes the tree down, and the error reaches the browser’s `error` event; report it from `window.addEventListener('error', …)`.",
+});
+
+export const reportBoundary = message({
+  ja: '`global-error.tsx`はありません。レイアウトの代わりに描くものは、レイアウトのProviderなしで`<html>`から描くことになるためです。落ちうる部分は、レイアウトの中で自分のエラー境界に包みます。`getDerivedStateFromError`を持つ十数行のクラスコンポーネントで、ほかの枠はそのまま残ります。',
+  en: 'There is no `global-error.tsx`: what replaced the layout would have to render from `<html>` with none of the layout’s providers. Wrap the parts that can fail in an error boundary of your own inside the layout, a dozen lines of a class component with `getDerivedStateFromError`, and the rest of the frame stays up.',
+});
+
 export const notFoundTitle = message({
   ja: '`not-found.tsx`',
   en: '`not-found.tsx`',

@@ -592,6 +592,47 @@ Keep one `<title>` on screen at a time: the root layout renders none, each
 page renders its own, and `not-found.tsx` renders one too. Two titles at once
 is not a fallback chain — React renders both.
 
+## Counting page views
+
+A page change here is not a document load, and it is not `pushState`
+either — the router commits it through the Navigation API — so an analytics
+script that counts only loads, or that watches the History API, misses
+it. The platform says when a page change is done: `navigatesuccess` fires
+once the new page is on screen, its `<title>` in place.
+
+```tsx
+'use client';
+
+import { useEffect } from 'react';
+
+export function PageViews() {
+  useEffect(() => {
+    let counted = location.pathname;
+    const count = () => {
+      // a search or a fragment that moved is a navigation too
+      if (location.pathname === counted) return;
+      counted = location.pathname;
+      gtag('event', 'page_view', {
+        page_location: location.href,
+        page_title: document.title,
+      });
+    };
+    navigation.addEventListener('navigatesuccess', count);
+    return () => {
+      navigation.removeEventListener('navigatesuccess', count);
+    };
+  }, []);
+  return null;
+}
+```
+
+Render it from the root layout; the same listener works from a plain
+script with no React at all. `usePathname()` is not the moment to count
+from: it follows the URL, which the router commits before the next page
+arrives, so the title read then is still the page being left. Turn off the
+tool's own counting of history changes as well — going back and forward
+still fires `popstate`, and those views would be counted twice.
+
 ## Fetching the next page ahead
 
 The client runtime listens on the whole document for a pointer moving onto a

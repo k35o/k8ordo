@@ -35,6 +35,22 @@ const SCOPE_TREE = `src/routes/
     [id]/
       page.tsx`;
 
+const REPORT = `'use client';
+
+import type { ErrorProps } from '@k8ordo/framework';
+import { useEffect } from 'react';
+
+export default function RouteError({ error, reset }: ErrorProps) {
+  useEffect(() => {
+    void fetch('/reports', { method: 'POST', body: String(error) });
+  }, [error]);
+  return (
+    <button onClick={reset} type="button">
+      try again
+    </button>
+  );
+}`;
+
 const NOT_FOUND = `export default function NotFoundPage() {
   return (
     <>
@@ -127,6 +143,24 @@ export default function FrameworkErrorsPage() {
         </p>
         <p>
           <Rich>{t.renderNoBoundary()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection id="report" title={t.reportTitle}>
+        <CodeBlock
+          code={REPORT}
+          lang="tsx"
+          marks={{ 7: 'highlight', 8: 'highlight', 9: 'highlight' }}
+          title="src/routes/error.tsx"
+        />
+        <p>
+          <Rich>{t.reportFrom()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.reportLayout()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.reportBoundary()}</Rich>
         </p>
       </DocSection>
 
