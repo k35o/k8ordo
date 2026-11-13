@@ -73,7 +73,7 @@ const generated = (root: string, file: string): Promise<string> =>
   readFile(path.join(root, '.k8ordo', file), 'utf8');
 
 describe('k8ordo generate', { timeout: 30_000 }, () => {
-  it('writes .k8ordo/ from the routes directory vite.config.ts names, never calling paths or building', async () => {
+  it('writes .k8ordo/ from the routes directory vite.config.ts names, never reading a paths.ts or building', async () => {
     const root = await app(
       `import { framework } from '@k8ordo/framework/vite';
 
@@ -82,9 +82,6 @@ export default {
     framework({
       mode: 'static',
       routesDir: 'app/routes',
-      paths: () => {
-        throw new Error('paths was called');
-      },
     }),
   ],
 };
@@ -93,6 +90,8 @@ export default {
         'app/routes/layout.tsx': ROUTE,
         'app/routes/page.tsx': ROUTE,
         'app/routes/posts/[id]/page.tsx': ROUTE,
+        'app/routes/posts/[id]/paths.ts':
+          "throw new Error('paths.ts was read');\nexport default () => [];\n",
       },
     );
 

@@ -1,8 +1,6 @@
 import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
 
-import { paths } from './src/paths';
-
 // build.test.ts が「サブパスに置いても動く」を主張するための構成。dist/ の
 // 既定の出力を上書きしないよう、出力先を dist/base/ の下に分ける
 export default defineConfig({
@@ -10,7 +8,6 @@ export default defineConfig({
   plugins: [
     framework({
       mode: 'static',
-      paths,
       site: 'https://example.test',
     }),
   ],

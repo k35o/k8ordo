@@ -40,9 +40,10 @@ Both adapters register the same components, and the prompts they generate list
 them. Most are the exported component of the same name. A few are shaped for a
 model instead:
 
-- **Icons** are one `Icon` entry whose `name` picks the glyph from a curated
-  set of icons that need nothing but a size. `ChevronIcon` has an entry of its
-  own, and `AlertIcon` is the `StatusIcon` entry.
+- **Icons** are one `Icon` entry whose `name` picks the glyph. Every icon in
+  `@k8ordo/ui/icons` that needs nothing but a size is there, under its name in
+  kebab-case without the suffix: `eye-closed` is `EyeClosedIcon`. `ChevronIcon`
+  has an entry of its own, and `AlertIcon` is the `StatusIcon` entry.
 - **Toasts** are a `Toast` entry, standing in for `ToastProvider` and
   `useToast`: a self-contained widget whose `triggerLabel` button shows the
   toast.
@@ -92,6 +93,8 @@ These exports are left out on purpose, so a model cannot place them:
 - `Prose` — it typesets the bare HTML that Markdown renders to. A spec places
   components, which keep their own look, so it would have nothing to typeset;
   lay a flow out with `Stack`.
+- `BaseIcon` — the base your own icons are drawn on. It has no glyph of its
+  own, and a spec picks a glyph by `name`.
 - `TableOfContents` — it points at the ids of the document's headings and
   follows the scroll. The headings a spec places carry no id, so there would be
   nothing to point at.

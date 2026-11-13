@@ -2,7 +2,8 @@
 
 import type { Message } from '@k8ordo/i18n';
 import { definePageState, useAppState } from '@k8ordo/state';
-import { Badge, Button, ChevronIcon, Code } from '@k8ordo/ui';
+import { Badge, Button, Code } from '@k8ordo/ui';
+import { ChevronIcon } from '@k8ordo/ui/icons';
 import { useId } from 'react';
 import * as z from 'zod/mini';
 

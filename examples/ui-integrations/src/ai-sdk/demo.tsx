@@ -1,5 +1,5 @@
 import { useChat } from '@ai-sdk/react';
-import { AssistantIcon, Avatar } from '@k8ordo/ui';
+import { Avatar } from '@k8ordo/ui';
 import {
   Attachment,
   Conversation,
@@ -10,6 +10,7 @@ import {
   ToolInvocation,
 } from '@k8ordo/ui/ai';
 import { mapMessageParts } from '@k8ordo/ui/ai-sdk';
+import { BotMessageIcon } from '@k8ordo/ui/icons';
 import { validateGeneratedSpec } from '@k8ordo/ui/json-render';
 import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
 import { lastAssistantMessageIsCompleteWithApprovalResponses } from 'ai';
@@ -38,7 +39,7 @@ function ChatMessage({ message, chat }: { message: UIMessage; chat: Chat }) {
         isUser ? undefined : (
           <Avatar
             color="primary"
-            icon={<AssistantIcon />}
+            icon={<BotMessageIcon />}
             name="AI"
             size="sm"
           />

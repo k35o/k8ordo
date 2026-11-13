@@ -66,11 +66,6 @@ export const frameworkReactCompiler = message({
   en: 'Either mode. With `true`, client components are compiled with React Compiler (the Rust one, through `@vitejs/plugin-react`’s `compiler`). The application needs `oxc-transform-react` installed. Server Components, and the HTML a client component renders on the server, are left as written. `false` by default.',
 });
 
-export const frameworkPaths = message({
-  ja: 'staticモードだけ。パラメータを持つルートのパス名を返す関数です。値の要るパターンの一覧を受け取り、パス名の配列かそのPromiseを返します。パス名にViteの`base`は含めません。`fallback.tsx`のあるページには、`/ja/posts/:id`のように値を残したシェルの場所も返せます。',
-  en: 'Static mode only. A function that returns the pathnames of routes with parameters. It receives the patterns that need values and returns an array of pathnames, or a promise of one. The pathnames carry no Vite `base`. For a page with a `fallback.tsx`, it may also return shell locations that leave a value open, such as `/ja/posts/:id`.',
-});
-
 export const frameworkSite = message({
   ja: 'staticモードだけ。サイトの配信元です（`https://example.com`）。渡すと、ビルドが`sitemap.xml`も書きます。`route.ts`が受け取る`request.url`のoriginにもなります。`sitemap.xml`を書く`route.ts`もあると、ビルドが止まります。',
   en: 'Static mode only. The origin the site is served from, such as `https://example.com`. With it, the build also writes `sitemap.xml`. It is also the origin of the `request.url` a `route.ts` receives. A `route.ts` that writes `sitemap.xml` as well stops the build.',
@@ -88,8 +83,12 @@ export const frameworkReturns = message({
 
 export const frameworkCaveats = [
   message({
-    ja: "`paths`と`site`、`csp`は、どれか1つでも`mode: 'server'`と一緒に書くと型エラーになります。",
-    en: "`paths`, `site` or `csp` written beside `mode: 'server'` is a type error.",
+    ja: "`site`と`csp`は、どちらか1つでも`mode: 'server'`と一緒に書くと型エラーになります。",
+    en: "`site` or `csp` written beside `mode: 'server'` is a type error.",
+  }),
+  message({
+    ja: '`paths`というオプションはありません。渡すと、設定を読んだ時点で`framework() takes no paths — …`のエラーになります。パラメータの値は、そのディレクトリの`paths.ts`が返します。',
+    en: 'There is no `paths` option. Passing one fails when the config loads, with `framework() takes no paths — …`. A parameter’s values come from the `paths.ts` in its directory.',
   }),
   message({
     ja: '`reactCompiler: true`で`oxc-transform-react`が入っていないと、`vite dev`も`vite build`も設定を読んだ時点で、Reactのプラグインのエラー`React Compiler requires the optional …`で止まります。エラーが名指す`react({ compiler: true })`は、`framework()`が代わりに渡しているオプションです。',
@@ -167,8 +166,8 @@ export const loadingDefault = message({
 });
 
 export const fallbackDefault = message({
-  ja: 'default export：propsを受け取らないコンポーネントです。staticモードで、`paths`に無い値のURLに横の`page.tsx`の代わりに描かれます。',
-  en: 'Default export: a component with no props. Under static mode it renders in place of the `page.tsx` beside it, for a URL whose value `paths` did not list.',
+  ja: 'default export：propsを受け取らないコンポーネントです。staticモードで、どの`paths.ts`も返さなかった値のURLに、横の`page.tsx`の代わりに描かれます。',
+  en: 'Default export: a component with no props. Under static mode it renders in place of the `page.tsx` beside it, for a URL whose value no `paths.ts` returned.',
 });
 
 export const fallbackPlace = message({
@@ -179,6 +178,21 @@ export const fallbackPlace = message({
 export const fallbackNote = message({
   ja: 'serverモードでは使われず、`page.tsx`がどの値もリクエストごとに描きます。',
   en: 'Server mode does not use it: `page.tsx` renders every value per request.',
+});
+
+export const pathsDefault = message({
+  ja: "default export：そのディレクトリのパラメータの値を、文字列の配列かそのPromiseで返す関数です。上のディレクトリのパラメータを引数として受け取ります。型は`Paths<'/:locale/posts/:id'>`のように、そのディレクトリまでのパターンで付けます。",
+  en: "Default export: a function that returns the values of its directory’s parameter, as an array of strings or a promise of one. It receives the parameters of the directories above it. Type it by the pattern down to its directory, as in `Paths<'/:locale/posts/:id'>`.",
+});
+
+export const pathsPlace = message({
+  ja: '`[id]`のようなパラメータのディレクトリに置きます。値は、横のページとその下のページ、`route.ts`、`redirect.ts`のすべてに使われます。',
+  en: 'It sits in a parameter’s directory, such as `[id]`. Its values apply to the page beside it and to every page, `route.ts` and `redirect.ts` below.',
+});
+
+export const pathsNote = message({
+  ja: 'staticモードのビルドと`vite dev`が呼びます。serverモードでは読まれません。',
+  en: 'A static mode build and `vite dev` call it. Server mode does not read it.',
 });
 
 export const redirectDefault = message({
@@ -217,8 +231,8 @@ export const rootTitle = message({
 });
 
 export const rootDescription = message({
-  ja: 'どれも`@k8ordo/router`のexportを、名前で再exportしています。どちらもフレームワークが描画しない`<Router>`を読むので、`useParams`と`useRoute`は含みません。ページは`params`をpropsで受け取ります。それぞれの説明は`@k8ordo/router`の',
-  en: 'Each is an export of `@k8ordo/router`, re-exported by name. `useParams` and `useRoute` are not among them: they read a `<Router>` the framework never renders. A page receives `params` as a prop instead. Each one is described on the ',
+  ja: 'どれも`@k8ordo/router`のexportを、名前で再exportしています。`paths.ts`のdefault exportの型`Paths`だけは、フレームワーク自身のものです。`useParams`と`useRoute`は、フレームワークが描画しない`<Router>`を読むので含みません。ページは`params`をpropsで受け取ります。それぞれの説明は`@k8ordo/router`の',
+  en: 'Each is an export of `@k8ordo/router`, re-exported by name, except `Paths`: the framework’s own type for the default export of a `paths.ts`. `useParams` and `useRoute` are not among them: they read a `<Router>` the framework never renders. A page receives `params` as a prop instead. Each one is described on the ',
 });
 
 export const rootLinkTail = message({

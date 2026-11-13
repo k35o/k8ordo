@@ -40,6 +40,11 @@ export type RouteDir = {
    * with for a value the build did not write.
    */
   readonly fallback: string | null;
+  /**
+   * A `paths.ts`: under static mode, the values this directory's parameter
+   * takes — what the build writes for everything below it.
+   */
+  readonly paths: string | null;
   readonly children: readonly RouteDir[];
 };
 
@@ -58,6 +63,7 @@ const CONVENTION = {
   'route.ts': 'route',
   'loading.tsx': 'loading',
   'fallback.tsx': 'fallback',
+  'paths.ts': 'paths',
 } as const;
 
 export const ROUTE_FILES = Object.keys(CONVENTION).join(', ');
@@ -194,6 +200,13 @@ const convert = (
     });
   }
 
+  if (slots.paths !== undefined && kind !== 'param') {
+    problems.push({
+      path: slots.paths,
+      message: `paths.ts gives the values of its directory's parameter, and "${here}" is not a [param] directory — move it into the parameter's directory`,
+    });
+  }
+
   const children = [...raw.dirs.entries()].map(([childName, childRaw]) => {
     const childPath = path === '' ? childName : `${path}/${childName}`;
     const classified = classify(childName, childPath, problems);
@@ -221,6 +234,7 @@ const convert = (
     guard: slots.guard ?? null,
     route: slots.route ?? null,
     fallback: slots.fallback ?? null,
+    paths: slots.paths ?? null,
     children,
   };
 };
@@ -255,6 +269,32 @@ const eachPattern = (
     const next = child.kind === 'group' ? here : `${here}${child.key}`;
     eachPattern(child, next, visit);
   }
+};
+
+export type PathsFile = {
+  /** The paths.ts, relative to the routes root. */
+  readonly file: string;
+  /** Its directory's pattern, ending in the parameter it gives values to: `/:locale/posts/:id`. */
+  readonly pattern: string;
+};
+
+/**
+ * Every `paths.ts` in a parameter's directory, outermost first. One in any
+ * other directory is a problem the parse reports, and is not listed.
+ */
+export const pathsFiles = (tree: RouteDir): PathsFile[] => {
+  const found: PathsFile[] = [];
+  const walk = (dir: RouteDir, prefix: string): void => {
+    const here = dir.kind === 'root' ? '' : prefix;
+    if (dir.paths !== null && dir.kind === 'param') {
+      found.push({ file: dir.paths, pattern: here });
+    }
+    for (const child of dir.children) {
+      walk(child, child.kind === 'group' ? here : `${here}${child.key}`);
+    }
+  };
+  walk(tree, '');
+  return found;
 };
 
 export type FallbackShape = {
@@ -308,7 +348,7 @@ const checkFallback = (
   const open = params.filter((name) => !(above?.params ?? []).includes(name));
   if (open.length === 0 && above !== null) {
     return refuse(
-      `fallback.tsx has nothing to leave to the browser — ${above.file} receives every parameter of "${pattern}"; remove fallback.tsx and list the values in paths`,
+      `fallback.tsx has nothing to leave to the browser — ${above.file} receives every parameter of "${pattern}"; remove fallback.tsx and return the values from a paths.ts`,
     );
   }
   return {

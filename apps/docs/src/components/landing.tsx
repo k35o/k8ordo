@@ -1,11 +1,12 @@
 import type { Message } from '@k8ordo/i18n';
-import { GitHubIcon, Heading } from '@k8ordo/ui';
+import { Heading } from '@k8ordo/ui';
 import type { ReactNode } from 'react';
 
 import { PACKAGES } from '../data/packages';
 import { href } from '../links';
 import * as m from '../messages';
 import { CodeBlock } from './code-block';
+import { GitHubIcon } from './github-icon';
 import { InstallTabs } from './install-tabs';
 import { LinkButton } from './link-button';
 import { PageTitle } from './page-title';

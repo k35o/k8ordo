@@ -16,3 +16,4 @@ export type {
   Register,
 } from '@k8ordo/router';
 export type { Guard, RedirectTarget } from '@k8ordo/framework-engine/server';
+export type { Paths } from './paths-type';

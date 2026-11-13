@@ -1,10 +1,7 @@
 'use client';
 
-import {
-  HorizontalWritingIcon,
-  IconButton,
-  VerticalWritingIcon,
-} from '@k8ordo/ui';
+import { IconButton } from '@k8ordo/ui';
+import { TextHorizontalIcon, TextVerticalIcon } from '@k8ordo/ui/icons';
 
 import * as m from '../messages';
 import { useWritingMode } from '../theme/writing-mode-context';
@@ -23,7 +20,7 @@ export function WritingModeSwitcher() {
       }
       onClick={toggleWritingMode}
     >
-      {isVertical ? <HorizontalWritingIcon /> : <VerticalWritingIcon />}
+      {isVertical ? <TextHorizontalIcon /> : <TextVerticalIcon />}
     </IconButton>
   );
 }

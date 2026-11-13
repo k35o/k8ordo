@@ -1,7 +1,8 @@
 'use client';
 
-import { Button, ChevronIcon, Code } from '@k8ordo/ui';
+import { Button, Code } from '@k8ordo/ui';
 import { Message } from '@k8ordo/ui/ai';
+import { ChevronIcon } from '@k8ordo/ui/icons';
 import type { ReactNode } from 'react';
 
 import styles from './ai-previews.module.css';

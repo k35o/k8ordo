@@ -37,7 +37,7 @@ it. Install one when you import the entry it belongs to.
 | ----------------------- | --------------- | -------- | ------------------------------------------------- |
 | `react`                 | ≥19.3.0         | yes      | the components and hooks                          |
 | `react-dom`             | ≥19.3.0         | yes      | portals and `useFormStatus`                       |
-| `@k8ordo/i18n`          | ^2.4.0          | yes      | the locale the components' own wording is read in |
+| `@k8ordo/i18n`          | ^3.0.0          | yes      | the locale the components' own wording is read in |
 | `typescript`            | ≥7.0.0          | optional | the shipped type declarations                     |
 | `@types/react`          | ≥19.3.0         | optional | the shipped type declarations                     |
 | `@types/react-dom`      | ≥19.3.0         | optional | the shipped type declarations                     |
@@ -283,7 +283,7 @@ entry in [docs/references/components.md](docs/references/components.md).
 
 ### Icons
 
-- [Icons](docs/references/components.md#icons) — decorative icon components (`CloseIcon`, `ChevronIcon`, …)
+- [Icons](docs/references/components.md#icons) — decorative icons from `@k8ordo/ui/icons` (`XIcon`, `ChevronIcon`, …)
 
 ### Providers
 
@@ -372,7 +372,7 @@ function MyComponent() {
 
 ## Imports & Bundle Size
 
-The core UI components ship from the root entry — there are no per-component subpaths; the AI chat components live under `@k8ordo/ui/ai`, with `Response` under `@k8ordo/ui/ai/response`, and `CodeBlock` under `@k8ordo/ui/code-block` so the highlighter stays out of everything else. The package is tree-shakeable (`sideEffects` is limited to CSS), so bundlers drop everything you don't import — the CSS too, since each component imports its own stylesheet:
+The core UI components ship from the root entry — there are no per-component subpaths; the icons live under `@k8ordo/ui/icons`, the AI chat components under `@k8ordo/ui/ai`, with `Response` under `@k8ordo/ui/ai/response`, and `CodeBlock` under `@k8ordo/ui/code-block` so the highlighter stays out of everything else. The package is tree-shakeable (`sideEffects` is limited to CSS), so bundlers drop everything you don't import — the CSS too, since each component imports its own stylesheet:
 
 ```tsx
 // Named imports from the root entry — unused exports are tree-shaken away
@@ -384,6 +384,7 @@ Optional features live behind dedicated subpath exports:
 | Subpath                           | Contents                                                                                  |
 | --------------------------------- | ----------------------------------------------------------------------------------------- |
 | `@k8ordo/ui`                      | Core UI components, their types, and provider hooks                                       |
+| `@k8ordo/ui/icons`                | Line icons, one module each, and `BaseIcon` for drawing your own                          |
 | `@k8ordo/ui/tokens`               | Design tokens as a DTCG resolver document                                                 |
 | `@k8ordo/ui/props.json`           | Every component's props as JSON, generated from the types                                 |
 | `@k8ordo/ui/i18n`                 | `ja` / `en`, `registerMessages`, `getMessages`, `messageUsage`, and the `Messages` type   |

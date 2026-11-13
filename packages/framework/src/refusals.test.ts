@@ -30,11 +30,8 @@ describe('a static build that cannot be written', () => {
       ['route-methods'],
       ['search'],
       ['request'],
-      [
-        'not-pages',
-        { paths: () => ['/products/1', '/products/3', '/products/x'] },
-      ],
-      ['paths', { paths: (patterns) => patterns }],
+      ['not-pages'],
+      ['paths'],
     ];
     // 同じプロセスで描くので、1 つずつ
     for (const [name, options] of builds) {
@@ -114,13 +111,13 @@ describe('a static build that cannot be written', () => {
 
   it('stops, naming the pathname, when a page it was supplied for said notFound()', () => {
     expect(said('not-pages')).toContain(
-      'the "paths" option supplied pathnames whose page called notFound(): /products/3',
+      'a paths.ts returned values whose page called notFound(): /products/3',
     );
   });
 
   it('names a pathname a schema refused in the same error as one whose page said notFound()', () => {
     expect(said('not-pages')).toContain(
-      'the "paths" option supplied pathnames a params schema refused: /products/x\n\nthe "paths" option supplied pathnames whose page called notFound(): /products/3',
+      'a paths.ts returned values a params schema refused: /products/x\n\na paths.ts returned values whose page called notFound(): /products/3',
     );
   });
 
@@ -131,12 +128,12 @@ describe('a static build that cannot be written', () => {
     ).toStrictEqual([]);
   });
 
-  it('stops before rendering, naming each pathname that still holds a parameter no shell takes', () => {
+  it('stops before rendering, naming each pattern whose parameter no paths.ts gives values to, and each shell a layout needs one for', () => {
     expect(said('paths')).toContain(
-      'the "paths" option supplied pathnames that still hold a parameter, and only a page with a fallback.tsx beside it takes one: /products/:id (products/[id]/page.tsx has none), /:locale/about ([locale]/about/page.tsx has none), /:locale/posts/first ([locale]/posts/first/redirect.ts cannot have one)',
+      "static build needs the values of /products/:id, /:locale/about, /:locale/posts/first — a paths.ts in each parameter's directory returns them, and a fallback.tsx beside a page answers the ones the build does not write",
     );
     expect(said('paths')).toContain(
-      'the "paths" option supplied shell locations that leave out a parameter a layout above their fallback.tsx receives: /:locale/posts/:id (:locale, received by [locale]/layout.tsx)',
+      'these shells leave out a parameter a layout above their fallback.tsx receives, so its directory needs a paths.ts: /:locale/posts/:id (:locale, received by [locale]/layout.tsx)',
     );
   });
 });

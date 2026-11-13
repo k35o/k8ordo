@@ -5,7 +5,7 @@ import { useId } from 'react';
 import type { FC, ReactNode } from 'react';
 
 import { useControllableState } from '../../../hooks/controllable-state';
-import { ChevronIcon } from '../../icons';
+import { ChevronIcon } from '../../icons/chevron';
 
 import focusRing from '../../_internal/focus-ring.module.css';
 import styles from './collapsible.module.css';

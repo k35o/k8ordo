@@ -346,6 +346,7 @@ Styling is controlled by `color` (not `variant`). `label` is required.
 
 ```tsx
 import { IconButton } from '@k8ordo/ui';
+import { CopyIcon, HomeIcon, SendIcon } from '@k8ordo/ui/icons';
 
 <IconButton color="transparent" label="Copy"><CopyIcon /></IconButton>
 <IconButton color="primary" label="Send"><SendIcon /></IconButton>

@@ -12,7 +12,8 @@ import { useControllableState } from '../../../hooks/controllable-state';
 import type { Option, Placement } from '../../../types/variables';
 import { Button } from '../../buttons/button';
 import { IconButton } from '../../buttons/icon-button';
-import { CheckIcon, ChevronIcon } from '../../icons';
+import { CheckIcon } from '../../icons/check';
+import { ChevronIcon } from '../../icons/chevron';
 import { useListNavigation } from '../_internal/use-list-navigation';
 import { Popover, useOpenContext } from '../popover';
 import {

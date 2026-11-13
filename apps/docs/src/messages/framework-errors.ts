@@ -177,8 +177,8 @@ export const pageNotFoundSchema = message({
 });
 
 export const pageNotFoundStatic = message({
-  ja: 'staticモードでは、ページのどこで`notFound()`を呼んでも404になります。ただし`paths`で渡したURLのページが`notFound()`を呼ぶと、そのURLを挙げたエラーになり、ビルドできません。サイトにあるはずのURLに、404のページを書くことになるからです。',
-  en: 'Under static mode, `notFound()` gives a 404 from anywhere in the page. A URL passed through `paths` whose page calls it stops the build, naming the URL: it would write a 404 page at a URL the site claims to have.',
+  ja: 'staticモードでは、ページのどこで`notFound()`を呼んでも404になります。ただし`paths.ts`が返した値のページが`notFound()`を呼ぶと、そのURLを挙げたエラーになり、ビルドできません。サイトにあるはずのURLに、404のページを書くことになるからです。',
+  en: 'Under static mode, `notFound()` gives a 404 from anywhere in the page. A value a `paths.ts` returned whose page calls it stops the build, naming the URL: it would write a 404 page at a URL the site claims to have.',
 });
 
 export const pageNotFoundShell = message({

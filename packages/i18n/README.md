@@ -125,7 +125,7 @@ Where a Server Component hands text to a Client Component as a prop, it calls
 the message and passes the string: a function does not cross that boundary.
 
 `/` negotiates and redirects; `<html lang>` and a language switcher read
-`locales.getLocale()`, and `<html dir>` its `locales.definitions[…].dir`; a static build passes `paths: locales.paths`. Links
+`locales.getLocale()`, and `<html dir>` its `locales.definitions[…].dir`; a static build's `src/routes/[locale]/paths.ts` returns `locales.all`. Links
 stay the router's: `bindParams(() => ({ locale: locales.getLocale() }))`
 (imported from `@k8ordo/framework` in a framework application) gives an `href` that spells `/:locale/…` patterns without the locale.
 

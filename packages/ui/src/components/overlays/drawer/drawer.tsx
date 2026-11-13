@@ -8,7 +8,7 @@ import { getMessages } from '../../../i18n/current';
 import type { DrawerSide } from '../../../types/variables';
 import { IconButton } from '../../buttons/icon-button';
 import { Heading } from '../../data-display/heading';
-import { CloseIcon } from '../../icons';
+import { XIcon } from '../../icons/x';
 import { Modal } from '../modal';
 
 import styles from './drawer.module.css';
@@ -63,7 +63,7 @@ export const Drawer: FC<
               }}
               tooltipDisabled
             >
-              <CloseIcon size="sm" />
+              <XIcon size="sm" />
             </IconButton>
           </div>
         </div>

@@ -99,10 +99,10 @@ describe('the root entry', () => {
     ).toStrictEqual([]);
   });
 
-  it('exports nothing of its own, so the router stays the one copy', async () => {
+  it('exports no value of its own, so the router stays the one copy — only the type a paths.ts is written against', async () => {
     const own = (
       await exportsOf(fileURLToPath(new URL('index.ts', import.meta.url)))
     ).filter(({ from }) => from !== '@k8ordo/router');
-    expect(own).toStrictEqual([]);
+    expect(own).toStrictEqual([{ name: 'Paths', from: './paths-type' }]);
   });
 });

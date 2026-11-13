@@ -5,8 +5,8 @@ import {
   Heading,
   Separator,
   Table,
-  TableIcon,
 } from '@k8ordo/ui';
+import { TableIcon } from '@k8ordo/ui/icons';
 
 import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';

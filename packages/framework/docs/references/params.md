@@ -72,90 +72,124 @@ schema and lets the pages below it receive the result.
 ## Routes with parameters
 
 Static mode only. A build into files cannot invent parameter values, so it
-asks for them:
+asks the parameter's own directory for them — a `paths.ts`, one more route
+file:
 
 ```ts
-framework({
-  mode: 'static',
-  paths: async () => {
-    const products = await readCatalog();
-    return products.map((product) => `/products/${product.id}`);
-  },
-});
+// src/routes/products/[id]/paths.ts
+import type { Paths } from '@k8ordo/framework';
+
+import { listProducts } from '../../../lib/catalog.server';
+
+const paths: Paths<'/products/:id'> = async () =>
+  (await listProducts()).map((product) => String(product.id));
+
+export default paths;
 ```
 
-The patterns that still need covering are handed in, so a parameter that takes
-the same values everywhere — a locale segment, say — is expanded rather than
-listed once per page:
+Its default export is a function returning the values the directory's
+parameter takes: an array of strings, or a promise of one. `Paths<Pattern>`
+is its type — exported from `@k8ordo/framework`, a type only — where the
+pattern is the directory's own, ending in that parameter; the generated
+table checks each file against it.
+
+**It runs where the pages run.** The build asks from the built RSC bundle,
+and `vite dev` through the RSC environment's module runner: the module graph
+the pages are in. So a `paths.ts` imports the application's modules by their
+aliases, a `server-only` one included, and shares their instances with the
+pages — a catalog it read and cached is the one the pages then read.
+
+**It covers everything below its directory.** The `page.tsx` beside it, and
+every page, `route.ts` and `redirect.ts` in the directories below, are
+written once per value: with `blog/[slug]/paths.ts`, so are
+`blog/[slug]/og.png/route.ts` (`/blog/:slug/og.png`) and
+`blog/[slug]/article.md/route.ts`. No pattern is expanded by hand.
+
+**It receives the params above it**, and is called once per combination of
+their values:
 
 ```ts
-framework({
-  mode: 'static',
-  paths: (patterns) =>
-    patterns.flatMap((pattern) => {
-      const segments = pattern.split('/');
-      if (!segments.includes(':locale')) return [pattern];
-      return ['ja', 'en'].map((locale) =>
-        segments
-          .map((segment) => (segment === ':locale' ? locale : segment))
-          .join('/'),
-      );
-    }),
-});
+// src/routes/[locale]/paths.ts
+import type { Paths } from '@k8ordo/framework';
+
+const paths: Paths<'/:locale'> = () => ['ja', 'en'];
+
+export default paths;
 ```
 
-A parameterised route with no path supplied **fails the build** — unless its
-page has a `fallback.tsx` beside it, whose shell answers the values the build
-did not write ([Values the build did not write](#values-the-build-did-not-write)):
+```ts
+// src/routes/[locale]/posts/[id]/paths.ts
+import type { Paths } from '@k8ordo/framework';
+
+import { postsIn } from '../../../../lib/posts.server';
+
+const paths: Paths<'/:locale/posts/:id'> = async ({ locale }) =>
+  (await postsIn(locale)).map((post) => String(post.id));
+
+export default paths;
+```
+
+The params arrive as the strings the files above returned — no
+`paramsSchema` has run. A `paths.ts` below a parameter whose directory has
+none cannot be asked, and the build refuses:
 
 ```
-static build needs pathnames for /products/:id — supply them with the "paths" option
+[locale]/posts/[id]/paths.ts is asked for its values once per value of the parameters above it, and /:locale/posts still holds one — give that parameter's directory a paths.ts too
+```
+
+**A value is the segment as a visitor reads it** — `café`, `a b` — not
+URL-escaped; the build escapes it for the URL and writes the file under the
+unescaped name. Values are non-empty strings, so an id is spelled
+(`String(product.id)`), and a value repeated is written once:
+
+```
+tags/[tag]/paths.ts has to return an array of non-empty strings, the values of :tag
+```
+
+A value that is `..` names a file outside the output, and `!fallback` is the
+segment the build keeps for shells:
+
+```
+a pathname to write leaves the output: /products/..
+a paths.ts returned !fallback, which the build keeps for shells: /posts/!fallback
+```
+
+A parameter with no `paths.ts` in its directory stays open, and an open
+route **fails the build** — unless its page has a `fallback.tsx` beside it,
+whose shell answers the values the build did not write
+([Values the build did not write](#values-the-build-did-not-write)):
+
+```
+static build needs the values of /tags/:tag — a paths.ts in each parameter's directory returns them, and a fallback.tsx beside a page answers the ones the build does not write
 ```
 
 Shipping a site quietly missing half its pages is worse than not shipping one.
 Parameterless routes need no declaration; they are taken from the table.
 
-The other direction counts too — a supplied pathname nothing matched costs
-exactly the page it was meant to add:
-
-```
-the "paths" option supplied pathnames no route wants: /produtcs/2
-```
-
-A supplied pathname that still holds a parameter (`/ja/blog/:slug` — what
-expanding only one of two parameters leaves behind) is a shell location,
-which only a page with a `fallback.tsx` beside it takes. For any other route
-the build names the file that has none — or, for a `redirect.ts` or
-`route.ts`, the file that cannot have one (`… cannot have one`):
-
-```
-the "paths" option supplied pathnames that still hold a parameter, and only a page with a fallback.tsx beside it takes one: /ja/blog/:slug ([locale]/blog/[slug]/page.tsx has none)
-```
-
-Pathnames are taken as a URL carries them, escapes included
-(`/products/caf%C3%A9`) — `href()` output as it is, unless the application is
-served under a `base`: these are pathnames in the table's terms, and `href()`
-puts the base in front. Only the file name is decoded, and a pathname whose
-escapes do not decode, or that decodes to a `..` segment, fails the build —
-neither names a file inside the output:
-
-```
-the "paths" option supplied a pathname with a malformed escape: /products/%zz
-the "paths" option supplied a pathname that leaves the output: /products/..%2F..
-```
-
-A supplied pathname that a `paramsSchema` along its route's stack refuses
+A returned value that a `paramsSchema` along its route's stack refuses
 fails the build too — it would otherwise be written as a 404 page under a
 URL the site claims to have — and so does one whose page says `notFound()`:
 
 ```
-the "paths" option supplied pathnames a params schema refused: /products/shoes
-the "paths" option supplied pathnames whose page called notFound(): /products/3
+a paths.ts returned values a params schema refused: /products/shoes
+a paths.ts returned values whose page called notFound(): /products/3
 ```
 
 Neither is written to `dist/client/`. A build that meets both names them in
 one error, with any page that failed to render, so fixing one does not reveal
 the next.
+
+`paths.ts` belongs in a `[param]` directory and nowhere else
+([What the build refuses](routing.md#what-the-build-refuses)), and
+`framework()` takes no `paths` option — passing one throws when the config
+loads:
+
+```
+framework() takes no paths — a parameter's values come from a paths.ts in its directory under routes/
+```
+
+Under `mode: 'server'` a `paths.ts` is never read and nothing of it is
+built in, so the same `routes/` works in both modes.
 
 ## Values the build did not write
 
@@ -165,19 +199,21 @@ after the site was deployed, an id in a link nobody listed — keeps a
 
 ```
 src/routes/posts/[id]/
-  page.tsx        the ids paths lists, rendered at build time
+  paths.ts        the ids the build writes
+  page.tsx        each of them, rendered at build time
   fallback.tsx    every other id: the shell, its post drawn in the browser
 ```
 
-The build writes the page for each id `paths` lists, as it always has, and
-once more a **shell**: the layouts above rendered as HTML, with the
-`fallback.tsx` in the page's place, at `posts/!fallback/`. The host answers
-any other id with it, through the rewrites the build writes beside the pages
+The build writes the page for each id `paths.ts` returns, and once more a
+**shell**: the layouts above rendered as HTML, with the `fallback.tsx` in
+the page's place, at `posts/!fallback/`. The host answers any other id with
+it, through the rewrites the build writes beside the pages
 ([Rewrites to a shell](deploy.md#rewrites-to-a-shell)), and the browser,
-which has the id in its URL, reads the post itself:
+which has the id in its URL, reads the post itself. Without the `paths.ts`
+the build writes no post at all, and the shell answers every id.
 
 ```tsx
-// src/routes/posts/[id]/page.tsx — the ids paths lists
+// src/routes/posts/[id]/page.tsx — the ids paths.ts returns
 import { notFound } from '@k8ordo/framework';
 import type { PageProps } from '@k8ordo/framework';
 
@@ -275,20 +311,20 @@ export const readPost = (id: number): Promise<Post | undefined> => {
 ```
 
 ```ts
-// vite.config.ts
-framework({
-  mode: 'static',
-  paths: async () => {
-    const response = await fetch('https://api.example.com/posts');
-    const posts = (await response.json()) as { id: number }[];
-    return posts.map((post) => `/posts/${String(post.id)}`);
-  },
-});
+// src/routes/posts/[id]/paths.ts
+import type { Paths } from '@k8ordo/framework';
+
+import { listPosts } from '../../../lib/posts.server';
+
+const paths: Paths<'/posts/:id'> = async () =>
+  (await listPosts()).map((post) => String(post.id));
+
+export default paths;
 ```
 
-`vite.config.ts` reads the ids itself rather than through
-`posts.server.ts`: it runs in Node outside the server environment, where a
-module that imports `server-only` throws. It supplies values only, so the
+`paths.ts` reads the ids through `posts.server.ts`, the module the page
+reads a post through: it runs in the server environment, where a module
+that imports `server-only` loads. No parameter stands above `[id]`, so the
 shell stands at the pattern itself, `/posts/:id`.
 
 ### What a `fallback.tsx` is handed
@@ -361,42 +397,39 @@ the shell for /posts/:id called notFound() while it rendered, and a shell has no
 ### Where a shell stands
 
 A shell stands at a **location**: a pathname whose remaining `:name`
-segments are left to the browser. With nothing in `paths` for it, the
-location is the pattern itself — `/posts/:id`, one shell for every id. A
-location may also fill some parameters and leave the rest, and `paths`
-supplies it beside the values:
+segments are left to the browser. Which parameters a location fills is
+decided by the `paths.ts` files above the `fallback.tsx`: a parameter whose
+directory has one is filled, once per value, and a parameter without one is
+left open. With no parameter above, the location is the pattern itself —
+`/posts/:id`, one shell for every id. With one above that lists its values,
+there is a shell per value:
 
-```ts
-paths: async () => {
-  const ids = await fetchPostIds();
-  return ['ja', 'en'].flatMap((locale) => [
-    `/${locale}/posts/:id`, // the shell for this locale
-    ...ids.map((id) => `/${locale}/posts/${String(id)}`),
-  ]);
-},
+```
+src/routes/[locale]/
+  paths.ts            ja, en
+  layout.tsx
+  posts/[id]/
+    page.tsx
+    fallback.tsx      shells at /ja/posts/:id and /en/posts/:id
 ```
 
 Each location is its own shell, rendered for its own URL — the location
 with `!fallback` for each parameter left open, `/ja/posts/!fallback`, a
-segment no route directory can be named — and written there. Once `paths`
-supplies a location for a pattern, the pattern itself is not added:
-the locations are the upper values the site has, and a shell at
-`/:locale/posts/:id` would answer `/fr/posts/1` too. `@k8ordo/i18n`'s
-`locales.paths` gives this shape on its own: it fills the locale and leaves
-the rest. A location belongs to the first pattern in the table's order it
-fits — the pattern whose URLs a host's rule for it catches.
+segment no route directory can be named — and written there. The filled
+values are the upper values the site has: no shell stands at
+`/:locale/posts/:id`, which would answer `/fr/posts/1` too. A `paths.ts` in
+`posts/[id]/` as well changes no location: the ids it returns are written as
+pages under each locale, and the same two shells answer the rest.
 
 **A parameter a layout above receives has to be filled.** A layout above
 the `fallback.tsx` is written into the shell once, as HTML, for every value
 the shell answers, so each parameter it receives is one the shell has to
 know. With `src/routes/[locale]/layout.tsx`, that layout receives `locale`,
 so `/:locale/posts/:id` cannot be a location — `/ja/posts/:id` and
-`/en/posts/:id` can — and the build says which to supply when there is
-none, and which one left it out:
+`/en/posts/:id` can — and without a `[locale]/paths.ts` the build says so:
 
 ```
-static build needs shell locations for /:locale/posts/:id — [locale]/layout.tsx receives :locale, so the "paths" option has to fill it, as in /<locale>/posts/:id
-the "paths" option supplied shell locations that leave out a parameter a layout above their fallback.tsx receives: /:locale/posts/:id (:locale, received by [locale]/layout.tsx)
+these shells leave out a parameter a layout above their fallback.tsx receives, so its directory needs a paths.ts: /:locale/posts/:id (:locale, received by [locale]/layout.tsx)
 ```
 
 The parameters a shell may leave are the ones no layout above the
@@ -409,10 +442,11 @@ the layouts above do, over the parameters the location fills. A schema whose
 work has to reach the shell belongs on a layout — `@k8ordo/i18n`'s, which
 sets the locale the shell's messages are rendered in, on
 `[locale]/layout.tsx` (`export const { paramsSchema } = locales;`). A layout
-schema that refuses a supplied location stops the build:
+schema that refuses a value a `paths.ts` above the shell returned stops the
+build:
 
 ```
-the "paths" option supplied shell locations a params schema refused: /xx/posts/:id
+the shells stand where a params schema refuses the values above them: /xx/posts/:id
 ```
 
 **Layouts render with the shell's pathname.** A layout above a shell
@@ -432,16 +466,19 @@ which reads the visitor's URL. React hoists a `<title>`, `<meta>` or
 `<link>` from either. A parameter no layout receives can still be one a
 layout derives something from: a root layout that takes `<html lang>` from
 the first segment of `pathname` reads `!fallback` there at the bare
-`/:locale/posts/:id`, and every value gets its default language. Supply
-locations that fill it.
+`/:locale/posts/:id`, and every value gets its default language. Give that
+parameter's directory a `paths.ts`, and the shells stand below its values.
 
 ### Routes below a fallback's parameter
 
 A `fallback.tsx` answers its own page's pattern and nothing below it.
 `posts/[id]/comments/page.tsx` is `/posts/:id/comments`, a pattern of its
-own: it needs its values in `paths`, as any route with parameters does,
-unless it keeps a `fallback.tsx` of its own. A `redirect.ts` or `route.ts`
-below the parameter cannot have one, so it answers only the values listed.
+own: it is written for the ids `posts/[id]/paths.ts` returns, and for no
+other — unless it keeps a `fallback.tsx` of its own, whose shell stands at
+`/posts/:id/comments`. With no `paths.ts` in `posts/[id]/` and no
+`fallback.tsx` of its own, it stops the build, as any open route does. A
+`redirect.ts` or `route.ts` below the parameter cannot have a
+`fallback.tsx`, so it answers only the values returned.
 
 ### What it costs
 
@@ -451,8 +488,8 @@ below the parameter cannot have one, so it answers only the values listed.
   `fallback.tsx`.
 - **Its HTML is the shell's.** No per-value `<title>`, no Open Graph tags:
   a crawler that runs no JavaScript and a link preview both read the
-  placeholder. A value that matters to them belongs in `paths`, and a rebuild is
-  what puts it there.
+  placeholder. A value that matters to them is one a `paths.ts` returns,
+  and a rebuild is what writes it.
 - **An unknown value answers `200`.** The host rewrites by shape, so
   `/posts/999` gets the shell too, and the not-found it shows in place is a
   soft 404 to a crawler. Give `not-found.tsx` a
@@ -466,14 +503,8 @@ below the parameter cannot have one, so it answers only the values listed.
 
 ### What else stops the build
 
-Every refusal of `paths` is said before anything is rendered, with the
-others above. A location whose parameter names are not its pattern's, and
-a pathname holding the segment the build keeps for shells, escaped or not:
-
-```
-the "paths" option supplied shell locations whose parameter names are not their pattern's: /en/posts/:slug (/:locale/posts/:id)
-the "paths" option supplied pathnames with a segment named !fallback, which the build keeps for shells: /posts/!fallback
-```
+Every refusal of what the `paths.ts` files returned is said before anything
+is rendered, with the others above.
 
 A shell's rule catches every URL of its location's shape that no file
 answers, so a location must not catch URLs that a pattern declared before
@@ -483,8 +514,8 @@ catches infinitely many of them, or the two overlap in one URL the build
 did not write:
 
 ```
-the shell for /:lang/:id ([lang]/[id]/fallback.tsx) would also answer URLs /docs/:section (docs/[section]/page.tsx) is declared first for — give docs/[section]/page.tsx a fallback.tsx too, or supply shell locations it cannot match
-the shell for /ja/posts/:id ([locale]/posts/[id]/fallback.tsx) would also answer /ja/posts/new, which [locale]/posts/new/page.tsx is declared first for and the build did not write — list /ja/posts/new in "paths", or supply shell locations it cannot match
+the shell for /:lang/:id ([lang]/[id]/fallback.tsx) would also answer URLs /docs/:section (docs/[section]/page.tsx) is declared first for — give docs/[section]/page.tsx a fallback.tsx too, or put the shell where it cannot match, with a paths.ts above it
+the shell for /ja/posts/:id ([locale]/posts/[id]/fallback.tsx) would also answer /ja/posts/new, which [locale]/posts/new/page.tsx is declared first for and the build did not write — return its value from that parameter's paths.ts, or put the shell where it cannot match, with a paths.ts above it
 ```
 
 A URL the build did write is not one of them — its file answers before any
@@ -499,33 +530,41 @@ renders is named by its location, as a page is:
 
 ```
 the shell for /ja/posts/:id ([locale]/posts/[id]/fallback.tsx) was answered by another route, which took "!fallback" as a value
-the shell for /en/posts/:id ([locale]/posts/[id]/fallback.tsx) was answered by en/[section]/[slug]/fallback.tsx, which the table tries first — supply shell locations that pattern cannot match
+the shell for /en/posts/:id ([locale]/posts/[id]/fallback.tsx) was answered by en/[section]/[slug]/fallback.tsx, which the table tries first — put the shell where that pattern cannot match, with a paths.ts above it
 static build could not render /ja/posts/:id — see the error above
 ```
 
 The grammar's refusals — a `fallback.tsx` with no `page.tsx` beside it, or
-beside a `layout.tsx`, or with nothing to leave to the browser — are in
+beside a `layout.tsx`, or with nothing to leave to the browser, and a
+`paths.ts` outside a `[param]` directory — are in
 [What the build refuses](routing.md#what-the-build-refuses).
 
 ### Under `vite dev`, and under server mode
 
-`vite dev` answers a value `paths` does not list with the shell, as a host's
-rule would, so a shell can be tried without a build. It says so once per
+`vite dev` answers a value as the build's host will, so what works locally
+is what is deployed. A value a `paths.ts` returns is rendered by its
+`page.tsx`. A value none returns is answered with the shell where a
+`fallback.tsx` stands beside the page, and otherwise with the not-found: a
+document is rendered as `not-found.tsx` under a 404, and a payload request
+gets a plain 404, so the browser loads the document; an application with no
+`not-found.tsx` gets a bare 404. It says which, once per pattern or
 `fallback.tsx`:
 
 ```
-k8ordo: /posts/3 is not in "paths", so vite dev answers it with posts/[id]/fallback.tsx's shell — list it in "paths" to render page.tsx
+k8ordo: no paths.ts returns /posts/3, so vite dev answers it with the not-found, as the build's host will — return its value from the paths.ts of /posts/:id to render it
+k8ordo: no paths.ts returns /posts/3, so vite dev answers it with posts/[id]/fallback.tsx's shell, as the build's host will
 ```
 
-It calls `paths` only for an application with a `fallback.tsx`, and again
-only when the patterns it hands in change, so a value added to the data
-since is one more unlisted value. A URL no fallback's pattern could match
-never waits for it. What the build would refuse in `paths` is logged as a
-warning, `k8ordo: the build will refuse "paths": …`, and a `paths` that
-throws leaves every value to its page:
-`k8ordo: the "paths" option failed, so vite dev renders every value with page.tsx: …`.
+It asks the `paths.ts` files once and keeps the answer until a file under
+`routes/` changes, and asks again when a request names a value it does not
+hold — so a value the data has gained since is rendered without a restart.
+A URL no pattern with a parameter could match never waits for them. What
+the build would refuse is logged as a warning,
+`k8ordo: the build will refuse this: …`, and a `paths.ts` that throws
+leaves every value to its page:
+`k8ordo: a paths.ts failed, so vite dev renders every value with page.tsx: …`.
 
 Under `mode: 'server'` every value is rendered by its page, per request, and
-a `fallback.tsx` is never rendered — nothing of it is built in — so switching
-modes needs no change to the files. The grammar's rules for it hold in both
-modes.
+neither a `fallback.tsx` nor a `paths.ts` is read — nothing of them is built
+in — so switching modes needs no change to the files. The grammar's rules
+for them hold in both modes.

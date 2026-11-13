@@ -7,7 +7,7 @@ import type { FC, PropsWithChildren } from 'react';
 import { readWritingMode } from '../../../hooks/writing-mode';
 import { getMessages } from '../../../i18n/current';
 import { IconButton } from '../../buttons/icon-button';
-import { ChevronIcon } from '../../icons';
+import { ChevronIcon } from '../../icons/chevron';
 
 import focusRing from '../../_internal/focus-ring.module.css';
 import styles from './carousel.module.css';

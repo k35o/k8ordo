@@ -14,8 +14,6 @@ const pluginNames = (options: FrameworkOptions): string[] =>
         : [],
     );
 
-const files = (): readonly string[] => [];
-
 describe('framework', () => {
   it('writes files in static mode, and nothing it would serve them with', () => {
     const names = pluginNames({ mode: 'static' });
@@ -29,20 +27,28 @@ describe('framework', () => {
     expect(names).not.toContain('k8ordo:static');
   });
 
-  it('takes paths, site and csp only in static mode, where there are files to describe', () => {
+  it('refuses paths, which a paths.ts in the parameter’s directory replaced, rather than writing no page with a value', () => {
+    expect(() =>
+      // @ts-expect-error the values of a parameter come from routes/
+      framework({ mode: 'static', paths: () => ['/posts/1'] }),
+    ).toThrow(
+      "framework() takes no paths — a parameter's values come from a paths.ts in its directory under routes/",
+    );
+  });
+
+  it('takes site and csp only in static mode, where there are files to describe', () => {
     expect(
       pluginNames({
         mode: 'static',
-        paths: files,
         site: 'https://example.test',
         csp: { 'script-src': ["'self'"] },
       }),
     ).toContain('k8ordo:static');
     expect(() =>
       // @ts-expect-error a server renders whatever pathname it is asked for
-      framework({ mode: 'server', paths: files, site: 'https://example.test' }),
+      framework({ mode: 'server', site: 'https://example.test' }),
     ).toThrow(
-      "mode: 'server' takes no paths, site — only mode: 'static' writes files for them to describe",
+      "mode: 'server' takes no site — only mode: 'static' writes files for it to describe",
     );
   });
 

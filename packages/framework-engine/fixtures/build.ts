@@ -72,9 +72,12 @@ export const buildFixture = async (
   {
     mode = 'server',
     clientChunks,
+    plugins = [],
   }: {
     readonly mode?: Mode;
     readonly clientChunks?: Rolldown.CodeSplittingOptions;
+    /** An application's own plugins, placed before the framework's as in its config. */
+    readonly plugins?: readonly PluginOption[];
   } = {},
 ): Promise<BuiltFixture> => {
   const root = fileURLToPath(new URL(`./${name}/`, import.meta.url));
@@ -97,7 +100,10 @@ export const buildFixture = async (
         warnings.push(message);
       },
     },
-    plugins: [engine({ routesDir: 'routes' }, { mode, runtimeDir })],
+    plugins: [
+      ...plugins,
+      engine({ routesDir: 'routes' }, { mode, runtimeDir }),
+    ],
     build: {
       // テストの下（NODE_ENV=test）では React の開発版を束ねるので、ブラウザの
       // 入口のチャンクは本番の出力よりずっと大きい。大きさの警告は数えない
