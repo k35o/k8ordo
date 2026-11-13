@@ -590,6 +590,35 @@ Form components are used together with `FormControl`'s `renderInput` pattern. Ev
 
 An uncontrolled field keeps its value in the DOM, so a form reset — `form.reset()`, a reset button, or React resetting the form after an action — puts it back to its `defaultValue`, and a `defaultValue` that changes after mount (the values a failed submission echoes back) is where the next reset goes. A value a component changes in code (a stepper, a chosen option, a removed file) is announced with an `input` event, so a form library listening on the `<form>` hears it like typing.
 
+**A controlled field does not hear what was typed before hydration.** A
+field in server-rendered HTML takes input before React attaches. React
+keeps what the visitor typed in the element and calls no `onChange` for it,
+so the state behind `value` stays at what the server rendered until the
+next keystroke: a search box shows `rea` while the list below it is still
+unfiltered. An uncontrolled field has no such gap, since its value is read
+from the element. For a controlled one, compare the element with the state
+when it attaches, through `ref`:
+
+```tsx
+const typedBeforeHydration =
+  (value: string, onTyped: (typed: string) => void) =>
+  (input: HTMLInputElement | null) => {
+    if (input !== null && input.value !== value) onTyped(input.value);
+  };
+
+<TextField
+  onChange={(event) => setQuery(event.target.value)}
+  ref={typedBeforeHydration(query, setQuery)}
+  value={query}
+/>;
+```
+
+This is React's behavior, the same for a plain `<input>`, and for a
+checkbox's `checked` as for a text field's `value`. The components carry
+no workaround of their own: React has a fix behind an experimental flag
+(a change event replayed at hydration), and a second one here would call
+`onChange` twice once it ships.
+
 Every field takes the attributes `@k8ordo/form`'s `formFields` derives as they are — spread `field.input` after `FormControl`'s props. Its guide's "Working with @k8ordo/ui" section has one example per component.
 
 ### Form
