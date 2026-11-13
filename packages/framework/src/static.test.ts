@@ -829,6 +829,46 @@ describe('the client files a build lists', () => {
   });
 });
 
+describe('the _headers a build writes', () => {
+  const HEADERS = { 'X-Content-Type-Options': 'nosniff' };
+
+  it('puts the declared headers ahead of the application’s own rules from public/, once however often the build runs', async () => {
+    await routeFiles(['page.tsx']);
+    await handlerAnswering(site());
+    await mkdir(path.join(root, 'public'), { recursive: true });
+    await writeFile(
+      path.join(root, 'public', '_headers'),
+      '/feed\n  Cache-Control: max-age=600\n',
+    );
+    const { build } = hooks({ headers: HEADERS });
+
+    await build();
+    // emptyOutDir: false のビルドは、前のビルドが重ねたファイルを残している
+    await build();
+
+    expect(await clientFile('_headers')).toBe(
+      [
+        '# @k8ordo/framework: the headers framework() declared for every response',
+        '/*',
+        '  X-Content-Type-Options: nosniff',
+        '',
+        '/feed',
+        '  Cache-Control: max-age=600',
+        '',
+      ].join('\n'),
+    );
+  });
+
+  it('writes none where no header is declared, leaving public/_headers as Vite copied it', async () => {
+    await routeFiles(['page.tsx']);
+    await handlerAnswering(site());
+
+    await hooks().build();
+
+    await expect(clientFile('_headers')).rejects.toThrow('ENOENT');
+  });
+});
+
 describe('the _redirects a build writes', () => {
   it('merges the application’s own rules from public/, once however often the build runs', async () => {
     await routeFiles(POSTS);

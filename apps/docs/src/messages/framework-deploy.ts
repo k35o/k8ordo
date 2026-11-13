@@ -585,6 +585,26 @@ export const vercelBundle = message({
   en: 'A Vercel function holds nothing but its own directory. The handler has every dependency bundled in, so it becomes the function as it is. A dependency left out with `resolve.external` is not in the function, and does not work on Vercel.',
 });
 
+export const headersTitle = message({
+  ja: '全応答のヘッダー',
+  en: 'Headers on every response',
+});
+
+export const headersWhat = message({
+  ja: '`framework()`の`headers`に書いたヘッダーは、ページ、ビルドのファイル、404、リダイレクトのどの応答にも付きます。どちらのモードでも使えます。`vite dev`、`vite preview`、`serve`が送り、Vercelには`vercel()`がルートとして書き、staticモードのビルドはNetlifyとCloudflareが読む`_headers`に書きます。`public/_headers`があれば、その前に足します。',
+  en: 'The headers in `framework()`’s `headers` are on every response: a page, a file of the build, a 404, a redirect. Either mode takes them. `vite dev`, `vite preview` and `serve` send them, `vercel()` writes them as a route for Vercel, and a static build writes them into the `_headers` Netlify and Cloudflare read, ahead of your own `public/_headers`.',
+});
+
+export const headersOwn = message({
+  ja: 'serverモードでは、`guard.ts`や`route.ts`が同じ名前で書いたヘッダーが残ります。ファイル向けの`Content-Security-Policy`をここに書いても、ページは`guard.ts`が`nonce()`で書いたものを保ちます。Vercelだけは、ルートのヘッダーと関数のヘッダーのどちらを送るかをVercelが決めるので、`guard.ts`が書く名前はここに書きません。',
+  en: 'Under server mode a header a `guard.ts` or a `route.ts` set under the same name stays. Declare a `Content-Security-Policy` for the files here, and the pages keep the one their `guard.ts` writes with `nonce()`. On Vercel alone, which of a route’s header and a function’s is sent is Vercel’s to decide, so do not declare a name there that a `guard.ts` also writes.',
+});
+
+export const headersNot = message({
+  ja: '`Cache-Control`は書きません。`assets/`のファイルにもページにも付いてしまいます。一部のパスだけのヘッダーは、`vercel()`のルートや`public/_headers`のように、ホストが読む場所に書きます。`vite dev`とビルドで値を変えるときは、`defineConfig(({ command }) => …)`で分けます。',
+  en: 'Leave `Cache-Control` out: it would reach the files under `assets/` and every page. A header for some paths only goes where the host reads it, a route of `vercel()`’s or a rule in `public/_headers`. For a value that differs between `vite dev` and the build, branch on `defineConfig(({ command }) => …)`.',
+});
+
 export const tabsTitle = message({
   ja: 'デプロイ前に開いたタブ',
   en: 'Tabs opened before a deploy',

@@ -106,6 +106,39 @@ export const payloadOf = (response: Response): ArrayBuffer | undefined =>
   filePayloads.get(response);
 
 /**
+ * The headers `framework({ headers })` declared for every response. Whatever
+ * serves the build's files reads them from here, since a file never passes
+ * through the handler.
+ */
+const everyAnswer = import.meta.env.K8ORDO_HEADERS as Readonly<
+  Record<string, string>
+>;
+export { everyAnswer as headers };
+
+const declaredEntries = Object.entries(everyAnswer);
+
+/**
+ * `response` carrying the declared headers it does not already have: what a
+ * guard.ts or a route.ts set for this request stays. Under `'static'` the
+ * answer becomes a file, which has no headers of its own to carry.
+ */
+const withDeclared = (response: Response): Response => {
+  if (import.meta.env.K8ORDO_MODE === 'static') return response;
+  const missing = declaredEntries.filter(
+    ([name]) => !response.headers.has(name),
+  );
+  if (missing.length === 0) return response;
+  // Response.redirect() や fetch の答えのヘッダーは書き換えられないので、作り直す
+  const merged = new Headers(response.headers);
+  for (const [name, value] of missing) merged.set(name, value);
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: merged,
+  });
+};
+
+/**
  * What a `paths.ts` answers when asked for its parameter's values, given the
  * params above it. The build into files asks through here, from the built
  * bundle, so the file runs as the pages do — the application's aliases, and
@@ -369,15 +402,17 @@ export default function handler(request: Request): Promise<Response> {
   // 書けないファイルなので、描けなかったページと同じく URL を名指して止める。
   // スタックがファイルと行を名指すので、丸ごと出す
   return withRequest(request, async () =>
-    answer(
-      await (import.meta.env.K8ORDO_MODE === 'static'
-        ? writingFile(() =>
-            respond(request).catch((error: unknown) => {
-              reportFailed('answering', new URL(request.url).pathname, error);
-              return renderFailed(error);
-            }),
-          )
-        : respond(request)),
+    withDeclared(
+      answer(
+        await (import.meta.env.K8ORDO_MODE === 'static'
+          ? writingFile(() =>
+              respond(request).catch((error: unknown) => {
+                reportFailed('answering', new URL(request.url).pathname, error);
+                return renderFailed(error);
+              }),
+            )
+          : respond(request)),
+      ),
     ),
   );
 }

@@ -2,6 +2,8 @@ import path from 'node:path';
 
 import type { Logger, Plugin } from 'vite';
 
+import { declaredHeaders } from './headers';
+import type { DeclaredHeaders } from './headers';
 import type { StaticAdapter, StaticOutput } from './static';
 import { writeStaticVercelOutput, writeVercelOutput } from './vercel-output';
 import type { VercelOptions } from './vercel-output';
@@ -29,11 +31,17 @@ export const vercel = (options: VercelOptions = {}): Plugin => {
   let root = '';
   let base = '/';
   let client = '';
+  let headers: DeclaredHeaders = {};
   const api: StaticAdapter = {
     // 静的ビルドのページは k8ordo:static の buildApp が書き終えて初めて揃う。
     // こちらの buildApp はその前にも後にも並びうるので、書き終えた側から呼ぶ
     async writeStatic(output: StaticOutput): Promise<void> {
-      await writeStaticVercelOutput({ root, client, base }, output, options);
+      await writeStaticVercelOutput(
+        { root, client, base },
+        output,
+        options,
+        headers,
+      );
       logger?.info('k8ordo: wrote .vercel/output');
     },
   };
@@ -47,6 +55,7 @@ export const vercel = (options: VercelOptions = {}): Plugin => {
         (plugin) => plugin.name === 'k8ordo:static',
       );
       ({ logger, root, base } = config);
+      headers = declaredHeaders(config.plugins);
       client = path.resolve(
         root,
         config.environments.client?.build.outDir ?? 'dist/client',
@@ -81,6 +90,7 @@ export const vercel = (options: VercelOptions = {}): Plugin => {
           builder.config.root,
           { client: dirOf('client'), rsc: dirOf('rsc'), ssr: dirOf('ssr') },
           builder.config.base,
+          headers,
         );
         builder.config.logger.info('k8ordo: wrote .vercel/output');
       },

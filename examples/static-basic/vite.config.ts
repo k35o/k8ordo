@@ -8,6 +8,9 @@ export default defineConfig({
       mode: 'static',
       // origin が分かれば sitemap.xml も書ける
       site: 'https://example.test',
+      // どの応答にも付く。vite dev・vite preview・serve が送り、ビルドは
+      // Netlify と Cloudflare が読む _headers に書く
+      headers: { 'X-Content-Type-Options': 'nosniff' },
       // ポリシーはアプリが決める。フレームワークは自分のインラインスクリプトと
       // head に書く空の style のハッシュを足して、ページごとの <meta> に書く。
       // アプリのインラインスクリプト（color-scheme）は、そのハッシュをここで許す

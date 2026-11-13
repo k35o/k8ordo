@@ -4,6 +4,7 @@ import path from 'node:path';
 import { sharedDir } from '@k8ordo/framework-engine';
 import { withBase } from '@k8ordo/router';
 
+import type { DeclaredHeaders } from './headers';
 import { isParamSegment } from './paths';
 import type { Rewrite } from './rewrites';
 import type { StaticOutput } from './static';
@@ -74,10 +75,21 @@ const immutableAssets = (base: string) => ({
   important: true,
 });
 
+/**
+ * The headers `framework()` declared, ahead of every other route: a route
+ * that only adds headers and goes on, so they are on whatever the routes
+ * after it lead to. None declared, no route.
+ */
+const declaredRoutes = (headers: DeclaredHeaders) =>
+  Object.keys(headers).length === 0
+    ? []
+    : [{ src: '^/.*$', headers, continue: true }];
+
 /** Files first, and whatever names none goes to the handler. */
-const configFor = (base: string) => ({
+const configFor = (base: string, headers: DeclaredHeaders) => ({
   version: 3,
   routes: [
+    ...declaredRoutes(headers),
     { handle: 'filesystem' },
     { src: '^/.*$', dest: `/${FUNCTION}` },
     { handle: 'hit' },
@@ -116,7 +128,8 @@ const routeOf = (rule: Rewrite) => {
 };
 
 /**
- * The application's `beforeFiles`, then the files; only what names none is
+ * The declared headers, the application's `beforeFiles`, then the files — a
+ * `beforeFiles` route may write a declared name over; only what names none is
  * rewritten — a value the build did not write to its shell, the payload URL
  * of a built URL that is not a page to HTML — and what nothing rewrote goes
  * through the application's `beforeNotFound` to the build's `404.html`. A
@@ -128,9 +141,11 @@ const staticConfigFor = (
   base: string,
   { rewrites, notFound, types }: StaticOutput,
   { beforeFiles = [], beforeNotFound = [] }: VercelOptions,
+  headers: DeclaredHeaders,
 ) => ({
   version: 3,
   routes: [
+    ...declaredRoutes(headers),
     ...beforeFiles,
     { handle: 'filesystem' },
     ...rewrites.map((rule) => routeOf(rule)),
@@ -189,6 +204,7 @@ export const writeVercelOutput = async (
   root: string,
   dirs: BuildDirs,
   base: string,
+  headers: DeclaredHeaders = {},
 ): Promise<void> => {
   const output = path.join(root, '.vercel', 'output');
   await rm(output, { recursive: true, force: true });
@@ -216,15 +232,18 @@ export const writeVercelOutput = async (
   );
   await writeFile(path.join(func, 'package.json'), json({ type: 'module' }));
   await writeFile(path.join(func, '.vc-config.json'), json(FUNCTION_CONFIG));
-  await writeFile(path.join(output, 'config.json'), json(configFor(base)));
+  await writeFile(
+    path.join(output, 'config.json'),
+    json(configFor(base, headers)),
+  );
 };
 
 /**
  * A static build laid out as Vercel's Build Output API (v3) reads it: the
  * client build as static files at Vite's `base`, and the rewrites a host
  * applies once no file answered as routes, around them the application's
- * own — no function. `_redirects` stays behind: Vercel never reads it, and
- * would serve it as a file.
+ * own — no function. `_redirects` and `_headers` stay behind: Vercel reads
+ * neither, and would serve them as files.
  */
 export const writeStaticVercelOutput = async (
   {
@@ -234,16 +253,19 @@ export const writeStaticVercelOutput = async (
   }: { readonly root: string; readonly client: string; readonly base: string },
   output: StaticOutput,
   routes: VercelOptions = {},
+  headers: DeclaredHeaders = {},
 ): Promise<void> => {
   const dir = path.join(root, '.vercel', 'output');
   await rm(dir, { recursive: true, force: true });
-  const redirects = path.join(client, '_redirects');
+  const left = new Set(
+    ['_redirects', '_headers'].map((name) => path.join(client, name)),
+  );
   await cp(client, path.join(dir, 'static', base), {
     recursive: true,
-    filter: (source) => source !== redirects,
+    filter: (source) => !left.has(source),
   });
   await writeFile(
     path.join(dir, 'config.json'),
-    json(staticConfigFor(base, output, routes)),
+    json(staticConfigFor(base, output, routes, headers)),
   );
 };

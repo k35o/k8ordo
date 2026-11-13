@@ -12,6 +12,8 @@ type Config = {
     readonly handle?: string;
     readonly dest?: string;
     readonly status?: number;
+    readonly headers?: Readonly<Record<string, string>>;
+    readonly continue?: boolean;
   }>;
   readonly overrides?: Readonly<Record<string, { contentType: string }>>;
 };
@@ -46,13 +48,17 @@ describe('the application built for Vercel', () => {
     });
   });
 
-  it('tries the files, then the shells, then 404.html', () => {
+  it('adds the declared headers, then tries the files, then the shells, then 404.html', () => {
     const answering = config.routes.slice(
       0,
       config.routes.findIndex((route) => route.handle === 'hit'),
     );
 
     expect(answering).toMatchObject([
+      {
+        headers: { 'X-Content-Type-Options': 'nosniff' },
+        continue: true,
+      },
       { handle: 'filesystem' },
       { dest: '/en/posts/!fallback/index.html' },
       { dest: '/ja/posts/!fallback/index.html' },

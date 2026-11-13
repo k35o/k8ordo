@@ -122,4 +122,5 @@ declare module 'virtual:vite-rsc/assets-manifest' {
 type ImportMetaEnv = {
   /** The mode the application chose in `framework({ mode })`. */
   readonly K8ORDO_MODE: 'static' | 'server';
+  readonly K8ORDO_HEADERS: Readonly<Record<string, string>>;
 };
