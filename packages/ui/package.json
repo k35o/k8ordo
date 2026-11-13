@@ -109,7 +109,7 @@
   "dependencies": {
     "clsx": "2.1.1",
     "server-only": "catalog:",
-    "shiki": "4.5.0"
+    "shiki": "4.6.0"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "catalog:",
@@ -152,8 +152,8 @@
     "zod": "catalog:"
   },
   "peerDependencies": {
-    "@json-render/core": ">=0.21.0 <0.22.0",
-    "@json-render/react": ">=0.21.0 <0.22.0",
+    "@json-render/core": ">=0.22.0 <0.23.0",
+    "@json-render/react": ">=0.22.0 <0.23.0",
     "@k8ordo/i18n": "workspace:^",
     "@openuidev/lang-core": "^1.0.0",
     "@openuidev/react-lang": "^1.0.0",

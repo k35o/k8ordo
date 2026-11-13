@@ -33,13 +33,13 @@ dependencies in either mode: the build bundles what the application runs.
 
 <!-- peers -->
 
-| Package               | Version  | Required | Needed for                                 |
-| --------------------- | -------- | -------- | ------------------------------------------ |
-| `@k8ordo/router`      | ^3.0.0   | yes      | routing, re-exported by the framework      |
-| `react`               | ≥19.3.0  | yes      | rendering                                  |
-| `react-dom`           | ≥19.3.0  | yes      | rendering                                  |
-| `vite`                | ≥8.1.0   | yes      | the build (`framework()` is a Vite plugin) |
-| `oxc-transform-react` | ^0.152.0 | optional | `reactCompiler: true` (React Compiler)     |
+| Package               | Version           | Required | Needed for                                 |
+| --------------------- | ----------------- | -------- | ------------------------------------------ |
+| `@k8ordo/router`      | ^3.0.0            | yes      | routing, re-exported by the framework      |
+| `react`               | ≥19.3.0           | yes      | rendering                                  |
+| `react-dom`           | ≥19.3.0           | yes      | rendering                                  |
+| `vite`                | ≥8.1.0            | yes      | the build (`framework()` is a Vite plugin) |
+| `oxc-transform-react` | ≥0.152.0 <0.157.0 | optional | `reactCompiler: true` (React Compiler)     |
 
 <!-- /peers -->
 

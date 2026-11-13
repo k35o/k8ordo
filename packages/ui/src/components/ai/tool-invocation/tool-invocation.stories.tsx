@@ -177,8 +177,12 @@ const AnsweredInPlace = () => {
       input={{ path: 'notes/2026-09.md' }}
       name="delete_file"
       onApprovalResponse={async ({ approved }) => {
-        // 答えが届くのは描画の更新をまたいだ後。実際の送信もそうなる
-        await afterRenderingUpdate();
+        // 描画の更新をここで待つと、その 2 フレームが play の waitFor の
+        // 1 秒に入る。CI の Firefox では 2 フレームに 1 秒を超えてかかる
+        // ことがあるので、play が描画の更新を待ってから届ける
+        await new Promise<void>((resolve) => {
+          finishAnswering = resolve;
+        });
         setState(approved ? 'output-available' : 'output-denied');
       }}
       output="削除しました"
@@ -191,6 +195,9 @@ export const FocusAfterAnswer: Story = {
   render: () => <AnsweredInPlace />,
   play: async ({ canvas, userEvent }) => {
     await userEvent.click(canvas.getByRole('button', { name: '許可' }));
+    // 答えが届くのは描画の更新をまたいだ後。実際の送信もそうなる
+    await afterRenderingUpdate();
+    finishAnswering();
 
     // 押したボタンは問いのバーごと消える。フォーカスは body に落とさず、
     // 同じツールの見出しへ移す
@@ -215,6 +222,8 @@ export const FocusAfterKeyboardAnswer: Story = {
     await expect(canvas.getByRole('button', { name: '拒否' })).toHaveFocus();
 
     await userEvent.keyboard('{Enter}');
+    await afterRenderingUpdate();
+    finishAnswering();
 
     await waitFor(() =>
       expect(
