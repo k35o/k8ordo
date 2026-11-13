@@ -95,43 +95,31 @@ export default function ProductsPage() {
   );
 }`;
 
-const PATHS = `import { framework } from '@k8ordo/framework/vite';
-import { defineConfig } from 'vite';
+const PATHS = `import type { Paths } from '@k8ordo/framework';
 
-import { listProductIds } from './src/lib/catalog';
+import { listProducts } from '../../../lib/catalog.server';
 
-export default defineConfig({
-  plugins: [
-    framework({
-      mode: 'static',
-      paths: async () => {
-        const ids = await listProductIds();
-        return ids.map((id) => \`/products/\${String(id)}\`);
-      },
-    }),
-  ],
-});`;
+const paths: Paths<'/products/:id'> = async () =>
+  (await listProducts()).map((product) => String(product.id));
 
-const LOCALES = `import { framework } from '@k8ordo/framework/vite';
-import { defineConfig } from 'vite';
+export default paths;`;
 
-import { locales } from './src/i18n';
+const LOCALES = `import type { Paths } from '@k8ordo/framework';
 
-export default defineConfig({
-  plugins: [framework({ mode: 'static', paths: locales.paths })],
-});`;
+import { locales } from '../../i18n';
 
-const PARTIAL = `const slugs = ['hello-world', 'second-post'];
+const paths: Paths<'/:locale'> = () => locales.all;
 
-framework({
-  mode: 'static',
-  paths: (patterns) =>
-    locales.paths(patterns).flatMap((pathname) =>
-      pathname.endsWith('/:slug')
-        ? slugs.map((slug) => pathname.replace(':slug', slug))
-        : [pathname],
-    ),
-});`;
+export default paths;`;
+
+const ABOVE = `import type { Paths } from '@k8ordo/framework';
+
+import { listPosts } from '../../../../lib/posts.server';
+
+const paths: Paths<'/:locale/posts/:id'> = async ({ locale }) =>
+  (await listPosts(locale)).map((post) => String(post.id));
+
+export default paths;`;
 
 const FALLBACK = `import { Suspense } from 'react';
 
@@ -184,17 +172,15 @@ export const readPost = (id: number): Promise<Post | null> => {
   return post;
 };`;
 
-const SHELL_PATHS = `const ids = ['1', '2'];
-
-framework({
-  mode: 'static',
-  paths: (patterns) =>
-    locales.paths(patterns).flatMap((pathname) =>
-      pathname.endsWith('/posts/:id')
-        ? [pathname, ...ids.map((id) => pathname.replace(':id', id))]
-        : [pathname],
-    ),
-});`;
+const SHELL_TREE = `src/routes/
+  [locale]/
+    paths.ts
+    layout.tsx
+    posts/
+      [id]/
+        paths.ts
+        page.tsx
+        fallback.tsx`;
 
 const Items = ({ items }: { items: readonly Message[] }) => (
   <ul>
@@ -354,8 +340,8 @@ export default function FrameworkParamsPage() {
         <CodeBlock
           code={PATHS}
           lang="ts"
-          marks={{ 10: 'highlight', 11: 'highlight', 12: 'highlight' }}
-          title="vite.config.ts"
+          marks={{ 5: 'highlight', 6: 'highlight' }}
+          title="src/routes/products/[id]/paths.ts"
         />
         <p>
           <Rich>{t.pathsRole()}</Rich>
@@ -366,12 +352,18 @@ export default function FrameworkParamsPage() {
         <p>
           <Rich>{t.pathsForm()}</Rich>
         </p>
-        <DocSubsection id="expand" title={t.expandTitle}>
+        <p>
+          <Rich>{t.pathsBelow()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.pathsServer()}</Rich>
+        </p>
+        <DocSubsection id="locales" title={t.expandTitle}>
           <CodeBlock
             code={LOCALES}
             lang="ts"
-            marks={{ 7: 'highlight' }}
-            title="vite.config.ts"
+            marks={{ 5: 'highlight' }}
+            title="src/routes/[locale]/paths.ts"
           />
           <p>
             <Rich>{t.expandLocales()}</Rich>
@@ -384,10 +376,18 @@ export default function FrameworkParamsPage() {
             <Rich>{t.expandSite()}</Rich>
           </p>
         </DocSubsection>
-        <DocSubsection id="partial" title={t.partialTitle}>
-          <CodeBlock code={PARTIAL} lang="ts" />
+        <DocSubsection id="above" title={t.aboveTitle}>
+          <CodeBlock
+            code={ABOVE}
+            lang="ts"
+            marks={{ 5: 'highlight', 6: 'highlight' }}
+            title="src/routes/[locale]/posts/[id]/paths.ts"
+          />
           <p>
-            <Rich>{t.expandPartial()}</Rich>
+            <Rich>{t.aboveParams()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.aboveMissing()}</Rich>
           </p>
         </DocSubsection>
         <DocSubsection id="stops" title={t.stopsTitle}>
@@ -437,17 +437,18 @@ export default function FrameworkParamsPage() {
           </p>
         </DocSubsection>
         <DocSubsection id="shell-paths" title={t.shellPathsTitle}>
-          <CodeBlock
-            callouts={{ 8: t.shellPathsCallout() }}
-            code={SHELL_PATHS}
-            lang="ts"
-            marks={{ 8: 'highlight' }}
-          />
+          <CodeBlock code={SHELL_TREE} lang="text" />
           <p>
             <Rich>{t.shellPathsLayout()}</Rich>
           </p>
           <p>
+            <Rich>{t.shellPathsBoth()}</Rich>
+          </p>
+          <p>
             <Rich>{t.shellPathsBare()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.shellPathsRequired()}</Rich>
           </p>
           <p>
             <Rich>{t.shellPathsBelow()}</Rich>

@@ -693,6 +693,35 @@ describe('fallback.tsx in the emitted table', () => {
     expect(source).not.toContain('/fallback');
   });
 
+  it('lists, under a build into files, what reads each paths.ts by its file, checked against the pattern of its directory', () => {
+    const source = emitRoutesModule(
+      parseRouteTree([...files, '[locale]/paths.ts']).tree,
+      { importPrefix: './routes', mode: 'static', withParams },
+    );
+    expect(source).toContain(
+      "const locale_paths = () => import('./routes/[locale]/paths');",
+    );
+    expect(source).toContain(
+      [
+        'export const paths = {',
+        "  '[locale]/paths.ts': locale_paths,",
+        '} as const;',
+      ].join('\n'),
+    );
+    expect(source).toContain(
+      "Checked<Loaded<typeof locale_paths>['default'], Paths<'/:locale'>>,",
+    );
+  });
+
+  it('lists no values and imports no paths.ts under a running server', () => {
+    const source = emitRoutesModule(
+      parseRouteTree([...files, '[locale]/paths.ts']).tree,
+      { importPrefix: './routes', mode: 'server', withParams },
+    );
+    expect(source).toContain('export const paths = {} as const;');
+    expect(source).not.toContain('/paths');
+  });
+
   it('leaves the route table as it is without the fallback.tsx', () => {
     const without = emitRoutesModule(
       parseRouteTree(files.filter((file) => !file.endsWith('fallback.tsx')))

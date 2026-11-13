@@ -24,19 +24,20 @@ called for each route at build time instead of once per request.
 
 Switching takes more than changing `mode`. Towards `mode: 'server'`:
 
-- drop `paths`, `site` and `csp`, which it refuses — the policy becomes a
-  header a `guard.ts` writes, and no `sitemap.xml` is written,
+- drop `site` and `csp`, which it refuses — the policy becomes a header a
+  `guard.ts` writes, and no `sitemap.xml` is written,
 - run the build with `node dist/server.js`, or hand its request handler to
   a host of your own ([Running and deploying](references/deploy.md)).
 
-A `fallback.tsx` may stay: server mode renders every value with its page
-and never renders it. Its placement is still checked, so a misplaced one
-fails either build.
+A `fallback.tsx` and a `paths.ts` may stay: server mode renders every value
+with its page and reads neither. Their placement is still checked, so a
+misplaced one fails either build.
 
 Towards `mode: 'static'`:
 
-- list the values of every route with parameters in `paths` — and, for
-  values the build cannot know, put a `fallback.tsx` beside the page
+- give every parameter's directory a `paths.ts` that returns its values —
+  and, for values the build cannot know, put a `fallback.tsx` beside the
+  page
   ([Values the build did not write](references/params.md#values-the-build-did-not-write)),
 - remove what static mode refuses (below), and every read of the `request`
   prop.
@@ -44,8 +45,8 @@ Towards `mode: 'static'`:
 |                                 | `mode: 'static'`                                 | `mode: 'server'`                        |
 | ------------------------------- | ------------------------------------------------ | --------------------------------------- |
 | What ships                      | `dist/client/`, files any static host serves     | `dist/`, run with `node dist/server.js` |
-| A route with parameters         | its values listed by the `paths` option          | any value, arriving with the request    |
-| A value `paths` does not list   | `404.html`, or a `fallback.tsx`'s shell          | rendered by its page                    |
+| A route with parameters         | its values returned by a `paths.ts`              | any value, arriving with the request    |
+| A value no `paths.ts` returns   | `404.html`, or a `fallback.tsx`'s shell          | rendered by its page                    |
 | A URL nothing answers           | the host serves `404.html`                       | the application answers with a real 404 |
 | `redirect.ts`                   | written as a page that sends the visitor on      | answered with `307` / `308`             |
 | `route.ts`                      | written as the file its `GET` answers            | answers every method it exports         |
@@ -205,18 +206,19 @@ the same origin rather than linking them from another one.
 ### `vite dev` under static mode
 
 `vite dev` runs the handler per request in either mode, and writes no files.
-Under `mode: 'static'` that makes it not quite the build: a parameter value
-`paths` does not list still renders with its page, a `redirect.ts` answers
-with a `307` (`308` when `permanent`) rather than a page that sends the
-visitor on, an unknown URL gets the handler's 404 rather than the host's
+Under `mode: 'static'` that makes it not quite the build: a `redirect.ts`
+answers with a `307` (`308` when `permanent`) rather than a page that sends
+the visitor on, an unknown URL gets the handler's 404 rather than the host's
 `404.html`, and a page whose Server Component throws answers a `500`
 carrying the thrown message, where the build would stop.
 
-Beside a `fallback.tsx`, a value `paths` does not list gets the shell
-instead, as a host's rewrite would answer it, and `vite dev` says so once
-per `fallback.tsx`. It calls `paths` only for an application with a
-`fallback.tsx`, and again only when the patterns it hands in change, so a
-value added to the data since is answered as an unlisted one.
+A parameter's value is answered as the build's host will answer it. One a
+`paths.ts` returns renders with its page. One none returns gets the shell
+where a `fallback.tsx` stands beside the page, and the not-found otherwise,
+and `vite dev` says so once per pattern. It asks the `paths.ts` files again
+when a request names a value it does not hold, so a value the data has
+gained since renders without a restart
+([Parameters](references/params.md#under-vite-dev-and-under-server-mode)).
 
 `vite preview` after a static build serves it as a static host does: the
 files in `dist/client/`, the rewrites in its `_redirects`, and `404.html`
@@ -276,12 +278,9 @@ read the config, with React's plugin's own error
 what runs in the browser is compiled; Server Components, and the HTML a
 client component renders on the server, are left as written.
 
-Three more describe files, so only `mode: 'static'` takes them — passing
+Two more describe files, so only `mode: 'static'` takes them — passing
 them with `mode: 'server'` is a type error:
 
-- `paths` — the pathnames of routes with parameters, and where a
-  `fallback.tsx`'s shell stands
-  ([Parameters](references/params.md#routes-with-parameters)).
 - `site` — the origin the site is served from, `https://example.com`. With
   it the build also writes `sitemap.xml`, listing every page it rendered;
   without it there is no sitemap, because a sitemap of relative URLs is not
@@ -300,9 +299,9 @@ Each topic has a reference of its own. Read the one the task needs:
   before the first paint goes, `loading.tsx`, `route.ts`, the generated
   `.k8ordo/` files, titles, and fetching the next page ahead.
 - [Parameters](references/params.md): typing parameters with `paramsSchema`,
-  what a refused value becomes, and, under static mode, supplying the
-  pathnames with `paths` and answering the values it does not list with a
-  `fallback.tsx`.
+  what a refused value becomes, and, under static mode, returning a
+  parameter's values from the `paths.ts` in its directory and answering the
+  values it does not return with a `fallback.tsx`.
 - [Errors and redirects](references/errors.md): `error.tsx`, what fails a
   static build, `notFound()` and `not-found.tsx`, and `redirect.ts`.
 - [Execution boundaries](references/boundaries.md): `'use client'`,

@@ -322,6 +322,125 @@ export const planPaths = (
   };
 };
 
+export type Supplied = {
+  /** Pathnames to write and shell locations, as `planPaths` takes them. */
+  readonly locations: readonly string[];
+  /** A paths.ts that could not be asked, or answered with something else than values. */
+  readonly problems: readonly string[];
+};
+
+/** A place the walk has reached: its pathname so far, and the values in it. */
+type At = {
+  readonly path: string;
+  readonly params: Readonly<Record<string, string>>;
+  /** Holds a `:name` no paths.ts gave values for. */
+  readonly open: boolean;
+};
+
+/**
+ * A value as the segment of a pathname. Past `encodeURIComponent`, the two
+ * characters this module reads a pathname by: `*`, and the `:` that would
+ * make a value starting with one a parameter left open.
+ */
+const segmentOf = (value: string): string =>
+  encodeURIComponent(value).replaceAll('*', '%2A').replaceAll(':', '%3A');
+
+const valuesFrom = (returned: unknown): string[] | null =>
+  Array.isArray(returned) &&
+  returned.every(
+    (value): value is string => typeof value === 'string' && value !== '',
+  )
+    ? [...new Set(returned)]
+    : null;
+
+/**
+ * What the `paths.ts` files say the site holds: each is asked for its
+ * directory's parameter, once per combination of the values above it, and
+ * the values multiply down the tree — to the pages, and to the route.ts and
+ * redirect.ts files, that sit below.
+ *
+ * A parameter no paths.ts gives values to stays open (`:name`), and an open
+ * location is offered only where a fallback.tsx stands in for the page: that
+ * is where its shell goes. So with `[locale]/paths.ts` and a fallback.tsx
+ * under `[id]`, the shells stand at `/ja/posts/:id` and `/en/posts/:id`,
+ * and `/fr/posts/1` is nobody's. A directory with both lists its values and
+ * keeps a shell for the rest. Everything else is left for `planPaths` to
+ * call unresolved.
+ *
+ * A value is the segment as a visitor reads it, escaped here for the URL.
+ */
+export const suppliedFrom = async (
+  tree: RouteDir,
+  valuesOf: (file: string, params: Readonly<Record<string, string>>) => unknown,
+): Promise<Supplied> => {
+  const locations: string[] = [];
+  const problems = new Set<string>();
+
+  const walk = async (dir: RouteDir, ats: readonly At[]): Promise<void> => {
+    const answers = dir.page ?? dir.route ?? dir.redirect;
+    const shell = dir.page !== null && dir.fallback !== null;
+    if (answers !== null) {
+      for (const at of ats) {
+        // 値を持たない pathname は表がそのまま持っている
+        if (at.open ? shell : Object.keys(at.params).length > 0) {
+          locations.push(at.path);
+        }
+      }
+    }
+    await Promise.all(
+      dir.children.map(async (child) => {
+        if (child.kind === 'group') return walk(child, ats);
+        if (child.kind !== 'param') {
+          return walk(
+            child,
+            ats.map((at) => ({ ...at, path: `${at.path}${child.key}` })),
+          );
+        }
+        const name = child.key.slice(2);
+        const opened = (at: At): At => ({
+          ...at,
+          path: `${at.path}/:${name}`,
+          open: true,
+        });
+        const { paths: file } = child;
+        if (file === null) return walk(child, ats.map(opened));
+        const below = await Promise.all(
+          ats.map(async (at): Promise<At[]> => {
+            if (at.open) {
+              problems.add(
+                `${file} is asked for its values once per value of the parameters above it, and ${at.path} still holds one — give that parameter's directory a paths.ts too`,
+              );
+              return [];
+            }
+            const values = valuesFrom(await valuesOf(file, at.params));
+            if (values === null) {
+              problems.add(
+                `${file} has to return an array of non-empty strings, the values of :${name}`,
+              );
+              return [];
+            }
+            return [
+              ...values.map((value) => ({
+                path: `${at.path}/${segmentOf(value)}`,
+                params: { ...at.params, [name]: value },
+                open: false,
+              })),
+              // 挙げなかった値には、このディレクトリのページの殻が答える
+              ...(child.page !== null && child.fallback !== null
+                ? [opened(at)]
+                : []),
+            ];
+          }),
+        );
+        return walk(child, below.flat());
+      }),
+    );
+  };
+  await walk(tree, [{ path: '', params: {}, open: false }]);
+
+  return { locations, problems: [...problems] };
+};
+
 export type ShadowedShell = {
   readonly location: string;
   /** Its fallback.tsx. */
@@ -422,17 +541,17 @@ export const planRefusals = (
   return [
     ...(plan.unresolved.length > 0
       ? [
-          `static build needs pathnames for ${plan.unresolved.join(', ')} — supply them with the "paths" option`,
+          `static build needs the values of ${plan.unresolved.join(', ')} — a paths.ts in each parameter's directory returns them, and a fallback.tsx beside a page answers the ones the build does not write`,
         ]
       : []),
     ...(plan.unusable.length > 0
       ? [
-          `the "paths" option supplied pathnames no route wants: ${plan.unusable.join(', ')}`,
+          `the paths.ts files returned pathnames no route wants: ${plan.unusable.join(', ')}`,
         ]
       : []),
     ...(plan.held.length > 0
       ? [
-          `the "paths" option supplied pathnames that still hold a parameter, and only a page with a fallback.tsx beside it takes one: ${plan.held
+          `these pathnames still hold a parameter, and only a page with a fallback.tsx beside it takes one: ${plan.held
             .map(
               ({ location, file }) =>
                 `${location} (${file} ${isPage(file) ? 'has none' : 'cannot have one'})`,
@@ -442,14 +561,14 @@ export const planRefusals = (
       : []),
     ...(plan.misnamed.length > 0
       ? [
-          `the "paths" option supplied shell locations whose parameter names are not their pattern's: ${plan.misnamed
+          `these shell locations name parameters that are not their pattern's: ${plan.misnamed
             .map(({ location, pattern }) => `${location} (${pattern})`)
             .join(', ')}`,
         ]
       : []),
     ...(suppliedClosed.length > 0
       ? [
-          `the "paths" option supplied shell locations that leave out a parameter a layout above their fallback.tsx receives: ${suppliedClosed
+          `these shells leave out a parameter a layout above their fallback.tsx receives, so its directory needs a paths.ts: ${suppliedClosed
             .map(
               ({ location, params, layout }) =>
                 `${location} (${paramList(params)}, received by ${layout})`,
@@ -462,7 +581,7 @@ export const planRefusals = (
           bare
             .map(
               ({ location, params, layout }) =>
-                `static build needs shell locations for ${location} — ${layout} receives ${paramList(params)}, so the "paths" option has to fill ${params.length === 1 ? 'it' : 'them'}, as in ${location
+                `static build needs the values of ${paramList(params)} for the shell of ${location} — ${layout} receives ${params.length === 1 ? 'it' : 'them'}, so ${params.length === 1 ? "that parameter's directory needs" : "those parameters' directories need"} a paths.ts, which puts the shell at ${location
                   .split('/')
                   .map((segment) =>
                     params.some((name) => segment === `:${name}`)
@@ -476,7 +595,7 @@ export const planRefusals = (
       : []),
     ...(plan.reserved.length > 0
       ? [
-          `the "paths" option supplied pathnames with a segment named ${FALLBACK_SEGMENT}, which the build keeps for shells: ${plan.reserved.join(', ')}`,
+          `a paths.ts returned ${FALLBACK_SEGMENT}, which the build keeps for shells: ${plan.reserved.join(', ')}`,
         ]
       : []),
     ...(shadowed.length > 0
@@ -484,8 +603,8 @@ export const planRefusals = (
           shadowed
             .map(({ location, fallback, pattern, file, url }) =>
               url === null
-                ? `the shell for ${location} (${fallback}) would also answer URLs ${pattern} (${file}) is declared first for — ${isPage(file) ? `give ${file} a fallback.tsx too, or supply` : 'supply'} shell locations it cannot match`
-                : `the shell for ${location} (${fallback}) would also answer ${url}, which ${file} is declared first for and the build did not write — list ${url} in "paths", or supply shell locations it cannot match`,
+                ? `the shell for ${location} (${fallback}) would also answer URLs ${pattern} (${file}) is declared first for — ${isPage(file) ? `give ${file} a fallback.tsx too, or put` : 'put'} the shell where it cannot match, with a paths.ts above it`
+                : `the shell for ${location} (${fallback}) would also answer ${url}, which ${file} is declared first for and the build did not write — return its value from that parameter's paths.ts, or put the shell where it cannot match, with a paths.ts above it`,
             )
             .join('\n'),
         ]
@@ -504,14 +623,10 @@ export const planRefusals = (
 export const dirFor = (pathname: string): string => {
   const decoded = decodePathname(pathname);
   if (decoded === null) {
-    throw new Error(
-      `the "paths" option supplied a pathname with a malformed escape: ${pathname}`,
-    );
+    throw new Error(`a pathname to write has a malformed escape: ${pathname}`);
   }
   if (decoded.split('/').some((segment) => segment === '..')) {
-    throw new Error(
-      `the "paths" option supplied a pathname that leaves the output: ${pathname}`,
-    );
+    throw new Error(`a pathname to write leaves the output: ${pathname}`);
   }
   return decoded;
 };

@@ -118,7 +118,6 @@ the definition, not later.
 | `negotiateRequest(…)` | The best supported tag for a `Request`: a cookie, then `Accept-Language`.         |
 | `localize`            | `'/ui'` → `'/en/ui'`; `'/'` → `'/en'`.                                            |
 | `delocalize`          | `'/en/ui'` → `{ locale: 'en', pathname: '/ui' }`; `'/x'` → `{ locale: null, … }`. |
-| `paths`               | The static build's `paths` option: `/:locale` expanded to every locale.           |
 | `paramsSchema`        | The `[locale]` segment's schema (Standard Schema; no schema library).             |
 | `getLocale()`         | The locale of the render in progress. Not a hook.                                 |
 | `run(locale, fn)`     | Server only: runs `fn` with `locale` current.                                     |
@@ -449,33 +448,50 @@ const locale = locales.delocalize(pathname).locale ?? locales.default;
 
 ## Static builds
 
-Static mode asks for the pathnames of every pattern with a parameter.
-The set answers for its own segment:
+Static mode asks each parameter's directory for the values it takes, in a
+`paths.ts`. The locale directory answers with the set:
 
 ```ts
-framework({ mode: 'static', paths: locales.paths });
+// src/routes/[locale]/paths.ts
+import type { Paths } from '@k8ordo/framework';
+
+import { locales } from '../../i18n';
+
+const paths: Paths<'/:locale'> = () => locales.all;
+
+export default paths;
 ```
 
-`/:locale` in every pattern becomes one pathname per locale. A pattern with
-another parameter comes back still holding it (`/ja/blog/:slug`). Only a
-page with a `fallback.tsx` beside it takes such a pathname, as the location
-of its shell: one per locale, answering in the browser the slugs the build
-did not write. For any other route the build stops:
+Every page, `route.ts` and `redirect.ts` below `[locale]/` is written once
+per locale. A parameter further down has a `paths.ts` of its own, which
+receives the locale it is asked for:
+
+```ts
+// src/routes/[locale]/blog/[slug]/paths.ts
+import type { Paths } from '@k8ordo/framework';
+
+import { slugsIn } from '../../../../lib/blog';
+
+const paths: Paths<'/:locale/blog/:slug'> = ({ locale }) => slugsIn(locale);
+
+export default paths;
+```
+
+Without one the build stops:
 
 ```
-the "paths" option supplied pathnames that still hold a parameter, and only a page with a fallback.tsx beside it takes one: /ja/blog/:slug ([locale]/blog/[slug]/page.tsx has none)
+static build needs the values of /:locale/blog/:slug — a paths.ts in each parameter's directory returns them, and a fallback.tsx beside a page answers the ones the build does not write
 ```
 
-A site with a second parameter expands the rest in the same function:
-`paths: (patterns) => locales.paths(patterns).flatMap(expandSlug)`, where
-`expandSlug` keeps `/ja/blog/:slug` beside the slugs for a page that has a
-`fallback.tsx`.
+A page with a `fallback.tsx` beside it is the exception: its shell stands
+below each locale (`/ja/blog/:slug`, `/en/blog/:slug`), answering in the
+browser the slugs the build did not write.
 
 A shell runs the schemas of the layouts above it, never its page's: there
 is no value for the page's to parse. With the schema on
 `[locale]/layout.tsx`, as in [The shape of it](#the-shape-of-it), the
 locale is set for every page below it, shells included, and a shell's
-messages come out in the locale its location fills.
+messages come out in the locale it stands under.
 
 Each path is rendered as its own request, so the schema names the locale
 for each and the messages come out in that locale; the build renders several

@@ -21,7 +21,6 @@ export default defineConfig({
   plugins: [
     framework({
       mode: 'static',
-      paths: () => ['/products/1', '/products/2'],
       site: 'https://example.com',
     }),
   ],
@@ -49,6 +48,7 @@ import type {
   MatchOptions,
   NavigateToOptions,
   PageProps,
+  Paths,
   RegisteredNavigablePattern,
   RegisteredPageParams,
   RegisteredParams,
@@ -109,6 +109,11 @@ const FILES: readonly RouteFile[] = [
     items: [t.fallbackDefault, t.fallbackPlace, t.fallbackNote],
   },
   {
+    id: 'paths-ts',
+    name: 'paths.ts',
+    items: [t.pathsDefault, t.pathsPlace, t.pathsNote],
+  },
+  {
     id: 'redirect-ts',
     name: 'redirect.ts',
     items: [t.redirectDefault, t.redirectNote],
@@ -157,11 +162,6 @@ export default function FrameworkReferencePage() {
             name: 'options.reactCompiler',
             type: 'boolean',
             description: t.frameworkReactCompiler,
-          },
-          {
-            name: 'options.paths',
-            type: '(patterns: readonly string[]) => readonly string[] | Promise<readonly string[]>',
-            description: t.frameworkPaths,
           },
           {
             name: 'options.site',

@@ -34,9 +34,9 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
 - **Routing**: file-based. `src/routes/` _is_ the URL space (`@k8ordo/framework`),
   and `.k8ordo/` holds the generated route table and type wiring — generated,
   git-ignored, and readable. Everything sits under `[locale]`, so every pattern
-  needs pathnames at build time; `vite.config.ts` passes `paths: locales.paths`,
-  which expands every `/:locale` pattern the build hands it once per locale
-  rather than listing pages twice.
+  is written once per locale: `src/routes/[locale]/paths.ts` returns
+  `locales.all`, the values of the one parameter every page shares, rather
+  than listing pages twice.
 - **Nothing here works around the framework.** Scroll-to-top after a
   navigation, the error boundary around a page, and "which package's pages
   are showing" are all the router's and the framework's job now
@@ -72,7 +72,7 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   still receives `params.locale` as a string — a layout's params are never
   typed by its schema, because `not-found.tsx` renders under it whether or not
   the schema accepted —
-  and `locales.paths` only ever expands the listed locales, so the build never asks
+  and `[locale]/paths.ts` only ever returns the listed locales, so the build never asks
   for a pathname the schema would refuse. The schema lives in a Server
   Component on purpose: a value exported from a `'use client'` module reaches
   the RSC side as a client reference, not a schema, which is why the layout

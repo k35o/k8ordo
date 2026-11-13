@@ -93,11 +93,6 @@ export default function I18nReferencePage() {
             description: t.localesDelocalize,
           },
           {
-            name: 'paths',
-            type: '(patterns) => string[]',
-            description: t.localesPaths,
-          },
-          {
             name: 'paramsSchema',
             type: 'LocaleParamsSchema<L>',
             description: t.localesParamsSchema,
@@ -134,7 +129,6 @@ export default function I18nReferencePage() {
     ) => L;
     localize: (pathname: string, locale: L) => string;
     delocalize: (pathname: string) => Delocalized<L>;
-    paths: (patterns: readonly string[]) => string[];
     paramsSchema: LocaleParamsSchema<L>;
     getLocale: () => L;
     run: <T>(locale: L, fn: () => T) => T;

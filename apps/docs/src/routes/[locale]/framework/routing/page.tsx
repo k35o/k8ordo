@@ -290,7 +290,9 @@ export default function FrameworkRoutingPage() {
         <p>
           <Rich>{t.filesLead()}</Rich>
         </p>
-        <Items items={[...t.filesList, t.guardFile, t.fallbackFile]} />
+        <Items
+          items={[...t.filesList, t.guardFile, t.pathsFile, t.fallbackFile]}
+        />
         <p>
           <Rich>{t.filesOther()}</Rich>
         </p>
