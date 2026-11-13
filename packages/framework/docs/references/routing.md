@@ -592,6 +592,55 @@ Keep one `<title>` on screen at a time: the root layout renders none, each
 page renders its own, and `not-found.tsx` renders one too. Two titles at once
 is not a fallback chain — React renders both.
 
+## MDX
+
+The framework compiles no MDX; an application adds a compiler as a Vite
+plugin, ahead of `framework()` and before the framework's own transforms see
+the file:
+
+```ts
+// vite.config.ts
+import { framework } from '@k8ordo/framework/vite';
+import mdx from '@mdx-js/rollup';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [{ enforce: 'pre', ...mdx() }, framework({ mode: 'static' })],
+});
+```
+
+An `.mdx` file is then a module whose default export is a Server Component,
+imported like any other — statically, or late through `import.meta.glob` so
+each page reads only its own:
+
+```tsx
+// src/routes/posts/[slug]/page.tsx
+const posts = import.meta.glob<{ default: ComponentType }>(
+  '../../../content/*.mdx',
+);
+
+export default async function PostPage({ params }: PageProps<'/posts/:slug'>) {
+  const load = posts[`../../../content/${params.slug}.mdx`];
+  if (load === undefined) notFound();
+  const { default: Post } = await load();
+  return <Post />;
+}
+```
+
+**CSS an `.mdx` file imports reaches the pages that render it**, as a `.tsx`
+module's does: `import './post.module.css'` or `import 'katex/dist/katex.css'`
+at the top of the file is linked in the HTML of the pages rendering that
+file's default export, and of no other. No query on the import is needed.
+(`?vite-rsc-css-export=default`, the RSC plugin's own, still works and is
+left alone.)
+
+The stylesheets ride on the component the module exports, in an `.mdx` as in
+a `.tsx`: a module that imports CSS and exports only a table of components
+(`export const components = { h1: Heading }`) for another module to render
+carries none of it to the page. Export a component that renders with the
+table — `export function Article({ children })` — from the module that
+imports the CSS.
+
 ## Fetching the next page ahead
 
 The client runtime listens on the whole document for a pointer moving onto a

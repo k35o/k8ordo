@@ -118,6 +118,20 @@ pnpm check         # check:write to auto-fix
   written; `@k8ordo/framework`'s `refusals.test.ts` reads that from a
   build's source maps. `oxc-transform-react` is `@k8ordo/framework`'s
   optional peer, not this package's.
+- **An `.mdx` module gets the RSC plugin's CSS wrapper too.** The RSC
+  plugin wraps the exported components of a module that imports CSS so the
+  page links it, and only for a file named `.js`, `.jsx`, `.ts` or `.tsx`;
+  the test is in the plugin, with no option to widen it. An `.mdx` an
+  application's plugin compiled is passed over, and its CSS reached a page
+  only where every import of it carried `?vite-rsc-css-export=default`.
+  `plugin/mdx-css.ts` runs the plugin's own `transformRscCssExport`
+  (`@vitejs/plugin-rsc/plugin`) on a compiled `.md`/`.mdx` that imports CSS
+  statically, under the plugin's own rule for which exports to wrap, and
+  leaves an id carrying the query to the plugin. It sits before `rsc()` in
+  the array: the wrapper calls `import.meta.viteRsc.loadCss()`, which a
+  later transform of the plugin replaces. `runtime/mdx-css.test.ts` builds
+  `fixtures/mdx-css/` with a stand-in compiler emitting what an MDX compiler
+  does (a default `function MDXContent`, the file's imports kept).
 - **The browser holds no route table.** `runtime/app-router.tsx` claims every
   same-origin URL and learns from the answer; anything that is not a payload
   (`runtime/is-payload.ts`) becomes a document load, which is also the
@@ -841,6 +855,7 @@ src/
   generate/emit.ts           buildTable (structure) + routes.gen / register.gen
   generate/write.ts          the filesystem edge: scan, generate, write
   plugin/core.ts             the Vite plugins: RSC pipeline, virtual routes
+  plugin/mdx-css.ts          the RSC plugin's CSS wrapper, applied to a compiled .mdx
   plugin/server-actions.ts   which modules declared 'use server'
   runtime/entry.{rsc,ssr,browser}.tsx  the three environments
   runtime/app-router.tsx     the client half: navigation + payloads, and whether this document can render one
@@ -926,6 +941,10 @@ fixtures/
   form-state/routes/         a form whose Server Action returns a client
                              component, which runtime/form-state.test.ts
                              posts without JavaScript
+  mdx-css/routes/            a page importing an .mdx and one reading another
+                             through a glob, each .mdx importing CSS, which
+                             runtime/mdx-css.test.ts builds with a stand-in
+                             MDX compiler
   head-scripts/routes/       a layout writing an inline script in <head> and
                              importing CSS, which runtime/head-scripts.test.ts
                              opens in each engine with the CSS held back
