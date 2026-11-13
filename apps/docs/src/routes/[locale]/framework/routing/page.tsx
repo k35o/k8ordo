@@ -222,6 +222,35 @@ export default function ProductPage({
   );
 }`;
 
+const MDX_CONFIG = `import { framework } from '@k8ordo/framework/vite';
+import mdx from '@mdx-js/rollup';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [{ enforce: 'pre', ...mdx() }, framework({ mode: 'static' })],
+});`;
+
+const MDX_PAGE = `import { notFound } from '@k8ordo/framework';
+import type { PageProps } from '@k8ordo/framework';
+import type { ComponentType } from 'react';
+
+const posts = import.meta.glob<{ default: ComponentType }>(
+  '../../../content/*.mdx',
+);
+
+export default async function PostPage({ params }: PageProps<'/posts/:slug'>) {
+  const load = posts[\`../../../content/\${params.slug}.mdx\`];
+  if (load === undefined) notFound();
+  const { default: Post } = await load();
+  return <Post />;
+}`;
+
+const MDX_FILE = `import './post.module.css';
+
+# Hello
+
+The stylesheet above is linked on this post's page.`;
+
 const PREFETCH = `<nav data-k8ordo-prefetch="false">
   <a href={href('/reports')}>Reports</a>
   <a data-k8ordo-prefetch="true" href={href('/')}>
@@ -261,7 +290,9 @@ export default function FrameworkRoutingPage() {
         <p>
           <Rich>{t.filesLead()}</Rich>
         </p>
-        <Items items={[...t.filesList, t.guardFile, t.fallbackFile]} />
+        <Items
+          items={[...t.filesList, t.guardFile, t.pathsFile, t.fallbackFile]}
+        />
         <p>
           <Rich>{t.filesOther()}</Rich>
         </p>
@@ -550,6 +581,38 @@ export default function FrameworkRoutingPage() {
         </p>
         <p>
           <Rich>{t.titlesOne()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection id="mdx" title={t.mdxTitle}>
+        <CodeBlock
+          code={MDX_CONFIG}
+          lang="ts"
+          marks={{ 6: 'highlight' }}
+          title="vite.config.ts"
+        />
+        <p>
+          <Rich>{t.mdxPlugin()}</Rich>
+        </p>
+        <CodeBlock
+          code={MDX_PAGE}
+          lang="tsx"
+          title="src/routes/posts/[slug]/page.tsx"
+        />
+        <p>
+          <Rich>{t.mdxModule()}</Rich>
+        </p>
+        <CodeBlock
+          code={MDX_FILE}
+          lang="md"
+          marks={{ 1: 'highlight' }}
+          title="src/content/hello.mdx"
+        />
+        <p>
+          <Rich>{t.mdxCss()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.mdxComponents()}</Rich>
         </p>
       </DocSection>
 

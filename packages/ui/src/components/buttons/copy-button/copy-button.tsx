@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import type { FC } from 'react';
 
 import { getMessages } from '../../../i18n/current';
-import { AlertIcon, CheckIcon, CopyIcon } from '../../icons';
+import { AlertIcon } from '../../icons/alert';
+import { CheckIcon } from '../../icons/check';
+import { CopyIcon } from '../../icons/copy';
 import { Button } from '../button';
 import { IconButton } from '../icon-button';
 

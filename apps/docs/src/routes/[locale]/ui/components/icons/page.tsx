@@ -1,77 +1,5 @@
-import {
-  AIIcon,
-  AccessibilityIcon,
-  AlertIcon,
-  Anchor,
-  AtomIcon,
-  BadIcon,
-  BlogIcon,
-  BoringIcon,
-  CheckIcon,
-  ChevronIcon,
-  CloseIcon,
-  ColorContrastIcon,
-  ColorInfoIcon,
-  ColorScaleIcon,
-  CopyIcon,
-  DarkModeIcon,
-  DifficultIcon,
-  EasyIcon,
-  ExternalLinkIcon,
-  FormIcon,
-  GitHubIcon,
-  GoodIcon,
-  Heading,
-  HistoryIcon,
-  InformativeIcon,
-  InterestingIcon,
-  LightModeIcon,
-  LinkIcon,
-  ListIcon,
-  LocationIcon,
-  LogoIcon,
-  MailIcon,
-  MinusIcon,
-  MixedColorIcon,
-  NavigationMenuIcon,
-  NewsIcon,
-  PaletteIcon,
-  PlusIcon,
-  PrepareIcon,
-  PublishDateIcon,
-  QiitaIcon,
-  RefreshIcon,
-  RSSIcon,
-  SendIcon,
-  Separator,
-  ShallowIcon,
-  ShieldCheckIcon,
-  SlideIcon,
-  SparklesIcon,
-  SubscribeIcon,
-  TableIcon,
-  TagIcon,
-  TwitterIcon,
-  UpdateDateIcon,
-  ViewIcon,
-  ViewOffIcon,
-  AssistantIcon,
-  CodeXmlIcon,
-  FlaskIcon,
-  ForkIcon,
-  FullscreenIcon,
-  HorizontalWritingIcon,
-  VerticalWritingIcon,
-  LockIcon,
-  LockOpenIcon,
-  PackageIcon,
-  SquircleIcon,
-  ChromeIcon,
-  EdgeIcon,
-  FirefoxIcon,
-  SafariIcon,
-  Logo,
-} from '@k8ordo/ui';
+import { Anchor, Heading, Separator } from '@k8ordo/ui';
+import * as icons from '@k8ordo/ui/icons';
 import type { ReactNode } from 'react';
 
 import { CodeBlock } from '../../../../../components/code-block';
@@ -84,6 +12,9 @@ import * as m from '../../../../../messages';
 
 import page from '../../../../../styles/page.module.css';
 import styles from '../../../../../styles/pages/ui/components/icons.module.css';
+
+const { AlertIcon, BaseIcon, ChevronIcon, ...shapes } = icons;
+const { CheckIcon } = shapes;
 
 const IconCard = ({
   name,
@@ -123,7 +54,7 @@ export default function IconsPage() {
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
         <CodeBlock
-          code="import { CloseIcon, CheckIcon } from '@k8ordo/ui';"
+          code="import { CheckIcon, XIcon } from '@k8ordo/ui/icons';"
           lang="ts"
         />
       </section>
@@ -161,223 +92,51 @@ export default function IconsPage() {
           <Rich>{m.components.common.usageTitle()}</Rich>
         </Heading>
         <div className={styles.grid}>
-          <IconCard name="LogoIcon">
-            <LogoIcon />
-          </IconCard>
-          <IconCard name="Logo">
-            <Logo className={styles.logo} />
-          </IconCard>
-          <IconCard name="CloseIcon">
-            <CloseIcon />
-          </IconCard>
-          <IconCard name="CheckIcon">
-            <CheckIcon />
-          </IconCard>
-          <IconCard name="ChevronIcon">
-            <ChevronIcon direction="down" />
-          </IconCard>
-          <IconCard name="PlusIcon">
-            <PlusIcon />
-          </IconCard>
-          <IconCard name="MinusIcon">
-            <MinusIcon />
-          </IconCard>
-          <IconCard name="LinkIcon">
-            <LinkIcon />
-          </IconCard>
-          <IconCard name="ExternalLinkIcon">
-            <ExternalLinkIcon />
-          </IconCard>
-          <IconCard name="CopyIcon">
-            <CopyIcon />
-          </IconCard>
-          <IconCard name="SendIcon">
-            <SendIcon />
-          </IconCard>
-          <IconCard name="MailIcon">
-            <MailIcon />
-          </IconCard>
-          <IconCard name="ViewIcon">
-            <ViewIcon />
-          </IconCard>
-          <IconCard name="ViewOffIcon">
-            <ViewOffIcon />
-          </IconCard>
-          <IconCard name="AlertIcon (info)">
-            <AlertIcon status="info" />
-          </IconCard>
-          <IconCard name="AlertIcon (success)">
-            <AlertIcon status="success" />
-          </IconCard>
-          <IconCard name="AlertIcon (warning)">
-            <AlertIcon status="warning" />
-          </IconCard>
-          <IconCard name="AlertIcon (error)">
-            <AlertIcon status="error" />
-          </IconCard>
-          <IconCard name="AccessibilityIcon">
-            <AccessibilityIcon />
-          </IconCard>
-          <IconCard name="AIIcon">
-            <AIIcon />
-          </IconCard>
-          <IconCard name="AtomIcon">
-            <AtomIcon />
-          </IconCard>
-          <IconCard name="BlogIcon">
-            <BlogIcon />
-          </IconCard>
-          <IconCard name="ColorContrastIcon">
-            <ColorContrastIcon />
-          </IconCard>
-          <IconCard name="ColorInfoIcon">
-            <ColorInfoIcon />
-          </IconCard>
-          <IconCard name="ColorScaleIcon">
-            <ColorScaleIcon />
-          </IconCard>
-          <IconCard name="DarkModeIcon">
-            <DarkModeIcon />
-          </IconCard>
-          <IconCard name="LightModeIcon">
-            <LightModeIcon />
-          </IconCard>
-          <IconCard name="FormIcon">
-            <FormIcon />
-          </IconCard>
-          <IconCard name="HistoryIcon">
-            <HistoryIcon />
-          </IconCard>
-          <IconCard name="RefreshIcon">
-            <RefreshIcon />
-          </IconCard>
-          <IconCard name="ListIcon">
-            <ListIcon />
-          </IconCard>
-          <IconCard name="LocationIcon">
-            <LocationIcon />
-          </IconCard>
-          <IconCard name="MixedColorIcon">
-            <MixedColorIcon />
-          </IconCard>
-          <IconCard name="NavigationMenuIcon">
-            <NavigationMenuIcon />
-          </IconCard>
-          <IconCard name="NewsIcon">
-            <NewsIcon />
-          </IconCard>
-          <IconCard name="PaletteIcon">
-            <PaletteIcon />
-          </IconCard>
-          <IconCard name="PrepareIcon">
-            <PrepareIcon />
-          </IconCard>
-          <IconCard name="PublishDateIcon">
-            <PublishDateIcon />
-          </IconCard>
-          <IconCard name="RSSIcon">
-            <RSSIcon />
-          </IconCard>
-          <IconCard name="ShieldCheckIcon">
-            <ShieldCheckIcon />
-          </IconCard>
-          <IconCard name="SlideIcon">
-            <SlideIcon />
-          </IconCard>
-          <IconCard name="SparklesIcon">
-            <SparklesIcon />
-          </IconCard>
-          <IconCard name="SubscribeIcon">
-            <SubscribeIcon />
-          </IconCard>
-          <IconCard name="TableIcon">
-            <TableIcon />
-          </IconCard>
-          <IconCard name="TagIcon">
-            <TagIcon />
-          </IconCard>
-          <IconCard name="UpdateDateIcon">
-            <UpdateDateIcon />
-          </IconCard>
-          <IconCard name="GoodIcon">
-            <GoodIcon />
-          </IconCard>
-          <IconCard name="BadIcon">
-            <BadIcon />
-          </IconCard>
-          <IconCard name="InformativeIcon">
-            <InformativeIcon />
-          </IconCard>
-          <IconCard name="ShallowIcon">
-            <ShallowIcon />
-          </IconCard>
-          <IconCard name="InterestingIcon">
-            <InterestingIcon />
-          </IconCard>
-          <IconCard name="BoringIcon">
-            <BoringIcon />
-          </IconCard>
-          <IconCard name="EasyIcon">
-            <EasyIcon />
-          </IconCard>
-          <IconCard name="DifficultIcon">
-            <DifficultIcon />
-          </IconCard>
-          <IconCard name="AssistantIcon">
-            <AssistantIcon />
-          </IconCard>
-          <IconCard name="CodeXmlIcon">
-            <CodeXmlIcon />
-          </IconCard>
-          <IconCard name="FlaskIcon">
-            <FlaskIcon />
-          </IconCard>
-          <IconCard name="ForkIcon">
-            <ForkIcon />
-          </IconCard>
-          <IconCard name="FullscreenIcon">
-            <FullscreenIcon />
-          </IconCard>
-          <IconCard name="HorizontalWritingIcon">
-            <HorizontalWritingIcon />
-          </IconCard>
-          <IconCard name="VerticalWritingIcon">
-            <VerticalWritingIcon />
-          </IconCard>
-          <IconCard name="LockIcon">
-            <LockIcon />
-          </IconCard>
-          <IconCard name="LockOpenIcon">
-            <LockOpenIcon />
-          </IconCard>
-          <IconCard name="PackageIcon">
-            <PackageIcon />
-          </IconCard>
-          <IconCard name="SquircleIcon">
-            <SquircleIcon />
-          </IconCard>
-          <IconCard name="GitHubIcon">
-            <GitHubIcon />
-          </IconCard>
-          <IconCard name="TwitterIcon">
-            <TwitterIcon />
-          </IconCard>
-          <IconCard name="QiitaIcon">
-            <QiitaIcon />
-          </IconCard>
-          <IconCard name="ChromeIcon">
-            <ChromeIcon />
-          </IconCard>
-          <IconCard name="EdgeIcon">
-            <EdgeIcon />
-          </IconCard>
-          <IconCard name="FirefoxIcon">
-            <FirefoxIcon />
-          </IconCard>
-          <IconCard name="SafariIcon">
-            <SafariIcon />
-          </IconCard>
+          {Object.entries(shapes).map(([name, Icon]) => (
+            <IconCard key={name} name={name}>
+              <Icon />
+            </IconCard>
+          ))}
         </div>
+      </section>
+      <Separator color="mute" />
+
+      <section className={page.stack}>
+        <Heading level="h2">
+          <Rich>{m.components.icons.ownTitle()}</Rich>
+        </Heading>
+        <p>
+          <Rich>{m.components.icons.ownDescription()}</Rich>
+        </p>
+        <div className={styles.sizes}>
+          {(['sm', 'md', 'lg'] as const).map((size) => (
+            <BaseIcon
+              key={size}
+              renderItem={(props) => (
+                <svg {...props} fill="currentColor" viewBox="0 0 16 16">
+                  <circle cx="8" cy="8" r="5" />
+                </svg>
+              )}
+              size={size}
+            />
+          ))}
+        </div>
+        <CodeBlock
+          code={`import { BaseIcon } from '@k8ordo/ui/icons';
+import type { BaseIconProps } from '@k8ordo/ui/icons';
+
+export const DotIcon = ({ size = 'md' }: Partial<BaseIconProps>) => (
+  <BaseIcon
+    renderItem={(props) => (
+      <svg {...props} fill="currentColor" viewBox="0 0 16 16">
+        <circle cx="8" cy="8" r="5" />
+      </svg>
+    )}
+    size={size}
+  />
+);`}
+          lang="tsx"
+        />
       </section>
       <Separator color="mute" />
 
@@ -390,9 +149,23 @@ export default function IconsPage() {
         </p>
         <PropsTable items={propsOf('CheckIcon')} />
         <Heading level="h3">ChevronIcon</Heading>
+        <div className={styles.sizes}>
+          <ChevronIcon direction="up" />
+          <ChevronIcon direction="down" />
+          <ChevronIcon direction="left" />
+          <ChevronIcon direction="right" />
+        </div>
         <PropsTable items={propsOf('ChevronIcon')} />
         <Heading level="h3">AlertIcon</Heading>
+        <div className={styles.sizes}>
+          <AlertIcon status="success" />
+          <AlertIcon status="info" />
+          <AlertIcon status="warning" />
+          <AlertIcon status="error" />
+        </div>
         <PropsTable items={propsOf('AlertIcon')} />
+        <Heading level="h3">BaseIcon</Heading>
+        <PropsTable items={propsOf('BaseIcon')} />
       </section>
     </div>
   );

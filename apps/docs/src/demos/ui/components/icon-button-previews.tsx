@@ -1,6 +1,7 @@
 'use client';
 
-import { CloseIcon, IconButton } from '@k8ordo/ui';
+import { IconButton } from '@k8ordo/ui';
+import { XIcon } from '@k8ordo/ui/icons';
 
 export function IconButtonAsLinkPreview() {
   return (
@@ -18,7 +19,7 @@ export function IconButtonAsLinkPreview() {
         </a>
       )}
     >
-      <CloseIcon size="sm" />
+      <XIcon size="sm" />
     </IconButton>
   );
 }

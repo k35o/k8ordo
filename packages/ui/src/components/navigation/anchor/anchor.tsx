@@ -1,7 +1,7 @@
 import { clsx } from 'clsx';
 import type { AnchorHTMLAttributes, ReactNode } from 'react';
 
-import { ExternalLinkIcon } from '../../icons';
+import { ExternalLinkIcon } from '../../icons/external-link';
 
 import focusRing from '../../_internal/focus-ring.module.css';
 import styles from './anchor.module.css';

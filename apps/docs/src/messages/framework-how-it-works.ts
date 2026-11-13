@@ -155,8 +155,8 @@ export const nonGuaranteesTitle = message({
 
 export const nonGuaranteesList = [
   message({
-    ja: 'staticモードでも、`vite dev`の結果はビルドと同じではありません。`fallback.tsx`の無いページは`paths`に無い値でも描画し、Server Componentのエラーには`500`を返します。',
-    en: 'Under static mode too, `vite dev` does not give what the build gives. A page without a `fallback.tsx` renders for a value `paths` does not list, and a Server Component that throws gets a `500`.',
+    ja: 'staticモードでも、`vite dev`の結果はビルドと同じではありません。`redirect.ts`には`307`か`308`で答え、Server Componentのエラーには`500`を返します。',
+    en: 'Under static mode too, `vite dev` does not give what the build gives. A `redirect.ts` is answered with a `307` or a `308`, and a Server Component that throws gets a `500`.',
   }),
   message({
     ja: '`node_modules`の依存が`@k8ordo/framework/server`をimportしていても、staticモードのビルドはその名前を挙げません。依存が`cookies()`などを呼んだ時点でエラーになります。',

@@ -68,8 +68,8 @@ export const differencesList = [
     en: 'Build output: files in `dist/client/` in static mode, a request handler in server mode.',
   }),
   message({
-    ja: 'パラメータのあるルート：staticモードでは値を`paths`で並べます。並べなかった値には、`fallback.tsx`を置けばブラウザで描くシェルが答えます。serverモードではリクエストと一緒に受け取るので、値が増えてもビルドし直しません。',
-    en: 'A route with parameters: in static mode its values are listed in `paths`, and a `fallback.tsx` answers the rest with a shell rendered in the browser. In server mode they arrive with the request, so new values need no rebuild.',
+    ja: 'パラメータのあるルート：staticモードでは、パラメータのディレクトリの`paths.ts`が値を返します。返さなかった値には、`fallback.tsx`を置けばブラウザで描くシェルが答えます。serverモードではリクエストと一緒に受け取るので、値が増えてもビルドし直しません。',
+    en: 'A route with parameters: in static mode a `paths.ts` in the parameter’s directory returns its values, and a `fallback.tsx` answers the rest with a shell rendered in the browser. In server mode they arrive with the request, so new values need no rebuild.',
   }),
   message({
     ja: 'どのルートにも当たらないURL：staticモードではホスティングが`404.html`を返し、serverモードではアプリが404のステータスで返します。',
@@ -104,13 +104,13 @@ export const switchMode = message({
 });
 
 export const switchOptions = message({
-  ja: "`paths`と`site`、`csp`は、staticモードだけのオプションです。`mode: 'server'`と一緒に書くと型エラーになり、設定を読み込んだ時点でもエラーになります。serverモードへ移るときは外します。",
-  en: "`paths`, `site` and `csp` are options of static mode only. Written beside `mode: 'server'` they are a type error, and `framework()` fails when the config loads, so drop them when moving to server mode.",
+  ja: "`site`と`csp`は、staticモードだけのオプションです。`mode: 'server'`と一緒に書くと型エラーになり、設定を読み込んだ時点でもエラーになります。serverモードへ移るときは外します。",
+  en: "`site` and `csp` are options of static mode only. Written beside `mode: 'server'` they are a type error, and `framework()` fails when the config loads, so drop them when moving to server mode.",
 });
 
 export const switchToStatic = message({
-  ja: 'staticモードへ移るときは、パラメータのあるルートの値を`paths`で並べるか、`fallback.tsx`を置きます。下の拒まれる書き方と、ページの`request`を読むコードも消します。',
-  en: 'When moving to static mode, list the values of each route with parameters in `paths`, or give the page a `fallback.tsx`. Remove the refused code below too, and any read of a page’s `request`.',
+  ja: 'staticモードへ移るときは、パラメータのディレクトリに`paths.ts`を置いて値を返すか、ページの横に`fallback.tsx`を置きます。下の拒まれる書き方と、ページの`request`を読むコードも消します。',
+  en: 'When moving to static mode, give each parameter’s directory a `paths.ts` that returns its values, or give the page a `fallback.tsx`. Remove the refused code below too, and any read of a page’s `request`.',
 });
 
 export const switchDeploy = message({

@@ -20,6 +20,7 @@ import {
   guards,
   pageModules,
   paramSchemas,
+  paths,
   redirects,
   routeModules,
   routes,
@@ -103,6 +104,30 @@ const filePayloads = new WeakMap<Response, ArrayBuffer>();
  */
 export const payloadOf = (response: Response): ArrayBuffer | undefined =>
   filePayloads.get(response);
+
+/**
+ * What a `paths.ts` answers when asked for its parameter's values, given the
+ * params above it. The build into files asks through here, from the built
+ * bundle, so the file runs as the pages do — the application's aliases, and
+ * the module instances the pages read their data through. Whatever it
+ * returned is handed back as it is: the build is what says a value is not one.
+ */
+export const pathValues = async (
+  file: string,
+  params: Readonly<Record<string, string>>,
+): Promise<unknown> => {
+  const load = paths[file];
+  if (load === undefined) {
+    throw new Error(`${file} is not a paths.ts of this build`);
+  }
+  const { default: values } = await load();
+  if (typeof values !== 'function') {
+    throw new TypeError(
+      `${file} has to export default a function returning its parameter's values`,
+    );
+  }
+  return (values as (above: typeof params) => unknown)(params);
+};
 
 /** A request for a shell: the URL is the shell pathname itself. */
 type Shell = {

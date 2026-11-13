@@ -14,7 +14,7 @@ import { useFormStatus } from 'react-dom';
 
 import { getMessages } from '../../../i18n/current';
 import type { Messages } from '../../../i18n/messages';
-import { ChevronIcon } from '../../icons';
+import { ChevronIcon } from '../../icons/chevron';
 import { chain, mergeRefs } from './../../../helpers';
 import { useControllableState } from './../../../hooks/controllable-state';
 import { clamp } from './../../../internal/clamp';

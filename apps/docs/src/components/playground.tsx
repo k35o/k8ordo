@@ -1,5 +1,5 @@
 import type { Message } from '@k8ordo/i18n';
-import { FlaskIcon } from '@k8ordo/ui';
+import { FlaskIcon } from '@k8ordo/ui/icons';
 import type { ReactNode } from 'react';
 
 import * as m from '../messages';

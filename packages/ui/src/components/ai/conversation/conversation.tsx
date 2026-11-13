@@ -6,7 +6,7 @@ import type { FC, ReactNode } from 'react';
 
 import { createSafeContext } from '../../../helpers/create-safe-context';
 import { getMessages } from '../../../i18n/current';
-import { ChevronIcon } from '../../icons';
+import { ChevronIcon } from '../../icons/chevron';
 import { InView } from '../../observers/in-view';
 import { Resize } from '../../observers/resize';
 

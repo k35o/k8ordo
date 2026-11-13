@@ -14,6 +14,7 @@ import {
   planRefusals,
   shadowedShells,
   shellPathname,
+  suppliedFrom,
 } from './paths';
 
 const treeOf = (files: readonly string[]) => {
@@ -90,7 +91,7 @@ describe('planPaths', () => {
     expect(plan.unusable).toStrictEqual([]);
     expect(plan.unresolved).toStrictEqual(['/:locale/blog/:slug']);
     expect(planRefusals(plan, [])).toContain(
-      'the "paths" option supplied pathnames that still hold a parameter, and only a page with a fallback.tsx beside it takes one: /ja/blog/:slug ([locale]/blog/[slug]/page.tsx has none)',
+      'these pathnames still hold a parameter, and only a page with a fallback.tsx beside it takes one: /ja/blog/:slug ([locale]/blog/[slug]/page.tsx has none)',
     );
   });
 
@@ -99,7 +100,7 @@ describe('planPaths', () => {
       '/feed/:id',
     ]);
     expect(planRefusals(plan, [])).toContain(
-      'the "paths" option supplied pathnames that still hold a parameter, and only a page with a fallback.tsx beside it takes one: /feed/:id (feed/[id]/route.ts cannot have one)',
+      'these pathnames still hold a parameter, and only a page with a fallback.tsx beside it takes one: /feed/:id (feed/[id]/route.ts cannot have one)',
     );
   });
 
@@ -321,7 +322,7 @@ describe('planPaths for a page with a fallback.tsx', () => {
       { location: '/en/posts/:slug', pattern: '/:locale/posts/:id' },
     ]);
     expect(planRefusals(plan, [])).toContain(
-      'the "paths" option supplied shell locations whose parameter names are not their pattern\'s: /en/posts/:slug (/:locale/posts/:id)',
+      "these shell locations name parameters that are not their pattern's: /en/posts/:slug (/:locale/posts/:id)",
     );
   });
 
@@ -336,7 +337,7 @@ describe('planPaths for a page with a fallback.tsx', () => {
       },
     ]);
     expect(planRefusals(plan, [])).toContain(
-      'the "paths" option supplied shell locations that leave out a parameter a layout above their fallback.tsx receives: /:locale/posts/:id (:locale, received by [locale]/layout.tsx)',
+      'these shells leave out a parameter a layout above their fallback.tsx receives, so its directory needs a paths.ts: /:locale/posts/:id (:locale, received by [locale]/layout.tsx)',
     );
   });
 
@@ -352,7 +353,7 @@ describe('planPaths for a page with a fallback.tsx', () => {
       },
     ]);
     expect(planRefusals(plan, [])).toContain(
-      'static build needs shell locations for /:locale/posts/:id — [locale]/layout.tsx receives :locale, so the "paths" option has to fill it, as in /<locale>/posts/:id',
+      "static build needs the values of :locale for the shell of /:locale/posts/:id — [locale]/layout.tsx receives it, so that parameter's directory needs a paths.ts, which puts the shell at /<locale>/posts/:id",
     );
   });
 
@@ -364,7 +365,7 @@ describe('planPaths for a page with a fallback.tsx', () => {
     const plan = planPaths(treeOf(posts), [path]);
     expect(plan.reserved).toStrictEqual([path]);
     expect(planRefusals(plan, [])).toContain(
-      `the "paths" option supplied pathnames with a segment named !fallback, which the build keeps for shells: ${path}`,
+      `a paths.ts returned !fallback, which the build keeps for shells: ${path}`,
     );
   });
 
@@ -408,7 +409,7 @@ describe('shadowedShells', () => {
       },
     ]);
     expect(planRefusals(plan, shadowed)).toContain(
-      'the shell for /:lang/:id ([lang]/[id]/fallback.tsx) would also answer URLs /docs/:section (docs/[section]/page.tsx) is declared first for — give docs/[section]/page.tsx a fallback.tsx too, or supply shell locations it cannot match',
+      'the shell for /:lang/:id ([lang]/[id]/fallback.tsx) would also answer URLs /docs/:section (docs/[section]/page.tsx) is declared first for — give docs/[section]/page.tsx a fallback.tsx too, or put the shell where it cannot match, with a paths.ts above it',
     );
   });
 
@@ -433,7 +434,7 @@ describe('shadowedShells', () => {
       },
     ]);
     expect(planRefusals(plan, shadowed)).toContain(
-      'the shell for /ja/posts/:id ([locale]/posts/[id]/fallback.tsx) would also answer /ja/posts/new, which [locale]/posts/new/page.tsx is declared first for and the build did not write — list /ja/posts/new in "paths", or supply shell locations it cannot match',
+      "the shell for /ja/posts/:id ([locale]/posts/[id]/fallback.tsx) would also answer /ja/posts/new, which [locale]/posts/new/page.tsx is declared first for and the build did not write — return its value from that parameter's paths.ts, or put the shell where it cannot match, with a paths.ts above it",
     );
   });
 
@@ -466,5 +467,190 @@ describe('shadowedShells', () => {
     expect(
       shadowedShells(tree, plan.shells, new Set(plan.paths)),
     ).toStrictEqual([]);
+  });
+});
+
+describe('suppliedFrom', () => {
+  const asked: Array<[string, Record<string, string>]> = [];
+  const answering =
+    (values: Record<string, (params: Record<string, string>) => unknown>) =>
+    (file: string, params: Readonly<Record<string, string>>): unknown => {
+      asked.push([file, { ...params }]);
+      return values[file]?.(params);
+    };
+
+  it('writes every page, route.ts and redirect.ts below a parameter for each of its values', async () => {
+    const tree = treeOf([
+      'page.tsx',
+      'blog/[slug]/page.tsx',
+      'blog/[slug]/paths.ts',
+      'blog/[slug]/og.png/route.ts',
+      'blog/[slug]/old/redirect.ts',
+    ]);
+
+    const { locations, problems } = await suppliedFrom(
+      tree,
+      answering({ 'blog/[slug]/paths.ts': () => ['a', 'b'] }),
+    );
+
+    expect(problems).toStrictEqual([]);
+    expect(planPaths(tree, locations).paths).toStrictEqual([
+      '/',
+      '/blog/a',
+      '/blog/b',
+      '/blog/a/og.png',
+      '/blog/b/og.png',
+      '/blog/a/old',
+      '/blog/b/old',
+    ]);
+  });
+
+  it('asks a paths.ts once per value of the parameters above it, handing them over', async () => {
+    asked.length = 0;
+    const tree = treeOf([
+      'page.tsx',
+      '[locale]/paths.ts',
+      '[locale]/posts/[id]/page.tsx',
+      '[locale]/posts/[id]/paths.ts',
+    ]);
+
+    const { locations } = await suppliedFrom(
+      tree,
+      answering({
+        '[locale]/paths.ts': () => ['ja', 'en'],
+        '[locale]/posts/[id]/paths.ts': ({ locale = '' }) =>
+          ({ ja: ['1', '2'], en: ['1'] })[locale],
+      }),
+    );
+
+    expect(asked).toStrictEqual([
+      ['[locale]/paths.ts', {}],
+      ['[locale]/posts/[id]/paths.ts', { locale: 'ja' }],
+      ['[locale]/posts/[id]/paths.ts', { locale: 'en' }],
+    ]);
+    expect(locations).toStrictEqual([
+      '/ja/posts/1',
+      '/ja/posts/2',
+      '/en/posts/1',
+    ]);
+  });
+
+  it('puts a shell at each value above a fallback.tsx, where no paths.ts gives its own parameter values', async () => {
+    const tree = treeOf([
+      'page.tsx',
+      '[locale]/layout.tsx',
+      '[locale]/paths.ts',
+      '[locale]/posts/[id]/page.tsx',
+      '[locale]/posts/[id]/fallback.tsx',
+    ]);
+
+    const { locations } = await suppliedFrom(
+      tree,
+      answering({ '[locale]/paths.ts': () => ['ja', 'en'] }),
+    );
+
+    expect(planPaths(tree, locations).shells).toStrictEqual([
+      {
+        pattern: '/:locale/posts/:id',
+        location: '/ja/posts/:id',
+        pathname: '/ja/posts/!fallback',
+      },
+      {
+        pattern: '/:locale/posts/:id',
+        location: '/en/posts/:id',
+        pathname: '/en/posts/!fallback',
+      },
+    ]);
+  });
+
+  it('writes the values a directory lists and keeps its fallback.tsx’s shell for the rest', async () => {
+    const tree = treeOf([
+      'page.tsx',
+      'posts/[id]/page.tsx',
+      'posts/[id]/fallback.tsx',
+      'posts/[id]/paths.ts',
+    ]);
+
+    const plan = planPaths(
+      tree,
+      (
+        await suppliedFrom(
+          tree,
+          answering({ 'posts/[id]/paths.ts': () => ['1'] }),
+        )
+      ).locations,
+    );
+
+    expect(plan.paths).toStrictEqual(['/', '/posts/1']);
+    expect(plan.shells.map((shell) => shell.location)).toStrictEqual([
+      '/posts/:id',
+    ]);
+  });
+
+  it('leaves a parameter with neither a paths.ts nor a fallback.tsx for the build to refuse', async () => {
+    const tree = treeOf(['page.tsx', 'tags/[tag]/page.tsx']);
+
+    const plan = planPaths(
+      tree,
+      (await suppliedFrom(tree, answering({}))).locations,
+    );
+
+    expect(planRefusals(plan, [])).toStrictEqual([
+      "static build needs the values of /tags/:tag — a paths.ts in each parameter's directory returns them, and a fallback.tsx beside a page answers the ones the build does not write",
+    ]);
+  });
+
+  it('escapes a value for the URL, the characters a pathname is read by included', async () => {
+    const tree = treeOf([
+      'page.tsx',
+      'tags/[tag]/page.tsx',
+      'tags/[tag]/paths.ts',
+    ]);
+
+    const { locations } = await suppliedFrom(
+      tree,
+      answering({ 'tags/[tag]/paths.ts': () => ['café', 'a b', 'a*b', ':id'] }),
+    );
+
+    expect(locations).toStrictEqual([
+      '/tags/caf%C3%A9',
+      '/tags/a%20b',
+      '/tags/a%2Ab',
+      '/tags/%3Aid',
+    ]);
+  });
+
+  it('says so when a paths.ts returns anything but non-empty strings', async () => {
+    const tree = treeOf([
+      'page.tsx',
+      'tags/[tag]/page.tsx',
+      'tags/[tag]/paths.ts',
+    ]);
+
+    const { problems } = await suppliedFrom(
+      tree,
+      answering({ 'tags/[tag]/paths.ts': () => [1, ''] }),
+    );
+
+    expect(problems).toStrictEqual([
+      'tags/[tag]/paths.ts has to return an array of non-empty strings, the values of :tag',
+    ]);
+  });
+
+  it('says so when a paths.ts sits below a parameter nothing gives values to', async () => {
+    const tree = treeOf([
+      'page.tsx',
+      '[locale]/posts/[id]/page.tsx',
+      '[locale]/posts/[id]/paths.ts',
+    ]);
+
+    const { problems } = await suppliedFrom(
+      tree,
+      answering({ '[locale]/posts/[id]/paths.ts': () => ['1'] }),
+    );
+
+    expect(problems).toStrictEqual([
+      "[locale]/posts/[id]/paths.ts is asked for its values once per value of the parameters above it, and /:locale/posts still holds one — give that parameter's directory a paths.ts too",
+    ]);
   });
 });

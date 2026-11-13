@@ -51,6 +51,11 @@ declare module 'virtual:k8ordo/routes' {
   >;
   /** Per pattern, what reads the page or the not-found that answers it. */
   export const pageModules: Readonly<Record<string, Load | undefined>>;
+  /**
+   * Per `paths.ts`, by its file relative to `routes/`: what reads it. Empty
+   * under a running server.
+   */
+  export const paths: Readonly<Record<string, Load | undefined>>;
   /** Per pattern, what reads the `route.ts` module that answers it. */
   export const routeModules: Readonly<Record<string, Load | undefined>>;
   /**

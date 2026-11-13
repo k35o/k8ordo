@@ -26,98 +26,113 @@ export const wantsServerCause = message({
 });
 
 export const wantsServerFix = message({
-  ja: "それが必要なら、`framework()`の`mode`を`'server'`に変えます。`paths`、`site`、`csp`はstaticモードだけのオプションなので外します。CSPは`guard.ts`で`nonce()`を使ってヘッダーに書きます。型だけを使っているなら、`import type`に書き換えます。staticモードのままで通ります。要らないなら、そのコードを消します。検索や絞り込みのようなGETのフォームなら、Server Actionは要りません。",
-  en: "If the application needs it, change the `mode` of `framework()` to `'server'`. Remove `paths`, `site` and `csp`, which only static mode accepts. Under server mode, write the CSP as a header in `guard.ts`, using `nonce()`. If only types are used, change the import to `import type`, which static mode lets through. If the application does not need it, remove that code. A GET form, such as a search or a filter, needs no Server Action.",
+  ja: "それが必要なら、`framework()`の`mode`を`'server'`に変えます。`site`と`csp`はstaticモードだけのオプションなので外します。CSPは`guard.ts`で`nonce()`を使ってヘッダーに書きます。型だけを使っているなら、`import type`に書き換えます。staticモードのままで通ります。要らないなら、そのコードを消します。検索や絞り込みのようなGETのフォームなら、Server Actionは要りません。",
+  en: "If the application needs it, change the `mode` of `framework()` to `'server'`. Remove `site` and `csp`, which only static mode accepts. Under server mode, write the CSP as a header in `guard.ts`, using `nonce()`. If only types are used, change the import to `import type`, which static mode lets through. If the application does not need it, remove that code. A GET form, such as a search or a filter, needs no Server Action.",
 });
 
 export const pathsTitle = message({
-  ja: '`static build needs pathnames for …`',
-  en: '`static build needs pathnames for …`',
+  ja: '`static build needs the values of …`',
+  en: '`static build needs the values of …`',
 });
 
 export const pathsCause = message({
-  ja: 'staticモードで、パラメータを持つルートに当てはまるURLが`paths`に1つもありません。ビルドはパラメータの値を自分では決められません。',
-  en: 'Under static mode, no URL in `paths` fits a route with parameters. A build cannot choose the values itself.',
+  ja: 'staticモードで、パラメータのディレクトリに`paths.ts`がありません。ビルドはパラメータの値を自分では決められません。',
+  en: 'Under static mode, a parameter’s directory has no `paths.ts`. A build cannot choose the values itself.',
 });
 
 export const pathsFix = message({
-  ja: '`framework()`の`paths`で、そのルートのURLを並べます。',
-  en: 'List that route’s URLs with the `paths` option of `framework()`.',
+  ja: 'エラーが挙げたパターンのパラメータごとに、そのディレクトリへ`paths.ts`を置いて値を返します。ビルドの時点で並べられない値に答えたいページなら、横に`fallback.tsx`を置きます。',
+  en: 'For each parameter of the patterns the error names, put a `paths.ts` in its directory and return the values. If the page should answer values the build cannot know, give it a `fallback.tsx`.',
 });
 
-export const unusedTitle = message({
-  ja: '`the "paths" option supplied pathnames no route wants`',
-  en: '`the "paths" option supplied pathnames no route wants`',
+export const pathsOptionTitle = message({
+  ja: '`framework() takes no paths — …`',
+  en: '`framework() takes no paths — …`',
 });
 
-export const unusedCause = message({
-  ja: 'staticモードで、`paths`が返したURLのどれかがどのルートにも当たりません。多くはURLの打ち間違いです。',
-  en: 'Under static mode, a URL that `paths` returned matches no route. Most often it is a typo.',
+export const pathsOptionCause = message({
+  ja: '`framework()`に`paths`を渡しています。パラメータの値は、`vite.config.ts`ではなく`routes/`の`paths.ts`が返します。',
+  en: 'The config passes `paths` to `framework()`. A parameter’s values come from a `paths.ts` under `routes/`, not from `vite.config.ts`.',
 });
 
-export const unusedFix = message({
-  ja: 'エラーの後ろに並んだURLを直すか、`paths`から外します。',
-  en: 'Fix the URLs the error lists, or drop them from `paths`.',
+export const pathsOptionFix = message({
+  ja: '`paths`を消し、パラメータのディレクトリごとに`paths.ts`を置きます。`[locale]/paths.ts`なら`locales.all`を返します。',
+  en: 'Remove `paths`, and give each parameter’s directory a `paths.ts`. `[locale]/paths.ts` returns `locales.all`.',
 });
 
-export const heldTitle = message({
-  ja: '`the "paths" option supplied pathnames that still hold a parameter, …`',
-  en: '`the "paths" option supplied pathnames that still hold a parameter, …`',
+export const valuesTitle = message({
+  ja: '`… has to return an array of non-empty strings, …`',
+  en: '`… has to return an array of non-empty strings, …`',
 });
 
-export const heldCause = message({
-  ja: 'staticモードで、`paths`が返したパスに`:slug`のようなパラメータが残っています。`locales.paths`でロケールだけを展開したときによく起きます。パラメータを残したパスを受け取れるのは、横に`fallback.tsx`のあるページだけです。',
-  en: 'Under static mode, a path `paths` returned still holds a parameter such as `:slug`. It often happens when `locales.paths` expanded the locale alone. Only a page with a `fallback.tsx` beside it takes a path with a parameter left in it.',
+export const valuesCause = message({
+  ja: '`paths.ts`の関数が、空でない文字列の配列以外を返しました。数値のidや空文字列、配列でない値でよく起きます。',
+  en: 'The function in a `paths.ts` returned something other than an array of non-empty strings: often numeric ids, an empty string, or a value that is not an array.',
 });
 
-export const heldFix = message({
-  ja: '残ったパラメータも、`paths`の中で値に展開します。ビルドしていない値に答えたいページなら、横に`fallback.tsx`を置きます。`route.ts`と`redirect.ts`には置けません。',
-  en: 'Expand the remaining parameter into values inside `paths`. If the page should answer values the build did not write, give it a `fallback.tsx`. A `route.ts` or a `redirect.ts` cannot have one.',
+export const valuesFix = message({
+  ja: '数値は`String()`で文字列にし、空の値は外します。値はエスケープせずに返します。',
+  en: 'Turn numbers into strings with `String()`, and leave empty values out. Return each value unescaped.',
 });
 
-export const misnamedTitle = message({
-  ja: "`… shell locations whose parameter names are not their pattern's`",
-  en: "`… shell locations whose parameter names are not their pattern's`",
+export const aboveTitle = message({
+  ja: '`… is asked for its values once per value of the parameters above it, …`',
+  en: '`… is asked for its values once per value of the parameters above it, …`',
 });
 
-export const misnamedCause = message({
-  ja: 'シェルの場所のパラメータの名前が、パターンと違います。`/:locale/posts/:id`に`/en/posts/:slug`を返すと、このエラーになります。',
-  en: 'A shell location names a parameter differently from its pattern, as `/en/posts/:slug` does for `/:locale/posts/:id`.',
+export const aboveCause = message({
+  ja: '`paths.ts`より上のパラメータに、値を返す`paths.ts`がありません。ビルドは上の値ごとに関数を呼ぶので、上の値が無いと呼べません。',
+  en: 'A parameter above the `paths.ts` has no `paths.ts` of its own. The build calls the function once per value above it, so without those values it cannot call it.',
 });
 
-export const misnamedFix = message({
-  ja: '括弧の中のパターンと同じ名前で書きます。',
-  en: 'Use the names of the pattern in the parentheses.',
+export const aboveFix = message({
+  ja: 'エラーが挙げたパスに残っているパラメータのディレクトリにも、`paths.ts`を置きます。',
+  en: 'Give the directory of the parameter left in the path the error names a `paths.ts` too.',
+});
+
+export const pathsPlaceTitle = message({
+  ja: "`paths.ts gives the values of its directory's parameter, …`",
+  en: "`paths.ts gives the values of its directory's parameter, …`",
+});
+
+export const pathsPlaceCause = message({
+  ja: '`paths.ts`が、`[id]`のようなパラメータのディレクトリでない場所にあります。どちらのモードでも同じエラーになります。',
+  en: 'A `paths.ts` sits in a directory that is not a parameter’s, such as `[id]`. The error is the same under either mode.',
+});
+
+export const pathsPlaceFix = message({
+  ja: '値を返したいパラメータのディレクトリへ移します。',
+  en: 'Move it into the directory of the parameter it returns values for.',
 });
 
 export const shellLocationsTitle = message({
-  ja: '`static build needs shell locations for …`',
-  en: '`static build needs shell locations for …`',
+  ja: '`these shells leave out a parameter a layout above their fallback.tsx receives, …`',
+  en: '`these shells leave out a parameter a layout above their fallback.tsx receives, …`',
 });
 
 export const shellLocationsCause = message({
-  ja: '`fallback.tsx`より上のレイアウトが受け取るパラメータを、シェルの場所が埋めていません。レイアウトはシェルでもHTMLとして書くので、その値が要ります。`:locale`を残した場所を返したときは、`… leave out a parameter a layout above their fallback.tsx receives`のエラーになります。',
-  en: 'A layout above the `fallback.tsx` receives a parameter the shell location leaves open. The layout is written as HTML in the shell too, so it needs that value. Returning a location that keeps `:locale` gives `… leave out a parameter a layout above their fallback.tsx receives` instead.',
+  ja: '`fallback.tsx`より上のレイアウトが受け取るパラメータに、値を返す`paths.ts`がありません。レイアウトはシェルでもHTMLとして書くので、その値が要ります。',
+  en: 'A layout above the `fallback.tsx` receives a parameter no `paths.ts` returns values for. The layout is written as HTML in the shell too, so it needs that value.',
 });
 
 export const shellLocationsFix = message({
-  ja: '`/ja/posts/:id`のように、レイアウトが受け取るパラメータを埋めた場所を返します。`locales.paths`の結果を残せば、ロケールごとの場所になります。',
-  en: 'Return locations with the layout’s parameters filled, such as `/ja/posts/:id`. Keeping what `locales.paths` returns gives one per locale.',
+  ja: 'そのパラメータのディレクトリに`paths.ts`を置きます。`[locale]/paths.ts`が`locales.all`を返せば、シェルは`/ja/posts/:id`のようにロケールごとに書かれます。',
+  en: 'Give that parameter’s directory a `paths.ts`. When `[locale]/paths.ts` returns `locales.all`, a shell is written per locale, as at `/ja/posts/:id`.',
 });
 
 export const reservedTitle = message({
-  ja: '`… with a segment named !fallback`',
-  en: '`… with a segment named !fallback`',
+  ja: '`a paths.ts returned !fallback, …`',
+  en: '`a paths.ts returned !fallback, …`',
 });
 
 export const reservedCause = message({
-  ja: '`!fallback`は、ビルドがシェルを書くディレクトリの名前です。`paths`の返すパスには使えません。`%21fallback`のようにエスケープしても同じです。',
-  en: 'The build writes shells into directories named `!fallback`, so no path `paths` returns may hold that segment, escaped as `%21fallback` or not.',
+  ja: '`!fallback`は、ビルドがシェルを書くディレクトリの名前です。`paths.ts`の返す値には使えません。',
+  en: 'The build writes shells into directories named `!fallback`, so no `paths.ts` may return that value.',
 });
 
 export const reservedFix = message({
-  ja: 'その値の名前を変えるか、`paths`から外します。',
-  en: 'Rename the value, or drop it from `paths`.',
+  ja: 'その値の名前を変えるか、`paths.ts`の戻り値から外します。',
+  en: 'Rename the value, or leave it out of what the `paths.ts` returns.',
 });
 
 export const shadowedTitle = message({
@@ -131,23 +146,23 @@ export const shadowedCause = message({
 });
 
 export const shadowedFix = message({
-  ja: '先のルートがページなら、そこにも`fallback.tsx`を置きます。重なるURLが1つだけなら、そのURLを`paths`に並べます。どちらでもなければ、そのルートに当たらないシェルの場所を返します。',
-  en: 'If that route is a page, give it a `fallback.tsx` too. If only one URL overlaps, list it in `paths`. Otherwise, return shell locations that route cannot match.',
+  ja: '先のルートがページなら、そこにも`fallback.tsx`を置きます。重なるURLが1つだけなら、その値を`paths.ts`で返してページとして書き出します。どちらでもなければ、上のパラメータに`paths.ts`を置き、シェルがそのルートに当たらない場所に書かれるようにします。',
+  en: 'If that route is a page, give it a `fallback.tsx` too. If only one URL overlaps, return its value from a `paths.ts` so it is written as a page. Otherwise, give a parameter above a `paths.ts`, so the shell is written where that route cannot match.',
 });
 
 export const shellRefusedTitle = message({
-  ja: '`… shell locations a params schema refused`',
-  en: '`… shell locations a params schema refused`',
+  ja: '`the shells stand where a params schema refuses the values above them`',
+  en: '`the shells stand where a params schema refuses the values above them`',
 });
 
 export const shellRefusedCause = message({
-  ja: 'シェルの場所に埋めた値を、レイアウトの`paramsSchema`が拒みました。`/fr/posts/:id`のように、ロケールの集合に無い値でよく起きます。',
-  en: 'A layout’s `paramsSchema` rejected a value a shell location fills in, often a locale outside the set, as in `/fr/posts/:id`.',
+  ja: 'シェルより上の`paths.ts`が返した値を、レイアウトの`paramsSchema`が拒みました。`/fr/posts/:id`のように、ロケールの一覧に無い値でよく起きます。',
+  en: 'A layout’s `paramsSchema` rejected a value a `paths.ts` above the shell returned, often a locale outside the set, as in `/fr/posts/:id`.',
 });
 
 export const shellRefusedFix = message({
-  ja: 'その場所を`paths`から外すか、値を直します。',
-  en: 'Drop that location from `paths`, or correct the value.',
+  ja: 'その値を`paths.ts`の戻り値から外すか、値を直します。',
+  en: 'Leave that value out of what the `paths.ts` returns, or correct it.',
 });
 
 export const shellNotFoundTitle = message({
@@ -176,8 +191,8 @@ export const shellTakenCause = message({
 });
 
 export const shellTakenFix = message({
-  ja: 'そのルートに当たらないシェルの場所を返します。',
-  en: 'Return shell locations that route cannot match.',
+  ja: '`!fallback`を値として受け取るページなら、その値を`paths.ts`の戻り値に入れていないか確かめます。別の`fallback.tsx`なら、上のパラメータに`paths.ts`を置き、シェルがそのルートに当たらない場所に書かれるようにします。',
+  en: 'For a page that took `!fallback` as a value, check that no `paths.ts` returns it. For another `fallback.tsx`, give a parameter above a `paths.ts`, so the shell is written where that route cannot match.',
 });
 
 export const renderTitle = message({
@@ -201,13 +216,28 @@ export const devTitle = message({
 });
 
 export const devCause = message({
-  ja: 'staticモードでも、`vite dev`はファイルを書かずにリクエストのたびにページを描画します。`paths`に無い値も、`fallback.tsx`が無ければページで描画します。Server Componentがエラーになっても、`500`を返して動き続けます。',
-  en: 'Under static mode too, `vite dev` writes no files and renders each page per request. A value `paths` does not list is rendered by its page, unless a `fallback.tsx` answers it. When a Server Component throws, it responds with a `500` and keeps running.',
+  ja: 'staticモードでも、`vite dev`はファイルを書かずにリクエストのたびにページを描画します。Server Componentがエラーになっても、`500`を返して動き続けます。`paths.ts`がエラーになると、その内容を1度ログに出し、どの値も`page.tsx`で描画します。',
+  en: 'Under static mode too, `vite dev` writes no files and renders each page per request. When a Server Component throws, it responds with a `500` and keeps running. When a `paths.ts` throws, it logs the error once and renders every value with `page.tsx`.',
 });
 
 export const devFix = message({
   ja: '公開する前に`vite build`を通し、エラーが出たらその文に従って直します。書き出したサイトは`vite preview`で確かめます。ホスティングと同じように、`dist/client/`のファイルだけを返します。',
   en: 'Run `vite build` before you ship, and follow the message it stops with. Check the site it wrote with `vite preview`, which serves only the files in `dist/client/`, as a host does.',
+});
+
+export const devNotFoundTitle = message({
+  ja: '`vite dev`で404になるパラメータのページ',
+  en: 'A page with a parameter is a 404 in `vite dev`',
+});
+
+export const devNotFoundCause = message({
+  ja: 'staticモードの`vite dev`は、ビルドしたサイトと同じように答えます。どの`paths.ts`も返さなかった値は、ビルドしてもページが書かれないので404です。ログには`k8ordo: no paths.ts returns /posts/3, so vite dev answers it with the not-found, …`と出ます。横に`fallback.tsx`があれば、シェルで答えます。',
+  en: 'Under static mode, `vite dev` answers as the built site will. A value no `paths.ts` returned would have no page in the build, so it is a 404, and the log says `k8ordo: no paths.ts returns /posts/3, so vite dev answers it with the not-found, …`. Where a `fallback.tsx` sits beside the page, the shell answers instead.',
+});
+
+export const devNotFoundFix = message({
+  ja: 'ログが挙げたパターンの`paths.ts`で、その値を返します。データに値を足しただけなら再起動は要りません。次のリクエストで`paths.ts`が呼び直されます。',
+  en: 'Return the value from the `paths.ts` of the pattern the log names. If the data just gained the value, no restart is needed: the next request calls the `paths.ts` files again.',
 });
 
 export const statusTitle = message({
@@ -236,8 +266,8 @@ export const githubPagesCause = message({
 });
 
 export const githubPagesFix = message({
-  ja: '書き換えのできるホスティングに移すか、値をすべて`paths`に並べます。',
-  en: 'Move to a host that rewrites, or list every value in `paths`.',
+  ja: '書き換えのできるホスティングに移すか、値をすべて`paths.ts`で返します。',
+  en: 'Move to a host that rewrites, or return every value from a `paths.ts`.',
 });
 
 export const cloudflareShellTitle = message({
@@ -581,8 +611,8 @@ export const fallbackGrammarCause = message({
 });
 
 export const fallbackGrammarFix = message({
-  ja: '横に`page.tsx`が無いなら、ページのディレクトリへ移します。横の`layout.tsx`は、1つ上のディレクトリへ移すか、中身を`page.tsx`と`fallback.tsx`に入れます。パラメータの無いページの`fallback.tsx`は消します。上のレイアウトがすべてのパラメータを受け取るときも、`fallback.tsx`を消して値を`paths`に並べます。',
-  en: 'With no `page.tsx` beside it, move the `fallback.tsx` to the page’s directory. Move a `layout.tsx` beside it one directory up, or fold it into `page.tsx` and `fallback.tsx`. Remove a `fallback.tsx` for a page with no parameter. When a layout above receives every parameter, remove the `fallback.tsx` too, and list the values in `paths`.',
+  ja: '横に`page.tsx`が無いなら、ページのディレクトリへ移します。横の`layout.tsx`は、1つ上のディレクトリへ移すか、中身を`page.tsx`と`fallback.tsx`に入れます。パラメータの無いページの`fallback.tsx`は消します。上のレイアウトがすべてのパラメータを受け取るときも、`fallback.tsx`を消して値を`paths.ts`で返します。',
+  en: 'With no `page.tsx` beside it, move the `fallback.tsx` to the page’s directory. Move a `layout.tsx` beside it one directory up, or fold it into `page.tsx` and `fallback.tsx`. Remove a `fallback.tsx` for a page with no parameter. When a layout above receives every parameter, remove the `fallback.tsx` too, and return the values from a `paths.ts`.',
 });
 
 export const syncTitle = message({

@@ -2,7 +2,7 @@ import { clsx } from 'clsx';
 import type { FC, PropsWithChildren, ReactNode } from 'react';
 
 import { getMessages } from '../../../i18n/current';
-import { ChevronIcon } from '../../icons';
+import { ChevronIcon } from '../../icons/chevron';
 
 import focusRing from '../../_internal/focus-ring.module.css';
 import styles from './breadcrumb.module.css';

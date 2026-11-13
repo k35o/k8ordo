@@ -7,7 +7,7 @@ import type { FC, PropsWithChildren, Ref, ReactNode } from 'react';
 import { getMessages } from '../../../i18n/current';
 import { IconButton } from '../../buttons/icon-button';
 import { Heading } from '../../data-display/heading';
-import { CloseIcon } from '../../icons';
+import { XIcon } from '../../icons/x';
 import { useModalDialogContext } from '../_internal/modal-dialog-context';
 import { createSafeContext } from './../../../helpers/create-safe-context';
 
@@ -88,7 +88,7 @@ export const Header: FC<{
           }}
           tooltipDisabled
         >
-          <CloseIcon size="sm" />
+          <XIcon size="sm" />
         </IconButton>
       </div>
     </div>

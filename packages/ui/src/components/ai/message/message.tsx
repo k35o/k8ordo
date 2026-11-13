@@ -9,7 +9,9 @@ import { useControllableState } from '../../../hooks/controllable-state';
 import { getMessages } from '../../../i18n/current';
 import { CopyButton } from '../../buttons/copy-button';
 import { IconButton } from '../../buttons/icon-button';
-import { BadIcon, GoodIcon, RefreshIcon } from '../../icons';
+import { RefreshIcon } from '../../icons/refresh';
+import { ThumbsDownIcon } from '../../icons/thumbs-down';
+import { ThumbsUpIcon } from '../../icons/thumbs-up';
 import { StreamingCursor } from '../_internal/streaming-cursor';
 import type { MessageFeedback } from '../types';
 
@@ -183,7 +185,7 @@ export const Feedback: FC<FeedbackProps> = ({
         size="sm"
       >
         <span className={clsx(feedback === 'positive' && styles.selected)}>
-          <GoodIcon size="sm" />
+          <ThumbsUpIcon size="sm" />
         </span>
       </IconButton>
       <IconButton
@@ -196,7 +198,7 @@ export const Feedback: FC<FeedbackProps> = ({
         size="sm"
       >
         <span className={clsx(feedback === 'negative' && styles.selected)}>
-          <BadIcon size="sm" />
+          <ThumbsDownIcon size="sm" />
         </span>
       </IconButton>
     </>

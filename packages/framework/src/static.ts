@@ -36,7 +36,14 @@ import type {
 } from '@k8ordo/framework-engine';
 import { normalizePathname, withBase, withoutBase } from '@k8ordo/router';
 import { contentType } from 'mime-types';
-import type { Connect, Logger, Plugin, ResolvedConfig } from 'vite';
+import type {
+  Connect,
+  Logger,
+  Plugin,
+  ResolvedConfig,
+  RunnableDevEnvironment,
+  ViteDevServer,
+} from 'vite';
 
 import {
   asFile,
@@ -53,11 +60,14 @@ import {
   catchAllRefusals,
   dirFor,
   fileAt,
+  isConcrete,
   patternsNeedingPaths,
+  patternsOf,
   planPaths,
   planRefusals,
   routeFileRefusals,
   shadowedShells,
+  suppliedFrom,
 } from './paths';
 import type { PathPlan, Shell } from './paths';
 import {
@@ -81,23 +91,6 @@ export type StaticOptions = EngineOptions & {
    * request API) builds.
    */
   readonly mode: 'static';
-  /**
-   * Pathnames for routes with parameters, in the table's terms — without
-   * Vite's `base`. Static rendering cannot invent them, and a build that
-   * quietly skipped half the site would be worse than one that refuses.
-   *
-   * The patterns that need covering are handed in, so a site whose parameter
-   * takes the same values everywhere — a locale segment, say — expands them
-   * rather than listing every page twice.
-   *
-   * For a page with a `fallback.tsx` beside it, a pathname that still holds
-   * a parameter (`/ja/posts/:id`) is where its shell stands: the values the
-   * build did not write are answered there. Without one, the bare pattern
-   * is the shell's location.
-   */
-  readonly paths?: (
-    patterns: readonly string[],
-  ) => readonly string[] | Promise<readonly string[]>;
   /**
    * The origin the site is served from — `https://example.com`. With it the
    * build also writes `sitemap.xml`, listing every page it rendered at its
@@ -147,15 +140,24 @@ type DevRoutes = {
   readonly tree: RouteDir;
   readonly failed: boolean;
   readonly shapes: readonly FallbackShape[];
+  /** The patterns a paths.ts has to give values for, as URLPatterns. */
+  readonly needing: readonly URLPattern[];
+  /** Every pattern but the catch-alls, in the matcher's order. */
+  readonly declared: ReadonlyArray<{
+    readonly pattern: string;
+    readonly matcher: URLPattern;
+  }>;
 };
 
-/** What `vite dev` reads of `paths`: what the build would write. */
-type DevShells = {
+/** What `vite dev` reads of the paths.ts files: what the build would write. */
+type DevPlan = {
   readonly paths: ReadonlySet<string>;
   readonly shells: readonly Shell[];
+  /** A paths.ts threw: nothing is known, so every value is rendered. */
+  readonly failed: boolean;
 };
 
-const NO_SHELLS: DevShells = { paths: new Set(), shells: [] };
+const NO_PLAN: DevPlan = { paths: new Set(), shells: [], failed: true };
 
 /** Every file below a directory, relative to it, POSIX separators. */
 const filesBelow = async (dir: string): Promise<string[]> =>
@@ -272,10 +274,10 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
   const serverImporters = new Set<string>();
 
   let routesRead: Promise<DevRoutes> | undefined;
-  let shellsRead: Promise<DevShells> | undefined;
-  let suppliedFor: string | undefined;
-  let suppliedInDev: Promise<readonly string[]> = Promise.resolve([]);
+  let planRead: Promise<DevPlan> | undefined;
+  let devServer: ViteDevServer | undefined;
   const noticed = new Set<string>();
+  const warned = new Set<string>();
 
   const fromRoot = (file: string): string =>
     path.relative(root, path.join(routesDir, file));
@@ -284,110 +286,188 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
     (routesRead ??= (async () => {
       const { tree, problems } = parseRouteTree(await scanRoutes(routesDir));
       const failed = problems.length > 0;
-      return { tree, failed, shapes: failed ? [] : fallbackShapes(tree) };
-    })());
-
-  const devShells = (): Promise<DevShells> =>
-    (shellsRead ??= (async () => {
-      const { tree } = await devRoutes();
-      const patterns = patternsNeedingPaths(tree);
-      const key = JSON.stringify(patterns);
-      if (key !== suppliedFor) {
-        suppliedFor = key;
-        noticed.clear();
-        suppliedInDev = (async () => (await options.paths?.(patterns)) ?? [])();
-      }
-      let given: readonly string[];
-      try {
-        given = await suppliedInDev;
-      } catch (error) {
-        // 次の変更でもう一度呼ぶ
-        suppliedFor = undefined;
-        logger?.error(
-          `k8ordo: the "paths" option failed, so vite dev renders every value with page.tsx: ${messageOf(error)}`,
-        );
-        return NO_SHELLS;
-      }
-      const plan = planPaths(tree, given);
-      for (const refusal of planRefusals(
-        plan,
-        shadowedShells(tree, plan.shells, new Set(plan.paths)),
-      )) {
-        logger?.warn(`k8ordo: the build will refuse "paths": ${refusal}`);
-      }
-      return { paths: new Set(plan.paths), shells: plan.shells };
+      return {
+        tree,
+        failed,
+        shapes: failed ? [] : fallbackShapes(tree),
+        needing: failed
+          ? []
+          : patternsNeedingPaths(tree).map(
+              (pathname) => new URLPattern({ pathname }),
+            ),
+        declared: failed
+          ? []
+          : patternsOf(tree)
+              .filter((pattern) => !pattern.endsWith('/*'))
+              .map((pattern) => ({
+                pattern,
+                matcher: new URLPattern({ pathname: pattern }),
+              })),
+      };
     })());
 
   /**
-   * Under `vite dev`, a value of a fallback.tsx's pattern that `paths` does
-   * not list is answered with the shell, as a host's rule answers it — so it
-   * can be tried locally. The URL is rewritten to the shell pathname before
-   * the RSC plugin's handler reads it; everything else passes untouched.
+   * A paths.ts under `vite dev`, read through the RSC environment's runner —
+   * the graph the pages are in, so it sees the application's aliases and an
+   * edit to it, or to what it imports, is what the next call reads.
    */
-  const rewriteUnbuilt = async (
+  const devValues = async (
+    file: string,
+    params: Readonly<Record<string, string>>,
+  ): Promise<unknown> => {
+    const environment = devServer?.environments.rsc;
+    if (environment === undefined || !('runner' in environment)) {
+      throw new Error('the rsc environment cannot run a paths.ts');
+    }
+    const { runner } = environment as RunnableDevEnvironment;
+    const { default: values } = (await runner.import(
+      path.join(routesDir, file),
+    )) as { default?: unknown };
+    if (typeof values !== 'function') {
+      throw new TypeError(
+        `${fromRoot(file)} has to export default a function returning its parameter's values`,
+      );
+    }
+    return (values as (above: typeof params) => unknown)(params);
+  };
+
+  /**
+   * What the build would write, as the paths.ts files say now. Kept until a
+   * file under `routes/` changes — and asked for again when a request names
+   * a value it does not hold, since the values come from data that changes
+   * with no file changing.
+   */
+  const devPlan = (again = false): Promise<DevPlan> => {
+    if (again) planRead = undefined;
+    return (planRead ??= (async () => {
+      const { tree } = await devRoutes();
+      let supplied;
+      try {
+        supplied = await suppliedFrom(tree, devValues);
+      } catch (error) {
+        // 覚えない。値の出どころが直れば、ファイルが変わらなくても次で読める
+        planRead = undefined;
+        const message = `k8ordo: a paths.ts failed, so vite dev renders every value with page.tsx: ${messageOf(error)}`;
+        if (!warned.has(message)) {
+          warned.add(message);
+          logger?.error(message);
+        }
+        return NO_PLAN;
+      }
+      const plan = planPaths(tree, supplied.locations);
+      for (const refusal of [
+        ...supplied.problems,
+        ...planRefusals(
+          plan,
+          shadowedShells(tree, plan.shells, new Set(plan.paths)),
+        ),
+      ]) {
+        if (warned.has(refusal)) continue;
+        warned.add(refusal);
+        logger?.warn(`k8ordo: the build will refuse this: ${refusal}`);
+      }
+      return { paths: new Set(plan.paths), shells: plan.shells, failed: false };
+    })());
+  };
+
+  /**
+   * Under `vite dev`, a value no paths.ts returns is answered as the build's
+   * host would answer it — so what works locally is what is deployed. With a
+   * fallback.tsx beside its page, that is the shell: the URL is rewritten to
+   * the shell pathname before the RSC plugin's handler reads it. Without
+   * one, it is the not-found: a document is rewritten to the pathname the
+   * build renders `404.html` from, and a payload — a file the host does not
+   * have — is a plain 404, which the browser answers by loading the
+   * document. Everything else passes untouched.
+   */
+  const answerUnbuilt = async (
     request: Connect.IncomingMessage,
-  ): Promise<void> => {
+    response: ServerResponse,
+  ): Promise<boolean> => {
     if (request.method !== 'GET' && request.method !== 'HEAD') {
-      return;
+      return false;
     }
     // RSC プラグインと同じく originalUrl を読む。base はそちらに残っている
     const url = new URL(request.originalUrl ?? request.url ?? '/', ORIGIN);
     const own = withoutBase(url.pathname, base);
     if (own === null) {
-      return;
+      return false;
     }
     const payload = isPayloadPath(own);
     const page = payload ? pagePathFor(own) : own;
     const routes = await devRoutes();
-    if (routes.failed || routes.shapes.length === 0) {
-      return;
+    if (routes.failed) {
+      return false;
     }
-    // 殻の形に合わない URL は、遅い paths を待たせない
-    if (
-      !routes.shapes.some((shape) =>
-        new URLPattern({ pathname: shape.pattern }).test({ pathname: page }),
-      )
-    ) {
-      return;
-    }
-    const state = await devShells();
-    if (state.shells.length === 0) {
-      return;
+    // 値の要らない URL（モジュールやアセットを含む）は、遅い paths.ts を待たせない
+    if (!routes.needing.some((matcher) => matcher.test({ pathname: page }))) {
+      return false;
     }
     const pathname = normalizePathname(page);
+    // 表で先に宣言された、値の要らないパターンが答える URL（/posts/new など）
+    const first = routes.declared.find(({ matcher }) =>
+      matcher.test({ pathname }),
+    );
+    if (first === undefined || isConcrete(first.pattern)) {
+      return false;
+    }
     if (
-      state.paths.has(pathname) ||
       pathname
         .split('/')
         .some((segment) => decodePathname(segment) === FALLBACK_SEGMENT)
     ) {
-      return;
+      return false;
     }
+    let state = await devPlan();
+    if (!state.failed && !state.paths.has(pathname)) {
+      state = await devPlan(true);
+    }
+    if (state.failed || state.paths.has(pathname)) {
+      return false;
+    }
+    const notice = (key: string, message: string): void => {
+      if (noticed.has(key)) return;
+      noticed.add(key);
+      logger?.info(message);
+    };
     // ホストと同じ規則を同じ順に試す。殻を渡された順に試すと、具体的な場所を
     // 先に並べた _redirects とは別の殻で答えることがある。ペイロードもページの
     // pathname で比べるので、文書の規則だけで足りる
     const answered = shellRules(state.shells, '/')
       .filter((rule) => rule.to.endsWith('/'))
       .find((rule) => rewriteFor([rule], page) !== null);
-    if (answered === undefined) {
-      return;
+    if (answered !== undefined) {
+      const shell = answered.to.slice(0, -1);
+      const target = `${withBase(payload ? `${shell}/index.rsc` : shell, base)}${url.search}`;
+      request.originalUrl = target;
+      request.url = target;
+      const pattern = state.shells.find((each) =>
+        shellRules([each], '/').some((rule) => rule.from === answered.from),
+      )?.pattern;
+      const fallback = routes.shapes.find(
+        (shape) => shape.pattern === pattern,
+      )?.file;
+      if (fallback !== undefined) {
+        notice(
+          fallback,
+          `k8ordo: no paths.ts returns ${pathname}, so vite dev answers it with ${fallback}'s shell, as the build's host will`,
+        );
+      }
+      return false;
     }
-    const shell = answered.to.slice(0, -1);
-    const target = `${withBase(payload ? `${shell}/index.rsc` : shell, base)}${url.search}`;
+    notice(
+      first.pattern,
+      `k8ordo: no paths.ts returns ${pathname}, so vite dev answers it with the not-found, as the build's host will — return its value from the paths.ts of ${first.pattern} to render it`,
+    );
+    const notFoundAt = catchAllPath(routes.tree);
+    if (payload || notFoundAt === null) {
+      response.writeHead(404).end();
+      return true;
+    }
+    const target = `${withBase(notFoundAt, base)}${url.search}`;
     request.originalUrl = target;
     request.url = target;
-    const pattern = state.shells.find((each) =>
-      shellRules([each], '/').some((rule) => rule.from === answered.from),
-    )?.pattern;
-    const fallback = routes.shapes.find(
-      (shape) => shape.pattern === pattern,
-    )?.file;
-    if (fallback !== undefined && !noticed.has(fallback)) {
-      noticed.add(fallback);
-      logger?.info(
-        `k8ordo: ${pathname} is not in "paths", so vite dev answers it with ${fallback}'s shell — list it in "paths" to render page.tsx`,
-      );
-    }
+    return false;
   };
 
   /**
@@ -483,18 +563,9 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
       // ハンドラの前に入る。モジュールの URL を殻の規則が取ることはない
       order: 'pre',
       handler(server) {
-        void devRoutes()
-          .then((routes) =>
-            routes.shapes.length > 0 ? devShells() : undefined,
-          )
-          .catch(() => undefined);
+        devServer = server;
         return () => {
-          server.middlewares.use(
-            middlewareOf(async (request) => {
-              await rewriteUnbuilt(request);
-              return false;
-            }),
-          );
+          server.middlewares.use(middlewareOf(answerUnbuilt));
         };
       },
     },
@@ -558,7 +629,9 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
       // `routes` と `routes-x` を取り違えないよう、区切りまで含めて見る
       if (!path.resolve(file).startsWith(`${routesDir}${path.sep}`)) return;
       routesRead = undefined;
-      shellsRead = undefined;
+      planRead = undefined;
+      noticed.clear();
+      warned.clear();
     },
 
     // Ahead of Vite's own resolver, which would answer the specifier first.
@@ -630,16 +703,31 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
       order: 'post',
       async handler(builder) {
         const { tree } = parseRouteTree(await scanRoutes(routesDir));
-        const plan = planPaths(
-          tree,
-          (await options.paths?.(patternsNeedingPaths(tree))) ?? [],
-        );
+        const rscOut = builder.environments.rsc?.config.build.outDir;
+        const client = builder.environments.client?.config;
+        if (rscOut === undefined || client === undefined) {
+          throw new Error('static build ran without the rsc/client builds');
+        }
+        // 値を返す paths.ts も、ページと同じく組み上がったバンドルから読む
+        const built = (await import(
+          pathToFileURL(path.resolve(root, rscOut, 'index.js')).href
+        )) as {
+          default: Handler;
+          pathValues: (
+            file: string,
+            params: Readonly<Record<string, string>>,
+          ) => Promise<unknown>;
+          payloadOf: (response: Response) => ArrayBuffer | undefined;
+        };
+        const supplied = await suppliedFrom(tree, built.pathValues);
+        const plan = planPaths(tree, supplied.locations);
         const answers = answersOf(tree, plan.paths);
         // RSC の仕組みは action とリクエストの API をどちらのモードでもコンパイル
         // するので、static で受けないと言えるのはビルドが断るときだけ
         const actions = serverActionModules(builder.config);
         const importers = [...serverImporters].toSorted();
         const refusals = [
+          ...supplied.problems,
           ...planRefusals(
             plan,
             shadowedShells(tree, plan.shells, new Set(plan.paths)),
@@ -654,21 +742,10 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         ];
         if (refusals.length > 0) throw new Error(refusals.join('\n\n'));
 
-        const rscOut = builder.environments.rsc?.config.build.outDir;
-        const client = builder.environments.client?.config;
-        if (rscOut === undefined || client === undefined) {
-          throw new Error('static build ran without the rsc/client builds');
-        }
         // outDir はすでに絶対パスのことがあるので resolve で受ける
         const clientDir = path.resolve(root, client.build.outDir);
         const origin =
           options.site === undefined ? ORIGIN : new URL(options.site).origin;
-        const built = (await import(
-          pathToFileURL(path.resolve(root, rscOut, 'index.js')).href
-        )) as {
-          default: Handler;
-          payloadOf: (response: Response) => ArrayBuffer | undefined;
-        };
         const render: Render = {
           handler: built.default,
           payloadOf: built.payloadOf,
@@ -900,11 +977,11 @@ const FAILURES = {
   route: (names: readonly string[]) =>
     `static build writes a route.ts from a GET that answers 200, and these did not: ${names.join(', ')}`,
   refused: (names: readonly string[]) =>
-    `the "paths" option supplied pathnames a params schema refused: ${names.join(', ')}`,
+    `a paths.ts returned values a params schema refused: ${names.join(', ')}`,
   disowned: (names: readonly string[]) =>
-    `the "paths" option supplied pathnames whose page called notFound(): ${names.join(', ')}`,
+    `a paths.ts returned values whose page called notFound(): ${names.join(', ')}`,
   shellRefused: (names: readonly string[]) =>
-    `the "paths" option supplied shell locations a params schema refused: ${names.join(', ')}`,
+    `the shells stand where a params schema refuses the values above them: ${names.join(', ')}`,
   shellDisowned: (names: readonly string[]) =>
     names
       .map(
@@ -1020,7 +1097,7 @@ const renderShell = async (
   if (answered.shell !== shell.pattern) {
     return failed(
       'shellTaken',
-      `the shell for ${named} was answered by ${fallbacks.get(answered.shell) ?? answered.shell}, which the table tries first — supply shell locations that pattern cannot match`,
+      `the shell for ${named} was answered by ${fallbacks.get(answered.shell) ?? answered.shell}, which the table tries first — put the shell where that pattern cannot match, with a paths.ts above it`,
     );
   }
   if (answered.payload === null) return failed('render', shell.location);

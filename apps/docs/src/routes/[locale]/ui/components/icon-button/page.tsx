@@ -1,4 +1,5 @@
-import { Anchor, CloseIcon, Heading, IconButton, Separator } from '@k8ordo/ui';
+import { Anchor, Heading, IconButton, Separator } from '@k8ordo/ui';
+import { XIcon } from '@k8ordo/ui/icons';
 
 import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
@@ -46,14 +47,14 @@ export default function IconButtonPage() {
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview
-            code={`import { CloseIcon } from '@k8ordo/ui';
+            code={`import { XIcon } from '@k8ordo/ui/icons';
 
 <IconButton label="Close">
-  <CloseIcon size="sm" />
+  <XIcon size="sm" />
 </IconButton>`}
           >
             <IconButton label="Close">
-              <CloseIcon size="sm" />
+              <XIcon size="sm" />
             </IconButton>
           </ComponentPreview>
         </div>
@@ -64,23 +65,23 @@ export default function IconButtonPage() {
           </Heading>
           <ComponentPreview
             code={`<IconButton label="Close" size="sm">
-  <CloseIcon size="sm" />
+  <XIcon size="sm" />
 </IconButton>
 <IconButton label="Close" size="md">
-  <CloseIcon size="sm" />
+  <XIcon size="sm" />
 </IconButton>
 <IconButton label="Close" size="lg">
-  <CloseIcon size="sm" />
+  <XIcon size="sm" />
 </IconButton>`}
           >
             <IconButton label="Close" size="sm">
-              <CloseIcon size="sm" />
+              <XIcon size="sm" />
             </IconButton>
             <IconButton label="Close" size="md">
-              <CloseIcon size="sm" />
+              <XIcon size="sm" />
             </IconButton>
             <IconButton label="Close" size="lg">
-              <CloseIcon size="sm" />
+              <XIcon size="sm" />
             </IconButton>
           </ComponentPreview>
         </div>
@@ -91,29 +92,29 @@ export default function IconButtonPage() {
           </Heading>
           <ComponentPreview
             code={`<IconButton color="transparent" label="Close">
-  <CloseIcon size="sm" />
+  <XIcon size="sm" />
 </IconButton>
 <IconButton color="base" label="Close">
-  <CloseIcon size="sm" />
+  <XIcon size="sm" />
 </IconButton>
 <IconButton color="primary" label="Close">
-  <CloseIcon size="sm" />
+  <XIcon size="sm" />
 </IconButton>
 <IconButton color="secondary" label="Close">
-  <CloseIcon size="sm" />
+  <XIcon size="sm" />
 </IconButton>`}
           >
             <IconButton color="transparent" label="Close">
-              <CloseIcon size="sm" />
+              <XIcon size="sm" />
             </IconButton>
             <IconButton color="base" label="Close">
-              <CloseIcon size="sm" />
+              <XIcon size="sm" />
             </IconButton>
             <IconButton color="primary" label="Close">
-              <CloseIcon size="sm" />
+              <XIcon size="sm" />
             </IconButton>
             <IconButton color="secondary" label="Close">
-              <CloseIcon size="sm" />
+              <XIcon size="sm" />
             </IconButton>
           </ComponentPreview>
         </div>
@@ -124,11 +125,11 @@ export default function IconButtonPage() {
           </Heading>
           <ComponentPreview
             code={`<IconButton disabled label="Close">
-  <CloseIcon size="sm" />
+  <XIcon size="sm" />
 </IconButton>`}
           >
             <IconButton disabled label="Close">
-              <CloseIcon size="sm" />
+              <XIcon size="sm" />
             </IconButton>
           </ComponentPreview>
         </div>
@@ -152,7 +153,7 @@ export default function IconButtonPage() {
     </a>
   )}
 >
-  <CloseIcon size="sm" />
+  <XIcon size="sm" />
 </IconButton>`}
           >
             <IconButtonAsLinkPreview />

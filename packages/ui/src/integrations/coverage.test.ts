@@ -8,6 +8,7 @@ import * as ai from '../components/ai';
 import * as response from '../components/ai/response';
 import * as codeBlock from '../components/data-display/code-block';
 import * as icons from '../components/icons';
+import { iconMap } from './_shared/icon-map';
 import { catalog } from './json-render/catalog';
 
 // CodeBlock は server-only を import する。ここでは export の名前を読むだけなので外す
@@ -63,19 +64,29 @@ const LEFT_OUT: ReadonlyMap<string, string> = new Map([
     'Markdown が描いた素の HTML を整える入れ物。spec が置くのは自分の見た目を持つ部品なので、効くものが無い（流れは Stack で組む）',
   ],
   [
+    'BaseIcon',
+    'アイコンを自作するための土台で、自分の絵を持たない。spec は name で絵を選ぶので、選ぶものが無い',
+  ],
+  [
     'TableOfContents',
     '文書の見出しの id を指し、スクロールに合わせて今の見出しを示す部品。spec の見出しは id を持たないので、指す先が無い',
   ],
 ]);
 
-// 部品を export するエントリをすべて見る。/ai と /code-block は root に出ていない
+// 部品を export するエントリをすべて見る。/ai、/code-block、/icons は root に出ていない
 const exported = [
   ...Object.keys(root),
   ...Object.keys(ai),
   ...Object.keys(response),
   ...Object.keys(codeBlock),
+  ...Object.keys(icons),
 ];
-const iconExports = new Set(Object.keys(icons));
+const catalogIcons = new Set<unknown>(Object.values(iconMap));
+const catalogIconExports = new Set(
+  Object.entries(icons)
+    .filter(([, component]) => catalogIcons.has(component))
+    .map(([name]) => name),
+);
 const catalogNames: readonly string[] = catalog.componentNames;
 
 // アイコンは 1 つずつではなく、name で絵柄を選ぶ Icon 1 項目として載る
@@ -84,7 +95,8 @@ const entryOf = (name: string): string | undefined => {
     return name;
   }
   return (
-    RENAMED_IN_CATALOG.get(name) ?? (iconExports.has(name) ? 'Icon' : undefined)
+    RENAMED_IN_CATALOG.get(name) ??
+    (catalogIconExports.has(name) ? 'Icon' : undefined)
   );
 };
 

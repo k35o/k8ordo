@@ -2,8 +2,8 @@ import { clsx } from 'clsx';
 import type { FC, ReactNode } from 'react';
 
 import { getMessages } from '../../../i18n/current';
-import { ExternalLinkIcon } from '../../icons';
-import { FileIcon } from '../_internal/icons';
+import { ExternalLinkIcon } from '../../icons/external-link';
+import { FileIcon } from '../../icons/file';
 
 import focusRing from '../../_internal/focus-ring.module.css';
 import styles from './source.module.css';

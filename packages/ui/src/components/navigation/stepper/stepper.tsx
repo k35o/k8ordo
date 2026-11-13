@@ -7,7 +7,7 @@ import { flushSync } from 'react-dom';
 
 import { useControllableState } from '../../../hooks/controllable-state';
 import { getMessages } from '../../../i18n/current';
-import { CheckIcon } from '../../icons';
+import { CheckIcon } from '../../icons/check';
 
 import focusRing from '../../_internal/focus-ring.module.css';
 import srOnly from '../../_internal/sr-only.module.css';

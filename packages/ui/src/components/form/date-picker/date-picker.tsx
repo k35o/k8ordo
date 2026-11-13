@@ -8,7 +8,7 @@ import { useFormStatus } from 'react-dom';
 import { mergeRefs } from '../../../helpers/merge-refs';
 import { getMessages } from '../../../i18n/current';
 import { commitInputValue } from '../../../internal/commit-input-value';
-import { PublishDateIcon } from '../../icons';
+import { CalendarIcon } from '../../icons/calendar';
 import { Popover } from '../../overlays/popover';
 import { Calendar } from '../calendar';
 
@@ -107,7 +107,7 @@ export const DatePicker: FC<Props> = ({
               disabled={locked}
               type="button"
             >
-              <PublishDateIcon size="sm" />
+              <CalendarIcon size="sm" />
             </button>
           )}
         />

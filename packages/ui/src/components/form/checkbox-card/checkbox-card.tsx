@@ -10,7 +10,7 @@ import type {
 } from 'react';
 import { useId } from 'react';
 
-import { CheckIcon } from '../../icons';
+import { CheckIcon } from '../../icons/check';
 
 import srOnly from '../../_internal/sr-only.module.css';
 import styles from './checkbox-card.module.css';

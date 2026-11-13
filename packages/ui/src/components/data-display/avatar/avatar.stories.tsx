@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 
-import { AssistantIcon } from '../../icons';
+import { BotMessageIcon } from '../../icons/bot-message';
 import { Avatar } from './avatar';
 
 import styles from './avatar.stories.module.css';
@@ -43,16 +43,16 @@ export const Large: Story = {
 export const WithIcon: Story = {
   args: {
     name: 'AI',
-    icon: <AssistantIcon />,
+    icon: <BotMessageIcon />,
   },
 };
 
 export const AccentColors: Story = {
   render: () => (
     <div className={styles.row}>
-      <Avatar icon={<AssistantIcon />} name="AI" />
-      <Avatar color="primary" icon={<AssistantIcon />} name="AI" />
-      <Avatar color="secondary" icon={<AssistantIcon />} name="AI" />
+      <Avatar icon={<BotMessageIcon />} name="AI" />
+      <Avatar color="primary" icon={<BotMessageIcon />} name="AI" />
+      <Avatar color="secondary" icon={<BotMessageIcon />} name="AI" />
     </div>
   ),
 };

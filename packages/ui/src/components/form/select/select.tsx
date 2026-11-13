@@ -7,7 +7,7 @@ import { useFormStatus } from 'react-dom';
 
 import type { Option } from '../../../types/variables';
 import { ignoreSelectKeys } from '../../_internal/ignore-changes';
-import { ChevronIcon } from '../../icons';
+import { ChevronIcon } from '../../icons/chevron';
 import { chain } from './../../../helpers/chain';
 import { mergeRefs } from './../../../helpers/merge-refs';
 

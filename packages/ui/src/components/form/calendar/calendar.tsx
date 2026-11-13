@@ -32,7 +32,7 @@ import {
   subscribeToDateChange,
 } from '../../../internal/iso-date';
 import { IconButton } from '../../buttons/icon-button';
-import { ChevronIcon } from '../../icons';
+import { ChevronIcon } from '../../icons/chevron';
 
 import focusRing from '../../_internal/focus-ring.module.css';
 import styles from './calendar.module.css';

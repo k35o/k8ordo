@@ -3,8 +3,8 @@ import { TimeZone } from '../../../components/time-zone';
 import { locales } from '../../../i18n';
 import { aboutTitle, openedOn } from '../../../messages/about';
 
-// /en/about と /ja/about だけのページ。/:locale は vite.config.ts の paths で
-// locales.paths がロケールの数だけ展開し、ビルドはロケールごとに 1 枚書く。
+// /en/about と /ja/about だけのページ。/:locale の値は [locale]/paths.ts が
+// ロケールの数だけ返し、ビルドはロケールごとに 1 枚書く。
 // ロケールを受け取るスキーマは [locale]/layout.tsx にある
 
 // 開いた時刻。ロケールの timeZone で書くので、en（UTC）では 9 月 1 日、

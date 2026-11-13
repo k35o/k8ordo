@@ -1,6 +1,7 @@
 'use client';
 
-import { DarkModeIcon, DropdownMenu } from '@k8ordo/ui';
+import { DropdownMenu } from '@k8ordo/ui';
+import { MoonIcon } from '@k8ordo/ui/icons';
 
 export function DropdownMenuBasicPreview() {
   return (
@@ -18,10 +19,7 @@ export function DropdownMenuBasicPreview() {
 export function DropdownMenuIconTriggerPreview() {
   return (
     <DropdownMenu.Root>
-      <DropdownMenu.IconTrigger
-        icon={<DarkModeIcon size="lg" />}
-        label="Theme"
-      />
+      <DropdownMenu.IconTrigger icon={<MoonIcon size="lg" />} label="Theme" />
       <DropdownMenu.Content>
         <DropdownMenu.Item label="Light" onAction={() => undefined} />
         <DropdownMenu.Item label="Dark" onAction={() => undefined} />
