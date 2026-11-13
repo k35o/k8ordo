@@ -544,6 +544,22 @@ const home = (extra: Record<string, Answer> = {}): Record<string, Answer> => ({
 
 describe('a route.ts at a file the build writes itself', () => {
   describe('異常系', () => {
+    it('names a route.ts paths gave 404.html beside a not-found.tsx, and one at _redirects beside a fallback.tsx, in one error', async () => {
+      await routeFiles([
+        ...POSTS,
+        'not-found.tsx',
+        '[file]/route.ts',
+        '_redirects/route.ts',
+      ]);
+      await handlerAnswering(site());
+
+      await expect(
+        hooks({ paths: () => ['/posts/1', '/404.html'] }).build(),
+      ).rejects.toThrow(
+        `${TAKEN}\n  404.html: src/routes/[file]/route.ts, and src/routes/not-found.tsx is written there\n  _redirects: src/routes/_redirects/route.ts, and the shells of src/routes/posts/[id]/fallback.tsx are reached through it — rules of your own go in public/_redirects, which the build adds to its own`,
+      );
+    });
+
     it('names in one error a route.ts at /, one with a page below it and one at a file the build writes', async () => {
       await rm(path.join(root, 'src', 'routes', 'page.tsx'));
       await routeFiles([

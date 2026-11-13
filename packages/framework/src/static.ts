@@ -708,13 +708,14 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
             : [],
         );
         // アプリが route.ts で書いた sitemap.xml は、そのサイトの一覧。上書きしない
-        const listsItself =
-          options.site !== undefined &&
-          answers.get(SITEMAP_PATHNAME)?.kind !== 'route';
-        if (options.site !== undefined && listsItself) {
+        const listed =
+          answers.get(SITEMAP_PATHNAME)?.kind === 'route'
+            ? undefined
+            : options.site;
+        if (listed !== undefined) {
           await writeSitemap(
             clientDir,
-            options.site,
+            listed,
             plan.paths
               .filter((pathname) => !notPages.includes(pathname))
               .map((pathname) => withBase(pathname, base)),
@@ -746,7 +747,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         builder.config.logger.info(
           `k8ordo: wrote ${summaryOf(plan, {
             notFound: notFoundAt !== null,
-            sitemap: listsItself,
+            sitemap: listed !== undefined,
           })}`,
         );
       },
