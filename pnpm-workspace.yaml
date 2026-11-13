@@ -33,17 +33,17 @@ catalog:
   '@types/react-dom': 19.3.0
   '@vitejs/plugin-basic-ssl': 2.3.0
   '@vitejs/plugin-react': 6.1.2
-  '@vitest/browser': 5.0.5
-  '@vitest/browser-playwright': 5.0.5
-  '@vitest/browser-preview': 5.0.5
-  '@vitest/coverage-v8': 5.0.5
-  '@vitest/expect': 5.0.5
-  '@vitest/mocker': 5.0.5
-  '@vitest/pretty-format': 5.0.5
-  '@vitest/snapshot': 5.0.5
-  '@vitest/spy': 5.0.5
-  '@vitest/ui': 5.0.5
-  '@vitest/utils': 5.0.5
+  '@vitest/browser': 5.1.0
+  '@vitest/browser-playwright': 5.1.0
+  '@vitest/browser-preview': 5.1.0
+  '@vitest/coverage-v8': 5.1.0
+  '@vitest/expect': 5.1.0
+  '@vitest/mocker': 5.1.0
+  '@vitest/pretty-format': 5.1.0
+  '@vitest/snapshot': 5.1.0
+  '@vitest/spy': 5.1.0
+  '@vitest/ui': 5.1.0
+  '@vitest/utils': 5.1.0
   # @k8ordo/ui/ai-sdk の peer。example が使う @ai-sdk/react は ai を exact で
   # 持つので、上げるときは同じ ai を持つ @ai-sdk/react と揃えて 1 コピーに保つ。
   ai: 7.0.163
@@ -67,7 +67,7 @@ catalog:
   # expect.element の型が消えるため。
   vite: npm:@voidzero-dev/vite-plus-core@1.4.0
   vite-plus: 1.4.0
-  vitest: 5.0.5
+  vitest: 5.1.0
   vitest-browser-react: 2.3.0
   zod: 4.6.7
 
