@@ -118,6 +118,12 @@ describe('vite dev under a value paths does not list', () => {
     expect(body).not.toContain('third post');
   });
 
+  it('sends the headers framework() declared, as the deployed site would', async () => {
+    const response = await fetch(new URL('/en/posts/3', origin()));
+
+    expect(response.headers.get('x-content-type-options')).toBe('nosniff');
+  });
+
   it('answers its payload with the shell’s', async () => {
     const { status, body } = await answerOf('/en/posts/3/index.rsc');
 

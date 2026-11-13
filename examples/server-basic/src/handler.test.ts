@@ -387,6 +387,31 @@ describe('a page that exports search', () => {
   });
 });
 
+describe('the headers framework() declared', () => {
+  it('are on every answer of the handler, a 404 included', async () => {
+    const page = await handler(new Request(`${ORIGIN}/`));
+    const missing = await handler(new Request(`${ORIGIN}/nowhere`));
+
+    expect(missing.status).toBe(404);
+    expect(
+      [page, missing].map((response) =>
+        response.headers.get('referrer-policy'),
+      ),
+    ).toStrictEqual([
+      'strict-origin-when-cross-origin',
+      'strict-origin-when-cross-origin',
+    ]);
+  });
+
+  it('leave a header the guard wrote for the request as the guard wrote it', async () => {
+    const response = await handler(new Request(`${ORIGIN}/`));
+
+    expect(response.headers.get('content-security-policy')).toContain(
+      "script-src 'nonce-",
+    );
+  });
+});
+
 describe('route.ts', () => {
   it('answers with what its GET returns, reading the request it was handed', async () => {
     const response = await handler(new Request(`${ORIGIN}/feed.xml`));

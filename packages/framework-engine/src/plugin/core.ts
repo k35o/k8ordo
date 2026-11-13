@@ -197,6 +197,9 @@ export const engine = (
           // The handler is the same function in both modes; this is how it
           // knows whether there is a request to hand a page.
           'import.meta.env.K8ORDO_MODE': JSON.stringify(host.mode),
+          'import.meta.env.K8ORDO_HEADERS': JSON.stringify(
+            options.headers ?? {},
+          ),
         },
         // The engine's runtime lives in node_modules while the application's
         // pages live in its own tree; without this they resolve React

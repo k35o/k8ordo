@@ -197,6 +197,21 @@ export default defineConfig({
   plugins: [framework({ mode: 'server' }), vercel()],
 });`;
 
+const HEADERS = `import { framework } from '@k8ordo/framework/vite';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [
+    framework({
+      mode: 'static',
+      headers: {
+        'X-Content-Type-Options': 'nosniff',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+      },
+    }),
+  ],
+});`;
+
 const BASE = `import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
 
@@ -491,6 +506,29 @@ export default function FrameworkDeployPage() {
             <Rich>{t.vercelBundle()}</Rich>
           </p>
         </DocSubsection>
+      </DocSection>
+
+      <DocSection id="headers" title={t.headersTitle}>
+        <CodeBlock
+          code={HEADERS}
+          lang="ts"
+          marks={{
+            8: 'highlight',
+            9: 'highlight',
+            10: 'highlight',
+            11: 'highlight',
+          }}
+          title="vite.config.ts"
+        />
+        <p>
+          <Rich>{t.headersWhat()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.headersOwn()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.headersNot()}</Rich>
+        </p>
       </DocSection>
 
       <DocSection id="tabs" title={t.tabsTitle}>

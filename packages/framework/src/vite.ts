@@ -4,6 +4,7 @@ import { engine } from '@k8ordo/framework-engine';
 import type { EngineOptions } from '@k8ordo/framework-engine';
 import type { PluginOption } from 'vite';
 
+import { headersPlugin, headersRefusal } from './headers';
 import { serverMode } from './server-mode';
 import { staticMode } from './static';
 import type { StaticOptions } from './static';
@@ -52,6 +53,8 @@ const checked = (options: unknown): FrameworkOptions => {
       "framework() takes no paths — a parameter's values come from a paths.ts in its directory under routes/",
     );
   }
+  const refused = headersRefusal(given.headers);
+  if (refused !== null) throw new Error(refused);
   const staticOnly = STATIC_ONLY.filter((name) => given[name] !== undefined);
   if (mode === 'server' && staticOnly.length > 0) {
     throw new Error(
@@ -73,6 +76,8 @@ const checked = (options: unknown): FrameworkOptions => {
 export const framework = (options: FrameworkOptions): PluginOption[] => {
   const valid = checked(options);
   return [
+    // どの middleware より先に並べる。答えるものが何であれ、ヘッダーは付いている
+    headersPlugin(valid.headers ?? {}),
     ...engine(valid, { mode: valid.mode, runtimeDir: RUNTIME_DIR }),
     ...(valid.mode === 'static' ? staticMode(valid) : [serverMode()]),
   ];

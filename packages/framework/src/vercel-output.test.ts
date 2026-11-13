@@ -163,6 +163,32 @@ describe('writeVercelOutput', () => {
       await readFile(path.join(root, '.vercel', 'project.json'), 'utf8'),
     ).toBe('{}');
   });
+
+  it('adds the headers framework() declared ahead of every route, and goes on', async () => {
+    await writeVercelOutput(
+      root,
+      {
+        client: path.join(root, 'dist', 'client'),
+        rsc: path.join(root, 'dist', 'rsc'),
+        ssr: path.join(root, 'dist', 'ssr'),
+      },
+      '/',
+      { 'X-Content-Type-Options': 'nosniff' },
+    );
+
+    const { routes } = (await read('config.json')) as {
+      routes: readonly Route[];
+    };
+
+    expect(routes.slice(0, 2)).toStrictEqual([
+      {
+        src: '^/.*$',
+        headers: { 'X-Content-Type-Options': 'nosniff' },
+        continue: true,
+      },
+      { handle: 'filesystem' },
+    ]);
+  });
 });
 
 describe('writeVercelOutput under a base', () => {
@@ -278,13 +304,14 @@ describe('writeStaticVercelOutput', () => {
     await writeFile(path.join(client, 'assets', 'app-abc123.js'), 'export {};');
     await writeFile(path.join(client, '404.html'), '<p>not found</p>');
     await writeFile(path.join(client, '_redirects'), '/a /b 200\n');
+    await writeFile(path.join(client, '_headers'), '/*\n  X-A: b\n');
   });
 
   afterEach(async () => {
     await rm(built, { recursive: true, force: true });
   });
 
-  it('ships the client build as static files, without the _redirects Vercel never reads, and no function', async () => {
+  it('ships the client build as static files, without the _redirects and _headers Vercel never reads, and no function', async () => {
     await writeStatic('/', true);
     const written = path.join(built, '.vercel', 'output');
 
@@ -470,6 +497,31 @@ describe('writeStaticVercelOutput', () => {
         continue: true,
         important: true,
       },
+    ]);
+  });
+
+  it('adds the headers framework() declared ahead of beforeFiles, which may write a name over', async () => {
+    const beforeFiles = [
+      { src: '^/feed$', headers: { 'X-Frame-Options': 'SAMEORIGIN' } },
+    ];
+    await writeStaticVercelOutput(
+      { root: built, client: path.join(built, 'dist', 'client'), base: '/' },
+      { rewrites: [], notFound: false, types: new Map() },
+      { beforeFiles },
+      { 'X-Frame-Options': 'DENY' },
+    );
+
+    const { routes } = JSON.parse(
+      await readFile(
+        path.join(built, '.vercel', 'output', 'config.json'),
+        'utf8',
+      ),
+    ) as Config;
+
+    expect(routes.slice(0, 3)).toStrictEqual([
+      { src: '^/.*$', headers: { 'X-Frame-Options': 'DENY' }, continue: true },
+      ...beforeFiles,
+      { handle: 'filesystem' },
     ]);
   });
 

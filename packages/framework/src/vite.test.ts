@@ -61,6 +61,12 @@ describe('framework', () => {
     );
   });
 
+  it('refuses a header HTTP could not send when the config loads, not when a server first meets it', () => {
+    expect(() =>
+      framework({ mode: 'server', headers: { 'X-A': 'b\r\nX-B: c' } }),
+    ).toThrow('framework() cannot send the header X-A');
+  });
+
   it('refuses a missing or misspelt mode, rather than building neither', () => {
     // @ts-expect-error the mode is always chosen, never assumed
     expect(() => framework({})).toThrow(

@@ -415,8 +415,8 @@ pnpm check         # check:write to auto-fix
   does nothing — placed first it would copy the client before a page is
   written — and `k8ordo:static` calls its `api.writeStatic` once every file
   is in place, which writes from the plugin's own resolved config (`root`,
-  the client's `outDir`, `base`): the client without `_redirects` (Vercel never reads it, and
-  would serve it), no function, and the rewrites as routes after
+  the client's `outDir`, `base`): the client without `_redirects` and `_headers` (Vercel reads neither, and
+  would serve them), no function, and the rewrites as routes after
   `handle: 'filesystem'` — the payload URL of a built non-page, the shells'
   documents (`…/index.html`, a trailing slash allowed) and payloads —
   case-sensitive, then `404.html` under 404 when it was written — and each
@@ -433,6 +433,25 @@ pnpm check         # check:write to auto-fix
   `vite dev`, `vite preview` and `serve` never apply them; an imitation of
   Vercel's routing nothing here can check against Vercel would be worse
   than none.
+- **`headers` is declared once and sent by whatever answers.**
+  `framework({ headers })`, in either mode (the engine's `EngineOptions`),
+  is one set for every response and nothing finer: a header for some paths
+  stays with the host's own means (`vercel()`'s routes, `public/_headers`),
+  because a path grammar would have to mean the same on every host.
+  `headersRefusal` (`headers.ts`) refuses a name or value HTTP could not
+  send when the config loads — a line break would start a rule of its own
+  in `_headers`. `k8ordo:headers`, first among the plugins, sets them in
+  `vite dev` and `vite preview` before anything answers, and its `api` is
+  where `vercel()` reads them (`declaredHeaders`), writing one
+  `continue` route ahead of every other in either mode. The engine compiles
+  them into the handler (`K8ORDO_HEADERS`), which exports them as `headers`
+  — `serve` sets them from there before anything answers, files included —
+  and under `mode: 'server'` adds them to its own answers where the answer
+  has no header of that name, so a guard's `Content-Security-Policy` stays
+  and a runtime calling the handler itself sends them. A static build
+  writes `dist/client/_headers` (`formatHeaders`): a `/*` rule, then the
+  application's `public/_headers` verbatim, read from `publicDir` as
+  `_redirects` is; `vercel()` leaves that file out of what it ships.
 - **`serve` and `vite preview` serve a static build as a static host.**
   One resolver, `resolveStatic` (`static-host.ts`), in Netlify's order: the
   file, a directory's `index.html`, the first `200` rule of the build's
@@ -474,6 +493,9 @@ src/
   rewrites.ts       the _redirects rules: shellRules / builtRules /
                     formatRedirects / cloudflareCounts, and parseRedirects /
                     rewriteFor, which apply them — pure functions
+  headers.ts        the headers option: headersRefusal, formatHeaders (the
+                    _headers file), headersPlugin (vite dev and preview, and
+                    the api a host adapter reads) / declaredHeaders
   static-host.ts    resolveStatic / readRules — what a static host serves for
                     a URL of a static build; serve and vite preview share it
   documents.ts      sitemap / redirectPage — the two files the build writes

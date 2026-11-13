@@ -234,6 +234,17 @@ describe('the static build', () => {
     expect(read('_redirects')).toBe(REDIRECTS);
   });
 
+  it('writes _headers: the headers framework() declared, for every path', () => {
+    expect(read('_headers')).toBe(
+      [
+        '# @k8ordo/framework: the headers framework() declared for every response',
+        '/*',
+        '  X-Content-Type-Options: nosniff',
+        '',
+      ].join('\n'),
+    );
+  });
+
   it('says what it wrote, the shells by location', () => {
     expect(builtLog).toContain(
       'k8ordo: wrote 16 routes, 2 shells (/en/posts/:id, /ja/posts/:id) and 404.html and sitemap.xml and _redirects',
