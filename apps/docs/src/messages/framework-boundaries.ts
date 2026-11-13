@@ -21,8 +21,8 @@ export const serverDefault = message({
 });
 
 export const serverWhen = message({
-  ja: 'Server Componentが動く時点は、モードで違います。staticモードではビルドのときに動きます。ページごとにHTML用と`index.rsc`用の2回描画し、その結果がファイルになります。serverモードではリクエストのたびに動き、その時点のデータを読みます。`vite dev`では、どちらのモードもリクエストごとに動きます。',
-  en: 'When a Server Component runs depends on the mode. In static mode it runs at build time. Each page is rendered twice, once for its HTML and once for `index.rsc`, and the results become files. In server mode it runs on every request and reads the data as it is at that moment. With `vite dev` it runs on every request in either mode.',
+  ja: 'Server Componentが動く時点は、モードで違います。staticモードではビルドのときに動きます。ページごとに1回描画し、その結果が`index.html`と`index.rsc`になります。serverモードではリクエストのたびに動き、その時点のデータを読みます。`vite dev`では、どちらのモードもリクエストごとに動きます。',
+  en: 'When a Server Component runs depends on the mode. In static mode it runs at build time. Each page is rendered once, and the result becomes `index.html` and `index.rsc`. In server mode it runs on every request and reads the data as it is at that moment. With `vite dev` it runs on every request in either mode.',
 });
 
 export const clientTitle = message({

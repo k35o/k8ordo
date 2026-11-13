@@ -20,6 +20,8 @@ type Handler = (request: Request) => Promise<Response>;
 
 export type BuiltFixture = {
   readonly handler: Handler;
+  /** The entry's `payloadOf`: the payload a document written into a file was rendered from. */
+  readonly payloadOf: (response: Response) => ArrayBuffer | undefined;
   /** The mode the handler says it was built for (`entry.rsc`'s `mode`). */
   readonly mode: string;
   /** Where the build went: `rsc/`, `ssr/` and `client/` below it. */
@@ -127,9 +129,15 @@ export const buildFixture = async (
   });
   await builder.buildApp();
 
-  const { default: handler, mode: built } = (await import(
-    pathToFileURL(path.join(out, 'rsc', 'index.js')).href
-  )) as { default: Handler; mode: string };
+  const {
+    default: handler,
+    mode: built,
+    payloadOf,
+  } = (await import(pathToFileURL(path.join(out, 'rsc', 'index.js')).href)) as {
+    default: Handler;
+    mode: string;
+    payloadOf: BuiltFixture['payloadOf'];
+  };
   const answers: Array<Promise<Response>> = [];
   return {
     handler: (request) => {
@@ -138,6 +146,7 @@ export const buildFixture = async (
       return answer;
     },
     mode: built,
+    payloadOf,
     out,
     warnings,
     dispose: async () => {

@@ -522,6 +522,21 @@ pnpm check         # check:write to auto-fix
   row a not-found receives late, included — and that a server says
   nothing; `runtime/payload.test.ts` carries a name that is not ASCII
   through a header.
+- **A document written into a file keeps the payload it was rendered
+  from.** Under `'static'` `answerHtml` already reads the whole payload
+  before the HTML render starts; it keeps those bytes by the `Response` it
+  answers (a `WeakMap`), and `payloadOf(response)`, exported by `entry.rsc`,
+  hands them to the build, which writes them as the page's `index.rsc`
+  instead of asking the handler for the payload: one render per page, so a
+  page's data is read once per build and its HTML and payload cannot be two
+  renders that disagree. The key holds because nothing under `'static'` can
+  add a header or a cookie for `answer()` to rebuild the `Response` around.
+  `undefined` for a payload's own answer and under a running server.
+  `runtime/file-payload.test.ts` holds who keeps one; that the bytes are
+  what a request for the payload answers is `examples/static-basic`'s
+  `build.test.ts` to hold, on a production build — a test build bundles
+  React's development build, whose payload carries each render's times and
+  stacks.
 - **HTML rendered for another pathname is hydrated as rendered, then
   rendered where the browser is.** That is `404.html`, rendered once under
   the build's sentinel, and a fallback.tsx's shell, rendered for
@@ -959,6 +974,8 @@ fixtures/
   form-state/routes/         a form whose Server Action returns a client
                              component, which runtime/form-state.test.ts
                              posts without JavaScript
+  file-payload/routes/       one page, which runtime/file-payload.test.ts
+                             builds into files and asks for its document
   mdx-css/routes/            a page importing an .mdx and one reading another
                              through a glob, each .mdx importing CSS, which
                              runtime/mdx-css.test.ts builds with a stand-in

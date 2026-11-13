@@ -90,6 +90,21 @@ export const base = import.meta.env.BASE_URL;
 export const mode: Mode =
   import.meta.env.K8ORDO_MODE === 'static' ? 'static' : 'server';
 
+const filePayloads = new WeakMap<Response, ArrayBuffer>();
+
+/**
+ * The payload a document written into a file was rendered from: what a
+ * request for that page's payload would answer, byte for byte, without
+ * rendering the page a second time. The build into files writes it beside
+ * the HTML, so a page reads its data once per build, and the HTML and the
+ * payload of a page can never be two renders that disagree. Kept by the
+ * answer itself, which under `'static'` is the handler's own — nothing there
+ * can add a header or a cookie for `answer()` to rebuild it around.
+ * `undefined` for any other answer, a running server's included.
+ */
+export const payloadOf = (response: Response): ArrayBuffer | undefined =>
+  filePayloads.get(response);
+
 /**
  * What a `paths.ts` answers when asked for its parameter's values, given the
  * params above it. The build into files asks through here, from the built
@@ -737,8 +752,8 @@ const answerHtml = async (
   // read to its end first — a not-found's too, whose rows the HTML render
   // does not wait for — so the render is handed every client component it
   // names.
-  const [forHtml, forNamed] = rendered.stream.tee();
-  await drain(forNamed);
+  const [forHtml, forFile] = rendered.stream.tee();
+  const payload = await new Response(forFile).arrayBuffer();
   const linked = new Set<string>();
   let body: ArrayBuffer;
   try {
@@ -764,7 +779,7 @@ const answerHtml = async (
   }
   const failed = rendered.failures[0];
   if (failed !== undefined) return renderFailed(failed);
-  return new Response(body, {
+  const response = new Response(body, {
     status,
     headers: {
       'content-type': HTML_TYPE,
@@ -774,6 +789,8 @@ const answerHtml = async (
       ...headers,
     },
   });
+  filePayloads.set(response, payload);
+  return response;
 };
 
 /**

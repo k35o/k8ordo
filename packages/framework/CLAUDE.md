@@ -71,7 +71,9 @@ pnpm check         # check:write to auto-fix
   the file name alone, since one under a `.`-prefixed directory is not one.
 - **The handler is the engine's, not ours.** Prerendering calls
   `dist/rsc/index.js`, the engine's request handler compiled for
-  `mode: 'static'` — once for each page's HTML and once for its payload —
+  `mode: 'static'` — once for each page, whose HTML and the payload it was
+  rendered from (the engine's `payloadOf`) are both written, so a page reads
+  its data once per build and its two files are one render —
   and `serve` loads the same handler compiled for `mode: 'server'`. If a page
   renders differently under the two modes, something has leaked.
 - **`site` and `csp` are static mode's options, in the type and when the
