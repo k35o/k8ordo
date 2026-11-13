@@ -293,7 +293,7 @@ pnpm check         # check:write to auto-fix
   each route.ts that cannot be its file: one at `/`, one with written
   pathnames below it (a file cannot also be a directory), and one at a file
   the build writes itself — a page's or a redirect's `index.html`, a page's
-  `index.rsc`, `404.html`, `sitemap.xml` under `site`, `_redirects` with
+  `index.rsc`, `404.html`, `_redirects` with
   shells, `client-files.json`: those are written after the routes' files (a
   page's beside them), so one would replace the other unseen. A file keeps
   no type, so the `Content-Type` its
@@ -346,9 +346,15 @@ pnpm check         # check:write to auto-fix
   computation, `src/static.test.ts` the wiring and the refusal, and
   `examples/static-basic`'s `build.test.ts` the built list and the site
   that reads it.
-- **`site` is the only reason a sitemap exists.** Without the origin a
+- **`site` is the only reason the build writes a sitemap, and a `route.ts`
+  at `sitemap.xml` is the reason it does not.** Without the origin a
   sitemap would list relative URLs, which is not a sitemap; with it every
   page the build wrote is listed, redirects and the not-found excluded.
+  Where a `route.ts` answers `/sitemap.xml` (`SITEMAP_PATHNAME`, asked of
+  `answersOf`, so one a `[file]/route.ts` writes counts too) the file is the
+  application's — its own `lastmod`, its own order — and the build writes
+  none over it. It is the one file of the build's a `route.ts` may take;
+  the others are refused (`routeFileRefusals`).
 - **The pattern walk is the engine's.** `patternsOf` is
   `declaredPatterns(tree)` from the engine, in the matcher's order, so the
   build, the shadow check and the prerenderer never disagree; the trailing

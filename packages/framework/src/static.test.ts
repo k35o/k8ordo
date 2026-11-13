@@ -618,21 +618,6 @@ const home = (extra: Record<string, Answer> = {}): Record<string, Answer> => ({
 
 describe('a route.ts at a file the build writes itself', () => {
   describe('異常系', () => {
-    it('stops before writing anything, naming the route.ts and the "site" option, when both write sitemap.xml', async () => {
-      await routeFiles(['sitemap.xml/route.ts']);
-      await handlerAnswering(
-        home({ '/sitemap.xml': { body: '<urlset>own</urlset>' } }),
-      );
-
-      await expect(
-        hooks({ site: 'https://example.com' }).build(),
-      ).rejects.toThrow(
-        `${TAKEN}\n  sitemap.xml: src/routes/sitemap.xml/route.ts, and the "site" option writes it`,
-      );
-      await expect(clientFile('sitemap.xml')).rejects.toThrow(/ENOENT/u);
-      await expect(clientFile('index.html')).rejects.toThrow(/ENOENT/u);
-    });
-
     it('names a route.ts paths gave 404.html beside a not-found.tsx, and one at _redirects beside a fallback.tsx, in one error', async () => {
       await routeFiles([
         ...POSTS,
@@ -654,14 +639,14 @@ describe('a route.ts at a file the build writes itself', () => {
         'route.ts',
         'feed/route.ts',
         'feed/latest/page.tsx',
-        'sitemap.xml/route.ts',
+        'client-files.json/route.ts',
       ]);
       await handlerAnswering({});
 
       await expect(
         hooks({ site: 'https://example.com' }).build(),
       ).rejects.toThrow(
-        `${TAKEN}\n  /: src/routes/route.ts, and a static host serves / from index.html\n  feed: src/routes/feed/route.ts, and /feed/latest is written below it\n  sitemap.xml: src/routes/sitemap.xml/route.ts, and the "site" option writes it`,
+        `${TAKEN}\n  /: src/routes/route.ts, and a static host serves / from index.html\n  client-files.json: src/routes/client-files.json/route.ts, and the build lists there what each page loads beyond its payload\n  feed: src/routes/feed/route.ts, and /feed/latest is written below it`,
       );
     });
 
@@ -691,6 +676,19 @@ describe('a route.ts at a file the build writes itself', () => {
   });
 
   describe('正常系', () => {
+    it('leaves sitemap.xml to a route.ts that writes it, "site" given or not: the application’s own list is the site’s', async () => {
+      await routeFiles(['sitemap.xml/route.ts']);
+      await handlerAnswering(
+        home({ '/sitemap.xml': { body: '<urlset>own</urlset>' } }),
+      );
+      const { build, said } = hooks({ site: 'https://example.com' });
+
+      await build();
+
+      expect(await clientFile('sitemap.xml')).toBe('<urlset>own</urlset>');
+      expect(said.info).toStrictEqual(['k8ordo: wrote 2 routes']);
+    });
+
     it('writes a route.ts at sitemap.xml as its own file when no "site" is given', async () => {
       await routeFiles(['sitemap.xml/route.ts']);
       await handlerAnswering(

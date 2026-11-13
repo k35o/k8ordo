@@ -67,6 +67,7 @@ import {
   planRefusals,
   routeFileRefusals,
   shadowedShells,
+  SITEMAP_PATHNAME,
   suppliedFrom,
 } from './paths';
 import type { PathPlan, Shell } from './paths';
@@ -95,8 +96,8 @@ export type StaticOptions = EngineOptions & {
    * The origin the site is served from — `https://example.com`. With it the
    * build also writes `sitemap.xml`, listing every page it rendered at its
    * URL, Vite's `base` included; without it, no sitemap, because a sitemap of
-   * relative URLs is not one. A `route.ts` that writes `sitemap.xml` as well
-   * stops the build, naming both: keep one of them.
+   * relative URLs is not one. A `route.ts` that writes `sitemap.xml` is the
+   * application's own list, and the build leaves the file to it.
    */
   readonly site?: string;
   /**
@@ -734,10 +735,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
           ...catchAllRefusals(tree),
           ...(actions.length > 0 ? [actionRefusal(actions)] : []),
           ...(importers.length > 0 ? [serverImportRefusal(importers)] : []),
-          ...routeFileRefusals(tree, plan, answers, {
-            site: options.site !== undefined,
-            named: fromRoot,
-          }),
+          ...routeFileRefusals(tree, plan, answers, { named: fromRoot }),
         ];
         if (refusals.length > 0) throw new Error(refusals.join('\n\n'));
 
@@ -787,10 +785,15 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
             ? [each.pathname]
             : [],
         );
-        if (options.site !== undefined) {
+        // アプリが route.ts で書いた sitemap.xml は、そのサイトの一覧。上書きしない
+        const listed =
+          answers.get(SITEMAP_PATHNAME)?.kind === 'route'
+            ? undefined
+            : options.site;
+        if (listed !== undefined) {
           await writeSitemap(
             clientDir,
-            options.site,
+            listed,
             plan.paths
               .filter((pathname) => !notPages.includes(pathname))
               .map((pathname) => withBase(pathname, base)),
@@ -822,7 +825,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         builder.config.logger.info(
           `k8ordo: wrote ${summaryOf(plan, {
             notFound: notFoundAt !== null,
-            sitemap: options.site !== undefined,
+            sitemap: listed !== undefined,
           })}`,
         );
       },

@@ -635,6 +635,9 @@ export const dirFor = (pathname: string): string => {
 export const fileAt = (pathname: string, name = ''): string =>
   posix.join(dirFor(pathname), name).slice(1);
 
+/** Where the build's own sitemap goes, unless a route.ts answers there. */
+export const SITEMAP_PATHNAME = '/sitemap.xml';
+
 /**
  * What answers each pathname the build writes: the first declared pattern
  * that matches it, in the matcher's order. The catch-all never answers a
@@ -662,16 +665,14 @@ export const answersOf = (
  * message: at `/`, below which every file goes; where something else is
  * written below it; or where the build writes a file of its own, after the
  * routes' files — a page's beside them — so one would replace the other
- * without a word.
+ * without a word. `sitemap.xml` is not among those: the build leaves it to a
+ * route.ts that writes it.
  */
 export const routeFileRefusals = (
   tree: RouteDir,
   plan: PathPlan,
   answers: ReadonlyMap<string, DeclaredPattern>,
-  {
-    site,
-    named,
-  }: { readonly site: boolean; readonly named: (file: string) => string },
+  { named }: { readonly named: (file: string) => string },
 ): string[] => {
   const written = new Map<string, string>();
   for (const [pathname, answer] of answers) {
@@ -686,7 +687,6 @@ export const routeFileRefusals = (
   if (notFound !== undefined) {
     written.set('404.html', `${named(notFound.file)} is written there`);
   }
-  if (site) written.set('sitemap.xml', 'the "site" option writes it');
   written.set(
     CLIENT_FILES_PATH.slice(1),
     'the build lists there what each page loads beyond its payload',
