@@ -30,7 +30,7 @@ jobs:
     # --with-deps の apt は mirror が遅いと 10 分を使い切るので、OS の
     # ライブラリまで入ったイメージで走らせる。
     container:
-      image: mcr.microsoft.com/playwright:v1.63.0-resolute
+      image: mcr.microsoft.com/playwright:v1.65.0-resolute
       options: --user 1001 --ipc=host
       env:
         # /etc/hosts が localhost を ::1 にも向け、試験の立てる Vite の dev・
@@ -170,7 +170,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     container:
-      image: mcr.microsoft.com/playwright:v1.63.0-resolute
+      image: mcr.microsoft.com/playwright:v1.65.0-resolute
       options: --user 1001 --ipc=host
       env:
         NODE_OPTIONS: --dns-result-order=ipv4first
