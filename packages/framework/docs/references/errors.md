@@ -72,7 +72,11 @@ export default function RouteError({ error, reset }: ErrorProps) {
   useEffect(() => {
     void fetch('/reports', { method: 'POST', body: String(error) });
   }, [error]);
-  return <button onClick={reset}>try again</button>;
+  return (
+    <button onClick={reset} type="button">
+      try again
+    </button>
+  );
 }
 ```
 

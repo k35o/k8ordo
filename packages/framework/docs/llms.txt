@@ -85,10 +85,12 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   forces them to fill, reading the value in the browser with `useMatch`,
   `notFound()` shown in place, routes below its parameter, and what it
   costs.
-- [Errors and redirects](references/errors.md): `error.tsx`, a Server
-  Component that throws stopping a static build, `notFound()` and
-  `not-found.tsx` (a document waits for its page under server mode; under a
-  `fallback.tsx`, shown in place), and `redirect.ts` in each mode.
+- [Errors and redirects](references/errors.md): `error.tsx` and reporting
+  from it (what no `error.tsx` catches — the root layout's own components —
+  and why there is no `global-error.tsx`), a Server Component that throws
+  stopping a static build, `notFound()` and `not-found.tsx` (a document
+  waits for its page under server mode; under a `fallback.tsx`, shown in
+  place), and `redirect.ts` in each mode.
 - [Execution boundaries](references/boundaries.md): `'use client'`,
   `use(browser())` for a component that needs a browser (and `useMatch` /
   `usePathname` waiting for it on their own under a `fallback.tsx`),
