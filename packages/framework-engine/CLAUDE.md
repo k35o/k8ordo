@@ -941,6 +941,8 @@ fixtures/
   form-state/routes/         a form whose Server Action returns a client
                              component, which runtime/form-state.test.ts
                              posts without JavaScript
+  file-payload/routes/       one page, which runtime/file-payload.test.ts
+                             builds into files and asks for its document
   head-scripts/routes/       a layout writing an inline script in <head> and
                              importing CSS, which runtime/head-scripts.test.ts
                              opens in each engine with the CSS held back

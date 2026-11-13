@@ -964,9 +964,10 @@ const renderPage = async (
   // リダイレクトにペイロードは無い。クライアントの遷移は index.rsc に何も
   // 見つけず、URL をブラウザに渡し、上の HTML がリダイレクトする
   if (status === 307 || status === 308) return { kind: 'redirect', pathname };
-  if (status !== 200 || payload === null) {
-    return { kind: 'document', files, payload: null };
-  }
+  if (status !== 200) return { kind: 'document', files, payload: null };
+  // 200 の文書は、描いたペイロードを必ず持つ。持たないなら約束が破れているので、
+  // index.rsc の無いページを黙って書かない
+  if (payload === null) return failed('render', pathname);
   await writeFile(path.join(dir, 'index.rsc'), Buffer.from(payload));
   return {
     kind: 'document',
