@@ -423,8 +423,8 @@ export const routeRefused = [
     en: 'A `route.ts` with pages below it',
   }),
   message({
-    ja: 'ビルドが自分で書くファイルと同じ場所に書く`route.ts`（`site`を渡したときの`sitemap.xml`、`not-found.tsx`があるときの`404.html`、シェルがあるときの`_redirects`、`client-files.json`、ページの`index.html`と`index.rsc`）。エラー文が`route.ts`ともう一方の両方を挙げるので、どちらかを外します。`vite dev`は止まりません',
-    en: 'A `route.ts` writing a file the build writes itself (`sitemap.xml` when `site` is given, `404.html` beside a `not-found.tsx`, `_redirects` when there are shells, `client-files.json`, a page’s `index.html` and `index.rsc`). The error names the `route.ts` and the other side; remove one of them. `vite dev` does not stop',
+    ja: 'ビルドが自分で書くファイルと同じ場所に書く`route.ts`（`not-found.tsx`があるときの`404.html`、シェルがあるときの`_redirects`、`client-files.json`、ページの`index.html`と`index.rsc`）。エラー文が`route.ts`ともう一方の両方を挙げるので、どちらかを外します。`vite dev`は止まりません',
+    en: 'A `route.ts` writing a file the build writes itself (`404.html` beside a `not-found.tsx`, `_redirects` when there are shells, `client-files.json`, a page’s `index.html` and `index.rsc`). The error names the `route.ts` and the other side; remove one of them. `vite dev` does not stop',
   }),
 ] as const;
 
@@ -506,6 +506,26 @@ export const titlesApi = message({
 export const titlesOne = message({
   ja: '画面に出る`<title>`は、いつも1つにします。ルートレイアウトでは描かず、各ページと`not-found.tsx`がそれぞれ1つずつ描きます。2つ描くと2つとも出力され、後のものが優先されることはありません。',
   en: 'Keep one `<title>` on screen at a time. The root layout renders none, and each page and `not-found.tsx` renders its own. Render two and both are output; the later one does not replace the earlier.',
+});
+
+export const viewsTitle = message({
+  ja: 'ページビューの計測',
+  en: 'Counting page views',
+});
+
+export const viewsWhen = message({
+  ja: 'ページの切り替えは文書の読み込みではなく、`pushState`でもありません。ルーターはNavigation APIで切り替えるので、読み込みだけを数える計測や、History APIを見張る計測には数えられません。切り替えが終わった時点は、ブラウザの`navigatesuccess`イベントでわかります。新しいページが画面に出て、`<title>`も替わったあとに発火します。',
+  en: 'A page change is not a document load, and it is not `pushState` either. The router changes pages through the Navigation API, so a tool that counts only loads, or that watches the History API, misses it. The browser’s `navigatesuccess` event says when a change is done: it fires once the new page is on screen with its `<title>` in place.',
+});
+
+export const viewsWhere = message({
+  ja: 'この部品はルートレイアウトから描きます。同じリスナーは、Reactを使わない素のスクリプトにも書けます。クエリやフラグメントだけの変更も`navigatesuccess`を発火するので、pathnameが変わったときだけ数えます。',
+  en: 'Render this component from the root layout. The same listener works in a plain script with no React. A change of only the search or the fragment fires `navigatesuccess` too, so count only when the pathname moved.',
+});
+
+export const viewsNot = message({
+  ja: '`usePathname()`が変わった時点では数えません。`usePathname()`はURLに従い、ルーターは次のページが届く前にURLを書き換えるので、その時点の`<title>`はまだ離れるページのものです。計測ツール自身の「履歴の変更を数える」設定も切ります。戻る/進むは`popstate`も発火するので、切らないと2回数えられます。',
+  en: 'Do not count when `usePathname()` changes. It follows the URL, which the router commits before the next page arrives, so the `<title>` at that moment is still the page being left. Turn off the tool’s own counting of history changes as well: going back and forward still fires `popstate`, and those views would be counted twice.',
 });
 
 export const mdxTitle = message({

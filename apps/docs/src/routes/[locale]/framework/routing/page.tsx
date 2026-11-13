@@ -222,6 +222,29 @@ export default function ProductPage({
   );
 }`;
 
+const PAGE_VIEWS = `'use client';
+
+import { useEffect } from 'react';
+
+export function PageViews() {
+  useEffect(() => {
+    let counted = location.pathname;
+    const count = () => {
+      if (location.pathname === counted) return;
+      counted = location.pathname;
+      gtag('event', 'page_view', {
+        page_location: location.href,
+        page_title: document.title,
+      });
+    };
+    navigation.addEventListener('navigatesuccess', count);
+    return () => {
+      navigation.removeEventListener('navigatesuccess', count);
+    };
+  }, []);
+  return null;
+}`;
+
 const MDX_CONFIG = `import { framework } from '@k8ordo/framework/vite';
 import mdx from '@mdx-js/rollup';
 import { defineConfig } from 'vite';
@@ -581,6 +604,24 @@ export default function FrameworkRoutingPage() {
         </p>
         <p>
           <Rich>{t.titlesOne()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection id="page-views" title={t.viewsTitle}>
+        <CodeBlock
+          code={PAGE_VIEWS}
+          lang="tsx"
+          marks={{ 16: 'highlight' }}
+          title="src/components/page-views.tsx"
+        />
+        <p>
+          <Rich>{t.viewsWhen()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.viewsWhere()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.viewsNot()}</Rich>
         </p>
       </DocSection>
 

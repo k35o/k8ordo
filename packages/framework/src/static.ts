@@ -68,6 +68,7 @@ import {
   planRefusals,
   routeFileRefusals,
   shadowedShells,
+  SITEMAP_PATHNAME,
   suppliedFrom,
 } from './paths';
 import type { PathPlan, Shell } from './paths';
@@ -96,8 +97,8 @@ export type StaticOptions = EngineOptions & {
    * The origin the site is served from — `https://example.com`. With it the
    * build also writes `sitemap.xml`, listing every page it rendered at its
    * URL, Vite's `base` included; without it, no sitemap, because a sitemap of
-   * relative URLs is not one. A `route.ts` that writes `sitemap.xml` as well
-   * stops the build, naming both: keep one of them.
+   * relative URLs is not one. A `route.ts` that writes `sitemap.xml` is the
+   * application's own list, and the build leaves the file to it.
    */
   readonly site?: string;
   /**
@@ -249,8 +250,8 @@ const READ_BY_NAME = new Set(['route', 'page']);
 
 /**
  * Static mode: the same request handler the server mode runs per request is
- * called at build time — for each route's HTML and again for its payload —
- * and its answers are written to files.
+ * called at build time — once for each route, whose HTML and the payload it
+ * was rendered from are both written to files.
  * There is no server here, and the build refuses a Server Action, because a
  * file cannot receive one.
  */
@@ -718,6 +719,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
             file: string,
             params: Readonly<Record<string, string>>,
           ) => Promise<unknown>;
+          payloadOf: (response: Response) => ArrayBuffer | undefined;
         };
         const supplied = await suppliedFrom(tree, built.pathValues);
         const plan = planPaths(tree, supplied.locations);
@@ -735,10 +737,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
           ...catchAllRefusals(tree),
           ...(actions.length > 0 ? [actionRefusal(actions)] : []),
           ...(importers.length > 0 ? [serverImportRefusal(importers)] : []),
-          ...routeFileRefusals(tree, plan, answers, {
-            site: options.site !== undefined,
-            named: fromRoot,
-          }),
+          ...routeFileRefusals(tree, plan, answers, { named: fromRoot }),
         ];
         if (refusals.length > 0) throw new Error(refusals.join('\n\n'));
 
@@ -748,6 +747,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
           options.site === undefined ? ORIGIN : new URL(options.site).origin;
         const render: Render = {
           handler: built.default,
+          payloadOf: built.payloadOf,
           clientDir,
           urlFor: (pathname) => `${origin}${withBase(pathname, base)}`,
           csp,
@@ -788,10 +788,15 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
             ? [each.pathname]
             : [],
         );
-        if (options.site !== undefined) {
+        // アプリが route.ts で書いた sitemap.xml は、そのサイトの一覧。上書きしない
+        const listed =
+          answers.get(SITEMAP_PATHNAME)?.kind === 'route'
+            ? undefined
+            : options.site;
+        if (listed !== undefined) {
           await writeSitemap(
             clientDir,
-            options.site,
+            listed,
             plan.paths
               .filter((pathname) => !notPages.includes(pathname))
               .map((pathname) => withBase(pathname, base)),
@@ -836,7 +841,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         builder.config.logger.info(
           `k8ordo: wrote ${summaryOf(plan, {
             notFound: notFoundAt !== null,
-            sitemap: options.site !== undefined,
+            sitemap: listed !== undefined,
           })}`,
         );
       },
@@ -958,6 +963,12 @@ const inParallel = async <T>(
 /** What the build asks the handler with, and where it writes the answers. */
 type Render = {
   readonly handler: Handler;
+  /**
+   * The payload the handler rendered a document from (the engine's
+   * `payloadOf`): written beside the HTML as it is, so a page is rendered
+   * once and its two files are one render.
+   */
+  readonly payloadOf: (response: Response) => ArrayBuffer | undefined;
   /** The client build, absolute. */
   readonly clientDir: string;
   /** A pathname in the table's terms as the URL the handler is asked for. */
@@ -1049,7 +1060,7 @@ const renderPage = async (
 ): Promise<Rendered> => {
   // URL はエスケープのまま頼み、ファイルの名前だけを復号する
   const dir = path.join(render.clientDir, dirFor(pathname));
-  const { status, notFound, files } = await writeHtml(
+  const { status, notFound, files, payload } = await writeHtml(
     path.join(dir, 'index.html'),
     render,
     render.urlFor(pathname),
@@ -1062,15 +1073,15 @@ const renderPage = async (
   // 見つけず、URL をブラウザに渡し、上の HTML がリダイレクトする
   if (status === 307 || status === 308) return { kind: 'redirect', pathname };
   if (status !== 200) return { kind: 'document', files, payload: null };
-  const payload = render.urlFor(payloadPathFor(pathname));
-  const written = await writeBody(
-    path.join(dir, 'index.rsc'),
-    render.handler,
-    payload,
-  );
-  return written.status === 200
-    ? { kind: 'document', files, payload: new URL(payload).pathname }
-    : failed('render', pathname);
+  // 200 の文書は、描いたペイロードを必ず持つ。持たないなら約束が破れているので、
+  // index.rsc の無いページを黙って書かない
+  if (payload === null) return failed('render', pathname);
+  await writeFile(path.join(dir, 'index.rsc'), Buffer.from(payload));
+  return {
+    kind: 'document',
+    files,
+    payload: new URL(render.urlFor(payloadPathFor(pathname))).pathname,
+  };
 };
 
 const renderNotFound = async (
@@ -1120,14 +1131,9 @@ const renderShell = async (
       `the shell for ${named} was answered by ${fallbacks.get(answered.shell) ?? answered.shell}, which the table tries first — put the shell where that pattern cannot match, with a paths.ts above it`,
     );
   }
-  const payload = await writeBody(
-    path.join(dir, 'index.rsc'),
-    render.handler,
-    render.urlFor(payloadPathFor(shell.pathname)),
-  );
-  return payload.status === 200
-    ? { kind: 'document', files: answered.files, payload: null }
-    : failed('render', shell.location);
+  if (answered.payload === null) return failed('render', shell.location);
+  await writeFile(path.join(dir, 'index.rsc'), Buffer.from(answered.payload));
+  return { kind: 'document', files: answered.files, payload: null };
 };
 
 /** The shells whose HTML outside its scripts holds the shell pathname. */
@@ -1221,6 +1227,8 @@ type Written = {
    * `null` for what was not written as HTML, or whose handler did not say.
    */
   readonly files: readonly string[] | null;
+  /** The payload that HTML was rendered from; `null` where no HTML was. */
+  readonly payload: ArrayBuffer | null;
 };
 
 /**
@@ -1230,7 +1238,7 @@ type Written = {
  */
 const writeHtml = async (
   file: string,
-  { handler, csp }: Render,
+  { handler, payloadOf, csp }: Render,
   url: string,
   {
     notFoundIsPage,
@@ -1249,6 +1257,7 @@ const writeHtml = async (
     notFound,
     shell: answered,
     files: null,
+    payload: payloadOf(response) ?? null,
   };
   // A page that failed to render is not a page, and neither is a 404 anywhere
   // but the not-found's own file: nothing is written, and the caller stops

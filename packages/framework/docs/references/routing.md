@@ -416,20 +416,22 @@ A `route.ts` at `/` cannot be a file (the host serves `/` from `index.html`),
 nor one with pages written below it, which would need a directory of the same
 name. What it writes is not a page, so `sitemap.xml` leaves it out.
 
-Nor can a `route.ts` write a file the build writes itself — `sitemap.xml`
-when `site` is given, `404.html` beside a `not-found.tsx`, `_redirects` when
-there are shells, `client-files.json`, a page's `index.html` or `index.rsc`
-— since one would replace the other. It stops before it renders anything,
-naming every such `route.ts` in one error, each beside what is in its way:
+Nor can a `route.ts` write a file the build writes itself — `404.html`
+beside a `not-found.tsx`, `_redirects` when there are shells,
+`client-files.json`, a page's `index.html` or `index.rsc` — since one would
+replace the other. It stops before it renders anything, naming every such
+`route.ts` in one error, each beside what is in its way:
 
 ```
 static build writes a route.ts as the file its GET answers, and these cannot be written — remove the route.ts, or what else is written there:
-  sitemap.xml: src/routes/sitemap.xml/route.ts, and the "site" option writes it
+  client-files.json: src/routes/client-files.json/route.ts, and the build lists there what each page loads beyond its payload
 ```
 
-For a sitemap of your own, keep the `route.ts` and drop `site`; the requests
-the build hands every `route.ts` then carry no origin of the site's, so write
-its absolute URLs from one of your own. Rules of your own for a host go in
+`sitemap.xml` is the exception: a `route.ts` there is the application's own
+list of the site, with the dates and priorities only it knows, so the build
+writes none of its own and leaves the file to it — `site` given or not. Keep
+`site` all the same: it is the origin of the `request.url` every `route.ts`
+is handed, which a sitemap's absolute URLs are built from. Rules of your own for a host go in
 `public/_redirects`, which the build adds to its own. `vite dev` does not
 stop: only the build writes the files.
 
@@ -623,6 +625,47 @@ export default function ProductPage({ params }: { params: { id: number } }) {
 Keep one `<title>` on screen at a time: the root layout renders none, each
 page renders its own, and `not-found.tsx` renders one too. Two titles at once
 is not a fallback chain — React renders both.
+
+## Counting page views
+
+A page change here is not a document load, and it is not `pushState`
+either — the router commits it through the Navigation API — so an analytics
+script that counts only loads, or that watches the History API, misses
+it. The platform says when a page change is done: `navigatesuccess` fires
+once the new page is on screen, its `<title>` in place.
+
+```tsx
+'use client';
+
+import { useEffect } from 'react';
+
+export function PageViews() {
+  useEffect(() => {
+    let counted = location.pathname;
+    const count = () => {
+      // a search or a fragment that moved is a navigation too
+      if (location.pathname === counted) return;
+      counted = location.pathname;
+      gtag('event', 'page_view', {
+        page_location: location.href,
+        page_title: document.title,
+      });
+    };
+    navigation.addEventListener('navigatesuccess', count);
+    return () => {
+      navigation.removeEventListener('navigatesuccess', count);
+    };
+  }, []);
+  return null;
+}
+```
+
+Render it from the root layout; the same listener works from a plain
+script with no React at all. `usePathname()` is not the moment to count
+from: it follows the URL, which the router commits before the next page
+arrives, so the title read then is still the page being left. Turn off the
+tool's own counting of history changes as well — going back and forward
+still fires `popstate`, and those views would be counted twice.
 
 ## MDX
 
