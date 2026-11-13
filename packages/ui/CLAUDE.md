@@ -371,16 +371,16 @@ category (`--teal-500`) is the palette, internal to `tokens.css`.
 
 ### Token Categories (color)
 
-| Category   | Tokens                                                                                                          | Usage              |
-| ---------- | --------------------------------------------------------------------------------------------------------------- | ------------------ |
-| Foreground | `--color-fg-base`, `-mute`, `-subtle`, `-inverse`                                                               | Text colors        |
-| Background | `--color-bg-base`, `-raised`, `-surface`, `-subtle`, `-mute`, `-emphasize`, `-inverse`                          | Surfaces           |
-| Border     | `--color-border-base`, `-subtle`, `-mute`, `-emphasize`, `-inverse`                                             | Borders            |
-| Status     | `--color-{fg,bg,border}-{info,success,warning,error}`                                                           | Semantic status    |
-| Primary    | `--color-primary-{fg,bg,bg-subtle,bg-mute,bg-emphasize,border}`                                                 | Teal accent        |
-| Secondary  | `--color-secondary-{fg,bg,bg-subtle,bg-mute,bg-emphasize,border}`                                               | Cyan accent        |
-| Group      | `--color-group-{primary,secondary,tertiary,quaternary}`                                                         | Data visualization |
-| Other      | `--color-back-drop`, `--color-logo-{primary,secondary}`, `--color-system-*` (system colors under forced colors) |                    |
+| Category   | Tokens                                                                                 | Usage              |
+| ---------- | -------------------------------------------------------------------------------------- | ------------------ |
+| Foreground | `--color-fg-base`, `-mute`, `-subtle`, `-inverse`                                      | Text colors        |
+| Background | `--color-bg-base`, `-raised`, `-surface`, `-subtle`, `-mute`, `-emphasize`, `-inverse` | Surfaces           |
+| Border     | `--color-border-base`, `-subtle`, `-mute`, `-emphasize`, `-inverse`                    | Borders            |
+| Status     | `--color-{fg,bg,border}-{info,success,warning,error}`                                  | Semantic status    |
+| Primary    | `--color-primary-{fg,bg,bg-subtle,bg-mute,bg-emphasize,border}`                        | Teal accent        |
+| Secondary  | `--color-secondary-{fg,bg,bg-subtle,bg-mute,bg-emphasize,border}`                      | Cyan accent        |
+| Group      | `--color-group-{primary,secondary,tertiary,quaternary}`                                | Data visualization |
+| Other      | `--color-back-drop`, `--color-system-*` (system colors under forced colors)            |                    |
 
 A token that reads another one (`--shadow-ring-info` reads
 `--color-border-info`) is declared again under `.dark`, because a custom

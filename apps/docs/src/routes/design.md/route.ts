@@ -195,7 +195,7 @@ UI では必ず以下のトークンを使う（\`var(--color-fg-base)\` のよ�
     `#### Group（データ可視化）`,
     semanticTable(GROUP_TOKENS),
 
-    `その他: \`--color-back-drop\`（\`${cssValueOf('color-back-drop')}\` オーバーレイ）, \`--color-logo-*\`（ロゴ）, \`--color-system-*\`（強制カラーで塗るシステムの色）。`,
+    `その他: \`--color-back-drop\`（\`${cssValueOf('color-back-drop')}\` オーバーレイ）, \`--color-system-*\`（強制カラーで塗るシステムの色）。`,
 
     `### ダークモード
 
