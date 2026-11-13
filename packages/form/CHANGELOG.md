@@ -1,5 +1,7 @@
 # @k8ordo/form
 
+## 3.0.0
+
 ## 2.3.1
 
 ### Patch Changes

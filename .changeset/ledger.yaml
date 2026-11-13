@@ -25,6 +25,10 @@
   dir: packages/color-scheme
   intents:
     - nice-pots-own
+"@k8ordo/color-scheme@3.0.0":
+  dir: packages/color-scheme
+  intents:
+    - color-scheme-script-out-of-payload
 "@k8ordo/form@0.1.1":
   dir: packages/form
   intents:
@@ -127,6 +131,18 @@
   dir: packages/framework
   intents:
     - nice-pots-own
+"@k8ordo/framework@3.0.0":
+  dir: packages/framework
+  intents:
+    - framework-docs-report-and-views
+    - framework-headers
+    - framework-in-view-prefetch-yields
+    - framework-mdx-css
+    - framework-own-sitemap
+    - framework-oxc-transform-react-range
+    - framework-paths-files
+    - framework-server-stylesheets-listed
+    - framework-static-one-render
 "@k8ordo/i18n@1.0.0":
   dir: packages/i18n
   intents:
@@ -156,6 +172,10 @@
   dir: packages/i18n
   intents:
     - nice-pots-own
+"@k8ordo/i18n@3.0.0":
+  dir: packages/i18n
+  intents:
+    - framework-paths-files
 "@k8ordo/router@0.1.0":
   dir: packages/router
   intents:
@@ -218,6 +238,11 @@
   dir: packages/router
   intents:
     - nice-pots-own
+"@k8ordo/router@3.0.0":
+  dir: packages/router
+  intents:
+    - router-dropped-fragment
+    - router-intercept-from-first-commit
 "@k8ordo/state@0.2.0":
   dir: packages/state
   intents:
@@ -260,6 +285,12 @@
   dir: packages/state
   intents:
     - nice-pots-own
+"@k8ordo/state@3.0.0":
+  dir: packages/state
+  intents:
+    - state-hash-slot
+    - state-testing-entry
+    - state-thin-url-writes
 "@k8ordo/ui@2.0.0":
   dir: packages/ui
   intents:
@@ -370,6 +401,13 @@
   dir: packages/ui
   intents:
     - nice-pots-own
+"@k8ordo/ui@3.0.0":
+  dir: packages/ui
+  intents:
+    - ui-docs-typed-before-hydration
+    - ui-drop-logo-tokens
+    - ui-json-render-0-22
+    - ui-own-icons
 docs@0.0.11:
   dir: apps/docs
   intents:
