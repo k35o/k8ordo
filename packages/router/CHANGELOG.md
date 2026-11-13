@@ -1,5 +1,13 @@
 # @k8ordo/router
 
+## 3.0.0
+
+### Patch Changes
+
+- URLからfragmentを外す移動（`/docs#api`から`/docs`）を、WebKitでも横取りするようにしました。WebKitはこの移動の`navigate`イベントにも`hashChange`を立てますが、行き先を同じ文書とは知らせず、横取りしなければ文書を読み込み直します。routerは`hashChange`だけを見てブラウザに任せていたので、Safariではfragmentの付いたページからそのページ自身へのリンクをたどると、文書が読み込み直されていました。今は、文書の中のfragmentへの移動だけをブラウザに任せます。`<Router>`と`useInterceptedNavigation`、それを使う`@k8ordo/framework`のランタイムに効きます。
+
+- ページが画面に出たときから、そのページでたどるリンクを横取りするようにしました。これまでは`navigate`イベントを聞き始めるのが`useEffect`の中で、Reactはページを画面に出してから一度ブラウザに処理を返し、そのあとで`useEffect`を走らせます。そのあいだにたどったリンクは横取りされず、文書の読み込みになっていました。今はページを画面に出すcommitの中で聞き始めます。`<Router>`と`useInterceptedNavigation`、それを使う`@k8ordo/framework`のランタイムに効きます。ハイドレーションの前にたどったリンクは、これまでどおりブラウザが文書を読み込みます。
+
 ## 2.3.1
 
 ### Patch Changes

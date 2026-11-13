@@ -1,5 +1,20 @@
 # @k8ordo/state
 
+## 3.0.0
+
+### Minor Changes
+
+- `definePageState`に`hash`を足しました。URLのフラグメントを、ページの状態の3つ目の置き場所として読み書きできます。フラグメントは1本の文字列なので、`hash`にはフィールドのオブジェクトではなく値1つ分のスキーマを渡し、値は状態の`hash`というフィールドになります。`update({ hash: 4 })`は`#4`を書き、既定値を書くとフラグメントが消え、`href()`にも`hash`を渡せます。スキーマが受け付けないフラグメント（`#main`のようなページ内リンク）はこの状態の値として扱わず、既定値で読んでURLに残します。これまでは、フラグメントに置く値を`history.replaceState`で自分で書くしかなく、そうすると同じ履歴エントリの`entry`の状態が消えていました。
+
+- テスト用の入口`@k8ordo/state/testing`と、その`mountPageUrl()`を足しました。URLやフラグメントを書く`update()`は、どのリスナーも横取りしなければ文書の読み込みになり、テストを動かしているページごと移動します。`mountPageUrl()`は`@k8ordo/router`と同じ条件でルーターの代わりに横取りし、`{ search, hash }`でテストを始めるURLを決めます。返す関数は後始末で、`resetStateRegistry()`を呼んで待っている書き込みごとストアを消し、URLと履歴エントリの状態を元に戻します。Vitestの`beforeEach`にもStorybookの`beforeEach`にも、そのまま返せます。これまでは、横取りするリスナーと後始末をテストごとに手で書く必要がありました。
+
+### Patch Changes
+
+- URLの値を続けて書いても、WebKitのnavigateの上限に届かないようにしました。WebKitは同じ文書へのnavigateを10秒に200回までしか通さず、超えた分を`QuotaExceededError`で断ります。スライダーのように入力ごとに`update()`する部品は数秒でそこに届き、以降の書き込みがURLに載りませんでした。今は、URLの値を変える`replace`の書き込みが前の書き込みから100msたっていなければ、残りの時間を待ち、そのあいだの`update()`を1回のnavigateにまとめます。画面の値はこれまでどおり`update()`のたびにすぐ変わります。`history: 'push'`の書き込みは待たせません。待っているあいだにページを離れた書き込みは書かれず、そのハンドルは`AbortError`で断られます。これまでは、`update()`の直後に同じハンドラで別のページへ移ると、その値が移った先のURLに書かれていました。
+
+- Updated dependencies:
+  - @k8ordo/router@3.0.0
+
 ## 2.3.1
 
 ### Patch Changes

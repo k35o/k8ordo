@@ -1,5 +1,34 @@
 # @k8ordo/framework
 
+## 3.0.0
+
+### Major Changes
+
+- staticモードで、パラメータの値を`framework()`の`paths`オプションではなく、パラメータのディレクトリに置く`paths.ts`から読むようにしました。`src/routes/blog/[slug]/paths.ts`は、`slug`の値を配列かそのPromiseで返す関数をdefault exportします（型は`@k8ordo/framework`の`Paths<'/blog/:slug'>`）。これまでは`vite.config.ts`の中で値を並べていたので、アプリのエイリアスや`server-only`のモジュールを素直に読めず、URLの情報の一部が`routes/`の外にありました。`paths.ts`はページと同じモジュールグラフで実行されるので、ページと同じデータの読み方をそのまま使えます。値はそのディレクトリより下のすべてに使われ、`/blog/:slug/og.png`のような`route.ts`や`redirect.ts`のパターンを手で展開する必要はありません。関数は上のディレクトリのパラメータを引数として受け取り、上の値の組み合わせごとに1回呼ばれます。値はエスケープする前の文字列で返します。`fallback.tsx`のシェルの場所も、上の`paths.ts`が返す値ごとに自動で決まります（`[locale]/paths.ts`が`ja`と`en`を返せば`/ja/posts/:id`と`/en/posts/:id`）。`fallback.tsx`と同じディレクトリに`paths.ts`を置くと、返した値はページとして書き出され、残りの値にシェルが答えます。`vite dev`は、どの`paths.ts`も返さなかった値にビルドしたサイトと同じく答えるようになりました。`fallback.tsx`があればシェルで、無ければ404です。これまでは、どの値も`page.tsx`で描画していました。`@k8ordo/i18n`の`locales.paths`は削除しました。移行するには、`vite.config.ts`から`paths`を消し（残っていると設定を読んだ時点でエラーになります）、パラメータのディレクトリごとに`paths.ts`を置きます。`paths: locales.paths`を渡していたアプリは、`src/routes/[locale]/paths.ts`で`locales.all`を返します。
+
+### Minor Changes
+
+- `framework()`に`headers`を足しました。書いたヘッダーは、ページ、ビルドのファイル、404、リダイレクトのどの応答にも付きます。これまで全応答のヘッダーは`vercel()`のルートにしか書けず、当てるのはVercelだけだったので、`vite dev`や`vite preview`ではアプリが自分でプラグインを書いて同じ値を付けていました。今は1度書けば、`vite dev`、`vite preview`、`serve`が送り、`vercel()`がどちらのモードでもルートとして書き、staticモードのビルドがNetlifyとCloudflareの読む`dist/client/_headers`に書きます（`public/_headers`はその後ろに残ります）。serverモードではハンドラも自分の応答に足し、`guard.ts`や`route.ts`が同じ名前で書いたヘッダーはそのまま残します。扱うのは全応答に付く1組だけで、一部のパスだけのヘッダーは今までどおり`vercel()`のルートや`public/_headers`に書きます。HTTPで送れない名前や値は、設定を読んだ時点で断ります。
+
+- `.mdx`のファイルがimportしたCSSが、そのファイルを描くページのHTMLに載るようにしました。RSCのプラグインは、CSSをimportするモジュールがexportした部品を包んでページにスタイルシートを載せますが、包むのはファイル名が`.js`・`.jsx`・`.ts`・`.tsx`のモジュールだけです。アプリのプラグインがコンパイルした`.mdx`は名前で外れるので、これまではimportのすべてに`?vite-rsc-css-export=default`を付ける必要があり、付け忘れるとスタイルの無いページが黙って書き出されていました。今は、CSSを静的にimportする`.mdx`（と`.md`）にframeworkが同じ変換を当てます。クエリは要りません。付けたままでも、これまでどおり動きます。MDXのコンパイラは、今までどおりアプリが`enforce: 'pre'`でViteのプラグインに足します。docsのRoutingにMDXの節を足しました。
+
+- staticモードで、アプリが`sitemap.xml`を`route.ts`で書いているときは、`site`を渡していてもビルドが`sitemap.xml`を書かないようにしました。これまでは両方があるとビルドが止まり、更新日や並びを自分で決めたいアプリは`site`を外すしかありませんでした。`site`を外すと、`route.ts`が受け取る`request.url`からもサイトの配信元が消えます。今は`routes/`の`route.ts`がそのURLの答えになり、`site`は渡したままにできます。`404.html`や`client-files.json`のように、ビルドが自分で書くほかのファイルに`route.ts`を置いたときは、これまでどおりビルドが止まります。
+
+### Patch Changes
+
+- docsに、エラーの報告のしかたとページビューの数え方を足しました。エラーは`error.tsx`が受け取る`error`から報告します。ルートの`error.tsx`はルートレイアウト自身の部品の失敗を受けないので、その扱いと、レイアウトの中に自分のエラー境界を置く方法を書きました。ページビューは、ページの切り替えが終わったことを知らせる`navigatesuccess`で数えます。`usePathname()`はURLに従い、次のページが届く前に変わるので、そこで数えると前のページの`<title>`を送ります。
+
+- タッチの端末で画面に入ったリンクを先読みする仕組みが、先読みの終わる前のタップを前より遅くしていたのを直しました。先読みの部品（`<link rel="modulepreload">`と`<link rel="preload" as="style">`）は、ペイロードと同じ低い優先度で取ります。ページの切り替えを読み込んでいるあいだは新しく先読みせず、ほかのページへの先読みは取り消して、次のページが表示されてから取り直します。先読みを始めるのは、文書の`load`イベントのあと、`client-files.json`を読み終えてからで、画面に1秒とどまったリンクだけを取ります。
+
+- `reactCompiler: true`で使う任意のpeerの`oxc-transform-react`の範囲を、`^0.152.0`から`>=0.152.0 <0.157.0`に広げました。フレームワークが使う`@vitejs/plugin-react`を6.2.1に上げ、そのpeerの範囲に合わせています。0.152系を入れているアプリはそのまま動き、0.156系まで上げられます。
+
+- staticモードのビルドが書く`client-files.json`に、ページごとのServer ComponentのCSSも並べるようにしました。先読みしていないページへ移るとき、これまではペイロードの最初の部分が届いてからServer ComponentのCSSを取り始め、ページの切り替えがその1往復を待っていました。今はペイロードと同時に、ペイロードと同じ優先度で取り始めます。ページはこれまでどおり、そのCSSが届いてから切り替わります。
+
+- staticモードのビルドが、ページを1回の描画で書き出すようにしました。これまではページごとにハンドラを2回呼び、`index.html`と`index.rsc`を別々の描画から書いていました。Reactの`cache()`は描画をまたがないので、ページが読むデータベースやファイルはビルドの中で2回読まれ、2回の描画で違う値を読めば、HTMLとペイロードが食い違うこともありえました。今は、HTMLを描いたペイロードをそのまま`index.rsc`に書きます。書き出されるファイルは変わりません。ページのデータの読み込みは、ビルドごとに1回になります。
+
+- Updated dependencies:
+  - @k8ordo/router@3.0.0
+
 ## 2.3.1
 
 ### Patch Changes

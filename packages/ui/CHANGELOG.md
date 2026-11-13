@@ -1,5 +1,31 @@
 # @k8ordo/ui
 
+## 3.0.0
+
+### Major Changes
+
+- トークンの`--color-logo-primary`と`--color-logo-secondary`を消しました。Tailwindの橋の`*-logo-primary`、`*-logo-secondary`と、`@k8ordo/ui/tokens`のDTCGの文書からも無くなります。ロゴを描く部品をuiが持たなくなったので、ロゴの色も使う側で持ちます。これまでの値は、ライトがteal-700とteal-600、ダークがteal-400とteal-500でした。
+
+- アイコンを自作の線画に替え、入口を`@k8ordo/ui/icons`に分けました。`lucide-react`への依存は無くなります。アイコンは1つずつ別のモジュールになり、どれもServer Componentのまま描けます（lucideのアイコンはcontextを読むClient Componentでした）。
+
+  - rootの入口（`@k8ordo/ui`）はアイコンをexportしなくなりました。`import { XIcon } from '@k8ordo/ui/icons'`と書きます。
+  - 名前を用途から形に改めました。`CloseIcon`→`XIcon`、`ViewIcon`→`EyeIcon`、`ViewOffIcon`→`EyeClosedIcon`、`DarkModeIcon`→`MoonIcon`、`LightModeIcon`→`SunIcon`、`PublishDateIcon`→`CalendarIcon`、`UpdateDateIcon`→`ClockIcon`、`SubscribeIcon`→`BookmarkIcon`、`NewsIcon`→`BellIcon`、`PrepareIcon`→`RocketIcon`、`BlogIcon`→`BookTextIcon`、`SlideIcon`→`PresentationIcon`、`LocationIcon`→`MapPinIcon`、`CodeXmlIcon`→`CodeIcon`、`RSSIcon`→`RssIcon`、`HorizontalWritingIcon`→`TextHorizontalIcon`、`VerticalWritingIcon`→`TextVerticalIcon`、`GoodIcon`→`ThumbsUpIcon`、`BadIcon`→`ThumbsDownIcon`、`InterestingIcon`→`SmileIcon`、`InformativeIcon`→`LightbulbIcon`、`MixedColorIcon`→`BlendIcon`、`ColorInfoIcon`→`PaintBucketIcon`、`ColorContrastIcon`→`ContrastIcon`、`AIIcon`→`BotIcon`、`AssistantIcon`→`BotMessageIcon`、`NavigationMenuIcon`→`MenuIcon`、`ForkIcon`→`GitForkIcon`、`FullscreenIcon`→`MaximizeIcon`。意味から絵を選ぶのは`AlertIcon`（`status`）と`ChevronIcon`（`direction`）だけです。
+  - `FormIcon`、`AccessibilityIcon`、`AtomIcon`、`BoringIcon`、`EasyIcon`、`DifficultIcon`、`ShallowIcon`を消しました。
+  - ロゴ（`Logo`、`LogoIcon`、`GitHubIcon`、`TwitterIcon`、`QiitaIcon`、`ChromeIcon`、`EdgeIcon`、`FirefoxIcon`、`SafariIcon`）を外しました。ロゴは使う側で持ちます。`BaseIcon`を`@k8ordo/ui/icons`から出したので、自分の`<svg>`にほかのアイコンと同じ`size`の刻みを付けられます。
+  - 検索、設定、人、家、鉛筆、ごみ箱、矢印、ダウンロードなど、どのアプリケーションでも使う形を足しました。全部で102個と、`AlertIcon`、`ChevronIcon`です。
+  - 生成UIのカタログでは、`Icon`の`name`が`size`だけで描けるアイコンの全部になりました。名前はアイコンの名前をケバブケースにしたもので、`close`は`x`、`publish-date`は`calendar`、`view-off`は`eye-closed`です。`logo`、`github`、`twitter`、`qiita`と、消したアイコンの名前は使えません。
+
+### Minor Changes
+
+- `@json-render/core`と`@json-render/react`のpeerの範囲を、0.21系（`>=0.21.0 <0.22.0`）から0.22系（`>=0.22.0 <0.23.0`）に移しました。0.21系を使っている場合は、2つのパッケージを一緒に0.22系へ上げてください。json-render 0.22.0のリリースノートに挙がっている変更は`@json-render/chat`の追加だけで、`@k8ordo/ui/json-render`と`@k8ordo/ui/json-render/registry`の使い方は変わりません。
+
+### Patch Changes
+
+- docsのコンポーネントカタログに、制御された欄がhydrateの前の入力を`onChange`で受け取らないことを書きました。サーバーが描いたHTMLの欄はReactが付く前から打てますが、Reactは打たれた値を欄に残すだけで`onChange`を呼ばないので、`value`の元の状態は次のキー入力まで古いままです。`ref`で欄と状態を比べて拾う書き方を載せています。コンポーネントの動きは変えていません。Reactが同じ直し（hydrate時のchangeの送り直し）をexperimentalで持っていて、ここで別に直すと、それが入った版で`onChange`が2回呼ばれるためです。
+
+- Updated dependencies:
+  - @k8ordo/i18n@3.0.0
+
 ## 2.3.1
 
 ### Patch Changes
