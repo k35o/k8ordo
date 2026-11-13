@@ -17,6 +17,7 @@ import type { Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 import { chromium, firefox, webkit } from 'playwright';
 import type { Browser, Page } from 'playwright';
@@ -119,6 +120,23 @@ describe('the static build', () => {
   it('writes the same page as a payload beside it', () => {
     expect(read('index.rsc')).toContain('rendered on the server');
   });
+
+  it.each(['/', '/products/1', '/en/posts/1', '/en/posts/!fallback'])(
+    'writes the payload of %s as a request for it is answered, from the one render its HTML came from',
+    async (pathname) => {
+      const { default: handler } = (await import(
+        pathToFileURL(path.join(root, 'dist', 'rsc', 'index.js')).href
+      )) as { default: (request: Request) => Promise<Response> };
+      const at = pathname === '/' ? '' : pathname;
+
+      const asked = await handler(
+        new Request(`https://example.test${at}/index.rsc`),
+      );
+
+      expect(asked.status).toBe(200);
+      expect(read(decodeURI(at), 'index.rsc')).toBe(await asked.text());
+    },
+  );
 
   it('writes a page under a loading.tsx whole, without the fallback', () => {
     const html = read('products', 'index.html');

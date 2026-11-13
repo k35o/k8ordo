@@ -289,15 +289,26 @@ const handlerAnswering = async (
   await mkdir(dir, { recursive: true });
   await writeFile(
     path.join(dir, 'index.js'),
-    `const answers = ${JSON.stringify(answers)};
+    `import { appendFileSync } from 'node:fs';
+const answers = ${JSON.stringify(answers)};
+// 本物のハンドラは、文書を描いたペイロードを答えに持たせる。ここでは
+// <pathname>/index.rsc と書かれた答えの本文がそれ
+const payloads = new WeakMap();
+export const payloadOf = (response) => payloads.get(response);
 export default async function handler(request) {
   const { pathname } = new URL(request.url);
+  appendFileSync(${JSON.stringify(path.join(root, 'asked.txt'))}, pathname + '\\n');
   const answer = answers[pathname] ?? answers['*'];
   if (answer === undefined) return new Response('not found', { status: 404 });
-  return new Response(answer.body ?? null, {
+  const response = new Response(answer.body ?? null, {
     status: answer.status ?? 200,
     headers: answer.headers ?? {},
   });
+  const payload = answers[pathname.replace(/\\/$/u, '') + '/index.rsc'];
+  if (payload !== undefined) {
+    payloads.set(response, new TextEncoder().encode(payload.body ?? '').buffer);
+  }
+  return response;
 }
 `,
   );
@@ -393,28 +404,20 @@ describe('the shells a build writes', () => {
     );
   });
 
-  it('stops the build naming a page and a shell whose payload failed to render, which the HTML did not', async () => {
+  it('asks the handler for each page once, and writes its payload from that one answer', async () => {
     await routeFiles(POSTS);
-    await handlerAnswering(
-      site({
-        '/posts/1/index.rsc': { status: 500, body: 'the payload threw' },
-        '/posts/!fallback/index.rsc': {
-          status: 500,
-          headers: SHELL_HEADER,
-          body: 'the shell’s payload threw',
-        },
-      }),
-    );
-    const logged = vi.spyOn(console, 'error').mockImplementation(() => {
-      // 描けなかったことは throw の文言で確かめる
-    });
+    await handlerAnswering(site());
+    const { build } = hooks({ paths: () => ['/posts/1'] });
 
-    await expect(hooks({ paths: () => ['/posts/1'] }).build()).rejects.toThrow(
-      'static build could not render /posts/1, /posts/:id — see the error above',
-    );
-    expect(logged).toHaveBeenCalledWith(
-      'k8ordo: http://k8ordo.localhost/posts/1/index.rsc — the payload threw',
-    );
+    await build();
+
+    expect(await clientFile('posts/1/index.rsc')).toBe('post 1 payload');
+    expect(
+      (await readFile(path.join(root, 'asked.txt'), 'utf8'))
+        .trim()
+        .split('\n')
+        .toSorted(),
+    ).toStrictEqual(['/', '/posts/!fallback', '/posts/1']);
   });
 
   it('refuses a shell another route answered, and writes nothing for it', async () => {

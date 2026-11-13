@@ -16,8 +16,8 @@ export const handlerBuild = message({
 });
 
 export const handlerModes = message({
-  ja: 'staticモードでは、ビルドの最後にページごとにHTMLとペイロードのためにハンドラを2回呼び、返った`Response`を`index.html`と`index.rsc`に書き出します。リダイレクトするページは`index.html`だけ、`route.ts`は`GET`の`Response`を1つのファイルに書き出します。serverモードでは、リクエストのたびにハンドラを呼び、その`Response`を返します。',
-  en: 'Under static mode the build calls the handler twice per page at its end, once for the HTML and once for the payload, and writes the responses to `index.html` and `index.rsc`. A page that redirects gets only `index.html`, and a `route.ts` is written as the one file its `GET` answers. Under server mode the handler is called for every request, and its response is returned.',
+  ja: 'staticモードでは、ビルドの最後にページごとにハンドラを1回呼び、返ったHTMLを`index.html`に、そのHTMLを描いたペイロードを`index.rsc`に書き出します。リダイレクトするページは`index.html`だけ、`route.ts`は`GET`の`Response`を1つのファイルに書き出します。serverモードでは、リクエストのたびにハンドラを呼び、その`Response`を返します。',
+  en: 'Under static mode the build calls the handler once per page at its end, and writes the HTML it answered to `index.html` and the payload that HTML was rendered from to `index.rsc`. A page that redirects gets only `index.html`, and a `route.ts` is written as the one file its `GET` answers. Under server mode the handler is called for every request, and its response is returned.',
 });
 
 export const handlerDev = message({
