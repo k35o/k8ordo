@@ -272,8 +272,8 @@ export const vercelRoutesExample = [
     en: 'The redirect takes the trailing slash off and keeps the query: `/about/?x=1` goes to `/about?x=1`, which Vercel answers from `about/index.html` as it is. Its pattern takes no empty segment, so it never answers with `Location: //evil.test`, which a browser reads as another origin. Vercel itself answers `//evil.test/` before any route, with a 308 to `/evil.test/` that carries none of your headers.',
   }),
   message({
-    ja: '`check: true`は`dest`をファイルの中から探します。無ければ、書き換えた後のパスで先へ進みます。`beforeNotFound`のルートが見るのは、`/posts/nope`でなく`/posts/nope/article.md`です。この例では`routes/posts/[slug]/article.md/`の`route.ts`が記事ごとのmarkdownを書き、markdownを求めるクライアントにはそれを返します。`paths`は、ページとmarkdownを記事の同じ一覧から返し、片方だけの記事を作らないようにします。',
-    en: '`check: true` looks for `dest` among the files. When none is there, the matching goes on with `dest` as the pathname: `beforeNotFound` sees `/posts/nope/article.md`, not `/posts/nope`. Here a `route.ts` at `routes/posts/[slug]/article.md/` wrote each post’s markdown, and a client asking for markdown is answered with it. Have `paths` give the pages and their markdown from one list of posts, so no post is written without the other.',
+    ja: '`check: true`は`dest`をファイルの中から探します。無ければ、書き換えた後のパスで先へ進みます。`beforeNotFound`のルートが見るのは、`/posts/nope`でなく`/posts/nope/article.md`です。この例では`routes/posts/[slug]/article.md/`の`route.ts`が記事ごとのmarkdownを書き、markdownを求めるクライアントにはそれを返します。ページもmarkdownも`posts/[slug]/paths.ts`が返した値ごとに書き出されるので、片方だけの記事はできません。',
+    en: '`check: true` looks for `dest` among the files. When none is there, the matching goes on with `dest` as the pathname: `beforeNotFound` sees `/posts/nope/article.md`, not `/posts/nope`. Here a `route.ts` at `routes/posts/[slug]/article.md/` wrote each post’s markdown, and a client asking for markdown is answered with it. Both are written for the values `posts/[slug]/paths.ts` returns, so no post is written without the other.',
   }),
   message({
     ja: '`has`は、ヘッダーの値を`value`の正規表現で照合するだけです。`.*text/markdown.*`は`Accept: text/markdown, text/html;q=0.9`に当たります。ブラウザの`text/html,application/xhtml+xml,*/*;q=0.8`は、`*/*`を含みますが当たりません。',
@@ -644,8 +644,8 @@ export const baseRedirect = message({
 });
 
 export const baseStatic = message({
-  ja: 'staticモードでは、ページはルート表のパスのまま`dist/client/`に書かれます。ホスティングはこのディレクトリを`/docs/`で配信します。`paths`には`base`を除いたパスを渡します。`sitemap.xml`には`base`を含めたURLが載ります。',
-  en: 'In static mode, pages are written into `dist/client/` at their paths in the route table, and the host serves that directory at `/docs/`. `paths` takes paths without the base. `sitemap.xml` lists URLs with it.',
+  ja: 'staticモードでは、ページはルート表のパスのまま`dist/client/`に書かれます。ホスティングはこのディレクトリを`/docs/`で配信します。`paths.ts`が返すのはパラメータの値なので、`base`は含めません。`sitemap.xml`には`base`を含めたURLが載ります。',
+  en: 'In static mode, pages are written into `dist/client/` at their paths in the route table, and the host serves that directory at `/docs/`. A `paths.ts` returns parameter values, which hold no base. `sitemap.xml` lists URLs with it.',
 });
 
 export const baseServer = message({

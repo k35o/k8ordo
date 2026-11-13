@@ -1,7 +1,8 @@
 'use client';
 
-import { ListBox, ListIcon } from '@k8ordo/ui';
+import { ListBox } from '@k8ordo/ui';
 import type { Option } from '@k8ordo/ui';
+import { ListIcon } from '@k8ordo/ui/icons';
 import { useState } from 'react';
 
 import styles from './list-box-previews.module.css';

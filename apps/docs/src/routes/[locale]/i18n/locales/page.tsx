@@ -170,7 +170,7 @@ export default function I18nLocalesPage() {
             <Rich>{t.see()}</Rich>
           </li>
           <li>
-            <Rich>{t.membersPaths()}</Rich>
+            <Rich>{t.membersStatic()}</Rich>
             <LocaleAnchor path="/:locale/framework/params">
               {m.framework.navParams()}
             </LocaleAnchor>

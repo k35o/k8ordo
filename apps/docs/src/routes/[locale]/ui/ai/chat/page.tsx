@@ -20,7 +20,8 @@ import page from '../../../../../styles/page.module.css';
 const t = m.aiChat;
 
 const DEMO = `'use client';
-import { Avatar, AssistantIcon } from '@k8ordo/ui';
+import { Avatar } from '@k8ordo/ui';
+import { BotMessageIcon } from '@k8ordo/ui/icons';
 import {
   Conversation,
   Message,
@@ -29,7 +30,7 @@ import {
 } from '@k8ordo/ui/ai';
 
 const avatar = (
-  <Avatar color="primary" icon={<AssistantIcon />} name="AI" size="sm" />
+  <Avatar color="primary" icon={<BotMessageIcon />} name="AI" size="sm" />
 );
 
 export function Chat({ messages, send }: Props) {
@@ -71,7 +72,8 @@ export function Chat({ messages, send }: Props) {
 }`;
 
 const SKELETON = `'use client';
-import { Avatar, AssistantIcon } from '@k8ordo/ui';
+import { Avatar } from '@k8ordo/ui';
+import { BotMessageIcon } from '@k8ordo/ui/icons';
 import { Conversation, Message, PromptInput } from '@k8ordo/ui/ai';
 import { useChat } from '@ai-sdk/react';
 import type { UIMessage } from 'ai';
@@ -92,7 +94,7 @@ export function Chat() {
                 m.role === 'user' ? undefined : (
                   <Avatar
                     color="primary"
-                    icon={<AssistantIcon />}
+                    icon={<BotMessageIcon />}
                     name="AI"
                     size="sm"
                   />

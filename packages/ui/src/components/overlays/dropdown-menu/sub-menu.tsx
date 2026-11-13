@@ -5,7 +5,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import type { FC, KeyboardEvent, PropsWithChildren } from 'react';
 
 import { mergeRefs } from '../../../helpers';
-import { ChevronIcon } from '../../icons';
+import { ChevronIcon } from '../../icons/chevron';
 import { useCanHover, useHoverIntent, useListNavigation } from '../_internal';
 import { Popover } from '../popover';
 import { useOpenContext, usePopoverContext } from '../popover/hooks';

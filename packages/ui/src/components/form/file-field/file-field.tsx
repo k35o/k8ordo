@@ -27,7 +27,7 @@ import { carriesFiles } from '../../../internal/carries-files';
 import { droppedFiles } from '../../../internal/dropped-files';
 import { Button } from '../../buttons/button';
 import { IconButton } from '../../buttons/icon-button';
-import { CloseIcon } from '../../icons';
+import { XIcon } from '../../icons/x';
 import { createSafeContext } from './../../../helpers/create-safe-context';
 import { mergeRefs } from './../../../helpers/merge-refs';
 
@@ -393,7 +393,7 @@ export const ItemList: FC<{
             </div>
             {clearable === true && (
               <IconButton label={messages.fileFieldRemove} onClick={onDelete}>
-                <CloseIcon size="sm" />
+                <XIcon size="sm" />
               </IconButton>
             )}
           </li>

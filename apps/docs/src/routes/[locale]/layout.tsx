@@ -5,8 +5,9 @@ import { componentGroups } from '../../data/component-groups';
 import { locales } from '../../i18n';
 
 // `/fr/ui` はこのパターンが答えない。スキーマが拒んだ pathname は表の次へ
-// 進み、最後は not-found（404）になる。ビルドが paths で展開するのは
-// locales.paths の分だけなので、静的化でここが拒む pathname は生成されない。
+// 進み、最後は not-found（404）になる。ビルドが書き出すロケールは横の
+// paths.ts が返す locales.all の分だけなので、静的化でここが拒む pathname は
+// 生成されない。
 // スキーマはロケール集合が自分で出す（Standard Schema）。zod は要らない。
 // 受理したロケールは、この描画の間の文言のロケールにもなる。
 export const { paramsSchema } = locales;

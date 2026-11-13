@@ -1,4 +1,4 @@
-import { fallbackShapes, slotOf } from '../grammar/tree';
+import { fallbackShapes, pathsFiles, slotOf } from '../grammar/tree';
 import type { Problem, RouteDir, Slot } from '../grammar/tree';
 import { FRAMEWORK } from '../host';
 import type { Mode } from '../host';
@@ -440,6 +440,7 @@ const LATE: ReadonlySet<Slot> = new Set([
   'notFound',
   'route',
   'fallback',
+  'paths',
 ]);
 
 const isLate = (file: string): boolean => {
@@ -477,6 +478,10 @@ export const emitRoutesModule = (
   // every value with its page, so nothing of a fallback.tsx is compiled in.
   const shells = options.mode === 'static' ? fallbackShapes(tree) : [];
   for (const shape of shells) namer.take(shape.file);
+  // Likewise the values of a parameter: only a build into files asks for
+  // them, so a running server compiles no paths.ts in.
+  const supplies = options.mode === 'static' ? pathsFiles(tree) : [];
+  for (const supply of supplies) namer.take(supply.file);
   const guarded = guardsOf(tree);
   const guardStacks = new Map(
     [...guarded.stacks].map(([pattern, files]) => [
@@ -582,15 +587,22 @@ export const emitRoutesModule = (
     ({ file }) =>
       `${pad(1)}Checked<Loaded<typeof ${namer.take(file)}>['default'], ComponentType>,`,
   );
+  // A paths.ts is handed the params above its own and returns its values.
+  const pathsChecks = supplies.map(
+    ({ pattern, file }) =>
+      `${pad(1)}Checked<Loaded<typeof ${namer.take(file)}>['default'], Paths<'${pattern}'>>,`,
+  );
   const hasChecks =
     schemaChecks.length +
       routeChecks.length +
       fallbackChecks.length +
+      pathsChecks.length +
       guardChecks.length >
     0;
   const readsLate =
     routeFiles.length > 0 ||
     shells.length > 0 ||
+    supplies.length > 0 ||
     searchReaders.size > 0 ||
     [...namer.names.keys()].some(
       (file) => withParams.has(file) && isLate(file),
@@ -626,6 +638,7 @@ export const emitRoutesModule = (
     ...(hasLayout ? ['ParamsOf'] : []),
     ...(schemaChecks.length > 0 ? ['ParamsSchemaFor'] : []),
     'ParsedParams',
+    ...(supplies.length > 0 ? ['Paths'] : []),
     ...(redirects.length > 0 ? ['RedirectTarget'] : []),
   ];
 
@@ -846,6 +859,30 @@ export const emitRoutesModule = (
       : [
           '// A running server renders every value with its page: no shells.',
           'export const fallbacks = {} as const;',
+        ]),
+    '',
+    ...(options.mode === 'static'
+      ? [
+          "// Per paths.ts, by its file: what reads the values its directory's",
+          '// parameter takes. Only the build asks.',
+          'export const paths = {',
+          ...supplies.map(
+            ({ file }) => `${pad(1)}'${file}': ${namer.take(file)},`,
+          ),
+          '} as const;',
+          ...(pathsChecks.length > 0
+            ? [
+                '',
+                '// The paths.ts files, each checked against the pattern of its directory.',
+                'export type PathsChecks = [',
+                ...pathsChecks,
+                '];',
+              ]
+            : []),
+        ]
+      : [
+          '// A running server renders whatever value arrives: no values to list.',
+          'export const paths = {} as const;',
         ]),
     '',
     'export const routes = defineRoutes({',

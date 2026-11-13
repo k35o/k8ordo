@@ -6,7 +6,7 @@ import type { ComponentProps, FC, PropsWithChildren, ReactNode } from 'react';
 import type { Placement } from '../../../types/variables';
 import { Button } from '../../buttons/button';
 import { IconButton } from '../../buttons/icon-button';
-import { ChevronIcon } from '../../icons';
+import { ChevronIcon } from '../../icons/chevron';
 import { useListNavigation } from '../_internal';
 import { Popover, useOpenContext } from '../popover';
 import { MenuContextProvider, useMenuContent, useMenuItem } from './hooks';

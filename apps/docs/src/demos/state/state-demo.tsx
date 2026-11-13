@@ -1,7 +1,8 @@
 'use client';
 
 import { useAppState } from '@k8ordo/state';
-import { Button, Code, IconButton, MinusIcon, PlusIcon } from '@k8ordo/ui';
+import { Button, Code, IconButton } from '@k8ordo/ui';
+import { MinusIcon, PlusIcon } from '@k8ordo/ui/icons';
 
 import { jsLiteral } from '../../components/js-literal';
 import * as m from '../../messages';

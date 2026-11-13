@@ -31,8 +31,8 @@ When installed via npm, these docs live under `node_modules/@k8ordo/i18n/docs/`.
   Component boundary (a message is called before it is passed to a
   `'use client'` component), what reaches the browser, where the locale comes
   from on each side, `/` (a `307` from a `guard.ts` in server mode,
-  an effect in static mode) and `<html lang>` / `dir`, static path
-  expansion, and pairing with `@k8ordo/router` / `@k8ordo/ui` /
+  an effect in static mode) and `<html lang>` / `dir`, the static build's
+  `[locale]/paths.ts`, and pairing with `@k8ordo/router` / `@k8ordo/ui` /
   `@k8ordo/form`.
 
 ## Entry point
@@ -40,12 +40,13 @@ When installed via npm, these docs live under `node_modules/@k8ordo/i18n/docs/`.
 - `@k8ordo/i18n` — `defineLocales(definitions, { default? })` takes each
   locale's `{ timeZone, dir }` by tag (both required; an unknown time zone
   throws) and returns `{ all, definitions, default, is, negotiate, localize,
-  delocalize, paths, paramsSchema, getLocale, run, negotiateRequest, dateTimeFormat,
+  delocalize, paramsSchema, getLocale, run, negotiateRequest, dateTimeFormat,
   numberFormat, relativeTimeFormat, pluralRules, listFormat }`; the last five
   return the `Intl` object for the current locale, cached per locale and
   options, and `dateTimeFormat` always in that locale's `timeZone` (its
-  options type refuses one); `paths(patterns)` is the static build's `paths` option
-  with `/:locale` expanded to every locale; typed links come from
+  options type refuses one); a static build takes the locales from
+  `src/routes/[locale]/paths.ts`, which returns `locales.all`; typed links
+  come from
   the router's `bindParams(() => ({ locale: locales.getLocale() }))`,
   written by the application (imported from `@k8ordo/framework` in a
   framework application); the first entry is the default unless told otherwise (and `default` is then typed as the whole union), every tag

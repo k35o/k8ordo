@@ -4,7 +4,7 @@ import type { FC, ReactNode } from 'react';
 import { expect } from 'storybook/test';
 
 import { Avatar } from '../data-display/avatar';
-import { AssistantIcon } from '../icons';
+import { BotMessageIcon } from '../icons/bot-message';
 import { Attachment } from './attachment';
 import { Conversation } from './conversation';
 import { Message } from './message';
@@ -31,7 +31,7 @@ const AssistantRow: FC<{ text?: string; children: ReactNode }> = ({
 }) => (
   <Message.Root
     avatar={
-      <Avatar color="primary" icon={<AssistantIcon />} name="AI" size="sm" />
+      <Avatar color="primary" icon={<BotMessageIcon />} name="AI" size="sm" />
     }
     from="assistant"
   >

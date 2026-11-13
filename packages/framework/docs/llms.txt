@@ -5,8 +5,8 @@
 > `framework({ mode: 'static' })` renders every route at build time into
 > files a static host serves, with no server, and
 > `framework({ mode: 'server' })` renders per request on a server. Switching
-> is changing `mode` (and dropping `paths`, `site` and `csp`, which server
-> mode refuses); nothing else in the application
+> is changing `mode` (and dropping `site` and `csp`, which server mode
+> refuses); nothing else in the application
 > changes. Pick `server` when the application needs the request — Server
 > Actions, `guard.ts`, the `request` prop, cookies, a page that exports
 > `search`, parameter values with no list rendered on the server (static
@@ -14,7 +14,8 @@
 > and `static` otherwise; static mode refuses all of those by name, in the
 > build and in `vite dev` (`this application wants mode: 'server'`).
 > `src/routes/` is the pathname space and holds nothing else
-> (page/layout/not-found/error/loading/fallback/redirect/guard/route files,
+> (page/layout/not-found/error/loading/fallback/paths/redirect/guard/route
+> files,
 > `[param]` and `(group)` directories; `_` is an ordinary character in
 > a segment and a name starting with `.` is not read, so `/.well-known` cannot
 > be a route; components live outside it in `src/components/` and every
@@ -29,8 +30,10 @@
 > method it exports; static: written as the file its `GET` answers). Under
 > server mode a Server Action ends with `redirect()`, a `guard.ts` runs before
 > whatever answers below it, `cookies()` reads and writes cookies, and a page
-> receives `request`. Static mode lists parameter values with `paths` —
-> beside a `fallback.tsx`, the values it does not list get a shell: the
+> receives `request`. Under static mode a parameter's values come from a
+> `paths.ts` in its directory (a function returning them, typed `Paths`,
+> run with the pages' own modules, applied to every route below it) —
+> beside a `fallback.tsx`, the values it does not return get a shell: the
 > layouts written as HTML, the page drawn in the browser from the URL, and a
 > `_redirects` (or `vercel()`'s routes) through which a host reaches it —
 > writes `404.html` and `sitemap.xml`, and puts a Content-Security-Policy in
@@ -74,16 +77,20 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   writes them before `tsc` without a build, titles,
   and fetching the next page ahead (`data-k8ordo-prefetch`; under static
   mode also the links on screen for a coarse pointer, every page kept for
-  going back and forward, and `client-files.json` linked with a payload).
+  going back and forward, and `client-files.json` linked with a payload),
+  and MDX (the application's own compiler plugin, `enforce: 'pre'`; the CSS
+  an `.mdx` file imports reaches the pages rendering it, with no query).
 - [Parameters](references/params.md): `paramsSchema` — a refused value is a
-  pathname the pattern does not answer — and, under static mode, the `paths`
-  option: supplying pathnames, expanding a parameter every page shares, and
-  what fails the build; and `fallback.tsx` for the values it does not list —
-  the shell it renders (no props, the layouts' schemas only, the shell's
-  `pathname`), shell locations in `paths` and the parameters a layout above
-  forces them to fill, reading the value in the browser with `useMatch`,
-  `notFound()` shown in place, routes below its parameter, and what it
-  costs.
+  pathname the pattern does not answer — and, under static mode, `paths.ts`:
+  the values of its directory's parameter (`Paths<Pattern>`), given the
+  params above it, for every page, `route.ts` and `redirect.ts` below it,
+  and what fails the build; and `fallback.tsx` for the values it does not
+  return — the shell it renders (no props, the layouts' schemas only, the
+  shell's `pathname`), where a shell stands (below the values of the
+  `paths.ts` files above it, which a layout receiving a parameter forces to
+  exist), reading the value in the browser with `useMatch`, `notFound()`
+  shown in place, routes below its parameter, what it costs, and how
+  `vite dev` answers a value no `paths.ts` returns.
 - [Errors and redirects](references/errors.md): `error.tsx`, a Server
   Component that throws stopping a static build, `notFound()` and
   `not-found.tsx` (a document waits for its page under server mode; under a
@@ -127,16 +134,13 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   `usePendingPathname`, `useMatch`, `matchPath`, `normalizePathname`,
   `withBase`, and the types `PageProps`, `LayoutProps`, `RouteContext`,
   `ErrorProps`, `BoundLinks`, `BoundParams`, `MatchablePattern`,
-  `MatchOptions`, `NavigateToOptions` and the `Registered*` types. Not
-  `useParams` or `useRoute`: a page receives `params` as a prop.
+  `MatchOptions`, `NavigateToOptions` and the `Registered*` types; and one
+  type of its own, `Paths<Pattern>`, what a `paths.ts` exports by default.
+  Not `useParams` or `useRoute`: a page receives `params` as a prop.
 - `@k8ordo/framework/vite` — `framework(options)` returns the Vite plugins;
   `options.mode` (`'static' | 'server'`) is required, `options.routesDir`
   moves the route directory (default `src/routes`). Only with
-  `mode: 'static'`: `options.paths` supplies concrete pathnames for routes
-  with parameters (a parameterised route left uncovered fails the build,
-  unless its page has a `fallback.tsx`), and for such a page also shell
-  locations, pathnames that still hold the parameters left to the browser
-  (`/ja/posts/:id`), `options.site` (the origin) makes the build also write
+  `mode: 'static'`: `options.site` (the origin) makes the build also write
   `sitemap.xml`, and
   `options.csp` (directives → sources, `ContentSecurityPolicy`) is the
   Content-Security-Policy written into each page's `<meta>`, first in
@@ -207,11 +211,11 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 - `k8ordo generate` — the package's one command (its `bin`), run in the
   application's directory: resolves the Vite config there as `vite build`
   does and writes `.k8ordo/` as the build does when it begins, then stops —
-  no environment built, no page rendered, `paths` never called — so CI
+  no environment built, no page rendered, no `paths.ts` read — so CI
   runs it before `tsc` without the data a build reads. A `routes/` with
   the problems the build names under
   `routes/ is not a valid pathname space:` fails it the same way (exit
   code 1), with nothing written. What `mode: 'static'` refuses on top of
   those — a `guard.ts`, a `route.ts` answering more than `GET`, a page
-  reading `search`, an `export *`, a Server Action, whatever `paths`
+  reading `search`, an `export *`, a Server Action, whatever a `paths.ts`
   returns — it does not check, so its success is not the build's.

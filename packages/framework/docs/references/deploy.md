@@ -92,8 +92,8 @@ rewrite: the host answers a URL no file answers with the shell's file,
 under `200`, the URL left as the visitor asked for it. Whenever it writes a
 shell, the build writes the rules into `dist/client/_redirects`, in the
 format Netlify and Cloudflare both read. For
-`[locale]/posts/[id]/fallback.tsx`, with `paths` supplying `/en/posts/:id`
-and `/ja/posts/:id`, the ids `1` and `2`, and a
+`[locale]/posts/[id]/fallback.tsx`, with `[locale]/paths.ts` returning `en`
+and `ja`, `[locale]/posts/[id]/paths.ts` the ids `1` and `2`, and a
 `[locale]/posts/first/redirect.ts` beside them:
 
 ```
@@ -616,8 +616,8 @@ export default defineConfig({
   matching goes on with `dest` as the pathname: `beforeNotFound` sees
   `/posts/nope/article.md`, not `/posts/nope`. Here a `route.ts` at
   `routes/posts/[slug]/article.md/` wrote each post's markdown beside its
-  page, and a client asking for markdown is answered with it. Have `paths`
-  give the pages and their markdown from one list of posts, so no post is
+  page, and a client asking for markdown is answered with it. Both are
+  written for the slugs `posts/[slug]/paths.ts` returns, so no post is
   written without the other.
 - `has` matches the header's text against `value`, a regular expression,
   and negotiates nothing: `.*text/markdown.*` takes
@@ -709,9 +709,9 @@ the way:
   it with a `404`, and the client runtime leaves it to the browser.
 
 Under `mode: 'static'` the pages are written into `dist/client/` at their
-pathnames in the table, so the host serves that directory at `/docs/`; the
-`paths` option takes pathnames without the base, and `sitemap.xml` lists
-each page at its URL, base included. `_redirects` is written at the root of
+pathnames in the table, so the host serves that directory at `/docs/`; a
+`paths.ts` returns a parameter's values, which hold no base, and
+`sitemap.xml` lists each page at its URL, base included. `_redirects` is written at the root of
 `dist/client/` too, with the base in every line
 (`/docs/posts/:p1 /docs/posts/!fallback/ 200`), but a host reads it only at
 the root of what it publishes: move it there. Under `mode: 'server'`, `serve` reads

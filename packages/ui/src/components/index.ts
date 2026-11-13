@@ -56,7 +56,6 @@ export { Slider } from './form/slider';
 export { Switch } from './form/switch';
 export { TextField } from './form/text-field';
 export { Textarea } from './form/textarea';
-export * from './icons';
 export type { GapSize } from './layout/_shared/gap';
 export type { PaddingSize } from './layout/_shared/padding';
 export { Grid, type GridProps } from './layout/grid';

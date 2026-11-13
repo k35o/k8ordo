@@ -118,6 +118,20 @@ pnpm check         # check:write to auto-fix
   written; `@k8ordo/framework`'s `refusals.test.ts` reads that from a
   build's source maps. `oxc-transform-react` is `@k8ordo/framework`'s
   optional peer, not this package's.
+- **An `.mdx` module gets the RSC plugin's CSS wrapper too.** The RSC
+  plugin wraps the exported components of a module that imports CSS so the
+  page links it, and only for a file named `.js`, `.jsx`, `.ts` or `.tsx`;
+  the test is in the plugin, with no option to widen it. An `.mdx` an
+  application's plugin compiled is passed over, and its CSS reached a page
+  only where every import of it carried `?vite-rsc-css-export=default`.
+  `plugin/mdx-css.ts` runs the plugin's own `transformRscCssExport`
+  (`@vitejs/plugin-rsc/plugin`) on a compiled `.md`/`.mdx` that imports CSS
+  statically, under the plugin's own rule for which exports to wrap, and
+  leaves an id carrying the query to the plugin. It sits before `rsc()` in
+  the array: the wrapper calls `import.meta.viteRsc.loadCss()`, which a
+  later transform of the plugin replaces. `runtime/mdx-css.test.ts` builds
+  `fixtures/mdx-css/` with a stand-in compiler emitting what an MDX compiler
+  does (a default `function MDXContent`, the file's imports kept).
 - **The browser holds no route table.** `runtime/app-router.tsx` claims every
   same-origin URL and learns from the answer; anything that is not a payload
   (`runtime/is-payload.ts`) becomes a document load, which is also the
@@ -765,7 +779,8 @@ pnpm check         # check:write to auto-fix
   Under `'static'` the generated table lists `fallbacks`, per page pattern
   with one: what reads the component, the params a shell may leave to the browser
   (`open`, those no layout above it receives — `fallbackShapes`, the one
-  walk the grammar, the emitter and the framework's `paths.ts` all read),
+  walk the grammar, the emitter and `@k8ordo/framework`'s `src/paths.ts` all
+  read),
   and the layouts' schemas. Under `'server'` it is `{}` and nothing of a
   fallback.tsx is imported. A request is a shell request when its pattern
   has an entry and only open params hold `FALLBACK_SEGMENT` (`!fallback`):
@@ -780,6 +795,22 @@ pnpm check         # check:write to auto-fix
   `SHELL_HEADER` (the pattern that rendered it), which the build compares
   with the one it asked for; a `notFound()` while it renders is a page's
   404 (`NOT_FOUND_HEADER`), which the build refuses.
+- **A `paths.ts` is a parameter's values, and only a build into files asks.**
+  The grammar finds one as the `paths` slot and takes it only in a `[param]`
+  directory — anywhere else is a problem, in both modes — and
+  `pathsFiles(tree)` lists them, outermost first, each with its directory's
+  pattern. Under `'static'` the generated table lists `paths`, keyed by the
+  file, each a late `() => import()`, and checks every default export
+  against `Paths<pattern>` in a `PathsChecks` type; under `'server'` it is
+  `{}` and no paths.ts is compiled in. `entry.rsc` exports
+  `pathValues(file, params)`, which loads the file through that table and
+  calls its default export with the params above it, handing back whatever
+  it returned: the static build calls it from the built bundle, so a
+  paths.ts runs in the pages' module graph (the application's aliases,
+  `server-only` modules, the instances the pages read through), and what
+  counts as a value is the framework's to say (`suppliedFrom`). `vite dev`
+  reads the same files through the RSC environment's runner, in
+  `@k8ordo/framework`.
 - **A shell carries its not-found, and shows it in place.** The nearest
   not-found is rendered into `Payload.notFound`, in the shell's render and
   context — the nearest that takes none of the params the shell leaves
@@ -806,14 +837,15 @@ pnpm check         # check:write to auto-fix
   name is a type error without any route file importing a helper — the
   layout's pattern is the prefix every route below it shares. What the table
   holds no value of (a page's `paramsSchema`, a `route.ts`, a
-  `fallback.tsx`) is checked as a type, `Checked<T, U>`. `tsc` reports it in
+  `fallback.tsx`, a `paths.ts`) is checked as a type, `Checked<T, U>`. `tsc` reports it in
   the generated file; `vite build` does not type-check, so the build itself
   still passes.
 - **The table reads a page when a request reaches it, and imports the frame.**
-  `page.tsx`, `not-found.tsx`, `route.ts` and `fallback.tsx` are
-  `() => import()` in `routes.gen.ts` (`isLate` in `emit.ts`); a page and a
-  not-found stand in the table as `lazy()` over it, and `pageModules`,
-  `routeModules` and `fallbacks` list it per pattern. Imported with the
+  `page.tsx`, `not-found.tsx`, `route.ts`, `fallback.tsx` and `paths.ts`
+  are `() => import()` in `routes.gen.ts` (`isLate` in `emit.ts`); a page
+  and a not-found stand in the table as `lazy()` over it, `pageModules`,
+  `routeModules` and `fallbacks` list it per pattern, and `paths` per
+  file. Imported with the
   table, a route file is in the RSC entry's chunk, and the RSC plugin
   groups client components, and attaches a server component's CSS, by the
   RSC chunk a module is in — so every page loaded every page's. Read late,
@@ -841,6 +873,7 @@ src/
   generate/emit.ts           buildTable (structure) + routes.gen / register.gen
   generate/write.ts          the filesystem edge: scan, generate, write
   plugin/core.ts             the Vite plugins: RSC pipeline, virtual routes
+  plugin/mdx-css.ts          the RSC plugin's CSS wrapper, applied to a compiled .mdx
   plugin/server-actions.ts   which modules declared 'use server'
   runtime/entry.{rsc,ssr,browser}.tsx  the three environments
   runtime/app-router.tsx     the client half: navigation + payloads, and whether this document can render one
@@ -926,6 +959,10 @@ fixtures/
   form-state/routes/         a form whose Server Action returns a client
                              component, which runtime/form-state.test.ts
                              posts without JavaScript
+  mdx-css/routes/            a page importing an .mdx and one reading another
+                             through a glob, each .mdx importing CSS, which
+                             runtime/mdx-css.test.ts builds with a stand-in
+                             MDX compiler
   head-scripts/routes/       a layout writing an inline script in <head> and
                              importing CSS, which runtime/head-scripts.test.ts
                              opens in each engine with the CSS held back

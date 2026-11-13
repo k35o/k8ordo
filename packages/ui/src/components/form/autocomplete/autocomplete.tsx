@@ -29,7 +29,7 @@ import { getMessages } from '../../../i18n/current';
 import type { Option } from '../../../types/variables';
 import { FormValue } from '../../_internal/form-value';
 import { IconButton } from '../../buttons/icon-button';
-import { CloseIcon } from '../../icons';
+import { XIcon } from '../../icons/x';
 import { chain } from './../../../helpers/chain';
 import { mergeRefs } from './../../../helpers/merge-refs';
 
@@ -295,7 +295,7 @@ export const Autocomplete: FC<Props> = ({
                   }}
                   size="sm"
                 >
-                  <CloseIcon size="sm" />
+                  <XIcon size="sm" />
                 </IconButton>
               </div>
             );
@@ -342,7 +342,7 @@ export const Autocomplete: FC<Props> = ({
             }}
             size="sm"
           >
-            <CloseIcon size="sm" />
+            <XIcon size="sm" />
           </IconButton>
         )}
       </div>

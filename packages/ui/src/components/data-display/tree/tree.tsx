@@ -6,7 +6,7 @@ import type { FC, HTMLAttributes, KeyboardEvent, ReactNode } from 'react';
 
 import { useControllableState } from '../../../hooks/controllable-state';
 import { readWritingMode } from '../../../hooks/writing-mode';
-import { ChevronIcon } from '../../icons';
+import { ChevronIcon } from '../../icons/chevron';
 
 import focusRing from '../../_internal/focus-ring.module.css';
 import styles from './tree.module.css';

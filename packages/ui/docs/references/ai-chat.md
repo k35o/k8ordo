@@ -61,8 +61,9 @@ The "default" shown for `label`, `sendLabel`, and similar props below is the bui
 ```tsx
 'use client';
 import { useChat } from '@ai-sdk/react';
-import { Avatar, AssistantIcon } from '@k8ordo/ui';
+import { Avatar } from '@k8ordo/ui';
 import { Conversation, Message, PromptInput } from '@k8ordo/ui/ai';
+import { BotMessageIcon } from '@k8ordo/ui/icons';
 import type { UIMessage } from 'ai';
 
 const textOf = (m: UIMessage) =>
@@ -88,7 +89,7 @@ export function Chat() {
                 m.role === 'user' ? undefined : (
                   <Avatar
                     color="primary"
-                    icon={<AssistantIcon />}
+                    icon={<BotMessageIcon />}
                     name="AI"
                     size="sm"
                   />
@@ -152,7 +153,7 @@ import { Message } from '@k8ordo/ui/ai';
   <Message.Content>Hello</Message.Content>
 </Message.Root>
 
-<Message.Root avatar={<Avatar icon={<AssistantIcon />} name="AI" size="sm" />} from="assistant">
+<Message.Root avatar={<Avatar icon={<BotMessageIcon />} name="AI" size="sm" />} from="assistant">
   <Message.Content isStreaming>Text still streaming…</Message.Content>
 </Message.Root>
 ```
@@ -494,7 +495,7 @@ Render each part as its own row under `Message.Root` — the children stack in a
 ```tsx
 'use client';
 import { useChat } from '@ai-sdk/react';
-import { Avatar, AssistantIcon } from '@k8ordo/ui';
+import { Avatar } from '@k8ordo/ui';
 import {
   Attachment,
   Message,
@@ -504,6 +505,7 @@ import {
 } from '@k8ordo/ui/ai';
 import { mapMessageParts } from '@k8ordo/ui/ai-sdk';
 import { Response } from '@k8ordo/ui/ai/response';
+import { BotMessageIcon } from '@k8ordo/ui/icons';
 import { validateGeneratedSpec } from '@k8ordo/ui/json-render';
 import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
 import { lastAssistantMessageIsCompleteWithApprovalResponses } from 'ai';
@@ -524,7 +526,7 @@ function ChatMessage({ message, chat }: { message: UIMessage; chat: Chat }) {
     <Message.Root
       avatar={
         isUser ? undefined : (
-          <Avatar icon={<AssistantIcon />} name="AI" size="sm" />
+          <Avatar icon={<BotMessageIcon />} name="AI" size="sm" />
         )
       }
       from={isUser ? 'user' : 'assistant'}

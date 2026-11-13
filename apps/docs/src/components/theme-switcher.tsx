@@ -1,7 +1,8 @@
 'use client';
 
 import { useColorScheme } from '@k8ordo/color-scheme';
-import { DarkModeIcon, IconButton, LightModeIcon } from '@k8ordo/ui';
+import { IconButton } from '@k8ordo/ui';
+import { MoonIcon, SunIcon } from '@k8ordo/ui/icons';
 
 import * as m from '../messages';
 
@@ -20,10 +21,10 @@ export function ThemeSwitcher() {
       }}
     >
       <span className={styles.toDark}>
-        <DarkModeIcon />
+        <MoonIcon />
       </span>
       <span className={styles.toLight}>
-        <LightModeIcon />
+        <SunIcon />
       </span>
     </IconButton>
   );

@@ -188,9 +188,9 @@ export const membersParams = message({
   en: '`paramsSchema`, `run` and `getLocale`: set the current locale and read it. See ',
 });
 
-export const membersPaths = message({
-  ja: '`paths`：`/:locale`を含むパターンを、ロケールごとのpathnameに展開する関数。`@k8ordo/framework`での使い方は',
-  en: '`paths`: expands each pattern with `/:locale` into one pathname per locale. For its use in `@k8ordo/framework`, see ',
+export const membersStatic = message({
+  ja: '`@k8ordo/framework`のstaticモードでは、`src/routes/[locale]/paths.ts`で`all`を返します。書き方は',
+  en: 'Under static mode of `@k8ordo/framework`, `src/routes/[locale]/paths.ts` returns `all`. Writing it is covered in ',
 });
 
 export const membersFormat = message({

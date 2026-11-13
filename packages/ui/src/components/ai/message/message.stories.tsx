@@ -4,7 +4,7 @@ import { expect, fn, spyOn, waitFor } from 'storybook/test';
 import { Message } from '.';
 import { blurActiveElement } from '../../../../.storybook/focus';
 import { Avatar } from '../../data-display/avatar';
-import { AssistantIcon } from '../../icons';
+import { BotMessageIcon } from '../../icons/bot-message';
 import { Attachment } from '../attachment';
 import { Source } from '../source';
 
@@ -19,7 +19,7 @@ export default meta;
 type Story = StoryObj<typeof Message.Root>;
 
 const assistantAvatar = (
-  <Avatar color="primary" icon={<AssistantIcon />} name="AI" size="sm" />
+  <Avatar color="primary" icon={<BotMessageIcon />} name="AI" size="sm" />
 );
 
 const ANSWER = 'いいですね。まずは会話の器・吹き出し・入力欄から始めましょう。';

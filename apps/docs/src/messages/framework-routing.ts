@@ -110,8 +110,13 @@ export const guardFile = message({
 });
 
 export const fallbackFile = message({
-  ja: '`fallback.tsx`：`paths`に無い値のURLに、横の`page.tsx`の代わりに答えます。staticモードだけで使えます。',
-  en: '`fallback.tsx`: answers a URL whose value `paths` did not list, in place of the `page.tsx` beside it. Static mode only.',
+  ja: '`fallback.tsx`：どの`paths.ts`も返さなかった値のURLに、横の`page.tsx`の代わりに答えます。staticモードだけで使えます。',
+  en: '`fallback.tsx`: answers a URL whose value no `paths.ts` returned, in place of the `page.tsx` beside it. Static mode only.',
+});
+
+export const pathsFile = message({
+  ja: '`paths.ts`：そのディレクトリのパラメータの値を返します。`[id]`のようなパラメータのディレクトリに置き、staticモードのビルドが読みます。',
+  en: '`paths.ts`: returns the values of its directory’s parameter. It sits in a parameter’s directory, such as `[id]`, and a static mode build reads it.',
 });
 
 export const filesOther = message({
@@ -175,8 +180,8 @@ export const localeRuns = message({
 });
 
 export const localeStatic = message({
-  ja: 'staticモードでは、ロケールの数だけページを書き出すので、`paths`に`locales.paths`を渡します。渡し方は',
-  en: 'Under static mode a page is written per locale, so `paths` takes `locales.paths`. Passing it is covered in ',
+  ja: 'staticモードでは、ロケールの数だけページを書き出すので、`[locale]/paths.ts`で`locales.all`を返します。書き方は',
+  en: 'Under static mode a page is written per locale, so `[locale]/paths.ts` returns `locales.all`. Writing it is covered in ',
 });
 
 export const rootServerTitle = message({
@@ -391,8 +396,8 @@ export const routeStaticTitle = message({
 });
 
 export const routeStatic = message({
-  ja: 'ビルドがURLごとに`GET`を1回呼び、返った`Response`をそのURLのファイルとして書き出します。`feed.xml/route.ts`なら`dist/client/feed.xml`です。パラメータを持つ`route.ts`には、ページと同じく`paths`で値を渡します。`framework()`に`site`を渡していれば、`request.url`のoriginはその値です。',
-  en: 'The build calls `GET` once per URL and writes the `Response` it returns as the file at that URL: `feed.xml/route.ts` becomes `dist/client/feed.xml`. A `route.ts` with parameters takes its values from `paths`, as a page does. With `site` given to `framework()`, the origin of `request.url` is that value.',
+  ja: 'ビルドがURLごとに`GET`を1回呼び、返った`Response`をそのURLのファイルとして書き出します。`feed.xml/route.ts`なら`dist/client/feed.xml`です。パラメータを持つ`route.ts`は、ページと同じく上の`paths.ts`が返した値ごとに書き出されます。`framework()`に`site`を渡していれば、`request.url`のoriginはその値です。',
+  en: 'The build calls `GET` once per URL and writes the `Response` it returns as the file at that URL: `feed.xml/route.ts` becomes `dist/client/feed.xml`. A `route.ts` with parameters is written once per value the `paths.ts` files above it return, as a page is. With `site` given to `framework()`, the origin of `request.url` is that value.',
 });
 
 export const routeRefusedLead = message({
@@ -484,8 +489,8 @@ export const generatedRead = message({
 });
 
 export const generatedTsc = message({
-  ja: '`vite build`は型を検査しないので、`satisfies`の結果は`tsc`で確かめます。cloneした直後やCIでは、`tsc`の前に`k8ordo generate`を実行します。`k8ordo generate`は、アプリのディレクトリのViteの設定を`vite build`と同じように読み、`.k8ordo/`を書くだけでビルドしません。`paths`も呼ばず、ページが読むデータにも触れないので、DBやsecretsの無いCIのジョブでも動きます。`routes/`の書き方や組み合わせに問題があれば（ビルドが`routes/ is not a valid pathname space:`に続けて挙げるもの）、同じエラーで失敗し、何も書きません。staticモードのビルドが断るもの（`guard.ts`、`GET`以外のメソッドをexportする`route.ts`、`search`を読むページ、`export *`、Server Action、`paths`が返す値）は見ないので、成功してもビルドが通るとは限りません。',
-  en: '`vite build` does not type-check, so run `tsc` to see the `satisfies` checks. In a fresh clone or in CI, run `k8ordo generate` before `tsc`. It reads the Vite config in the application’s directory as `vite build` does, writes `.k8ordo/`, and builds nothing. It never calls `paths` and touches no data a page reads, so it runs in a CI job with no database or secrets. When `routes/` has a problem the build lists under `routes/ is not a valid pathname space:`, it fails with the same error and writes nothing. What a static mode build refuses on top of that — a `guard.ts`, a `route.ts` answering more than `GET`, a page reading `search`, an `export *`, a Server Action, whatever `paths` returns — it does not check, so its success does not mean the build will succeed.',
+  ja: '`vite build`は型を検査しないので、`satisfies`の結果は`tsc`で確かめます。cloneした直後やCIでは、`tsc`の前に`k8ordo generate`を実行します。`k8ordo generate`は、アプリのディレクトリのViteの設定を`vite build`と同じように読み、`.k8ordo/`を書くだけでビルドしません。`paths.ts`も読まず、ページが読むデータにも触れないので、DBやsecretsの無いCIのジョブでも動きます。`routes/`の書き方や組み合わせに問題があれば（ビルドが`routes/ is not a valid pathname space:`に続けて挙げるもの）、同じエラーで失敗し、何も書きません。staticモードのビルドが断るもの（`guard.ts`、`GET`以外のメソッドをexportする`route.ts`、`search`を読むページ、`export *`、Server Action、`paths.ts`が返す値）は見ないので、成功してもビルドが通るとは限りません。',
+  en: '`vite build` does not type-check, so run `tsc` to see the `satisfies` checks. In a fresh clone or in CI, run `k8ordo generate` before `tsc`. It reads the Vite config in the application’s directory as `vite build` does, writes `.k8ordo/`, and builds nothing. It reads no `paths.ts` and touches no data a page reads, so it runs in a CI job with no database or secrets. When `routes/` has a problem the build lists under `routes/ is not a valid pathname space:`, it fails with the same error and writes nothing. What a static mode build refuses on top of that — a `guard.ts`, a `route.ts` answering more than `GET`, a page reading `search`, an `export *`, a Server Action, whatever a `paths.ts` returns — it does not check, so its success does not mean the build will succeed.',
 });
 
 export const titlesTitle = message({
@@ -501,6 +506,31 @@ export const titlesApi = message({
 export const titlesOne = message({
   ja: '画面に出る`<title>`は、いつも1つにします。ルートレイアウトでは描かず、各ページと`not-found.tsx`がそれぞれ1つずつ描きます。2つ描くと2つとも出力され、後のものが優先されることはありません。',
   en: 'Keep one `<title>` on screen at a time. The root layout renders none, and each page and `not-found.tsx` renders its own. Render two and both are output; the later one does not replace the earlier.',
+});
+
+export const mdxTitle = message({
+  ja: 'MDX',
+  en: 'MDX',
+});
+
+export const mdxPlugin = message({
+  ja: "frameworkはMDXをコンパイルしません。`@mdx-js/rollup`のようなコンパイラを、`framework()`より前にViteのプラグインとして足します。frameworkの変換より先に走るよう、`enforce: 'pre'`を付けます。",
+  en: "The framework compiles no MDX. Add a compiler such as `@mdx-js/rollup` as a Vite plugin ahead of `framework()`, with `enforce: 'pre'` so it runs before the framework's transforms.",
+});
+
+export const mdxModule = message({
+  ja: '`.mdx`のファイルは、defaultがServer Componentのモジュールになります。ページから静的にimportすることも、`import.meta.glob`で遅れて読むこともできます。遅れて読めば、各ページは自分の記事だけを読みます。',
+  en: 'An `.mdx` file is a module whose default export is a Server Component. A page imports it statically, or reads it late through `import.meta.glob`, so each page reads only its own article.',
+});
+
+export const mdxCss = message({
+  ja: '`.mdx`のファイルがimportしたCSSは、`.tsx`のモジュールと同じく、そのファイルを描くページのHTMLにだけ載ります。importにクエリを付ける必要はありません。',
+  en: 'CSS an `.mdx` file imports is linked in the HTML of the pages that render the file and of no other, as a `.tsx` module’s is. The import needs no query.',
+});
+
+export const mdxComponents = message({
+  ja: 'CSSは、モジュールがexportした部品に載って運ばれます。CSSをimportして部品の表（`components`）だけをexportするモジュールは、ほかのモジュールがその表で描いても、CSSをページに届けません。表を使って描く部品を、CSSをimportするモジュールからexportします。',
+  en: 'The CSS rides on the components a module exports. A module that imports CSS and exports only a table of components (`components`) carries none of it to a page that another module renders with the table. Export a component that renders with the table from the module that imports the CSS.',
 });
 
 export const prefetchTitle = message({

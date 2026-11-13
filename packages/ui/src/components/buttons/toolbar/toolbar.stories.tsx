@@ -4,7 +4,10 @@ import type { ComponentProps } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
 
 import { Toolbar } from '.';
-import { CopyIcon, LinkIcon, ListIcon, TableIcon } from '../../icons';
+import { CopyIcon } from '../../icons/copy';
+import { LinkIcon } from '../../icons/link';
+import { ListIcon } from '../../icons/list';
+import { TableIcon } from '../../icons/table';
 import { Button } from '../button';
 import { IconButton } from '../icon-button';
 

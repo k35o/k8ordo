@@ -16,12 +16,12 @@ import { getMessages } from '../../../i18n/current';
 import { acceptsFile } from '../../../internal/accepts-file';
 import { carriesFiles } from '../../../internal/carries-files';
 import { droppedFiles } from '../../../internal/dropped-files';
-import { SendIcon } from '../../icons';
+import { PaperclipIcon } from '../../icons/paperclip';
+import { SendIcon } from '../../icons/send';
 import {
   AttachmentPreview,
   isImageMediaType,
 } from '../_internal/attachment-preview';
-import { AttachIcon } from '../_internal/icons';
 import { List as AttachmentList } from '../attachment/attachment';
 import type { ChatStatus } from '../types';
 
@@ -356,7 +356,7 @@ export const Attach: FC<AttachProps> = ({ label }) => {
         }}
         type="button"
       >
-        <AttachIcon size="sm" />
+        <PaperclipIcon size="sm" />
       </button>
     </>
   );

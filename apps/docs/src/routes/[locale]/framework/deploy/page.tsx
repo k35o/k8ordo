@@ -44,7 +44,6 @@ export default defineConfig({
   plugins: [
     framework({
       mode: 'static',
-      paths: () => ['/products/1'],
       site: 'https://example.com',
     }),
   ],

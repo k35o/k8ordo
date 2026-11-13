@@ -34,3 +34,4 @@ export type {
   RegisteredPattern,
   RouteContext,
 } from '@k8ordo/router';
+export type { Paths } from './paths-type';

@@ -53,11 +53,12 @@ import type { Symbol as TsSymbol, Type } from 'typescript/unstable/sync';
 
 const PACKAGE_DIR = fileURLToPath(new URL('..', import.meta.url));
 const TSCONFIG = fileURLToPath(new URL('../tsconfig.json', import.meta.url));
-// Every subpath entry that exports components. The `./ai` surfaces and
-// `./code-block` live outside `src/index.ts`, so walking the root entry alone
-// would miss them.
+// Every subpath entry that exports components. The `./ai` surfaces,
+// `./code-block`, and `./icons` live outside `src/index.ts`, so walking the
+// root entry alone would miss them.
 const ENTRIES = [
   '../src/index.ts',
+  '../src/components/icons/index.ts',
   '../src/components/ai/index.ts',
   '../src/components/ai/response/index.ts',
   '../src/components/data-display/code-block/index.ts',

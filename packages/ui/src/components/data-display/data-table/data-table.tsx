@@ -8,7 +8,7 @@ import { getMessages } from '../../../i18n/current';
 import { Button } from '../../buttons/button';
 import { Checkbox } from '../../form/checkbox';
 import { CheckboxGroup } from '../../form/checkbox-group';
-import { ChevronIcon } from '../../icons';
+import { ChevronIcon } from '../../icons/chevron';
 import { Popover } from '../../overlays/popover';
 import { Table } from '../table';
 import type { CellAlign } from '../table';

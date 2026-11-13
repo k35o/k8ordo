@@ -1444,15 +1444,23 @@ export const resize = {
 
 export const icons = {
   description: message({
-    ja: '`@k8ordo/ui`のアイコンの一覧です。`Logo`を除き、どれも`aria-hidden`の`<svg>`で、名前は周りのボタンなどが持ちます。',
-    en: 'The icons in `@k8ordo/ui`. Except for `Logo`, each is an `aria-hidden` `<svg>`, and the control around it carries the name.',
+    ja: '`@k8ordo/ui/icons`のアイコンの一覧です。どれも`aria-hidden`の`<svg>`で、名前は周りのボタンなどが持ちます。名前は用途でなく、描いてある形から付けています。',
+    en: 'The icons in `@k8ordo/ui/icons`. Each is an `aria-hidden` `<svg>`, and the control around it carries the name. An icon is named for the shape it draws, not for a use.',
   }),
   sizesTitle: message({
     ja: 'サイズ',
     en: 'Sizes',
   }),
+  ownTitle: message({
+    ja: '自分のアイコン',
+    en: 'Your own icons',
+  }),
+  ownDescription: message({
+    ja: 'ロゴはここにありません。ロゴや、ここに無い絵は`BaseIcon`の上に描きます。`size`の刻みと`aria-hidden`が、ほかのアイコンと同じになります。',
+    en: 'There are no logos here. Draw a logo, or any shape this set lacks, on `BaseIcon`. It gets the same `size` steps and the same `aria-hidden` as the other icons.',
+  }),
   propsDescription: message({
-    ja: 'アイコンは共通で`size`を受け取ります。向きを持つ`ChevronIcon`と、ステータスを表す`AlertIcon`には追加のpropsがあります。`Logo`は`size`を持たないSVG本体で、大きさは`className`で決めます。`size`でそろえるときは`LogoIcon`を使います。',
-    en: 'Icons share a `size` prop. `ChevronIcon` (direction) and `AlertIcon` (status) take additional props. `Logo` is the bare SVG without `size`, sized through `className`; use `LogoIcon` to size it like the other icons.',
+    ja: 'アイコンは共通で`size`を受け取ります。向きを持つ`ChevronIcon`と、ステータスを表す`AlertIcon`には追加のpropsがあります。`BaseIcon`は`renderItem`に渡した`<svg>`へ、大きさのクラスと`aria-hidden`を渡します。',
+    en: 'Icons share a `size` prop. `ChevronIcon` (direction) and `AlertIcon` (status) take additional props. `BaseIcon` hands the size class and `aria-hidden` to the `<svg>` you return from `renderItem`.',
   }),
 };
