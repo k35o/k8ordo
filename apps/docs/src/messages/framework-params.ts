@@ -150,6 +150,26 @@ export const layoutValue = message({
   en: 'At run time the value is a string too, as the type says. A layout receives the URL’s strings whether it wraps a page or `not-found.tsx`; only the page receives what the schema produced. When you need the converted value, take it in the page, or run the schema inside the layout.',
 });
 
+export const restTitle = message({
+  ja: '`[...name]`のパラメータ',
+  en: '`[...name]` parameters',
+});
+
+export const restArray = message({
+  ja: '`[...path]`のディレクトリのパラメータは、区間の配列です。スキーマにも配列が渡るので、`z.array`で検証します。ページが受け取る`params.path`とリンクに渡す値は、スキーマが返した型になります。',
+  en: 'The parameter of a `[...path]` directory is an array of segments. The schema receives the array too, so validate it with `z.array`. The `params.path` the page receives, and the value a link takes, have the type the schema returns.',
+});
+
+export const restRefused = message({
+  ja: 'スキーマに合わないパスには、このディレクトリは当たりません。`/docs/Guide`は、いちばん近い`not-found.tsx`が404で応答します。',
+  en: 'A path the schema refuses is one this directory does not answer. `/docs/Guide` is answered by the nearest `not-found.tsx`, under a 404.',
+});
+
+export const restGrammarBefore = message({
+  ja: '`[...name]`はserverモードだけで使えます。ディレクトリの決まりは',
+  en: '`[...name]` is server mode only. For the rules of the directory, see ',
+});
+
 export const pathsTitle = message({
   ja: '`paths.ts`が返す値',
   en: 'Values from `paths.ts`',
