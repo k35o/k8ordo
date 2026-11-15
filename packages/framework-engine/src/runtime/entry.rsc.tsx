@@ -169,7 +169,7 @@ type Shell = {
   /** Reads the fallback.tsx. */
   readonly load: () => Promise<Leaf>;
   /** The params the shell fills; the rest are left to the browser. */
-  readonly known: Readonly<Record<string, string>>;
+  readonly known: Match['params'];
 };
 
 /** What answers a pathname, as the walk through the table found it. */

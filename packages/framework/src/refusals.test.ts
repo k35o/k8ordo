@@ -27,6 +27,7 @@ describe('a static build that cannot be written', () => {
       ['not-found-throws'],
       ['no-boundary'],
       ['guard'],
+      ['rest'],
       ['route-methods'],
       ['search'],
       ['request'],
@@ -83,6 +84,16 @@ describe('a static build that cannot be written', () => {
     expect(said('guard')).toContain(
       "static build cannot run guard.ts — a file has no request to guard, and these are guards:\n  src/routes/admin/guard.ts\n  src/routes/guard.ts\nthis application wants mode: 'server'",
     );
+  });
+
+  it('refuses a [...name] directory, naming every one and the mode that answers them', () => {
+    expect(said('rest')).toContain(
+      "static build cannot write a [...name] directory — it answers a pathname of any depth, which only a request names, and these are:\n  src/routes/api/[...rest]\n  src/routes/files/[...path]\nthis application wants mode: 'server'",
+    );
+  });
+
+  it('refuses a [...name] directory before anything is built', () => {
+    expect(existsSync(buildOf('rest').client)).toBe(false);
   });
 
   it('refuses a route.ts that answers a method a file cannot, naming it and the method', () => {
@@ -145,7 +156,7 @@ describe('vite dev in static mode', () => {
   const servers = new Map<string, ViteDevServer>();
 
   beforeAll(async () => {
-    for (const name of ['server-only', 'guard', 'route-methods']) {
+    for (const name of ['server-only', 'guard', 'rest', 'route-methods']) {
       servers.set(name, await devServer(name));
     }
   }, 180_000);
@@ -200,6 +211,20 @@ describe('vite dev in static mode', () => {
     ).rejects.toThrow(
       /static build cannot run guard\.ts[\s\S]*src\/routes\/admin\/guard\.ts/u,
     );
+  });
+
+  it('refuses a file of a [...name] directory the moment it is compiled, naming the directory', async () => {
+    await expect(
+      transform('rest', 'rsc', '/src/routes/files/[...path]/page.tsx'),
+    ).rejects.toThrow(
+      "static build cannot write a [...name] directory — it answers a pathname of any depth, which only a request names, and this is one:\n  src/routes/files/[...path]\nthis application wants mode: 'server'",
+    );
+  });
+
+  it('leaves a page beside a [...name] directory alone', async () => {
+    await expect(
+      transform('rest', 'rsc', '/src/routes/files/page.tsx'),
+    ).resolves.not.toBeNull();
   });
 
   it('refuses a route.ts that answers a method a file cannot, the moment it is compiled', async () => {

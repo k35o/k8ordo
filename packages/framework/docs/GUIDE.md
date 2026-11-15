@@ -62,8 +62,8 @@ Towards `mode: 'static'`:
 Under `mode: 'static'` there is no request, so nothing that answers one can
 be built. The build does not leave such code to fail quietly in production:
 it refuses it by name, every offending file of a kind at once. What the route
-files declare — a `guard.ts`, a page's `search`, a `route.ts`'s methods — is
-refused before anything is compiled; the `@k8ordo/framework/server` imports
+files declare — a `[...name]` directory, a `guard.ts`, a page's `search`, a
+`route.ts`'s methods — is refused before anything is compiled; the `@k8ordo/framework/server` imports
 and `'use server'` modules only after compiling, which is what finds them.
 So a build stopped by the first can stop again on the second.
 
@@ -81,6 +81,8 @@ The same refusal, with the same last line, is said for:
   refused),
 - a `'use server'` module,
 - a `guard.ts`,
+- a `[...name]` directory, whose pathnames only a request names
+  ([Rest parameters](references/routing.md#rest-parameters)),
 - a page that exports `search`,
 - a `route.ts` that exports any method but `GET`.
 

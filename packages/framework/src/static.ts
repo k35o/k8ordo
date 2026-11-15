@@ -27,6 +27,7 @@ import {
   SERVER_STYLESHEETS_HEADER,
   serverActionModules,
   SHELL_HEADER,
+  restDirOf,
   slotOf,
 } from '@k8ordo/framework-engine';
 import type {
@@ -207,6 +208,16 @@ const actionRefusal = (files: readonly string[]): string =>
 const guardRefusal = (files: readonly string[]): string =>
   `static build cannot run guard.ts — a file has no request to guard, and these are guards:\n${files
     .map((file) => `  ${file}`)
+    .join('\n')}\n${WANTS_SERVER}`;
+
+/**
+ * A `[...name]` directory answers pathnames of any depth, and a build writes
+ * a file per pathname it is told of — `paths.ts` gives one parameter's values,
+ * one segment each. Named every one at once.
+ */
+const restRefusal = (dirs: readonly string[]): string =>
+  `static build cannot write a [...name] directory — it answers a pathname of any depth, which only a request names, and ${dirs.length === 1 ? 'this is one' : 'these are'}:\n${dirs
+    .map((dir) => `  ${dir}`)
     .join('\n')}\n${WANTS_SERVER}`;
 
 /**
@@ -678,6 +689,8 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         // 文法は / 区切りで読む。Windows の path.relative は \ で区切って返す
         const file = path.relative(routesDir, module).split(path.sep).join('/');
         const slot = file.startsWith('..') ? null : slotOf(file);
+        const restDir = file.startsWith('..') ? null : restDirOf(file);
+        if (restDir !== null) throw new Error(restRefusal([fromRoot(restDir)]));
         if (slot === 'guard') {
           throw new Error(guardRefusal([path.relative(root, module)]));
         }
@@ -857,6 +870,9 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         const guards = files
           .filter((file) => slotOf(file) === 'guard')
           .map((file) => fromRoot(file));
+        const restDirs = [
+          ...new Set(files.flatMap((file) => restDirOf(file) ?? [])),
+        ].map((dir) => fromRoot(dir));
         const exported = await readExports(routesDir, files);
         const routes = [...exported]
           .filter(([file]) => slotOf(file) === 'route')
@@ -872,6 +888,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
           )
           .map(([file]) => fromRoot(file));
         const refusals = [
+          ...(restDirs.length > 0 ? [restRefusal(restDirs)] : []),
           ...(guards.length > 0 ? [guardRefusal(guards)] : []),
           ...(routes.length > 0 ? [routeRefusal(routes)] : []),
           ...(searching.length > 0 ? [searchRefusal(searching)] : []),

@@ -66,6 +66,20 @@ describe('resolveRedirects', () => {
     },
   );
 
+  it('moves every segment a rest param took, as the URL spelled them', () => {
+    const redirectFor = resolveRedirects({ '/old/:path+': '/new/:path+' });
+    expect(
+      redirectFor('/old/:path+', pathnameOf('/old/a%2Fb/café/c')),
+    ).toStrictEqual({ to: '/new/a%2Fb/caf%C3%A9/c', permanent: false });
+  });
+
+  it('refuses a target that names a rest param as one segment', () => {
+    const redirectFor = resolveRedirects({ '/old/:path+': '/new/:path' });
+    expect(() => redirectFor('/old/:path+', pathnameOf('/old/a/b'))).toThrow(
+      'redirect target "/new/:path" needs a value for ":path"',
+    );
+  });
+
   it('answers null for a pattern no redirect declares', () => {
     const redirectFor = resolveRedirects({ '/old': '/new' });
     expect(redirectFor('/products', pathnameOf('/products'))).toBeNull();

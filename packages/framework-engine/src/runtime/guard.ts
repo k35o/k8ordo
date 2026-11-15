@@ -1,11 +1,12 @@
-import type { ParamsOf } from '@k8ordo/router';
+import type { Match, ParamsOf } from '@k8ordo/router';
 
 import { inPhase } from './request-scope';
 
 /**
  * What a `guard.ts` receives: the request, and the params of the pattern its
- * directory puts it under, as the strings the pathname carried — a guard runs
- * above the page and every layout, where no schema has typed them.
+ * directory puts it under, as the pathname carried them — a string each, a
+ * rest param its segments — since a guard runs above the page and every
+ * layout, where no schema has typed them.
  */
 export type GuardContext<P extends string = string> = {
   readonly request: Request;
@@ -26,7 +27,7 @@ export type Guard<P extends string = string> = (
 
 type AnyGuard = (context: {
   readonly request: Request;
-  readonly params: Readonly<Record<string, string>>;
+  readonly params: Match['params'];
 }) => unknown;
 
 /**
