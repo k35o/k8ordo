@@ -411,7 +411,10 @@ pnpm check         # check:write to auto-fix
   handler with every dependency bundled in). It takes either mode, read in
   `configResolved`, where every plugin is listed whichever side of
   `framework()` it was put. Under `mode: 'server'` its own `buildApp` writes
-  the client and the function. Under `mode: 'static'` its own `buildApp`
+  the client and the function, whose `.vc-config.json` takes `maxDuration`
+  and `regions` from `vercel()`'s options as given — the one function
+  answers every route, so there is one value of each — and static mode
+  refuses both, having no function. Under `mode: 'static'` its own `buildApp`
   does nothing — placed first it would copy the client before a page is
   written — and `k8ordo:static` calls its `api.writeStatic` once every file
   is in place, which writes from the plugin's own resolved config (`root`,

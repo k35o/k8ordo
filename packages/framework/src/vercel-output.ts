@@ -48,7 +48,21 @@ export type VercelOptions = {
    * answered, before `404.html`.
    */
   readonly beforeNotFound?: readonly VercelRoute[];
+  /**
+   * Under `mode: 'server'`, how long the function may run for one request,
+   * in seconds, or `'max'` for the plan's maximum. Without it, Vercel's
+   * default for the plan.
+   */
+  readonly maxDuration?: number | 'max';
+  /**
+   * Under `mode: 'server'`, the Vercel regions the function is deployed to
+   * (`['hnd1']`). Without it, the project's own setting.
+   */
+  readonly regions?: readonly string[];
 };
+
+/** What `vercel()` passes on to the function's own configuration. */
+export type FunctionSettings = Pick<VercelOptions, 'maxDuration' | 'regions'>;
 
 /** Where the build writes the environments, all absolute. */
 export type BuildDirs = {
@@ -205,6 +219,7 @@ export const writeVercelOutput = async (
   dirs: BuildDirs,
   base: string,
   headers: DeclaredHeaders = {},
+  { maxDuration, regions }: FunctionSettings = {},
 ): Promise<void> => {
   const output = path.join(root, '.vercel', 'output');
   await rm(output, { recursive: true, force: true });
@@ -231,7 +246,14 @@ export const writeVercelOutput = async (
     `import handler from './${entry}';\n\nexport default { fetch: handler };\n`,
   );
   await writeFile(path.join(func, 'package.json'), json({ type: 'module' }));
-  await writeFile(path.join(func, '.vc-config.json'), json(FUNCTION_CONFIG));
+  await writeFile(
+    path.join(func, '.vc-config.json'),
+    json({
+      ...FUNCTION_CONFIG,
+      ...(maxDuration === undefined ? {} : { maxDuration }),
+      ...(regions === undefined ? {} : { regions }),
+    }),
+  );
   await writeFile(
     path.join(output, 'config.json'),
     json(configFor(base, headers)),
