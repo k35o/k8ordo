@@ -86,3 +86,36 @@ export type Props = PageProps<'/membrs'>;
     );
   }, 60_000);
 });
+
+describe('a rest param in the registered table', () => {
+  it('reaches a page, a route.ts and useMatch as an array, and a link takes one', async () => {
+    const output = await diagnosticsOf(`
+import { defineRoutes, href, matchPath, navigateTo } from '@k8ordo/router';
+import type { PageProps, RouteContext } from '@k8ordo/router';
+
+const Page = () => null;
+const routes = defineRoutes({ '/files': Page, '/files/:path+': Page });
+
+declare module '@k8ordo/router' {
+  interface Register { routes: typeof routes }
+}
+
+const segments: readonly string[] = ['a', 'b'];
+href('/files/:path+', { path: segments });
+navigateTo('/files/:path+', { path: ['a', 1] }, { history: 'replace' });
+export const page: readonly string[] = ({} as PageProps<'/files/:path+'>).params.path;
+export const route: readonly string[] = ({} as RouteContext<'/files/:path+'>).params.path;
+export const matched: readonly string[] | undefined = matchPath('/files/:path+', '/files/a')?.path;
+
+href('/files/:path+', { path: 'a/b' });
+export const one: string = ({} as PageProps<'/files/:path+'>).params.path;
+`);
+    expect(output.split('\n')).toHaveLength(2);
+    expect(output).toContain(
+      `app.ts(19,25): error TS2322: Type 'string' is not assignable to type 'readonly ParamValue[]'.`,
+    );
+    expect(output).toContain(
+      `app.ts(20,14): error TS2322: Type 'readonly string[]' is not assignable to type 'string'.`,
+    );
+  }, 60_000);
+});

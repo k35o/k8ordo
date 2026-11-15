@@ -5,6 +5,7 @@ import { describe, expect, expectTypeOf, it } from 'vite-plus/test';
 import { defineRoutes } from './define-routes';
 import type { NavigablePath, PatternOf } from './define-routes';
 import { href } from './links';
+import type { ParamsOf, PathFor, PathMatching } from './paths';
 
 const Home: FC = () => null;
 const LocaleLayout: FC = () => null;
@@ -322,5 +323,168 @@ describe('href with schema-typed params', () => {
     expect(() =>
       href('/:locale/products/:id', { locale: 'ja', id: { a: 1 } as never }),
     ).toThrow(/no URL spelling/u);
+  });
+});
+
+describe('a rest param', () => {
+  const Files: FC = () => null;
+  const FileIndex: FC = () => null;
+  const Readme: FC = () => null;
+  const One: FC = () => null;
+  const files = defineRoutes({
+    '/files': FileIndex,
+    '/files/readme': Readme,
+    '/files/:path+': Files,
+    '/:locale/docs/:id': One,
+    '/:locale/docs/:path+': Files,
+    '/*': NotFound,
+  });
+
+  it('takes every remaining segment, as an array', () => {
+    expect(files.match('/files/a/b/c')).toStrictEqual({
+      pattern: '/files/:path+',
+      params: { path: ['a', 'b', 'c'] },
+      stack: [Files],
+    });
+  });
+
+  it('hands a single segment over as an array of one', () => {
+    expect(files.match('/files/a')?.params).toStrictEqual({ path: ['a'] });
+  });
+
+  it('does not take zero segments', () => {
+    expect(files.match('/files')?.pattern).toBe('/files');
+    expect(files.match('/files/')?.pattern).toBe('/files');
+    expect(defineRoutes({ '/files/:path+': Files }).match('/files')).toBeNull();
+  });
+
+  it('does not take an empty segment', () => {
+    expect(files.match('/files/a//b')?.pattern).toBe('/*');
+  });
+
+  it('decodes each segment on its own, so an escaped slash stays inside one', () => {
+    expect(files.match('/files/a%2Fb/caf%C3%A9')?.params).toStrictEqual({
+      path: ['a/b', 'café'],
+    });
+  });
+
+  it('keeps the spelling of a segment that does not decode', () => {
+    expect(files.match('/files/%E0%A4%A/b')?.params).toStrictEqual({
+      path: ['%E0%A4%A', 'b'],
+    });
+  });
+
+  it('comes after what is declared before it, and before what is declared after', () => {
+    expect(files.match('/files/readme')?.pattern).toBe('/files/readme');
+    expect(
+      [...files.matchAll('/ja/docs/intro')].map((found) => found.pattern),
+    ).toStrictEqual(['/:locale/docs/:id', '/:locale/docs/:path+', '/*']);
+  });
+
+  it('sits beside the params before it', () => {
+    expect(files.match('/ja/docs/guide/intro')?.params).toStrictEqual({
+      locale: 'ja',
+      path: ['guide', 'intro'],
+    });
+  });
+
+  it('types its param as the segments it took', () => {
+    expectTypeOf<ParamsOf<'/files/:path+'>['path']>().toEqualTypeOf<
+      readonly string[]
+    >();
+    type Docs = ParamsOf<'/:locale/docs/:path+'>;
+    expectTypeOf<Docs['locale']>().toEqualTypeOf<string>();
+    expectTypeOf<Docs['path']>().toEqualTypeOf<readonly string[]>();
+    expectTypeOf<keyof Docs>().toEqualTypeOf<'locale' | 'path'>();
+  });
+
+  it('types its paths as everything below the prefix', () => {
+    expectTypeOf<
+      PathFor<'/files/:path+'>
+    >().toEqualTypeOf<`/files/${string}`>();
+  });
+
+  it('takes a path of one segment or more, and none of zero', () => {
+    type Fits<Path extends string> = PathMatching<Path, '/files/:path+'>;
+    expectTypeOf<Fits<'/files/a'>>().toEqualTypeOf<'/files/a'>();
+    expectTypeOf<Fits<'/files/a/b/c'>>().toEqualTypeOf<'/files/a/b/c'>();
+    expectTypeOf<
+      Fits<`/files/${string}`>
+    >().toEqualTypeOf<`/files/${string}`>();
+    expectTypeOf<Fits<'/files'>>().toBeNever();
+    expectTypeOf<Fits<'/files/'>>().toBeNever();
+    expectTypeOf<Fits<'/files/a//b'>>().toBeNever();
+    expectTypeOf<Fits<'/files/a/'>>().toBeNever();
+    expectTypeOf<Fits<'/other/a'>>().toBeNever();
+  });
+
+  it('is a path a link can point at', () => {
+    expectTypeOf<
+      NavigablePath<typeof files, '/files/a/b'>
+    >().toEqualTypeOf<'/files/a/b'>();
+    expectTypeOf<
+      NavigablePath<typeof files, '/ja/docs/guide/intro'>
+    >().toEqualTypeOf<'/ja/docs/guide/intro'>();
+  });
+});
+
+describe('href with a rest param', () => {
+  it('escapes each segment and joins them with slashes', () => {
+    expect(href('/files/:path+', { path: ['a', 'b'] })).toBe('/files/a/b');
+    expect(href('/files/:path+', { path: ['a/b', 'café', 'x y'] })).toBe(
+      '/files/a%2Fb/caf%C3%A9/x%20y',
+    );
+  });
+
+  it('spells a number the one way a schema reads back', () => {
+    expect(href('/files/:path+', { path: [2026, 'report'] })).toBe(
+      '/files/2026/report',
+    );
+  });
+
+  it('builds a path the pattern gives back as the same segments', () => {
+    const files = defineRoutes({ '/files/:path+': Home });
+    const path = ['a/b', 'c d'];
+    expect(files.match(href('/files/:path+', { path }))?.params).toStrictEqual({
+      path,
+    });
+  });
+
+  it('refuses an empty array — the pattern takes one segment or more', () => {
+    expect(() => href('/files/:path+', { path: [] })).toThrow(
+      '"/files/:path+" needs at least one segment for ":path+"',
+    );
+  });
+
+  it('refuses an empty segment', () => {
+    expect(() => href('/files/:path+', { path: ['a', ''] })).toThrow(
+      '"/files/:path+" got an empty segment for ":path+"',
+    );
+  });
+
+  it('refuses a value that is not an array, and a segment with no URL spelling', () => {
+    expect(() => href('/files/:path+', { path: 'a/b' as never })).toThrow(
+      '"/files/:path+" takes an array of segments for ":path+"',
+    );
+    expect(() => href('/files/:path+', { path: [{ a: 1 }] as never })).toThrow(
+      '"/files/:path+" got a segment for ":path+" that has no URL spelling',
+    );
+  });
+
+  it('refuses a missing value', () => {
+    // @ts-expect-error ":path+" is missing
+    expect(() => href('/files/:path+')).toThrow(
+      '"/files/:path+" needs a value for ":path+"',
+    );
+  });
+
+  it('takes an array and nothing else, in the type', () => {
+    const rejected = (): void => {
+      // @ts-expect-error a rest param is an array of segments
+      href('/files/:path+', { path: 'a' });
+      // @ts-expect-error a single param is not an array
+      href('/products/:id', { id: ['a'] });
+    };
+    expect(rejected).toBeTypeOf('function');
   });
 });
