@@ -182,6 +182,41 @@ export const headersWhere = message({
   en: 'Like `cookies()`, `requestHeaders()` works only inside a `guard.ts`, a `route.ts` or a Server Action. A `guard.ts` and a `route.ts` receive the `Request` itself, so they usually read `request.headers` instead.',
 });
 
+export const waitTitle = message({
+  ja: '`waitUntil()`',
+  en: '`waitUntil()`',
+});
+
+export const waitCallout = message({
+  ja: '保存が終わるまでホストは止めない',
+  en: 'The host keeps running until the save ends',
+});
+
+export const waitWhat = message({
+  ja: '`waitUntil()`に渡したPromiseが決着するまで、ホストはプロセスや関数を止めません。応答を返したあとも続く処理に使います。',
+  en: 'The host does not stop the process or the function until the promise passed to `waitUntil()` settles. Use it for work that goes on after the response is sent.',
+});
+
+export const waitStarted = message({
+  ja: '処理は`waitUntil()`を呼んだ時点ですでに始まっています。フレームワークが渡された処理をあとから実行することはありません。',
+  en: 'The work has already started when `waitUntil()` is called. The framework never runs it later.',
+});
+
+export const waitWhere = message({
+  ja: '`guard.ts`と`route.ts`、Server Actionのほか、ページやレイアウトの描画の中でも呼べます。`route.ts`が返したストリームの中からも呼べます。リクエストの外で呼ぶと、`waitUntil() needs a request`で始まるエラーになります。',
+  en: 'It can be called from a `guard.ts`, a `route.ts` or a Server Action, and while a page or a layout renders. A stream a `route.ts` returned can call it too. Called outside a request, it fails with an error that starts `waitUntil() needs a request`.',
+});
+
+export const waitReject = message({
+  ja: '渡したPromiseがrejectしても、未処理のrejectionにはなりません。ハンドラが`k8ordo: waitUntil() of POST /api/chat failed`の形で、エラーを1度だけログに出します。',
+  en: 'A promise that rejects does not become an unhandled rejection. The handler logs the error once, as `k8ordo: waitUntil() of POST /api/chat failed`.',
+});
+
+export const waitHost = message({
+  ja: '`node dist/server.js`は終了の前に待ちます。Vercelでは`@vercel/functions`のインストールが要ります。ホストごとの違いは',
+  en: '`node dist/server.js` waits before it exits, and Vercel needs `@vercel/functions` installed. What each host needs is covered in ',
+});
+
 export const pageTitle = message({
   ja: '応答への書き込み',
   en: 'Writing to the response',

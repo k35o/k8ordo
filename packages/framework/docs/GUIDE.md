@@ -93,7 +93,8 @@ this application wants mode: 'server'
 The build names the application's own modules. A dependency it leaves
 external — one installed in `node_modules` — is not compiled, so its import
 of `@k8ordo/framework/server` is not seen; what is refused there is the call
-— `cookies()`, `requestHeaders()`, `responseHeaders()`, `nonce()` — and the
+— `cookies()`, `requestHeaders()`, `responseHeaders()`, `nonce()`,
+`waitUntil()` — and the
 page or `route.ts` that made it fails to build. A page reading the `request`
 prop fails the same way, with the same last line.
 
@@ -241,8 +242,9 @@ The package is split by where the code runs.
   loads Vite.
 - `@k8ordo/framework/server` — server mode only. What code inside the
   request handler imports: `cookies()`, `responseHeaders()`,
-  `requestHeaders()`, `redirect()`, `nonce()`, and the types `Guard`,
-  `GuardContext`, `RouteRequest` and `RedirectTarget`.
+  `requestHeaders()`, `redirect()`, `nonce()`, `waitUntil()`, and the types
+  `Guard`, `GuardContext`, `RouteRequest`, `RedirectTarget` and
+  `HandlerContext`.
 - `@k8ordo/framework/serve` — `serve`, the Node.js server for a build: what
   `dist/server.js` runs, for a server of your own to import. A static build
   it serves as a static host does, its `_redirects` applied.
@@ -311,8 +313,8 @@ Each topic has a reference of its own. Read the one the task needs:
   what an action may read and write, the page context it runs in, forms
   before JavaScript, and ending with `redirect()`.
 - [Guards, cookies and the request](references/guards.md): server mode
-  only. `guard.ts`, `responseHeaders()`, `cookies()`, and the `request` a
-  page reads.
+  only. `guard.ts`, `responseHeaders()`, `cookies()`, `waitUntil()` for
+  work after the answer, and the `request` a page reads.
 - [Content Security Policy](references/csp.md): `nonce()` under server
   mode, the `csp` option and hashes under static mode.
 - [Running and deploying](references/deploy.md): what a static build
