@@ -200,9 +200,10 @@ pnpm check         # check:write to auto-fix
   `examples/server-basic`'s `deployed.test.ts` copies `dist/` alone into a
   temporary directory and asks the started server for a page, an action, a
   guard, a 404, a redirect and a compressed file, stops it with each
-  signal, and builds the application once more under a `package.json` with
-  no `type`. `vercel()` bundles nothing of the application's; its function
-  is this handler.
+  signal — once with a `route.ts`'s `waitUntil()` work still under way,
+  which is finished before the exit — and builds the application once more
+  under a `package.json` with no `type`. `vercel()` bundles nothing of the
+  application's; its function is this handler.
 - **Either mode builds whatever the application's `package.json` says about
   `type`.** The RSC plugin names `../ssr/index.js` itself, and static
   mode's prerender, `serve` and `vercel()` name `rsc/index.js`, while Vite
@@ -470,7 +471,8 @@ pnpm check         # check:write to auto-fix
   `vercel-wait-until.test.ts` builds three applications outside the
   repository — importing it without the package, with it, and not importing
   it — and calls the second's function, copied alone, under a stand-in for
-  Vercel's request context.
+  Vercel's request context; `examples/server-basic` builds for Vercel with
+  a `route.ts` that calls `waitUntil()`.
 - **`headers` is declared once and sent by whatever answers.**
   `framework({ headers })`, in either mode (the engine's `EngineOptions`),
   is one set for every response and nothing finer: a header for some paths
