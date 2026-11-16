@@ -684,6 +684,28 @@ pnpm check         # check:write to auto-fix
   `Set-Cookie` line, the last one per name, path and domain. Static mode refuses
   `guard.ts` (by name at build, per module in `vite dev`), reading the slot
   through `slotOf`.
+- **`waitUntil()` hands the host a promise that cannot reject, and the
+  handler's second argument is the host.** The handler is
+  `(request, host?: HandlerContext)`, and `withRequest` keeps `host` in the
+  request's scope. `waitUntil(promise)` (`runtime/request-scope.ts`, on
+  `./server`) runs nothing — the work has started — and attaches the one
+  rejection handler, which logs `k8ordo: waitUntil() of %s %s failed` with
+  the method and pathname as arguments, then calls `host.waitUntil` with the
+  promise that handler returned: a host never sees a rejection, and with no
+  host (the build, `vite dev`, `vite preview`, a runtime that passed none)
+  nothing is left unhandled either. It is called as the host's own method,
+  since a Worker's `ctx.waitUntil` breaks once taken off `ctx`. Unlike the
+  response API it is allowed in every phase, the render included: it writes
+  nothing to the response, which is all the phase rule protects. It refuses
+  outside a request and inside `writingFile`, as `nonce()` does. A stream's
+  `pull` runs in the async context of whoever reads it — the host writing
+  the answer, which is in no request — so `runRoute` wraps the body a
+  `route.ts` answered with in `readInRequest`, which reads it inside the
+  request's scope; without it a `waitUntil()` from a later `pull` finds no
+  request. Only a `route.ts` body is wrapped: a page's stream is React's,
+  whose work continues from promises made inside the request.
+  `runtime/wait-until.test.ts` builds `fixtures/wait-until/` and calls the
+  handler as a host would, with and without one.
 - **A `route.ts` holds its place in the table and answers outside it.**
   It is a slot of the grammar that answers its directory's URL, so it
   conflicts with a `page.tsx` or a `redirect.ts` there and counts as a
@@ -914,11 +936,11 @@ src/
   runtime/pathname.ts        decodePathname, before a pathname may name a file
   runtime/redirect.ts        redirect(), what a Server Action throws; where a redirect.ts sends a pathname the table matched to it
   runtime/request.ts         the read-only request a page receives
-  runtime/request-scope.ts   the request in progress: phases, cookies() / responseHeaders() / requestHeaders(), nonce(), answer()
+  runtime/request-scope.ts   the request in progress: phases, cookies() / responseHeaders() / requestHeaders(), nonce(), answer(); waitUntil() and the host it hands promises to (HandlerContext), readInRequest
   runtime/server.ts          the request API, which is @k8ordo/framework/server: the framework points that entry here
   runtime/cookies.ts         the per-request cookie jar and its Set-Cookie lines
   runtime/guard.ts           Guard / GuardContext, runGuards (outer first, first Response ends it)
-  runtime/route.ts           ROUTE_METHODS, which export answers a method, 405, running it in the route phase
+  runtime/route.ts           ROUTE_METHODS, which export answers a method, 405, running it in the route phase, its body read inside the request
   runtime/render.tsx         the matched stack, nested through children; the framework's own not-found, inside the root layout
   runtime/page-watch.ts      a page called as the render calls it, its answer watched
   runtime/page-boundary.tsx  a navigation's late notFound() → a document load; anything else on to error.tsx
@@ -984,6 +1006,12 @@ fixtures/
                              through a glob, each .mdx importing CSS, which
                              runtime/mdx-css.test.ts builds with a stand-in
                              MDX compiler
+  wait-until/routes/         a route.ts calling waitUntil() (with a promise
+                             that settles or, asked with ?fail, rejects),
+                             one calling it from a late pull of the stream
+                             it answered with, and a page calling it as it
+                             renders, which runtime/wait-until.test.ts
+                             builds and calls with and without a host
   head-scripts/routes/       a layout writing an inline script in <head> and
                              importing CSS, which runtime/head-scripts.test.ts
                              opens in each engine with the CSS held back

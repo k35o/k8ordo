@@ -19,8 +19,19 @@ type Outgoing = {
   readonly cookies: () => readonly string[];
 };
 
+/**
+ * What whoever calls the handler hands it beside the request: the host's own
+ * `waitUntil`, where it has one. A Worker's `ctx` fits as it is, and so does
+ * `{ waitUntil }` around a function a host exports.
+ */
+export type HandlerContext = {
+  /** Keeps the host running until `promise` settles. */
+  readonly waitUntil?: (promise: Promise<unknown>) => void;
+};
+
 type Scope = {
   readonly request: Request;
+  readonly host: HandlerContext;
   readonly phase: Phase;
   readonly cookies: Cookies;
   readonly outgoing: Outgoing;
@@ -36,8 +47,15 @@ const storage = new AsyncLocalStorage<Scope>();
 const freshNonce = (): string =>
   btoa(String.fromCodePoint(...crypto.getRandomValues(new Uint8Array(16))));
 
-/** Runs `fn` as the handling of `request`, starting in the render. */
-export const withRequest = <T>(request: Request, fn: () => T): T => {
+/**
+ * Runs `fn` as the handling of `request`, starting in the render, with what
+ * the handler's caller handed it as `host`.
+ */
+export const withRequest = <T>(
+  request: Request,
+  fn: () => T,
+  host: HandlerContext = {},
+): T => {
   const jar = createCookies(
     parseCookies(request.headers.get('cookie')),
     new URL(request.url),
@@ -45,6 +63,7 @@ export const withRequest = <T>(request: Request, fn: () => T): T => {
   return storage.run(
     {
       request,
+      host,
       phase: 'render',
       cookies: jar.cookies,
       outgoing: { headers: new Headers(), cookies: jar.lines },
@@ -172,6 +191,69 @@ export const nonce = (): string => {
   }
   if (scope.file === true) throw fileRefusal('nonce()');
   return scope.nonce;
+};
+
+/**
+ * `body`, read as part of the request in progress. A stream's `pull` runs in
+ * the async context of whoever reads it — the host writing the answer out,
+ * which is in no request — so what a route.ts calls from inside the stream
+ * it answered with would find none.
+ */
+export const readInRequest = (
+  body: ReadableStream<Uint8Array>,
+): ReadableStream<Uint8Array> => {
+  const scope = storage.getStore();
+  if (scope === undefined) return body;
+  const reader = body.getReader();
+  return new ReadableStream<Uint8Array>(
+    {
+      pull: (controller) =>
+        storage.run(scope, async () => {
+          const { done, value } = await reader.read();
+          if (done) controller.close();
+          else controller.enqueue(value);
+        }),
+      cancel: (reason) => storage.run(scope, () => reader.cancel(reason)),
+    },
+    // 元のストリームが自分で決めた以上には先読みしない
+    { highWaterMark: 0 },
+  );
+};
+
+/**
+ * Keeps the host from stopping this request's work before `promise` settles:
+ * what goes on after the answer has left — a generation read to its end and
+ * saved once the visitor is gone. As a Service Worker's `waitUntil`: the
+ * work has already started, and nothing here runs it again. Callable
+ * wherever the request is in progress, the render included, since it writes
+ * nothing to the response. A rejection is logged, once, and goes no further.
+ */
+export const waitUntil = (promise: Promise<unknown>): void => {
+  const scope = storage.getStore();
+  if (scope === undefined) {
+    throw new Error(
+      'waitUntil() needs a request — call it while one is answered: from a guard.ts, a route.ts, a Server Action, or a layout or page',
+    );
+  }
+  if (scope.file === true) throw fileRefusal('waitUntil()');
+  const { request, host } = scope;
+  // ホストに渡すのは失敗を報告し終えたほう。元の promise を渡すと、reject の
+  // 行き先がホストごとに変わり、口の無いホストでは未処理の rejection になる
+  const reported = promise.then(
+    () => undefined,
+    (error: unknown) => {
+      // メソッドと pathname は引数として渡す。第 1 引数はフォーマット文字列
+      // なので、`%s` を含む URL では error が食われて消える
+      console.error(
+        'k8ordo: waitUntil() of %s %s failed',
+        request.method,
+        new URL(request.url).pathname,
+        error,
+      );
+    },
+  );
+  // ホストのメソッドのまま呼ぶ。Worker の ctx.waitUntil は ctx から外すと動かない
+  host.waitUntil?.(reported);
 };
 
 /**

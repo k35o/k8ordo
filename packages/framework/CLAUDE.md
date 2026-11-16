@@ -55,8 +55,8 @@ pnpm check         # check:write to auto-fix
   the application's own modules — a dependency left external imports
   `/server` unseen — so the handler compiled for `mode: 'static'` runs every
   answer inside `writingFile`, where `cookies()`, `requestHeaders()`,
-  `responseHeaders()` and `nonce()` refuse with the same last line when
-  called. The `request` prop is the same promise: the generated `Register`
+  `responseHeaders()`, `nonce()` and `waitUntil()` refuse with the same last
+  line when called. The `request` prop is the same promise: the generated `Register`
   carries it only under `mode: 'server'`, and under `mode: 'static'` a page
   is handed `fileRequest`, whose getters refuse.
 - **`'use server'` is refused through the registry, not the text.** The RSC
@@ -153,8 +153,9 @@ pnpm check         # check:write to auto-fix
 - **Entries by where the code runs.** `./vite` is the plugin and loads Vite,
   which a deployed application does not have installed. `./server` is what
   code inside the handler imports — `redirect`, `cookies`,
-  `responseHeaders`, `requestHeaders`, `nonce` and the types, `Guard` among
-  them — and it is not built here: it points at the engine's
+  `responseHeaders`, `requestHeaders`, `nonce`, `waitUntil` and the types,
+  `Guard` among them, and `HandlerContext`, the handler's second argument,
+  for a runtime that calls it — and it is not built here: it points at the engine's
   `runtime/server.ts` in the copied `dist/runtime/`, the directory the
   handler is built from, so an application's import of it and the handler
   are one module, with one request in progress and one `Redirect` class.
@@ -193,7 +194,9 @@ pnpm check         # check:write to auto-fix
   copied out of the application has no `package.json` above it to say ESM;
   the engine's `dist/package.json` (the next invariant) says it. The
   launcher closes `serve` and exits with `0` on `SIGTERM` and `SIGINT`,
-  since Node as a container's PID 1 ignores a signal nothing handles.
+  since Node as a container's PID 1 ignores a signal nothing handles;
+  `close()` resolves only once the work handed to `waitUntil()` has settled
+  (below), so the exit cuts none of it off.
   `examples/server-basic`'s `deployed.test.ts` copies `dist/` alone into a
   temporary directory and asks the started server for a page, an action, a
   guard, a 404, a redirect and a compressed file, stops it with each
@@ -393,6 +396,14 @@ pnpm check         # check:write to auto-fix
 - **`serve` hands back a handle.** `{ port, url, close }`, so a test can
   listen on port 0 and stop what it started (`serve.test.ts` runs it against
   a fixture `dist`, no real build needed).
+- **`serve` is the host `waitUntil()` tells, and `close()` is where it
+  waits.** It hands the handler `{ waitUntil }` with every request and
+  keeps each promise until it settles; `close()` closes the server, then
+  resolves once none is left — looping, since work under way may hand over
+  more. No limit on the wait: how long a deploy may take to stop is the
+  operator's to say (a container's grace period), not a number here. The
+  promises are the engine's, which cannot reject. `serve.test.ts` holds the
+  order with promises the test settles itself.
 - **Compression happens once where it can, and never holds a stream back.**
   Under `mode: 'server'` the client build is compressed at build time
   (`precompress`, from `serverMode`'s `buildApp` hook) and `serve` only

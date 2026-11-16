@@ -1,4 +1,4 @@
-import { inPhase } from './request-scope';
+import { inPhase, readInRequest } from './request-scope';
 
 /** The request methods a `route.ts` answers by exporting a function named so. */
 export const ROUTE_METHODS = [
@@ -72,7 +72,8 @@ export const methodNotAllowed = (module: AnyRouteModule): Response =>
 
 /**
  * Runs what answers, in the phase that may write the response: a route
- * answers the request as much as a guard does.
+ * answers the request as much as a guard does. A body it answered with is
+ * read inside the request too, so a stream's later `pull` still has one.
  */
 export const runRoute = async (
   { handler, headOnly }: RouteAnswer,
@@ -84,9 +85,13 @@ export const runRoute = async (
       `a route.ts ${context.request.method} answers with a Response, and this one returned something else`,
     );
   }
-  if (!headOnly) return response;
-  // GET の答えから本文だけを外す。ヘッダーは GET と同じものを返すのが HEAD
-  return new Response(null, {
+  // 本文は答えたあとに読まれる。そこから waitUntil() を呼べるよう、この
+  // リクエストの中で読む。HEAD は GET の答えから本文だけを外す。ヘッダーは
+  // GET と同じものを返すのが HEAD
+  const body =
+    headOnly || response.body === null ? null : readInRequest(response.body);
+  if (body === response.body) return response;
+  return new Response(body, {
     status: response.status,
     statusText: response.statusText,
     headers: response.headers,

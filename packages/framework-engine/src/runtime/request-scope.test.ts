@@ -8,6 +8,7 @@ import {
   requestHeaders,
   responseHeaders,
   signingNonce,
+  waitUntil,
   withRequest,
   writingFile,
 } from './request-scope';
@@ -206,6 +207,52 @@ describe('nonce()', () => {
   });
 });
 
+describe('waitUntil()', () => {
+  it('refuses outside a request, naming where it belongs', () => {
+    expect(() => {
+      waitUntil(Promise.resolve());
+    }).toThrow('waitUntil() needs a request — call it while one is answered');
+  });
+
+  it.each(['guard', 'route', 'action', 'render'] as const)(
+    'hands the host one promise in a %s of the request',
+    (phase) => {
+      const held: Array<Promise<unknown>> = [];
+      withRequest(
+        request,
+        () => {
+          inPhase(phase, () => {
+            waitUntil(Promise.resolve('done'));
+          });
+        },
+        {
+          waitUntil: (promise) => {
+            held.push(promise);
+          },
+        },
+      );
+      expect(held).toHaveLength(1);
+    },
+  );
+
+  it('calls the host as its own method, as a Worker’s ctx has to be', () => {
+    const host = {
+      held: 0,
+      waitUntil(this: { held: number }): void {
+        this.held += 1;
+      },
+    };
+    withRequest(
+      request,
+      () => {
+        waitUntil(Promise.resolve());
+      },
+      host,
+    );
+    expect(host.held).toBe(1);
+  });
+});
+
 describe('a request answered into a file', () => {
   const REFUSAL =
     /answers a request, and under mode: 'static' a file is written once for every visitor[\s\S]*this application wants mode: 'server'$/u;
@@ -215,6 +262,12 @@ describe('a request answered into a file', () => {
     ['cookies()', cookies],
     ['requestHeaders()', requestHeaders],
     ['nonce()', nonce],
+    [
+      'waitUntil()',
+      () => {
+        waitUntil(Promise.resolve());
+      },
+    ],
   ])('%s', (name, api) => {
     it.each(['route', 'render'] as const)(
       'refuses in a %s, naming static mode, rather than writing one visitor’s answer for all',
