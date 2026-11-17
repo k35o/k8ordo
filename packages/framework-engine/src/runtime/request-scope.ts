@@ -230,12 +230,21 @@ export const readInRequest = (
  */
 export const waitUntil = (promise: Promise<unknown>): void => {
   const scope = storage.getStore();
-  if (scope === undefined) {
-    throw new Error(
-      'waitUntil() needs a request — call it while one is answered: from a guard.ts, a route.ts, a Server Action, or a layout or page',
-    );
+  if (scope === undefined || scope.file === true) {
+    // 断っても、渡された処理はもう走っている。あとで失敗したときに受け手が
+    // 無いと未処理の rejection になり、Node は既定でプロセスごと落とす
+    promise.catch((error: unknown) => {
+      console.error(
+        'k8ordo: what a refused waitUntil() was handed failed',
+        error,
+      );
+    });
+    throw scope === undefined
+      ? new Error(
+          'waitUntil() needs a request — call it while one is answered: from a guard.ts, a route.ts, a Server Action, or a layout or page',
+        )
+      : fileRefusal('waitUntil()');
   }
-  if (scope.file === true) throw fileRefusal('waitUntil()');
   const { request, host } = scope;
   // ホストに渡すのは失敗を報告し終えたほう。元の promise を渡すと、reject の
   // 行き先がホストごとに変わり、口の無いホストでは未処理の rejection になる

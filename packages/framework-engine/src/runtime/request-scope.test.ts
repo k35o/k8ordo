@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import {
   answer,
@@ -208,6 +208,27 @@ describe('nonce()', () => {
 });
 
 describe('waitUntil()', () => {
+  it('reports what it was handed failing even when it refuses the call, leaving no rejection unhandled', async () => {
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {
+      // 出したことは呼び出しで確かめる
+    });
+    const failure = new Error('the save failed');
+    const work = Promise.reject(failure);
+
+    expect(() => {
+      waitUntil(work);
+    }).toThrow('waitUntil() needs a request');
+    // 付けた受け手が走るのを待つ。work は reject 済みなので 1 回の await で届く
+    await Promise.allSettled([work]);
+    await Promise.resolve();
+    const { calls } = logged.mock;
+    logged.mockRestore();
+
+    expect(calls).toStrictEqual([
+      ['k8ordo: what a refused waitUntil() was handed failed', failure],
+    ]);
+  });
+
   it('refuses outside a request, naming where it belongs', () => {
     expect(() => {
       waitUntil(Promise.resolve());
