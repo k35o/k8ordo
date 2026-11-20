@@ -15,7 +15,7 @@
     "@json-render/core": "catalog:",
     "@json-render/react": "catalog:",
     "@k8ordo/ui": "workspace:^",
-    "next": "16.4.5",
+    "next": "16.4.6",
     "react": "catalog:",
     "react-dom": "catalog:",
     "zod": "catalog:"
