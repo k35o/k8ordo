@@ -5,8 +5,20 @@
  */
 
 /* 枠線のある部品。輪と重ならないよう、フォーカス中は枠線を消す。
-   不正な値の枠線は、フォーカス中も見せたいので残す */
-.ring:focus-visible {
+   不正な値の枠線は、フォーカス中も見せたいので残す。
+
+   日付や時刻の欄は :focus でも輪を出す。フォーカスを持つのは欄の中のパーツ
+   （年、月、日など）で、WebKit はそのあいだ欄を :focus にはするが
+   :focus-visible にはしない。ほかのエンジンでは、この欄はフォーカスがあれば
+   必ず :focus-visible になる。:where() で詳細度を :focus-visible の側に揃える */
+.ring:focus-visible,
+.ring:where(
+    [type='date'],
+    [type='time'],
+    [type='datetime-local'],
+    [type='month'],
+    [type='week']
+  ):focus {
   outline-style: none;
   box-shadow: var(--shadow-ring-info);
 

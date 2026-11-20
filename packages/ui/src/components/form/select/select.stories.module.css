@@ -4,3 +4,7 @@
   align-items: flex-start;
   gap: calc(var(--spacing) * 2);
 }
+
+.verticalFrame {
+  inline-size: calc(var(--spacing) * 50);
+}
