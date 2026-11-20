@@ -53,6 +53,18 @@ const copyAlone = async (from: string): Promise<string> => {
   return to;
 };
 
+/** 終わるまでに子プロセスが標準エラーに書いたすべて */
+const saidBy = (child: ChildProcess): Promise<string> =>
+  new Promise((resolve) => {
+    let said = '';
+    child.stderr?.on('data', (chunk: string) => {
+      said += chunk;
+    });
+    child.once('close', () => {
+      resolve(said);
+    });
+  });
+
 const start = (cwd: string): ChildProcess =>
   spawn(process.execPath, ['server.js'], {
     cwd,
@@ -286,6 +298,25 @@ describe('the started build, told to stop', () => {
       expect(await exited).toStrictEqual([0, null]);
     },
   );
+
+  it('finishes what a route.ts handed waitUntil() before it exits on SIGTERM', async () => {
+    server = start(deployed);
+    const origin = await listeningOn(server);
+    const said = saidBy(server);
+
+    const response = await fetch(`${origin}/api/entries/later`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'afterwards' }),
+    });
+    expect(response.status).toBe(202);
+    // 保存はまだ終わっていない。ここで止めるよう言う
+    const exited = once(server, 'exit');
+    server.kill('SIGTERM');
+
+    expect(await exited).toStrictEqual([0, null]);
+    expect(await said).toContain('example: saved afterwards after the answer');
+  });
 });
 
 describe('an application whose package.json does not say type: module', () => {

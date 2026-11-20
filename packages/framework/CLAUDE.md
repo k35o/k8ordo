@@ -55,8 +55,8 @@ pnpm check         # check:write to auto-fix
   the application's own modules — a dependency left external imports
   `/server` unseen — so the handler compiled for `mode: 'static'` runs every
   answer inside `writingFile`, where `cookies()`, `requestHeaders()`,
-  `responseHeaders()` and `nonce()` refuse with the same last line when
-  called. The `request` prop is the same promise: the generated `Register`
+  `responseHeaders()`, `nonce()` and `waitUntil()` refuse with the same last
+  line when called. The `request` prop is the same promise: the generated `Register`
   carries it only under `mode: 'server'`, and under `mode: 'static'` a page
   is handed `fileRequest`, whose getters refuse.
 - **`'use server'` is refused through the registry, not the text.** The RSC
@@ -153,8 +153,9 @@ pnpm check         # check:write to auto-fix
 - **Entries by where the code runs.** `./vite` is the plugin and loads Vite,
   which a deployed application does not have installed. `./server` is what
   code inside the handler imports — `redirect`, `cookies`,
-  `responseHeaders`, `requestHeaders`, `nonce` and the types, `Guard` among
-  them — and it is not built here: it points at the engine's
+  `responseHeaders`, `requestHeaders`, `nonce`, `waitUntil` and the types,
+  `Guard` among them, and `HandlerContext`, the handler's second argument,
+  for a runtime that calls it — and it is not built here: it points at the engine's
   `runtime/server.ts` in the copied `dist/runtime/`, the directory the
   handler is built from, so an application's import of it and the handler
   are one module, with one request in progress and one `Redirect` class.
@@ -193,13 +194,16 @@ pnpm check         # check:write to auto-fix
   copied out of the application has no `package.json` above it to say ESM;
   the engine's `dist/package.json` (the next invariant) says it. The
   launcher closes `serve` and exits with `0` on `SIGTERM` and `SIGINT`,
-  since Node as a container's PID 1 ignores a signal nothing handles.
+  since Node as a container's PID 1 ignores a signal nothing handles;
+  `close()` resolves only once the work handed to `waitUntil()` has settled
+  (below), so the exit cuts none of it off.
   `examples/server-basic`'s `deployed.test.ts` copies `dist/` alone into a
   temporary directory and asks the started server for a page, an action, a
   guard, a 404, a redirect and a compressed file, stops it with each
-  signal, and builds the application once more under a `package.json` with
-  no `type`. `vercel()` adds no bundling of its own; its function is this
-  handler.
+  signal — once with a `route.ts`'s `waitUntil()` work still under way,
+  which is finished before the exit — and builds the application once more
+  under a `package.json` with no `type`. `vercel()` bundles nothing of the
+  application's; its function is this handler.
 - **Either mode builds whatever the application's `package.json` says about
   `type`.** The RSC plugin names `../ssr/index.js` itself, and static
   mode's prerender, `serve` and `vercel()` name `rsc/index.js`, while Vite
@@ -393,6 +397,14 @@ pnpm check         # check:write to auto-fix
 - **`serve` hands back a handle.** `{ port, url, close }`, so a test can
   listen on port 0 and stop what it started (`serve.test.ts` runs it against
   a fixture `dist`, no real build needed).
+- **`serve` is the host `waitUntil()` tells, and `close()` is where it
+  waits.** It hands the handler `{ waitUntil }` with every request and
+  keeps each promise until it settles; `close()` closes the server, then
+  resolves once none is left — looping, since work under way may hand over
+  more. No limit on the wait: how long a deploy may take to stop is the
+  operator's to say (a container's grace period), not a number here. The
+  promises are the engine's, which cannot reject. `serve.test.ts` holds the
+  order with promises the test settles itself.
 - **Compression happens once where it can, and never holds a stream back.**
   Under `mode: 'server'` the client build is compressed at build time
   (`precompress`, from `serverMode`'s `buildApp` hook) and `serve` only
@@ -433,6 +445,34 @@ pnpm check         # check:write to auto-fix
   `vite dev`, `vite preview` and `serve` never apply them; an imitation of
   Vercel's routing nothing here can check against Vercel would be worse
   than none.
+- **On Vercel `waitUntil()` goes through the application's own
+  `@vercel/functions`, and only when the application uses it.** Vercel
+  stops a function once its response ends unless told through that package,
+  which is an optional peer here and never a dependency: the framework does
+  not read Vercel's request context itself (`Symbol.for(…)`, private), and
+  an application that never calls `waitUntil()` installs nothing. Under
+  server mode `vercel()`'s `transform` (`order: 'post'`, the `rsc`
+  environment — the handler's modules, dependencies included, since server
+  mode bundles them) notes each compiled module that takes `waitUntil` from
+  `@k8ordo/framework/server` (`importsWaitUntil`, `vercel-wait-until.ts`):
+  by name, or through `import * as` / `export *`, which name nothing and
+  are counted, because the other mistake is a function stopped mid-work
+  with no word. With none, the function is written exactly as before —
+  `export default { fetch: handler }`. With any, `writeVercelOutput` first
+  bundles `export { waitUntil } from '@vercel/functions'` into the
+  function's `wait-until.mjs` (`bundleWaitUntil`: a `build()` of its own
+  with no config of the application's, as `dist/server.js` is, resolving the
+  package from the application's root), and the entry hands it to the
+  handler: `fetch: (request) => handler(request, { waitUntil })`. A package
+  that does not resolve stops the build before anything else is written,
+  naming every module that imports `waitUntil` and the package to install.
+  The fifth argument of `writeVercelOutput` is an object (`FunctionOptions`)
+  so that what else a function is told goes beside `waitUntil`.
+  `vercel-wait-until.test.ts` builds three applications outside the
+  repository — importing it without the package, with it, and not importing
+  it — and calls the second's function, copied alone, under a stand-in for
+  Vercel's request context; `examples/server-basic` builds for Vercel with
+  a `route.ts` that calls `waitUntil()`.
 - **`headers` is declared once and sent by whatever answers.**
   `framework({ headers })`, in either mode (the engine's `EngineOptions`),
   is one set for every response and nothing finer: a header for some paths
@@ -515,7 +555,10 @@ src/
   serve.ts          ./serve: the node:http server (static files + handing off to
                     the handler; a static build as a static host)
   vercel-output.ts  the build as Vercel's Build Output API directory, either mode
-  vercel.ts         ./vercel: the plugin that writes it
+  vercel.ts         ./vercel: the plugin that writes it, and notes which
+                    modules import waitUntil
+  vercel-wait-until.ts  importsWaitUntil; bundleWaitUntil — @vercel/functions'
+                    waitUntil bundled into the function
   cli.ts            bin k8ordo: `k8ordo generate`, .k8ordo/ from the resolved
                     config through the engine plugin's api, building nothing
 fixtures/

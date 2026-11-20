@@ -22,7 +22,7 @@ describe('the request API an application imports, in vite dev', () => {
 
   // 最初のリクエストが rsc と ssr のグラフをまとめて変換する。CI の負荷の
   // 下ではそれだけで 5 秒を超える
-  it('reads and writes the request the handler is answering', async () => {
+  it('reads and writes the request the handler is answering, and keeps work for after it with no host to tell', async () => {
     const response = await fetch(new URL('/', origin), {
       headers: { cookie: 'visits=3' },
     });

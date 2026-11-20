@@ -181,7 +181,9 @@ Deno.serve(handler);
 Bun.serve({ fetch: handler });
 
 // Cloudflare Workers
-export default { fetch: handler };`;
+export default {
+  fetch: (request, env, ctx) => handler(request, ctx),
+};`;
 
 const WRANGLER = `{
   "main": "worker.js",
@@ -196,6 +198,8 @@ import { defineConfig } from 'vite';
 export default defineConfig({
   plugins: [framework({ mode: 'server' }), vercel()],
 });`;
+
+const VERCEL_FUNCTIONS = 'npm install @vercel/functions';
 
 const HEADERS = `import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
@@ -426,6 +430,9 @@ export default function FrameworkDeployPage() {
           <p>
             <Rich>{t.startStop()}</Rich>
           </p>
+          <p>
+            <Rich>{t.startWait()}</Rich>
+          </p>
         </DocSubsection>
         <DocSubsection id="external" title={t.externalTitle}>
           <CodeBlock
@@ -450,6 +457,9 @@ export default function FrameworkDeployPage() {
           <p>
             <Rich>{t.serveReturn()}</Rich>
           </p>
+          <p>
+            <Rich>{t.serveClose()}</Rich>
+          </p>
         </DocSubsection>
         <DocSubsection id="answers" title={t.answersTitle}>
           <p>
@@ -468,6 +478,9 @@ export default function FrameworkDeployPage() {
           <CodeBlock code={RUNTIMES} lang="js" />
           <p>
             <Rich>{t.handlerRuntime()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.handlerContext()}</Rich>
           </p>
           <CodeBlock code={WRANGLER} lang="json" title="wrangler.jsonc" />
           <p>
@@ -504,6 +517,13 @@ export default function FrameworkDeployPage() {
           </p>
           <p>
             <Rich>{t.vercelBundle()}</Rich>
+          </p>
+          <CodeBlock code={VERCEL_FUNCTIONS} lang="bash" />
+          <p>
+            <Rich>{t.vercelWaitUntil()}</Rich>
+          </p>
+          <p>
+            <Rich>{t.vercelWaitUntilMissing()}</Rich>
           </p>
         </DocSubsection>
       </DocSection>

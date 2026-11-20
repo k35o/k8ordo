@@ -19,6 +19,12 @@ const SCRIPT = 'export {};';
 // ストリームの途中で止まっている handler を、テストが先へ進める合図
 type Gate = { k8ordoRelease?: Promise<undefined> };
 
+// handler が waitUntil() に渡す処理。テストが握っていて、テストが決着させる
+type Work = {
+  k8ordoWork?: Promise<unknown>;
+  k8ordoMoreWork?: Promise<unknown>;
+};
+
 /** 本文を、届いた塊ごとの文字列として読むストリーム */
 const textOf = (response: Response): ReadableStream<string> => {
   if (response.body === null) throw new Error('the answer has no body');
@@ -52,8 +58,18 @@ beforeAll(async () => {
       'X-Content-Type-Options': 'nosniff',
       'Referrer-Policy': 'no-referrer',
     };
-    export default async (request) => {
+    export default async (request, host) => {
       const url = new URL(request.url);
+      if (url.pathname === '/waits') {
+        host.waitUntil(globalThis.k8ordoWork);
+        return new Response('answered');
+      }
+      if (url.pathname === '/waits-twice') {
+        host.waitUntil(globalThis.k8ordoWork.then(() => {
+          host.waitUntil(globalThis.k8ordoMoreWork);
+        }));
+        return new Response('answered');
+      }
       if (url.pathname === '/own-policy') {
         return new Response('own', {
           headers: { 'referrer-policy': 'same-origin' },
@@ -492,6 +508,47 @@ describe('serve', () => {
     } finally {
       log.mockRestore();
     }
+  });
+});
+
+describe('what the handler handed waitUntil()', () => {
+  it('is settled before close() resolves, though the answer left long before', async () => {
+    const work = Promise.withResolvers<undefined>();
+    (globalThis as Work).k8ordoWork = work.promise;
+    const own = await serve({ dist, port: 0 });
+    const order: string[] = [];
+
+    const response = await fetch(`${own.url}/waits`);
+    expect(await response.text()).toBe('answered');
+    const closing = own.close().then(() => order.push('closed'));
+    // もう待ち受けていない。残っているのは握っている処理だけ
+    await expect(fetch(`${own.url}/waits`)).rejects.toThrow(TypeError);
+    order.push('settling');
+    work.resolve(undefined);
+    await closing;
+
+    expect(order).toStrictEqual(['settling', 'closed']);
+  });
+
+  it('is settled before close() resolves when it was handed over while close() waited', async () => {
+    const work = Promise.withResolvers<undefined>();
+    const more = Promise.withResolvers<undefined>();
+    (globalThis as Work).k8ordoWork = work.promise;
+    (globalThis as Work).k8ordoMoreWork = more.promise;
+    const own = await serve({ dist, port: 0 });
+    const order: string[] = [];
+
+    await (await fetch(`${own.url}/waits-twice`)).text();
+    const closing = own.close().then(() => order.push('closed'));
+    await expect(fetch(`${own.url}/waits-twice`)).rejects.toThrow(TypeError);
+    work.resolve(undefined);
+    // 1 つ目の続きが 2 つ目を渡し終えてから、2 つ目を決着させる
+    await work.promise.then(() => undefined);
+    order.push('settling');
+    more.resolve(undefined);
+    await closing;
+
+    expect(order).toStrictEqual(['settling', 'closed']);
   });
 });
 

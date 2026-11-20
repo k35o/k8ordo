@@ -47,7 +47,9 @@ An action answers the request as much as a [guard](guards.md) does, so it
 has the same API: `cookies()` to read and write the cookies,
 `responseHeaders()` to add to the answer, and `requestHeaders()` for the
 headers the request arrived with — an action is handed its arguments, not the
-request.
+request. `waitUntil(promise)` keeps the host running for work the action
+leaves going after it returns
+([Work after the answer](guards.md#work-after-the-answer)).
 
 ```ts
 'use server';

@@ -2,7 +2,9 @@
  * `@k8ordo/framework/server`: what code inside the request handler imports
  * under mode: 'server' — the response API a guard and a Server Action answer
  * through, a Server Action's `redirect()`, the nonce the answer's inline
- * scripts carry, and the types a route file names. The framework points that
+ * scripts carry, `waitUntil()` for what goes on after the answer, and the
+ * types a route file names — and `HandlerContext`, what a runtime calling the
+ * built handler itself hands it beside the request. The framework points that
  * entry at this file in the runtime it copies rather than at a bundle of its
  * own, so an application's import and the handler are one module: one
  * request in progress, one `Redirect`. The handler runs on any runtime with
@@ -19,5 +21,7 @@ export {
   nonce,
   requestHeaders,
   responseHeaders,
+  waitUntil,
 } from './request-scope';
+export type { HandlerContext } from './request-scope';
 export type { CookieOptions, Cookies, CookieScope } from './cookies';
