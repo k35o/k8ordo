@@ -325,7 +325,7 @@ font-family: 'Noto Sans JP', 'M PLUS 2', sans-serif;
 | Selected | \`--color-primary-bg-subtle\` |
 | Error | \`--color-border-error\` + \`--color-fg-error\` |
 
-フォーカスは必ず \`:focus-visible\`（\`:focus\` ではない）を使い、輪は \`--shadow-ring-info\` で統一。
+フォーカスは必ず \`:focus-visible\`（\`:focus\` ではない）を使い、輪は \`--shadow-ring-info\` で統一。日付や時刻の \`<input>\` だけは \`:focus\` でも輪を出す（WebKit は欄の中のパーツがフォーカスを持つあいだ、欄を \`:focus-visible\` にしない）。
 
 OS の \`prefers-contrast: more\` と \`forced-colors: active\` にはライブラリの CSS が従う。高コントラストでは文字と線のトークンが一段強くなり、影だけで縁取る面に線が付く。強制カラーでは境界線・フォーカスリング・選択状態をシステムカラー（\`--color-system-highlight\` / \`--color-system-canvas-text\`）で描く。自前の UI では、境界やフォーカスを \`box-shadow\` だけで描かず、透明な色で隠さない（強制カラーで塗られる。\`visibility: hidden\` を使う）。`,
 

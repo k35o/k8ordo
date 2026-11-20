@@ -70,6 +70,7 @@ duration-150 ease-out`.
 ## Focus management
 
 - Use `:focus-visible`, not `:focus` — no ring appears on a mouse click
+- A date or time `<input>` is the exception and takes the ring on `:focus` as well. Its inner parts (year, month, day) hold the focus, and WebKit then matches `:focus` on the input but never `:focus-visible`. Chromium and Firefox match `:focus-visible` on such a field whenever it has focus, a mouse click included, so `:focus` adds nothing there. `DateField` and `TextField` do this
 - Keep the focus ring consistent with `--shadow-ring-info`
 - Clear the default outline before applying the ring, and give it back under forced colors, where the ring (a shadow) disappears
 - Keep focus on a button that is waiting on its own action: show the wait with `aria-busy` and `aria-disabled` and ignore presses, rather than setting `disabled`. Chromium moves focus to `body` when the focused element becomes disabled, so the keyboard user who pressed it loses their place. `Button` and `IconButton` do this for `onAction`
