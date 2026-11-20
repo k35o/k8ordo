@@ -127,7 +127,8 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   `node dist/server.js` (`PORT`, `HOST`, every dependency bundled in, and
   `resolve.external` for one that cannot be), `serve` (compression, `ETag`,
   `Range`), the request handler under Node.js, Bun, Deno and Cloudflare
-  Workers, the same-origin rule for a `POST`, and `vercel()` in either mode,
+  Workers, the same-origin rule for a `POST`, and `vercel()` in either mode
+  (under server mode its function's `maxDuration` and `regions`),
   with routes of your own under static mode;
   a tab opened before a deploy, and Vite's `base`.
 
