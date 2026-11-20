@@ -119,6 +119,23 @@ describe('the built request handler', () => {
     expect(await response.text()).toContain('not found');
   });
 
+  it('hands a [...path] route.ts every remaining segment as an array, each decoded', async () => {
+    const response = await handler(
+      new Request(`${ORIGIN}/files/reports/2026%2F11/summary.pdf`),
+    );
+    expect(response.status).toBe(200);
+    expect(await response.json()).toStrictEqual({
+      name: 'summary.pdf',
+      folders: ['reports', '2026/11'],
+    });
+  });
+
+  it('answers a [...path] directory with no segment left as a URL it does not have', async () => {
+    const response = await handler(new Request(`${ORIGIN}/files`));
+    expect(response.status).toBe(404);
+    expect(await response.text()).toContain('not found');
+  });
+
   it('answers a URL it does not have with the not-found page, under a real 404', async () => {
     const response = await handler(new Request(`${ORIGIN}/nowhere`));
     expect(response.status).toBe(404);

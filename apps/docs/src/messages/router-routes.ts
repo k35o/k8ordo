@@ -55,6 +55,31 @@ export const paramMatch = message({
   en: '`match` is the same matching `<Router>` performs, as a plain function. It needs no browser, so it is a quick way to check which page a path becomes.',
 });
 
+export const restTitle = message({
+  ja: '`:name+`',
+  en: '`:name+`',
+});
+
+export const restSegments = message({
+  ja: '`:name+`の区間は、パスのその位置から後ろの区間をすべて受け取ります。パターンの最後に書きます。値は区間の配列で、区間ごとにデコードされます。',
+  en: 'A `:name+` segment takes every segment of the path from its position on. It goes at the end of a pattern. The value is an array of segments, each decoded on its own.',
+});
+
+export const restOne = message({
+  ja: '受け取る区間は1つ以上です。`/files`は`/files/:path+`に合わないので、`/files`のページは別のパターンで書きます。',
+  en: 'It takes one segment or more. `/files` does not match `/files/:path+`, so the page at `/files` is a pattern of its own.',
+});
+
+export const restType = message({
+  ja: 'paramの型は`readonly string[]`です。`:name`が受け取る1区間のパスにも合うので、`/files/:id`と並べるときは`/files/:id`を先に書きます。',
+  en: 'The type of the param is `readonly string[]`. It also matches the one-segment path a `:name` takes, so beside `/files/:id`, write `/files/:id` first.',
+});
+
+export const restLink = message({
+  ja: '`href`と`navigateTo`には同じ配列を渡します。区間ごとにエスケープして`/`でつなぎます。空の配列と空文字の区間は`TypeError`になります。',
+  en: '`href` and `navigateTo` take the same array, escape each segment and join them with `/`. An empty array or an empty segment throws a `TypeError`.',
+});
+
 export const wildcardTitle = message({
   ja: '`/*`',
   en: '`/*`',

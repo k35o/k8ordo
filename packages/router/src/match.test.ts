@@ -30,6 +30,23 @@ describe('matchPath', () => {
   });
 });
 
+describe('matchPath with a rest param', () => {
+  it('answers with every segment the rest param took, each decoded', () => {
+    expect(matchPath('/files/:path+', '/files/a%2Fb/c')).toStrictEqual({
+      path: ['a/b', 'c'],
+    });
+    expect(matchPath('/:locale/files/:path+', '/ja/files/a')).toStrictEqual({
+      locale: 'ja',
+      path: ['a'],
+    });
+  });
+
+  it('does not answer for zero segments', () => {
+    expect(matchPath('/files/:path+', '/files')).toBeNull();
+    expect(matchPath('/files/:path+', '/files/')).toBeNull();
+  });
+});
+
 describe('matchPath with inclusive', () => {
   it('counts the section index in when asked, and only then', () => {
     expect(

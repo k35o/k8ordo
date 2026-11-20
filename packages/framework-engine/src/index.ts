@@ -10,6 +10,7 @@ export {
   fallbackShapes,
   parseRouteTree,
   pathsFiles,
+  restDirOf,
   slotOf,
 } from './grammar/tree';
 export type { FallbackShape, PathsFile, RouteDir } from './grammar/tree';

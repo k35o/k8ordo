@@ -167,7 +167,9 @@ export default '/products';
 ```
 
 The target is a pattern the matched params fill in, so `/:locale/legacy` can
-send to `/:locale/new`. A redirect holds its place in the table as a page
+send to `/:locale/new`, and `old/[...path]/redirect.ts` can send to
+`/files/:path+`, every segment the rest parameter took moved as the URL
+spelled it (server mode only, as every `[...name]` directory is). A redirect holds its place in the table as a page
 does, so a literal directory beside a `[slug]/redirect.ts` keeps its URL; a
 directory that redirects has no page to render, so it cannot hold both. The
 generated table checks the default export's shape; `RedirectTarget` is that

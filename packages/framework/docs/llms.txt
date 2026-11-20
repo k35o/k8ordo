@@ -10,13 +10,15 @@
 > changes. Pick `server` when the application needs the request — Server
 > Actions, `guard.ts`, the `request` prop, cookies, a page that exports
 > `search`, parameter values with no list rendered on the server (static
-> mode has only a `fallback.tsx`'s shell for those, drawn in the browser) —
-> and `static` otherwise; static mode refuses all of those by name, in the
+> mode has only a `fallback.tsx`'s shell for those, drawn in the browser), a
+> `[...name]` directory — and `static` otherwise; static mode refuses all of those by name, in the
 > build and in `vite dev` (`this application wants mode: 'server'`).
 > `src/routes/` is the pathname space and holds nothing else
 > (page/layout/not-found/error/loading/fallback/paths/redirect/guard/route
 > files,
-> `[param]` and `(group)` directories; `_` is an ordinary character in
+> `[param]` and `(group)` directories, and under server mode `[...name]`,
+> which takes every remaining segment — one or more — as an array
+> (`/files/:path+`); `_` is an ordinary character in
 > a segment and a name starting with `.` is not read, so `/.well-known` cannot
 > be a route; components live outside it in `src/components/` and every
 > other module in `src/lib/`); a page or layout may
@@ -62,7 +64,11 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 ## References
 
 - [Routing](references/routing.md): the `routes/` grammar and every refusal
-  the build names, where a `fallback.tsx` may sit, how a page is sent in
+  the build names, rest parameters (`[...name]`, server mode only: the
+  pattern `/files/:path+`, an array of decoded segments for the page, layout,
+  `route.ts` and `guard.ts`, never zero segments, always the last directory,
+  tried after a literal and a `[name]` beside it and before the
+  `not-found.tsx`), where a `fallback.tsx` may sit, how a page is sent in
   each mode (each page loads only its own client components and CSS, what
   every page loads comes in at most two files — the entry's and the frame's,
   which sets the client build's `codeSplitting` — and the browser renders
@@ -82,7 +88,8 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   an `.mdx` file imports reaches the pages rendering it, with no query),
   and counting page views (`navigatesuccess`, not `usePathname()`).
 - [Parameters](references/params.md): `paramsSchema` — a refused value is a
-  pathname the pattern does not answer — and, under static mode, `paths.ts`:
+  pathname the pattern does not answer; a `[...name]` directory's receives
+  the array of segments — and, under static mode, `paths.ts`:
   the values of its directory's parameter (`Paths<Pattern>`), given the
   params above it, for every page, `route.ts` and `redirect.ts` below it,
   and what fails the build; and `fallback.tsx` for the values it does not
@@ -221,6 +228,6 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   the problems the build names under
   `routes/ is not a valid pathname space:` fails it the same way (exit
   code 1), with nothing written. What `mode: 'static'` refuses on top of
-  those — a `guard.ts`, a `route.ts` answering more than `GET`, a page
+  those — a `[...name]` directory, a `guard.ts`, a `route.ts` answering more than `GET`, a page
   reading `search`, an `export *`, a Server Action, whatever a `paths.ts`
   returns — it does not check, so its success is not the build's.

@@ -49,6 +49,10 @@ export const namesList = [
     en: '`[id]`: a parameter that takes one segment. Its name starts with a letter or `_`.',
   }),
   message({
+    ja: '`[...path]`：残りの区間をすべて受け取るパラメータです。serverモードだけで使えます。',
+    en: '`[...path]`: a parameter that takes every remaining segment. Server mode only.',
+  }),
+  message({
     ja: '`(docs)`：区間を足さないグループです。`routes/`の一部にだけレイアウトや`error.tsx`を持たせるときに使います。',
     en: '`(docs)`: a group, which adds no segment. Use it to give part of `routes/` a layout or an `error.tsx` of its own.',
   }),
@@ -58,9 +62,44 @@ export const namesList = [
   }),
 ] as const;
 
-export const namesNoRest = message({
-  ja: '`[...rest]`のように、複数の区間をまとめて受け取るパラメータはありません。',
-  en: 'There is no parameter that takes several segments, such as `[...rest]`.',
+export const restTitle = message({
+  ja: '`[...name]`のディレクトリ',
+  en: '`[...name]` directories',
+});
+
+export const restValue = message({
+  ja: "`[...path]`のディレクトリは、その位置から後ろの区間をすべて受け取ります。値は区間の配列で、`/files/a/b`なら`params.path`は`['a', 'b']`です。パターンは`/files/:path+`と書きます。",
+  en: "A `[...path]` directory takes every segment from its position on. The value is an array of segments: at `/files/a/b`, `params.path` is `['a', 'b']`. Its pattern is written `/files/:path+`.",
+});
+
+export const restDecode = message({
+  ja: "区間は1つずつデコードされるので、`/files/a%2Fb/c`は`['a/b', 'c']`になります。同じディレクトリの`layout.tsx`と`route.ts`、`guard.ts`も同じ配列を受け取ります。",
+  en: "Each segment is decoded on its own, so `/files/a%2Fb/c` is `['a/b', 'c']`. A `layout.tsx`, `route.ts` and `guard.ts` in the same directory receive the same array.",
+});
+
+export const restOne = message({
+  ja: '受け取る区間は1つ以上です。`/files`には当たらないので、`/files`のページは`files/page.tsx`に書きます。`[[...path]]`のように、区間が無くても当たる形はありません。',
+  en: 'It takes one segment or more. It does not answer `/files`, so the page for `/files` goes in `files/page.tsx`. There is no form that also answers with no segment, such as `[[...path]]`.',
+});
+
+export const restLast = message({
+  ja: '`[...path]`の下にはディレクトリを置けません。グループも置けません。同じ階層に置ける`[...name]`は1つです。`not-found.tsx`と`fallback.tsx`、`paths.ts`も置けません。',
+  en: 'No directory goes below `[...path]`, a group included, and one level holds one `[...name]`. It cannot hold `not-found.tsx`, `fallback.tsx` or `paths.ts` either.',
+});
+
+export const restLink = message({
+  ja: '`href`には区間の配列を渡します。区間ごとにエスケープして`/`でつなぎます。空の配列と空文字の区間は`TypeError`になります。',
+  en: '`href` takes the array of segments, escapes each one and joins them with `/`. An empty array or an empty segment throws a `TypeError`.',
+});
+
+export const restSchemaBefore = message({
+  ja: '`paramsSchema`にも配列が渡ります。書き方は',
+  en: 'A `paramsSchema` receives the array too. See ',
+});
+
+export const restStatic = message({
+  ja: "staticモードのビルドは、`[...name]`のディレクトリを名指ししてエラーにします。区間の数はリクエストごとに違い、書き出すパスをビルドが決められません。エラーは`this application wants mode: 'server'`の行で終わります。",
+  en: "A static mode build fails on a `[...name]` directory, naming it. The number of segments differs per request, so the build cannot decide which paths to write. The error ends with the line `this application wants mode: 'server'`.",
 });
 
 export const filesTitle = message({
@@ -265,8 +304,8 @@ export const orderTitle = message({
 });
 
 export const orderRule = message({
-  ja: 'ディレクトリに順番は無いので、生成されるルート表が順番を決めます。同じ階層では、固定の区間がパラメータより先に試されます。`not-found.tsx`は最後です。`about/`のとなりに`[id]/`を直接置いても、`/about`は`about/`に当たります。',
-  en: 'Directories have no order of their own, so the generated route table picks one. At each level a fixed segment is tried before a parameter, and `not-found.tsx` comes last. Put `[id]/` directly beside `about/`, and `/about` still reaches `about/`.',
+  ja: 'ディレクトリに順番は無いので、生成されるルート表が順番を決めます。同じ階層では、固定の区間、パラメータ、`[...name]`の順に試されます。`not-found.tsx`は最後です。`about/`のとなりに`[id]/`を直接置いても、`/about`は`about/`に当たります。',
+  en: 'Directories have no order of their own, so the generated route table picks one. At each level a fixed segment is tried first, then a parameter, then a `[...name]`, and `not-found.tsx` comes last. Put `[id]/` directly beside `about/`, and `/about` still reaches `about/`.',
 });
 
 export const orderGroup = message({
@@ -301,6 +340,14 @@ export const refusesList = [
   message({
     ja: '上のディレクトリと同じ名前のパラメータ（`[id]/things/[id]/`）',
     en: 'A parameter named the same as one above it (`[id]/things/[id]/`)',
+  }),
+  message({
+    ja: '`[...name]`の下に置いたディレクトリ（`files/[...path]/raw/`）',
+    en: 'A directory below a `[...name]` (`files/[...path]/raw/`)',
+  }),
+  message({
+    ja: '同じ階層に並んだ2つの`[...name]`（`files/[...a]/`と`files/[...b]/`）',
+    en: 'Two `[...name]` directories at one level (`files/[...a]/` and `files/[...b]/`)',
   }),
   message({
     ja: '下にページも`redirect.ts`も`route.ts`も無いディレクトリ（レイアウトや`error.tsx`だけがある、など）',

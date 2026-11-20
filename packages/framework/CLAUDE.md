@@ -35,9 +35,12 @@ pnpm check         # check:write to auto-fix
   `mode: 'static'` every module that imports a value from
   `@k8ordo/framework/server`, declares `'use server'`, is a `guard.ts`, is a
   page exporting `search`, or is a `route.ts` exporting a method other than
-  `GET` is refused, every offending file of a kind named at once and each refusal
+  `GET` is refused, and so is every `[...name]` directory — it answers a
+  pathname of any depth, which only a request names, and a `paths.ts` gives
+  one segment's values — every offending file (or directory) of a kind named
+  at once and each refusal
   ending `this application wants mode: 'server'`. What the route files say
-  (guards, `search`, a `route.ts`'s methods) is refused before anything is
+  (a `[...name]` directory, guards, `search`, a `route.ts`'s methods) is refused before anything is
   built (`buildApp`, `order: 'pre'`); the `/server` importers and the Server
   Actions only once the environments are built, since only compiling finds
   them. `vite dev` says the same
@@ -68,7 +71,11 @@ pnpm check         # check:write to auto-fix
   code it is handed: that transform prepends its runtime import, so the file
   has stopped beginning with the directive by the time anyone downstream sees
   it. A `guard.ts` is found through the engine's grammar (`slotOf`), never by
-  the file name alone, since one under a `.`-prefixed directory is not one.
+  the file name alone, since one under a `.`-prefixed directory is not one;
+  a `[...name]` directory likewise (`restDirOf`), so every file in one is
+  refused as `vite dev` compiles it, naming the directory. Nothing else in
+  static mode knows the kind: `paths.ts`, the shells, `_redirects` and
+  Vercel's static output never meet one, because the build stops first.
 - **The handler is the engine's, not ours.** Prerendering calls
   `dist/rsc/index.js`, the engine's request handler compiled for
   `mode: 'static'` — once for each page, whose HTML and the payload it was
@@ -144,8 +151,8 @@ pnpm check         # check:write to auto-fix
   the build names under `routes/ is not a valid pathname space:` both exit
   with `1`, the second with the build's message and nothing written. What
   `mode: 'static'` refuses on top of those — `k8ordo:static-refuses`
-  (`guard.ts`, a `route.ts` answering more than `GET`, a page reading
-  `search`, `export *`), Server Actions, whatever a `paths.ts` returns — it
+  (a `[...name]` directory, `guard.ts`, a `route.ts` answering more than
+  `GET`, a page reading `search`, `export *`), Server Actions, whatever a `paths.ts` returns — it
   does
   not check, so its success is not the build's. `cli.test.ts` runs the
   built `dist/cli.mjs` in temporary applications with this package linked
