@@ -1,5 +1,6 @@
 import { formFields, parseForm } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { clsx } from 'clsx';
 import { useRef } from 'react';
 import { expect, fireEvent, waitFor } from 'storybook/test';
 import { z } from 'zod';
@@ -82,6 +83,57 @@ export const Disabled: Story = {
     disabled: true,
     invalid: false,
     required: false,
+  },
+};
+
+// シェブロンの真ん中と、シェブロンから枠線までの余白の真ん中を押した先の要素。
+// シェブロンは枠の末尾にあり、末尾は横書きなら右、縦書きなら下になる
+const pressedAroundChevron = (select: HTMLElement, end: 'right' | 'bottom') => {
+  const frame = select.parentElement;
+  const chevron = frame?.querySelector('svg');
+  if (!frame || !chevron) {
+    throw new Error('シェブロンが見つからない');
+  }
+  const icon = chevron.getBoundingClientRect();
+  const edge = frame.getBoundingClientRect();
+  const center = { x: icon.x + icon.width / 2, y: icon.y + icon.height / 2 };
+  const margin =
+    end === 'right'
+      ? { x: (icon.right + edge.right) / 2, y: center.y }
+      : { x: center.x, y: (icon.bottom + edge.bottom) / 2 };
+  return {
+    onChevron: document.elementFromPoint(center.x, center.y),
+    besideChevron: document.elementFromPoint(margin.x, margin.y),
+  };
+};
+
+// シェブロンやその外側の余白を押した先は <select> で、ネイティブの一覧が開く。
+// 一覧が開いたか（:open）は読まない。Playwright のもとでは、Firefox は開いた
+// 一覧をボタンを離したところで閉じ、Linux の WebKit は押しても :open にならない
+export const PressOnChevron: Story = {
+  play: async ({ canvas }) => {
+    const select = canvas.getByRole('combobox');
+    const { onChevron, besideChevron } = pressedAroundChevron(select, 'right');
+
+    await expect(onChevron).toBe(select);
+    await expect(besideChevron).toBe(select);
+  },
+};
+
+export const VerticalWritingMode: Story = {
+  decorators: [
+    (Story) => (
+      <div className={clsx('writing-v', styles.verticalFrame)}>
+        <Story />
+      </div>
+    ),
+  ],
+  play: async ({ canvas }) => {
+    const select = canvas.getByRole('combobox');
+    const { onChevron, besideChevron } = pressedAroundChevron(select, 'bottom');
+
+    await expect(onChevron).toBe(select);
+    await expect(besideChevron).toBe(select);
   },
 };
 

@@ -30,6 +30,7 @@ type Props<T extends string> = {
 // Stable module-level reference so it is not re-created on every render
 // (default prop function expressions break referential equality).
 const defaultRenderAnchor = ({
+  kind: _kind,
   children: anchorChildren,
   ...rest
 }: RenderAnchorProps<string>): ReactNode => <a {...rest}>{anchorChildren}</a>;
