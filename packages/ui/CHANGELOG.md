@@ -1,5 +1,19 @@
 # @k8ordo/ui
 
+## 3.1.0
+
+### Minor Changes
+
+- `@k8ordo/ui/icons`に`GitPullRequestIcon`（プルリクエスト）と`ClipboardCheckIcon`（チェックの付いたクリップボード）を足しました。generative UIのカタログでは`git-pull-request`と`clipboard-check`の名前で使えます。
+
+### Patch Changes
+
+- `Anchor`が既定の`<a>`に`kind="internal"`や`kind="external"`という属性を出していたのを直しました。`kind`は`renderAnchor`に渡す値で、HTMLの属性ではありません。`renderAnchor`にはこれまでどおり渡ります。CSSやテストが`a[kind]`を読んでいた場合は、`renderAnchor`で自分の属性を付けてください。
+
+- WebKit（Safari）で、`DateField`と、`type`が`date`、`time`、`datetime-local`の`TextField`にフォーカスの輪が出なかったのを直しました。これらの欄ではフォーカスを持つのが欄の中のパーツ（年、月、日など）で、WebKitはそのあいだ`<input>`を`:focus`にはしますが、`:focus-visible`にはしません。日付や時刻の欄は`:focus`でも輪を出すようにしました。ChromiumとFirefoxでは、これらの欄はフォーカスがあれば必ず`:focus-visible`になるので、見た目は変わりません。
+
+- `Select`の枠の右端にあるシェブロンと、その外側の余白を押しても、選択肢が開くようにしました。これまではシェブロンが`<select>`の隣に並んでいたので、そこは`<select>`の外になり、押しても何も起きませんでした。`<select>`を枠いっぱいに広げ、シェブロンをその上に重ねています。見た目は変わりません。
+
 ## 3.0.0
 
 ### Major Changes
