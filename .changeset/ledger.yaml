@@ -408,6 +408,13 @@
     - ui-drop-logo-tokens
     - ui-json-render-0-22
     - ui-own-icons
+"@k8ordo/ui@3.1.0":
+  dir: packages/ui
+  intents:
+    - ui-anchor-kind-attribute
+    - ui-date-time-focus-ring-webkit
+    - ui-icons-git-pull-request-clipboard-check
+    - ui-select-chevron-opens-picker
 docs@0.0.11:
   dir: apps/docs
   intents:
