@@ -6,8 +6,8 @@
  * `--font-family-*`, `--font-size-*`, `--font-weight-*`, `--line-height-*`,
  * `--letter-spacing-*`, `--z-index-*`, `--duration-*`, `--easing-*`,
  * `--breakpoint-*`). A name without a category (`--gray-500`) is the palette,
- * internal to this file. `.dark` and `@media (prefers-contrast: more)` are
- * modes: they only override names declared at `:root`.
+ * internal to this file. `@media (prefers-contrast: more)` is a mode: it only
+ * overrides names declared at `:root`.
  *
  * `better-css-modules check` holds every CSS module to these tokens, and
  * `@k8ordo/ui/tokens` is generated from them.
@@ -147,57 +147,60 @@
   --orange-900: oklch(0.37 0.128 55);
   --orange-950: oklch(0.18 0.09 55);
 
-  --color-fg-base: var(--gray-900);
-  --color-fg-subtle: var(--gray-600);
-  --color-fg-mute: var(--gray-700);
-  --color-fg-inverse: var(--gray-50);
-  --color-fg-info: var(--blue-800);
-  --color-fg-success: var(--green-800);
-  --color-fg-warning: var(--yellow-800);
-  --color-fg-error: var(--red-800);
+  --color-fg-base: light-dark(var(--gray-900), var(--gray-50));
+  --color-fg-subtle: light-dark(var(--gray-600), var(--gray-400));
+  --color-fg-mute: light-dark(var(--gray-700), var(--gray-300));
+  --color-fg-inverse: light-dark(var(--gray-50), var(--gray-900));
+  --color-fg-info: light-dark(var(--blue-800), var(--blue-200));
+  --color-fg-success: light-dark(var(--green-800), var(--green-200));
+  --color-fg-warning: light-dark(var(--yellow-800), var(--yellow-200));
+  --color-fg-error: light-dark(var(--red-800), var(--red-200));
 
-  --color-bg-base: var(--white);
-  --color-bg-raised: var(--white);
-  --color-bg-surface: var(--gray-50);
-  --color-bg-subtle: var(--gray-100);
-  --color-bg-mute: var(--gray-200);
-  --color-bg-emphasize: var(--gray-300);
-  --color-bg-inverse: var(--gray-900);
-  --color-bg-info: var(--blue-100);
-  --color-bg-success: var(--green-100);
-  --color-bg-warning: var(--yellow-100);
-  --color-bg-error: var(--red-100);
+  --color-bg-base: light-dark(var(--white), var(--gray-800));
+  --color-bg-raised: light-dark(var(--white), var(--gray-800));
+  --color-bg-surface: light-dark(var(--gray-50), var(--gray-950));
+  --color-bg-subtle: light-dark(var(--gray-100), var(--gray-900));
+  --color-bg-mute: light-dark(var(--gray-200), var(--gray-700));
+  --color-bg-emphasize: light-dark(var(--gray-300), var(--gray-600));
+  --color-bg-inverse: light-dark(var(--gray-900), var(--white));
+  --color-bg-info: light-dark(var(--blue-100), var(--blue-900));
+  --color-bg-success: light-dark(var(--green-100), var(--green-900));
+  --color-bg-warning: light-dark(var(--yellow-100), var(--yellow-900));
+  --color-bg-error: light-dark(var(--red-100), var(--red-900));
 
-  --color-border-base: var(--gray-400);
-  --color-border-subtle: var(--gray-100);
-  --color-border-mute: var(--gray-200);
-  --color-border-emphasize: var(--gray-500);
-  --color-border-inverse: var(--gray-700);
-  --color-border-info: var(--blue-500);
-  --color-border-success: var(--green-500);
-  --color-border-warning: var(--yellow-500);
-  --color-border-error: var(--red-500);
+  --color-border-base: light-dark(var(--gray-400), var(--gray-600));
+  --color-border-subtle: light-dark(var(--gray-100), var(--gray-700));
+  --color-border-mute: light-dark(var(--gray-200), var(--gray-600));
+  --color-border-emphasize: light-dark(var(--gray-500), var(--gray-500));
+  --color-border-inverse: light-dark(var(--gray-700), var(--gray-300));
+  --color-border-info: light-dark(var(--blue-500), var(--blue-400));
+  --color-border-success: light-dark(var(--green-500), var(--green-400));
+  --color-border-warning: light-dark(var(--yellow-500), var(--yellow-400));
+  --color-border-error: light-dark(var(--red-500), var(--red-400));
 
-  --color-primary-fg: var(--teal-800);
-  --color-primary-bg: var(--teal-200);
-  --color-primary-bg-subtle: var(--teal-50);
-  --color-primary-bg-mute: var(--teal-100);
-  --color-primary-bg-emphasize: var(--teal-300);
-  --color-primary-border: var(--teal-500);
+  /* ダークの bg と emphasize を 1 段暗くしているのは、hover / active の
+     emphasize の上でも *-fg を通常の文字で AA にするため。700 だと 3.7:1 に
+     しかならない */
+  --color-primary-fg: light-dark(var(--teal-800), var(--teal-300));
+  --color-primary-bg: light-dark(var(--teal-200), var(--teal-900));
+  --color-primary-bg-subtle: light-dark(var(--teal-50), var(--teal-950));
+  --color-primary-bg-mute: light-dark(var(--teal-100), var(--teal-900));
+  --color-primary-bg-emphasize: light-dark(var(--teal-300), var(--teal-800));
+  --color-primary-border: light-dark(var(--teal-500), var(--teal-500));
 
-  --color-secondary-fg: var(--cyan-800);
-  --color-secondary-bg: var(--cyan-200);
-  --color-secondary-bg-subtle: var(--cyan-50);
-  --color-secondary-bg-mute: var(--cyan-100);
-  --color-secondary-bg-emphasize: var(--cyan-300);
-  --color-secondary-border: var(--cyan-500);
+  --color-secondary-fg: light-dark(var(--cyan-800), var(--cyan-300));
+  --color-secondary-bg: light-dark(var(--cyan-200), var(--cyan-900));
+  --color-secondary-bg-subtle: light-dark(var(--cyan-50), var(--cyan-950));
+  --color-secondary-bg-mute: light-dark(var(--cyan-100), var(--cyan-900));
+  --color-secondary-bg-emphasize: light-dark(var(--cyan-300), var(--cyan-800));
+  --color-secondary-border: light-dark(var(--cyan-500), var(--cyan-500));
 
   --color-back-drop: rgb(0 0 0 / 0.5);
 
-  --color-group-primary: var(--teal-800);
-  --color-group-secondary: var(--cyan-800);
-  --color-group-tertiary: var(--pink-800);
-  --color-group-quaternary: var(--purple-800);
+  --color-group-primary: light-dark(var(--teal-800), var(--teal-200));
+  --color-group-secondary: light-dark(var(--cyan-800), var(--cyan-200));
+  --color-group-tertiary: light-dark(var(--pink-800), var(--pink-200));
+  --color-group-quaternary: light-dark(var(--purple-800), var(--purple-200));
 
   /* 強制カラーで塗るシステムの色。@media (forced-colors: active) の中で使う */
   --color-system-canvas-text: CanvasText;
@@ -310,206 +313,31 @@
   --breakpoint-2xl: 96rem;
 }
 
-.dark {
-  --color-fg-base: var(--gray-50);
-  --color-fg-subtle: var(--gray-400);
-  --color-fg-mute: var(--gray-300);
-  --color-fg-inverse: var(--gray-900);
-  --color-fg-info: var(--blue-200);
-  --color-fg-success: var(--green-200);
-  --color-fg-warning: var(--yellow-200);
-  --color-fg-error: var(--red-200);
-
-  --color-bg-base: var(--gray-800);
-  --color-bg-raised: var(--gray-800);
-  --color-bg-surface: var(--gray-950);
-  --color-bg-subtle: var(--gray-900);
-  --color-bg-mute: var(--gray-700);
-  --color-bg-emphasize: var(--gray-600);
-  --color-bg-inverse: var(--white);
-  --color-bg-info: var(--blue-900);
-  --color-bg-success: var(--green-900);
-  --color-bg-warning: var(--yellow-900);
-  --color-bg-error: var(--red-900);
-
-  --color-border-base: var(--gray-600);
-  --color-border-subtle: var(--gray-700);
-  --color-border-mute: var(--gray-600);
-  --color-border-emphasize: var(--gray-500);
-  --color-border-inverse: var(--gray-300);
-  --color-border-info: var(--blue-400);
-  --color-border-success: var(--green-400);
-  --color-border-warning: var(--yellow-400);
-  --color-border-error: var(--red-400);
-
-  /* bg と emphasize を 1 段暗くしているのは、hover / active の emphasize の上でも
-     *-fg を通常の文字で AA にするため。700 だと 3.7:1 にしかならない */
-  --color-primary-fg: var(--teal-300);
-  --color-primary-bg: var(--teal-900);
-  --color-primary-bg-subtle: var(--teal-950);
-  --color-primary-bg-mute: var(--teal-900);
-  --color-primary-bg-emphasize: var(--teal-800);
-  --color-primary-border: var(--teal-500);
-
-  --color-secondary-fg: var(--cyan-300);
-  --color-secondary-bg: var(--cyan-900);
-  --color-secondary-bg-subtle: var(--cyan-950);
-  --color-secondary-bg-mute: var(--cyan-900);
-  --color-secondary-bg-emphasize: var(--cyan-800);
-  --color-secondary-border: var(--cyan-500);
-
-  --color-group-primary: var(--teal-200);
-  --color-group-secondary: var(--cyan-200);
-  --color-group-tertiary: var(--pink-200);
-  --color-group-quaternary: var(--purple-200);
-
-  /* 別の変数を読む変数は、宣言した要素で値が決まる。:root の宣言だけだと、
-     html より下に付いた .dark の中でも輪がライトの色のままになる */
-  --shadow-ring-info: 0 0 0 2px var(--color-border-info);
-  --shadow-ring-error: 0 0 0 2px var(--color-border-error);
-  --shadow-ring-inset-info: inset 0 0 0 2px var(--color-border-info);
-  --shadow-ring-offset-info:
-    0 0 0 2px var(--white), 0 0 0 4px var(--color-border-info);
-}
-
 @media (prefers-contrast: more) {
-  /* :root だけにすると、後に書いたこちらが html.dark のダークの値を上書きする。
-     :not(.dark) を :where で包むのは、詳細度を :root のままにして、利用側が
-     後から :root で上書きしたトークンに勝たないようにするため */
-  :root:where(:not(.dark)) {
-    --color-fg-base: var(--gray-950);
-    --color-fg-subtle: var(--gray-800);
-    --color-fg-mute: var(--gray-900);
-    --color-fg-info: var(--blue-900);
-    --color-fg-success: var(--green-900);
-    --color-fg-warning: var(--yellow-900);
-    --color-fg-error: var(--red-900);
+  :root {
+    --color-fg-base: light-dark(var(--gray-950), var(--white));
+    --color-fg-subtle: light-dark(var(--gray-800), var(--gray-200));
+    --color-fg-mute: light-dark(var(--gray-900), var(--gray-100));
+    --color-fg-info: light-dark(var(--blue-900), var(--blue-100));
+    --color-fg-success: light-dark(var(--green-900), var(--green-100));
+    --color-fg-warning: light-dark(var(--yellow-900), var(--yellow-100));
+    --color-fg-error: light-dark(var(--red-900), var(--red-100));
 
-    --color-border-base: var(--gray-600);
-    --color-border-subtle: var(--gray-500);
-    --color-border-mute: var(--gray-500);
-    --color-border-emphasize: var(--gray-800);
-    --color-border-info: var(--blue-700);
-    --color-border-success: var(--green-700);
-    --color-border-warning: var(--yellow-700);
-    --color-border-error: var(--red-700);
+    --color-bg-emphasize: light-dark(var(--gray-300), var(--gray-700));
 
-    --color-primary-fg: var(--teal-900);
-    --color-primary-border: var(--teal-700);
+    --color-border-base: light-dark(var(--gray-600), var(--gray-400));
+    --color-border-subtle: light-dark(var(--gray-500), var(--gray-500));
+    --color-border-mute: light-dark(var(--gray-500), var(--gray-400));
+    --color-border-emphasize: light-dark(var(--gray-800), var(--gray-200));
+    --color-border-info: light-dark(var(--blue-700), var(--blue-300));
+    --color-border-success: light-dark(var(--green-700), var(--green-300));
+    --color-border-warning: light-dark(var(--yellow-700), var(--yellow-300));
+    --color-border-error: light-dark(var(--red-700), var(--red-300));
 
-    --color-secondary-fg: var(--cyan-900);
-    --color-secondary-border: var(--cyan-700);
-  }
+    --color-primary-fg: light-dark(var(--teal-900), var(--teal-100));
+    --color-primary-border: light-dark(var(--teal-700), var(--teal-300));
 
-  .dark {
-    --color-fg-base: var(--white);
-    --color-fg-subtle: var(--gray-200);
-    --color-fg-mute: var(--gray-100);
-    --color-fg-info: var(--blue-100);
-    --color-fg-success: var(--green-100);
-    --color-fg-warning: var(--yellow-100);
-    --color-fg-error: var(--red-100);
-
-    --color-bg-emphasize: var(--gray-700);
-
-    --color-border-base: var(--gray-400);
-    --color-border-subtle: var(--gray-500);
-    --color-border-mute: var(--gray-400);
-    --color-border-emphasize: var(--gray-200);
-    --color-border-info: var(--blue-300);
-    --color-border-success: var(--green-300);
-    --color-border-warning: var(--yellow-300);
-    --color-border-error: var(--red-300);
-
-    --color-primary-fg: var(--teal-100);
-    --color-primary-border: var(--teal-300);
-
-    --color-secondary-fg: var(--cyan-100);
-    --color-secondary-border: var(--cyan-300);
-  }
-}
-
-@media print {
-  /* .dark を @media screen で囲まずに :root の値を繰り返すのは、.print-as-shown を
-     含む .dark（背景ごと刷るスライドなど）には、印刷でもダークの値が要るから。
-     :root と揃っていることは print.test.tsx が確かめる。:where は詳細度を .dark
-     のままにして、利用側が後から書いたトークンに勝たないようにするため */
-  .dark:where(:not(:has(.print-as-shown))) {
-    --color-fg-base: var(--gray-900);
-    --color-fg-subtle: var(--gray-600);
-    --color-fg-mute: var(--gray-700);
-    --color-fg-inverse: var(--gray-50);
-    --color-fg-info: var(--blue-800);
-    --color-fg-success: var(--green-800);
-    --color-fg-warning: var(--yellow-800);
-    --color-fg-error: var(--red-800);
-
-    --color-bg-base: var(--white);
-    --color-bg-raised: var(--white);
-    --color-bg-surface: var(--gray-50);
-    --color-bg-subtle: var(--gray-100);
-    --color-bg-mute: var(--gray-200);
-    --color-bg-emphasize: var(--gray-300);
-    --color-bg-inverse: var(--gray-900);
-    --color-bg-info: var(--blue-100);
-    --color-bg-success: var(--green-100);
-    --color-bg-warning: var(--yellow-100);
-    --color-bg-error: var(--red-100);
-
-    --color-border-base: var(--gray-400);
-    --color-border-subtle: var(--gray-100);
-    --color-border-mute: var(--gray-200);
-    --color-border-emphasize: var(--gray-500);
-    --color-border-inverse: var(--gray-700);
-    --color-border-info: var(--blue-500);
-    --color-border-success: var(--green-500);
-    --color-border-warning: var(--yellow-500);
-    --color-border-error: var(--red-500);
-
-    --color-primary-fg: var(--teal-800);
-    --color-primary-bg: var(--teal-200);
-    --color-primary-bg-subtle: var(--teal-50);
-    --color-primary-bg-mute: var(--teal-100);
-    --color-primary-bg-emphasize: var(--teal-300);
-    --color-primary-border: var(--teal-500);
-
-    --color-secondary-fg: var(--cyan-800);
-    --color-secondary-bg: var(--cyan-200);
-    --color-secondary-bg-subtle: var(--cyan-50);
-    --color-secondary-bg-mute: var(--cyan-100);
-    --color-secondary-bg-emphasize: var(--cyan-300);
-    --color-secondary-border: var(--cyan-500);
-
-    --color-group-primary: var(--teal-800);
-    --color-group-secondary: var(--cyan-800);
-    --color-group-tertiary: var(--pink-800);
-    --color-group-quaternary: var(--purple-800);
-  }
-}
-
-@media print and (prefers-contrast: more) {
-  .dark:where(:not(:has(.print-as-shown))) {
-    --color-fg-base: var(--gray-950);
-    --color-fg-subtle: var(--gray-800);
-    --color-fg-mute: var(--gray-900);
-    --color-fg-info: var(--blue-900);
-    --color-fg-success: var(--green-900);
-    --color-fg-warning: var(--yellow-900);
-    --color-fg-error: var(--red-900);
-
-    --color-border-base: var(--gray-600);
-    --color-border-subtle: var(--gray-500);
-    --color-border-mute: var(--gray-500);
-    --color-border-emphasize: var(--gray-800);
-    --color-border-info: var(--blue-700);
-    --color-border-success: var(--green-700);
-    --color-border-warning: var(--yellow-700);
-    --color-border-error: var(--red-700);
-
-    --color-primary-fg: var(--teal-900);
-    --color-primary-border: var(--teal-700);
-
-    --color-secondary-fg: var(--cyan-900);
-    --color-secondary-border: var(--cyan-700);
+    --color-secondary-fg: light-dark(var(--cyan-900), var(--cyan-100));
+    --color-secondary-border: light-dark(var(--cyan-700), var(--cyan-300));
   }
 }
