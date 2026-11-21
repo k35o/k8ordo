@@ -29,4 +29,8 @@
   border: 1px solid var(--color-border-base);
   border-radius: var(--radius-sm);
   forced-color-adjust: none;
+
+  @media (forced-colors: active) {
+    border-color: var(--color-system-canvas-text);
+  }
 }

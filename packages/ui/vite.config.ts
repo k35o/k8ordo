@@ -192,6 +192,14 @@ export default defineConfig({
         tags: { include: ['forced-colors'] },
         context: { forcedColors: 'active' },
       }),
+      // Windows のコントラストテーマは強制カラーと prefers-contrast: more を
+      // 両方効かせ、片方ずつのときと規則の勝ち負けが変わる
+      storiesProject({
+        label: 'components-forced-colors-contrast-more',
+        color: 'yellow',
+        tags: { include: ['forced-colors'] },
+        context: { forcedColors: 'active', contrast: 'more' },
+      }),
       storiesProject({
         label: 'components-contrast-more',
         color: 'cyan',
