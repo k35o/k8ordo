@@ -617,7 +617,7 @@ layer. Customize them through:
 
 - CSS custom properties (semantic design tokens), overridden after `styles.css`
 - `renderItem` / `renderAnchor`, which hand you the component's `className`
-- Light / Dark mode via semantic color tokens (`.dark`)
+- Light / Dark mode via semantic color tokens (`light-dark()`, switched by the `dark` class)
 - Tailwind utility classes on your own markup, through `tailwind.css`
 
 ## Development
