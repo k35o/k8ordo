@@ -1,8 +1,8 @@
 /**
  * Writes `@k8ordo/ui/tokens`: the design tokens of `src/styles/index.css` as
  * the DTCG resolver document better-css-modules exports (Resolver Module
- * 2025.10). The tokens at `:root` are the set, and each mode (`.dark`, the
- * `prefers-contrast: more` overrides) is a modifier.
+ * 2025.10). The tokens at `:root` are the set, and each mode (the dark side
+ * of `light-dark()`, the `prefers-contrast: more` overrides) is a modifier.
  *
  *   dist/styles/tokens.mjs    export const tokens = { … }
  *   dist/styles/tokens.d.mts  the same document as a literal type

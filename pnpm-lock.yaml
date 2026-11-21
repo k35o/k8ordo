@@ -177,14 +177,14 @@ catalogs:
       specifier: 0.18.5
       version: 0.18.5
     '@better-css-modules/cli':
-      specifier: 0.4.1
-      version: 0.4.1
+      specifier: 0.5.0
+      version: 0.5.0
     '@better-css-modules/core':
-      specifier: 0.4.1
-      version: 0.4.1
+      specifier: 0.5.0
+      version: 0.5.0
     '@better-css-modules/vite':
-      specifier: 0.4.1
-      version: 0.4.1
+      specifier: 0.5.0
+      version: 0.5.0
     '@json-render/core':
       specifier: 0.22.0
       version: 0.22.0
@@ -336,13 +336,13 @@ importers:
     devDependencies:
       '@better-css-modules/cli':
         specifier: 'catalog:'
-        version: 0.4.1
+        version: 0.5.0
       '@better-css-modules/core':
         specifier: 'catalog:'
-        version: 0.4.1
+        version: 0.5.0
       '@better-css-modules/vite':
         specifier: 'catalog:'
-        version: 0.4.1(@voidzero-dev/vite-plus-core@1.4.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.25)(typescript@7.0.2))
+        version: 0.5.0(@voidzero-dev/vite-plus-core@1.4.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.25)(typescript@7.0.2))
       '@k8ordo/framework':
         specifier: workspace:^
         version: link:../../packages/framework
@@ -959,13 +959,13 @@ importers:
         version: 0.18.5
       '@better-css-modules/cli':
         specifier: 'catalog:'
-        version: 0.4.1
+        version: 0.5.0
       '@better-css-modules/core':
         specifier: 'catalog:'
-        version: 0.4.1
+        version: 0.5.0
       '@better-css-modules/vite':
         specifier: 'catalog:'
-        version: 0.4.1(@voidzero-dev/vite-plus-core@1.4.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.25)(typescript@7.0.2))
+        version: 0.5.0(@voidzero-dev/vite-plus-core@1.4.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.25)(typescript@7.0.2))
       '@chromatic-com/storybook':
         specifier: 5.6.0
         version: 5.6.0(storybook@10.6.7(@types/react@19.3.0)(react@19.3.1)(vite-plus@1.4.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.6)(@vitest/browser-playwright@5.1.0)(@vitest/coverage-v8@5.1.0)(@vitest/ui@5.1.0)(esbuild@0.28.2)(jiti@2.7.0)(playwright@1.65.0)(publint@0.3.25)(typescript@7.0.2)))
@@ -1193,17 +1193,17 @@ packages:
     resolution: {integrity: sha512-6zABk/ECA/QYSCQ1NGiVwwbQerUCZ+TQbp64Q3AgmfNvurHH0j8TtXa1qbShXA6qqkpAj4V5W8pP6mLe1mcMqA==}
     engines: {node: '>=18'}
 
-  '@better-css-modules/cli@0.4.1':
-    resolution: {integrity: sha512-DM1Dj/LD4x/en3IgAuTwtR66okBL0b5Mj4NmvZR2jw8umm08cHxBH7xEO0Yfs9xiOhhIFWcUD0871eCsRfuSXQ==}
+  '@better-css-modules/cli@0.5.0':
+    resolution: {integrity: sha512-u2ySQNBNtCq+Y9xZPNCW70p94YU5jm5WULdAb1cxvpnqx+B5c1VU7MMw5jp3xCdNyayBQJpvSLZrRI91kcvhuQ==}
     engines: {node: '>=24'}
     hasBin: true
 
-  '@better-css-modules/core@0.4.1':
-    resolution: {integrity: sha512-jPgB4aJAg4zoQuiH3G4iEwUs37iUw0fp1um04EDiPg96S4plAmeCaMYqpeePLhDMOG1vYWNQGJmJCcU2mwODmw==}
+  '@better-css-modules/core@0.5.0':
+    resolution: {integrity: sha512-DyD9EO+B6FZG/YmkSm8Zo0Ig0R3G/repVWxkccB0DIRa9DPEPPVCf4knEgQcb1UyVL90okl6FJgbe/kHhJINMg==}
     engines: {node: '>=24'}
 
-  '@better-css-modules/vite@0.4.1':
-    resolution: {integrity: sha512-JG8Wc0npx5cIpY6JswSFBY6A/TsF5AT8gjZQJgvlGorJHA9cKodibuu9qwB7XOXg4lN46h4sTuvG749WYnk0BQ==}
+  '@better-css-modules/vite@0.5.0':
+    resolution: {integrity: sha512-ncFwX6IHkFzM2dITlaBF0wDguIG3JQV7TwAzfrUZwl5GbbFApuAG5Cwm7IlzkXM6nMOsgOwpJA4EzDSCe6TVFg==}
     engines: {node: '>=24'}
     peerDependencies:
       vite: ^8.0.0
@@ -5285,12 +5285,12 @@ snapshots:
 
   '@bcoe/v8-coverage@1.0.2': {}
 
-  '@better-css-modules/cli@0.4.1':
+  '@better-css-modules/cli@0.5.0':
     dependencies:
-      '@better-css-modules/core': 0.4.1
+      '@better-css-modules/core': 0.5.0
       cac: 7.0.0
 
-  '@better-css-modules/core@0.4.1':
+  '@better-css-modules/core@0.5.0':
     dependencies:
       '@csstools/css-syntax-patches-for-csstree': 1.1.14(css-tree@3.2.1)
       chokidar: 5.0.0
@@ -5303,9 +5303,9 @@ snapshots:
       source-map-js: 1.2.2
       tinyglobby: 0.2.17
 
-  '@better-css-modules/vite@0.4.1(@voidzero-dev/vite-plus-core@1.4.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.25)(typescript@7.0.2))':
+  '@better-css-modules/vite@0.5.0(@voidzero-dev/vite-plus-core@1.4.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.25)(typescript@7.0.2))':
     dependencies:
-      '@better-css-modules/core': 0.4.1
+      '@better-css-modules/core': 0.5.0
       unplugin: 3.0.0
       vite: '@voidzero-dev/vite-plus-core@1.4.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.25)(typescript@7.0.2)'
 
