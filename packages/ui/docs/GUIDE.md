@@ -53,9 +53,55 @@ one rule that does not yield is the reset's
 `[hidden] { display: none !important }`.
 
 The CSS is written for what browsers ship today: `@scope`, container style
-queries, `light-dark()`, `:dir()`, nesting. Keep your bundler's CSS target
-recent (in Vite, `build.cssTarget`): an older target makes Lightning CSS
-rewrite `:dir(rtl)` into `:lang()` selectors, which no longer follow `dir`.
+queries, `light-dark()`, `:dir()`, nesting. Lightning CSS, which transforms
+and minifies CSS in Vite and in Next.js, rewrites them for an older target,
+and the rewrites change what they do:
+
+- `light-dark()` becomes variables resolved where each token is declared,
+  so a `.dark` below `<html>` no longer darkens what it holds.
+- `:dir(rtl)` becomes `:lang()` selectors, which do not follow `dir`.
+- A `&` inside `@scope` becomes `:scope`, which adds a class's specificity,
+  so the rule beats classes it was written to lose to.
+
+Both tools target older browsers by default, so aim the CSS at the browsers
+this library is built for. In Vite, set `build.cssTarget`, and
+`css.lightningcss.targets` too when `css.transformer` is `'lightningcss'`:
+the transform reads that one, and only the minifier reads `build.cssTarget`.
+
+```ts
+// vite.config.ts
+export default defineConfig({
+  build: { cssTarget: ['chrome146', 'edge146', 'firefox151', 'safari26'] },
+  css: {
+    transformer: 'lightningcss',
+    lightningcss: {
+      targets: {
+        chrome: 146 << 16,
+        edge: 146 << 16,
+        firefox: 151 << 16,
+        safari: 26 << 16,
+      },
+    },
+  },
+});
+```
+
+In Next.js, set `browserslist` in `package.json`:
+
+```json
+{
+  "browserslist": [
+    "chrome >= 146",
+    "edge >= 146",
+    "firefox >= 151",
+    "safari >= 26"
+  ]
+}
+```
+
+A k8ordo application sets neither: `@k8ordo/framework` aims its build at the
+browsers Baseline has newly available unless the config sets its own
+targets.
 
 Components take no `className`. To change how one looks, change the tokens, or
 render your own element through its `renderItem` / `renderAnchor`, which hands

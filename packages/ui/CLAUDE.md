@@ -437,6 +437,8 @@ The stylesheet follows `prefers-contrast: more` and `forced-colors: active`; `@k
 
 `src/styles/dist.test.ts` holds the output to the contract: every component CSS file is in `@layer components` after the full layer statement, every `.module.mjs` imports its CSS, `styles.css` puts nothing but tokens outside a layer, and `tokens.mjs` is the DTCG document. It reads `dist/`, so build first.
 
+The CSS is compiled for the browsers in `css-target.ts` — by `vp pack`, and by Vite under Storybook and the tests, through both `build.cssTarget` and `css.lightningcss.targets` — so Lightning CSS rewrites none of `light-dark()`, `:dir()` and nesting. `docs/GUIDE.md` asks a consumer's bundler for the same browsers, and `src/styles/css-target.test.ts` fails when the versions it names drift from `CSS_TARGET`.
+
 The types of the CSS modules are written by `better-css-modules generate` into `__generated__/` (git-ignored; `rootDirs` in `tsconfig.json`). `typecheck` and `check` run it first; the Vite plugin writes them when Storybook, vitest or `vp pack` start.
 
 ## Export Structure
