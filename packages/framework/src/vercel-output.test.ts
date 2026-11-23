@@ -189,6 +189,42 @@ describe('writeVercelOutput', () => {
       { handle: 'filesystem' },
     ]);
   });
+
+  it('passes maxDuration and regions on to the function, and leaves out what was not given', async () => {
+    const dirs = {
+      client: path.join(root, 'dist', 'client'),
+      rsc: path.join(root, 'dist', 'rsc'),
+      ssr: path.join(root, 'dist', 'ssr'),
+    };
+
+    await writeVercelOutput(root, dirs, '/', {}, { maxDuration: 800 });
+    const durationOnly = await read('functions/handler.func/.vc-config.json');
+    await writeVercelOutput(
+      root,
+      dirs,
+      '/',
+      {},
+      { maxDuration: 'max', regions: ['hnd1'] },
+    );
+
+    expect(durationOnly).toStrictEqual({
+      runtime: 'nodejs24.x',
+      handler: 'index.mjs',
+      launcherType: 'Nodejs',
+      shouldAddHelpers: false,
+      supportsResponseStreaming: true,
+      maxDuration: 800,
+    });
+    expect(await read('functions/handler.func/.vc-config.json')).toStrictEqual({
+      runtime: 'nodejs24.x',
+      handler: 'index.mjs',
+      launcherType: 'Nodejs',
+      shouldAddHelpers: false,
+      supportsResponseStreaming: true,
+      maxDuration: 'max',
+      regions: ['hnd1'],
+    });
+  });
 });
 
 describe('writeVercelOutput under a base', () => {

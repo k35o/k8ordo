@@ -499,6 +499,25 @@ nothing but its own directory, which is all the handler needs: server mode
 bundles every dependency into it. A dependency left out with
 `resolve.external` is not in the function, so it does not work there.
 
+**How long the function may run, and where, is `vercel()`'s to say.**
+Server mode only:
+
+```ts
+vercel({ maxDuration: 300, regions: ['hnd1'] });
+```
+
+`maxDuration` is the seconds one request may take — a long answer streamed
+from a `route.ts` needs more than the plan's default — or `'max'` for the
+plan's maximum; `regions` is the Vercel regions the function is deployed
+to. Both are written into the function's configuration as given, and left
+out when not given, which leaves them to the plan's default and the
+project's own setting. There is one function, so one value answers every
+route. Under `mode: 'static'` the build refuses them:
+
+```text
+vercel() takes maxDuration and regions under mode: 'server' only — under mode: 'static' there is no function for them to configure
+```
+
 **Under `mode: 'static'`** there is no function. The client build becomes
 static files at the base — a file under `assets/` sent `immutable`, and
 `_redirects` left out, since Vercel never reads it and would serve it as a

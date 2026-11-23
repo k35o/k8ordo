@@ -25,7 +25,7 @@ export type { VercelOptions, VercelRoute } from './vercel-output';
  * served with the `Content-Type` its `GET` answered.
  */
 export const vercel = (options: VercelOptions = {}): Plugin => {
-  const { beforeFiles, beforeNotFound } = options;
+  const { beforeFiles, beforeNotFound, maxDuration, regions } = options;
   let isStatic = false;
   let logger: Logger | undefined;
   let root = '';
@@ -68,6 +68,20 @@ export const vercel = (options: VercelOptions = {}): Plugin => {
           "vercel() takes beforeFiles and beforeNotFound under mode: 'static' only — under mode: 'server' the handler answers every URL no file names",
         );
       }
+      if (isStatic && (maxDuration !== undefined || regions !== undefined)) {
+        throw new Error(
+          "vercel() takes maxDuration and regions under mode: 'server' only — under mode: 'static' there is no function for them to configure",
+        );
+      }
+      if (
+        maxDuration !== undefined &&
+        maxDuration !== 'max' &&
+        !(Number.isInteger(maxDuration) && maxDuration > 0)
+      ) {
+        throw new Error(
+          `vercel() takes maxDuration as a whole number of seconds or 'max', and got ${String(maxDuration)}`,
+        );
+      }
     },
 
     api,
@@ -91,6 +105,7 @@ export const vercel = (options: VercelOptions = {}): Plugin => {
           { client: dirOf('client'), rsc: dirOf('rsc'), ssr: dirOf('ssr') },
           builder.config.base,
           headers,
+          { maxDuration, regions },
         );
         builder.config.logger.info('k8ordo: wrote .vercel/output');
       },
