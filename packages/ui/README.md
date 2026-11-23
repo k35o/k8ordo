@@ -37,7 +37,7 @@ it. Install one when you import the entry it belongs to.
 | ----------------------- | --------------- | -------- | ------------------------------------------------- |
 | `react`                 | ≥19.3.0         | yes      | the components and hooks                          |
 | `react-dom`             | ≥19.3.0         | yes      | portals and `useFormStatus`                       |
-| `@k8ordo/i18n`          | ^3.1.0          | yes      | the locale the components' own wording is read in |
+| `@k8ordo/i18n`          | ^4.0.0          | yes      | the locale the components' own wording is read in |
 | `typescript`            | ≥7.0.0          | optional | the shipped type declarations                     |
 | `@types/react`          | ≥19.3.0         | optional | the shipped type declarations                     |
 | `@types/react-dom`      | ≥19.3.0         | optional | the shipped type declarations                     |
@@ -617,7 +617,7 @@ layer. Customize them through:
 
 - CSS custom properties (semantic design tokens), overridden after `styles.css`
 - `renderItem` / `renderAnchor`, which hand you the component's `className`
-- Light / Dark mode via semantic color tokens (`.dark`)
+- Light / Dark mode via semantic color tokens (`light-dark()`, switched by the `dark` class)
 - Tailwind utility classes on your own markup, through `tailwind.css`
 
 ## Development

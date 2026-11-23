@@ -54,9 +54,13 @@
   outline-style: none;
   box-shadow: var(--shadow-ring-info);
 
+  /* 見本は forced-color-adjust: none なので、ブラウザは透明の輪を塗らず、影も
+     消さない。塗り替えられる部品の輪と同じ色を自分で塗る */
   @media (forced-colors: active) {
-    outline: 2px solid transparent;
+    border-color: var(--color-system-canvas-text);
+    outline: 2px solid var(--color-system-canvas-text);
     outline-offset: 2px;
+    box-shadow: none;
   }
 }
 
@@ -118,10 +122,6 @@
   inline-size: 100%;
   border-radius: var(--radius-full);
   forced-color-adjust: none;
-
-  @media (forced-colors: active) {
-    outline-color: var(--color-system-canvas-text);
-  }
 }
 
 .track:where(:dir(rtl), [dir='rtl'], [dir='rtl'] *) {

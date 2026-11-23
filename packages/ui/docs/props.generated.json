@@ -1223,6 +1223,20 @@
       "omitted": []
     },
     {
+      "name": "ClipboardCheckIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
       "name": "ClockIcon",
       "category": "icons",
       "props": [
@@ -2484,6 +2498,20 @@
     },
     {
       "name": "GitForkIcon",
+      "category": "icons",
+      "props": [
+        {
+          "name": "size",
+          "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
+          "defaultValue": "'md'",
+          "required": false
+        }
+      ],
+      "inherits": null,
+      "omitted": []
+    },
+    {
+      "name": "GitPullRequestIcon",
       "category": "icons",
       "props": [
         {
