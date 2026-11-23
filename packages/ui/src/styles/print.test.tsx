@@ -14,25 +14,33 @@ declare module 'vitest/browser' {
 
 const root = document.documentElement;
 
-// .dark が上書きするトークンの名前。値は書き写さず、画面で測った値と比べる
-const darkTokenNames = () => {
-  const darkRule = [...document.styleSheets]
+// 値は書き写さず、画面で測った値と比べる
+const darkTokenNames = () =>
+  [...document.styleSheets]
     .flatMap((sheet) => Array.from(sheet.cssRules))
-    .find(
+    .filter(
       (rule): rule is CSSStyleRule =>
-        rule instanceof CSSStyleRule && rule.selectorText === '.dark',
+        rule instanceof CSSStyleRule && rule.selectorText === ':root',
+    )
+    .flatMap((rule) =>
+      [...rule.style].filter((name) =>
+        rule.style.getPropertyValue(name).includes('light-dark('),
+      ),
     );
-  if (!darkRule) {
-    throw new Error('.dark の規則が見つからない');
-  }
-  return [...darkRule.style].filter((name) => name.startsWith('--'));
-};
 
-const tokensOf = (names: string[]) => {
-  const style = getComputedStyle(root);
-  return Object.fromEntries(
-    names.map((name) => [name, style.getPropertyValue(name)]),
+// light-dark() は使った要素の color-scheme で決まるので、変数の文字列ではなく、
+// 文字の色に使ったときの値を読む
+const colorsOf = (names: string[]) => {
+  const probe = document.createElement('div');
+  document.body.append(probe);
+  const colors = Object.fromEntries(
+    names.map((name) => {
+      probe.style.color = `var(${name})`;
+      return [name, getComputedStyle(probe).color];
+    }),
   );
+  probe.remove();
+  return colors;
 };
 
 const keepShownInPrint = () => {
@@ -56,28 +64,28 @@ const contrast = matchMedia('(prefers-contrast: more)').matches
   : '既定のコントラスト';
 
 describe(`${contrast} で刷る`, () => {
-  it('.dark が付いていても、.dark が上書きするトークンはライトの値になる', async () => {
+  it('.dark が付いていても、ダークの値を持つトークンはライトの色になる', async () => {
     const names = darkTokenNames();
-    const light = tokensOf(names);
+    const light = colorsOf(names);
     root.classList.add('dark');
 
     await commands.emulateMedia({ media: 'print' });
 
     expect(names.length).toBeGreaterThan(40);
-    expect(tokensOf(names)).toStrictEqual(light);
+    expect(colorsOf(names)).toStrictEqual(light);
   });
 
-  it('print-as-shown を含む .dark は、ダークの値のまま刷る', async () => {
+  it('print-as-shown を含む .dark は、ダークの色のまま刷る', async () => {
     const names = darkTokenNames();
-    const light = tokensOf(names);
+    const light = colorsOf(names);
     root.classList.add('dark');
-    const dark = tokensOf(names);
+    const dark = colorsOf(names);
     keepShownInPrint();
 
     await commands.emulateMedia({ media: 'print' });
 
     expect(dark).not.toStrictEqual(light);
-    expect(tokensOf(names)).toStrictEqual(dark);
+    expect(colorsOf(names)).toStrictEqual(dark);
   });
 });
 
