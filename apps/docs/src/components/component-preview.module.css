@@ -4,14 +4,11 @@
   border-radius: var(--radius-lg);
 }
 
-/* 下のコードは、角丸を外して上の線だけでプレビューと区切る。CodeBlock は
-   className を受け取らないので、包みの中の figure に当てる。サイトの
+/* 下のコードは、上の線だけでプレビューと区切る。CodeBlock は className を
+   受け取らず、自分の角丸のクラスに @scope からは勝てないので、包みに線を
+   引き、CodeBlock の面と同じ色を敷いて角丸のすき間を埋める。サイトの
    CodeBlock の包み（枠線）は使わない */
 .code {
-  @scope (&) {
-    & > figure {
-      border-top: 1px solid var(--color-border-mute);
-      border-radius: 0;
-    }
-  }
+  border-top: 1px solid var(--color-border-mute);
+  background-color: var(--color-bg-surface);
 }
