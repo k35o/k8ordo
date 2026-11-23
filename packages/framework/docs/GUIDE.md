@@ -226,6 +226,27 @@ under a `404`. It never calls the handler, so a page is the file the build
 wrote, with its Content-Security-Policy `<meta>`
 ([Serving a static build](references/deploy.md#serving-a-static-build)).
 
+## Browser targets
+
+A build is aimed at the browsers that ship every feature Baseline has newly
+available. The framework gives their versions to the client environment's
+`build.target` and to the CSS's `build.cssTarget` and
+`css.lightningcss.targets`. It reads them from `baseline-browser-mapping` as
+browserslist's `baseline newly available` does, so they move with the data
+each release of the framework carries.
+
+Vite's own default is an older, fixed set (Chrome 111, Safari 16.4), for
+which Lightning CSS rewrites what those browsers lack: `light-dark()` into
+variables resolved where each custom property is declared, so a `.dark`
+below `<html>` no longer darkens what it holds, and `:dir(rtl)` into
+`:lang()` selectors, which do not follow `dir`.
+
+An application that sets `build.target`, `build.cssTarget` or
+`css.lightningcss.targets` keeps what it set: the framework fills in only
+what is unset, and `build.target` stands for the CSS too, as it does in
+Vite. The code the `rsc` and `ssr` environments build keeps Vite's own
+target, since a server reads it.
+
 ## The entries
 
 The package is split by where the code runs.

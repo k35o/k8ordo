@@ -11,11 +11,12 @@ import {
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-import { createFilter, parseSync } from 'vite';
+import { createFilter, parseSync, resolveConfig } from 'vite';
 import type {
   ConfigEnv,
   FilterPattern,
   Plugin,
+  PluginOption,
   ResolvedConfig,
   UserConfig,
 } from 'vite';
@@ -24,6 +25,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import type { EngineOptions } from '../host';
 import { engine } from './core';
 import type { EngineApi } from './core';
+import { newlyAvailableTargets } from './targets';
 
 const enginePlugin = (): Plugin | undefined =>
   engine({}, { mode: 'static', runtimeDir: '/runtime' })
@@ -279,6 +281,98 @@ describe("the engine's React plugin", () => {
     expect(pluginNames({ reactCompiler: false })).not.toContain(
       'vite:react-compiler',
     );
+  });
+});
+
+const resolvedForBuild = async (
+  config: UserConfig,
+  plugins: PluginOption[],
+): Promise<ResolvedConfig> => {
+  const root = await mkdtemp(path.join(tmpdir(), 'k8ordo-targets-'));
+  try {
+    return await resolveConfig(
+      { ...config, root, configFile: false, logLevel: 'silent', plugins },
+      'build',
+    );
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+};
+
+const withEngine = (config: UserConfig = {}): Promise<ResolvedConfig> =>
+  resolvedForBuild(
+    config,
+    engine({}, { mode: 'static', runtimeDir: '/runtime' }),
+  );
+
+describe("the engine plugin's targets", () => {
+  it('aims the CSS at the browsers that ship everything Baseline has newly available', async () => {
+    const config = await withEngine({ css: { transformer: 'lightningcss' } });
+
+    expect(config.build.cssTarget).toStrictEqual(newlyAvailableTargets().build);
+    expect(config.css.lightningcss?.targets).toStrictEqual(
+      newlyAvailableTargets().lightningcss,
+    );
+  });
+
+  it('aims the code the browser runs at the same browsers', async () => {
+    const config = await withEngine();
+
+    expect(config.environments.client?.build.target).toStrictEqual(
+      newlyAvailableTargets().build,
+    );
+  });
+
+  it.each(['rsc', 'ssr'])(
+    'leaves the code %s runs at the target Vite gives server code',
+    async (name) => {
+      const [config, withoutEngine] = await Promise.all([
+        withEngine(),
+        resolvedForBuild({ environments: { ssr: {} } }, []),
+      ]);
+
+      expect(config.environments[name]?.build.target).toStrictEqual(
+        withoutEngine.environments.ssr?.build.target,
+      );
+    },
+  );
+
+  it('keeps the target an application sets, for its code and its CSS', async () => {
+    const config = await withEngine({ build: { target: ['chrome120'] } });
+
+    expect(config.environments.client?.build.target).toStrictEqual([
+      'chrome120',
+    ]);
+    expect(config.build.cssTarget).toStrictEqual(['chrome120']);
+  });
+
+  it('keeps the CSS target an application sets', async () => {
+    const config = await withEngine({ build: { cssTarget: ['chrome120'] } });
+
+    expect(config.build.cssTarget).toStrictEqual(['chrome120']);
+  });
+
+  it('keeps the targets an application gives Lightning CSS', async () => {
+    const config = await withEngine({
+      css: {
+        transformer: 'lightningcss',
+        lightningcss: { targets: { chrome: 120 << 16 } },
+      },
+    });
+
+    expect(config.css.lightningcss?.targets).toStrictEqual({
+      chrome: 7_864_320,
+    });
+  });
+
+  it('keeps the target an application sets for the browser alone', async () => {
+    const config = await withEngine({
+      environments: { client: { build: { target: ['chrome120'] } } },
+    });
+
+    expect(config.environments.client?.build.target).toStrictEqual([
+      'chrome120',
+    ]);
   });
 });
 

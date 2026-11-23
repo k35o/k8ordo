@@ -136,6 +136,28 @@ pnpm check         # check:write to auto-fix
   later transform of the plugin replaces. `runtime/mdx-css.test.ts` builds
   `fixtures/mdx-css/` with a stand-in compiler emitting what an MDX compiler
   does (a default `function MDXContent`, the file's imports kept).
+- **An application is built for the browsers that ship what Baseline has
+  newly available, unless it names its own.** Vite's default is the widely
+  available set it fixed at a release (Chrome 111, Safari 16.4), for which
+  Lightning CSS rewrites `light-dark()` into variables resolved where a
+  token is declared — a `.dark` below the root no longer darkens what it
+  holds — and `:dir(rtl)` into `:lang()` selectors, which no longer follow
+  `dir`. `plugin/targets.ts` asks `baseline-browser-mapping` for the
+  versions as browserslist's `baseline newly available` does (widely
+  available 30 months from now), and the plugin sets them only where the
+  application set nothing, since a `config` hook's return overrides what
+  the application wrote: the top-level `build.cssTarget` (when neither
+  `build.target` nor `build.cssTarget` is set), `css.lightningcss.targets`,
+  and the client environment's `build.target`. The CSS target is top-level
+  because the RSC plugin sets `builder.sharedConfigBuild`, under which every
+  environment's CSS is minified with the top-level config;
+  `css.lightningcss.targets` is the other pass, the transform, when
+  `css.transformer` is `'lightningcss'`. `rsc` and `ssr` keep Vite's own
+  target: a server reads that code, and the browsers' versions would leave
+  syntax it cannot parse. `core.test.ts` resolves configs that set each of
+  them; `plugin/css-targets.test.ts` builds `fixtures/css-targets/` under
+  `transformer: 'lightningcss'` and reads `light-dark()` and `:dir()` back
+  as written.
 - **The browser holds no route table.** `runtime/app-router.tsx` claims every
   same-origin URL and learns from the answer; anything that is not a payload
   (`runtime/is-payload.ts`) becomes a document load, which is also the
@@ -893,6 +915,7 @@ src/
   generate/write.ts          the filesystem edge: scan, generate, write
   plugin/core.ts             the Vite plugins: RSC pipeline, virtual routes
   plugin/mdx-css.ts          the RSC plugin's CSS wrapper, applied to a compiled .mdx
+  plugin/targets.ts          the browsers Baseline has newly available, as Vite's targets
   plugin/server-actions.ts   which modules declared 'use server'
   runtime/entry.{rsc,ssr,browser}.tsx  the three environments
   runtime/app-router.tsx     the client half: navigation + payloads, and whether this document can render one
@@ -955,6 +978,10 @@ fixtures/
                              @k8ordo/state
   client-css/routes/         a layout rendering a client component that imports
                              CSS, whose HTML runtime/client-css.test.ts reads
+  css-targets/routes/        a layout importing CSS that uses light-dark() and
+                             :dir(), rendering a client component whose CSS
+                             uses light-dark(), whose built CSS
+                             plugin/css-targets.test.ts reads
   chunks/routes/             two pages and a not-found, each with a client
                              component and a CSS Module of its own, under a
                              provider that renders again as it hydrates, which
