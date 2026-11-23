@@ -21,6 +21,7 @@ import { CircleAlertIcon } from '../../components/icons/circle-alert';
 import { CircleCheckIcon } from '../../components/icons/circle-check';
 import { CircleHelpIcon } from '../../components/icons/circle-help';
 import { CircleXIcon } from '../../components/icons/circle-x';
+import { ClipboardCheckIcon } from '../../components/icons/clipboard-check';
 import { ClockIcon } from '../../components/icons/clock';
 import { CodeIcon } from '../../components/icons/code';
 import { ColorScaleIcon } from '../../components/icons/color-scale';
@@ -39,6 +40,7 @@ import { FlaskIcon } from '../../components/icons/flask';
 import { FolderIcon } from '../../components/icons/folder';
 import { FolderOpenIcon } from '../../components/icons/folder-open';
 import { GitForkIcon } from '../../components/icons/git-fork';
+import { GitPullRequestIcon } from '../../components/icons/git-pull-request';
 import { GlobeIcon } from '../../components/icons/globe';
 import { GridIcon } from '../../components/icons/grid';
 import { GripVerticalIcon } from '../../components/icons/grip-vertical';
@@ -125,6 +127,7 @@ export const iconMap = {
   'circle-check': CircleCheckIcon,
   'circle-help': CircleHelpIcon,
   'circle-x': CircleXIcon,
+  'clipboard-check': ClipboardCheckIcon,
   clock: ClockIcon,
   code: CodeIcon,
   'color-scale': ColorScaleIcon,
@@ -143,6 +146,7 @@ export const iconMap = {
   folder: FolderIcon,
   'folder-open': FolderOpenIcon,
   'git-fork': GitForkIcon,
+  'git-pull-request': GitPullRequestIcon,
   globe: GlobeIcon,
   grid: GridIcon,
   'grip-vertical': GripVerticalIcon,
