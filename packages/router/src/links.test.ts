@@ -42,6 +42,15 @@ describe('bindParams', () => {
     expect(call).toBeTypeOf('function');
   });
 
+  it('takes a rest param beside the bound one', () => {
+    expect(links.href('/:locale/files/:path+', { path: ['a b', 'c'] })).toBe(
+      '/ja/files/a%20b/c',
+    );
+    expect(() => links.href('/:locale/files/:path+', { path: [] })).toThrow(
+      '"/:locale/files/:path+" needs at least one segment for ":path+"',
+    );
+  });
+
   it('builds the same path the unbound href would', () => {
     expect(links.href('/:locale/products/:id', { id: 'a b' })).toBe(
       href('/:locale/products/:id', { locale: 'ja', id: 'a b' }),

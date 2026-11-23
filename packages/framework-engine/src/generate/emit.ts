@@ -52,23 +52,26 @@ const isLeaf = (dir: RouteDir): boolean =>
   dir.children.length === 0;
 
 /**
- * What a subtree offers the matcher first: a literal, a parameter, or only a
- * catch-all. A group contributes its children's URLs rather than one of its
- * own, so it ranks as whatever the best of them is — otherwise a `[slug]`
- * tucked inside a group would still be tried before a literal sibling.
+ * What a subtree offers the matcher first: a literal, a parameter, a rest
+ * parameter, or only a catch-all. A group contributes its children's URLs
+ * rather than one of its own, so it ranks as whatever the best of them is —
+ * otherwise a `[slug]` tucked inside a group would still be tried before a
+ * literal sibling.
  */
 const rank = (dir: RouteDir): number => {
   if (dir.kind === 'param') return 1;
+  if (dir.kind === 'rest') return 2;
   if (dir.kind !== 'group') return 0;
   const children = dir.children.map(rank);
   if (dir.page !== null) children.push(0);
-  if (dir.notFound !== null) children.push(2);
-  return Math.min(...children, 2);
+  if (dir.notFound !== null) children.push(3);
+  return Math.min(...children, 3);
 };
 
 /**
- * Literal segments before parameters, and otherwise the order the directories
- * came in. The table matches in declaration order, and the directories arrive
+ * Literal segments before parameters, a parameter before a rest parameter —
+ * `[...path]` also takes the one segment `[id]` takes, so it comes after or
+ * `[id]` never answers — and otherwise the order the directories came in. The table matches in declaration order, and the directories arrive
  * sorted by name — under which `[slug]` precedes `about`, because `[` sorts
  * before letters. Left alone, the most ordinary layout there is would make
  * `/about` unreachable behind `/:slug`.

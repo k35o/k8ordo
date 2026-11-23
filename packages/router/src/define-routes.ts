@@ -5,10 +5,10 @@ import { RouteErrorBoundary } from './boundary';
 import type { ErrorComponent } from './boundary';
 import { Outlet } from './outlet';
 import {
-  decodeOrKeep,
   isGroupKey,
   joinPattern,
   normalizePathname,
+  readParams,
 } from './paths';
 import type { Join, PathMatching } from './paths';
 
@@ -64,7 +64,8 @@ export type NavigablePatternOf<R extends RoutesRecord> = Exclude<
 /**
  * `Path` when one of the table's navigable patterns matches it, segment by
  * segment — a literal spelled as the pattern spells it, a `:param` taking any
- * one non-empty segment — and `never` when none does. What `@k8ordo/state`
+ * one non-empty segment, a rest param (`:name+`) one or more — and `never`
+ * when none does. What `@k8ordo/state`
  * checks a path against with the `routes` its `Register` is given, and what
  * any other typed-path consumer takes.
  */
@@ -76,7 +77,8 @@ export type NavigablePath<D, Path extends string> =
 export type Match = {
   /** The full pattern that won, as written in the table. */
   pattern: string;
-  params: Readonly<Record<string, string>>;
+  /** A `:param` as its segment, a rest param (`:name+`) as its segments. */
+  params: Readonly<Record<string, string | readonly string[]>>;
   /** Layouts outer-first, the leaf last. */
   stack: readonly RouteComponent[];
 };
@@ -215,15 +217,11 @@ export function defineRoutes<R extends RoutesRecord>(record: R): Routes<R> {
     for (const entry of entries) {
       const result = entry.matcher.exec({ pathname: normalized });
       if (result === null) continue;
-      const params: Record<string, string> = {};
-      for (const [name, value] of Object.entries(result.pathname.groups)) {
-        // Numeric keys are URLPattern's anonymous wildcard captures — the
-        // table only names params, so only named ones surface.
-        if (!/^\d+$/u.test(name) && value !== undefined) {
-          params[name] = decodeOrKeep(value);
-        }
-      }
-      yield { pattern: entry.pattern, params, stack: entry.stack };
+      yield {
+        pattern: entry.pattern,
+        params: readParams(entry.pattern, result.pathname.groups),
+        stack: entry.stack,
+      };
     }
     return undefined;
   }

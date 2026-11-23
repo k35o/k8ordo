@@ -287,10 +287,26 @@ pnpm check         # check:write to auto-fix
 - **The type mirrors the runtime walk.** `Below` resets a branch that landed
   on the root, exactly as `walk` does; without it every route under a root
   layout types as `//products`. Any change to one has to change the other.
+- **A rest param is `:name+`, and its value is its segments.** URLPattern's
+  one-or-more modifier is the only one the grammar reads: `/files/:path+`
+  takes one segment or more, never zero (`/files` is another pattern's), and
+  `:name*` / `:name?` are not part of it. `readParams` (`paths.ts`) is the one
+  place a captured group becomes a param, for `matchAll` and `matchPath`
+  alike: a rest param is split at `/` and each segment decoded on its own, so
+  `a%2Fb/c` is `['a/b', 'c']`. `buildHref` is its inverse — each segment
+  escaped, joined with `/` — and throws for anything but an array, for an
+  empty one, and for an empty segment, since each would spell a pathname the
+  pattern does not match. The types say the same: `ParamsOf` gives
+  `readonly string[]`, a link takes `readonly ParamValue[]`, `PathFor` a
+  `${string}` (which spans slashes), and `PathMatching` reads `:name+` only
+  where it ends the pattern, which is where `@k8ordo/framework`'s grammar
+  puts it. Where it sits among other patterns is declaration order, as for
+  everything else; the framework's generator is what orders it after a
+  `:param`.
 - **A typed path is checked, never enumerated.** `NavigablePath` matches the
   path it is handed against the table's patterns segment by segment
   (`PathMatching` in `paths.ts`, a `:param` reading as URLPattern reads it:
-  one non-empty segment). Never go back to a union of `PathFor` each
+  one non-empty segment, a `:name+` one or more). Never go back to a union of `PathFor` each
   pattern: a `/:locale` page puts `/${string}` in it, and that one member
   takes every path there is.
 
@@ -298,7 +314,7 @@ pnpm check         # check:write to auto-fix
 
 ```
 src/
-  paths.ts          type derivation (ParamsOf / PathFor / Join) + string operations
+  paths.ts          type derivation (ParamsOf / PathFor / Join) + string operations (readParams / buildHref)
   base.ts           withBase / withoutBase (Vite's base at the edges)
   define-routes.ts  defineRoutes / match / matchAll / NavigablePath
   links.ts          href / navigateTo / bindParams (the side that needs no table)

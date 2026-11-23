@@ -6,16 +6,22 @@
  * path handed in fits it.
  */
 
-type SegParam<Segment extends string> = Segment extends `:${infer Name}`
-  ? Record<Name, string>
-  : object;
+type SegParam<Segment extends string> = Segment extends `:${infer Name}+`
+  ? Record<Name, readonly string[]>
+  : Segment extends `:${infer Name}`
+    ? Record<Name, string>
+    : object;
 
 type SegListParams<Rest extends string> =
   Rest extends `${infer Segment}/${infer Tail}`
     ? SegParam<Segment> & SegListParams<Tail>
     : SegParam<Rest>;
 
-/** `'/:locale/products/:id'` → `{ locale: string; id: string }` */
+/**
+ * `'/:locale/products/:id'` → `{ locale: string; id: string }`, and a rest
+ * param — `'/files/:path+'` — is every segment it took:
+ * `{ path: readonly string[] }`.
+ */
 export type ParamsOf<Pattern extends string> = Pattern extends `/${infer Rest}`
   ? SegListParams<Rest>
   : object;
@@ -77,7 +83,11 @@ type SegListPath<Rest extends string> =
     ? `${SegPath<Segment>}/${SegListPath<Tail>}`
     : SegPath<Rest>;
 
-/** `'/:locale/products/:id'` → `` `/${string}/products/${string}` `` */
+/**
+ * `'/:locale/products/:id'` → `` `/${string}/products/${string}` ``. A rest
+ * param is a `${string}` too — `'/files/:path+'` → `` `/files/${string}` `` —
+ * since a template's `${string}` spans the slashes between its segments.
+ */
 export type PathFor<Pattern extends string> = Pattern extends `/${infer Rest}`
   ? `/${SegListPath<Rest>}`
   : never;
@@ -86,6 +96,7 @@ export type PathFor<Pattern extends string> = Pattern extends `/${infer Rest}`
  * One segment of a path against one segment of a pattern, the way URLPattern
  * reads a `:param`: any single segment that is not empty. A `${string}` in
  * the path — a param built into a template literal — counts as one segment.
+ * A rest param (`:name+`) is `SegmentsFit`'s to read: it takes more than one.
  */
 type SegmentFits<
   Segment extends string,
@@ -98,18 +109,32 @@ type SegmentFits<
     ? true
     : false;
 
+/** One segment or more, none of them empty: what a rest param takes. */
+type EverySegmentFilled<Rest extends string> =
+  Rest extends `${infer Segment}/${infer Tail}`
+    ? Segment extends ''
+      ? false
+      : EverySegmentFilled<Tail>
+    : Rest extends ''
+      ? false
+      : true;
+
+// A rest param (`:name+`) is read only where it ends the pattern, which is
+// the one place the framework's grammar puts it.
 type SegmentsFit<
   Rest extends string,
   PatternRest extends string,
-> = Rest extends `${infer Segment}/${infer Tail}`
-  ? PatternRest extends `${infer PatternSegment}/${infer PatternTail}`
+> = PatternRest extends `${infer PatternSegment}/${infer PatternTail}`
+  ? Rest extends `${infer Segment}/${infer Tail}`
     ? SegmentFits<Segment, PatternSegment> extends true
       ? SegmentsFit<Tail, PatternTail>
       : false
     : false
-  : PatternRest extends `${string}/${string}`
-    ? false
-    : SegmentFits<Rest, PatternRest>;
+  : PatternRest extends `:${string}+`
+    ? EverySegmentFilled<Rest>
+    : Rest extends `${string}/${string}`
+      ? false
+      : SegmentFits<Rest, PatternRest>;
 
 // Pattern を裸の型引数のまま条件に置き、パターンの和集合に 1 つずつ分配する
 type FitsAny<
@@ -193,6 +218,73 @@ export const decodeOrKeep = (value: string): string => {
 /** What a param value may be on the way into a link: anything with one spelling. */
 export type ParamValue = string | number | bigint | boolean;
 
+/** The name a rest segment (`:name+`) gives its param, or `null` for any other segment. */
+const restNameOf = (segment: string): string | null =>
+  segment.startsWith(':') && segment.endsWith('+')
+    ? segment.slice(1, -1)
+    : null;
+
+/**
+ * A pattern's params out of what URLPattern captured: a `:param` decoded, a
+ * rest param (`:name+`) split into the segments it took, each decoded on its
+ * own — so an escaped slash stays inside its segment.
+ */
+export const readParams = (
+  pattern: string,
+  groups: Readonly<Record<string, string | undefined>>,
+): Record<string, string | readonly string[]> => {
+  const rest = new Set(pattern.split('/').map(restNameOf));
+  const params: Record<string, string | readonly string[]> = {};
+  for (const [name, value] of Object.entries(groups)) {
+    // Numeric keys are URLPattern's anonymous wildcard captures — the
+    // table only names params, so only named ones surface.
+    if (/^\d+$/u.test(name) || value === undefined) continue;
+    params[name] = rest.has(name)
+      ? value.split('/').map(decodeOrKeep)
+      : decodeOrKeep(value);
+  }
+  return params;
+};
+
+const isParamValue = (value: unknown): value is ParamValue =>
+  typeof value === 'string' ||
+  typeof value === 'number' ||
+  typeof value === 'bigint' ||
+  typeof value === 'boolean';
+
+const restSegments = (
+  pattern: string,
+  name: string,
+  value: unknown,
+): string => {
+  if (!Array.isArray(value)) {
+    throw new TypeError(
+      `"${pattern}" takes an array of segments for ":${name}+"`,
+    );
+  }
+  if (value.length === 0) {
+    throw new TypeError(
+      `"${pattern}" needs at least one segment for ":${name}+"`,
+    );
+  }
+  return value
+    .map((segment: unknown) => {
+      if (!isParamValue(segment)) {
+        throw new TypeError(
+          `"${pattern}" got a segment for ":${name}+" that has no URL spelling`,
+        );
+      }
+      // An empty segment would spell `//`, which the pattern does not match.
+      if (segment === '') {
+        throw new TypeError(
+          `"${pattern}" got an empty segment for ":${name}+"`,
+        );
+      }
+      return encodeURIComponent(String(segment));
+    })
+    .join('/');
+};
+
 export const buildHref = (
   pattern: string,
   params: Readonly<Record<string, unknown>> | undefined,
@@ -204,20 +296,17 @@ export const buildHref = (
     .split('/')
     .map((segment) => {
       if (!segment.startsWith(':')) return segment;
-      const name = segment.slice(1);
+      const rest = restNameOf(segment);
+      const name = rest ?? segment.slice(1);
       const value = params?.[name];
       if (value === undefined) {
-        throw new TypeError(`"${pattern}" needs a value for ":${name}"`);
+        throw new TypeError(`"${pattern}" needs a value for "${segment}"`);
       }
+      if (rest !== null) return restSegments(pattern, name, value);
       // A schema-typed param arrives as what the page received — a number,
       // a boolean — and a segment is its one spelling, which is what the
       // schema will read back.
-      if (
-        typeof value !== 'string' &&
-        typeof value !== 'number' &&
-        typeof value !== 'bigint' &&
-        typeof value !== 'boolean'
-      ) {
+      if (!isParamValue(value)) {
         throw new TypeError(
           `"${pattern}" got a value for ":${name}" that has no URL spelling`,
         );

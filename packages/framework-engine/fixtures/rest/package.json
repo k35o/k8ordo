@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "description": "An application with [...name] directories, whose handler runtime/rest.test.ts calls.",
+  "type": "module"
+}

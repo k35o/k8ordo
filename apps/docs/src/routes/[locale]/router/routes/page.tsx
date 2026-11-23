@@ -30,6 +30,17 @@ routes.match('/products/a%2Fb')?.params; // { id: 'a/b' }
 routes.match('/products/a/b'); // null
 routes.match('/products/'); // null`;
 
+const REST = `const routes = defineRoutes({
+  '/files': FileIndex,
+  '/files/:path+': FilePage,
+});
+
+routes.match('/files/a/b')?.params; // { path: ['a', 'b'] }
+routes.match('/files/a%2Fb/c')?.params; // { path: ['a/b', 'c'] }
+routes.match('/files')?.pattern; // '/files'`;
+
+const REST_LINK = `href('/files/:path+', { path: ['a/b', 'c'] }); // '/files/a%2Fb/c'`;
+
 const WILDCARD = `const routes = defineRoutes({
   '/': Home,
   '/products/:id': ProductPage,
@@ -123,6 +134,23 @@ export default function RouterRoutesPage() {
         </p>
         <p>
           <Rich>{t.paramMatch()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection id="rest" title={t.restTitle}>
+        <CodeBlock code={REST} lang="ts" marks={{ 3: 'highlight' }} />
+        <p>
+          <Rich>{t.restSegments()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.restOne()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.restType()}</Rich>
+        </p>
+        <CodeBlock code={REST_LINK} lang="ts" />
+        <p>
+          <Rich>{t.restLink()}</Rich>
         </p>
       </DocSection>
 

@@ -31,7 +31,8 @@ export default guard;
 
 It receives `{ request, params }` — the `Request` as it arrived, and the
 params of the pattern its directory puts it under, as the strings the URL
-carried: a guard runs above every layout, where no schema has typed them.
+carried (a `[...name]` directory's as an array of them): a guard runs above
+every layout, where no schema has typed them.
 `Guard<'/admin/:id'>` is its type (`GuardContext<'/admin/:id'>` its
 argument's), and the generated table checks each `guard.ts` against its
 directory's pattern either way.
