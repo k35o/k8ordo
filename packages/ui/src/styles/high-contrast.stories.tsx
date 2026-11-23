@@ -3,9 +3,11 @@ import { expect } from 'storybook/test';
 
 import { Button } from '../components/buttons/button';
 import { Card } from '../components/data-display/card';
+import { Code } from '../components/data-display/code';
 import { Alert } from '../components/feedback/alert';
 import { Progress } from '../components/feedback/progress';
 import { CheckboxCard } from '../components/form/checkbox-card';
+import { ColorPicker } from '../components/form/color-picker';
 import { Radio } from '../components/form/radio';
 import { Switch } from '../components/form/switch';
 import { Separator } from '../components/layout/separator';
@@ -32,6 +34,15 @@ const canvasColor = (): string => {
   probe.style.backgroundColor = 'Canvas';
   document.body.append(probe);
   const color = getComputedStyle(probe).backgroundColor;
+  probe.remove();
+  return color;
+};
+
+const canvasTextColor = (): string => {
+  const probe = document.createElement('span');
+  probe.style.color = 'CanvasText';
+  document.body.append(probe);
+  const { color } = getComputedStyle(probe);
   probe.remove();
   return color;
 };
@@ -161,6 +172,35 @@ export const ForcedColors: Story = {
     );
 
     await expect(isPainted(progress)).toBe(true);
+  },
+};
+
+export const ForcedColorsOwnColors: Story = {
+  tags: ['forced-colors'],
+  render: () => (
+    <div className={styles.parts}>
+      <Code>#3366cc</Code>
+      <ColorPicker aria-label="色" defaultValue="#3366cc" />
+    </div>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    await expect(matchMedia('(forced-colors: active)').matches).toBe(true);
+    const canvasText = canvasTextColor();
+
+    const swatch = canvas.getByRole('img', { name: /#3366cc/u });
+    await expect(getComputedStyle(swatch).borderTopColor).toBe(canvasText);
+
+    for (const slider of canvas.getAllByRole('slider')) {
+      const track = partOf(slider.previousElementSibling);
+      await expect(getComputedStyle(track).outlineColor).toBe(canvasText);
+    }
+
+    await userEvent.tab();
+    const picker = canvas.getByLabelText('パレットから選ぶ');
+    await expect(picker).toHaveFocus();
+    const preview = getComputedStyle(partOf(picker.nextElementSibling));
+    await expect(preview.outlineColor).toBe(canvasText);
+    await expect(preview.boxShadow).toBe('none');
   },
 };
 

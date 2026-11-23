@@ -12,9 +12,12 @@
     outline-offset: -1px;
   }
 
+  /* 色も書くのは、forced-color-adjust: none の面（ColorPicker の溝）を
+     ブラウザが塗り替えず、上の prefers-contrast の色が残るから */
   @media (forced-colors: active) {
     outline-style: solid;
     outline-width: 1px;
     outline-offset: -1px;
+    outline-color: var(--color-system-canvas-text);
   }
 }
