@@ -186,11 +186,11 @@ catalogs:
       specifier: 0.5.0
       version: 0.5.0
     '@json-render/core':
-      specifier: 0.22.0
-      version: 0.22.0
+      specifier: 0.23.1
+      version: 0.23.1
     '@json-render/react':
-      specifier: 0.22.0
-      version: 0.22.0
+      specifier: 0.23.1
+      version: 0.23.1
     '@openuidev/lang-core':
       specifier: 1.1.1
       version: 1.1.1
@@ -504,10 +504,10 @@ importers:
         version: 4.0.175(react@19.3.1)(zod@4.6.7)
       '@json-render/core':
         specifier: 'catalog:'
-        version: 0.22.0(zod@4.6.7)
+        version: 0.23.1(zod@4.6.7)
       '@json-render/react':
         specifier: 'catalog:'
-        version: 0.22.0(react@19.3.1)(zod@4.6.7)
+        version: 0.23.1(react@19.3.1)(zod@4.6.7)
       '@k8ordo/ui':
         specifier: workspace:^
         version: link:../../packages/ui
@@ -568,10 +568,10 @@ importers:
     dependencies:
       '@json-render/core':
         specifier: 'catalog:'
-        version: 0.22.0(zod@4.6.7)
+        version: 0.23.1(zod@4.6.7)
       '@json-render/react':
         specifier: 'catalog:'
-        version: 0.22.0(react@19.3.1)(zod@4.6.7)
+        version: 0.23.1(react@19.3.1)(zod@4.6.7)
       '@k8ordo/ui':
         specifier: workspace:^
         version: link:../../packages/ui
@@ -971,10 +971,10 @@ importers:
         version: 5.6.0(storybook@10.6.7(@types/react@19.3.0)(react@19.3.1)(vite-plus@1.4.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.6)(@vitest/browser-playwright@5.1.0)(@vitest/coverage-v8@5.1.0)(@vitest/ui@5.1.0)(esbuild@0.28.2)(jiti@2.7.0)(playwright@1.65.0)(publint@0.3.25)(typescript@7.0.2)))
       '@json-render/core':
         specifier: 'catalog:'
-        version: 0.22.0(zod@4.6.7)
+        version: 0.23.1(zod@4.6.7)
       '@json-render/react':
         specifier: 'catalog:'
-        version: 0.22.0(react@19.3.1)(zod@4.6.7)
+        version: 0.23.1(react@19.3.1)(zod@4.6.7)
       '@k8ordo/form':
         specifier: workspace:^
         version: link:../form
@@ -1658,13 +1658,13 @@ packages:
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
 
-  '@json-render/core@0.22.0':
-    resolution: {integrity: sha512-BIfJ2V3bLYETetBu2KWoxxRPU5cSAf77dDTBgqaV54kEAfyHta1psPJgNk0fDcB3FCrnCZ5KO/X41VDkrNSYgw==}
+  '@json-render/core@0.23.1':
+    resolution: {integrity: sha512-FVTxhxucSNdcZe9CWQ/767N/vtj4f5YLu5BEY8P8eXYs80tvbKh/26avadTEDaAMfCnnyGRsuA/POzyvA2O85A==}
     peerDependencies:
       zod: ^4.0.0
 
-  '@json-render/react@0.22.0':
-    resolution: {integrity: sha512-dUBSPn/OZGJGwYiVUVv6qk14AGvfIutKgw7EKJejof14Ft/UPKsoV7/SkF5xIbGIWcM/vk3U4UnNm3NgPnOSSQ==}
+  '@json-render/react@0.23.1':
+    resolution: {integrity: sha512-brRkMkVi2944EhYG/oa/UbXXdgq5nHU7GWty4l/LDYO6TOrKDPyO2A6m+cXC5wC04oefkHfI3LPPA9lVVArFog==}
     peerDependencies:
       react: ^19.2.3
 
@@ -5102,10 +5102,12 @@ packages:
   yuku-core@0.19.0:
     resolution: {integrity: sha512-kYK9e1XdfirNhkipzW0wmMcSWcVF/CWnuugodfVYRCUwvoBefweL9HzB96OiKEhsx78V5WbUxbJqlizMX869Qg==}
     engines: {node: '>=14.18.0'}
+    deprecated: 'Yuku is now one package with one core. Use "yuku" instead: https://yuku.fyi/javascript/. Existing installs keep working but get no more fixes.'
 
   yuku-parser@0.19.0:
     resolution: {integrity: sha512-XrBh9ZiQK5mJVRxZBAvD6LwRyAYrK3MFtH3+onyuxFL5hFD44EC3QOmIC1FjTj6H2MMwq46/NAI+NZxLZPZgxg==}
     engines: {node: '>=14.18.0'}
+    deprecated: 'Yuku is now one package with one core. Use "yuku" instead: https://yuku.fyi/javascript/. Existing installs keep working but get no more fixes.'
 
   zod@4.6.7:
     resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
@@ -5627,13 +5629,13 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
 
-  '@json-render/core@0.22.0(zod@4.6.7)':
+  '@json-render/core@0.23.1(zod@4.6.7)':
     dependencies:
       zod: 4.6.7
 
-  '@json-render/react@0.22.0(react@19.3.1)(zod@4.6.7)':
+  '@json-render/react@0.23.1(react@19.3.1)(zod@4.6.7)':
     dependencies:
-      '@json-render/core': 0.22.0(zod@4.6.7)
+      '@json-render/core': 0.23.1(zod@4.6.7)
       react: 19.3.1
     transitivePeerDependencies:
       - zod
