@@ -38,8 +38,8 @@ const layerOrder = (nodes: ChildNode[]): string[] => [
   ),
 ];
 
-// レイヤーの外に置いた、トークンの宣言でないもの。@media の中の :root と .dark
-// （配色のモード）もトークンの宣言として数える
+// レイヤーの外に置いた、トークンの宣言でないもの。@media の中の :root
+// （コントラストのモード）もトークンの宣言として数える
 const unlayeredStyles = (nodes: ChildNode[]): ChildNode[] =>
   nodes.flatMap((node) => {
     if (node.type === 'comment' || layerOf(node)) return [];
@@ -74,6 +74,61 @@ const modulesWithoutCss = (modules: string[]): string[] =>
     );
   });
 
+type Tokens = Record<string, { $type?: string }>;
+type TokensDocument = {
+  version: string;
+  resolutionOrder: Array<{
+    name: string;
+    sources?: Tokens[];
+    contexts?: { on: Tokens[] };
+  }>;
+};
+
+const readTokens = (): TokensDocument => {
+  const source = readFileSync(path.join(dist, 'styles', 'tokens.mjs'), 'utf8');
+  return JSON.parse(
+    source.slice(source.indexOf('{'), source.lastIndexOf('}') + 1),
+  ) as TokensDocument;
+};
+
+const tokensIn = (
+  resolutionOrder: TokensDocument['resolutionOrder'],
+  name: string,
+): Tokens => {
+  const entry = resolutionOrder.find((candidate) => candidate.name === name);
+  const tokens = entry?.sources?.[0] ?? entry?.contexts?.on[0];
+  if (tokens === undefined) {
+    throw new Error(`tokens に ${name} が無い`);
+  }
+  return tokens;
+};
+
+const lightDarkNamesIn = (media: string | undefined): string[] => {
+  const sheet = postcss.parse(
+    readFileSync(path.join(import.meta.dirname, 'tokens.css'), 'utf8'),
+  );
+  const container =
+    media === undefined
+      ? sheet
+      : sheet.nodes.find(
+          (node): node is AtRule =>
+            node.type === 'atrule' &&
+            node.name === 'media' &&
+            node.params === media,
+        );
+  return (container?.nodes ?? [])
+    .filter(
+      (node): node is Rule => node.type === 'rule' && node.selector === ':root',
+    )
+    .flatMap((rule) =>
+      rule.nodes.filter(
+        (node): node is Declaration =>
+          node.type === 'decl' && node.value.includes('light-dark('),
+      ),
+    )
+    .map((declaration) => declaration.prop.slice('--'.length));
+};
+
 describe('dist', () => {
   const styles = path.join('styles', 'index.css');
   const components = filesIn('.css').filter(
@@ -107,33 +162,56 @@ describe('dist', () => {
   });
 
   it('tokens は styles.css のトークンとモードを DTCG の resolver 文書で出す', () => {
-    const source = readFileSync(
-      path.join(dist, 'styles', 'tokens.mjs'),
-      'utf8',
-    );
-    const { version, resolutionOrder } = JSON.parse(
-      source.slice(source.indexOf('{'), source.lastIndexOf('}') + 1),
-    ) as {
-      version: string;
-      resolutionOrder: Array<{
-        name: string;
-        sources?: Array<Record<string, unknown>>;
-        contexts?: { on: Array<Record<string, unknown>> };
-      }>;
-    };
-    const [root, ...modes] = resolutionOrder;
+    const { version, resolutionOrder } = readTokens();
 
     expect(version).toBe('2025.10');
-    expect(root?.sources?.[0]?.['color-fg-base']).toStrictEqual({
+    expect(tokensIn(resolutionOrder, ':root')['color-fg-base']).toStrictEqual({
       $type: 'color',
       $value: '{gray-900}',
     });
     expect(
-      modes.find(({ name }) => name === '.dark')?.contexts?.on[0]?.[
-        'color-fg-base'
-      ],
+      tokensIn(resolutionOrder, ':root color-scheme: dark')['color-fg-base'],
     ).toStrictEqual({ $type: 'color', $value: '{gray-50}' });
   });
+
+  it('tokens の modifier は、場所ごとの値と light-dark() の暗い側を名前で分ける', () => {
+    expect(readTokens().resolutionOrder.map(({ name }) => name)).toStrictEqual([
+      ':root',
+      ':root color-scheme: dark',
+      '@media (prefers-contrast: more) :root',
+      '@media (prefers-contrast: more) :root color-scheme: dark',
+      '.writing-h',
+      '.writing-v',
+    ]);
+  });
+
+  it.each([
+    { place: ':root', media: undefined },
+    {
+      place: '@media (prefers-contrast: more) :root',
+      media: '(prefers-contrast: more)',
+    },
+  ])(
+    '$place で light-dark() に書いた色は、明るい側も暗い側も型つきで出る',
+    ({ place, media }) => {
+      const { resolutionOrder } = readTokens();
+      const names = lightDarkNamesIn(media);
+      const typesIn = (name: string) =>
+        Object.fromEntries(
+          Object.entries(tokensIn(resolutionOrder, name))
+            .filter(([token]) => names.includes(token))
+            .map(([token, { $type }]) => [token, $type]),
+        );
+      const colors = Object.fromEntries(names.map((name) => [name, 'color']));
+
+      expect(names.length).toBeGreaterThanOrEqual(20);
+      expect(typesIn(place)).toStrictEqual(colors);
+      expect(
+        Object.keys(tokensIn(resolutionOrder, `${place} color-scheme: dark`)),
+      ).toStrictEqual(names);
+      expect(typesIn(`${place} color-scheme: dark`)).toStrictEqual(colors);
+    },
+  );
 
   it('styles.css はトークンのほかをどれかのレイヤーに入れる', () => {
     // ほかの規則がレイヤーの外にあると、利用者がレイヤーに入れた CSS に勝ってしまう

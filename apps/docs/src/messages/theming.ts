@@ -255,8 +255,8 @@ export const customizeTitle = message({
 });
 
 export const customizeHow = message({
-  ja: 'トークンは`:root`と`.dark`に、レイヤーの外で定義されています。`@k8ordo/ui`のスタイルシートより後に読み込むCSSで同じ名前を定義すると、上書きできます。',
-  en: 'Tokens are declared on `:root` and `.dark`, outside any layer. Redefine a name in CSS loaded after the `@k8ordo/ui` stylesheet to override it.',
+  ja: 'トークンは`:root`に、レイヤーの外で定義されています。`@k8ordo/ui`のスタイルシートより後に読み込むCSSで同じ名前を定義すると、上書きできます。',
+  en: 'Tokens are declared on `:root`, outside any layer. Redefine a name in CSS loaded after the `@k8ordo/ui` stylesheet to override it.',
 });
 
 export const customizePalette = message({
@@ -265,8 +265,8 @@ export const customizePalette = message({
 });
 
 export const customizeContrast = message({
-  ja: 'ハイコントラストの値は、`@media (prefers-contrast: more)`の中の`:root`と`.dark`で定義し直します。',
-  en: 'High-contrast values are redefined on `:root` and `.dark` inside `@media (prefers-contrast: more)`.',
+  ja: 'ハイコントラストの値は、`@media (prefers-contrast: more)`の中の`:root`で定義し直します。',
+  en: 'High-contrast values are redefined on `:root` inside `@media (prefers-contrast: more)`.',
 });
 
 export const typographyTitle = message({

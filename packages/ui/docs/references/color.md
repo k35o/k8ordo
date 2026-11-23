@@ -198,7 +198,7 @@ boundaries, focus rings, and selected states visible:
 - Write the two settings as media queries: `@media (prefers-contrast: more)` and `@media (forced-colors: active)` (with `tailwind.css`, the `contrast-more:` and `forced-colors:` variants). Under forced colors only system colors survive, so paint state with them (`background-color: var(--color-system-highlight)`)
 - Do not draw a boundary or a focus ring with `box-shadow` alone
 - Do not hide something with a transparent color: forced colors paints it. Use `visibility: hidden`
-- To tune the high-contrast values, redefine the tokens inside `@media (prefers-contrast: more)`, on `:root` and on `.dark`, in CSS loaded after the library stylesheet
+- To tune the high-contrast values, redefine the tokens on `:root` inside `@media (prefers-contrast: more)`, as `light-dark(<light>, <dark>)`, in CSS loaded after the library stylesheet
 
 ## Usage examples
 

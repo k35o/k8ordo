@@ -382,21 +382,23 @@ category (`--teal-500`) is the palette, internal to `tokens.css`.
 | Group      | `--color-group-{primary,secondary,tertiary,quaternary}`                                | Data visualization |
 | Other      | `--color-back-drop`, `--color-system-*` (system colors under forced colors)            |                    |
 
-A token that reads another one (`--shadow-ring-info` reads
-`--color-border-info`) is declared again under `.dark`, because a custom
-property resolves where it is declared.
+A color token with a dark value is `light-dark(<light>, <dark>)` at `:root`. A
+custom property passes `light-dark()` on unresolved, and the element that uses
+the value picks the color by its own `color-scheme`, so a token that reads
+another one (`--shadow-ring-info` reads `--color-border-info`) is declared once,
+at `:root`, and is dark under a nested `.dark` too.
 
 ### Dark Mode
 
-Dark mode is class-based (`.dark` on `html`, put there by `@k8ordo/color-scheme`; the library never adds it). All semantic tokens remap under `.dark`, so components never branch on it. `base.css` sets `color-scheme` to follow the same class (`light` on `:root`, `dark` on `.dark`), not `light dark`, since the tokens do not follow `prefers-color-scheme`; `light-dark()` therefore follows `.dark` too.
+Dark mode is class-based (`.dark` on `html`, put there by `@k8ordo/color-scheme`; the library never adds it). `base.css` sets `color-scheme` from the class (`light` on `:root`, `dark` on `.dark`), not `light dark`, so the OS setting alone changes nothing. The color tokens' `light-dark()` follows `color-scheme`, so it follows `.dark`, and components never branch on it. A page that should follow the OS setting instead sets `color-scheme: light dark` on `:root` in its own CSS.
 
-Under `@media print` a `.dark` that contains no `.print-as-shown` goes back to light: `tokens.css` repeats the `:root` value of every name `.dark` overrides (and the light `prefers-contrast: more` values), `base.css` sets `color-scheme: light`, and the bridge's `dark:` / `light:` variants split on the same condition. A color token added to `.dark` needs its light value in the print block as well; `src/styles/print.test.tsx` fails until it has one.
+Under `@media print` a `.dark` that contains no `.print-as-shown` goes back to light: `base.css` sets `color-scheme: light` on it, so every `light-dark()` gives its light value (the light `prefers-contrast: more` values included), and the bridge's `dark:` / `light:` variants split on the same condition.
 
 ### High Contrast and Forced Colors
 
 The stylesheet follows `prefers-contrast: more` and `forced-colors: active`; `@k8ordo/color-scheme` is not involved, since the OS owns both settings.
 
-- `tokens.css` redefines text and border tokens inside `@media (prefers-contrast: more)` on `:root:where(:not(.dark))` and `.dark`. `:where` keeps the specificity of `:root`, so a consumer's later `:root` override still wins.
+- `tokens.css` redefines text and border tokens (and the dark `bg-emphasize`) inside `@media (prefers-contrast: more)` on `:root`, each as a `light-dark()` pair, so a consumer's later `:root` override still wins. A name only one side changes keeps the other side's usual value.
 - A surface outlined only by a shadow or a ground takes `highContrast.edge` (`src/components/_internal/high-contrast.module.css`): an inset `--color-border-base` outline under either setting. Every part of it, color and offset included, sits behind those media queries and `:not(:focus-visible)`, so a surface that takes focus itself (`Modal`'s `<dialog>`) keeps the browser's own focus ring untouched.
 - Under forced colors only system colors survive and shadows are dropped. Paint selected state with `var(--color-system-highlight)` / `var(--color-system-canvas-text)` inside `@media (forced-colors: active)`, never rely on `box-shadow` for a boundary or focus, and hide with `visibility: hidden`, not a transparent color (a transparent color is repainted).
 
@@ -422,7 +424,7 @@ The stylesheet follows `prefers-contrast: more` and `forced-colors: active`; `@k
 - `src/styles/contrast.stories.tsx` renders every pair in `docs/references/color.md`'s contrast table, AAA rows under `color-contrast-enhanced`; keep the two in step.
 - The OS color settings cannot be switched per story, so they get projects of their own: `components-forced-colors` (Playwright `forcedColors: 'active'`) runs only stories tagged `forced-colors`, `components-contrast-more` (`contrast: 'more'`) only those tagged `contrast-more`, and `components` excludes both tags. Those stories live in `src/styles/high-contrast.stories.tsx`, hidden from the sidebar (`!dev`) and from Chromatic. Browser context options go in `playwright({ contextOptions })`; Vitest 5 ignores `instances[].context`.
 - A focus mark a play function cannot read (a range thumb is a pseudo-element; WebKit emulates forced colors as the media query alone, so a transparent outline still reads as transparent) is compared as screenshots, with and without focus, in `src/styles/forced-colors.test.tsx`, run by the `forced-colors` project (plain Vitest browser tests under `forcedColors: 'active'`). WebKit keeps the `box-shadow` ring, so those tests catch a regression only in Chromium and Firefox.
-- Print media has no Playwright context option either, so `src/styles/print.test.tsx` runs in a `print` project of its own and switches the page with the `emulateMedia` command defined there (`page.emulateMedia` on the Playwright side). It reads the names `.dark` overrides from the loaded stylesheet and compares their print values with the ones measured on screen, so it never copies a token value. `prefers-contrast: more` is not switched by that command: `print-contrast-more` runs the same file with `contrast: 'more'` as a context option, because Firefox's emulation never restyles the page when only the contrast changes (`matchMedia` flips, computed styles do not).
+- Print media has no Playwright context option either, so `src/styles/print.test.tsx` runs in a `print` project of its own and switches the page with the `emulateMedia` command defined there (`page.emulateMedia` on the Playwright side). It reads the names of the `light-dark()` tokens from the loaded stylesheet and compares the colors they give in print with the ones measured on screen, so it never copies a token value. `prefers-contrast: more` is not switched by that command: `print-contrast-more` runs the same file with `contrast: 'more'` as a context option, because Firefox's emulation never restyles the page when only the contrast changes (`matchMedia` flips, computed styles do not).
 - a11y addon fails a story on violations (`test: 'error'`), `color-contrast` included. Only overlay stories that axe misreads while they fade in turn `color-contrast` off for themselves: every `Modal` story, and one story each in `Dialog` and `Popover`.
 - Mock date is set to `2023-01-02 12:34:56` in Storybook.
 

@@ -4,7 +4,8 @@
  * Everything derivable comes from `@k8ordo/ui/tokens`, the DTCG resolver
  * document better-css-modules writes from the design system's CSS:
  *   - palette families / shades / hue ← the internal `<hue>-<shade>` tokens
- *   - semantic → palette mappings     ← the aliases at `:root` and in `.dark`
+ *   - semantic → palette mappings     ← the aliases at `:root` and in its
+ *                                       dark side (`:root color-scheme: dark`)
  *   - typography / scales / z-index   ← the tokens of each category
  *
  * Only genuinely authored knowledge is hand-written here: the palette
@@ -56,7 +57,12 @@ const [root, ...modes] = (
   }
 ).resolutionOrder;
 const ROOT = root.sources[0];
-const DARK = modes.find(({ name }) => name === '.dark')?.contexts.on[0] ?? {};
+const DARK_MODE = ':root color-scheme: dark';
+const darkMode = modes.find(({ name }) => name === DARK_MODE);
+if (darkMode === undefined) {
+  throw new Error(`design-tokens: @k8ordo/ui/tokens has no ${DARK_MODE}`);
+}
+const DARK = darkMode.contexts.on[0];
 
 const tokenOf = (name: string): Token => {
   if (!Object.hasOwn(ROOT, name)) {
