@@ -74,9 +74,11 @@ The tokens are custom properties declared at `:root`, named by category:
 They are declared outside any layer, so to override one, declare it after
 `styles.css` is loaded: between unlayered rules of equal specificity, source
 order decides. `@k8ordo/ui/tokens` exports the same tokens as data, a DTCG
-resolver document (Resolver Module 2025.10), with each mode (`.dark`,
-`prefers-contrast: more`, and their [print](#printing) overrides) as a
-modifier.
+resolver document (Resolver Module 2025.10), with each mode as a modifier: the
+dark values of the colors (`:root color-scheme: dark`), the
+`prefers-contrast: more` overrides (`@media (prefers-contrast: more) :root`),
+and their dark values
+(`@media (prefers-contrast: more) :root color-scheme: dark`).
 
 [better-css-modules](https://github.com/k35o/better-css-modules) holds CSS
 Modules to these tokens: list `@k8ordo/ui/styles.css` in its `globalCss`, and
@@ -113,17 +115,19 @@ see [Typography](references/typography.md#long-form-text-prose).
 
 ### Dark mode
 
-The tokens switch on a `dark` class: `:root` holds the light values and `.dark`
-the dark ones, so everything under an element with the class is dark. The
-library never adds the class itself. In a k8ordo application
+The tokens switch on a `dark` class, so everything under an element with the
+class is dark. The library never adds the class itself. In a k8ordo application
 `@k8ordo/color-scheme` does, resolving the visitor's choice and the system
 preference into `dark` on `<html>` before the first paint; anything else that
 toggles the class works the same.
 
-The base layer sets the CSS `color-scheme` property to match — `light` on
-`:root`, `dark` under `.dark` — so the browser's own rendering (scrollbars, form
-controls, a `<dialog>`'s default colors) follows the tokens rather than the OS.
-Your own CSS follows the same way when it reads the tokens. With
+The class works through the CSS `color-scheme` property. The base layer sets
+it to `light` on `:root` and `dark` under `.dark`, and each color token holds
+both of its values as `light-dark(<light>, <dark>)` at `:root`. The tokens and
+the browser's own rendering (scrollbars, form controls, a `<dialog>`'s default
+colors) therefore follow the class rather than the OS, and your own CSS follows
+the same way when it reads the tokens. A page that should follow the OS setting
+instead sets `color-scheme: light dark` on `:root` in its own CSS. With
 `tailwind.css`, the `dark:` variant applies under `.dark` and `light:`
 everywhere else.
 
@@ -131,10 +135,10 @@ everywhere else.
 
 Printing puts the light values back. Browsers leave a page's backgrounds out
 of a printout by default, so the dark values would print light text on white
-paper. Under `@media print`, a `.dark` element takes the `:root` values of the
-color tokens (the light high-contrast ones under `prefers-contrast: more`) and
-`color-scheme: light`, and the `dark:` and `light:` variants of `tailwind.css`
-switch with them.
+paper. Under `@media print`, a `.dark` element takes `color-scheme: light`, so
+the color tokens give their light values (the light high-contrast ones under
+`prefers-contrast: more`), and the `dark:` and `light:` variants of
+`tailwind.css` switch with them.
 
 To print in the scheme on screen, such as a slide deck printed with its
 backgrounds (`print-color-adjust: exact`), put the `print-as-shown` class on an

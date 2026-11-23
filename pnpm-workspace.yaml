@@ -17,13 +17,13 @@ catalog:
   '@arethetypeswrong/cli': 0.18.5
   # ui と docs の CSS Modules の型生成と検査 (better-css-modules check)。
   # 3 つは同じ版で出るので、上げるときは揃える。
-  '@better-css-modules/cli': 0.4.1
-  '@better-css-modules/core': 0.4.1
-  '@better-css-modules/vite': 0.4.1
+  '@better-css-modules/cli': 0.5.0
+  '@better-css-modules/core': 0.5.0
+  '@better-css-modules/vite': 0.5.0
   # generative-UI アダプタの peer。@k8ordo/ui が開発対象にする版と examples が
   # 使う版を同じ 1 コピーに保つ (scripts/check-peer-copies.mjs が検査する)。
-  '@json-render/core': 0.22.0
-  '@json-render/react': 0.22.0
+  '@json-render/core': 0.23.1
+  '@json-render/react': 0.23.1
   '@openuidev/lang-core': 1.1.1
   '@openuidev/react-lang': 1.1.1
   '@tailwindcss/postcss': 4.3.5

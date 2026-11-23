@@ -24,10 +24,16 @@ const colorSchemeOf = (element: Element): string =>
 
 const colorOf = (element: Element): string => getComputedStyle(element).color;
 
-// 別のトークンを読むトークンは、宣言した要素で値が決まる。.dark の中で
-// 宣言し直していなければ、html の値（ライト）のまま継がれてくる
-const focusRingOf = (element: Element): string =>
-  getComputedStyle(element).getPropertyValue('--shadow-ring-info');
+// 変数の文字列は light-dark() のまま継がれて配色によらず同じなので、輪を
+// 描いた box-shadow を読む。スナップショットに残らないよう、読んだらすぐ外す
+const focusRingOf = (element: Element): string => {
+  const probe = document.createElement('span');
+  probe.style.boxShadow = 'var(--shadow-ring-info)';
+  element.append(probe);
+  const { boxShadow } = getComputedStyle(probe);
+  probe.remove();
+  return boxShadow;
+};
 
 export const LightPage: Story = {
   parameters: { theme: 'light' },
