@@ -45,10 +45,22 @@ export type Server = {
   readonly port: number;
   /** The address it listens on, which `localhost` may have made `[::1]`. */
   readonly url: string;
+  /**
+   * Stops listening, and resolves once every answer under way is written
+   * and everything handed to `waitUntil()` has settled.
+   */
   readonly close: () => Promise<void>;
 };
 
-type Handler = (request: Request) => Promise<Response>;
+/**
+ * The handler as `serve` calls it: with the request, and `waitUntil` as the
+ * host. What it is handed never rejects — the handler has reported a
+ * rejection by then.
+ */
+type Handler = (
+  request: Request,
+  host: { readonly waitUntil: (promise: Promise<unknown>) => void },
+) => Promise<Response>;
 
 /**
  * What `dist/rsc/index.js` exports: the handler, and the base and mode it was
@@ -383,6 +395,17 @@ export const serve = async (options: ServeOptions = {}): Promise<Server> => {
     await sendFile(incoming, response, answer.file, answer.status);
   };
 
+  // waitUntil() に渡されたもののうち、まだ決着していないもの。close が待つ
+  const pending = new Set<Promise<unknown>>();
+  const keeping = {
+    waitUntil: (promise: Promise<unknown>): void => {
+      const settled = promise.finally(() => {
+        pending.delete(settled);
+      });
+      pending.add(settled);
+    },
+  };
+
   const server = createServer(
     (incoming: IncomingMessage, response: ServerResponse) => {
       // 何が答えても付く。答えが同じ名前を書けば、writeHead がそちらを取る
@@ -414,7 +437,7 @@ export const serve = async (options: ServeOptions = {}): Promise<Server> => {
         await sendAnswer(
           incoming,
           response,
-          await handler(asRequest(incoming, url)),
+          await handler(asRequest(incoming, url), keeping),
         );
       })().catch((error: unknown) => {
         // 例外の中身は運用者のもので、訪問者のものではない。パスやスタックが
@@ -445,12 +468,15 @@ export const serve = async (options: ServeOptions = {}): Promise<Server> => {
   return {
     port,
     url,
-    close: () =>
-      new Promise<void>((resolve, reject) => {
+    close: async () => {
+      await new Promise<void>((resolve, reject) => {
         server.close((error) => {
           if (error === undefined) resolve();
           else reject(error);
         });
-      }),
+      });
+      // 待っている間に、その処理がまた waitUntil() を呼ぶことがある
+      while (pending.size > 0) await Promise.all(pending);
+    },
   };
 };

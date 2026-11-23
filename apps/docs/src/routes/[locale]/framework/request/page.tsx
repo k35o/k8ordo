@@ -60,6 +60,18 @@ export async function report(formData: FormData): Promise<void> {
   await saveReport(formData.get('body'), agent);
 }`;
 
+const CHAT = `import { waitUntil } from '@k8ordo/framework/server';
+
+import { saveChat } from '../../../lib/chats.server';
+import { generate } from '../../../lib/generate.server';
+
+export async function POST({ request }: { request: Request }) {
+  const generation = await generate(await request.json());
+  const [forVisitor, forStore] = generation.tee();
+  waitUntil(saveChat(forStore));
+  return new Response(forVisitor);
+}`;
+
 const OPTIONS = `cookies().set('session', token, { maxAge: 3600, sameSite: 'strict' });`;
 
 const STATE_LAYOUT = `import type { LayoutProps } from '@k8ordo/framework';
@@ -223,6 +235,35 @@ export default function FrameworkRequestPage() {
         </p>
         <p>
           <Rich>{t.headersWhere()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection id="wait-until" title={t.waitTitle}>
+        <CodeBlock
+          callouts={{ 9: t.waitCallout() }}
+          code={CHAT}
+          lang="ts"
+          marks={{ 9: 'highlight' }}
+          title="src/routes/api/chat/route.ts"
+        />
+        <p>
+          <Rich>{t.waitWhat()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.waitStarted()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.waitWhere()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.waitReject()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.waitHost()}</Rich>
+          <LocaleAnchor path="/:locale/framework/deploy">
+            {m.framework.navDeploy()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
       </DocSection>
 

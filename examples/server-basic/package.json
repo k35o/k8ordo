@@ -26,6 +26,7 @@
     "@k8ordo/router": "workspace:^",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@vercel/functions": "3.7.6",
     "playwright": "catalog:",
     "typescript": "catalog:",
     "vite": "catalog:",

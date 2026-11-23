@@ -117,6 +117,55 @@ RFC 6265's token characters throws.
 A page never writes a cookie: it reads `request.cookies` from its props, the
 cookies the request carried.
 
+## Work after the answer
+
+`waitUntil(promise)` keeps the host from stopping before `promise` settles,
+for work that goes on once the answer has left — a generation read to its
+end and saved after the visitor closed the tab, a log line sent to another
+service:
+
+```ts
+// src/routes/api/chat/route.ts
+import { waitUntil } from '@k8ordo/framework/server';
+
+export async function POST({ request }: { request: Request }) {
+  const generation = await generate(await request.json());
+  const [forVisitor, forStore] = generation.tee();
+  // Reading forStore to its end does not depend on the visitor reading theirs.
+  waitUntil(save(forStore));
+  return new Response(forVisitor);
+}
+```
+
+It means what a Service Worker's `waitUntil` means. The work has already
+started when it is called — `save(forStore)` above runs whether or not it is
+handed over — and the framework never calls anything again; handing the
+promise over only tells the host the request is not finished yet. Without it
+a host is free to stop once the response ends: Vercel freezes the function,
+and `node dist/server.js` told to stop exits with the save half done.
+
+It can be called wherever the request is in progress: a `guard.ts`, a
+`route.ts`, a Server Action, a layout or a page, and from inside the stream
+a `route.ts` answered with. It writes nothing to the response, which is why
+a render may call it where `cookies()` may not. Outside a request it throws,
+and under `mode: 'static'` it is refused with the rest of
+`@k8ordo/framework/server`.
+
+A promise that rejects does not become an unhandled rejection. The handler
+logs it once, with the request it belongs to, and goes on:
+
+```
+k8ordo: waitUntil() of POST /api/chat failed Error: …
+```
+
+What keeps the process alive is the host's own means, so it depends on where
+the handler runs — `node dist/server.js` waits before it exits, Vercel needs
+`@vercel/functions` installed, and a runtime that calls the handler itself
+hands it its own `waitUntil`: [Running the build](deploy.md#running-the-build),
+[The request handler](deploy.md#the-request-handler) and
+[Deploying to Vercel](deploy.md#deploying-to-vercel). `vite dev` and
+`vite preview` have no host to tell and need none: the process stays up.
+
 ## Reading the request
 
 A page and a layout receive `request` beside `params` and `pathname`: the

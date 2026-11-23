@@ -9,6 +9,7 @@ import { isParamSegment } from './paths';
 import type { Rewrite } from './rewrites';
 import type { StaticOutput } from './static';
 import { isFile } from './static-file';
+import { bundleWaitUntil, WAIT_UNTIL_FILE } from './vercel-wait-until';
 
 /**
  * A route as Vercel's Build Output API (v3) reads it, written to
@@ -60,9 +61,6 @@ export type VercelOptions = {
    */
   readonly regions?: readonly string[];
 };
-
-/** What `vercel()` passes on to the function's own configuration. */
-export type FunctionSettings = Pick<VercelOptions, 'maxDuration' | 'regions'>;
 
 /** Where the build writes the environments, all absolute. */
 export type BuildDirs = {
@@ -208,21 +206,46 @@ const isCompressedCopy = async (file: string): Promise<boolean> => {
 
 const json = (value: unknown): string => `${JSON.stringify(value, null, 2)}\n`;
 
+/** What the function is, beyond the handler it holds. */
+export type FunctionOptions = Pick<VercelOptions, 'maxDuration' | 'regions'> & {
+  /**
+   * The modules that import `waitUntil` from `@k8ordo/framework/server`,
+   * each relative to the root. With any, the function hands the handler
+   * `@vercel/functions`' `waitUntil`, bundled beside it.
+   */
+  readonly waitUntil?: readonly string[];
+};
+
+/**
+ * The function's entry: the handler as `fetch`, and with `waitUntil`, the
+ * host's handed to it beside every request.
+ */
+const entryFor = (handler: string, waitUntil: boolean): string =>
+  waitUntil
+    ? `import handler from './${handler}';\nimport { waitUntil } from './${WAIT_UNTIL_FILE}';\n\nexport default { fetch: (request) => handler(request, { waitUntil }) };\n`
+    : `import handler from './${handler}';\n\nexport default { fetch: handler };\n`;
+
 /**
  * The build laid out as Vercel's Build Output API (v3) reads it, under
  * `<root>/.vercel/output`: the client build as static files at Vite's `base`,
  * and the request handler as the one function behind them. Only `output/` is
  * replaced — `vercel pull` keeps the project's link and settings beside it.
+ * An application that calls `waitUntil()` gets `@vercel/functions`' in the
+ * function, and without the package installed nothing is written but the
+ * refusal.
  */
 export const writeVercelOutput = async (
   root: string,
   dirs: BuildDirs,
   base: string,
   headers: DeclaredHeaders = {},
-  { maxDuration, regions }: FunctionSettings = {},
+  { maxDuration, regions, waitUntil = [] }: FunctionOptions = {},
 ): Promise<void> => {
   const output = path.join(root, '.vercel', 'output');
   await rm(output, { recursive: true, force: true });
+  const func = path.join(output, 'functions', `${FUNCTION}.func`);
+  // 無ければここで止まる。ほかを書く前に
+  if (waitUntil.length > 0) await bundleWaitUntil(root, func, waitUntil);
 
   await cp(dirs.client, path.join(output, 'static', base), {
     recursive: true,
@@ -230,7 +253,6 @@ export const writeVercelOutput = async (
   });
 
   // rsc は ssr を相対パスで import するので、2 つの位置関係ごと写す
-  const func = path.join(output, 'functions', `${FUNCTION}.func`);
   const shared = sharedDir(dirs.rsc, dirs.ssr);
   await Promise.all(
     [dirs.rsc, dirs.ssr].map((dir) =>
@@ -243,7 +265,7 @@ export const writeVercelOutput = async (
     .join('/');
   await writeFile(
     path.join(func, 'index.mjs'),
-    `import handler from './${entry}';\n\nexport default { fetch: handler };\n`,
+    entryFor(entry, waitUntil.length > 0),
   );
   await writeFile(path.join(func, 'package.json'), json({ type: 'module' }));
   await writeFile(

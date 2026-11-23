@@ -61,6 +61,7 @@ import {
   withRequest,
   writingFile,
 } from './request-scope';
+import type { HandlerContext } from './request-scope';
 import { methodNotAllowed, routeAnswerFor, runRoute } from './route';
 import { shellParams } from './shell';
 
@@ -395,25 +396,37 @@ const renderFailed = (error: unknown): Response =>
  * calls it per request; mode: 'static' calls it at build time, for each
  * route's HTML and again for its payload, and writes the answers to files.
  * What it knows of the mode is compiled in (`K8ORDO_MODE`): whether a page
- * gets the request, and whether a failed render may still stream.
+ * gets the request, and whether a failed render may still stream. `host` is
+ * what the caller offers beside the request — its `waitUntil` — and may be
+ * left out: the build, `vite dev` and `vite preview` hand none.
  */
-export default function handler(request: Request): Promise<Response> {
+export default function handler(
+  request: Request,
+  host?: HandlerContext,
+): Promise<Response> {
   // ビルドでは、答える途中で投げたもの（読み込んで投げた route file など）も
   // 書けないファイルなので、描けなかったページと同じく URL を名指して止める。
   // スタックがファイルと行を名指すので、丸ごと出す
-  return withRequest(request, async () =>
-    withDeclared(
-      answer(
-        await (import.meta.env.K8ORDO_MODE === 'static'
-          ? writingFile(() =>
-              respond(request).catch((error: unknown) => {
-                reportFailed('answering', new URL(request.url).pathname, error);
-                return renderFailed(error);
-              }),
-            )
-          : respond(request)),
+  return withRequest(
+    request,
+    async () =>
+      withDeclared(
+        answer(
+          await (import.meta.env.K8ORDO_MODE === 'static'
+            ? writingFile(() =>
+                respond(request).catch((error: unknown) => {
+                  reportFailed(
+                    'answering',
+                    new URL(request.url).pathname,
+                    error,
+                  );
+                  return renderFailed(error);
+                }),
+              )
+            : respond(request)),
+        ),
       ),
-    ),
+    host,
   );
 }
 

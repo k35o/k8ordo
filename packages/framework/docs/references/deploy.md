@@ -303,9 +303,13 @@ PORT=8080 HOST=0.0.0.0 node dist/server.js
 ```
 
 On `SIGTERM` or `SIGINT`, `server.js` stops taking connections, finishes the
-answers already under way, and exits with `0`. Run as a container's first
-process, where Node ignores a signal nothing handles, it still stops when
-the container is told to, rather than when the grace period runs out.
+answers already under way and the work handed to
+[`waitUntil()`](guards.md#work-after-the-answer), and exits with `0`. Run as
+a container's first process, where Node ignores a signal nothing handles, it
+still stops when the container is told to, rather than when the grace period
+runs out. Nothing cuts that work short: a promise that never settles keeps
+the process until the container's grace period ends it, so give such work a
+limit of its own.
 
 **A dependency that cannot be bundled stays installed.** One that ships a
 native binary, or reads its own files by path, does not survive bundling.
@@ -341,7 +345,9 @@ directory); `port` (default `3000`); and `host` (default `localhost` —
 inside a container, `'0.0.0.0'`). `server.url` names the address it listens
 on, so under the default it is `http://[::1]:3000` wherever `localhost`
 gave Node `::1`. Stopping it on a signal is up to the server that calls it:
-`await server.close()`.
+`await server.close()`, which stops taking connections and resolves once
+the answers under way are written and every promise handed to `waitUntil()`
+has settled — exit after it, and no work is cut off.
 
 For a server build, `serve` hands out the client build's files as they are
 and passes everything else to the request handler: HTML for a page, its RSC
@@ -398,10 +404,27 @@ import handler from './dist/rsc/index.js';
 const response = await handler(new Request('https://example.com/products/1'));
 ```
 
-`dist/rsc/index.js` default-exports `(request: Request) => Promise<Response>`,
-the same handler a static build calls for each route at build time. It loads
+`dist/rsc/index.js` default-exports
+`(request: Request, context?: HandlerContext) => Promise<Response>`, the
+same handler a static build calls for each route at build time. It loads
 `dist/ssr/` from beside itself, so the two travel together, and has every
 dependency bundled in, so nothing has to be installed where it runs.
+
+**The second argument is the host's `waitUntil`.** `HandlerContext` (a type
+from `@k8ordo/framework/server`) is `{ waitUntil?: (promise) => void }`:
+what the handler calls with each promise the application handed
+[`waitUntil()`](guards.md#work-after-the-answer), so the runtime keeps going
+until it settles. A Worker's `ctx` fits as it is. Left out, the handler
+holds the promises itself, which is enough wherever the process outlives
+the response. The promise it hands over never rejects — a rejection has been
+logged by then.
+
+```js
+// Cloudflare Workers — worker.js
+export default {
+  fetch: (request, env, ctx) => handler(request, ctx),
+};
+```
 
 **It runs wherever `AsyncLocalStorage` does.** Past the web platform's
 `Request`, `Response` and streams, the one thing the handler takes from its
@@ -418,7 +441,7 @@ Deno.serve(handler);
 Bun.serve({ fetch: handler });
 
 // Cloudflare Workers — worker.js
-export default { fetch: handler };
+export default { fetch: (request, env, ctx) => handler(request, ctx) };
 ```
 
 What the handler runs keeps that promise only as long as it imports nothing
@@ -517,6 +540,32 @@ route. Under `mode: 'static'` the build refuses them:
 ```text
 vercel() takes maxDuration and regions under mode: 'server' only — under mode: 'static' there is no function for them to configure
 ```
+
+**`waitUntil()` needs `@vercel/functions` installed.** Vercel stops a
+function once its response ends unless told through that package, so an
+application that imports `waitUntil` from `@k8ordo/framework/server` —
+in its own code or in a dependency — installs it:
+
+```bash
+npm install @vercel/functions
+```
+
+The build then bundles the package's `waitUntil` into the function and
+hands it to the handler with every request; nothing in the application
+imports `@vercel/functions` itself. Without the package the build stops,
+naming what imports `waitUntil`:
+
+```
+the build for Vercel cannot keep the function running after its answer — on Vercel waitUntil() goes through @vercel/functions, which is not installed here, and this imports waitUntil from @k8ordo/framework/server:
+  src/routes/api/chat/route.ts
+install @vercel/functions in this application
+```
+
+A module that reaches the entry through `import * as` or `export * from`
+counts as importing it, since neither says which names it uses. An
+application that never imports `waitUntil` needs no `@vercel/functions`, and
+its function is written as before. How long the function may go on is
+its `maxDuration` (above), not the framework's.
 
 **Under `mode: 'static'`** there is no function. The client build becomes
 static files at the base — a file under `assets/` sent `immutable`, and

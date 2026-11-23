@@ -114,9 +114,9 @@ describe('a static build that cannot be written', () => {
     );
   });
 
-  it('refuses the request API, naming every module that imports it', () => {
+  it('refuses the request API, waitUntil() included, naming every module that imports it', () => {
     expect(said('request')).toContain(
-      "static build cannot answer a request — a file is written once for every visitor, and these import @k8ordo/framework/server:\n  src/home.ts\n  src/routes/page.tsx\n  src/visits.ts\nthis application wants mode: 'server'",
+      "static build cannot answer a request — a file is written once for every visitor, and these import @k8ordo/framework/server:\n  src/home.ts\n  src/later.ts\n  src/routes/page.tsx\n  src/visits.ts\nthis application wants mode: 'server'",
     );
   });
 
@@ -196,6 +196,14 @@ describe('vite dev in static mode', () => {
       transform('server-only', 'rsc', '/src/request.ts'),
     ).rejects.toThrow(
       /static build cannot answer a request[\s\S]*src\/request\.ts/u,
+    );
+  });
+
+  it('refuses a module that imports waitUntil, naming it', async () => {
+    await expect(
+      transform('server-only', 'rsc', '/src/later.ts'),
+    ).rejects.toThrow(
+      /static build cannot answer a request[\s\S]*src\/later\.ts/u,
     );
   });
 

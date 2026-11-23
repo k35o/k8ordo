@@ -11,7 +11,10 @@ import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
 import { formDataOf } from './form-data';
 
-type Handler = (request: Request) => Promise<Response>;
+type Handler = (
+  request: Request,
+  host?: { readonly waitUntil: (promise: Promise<unknown>) => void },
+) => Promise<Response>;
 
 // ページの entries リストだけを切り出す
 const entriesOf = (html: string): string =>
@@ -484,6 +487,37 @@ describe('route.ts', () => {
     const listed = await handler(new Request(`${ORIGIN}/api/entries`));
     expect(await listed.json()).toMatchObject({
       entries: expect.arrayContaining(['webhook']),
+    });
+  });
+});
+
+describe('waitUntil()', () => {
+  it('hands the host the work a route.ts goes on with after its answer', async () => {
+    const held: Array<Promise<unknown>> = [];
+
+    const response = await handler(
+      new Request(`${ORIGIN}/api/entries/later`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ name: 'afterwards' }),
+      }),
+      {
+        waitUntil: (promise) => {
+          held.push(promise);
+        },
+      },
+    );
+
+    expect(response.status).toBe(202);
+    expect(held).toHaveLength(1);
+    const before = await handler(new Request(`${ORIGIN}/api/entries`));
+    expect(await before.json()).toStrictEqual({
+      entries: expect.not.arrayContaining(['afterwards']),
+    });
+    await held[0];
+    const after = await handler(new Request(`${ORIGIN}/api/entries`));
+    expect(await after.json()).toStrictEqual({
+      entries: expect.arrayContaining(['afterwards']),
     });
   });
 });

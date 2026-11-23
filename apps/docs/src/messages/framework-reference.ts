@@ -390,6 +390,45 @@ export const nonceCaveats = [
   }),
 ] as const;
 
+export const waitUntilSummary = message({
+  ja: 'serverモードだけ。渡したPromiseが決着するまで、ホストがプロセスや関数を止めないようにします。応答を返したあとも続く処理に使います。',
+  en: 'Server mode only. Keeps the host from stopping the process or the function until the promise settles. Use it for work that goes on after the response is sent.',
+});
+
+export const waitUntilPromise = message({
+  ja: 'すでに始まっている処理のPromiseです。',
+  en: 'The promise of work that has already started.',
+});
+
+export const waitUntilCaveats = [
+  message({
+    ja: 'リクエストを処理している間なら、描画の中でも呼べます。',
+    en: 'It can be called while the request is being handled, the render included.',
+  }),
+  message({
+    ja: 'rejectしたPromiseのエラーは、ハンドラが1度だけログに出します。未処理のrejectionにはなりません。',
+    en: 'The handler logs the error of a promise that rejects, once. It does not become an unhandled rejection.',
+  }),
+  message({
+    ja: 'リクエストの外で呼ぶと、`waitUntil() needs a request`のエラーになります。',
+    en: 'Outside a request it fails with `waitUntil() needs a request`.',
+  }),
+  message({
+    ja: 'Vercelでは`@vercel/functions`のインストールが要ります。',
+    en: 'On Vercel it needs `@vercel/functions` installed.',
+  }),
+] as const;
+
+export const handlerContextSummary = message({
+  ja: 'serverモードだけ。ビルドされたハンドラが第2引数で受け取る値の型です。ハンドラを自分で呼ぶランタイムが、自分の`waitUntil`を渡します。',
+  en: 'Server mode only. The type of the second argument the built handler takes. A runtime that calls the handler itself passes its own `waitUntil`.',
+});
+
+export const handlerContextWaitUntil = message({
+  ja: 'アプリが`waitUntil()`に渡したPromiseごとに、ハンドラが呼びます。受け取るPromiseはrejectしません。',
+  en: 'The handler calls it for every promise the application passed to `waitUntil()`. The promise it receives never rejects.',
+});
+
 export const guardSummary = message({
   ja: 'serverモードだけ。`guard.ts`がdefault exportする関数の型です。そのディレクトリのパターンを型引数に渡します。',
   en: 'Server mode only. The type of what a `guard.ts` default-exports. Pass its directory’s pattern as the type argument.',

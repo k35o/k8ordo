@@ -15,8 +15,9 @@ import type { PluginOption, Rolldown } from 'vite';
 
 import type { Mode } from '../src/host';
 import { engine } from '../src/plugin/core';
+import type { HandlerContext } from '../src/runtime/request-scope';
 
-type Handler = (request: Request) => Promise<Response>;
+type Handler = (request: Request, host?: HandlerContext) => Promise<Response>;
 
 export type BuiltFixture = {
   readonly handler: Handler;
@@ -140,8 +141,8 @@ export const buildFixture = async (
   };
   const answers: Array<Promise<Response>> = [];
   return {
-    handler: (request) => {
-      const answer = handler(request);
+    handler: (request, host) => {
+      const answer = handler(request, host);
       answers.push(answer);
       return answer;
     },

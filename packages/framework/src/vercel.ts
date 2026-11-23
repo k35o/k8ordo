@@ -7,6 +7,7 @@ import type { DeclaredHeaders } from './headers';
 import type { StaticAdapter, StaticOutput } from './static';
 import { writeStaticVercelOutput, writeVercelOutput } from './vercel-output';
 import type { VercelOptions } from './vercel-output';
+import { importsWaitUntil } from './vercel-wait-until';
 
 export type { VercelOptions, VercelRoute } from './vercel-output';
 
@@ -23,6 +24,12 @@ export type { VercelOptions, VercelRoute } from './vercel-output';
  * own routes around them, written as given: `beforeFiles` ahead of every
  * file, `beforeNotFound` ahead of `404.html`. A file a `route.ts` wrote is
  * served with the `Content-Type` its `GET` answered.
+ *
+ * Vercel stops a function once its answer is sent, unless told through
+ * `@vercel/functions`. So when the application imports `waitUntil` from
+ * `@k8ordo/framework/server`, the function hands the handler that package's
+ * `waitUntil`, bundled in from the application's own install of it — and
+ * without one the build stops, naming the modules that import it.
  */
 export const vercel = (options: VercelOptions = {}): Plugin => {
   const { beforeFiles, beforeNotFound, maxDuration, regions } = options;
@@ -32,6 +39,7 @@ export const vercel = (options: VercelOptions = {}): Plugin => {
   let base = '/';
   let client = '';
   let headers: DeclaredHeaders = {};
+  const waitUntilUsers = new Set<string>();
   const api: StaticAdapter = {
     // 静的ビルドのページは k8ordo:static の buildApp が書き終えて初めて揃う。
     // こちらの buildApp はその前にも後にも並びうるので、書き終えた側から呼ぶ
@@ -86,6 +94,20 @@ export const vercel = (options: VercelOptions = {}): Plugin => {
 
     api,
 
+    // ハンドラに入るのは rsc のモジュールだけ。server mode は依存も束ねるので、
+    // 依存の中の import もここを通る。ほかの変換が済んだ後の JavaScript を読む
+    transform: {
+      order: 'post',
+      handler(code, id) {
+        if (isStatic || this.environment.name !== 'rsc') return null;
+        if (importsWaitUntil(code)) {
+          const [module = id] = id.split('?');
+          waitUntilUsers.add(path.relative(root, module));
+        }
+        return null;
+      },
+    },
+
     buildApp: {
       // After the RSC plugin's own buildApp, which builds every environment.
       order: 'post',
@@ -105,7 +127,7 @@ export const vercel = (options: VercelOptions = {}): Plugin => {
           { client: dirOf('client'), rsc: dirOf('rsc'), ssr: dirOf('ssr') },
           builder.config.base,
           headers,
-          { maxDuration, regions },
+          { maxDuration, regions, waitUntil: [...waitUntilUsers].toSorted() },
         );
         builder.config.logger.info('k8ordo: wrote .vercel/output');
       },
