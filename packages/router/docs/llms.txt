@@ -14,7 +14,7 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
 ## Guide
 
 - [Design Guide](GUIDE.md): the table's grammar (leaves, branches, params,
-  wildcards, route groups, declaration order), mounting `<Router>` and
+  rest params, wildcards, route groups, declaration order), mounting `<Router>` and
   `<Outlet>`, links without a `<Link>` component, `useMatch` for active
   sections, `Register` for checked patterns, what navigation guarantees
   (`finished` after commit, scroll to top or fragment on a new page, and
@@ -38,7 +38,14 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   and `navigateTo(pattern, params?, options?)` build and perform navigations
   from the pattern **string** alone — no table import, so no cycle — with
   params inferred from the literal and the pattern itself checked once
-  `interface Register { routes }` is augmented. `useParams(pattern)` returns
+  `interface Register { routes }` is augmented. A rest param, `/files/:path+`,
+  takes every remaining segment — one or more, never zero — and is an array
+  everywhere: `match` / `matchPath` / `useMatch` / `useParams` return
+  `{ path: ['a', 'b'] }` with each segment decoded on its own, and `href` /
+  `navigateTo` / `bindParams` take `{ path: ['a', 'b'] }`, escape each
+  segment and join them with `/`, throwing for an empty array or an empty
+  segment (`ParamsOf` gives `readonly string[]`, `PathFor` `/files/${string}`).
+  `useParams(pattern)` returns
   typed params and throws if rendered under a different pattern; under the
   framework `Register` also carries `params` — the type each pattern's
   `paramsSchema` produces — so `href` takes a param as the page receives it
@@ -47,7 +54,8 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   is the untyped form.
   `@k8ordo/state`'s `Register` takes the same `routes: typeof routes`;
   `NavigablePath<typeof routes, Path>` is `Path` when a linkable pattern
-  matches it segment by segment (a `:param` takes one non-empty segment)
+  matches it segment by segment (a `:param` takes one non-empty segment, a
+  `:name+` one or more)
   and `never` otherwise — a check of the path given, never a union of every
   path, which a `/:locale` page would turn into `/${string}` — for any other
   typed-path consumer. `usePathname()` reads the platform's

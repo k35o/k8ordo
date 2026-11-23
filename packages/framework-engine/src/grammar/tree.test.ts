@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { fallbackShapes, parseRouteTree, pathsFiles, slotOf } from './tree';
+import {
+  fallbackShapes,
+  parseRouteTree,
+  pathsFiles,
+  restDirOf,
+  slotOf,
+} from './tree';
 import type { RouteDir } from './tree';
 
 const childOf = (dir: RouteDir, name: string): RouteDir => {
@@ -145,6 +151,167 @@ describe('what routes/ refuses to hold', () => {
       '[1bad]/page.tsx',
     ]);
     expect(problems.length).toBeGreaterThan(1);
+  });
+});
+
+describe('a [...name] directory', () => {
+  it('becomes a rest key that takes one segment or more', () => {
+    const { tree, problems } = parseRouteTree([
+      'files/page.tsx',
+      'files/[...path]/page.tsx',
+    ]);
+    expect(problems).toStrictEqual([]);
+    expect(childOf(childOf(tree, 'files'), '[...path]')).toMatchObject({
+      kind: 'rest',
+      key: '/:path+',
+      path: 'files/[...path]',
+      page: 'files/[...path]/page.tsx',
+    });
+  });
+
+  it('takes every file that answers or frames its URL', () => {
+    expect(
+      parseRouteTree([
+        'a/[...rest]/layout.tsx',
+        'a/[...rest]/page.tsx',
+        'a/[...rest]/error.tsx',
+        'a/[...rest]/loading.tsx',
+        'a/[...rest]/guard.ts',
+        'b/[...rest]/route.ts',
+        'c/[...rest]/redirect.ts',
+      ]).problems,
+    ).toStrictEqual([]);
+  });
+
+  it('sits beside a literal and a [name] directory', () => {
+    expect(
+      parseRouteTree([
+        'docs/intro/page.tsx',
+        'docs/[id]/page.tsx',
+        'docs/[...path]/page.tsx',
+      ]).problems,
+    ).toStrictEqual([]);
+  });
+
+  it('names a directory below it, a route group included', () => {
+    const { problems } = parseRouteTree([
+      'files/[...path]/page.tsx',
+      'files/[...path]/raw/page.tsx',
+      'files/[...path]/(view)/page.tsx',
+    ]);
+    expect(problems).toContainEqual({
+      path: 'files/[...path]/raw',
+      message:
+        '"[...path]" takes the rest of the pathname, so it is the last directory of its path — move "raw" out of "files/[...path]"',
+    });
+    expect(problems).toContainEqual({
+      path: 'files/[...path]/(view)',
+      message:
+        '"[...path]" takes the rest of the pathname, so it is the last directory of its path — move "(view)" out of "files/[...path]"',
+    });
+  });
+
+  it('refuses a second one under the same parent, naming both', () => {
+    const { problems } = parseRouteTree([
+      'files/[...a]/page.tsx',
+      'files/[...b]/page.tsx',
+    ]);
+    expect(problems).toStrictEqual([
+      {
+        path: 'files/[...b]',
+        message:
+          '"[...b]" cannot sit beside "[...a]" — each takes the rest of the pathname below "files"; keep one',
+      },
+    ]);
+  });
+
+  it('refuses a name an ancestor already took', () => {
+    const { problems } = parseRouteTree(['[path]/files/[...path]/page.tsx']);
+    expect(problems).toStrictEqual([
+      {
+        path: '[path]/files/[...path]',
+        message:
+          '":path" is already taken by an ancestor — params must be unique within a path',
+      },
+    ]);
+  });
+
+  it('names a malformed one, and reads no optional form', () => {
+    expect(parseRouteTree(['[...1]/page.tsx']).problems).toStrictEqual([
+      {
+        path: '[...1]',
+        message:
+          '"[...1]" is not a valid rest directory — use [...name] with a letter or underscore first',
+      },
+    ]);
+    expect(parseRouteTree(['[[...path]]/page.tsx']).problems).toStrictEqual([
+      {
+        path: '[[...path]]',
+        message:
+          '"[[...path]]" is not a valid param directory — use [name] with a letter or underscore first',
+      },
+    ]);
+  });
+
+  it('refuses a not-found.tsx, which would have nothing below it to answer for', () => {
+    const { problems } = parseRouteTree([
+      'files/[...path]/page.tsx',
+      'files/[...path]/not-found.tsx',
+    ]);
+    expect(problems).toStrictEqual([
+      {
+        path: 'files/[...path]/not-found.tsx',
+        message:
+          'not-found.tsx answers what nothing below its directory did, and nothing is below "files/[...path]" — [...path] takes the rest of the pathname; move it one directory up',
+      },
+    ]);
+  });
+
+  it('refuses a fallback.tsx and a paths.ts, which only a build into files reads', () => {
+    const { problems } = parseRouteTree([
+      'files/[...path]/page.tsx',
+      'files/[...path]/fallback.tsx',
+      'files/[...path]/paths.ts',
+    ]);
+    expect(problems).toStrictEqual([
+      {
+        path: 'files/[...path]/paths.ts',
+        message:
+          'paths.ts gives the values of its directory\'s parameter, and "files/[...path]" is not a [param] directory — move it into the parameter\'s directory',
+      },
+      {
+        path: 'files/[...path]/fallback.tsx',
+        message:
+          'fallback.tsx is the shell a build into files answers a parameter\'s unwritten values with, and "files/[...path]" is a [...name] directory, which no build into files writes; remove it',
+      },
+    ]);
+  });
+
+  it('declares its URL, so the same rest through a group is refused', () => {
+    const { problems } = parseRouteTree([
+      'files/[...path]/page.tsx',
+      'files/(raw)/[...path]/route.ts',
+    ]);
+    expect(problems).toStrictEqual([
+      {
+        path: 'files/(raw)/[...path]/route.ts',
+        message:
+          '"/files/:path+" is already declared by files/[...path]/page.tsx — route groups do not separate URLs',
+      },
+    ]);
+  });
+});
+
+describe('restDirOf', () => {
+  it('names the [...name] directory a route file sits in', () => {
+    expect(restDirOf('files/[...path]/page.tsx')).toBe('files/[...path]');
+    expect(restDirOf('[...all]/route.ts')).toBe('[...all]');
+  });
+
+  it('names none for a file in any other directory, or one the grammar skips', () => {
+    expect(restDirOf('files/[id]/page.tsx')).toBeNull();
+    expect(restDirOf('page.tsx')).toBeNull();
+    expect(restDirOf('.cache/[...path]/page.tsx')).toBeNull();
   });
 });
 

@@ -91,8 +91,29 @@ pnpm check         # check:write to auto-fix
 - **Declaration order is load-bearing.** `not-found.tsx` is emitted last in
   its branch because the router matches in declaration order; every route the
   app actually declared has to out-rank the catch-all. Literal directories are
-  emitted before parameters for the same reason — a directory tree has no
+  emitted before parameters, and a parameter before a rest parameter, for the
+  same reason — a directory tree has no
   order of its own, and the alphabet would put `[slug]` before `about`.
+- **A `[...name]` directory is a rest parameter, and the last directory of
+  its path.** `kind: 'rest'`, key `/:name+` — the router's one-or-more — so
+  it answers one segment or more below its parent and never the parent's own
+  URL. Not "catch-all" in the code or the docs: that word is taken by a
+  not-found's `/*`. The grammar refuses a directory below one (a route group
+  included), a second one under the same parent, a name an ancestor took, and
+  the files that would mean nothing there: `not-found.tsx` (nothing is below
+  it), and `fallback.tsx` and `paths.ts` (a build into files writes none of
+  it). There is no optional form: `[[...name]]` is a malformed `[name]`.
+  `rank` orders it after a `[name]` beside it and before a not-found, since
+  it also takes the one segment `[name]` takes. The handler needs nothing of
+  its own: the router hands the param over as its segments, each decoded, and
+  `Match['params']` is the type everything between the match and the route
+  file carries (the schemas, a guard, a shell's known params) — a
+  `paramsSchema` receives the array and may replace it. A `redirect.ts`
+  target moves one with the same spelling, `:name+`, every segment as the URL
+  spelled it; `:name` there has no value. Mode-free here: what refuses it
+  under `'static'` is `@k8ordo/framework`, through `restDirOf`.
+  `grammar/tree.test.ts` holds the grammar, `generate/emit.integration.test.ts`
+  the order, and `runtime/rest.test.ts` the built handler.
 - **Shadowing is checked only on a grammatical tree.** `unreachableRoutes`
   builds URLPatterns from directory names, and a name the grammar rejected is
   not a pattern — running it on a broken tree throws instead of reporting. So
@@ -867,8 +888,8 @@ pnpm check         # check:write to auto-fix
   its trees is on screen; `reportCaught` stays quiet about a not-found it
   answered. `app-router.browser.test.tsx` holds each of these.
 - **One pattern walk.** `declaredPatterns(tree)` is the order the matcher
-  tries patterns — pages and redirects, literals before params, the
-  catch-all last in its branch — and everything that asks "which URLs does
+  tries patterns — pages and redirects, literals before params, params
+  before a rest param, the catch-all last in its branch — and everything that asks "which URLs does
   this site have" reads it: the shadow check here, `patternsOf` in
   `@k8ordo/framework`'s static mode. `decodePathname` is likewise the one
   decoding both modes use before a pathname may name a file.
@@ -962,6 +983,10 @@ fixtures/
                              runtime/not-found.test.ts opens in each engine
   redirect-beside-literal/routes/  a [slug]/redirect.ts beside about/page.tsx,
                              whose handler runtime/redirect-order.test.ts calls
+  rest/routes/               [...name] directories holding a page under a
+                             layout, a page with a schema, a route.ts under a
+                             guard and a redirect.ts, beside a literal and a
+                             [name], whose handler runtime/rest.test.ts calls
   fallback/routes/           pages with a fallback.tsx (a server one, one that
                              says notFound(), a 'use client' one, one with a
                              not-found.tsx beside it) under a layout whose

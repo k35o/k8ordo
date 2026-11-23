@@ -216,6 +216,8 @@ export default defineConfig({
   ],
 });`;
 
+const VERCEL_SETTINGS = `vercel({ maxDuration: 300, regions: ['hnd1'] });`;
+
 const BASE = `import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
 
@@ -517,6 +519,10 @@ export default function FrameworkDeployPage() {
           </p>
           <p>
             <Rich>{t.vercelBundle()}</Rich>
+          </p>
+          <CodeBlock code={VERCEL_SETTINGS} lang="ts" />
+          <p>
+            <Rich>{t.vercelSettings()}</Rich>
           </p>
           <CodeBlock code={VERCEL_FUNCTIONS} lang="bash" />
           <p>

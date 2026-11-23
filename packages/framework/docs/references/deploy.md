@@ -522,6 +522,25 @@ nothing but its own directory, which is all the handler needs: server mode
 bundles every dependency into it. A dependency left out with
 `resolve.external` is not in the function, so it does not work there.
 
+**How long the function may run, and where, is `vercel()`'s to say.**
+Server mode only:
+
+```ts
+vercel({ maxDuration: 300, regions: ['hnd1'] });
+```
+
+`maxDuration` is the seconds one request may take — a long answer streamed
+from a `route.ts` needs more than the plan's default — or `'max'` for the
+plan's maximum; `regions` is the Vercel regions the function is deployed
+to. Both are written into the function's configuration as given, and left
+out when not given, which leaves them to the plan's default and the
+project's own setting. There is one function, so one value answers every
+route. Under `mode: 'static'` the build refuses them:
+
+```text
+vercel() takes maxDuration and regions under mode: 'server' only — under mode: 'static' there is no function for them to configure
+```
+
 **`waitUntil()` needs `@vercel/functions` installed.** Vercel stops a
 function once its response ends unless told through that package, so an
 application that imports `waitUntil` from `@k8ordo/framework/server` —
@@ -546,7 +565,7 @@ A module that reaches the entry through `import * as` or `export * from`
 counts as importing it, since neither says which names it uses. An
 application that never imports `waitUntil` needs no `@vercel/functions`, and
 its function is written as before. How long the function may go on is
-Vercel's limit for it (`maxDuration`), not the framework's.
+its `maxDuration` (above), not the framework's.
 
 **Under `mode: 'static'`** there is no function. The client build becomes
 static files at the base — a file under `assets/` sent `immutable`, and

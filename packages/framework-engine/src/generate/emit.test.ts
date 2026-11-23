@@ -116,6 +116,23 @@ describe('what a route file is promised', () => {
     expect(source).toContain("lazy(not_found) satisfies Page<'/*'>");
   });
 
+  it('states the files of a [...name] directory against its rest pattern', () => {
+    const source = emit([
+      'page.tsx',
+      'files/[...path]/layout.tsx',
+      'files/[...path]/page.tsx',
+      'api/[...rest]/route.ts',
+    ]);
+    expect(source).toContain("'/:path+': {");
+    expect(source).toContain(
+      "lazy(files_path_page) satisfies Page<'/files/:path+'>",
+    );
+    expect(source).toContain(
+      "files_path_layout satisfies Layout<'/files/:path+'>",
+    );
+    expect(source).toContain("'/api/:rest+': api_rest_route,");
+  });
+
   it('states a layout against the prefix every route below it shares', () => {
     const source = emit([
       'layout.tsx',

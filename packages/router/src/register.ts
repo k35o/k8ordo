@@ -58,9 +58,14 @@ export type RegisteredNavigablePattern = Register extends {
 
 type RegisteredParamsMap = Register extends { params: infer M } ? M : null;
 
-/** The pattern's params as anything with one spelling, before any schema. */
+/**
+ * The pattern's params as anything with one spelling, before any schema — a
+ * rest param as an array of them, one per segment.
+ */
 type LooseParamsOf<P extends string> = {
-  [K in keyof ParamsOf<P>]: ParamValue;
+  [K in keyof ParamsOf<P>]: ParamsOf<P>[K] extends readonly string[]
+    ? readonly ParamValue[]
+    : ParamValue;
 };
 
 /**

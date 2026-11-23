@@ -68,7 +68,7 @@ declare module 'virtual:k8ordo/routes' {
       ReadonlyArray<
         (context: {
           readonly request: Request;
-          readonly params: Readonly<Record<string, string>>;
+          readonly params: Readonly<Record<string, string | readonly string[]>>;
         }) => unknown
       >
     >

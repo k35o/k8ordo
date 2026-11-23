@@ -54,7 +54,8 @@ const resolveTarget = (
 /**
  * Where a `redirect.ts` sends a pathname the table matched to its pattern,
  * with the matched params filled into the target, so `/:locale/legacy` can
- * send to `/:locale/new`; `null` for a pattern no redirect declares. Which
+ * send to `/:locale/new`, and `/old/:path+` to `/new/:path+`, every segment
+ * the rest param took moved as one; `null` for a pattern no redirect declares. Which
  * pattern answers is the table's to say — the redirect holds its place there
  * — so this only reads the params again: the router hands them decoded, and a
  * target moves a segment as the URL spelled it. The pathname is normalized as
@@ -66,19 +67,34 @@ export const resolveRedirects = (
   const matchers = new Map(
     Object.entries(declared).map(([pattern, target]) => [
       pattern,
-      { matcher: new URLPattern({ pathname: pattern }), target },
+      {
+        matcher: new URLPattern({ pathname: pattern }),
+        rest: new Set(
+          pattern
+            .split('/')
+            .filter(
+              (segment) => segment.startsWith(':') && segment.endsWith('+'),
+            )
+            .map((segment) => segment.slice(1, -1)),
+        ),
+        target,
+      },
     ]),
   );
   return (pattern, pathname) => {
     const declaredHere = matchers.get(pattern);
     if (declaredHere === undefined) return null;
+    const { rest } = declaredHere;
     const result = declaredHere.matcher.exec({
       pathname: normalizePathname(pathname),
     });
     if (result === null) return null;
     const segments: Record<string, string> = {};
     for (const [name, value] of Object.entries(result.pathname.groups)) {
-      if (!/^\d+$/u.test(name) && value !== undefined) segments[name] = value;
+      if (/^\d+$/u.test(name) || value === undefined) continue;
+      // A rest param goes by the spelling the pattern gives it (`path+`), so a
+      // target moves it with `:path+` and nowhere a single segment is meant.
+      segments[rest.has(name) ? `${name}+` : name] = value;
     }
     return resolveTarget(declaredHere.target, segments);
   };

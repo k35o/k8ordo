@@ -595,6 +595,11 @@ export const vercelFunction = message({
   en: 'The client build becomes static files on Vercel’s CDN, and every request that matches no file goes to one Node.js function, which is the request handler. The copies compressed for `serve()` are left out.',
 });
 
+export const vercelSettings = message({
+  ja: "関数の実行時間の上限とリージョンは、`vercel()`に渡します。`maxDuration`は1つのリクエストにかけられる秒数（`'max'`ならプランの上限）、`regions`は関数を置くVercelのリージョンです。関数は1つなので、どのルートにも同じ値が効きます。渡さなければ、プランの既定とプロジェクトの設定のままです。staticモードには関数が無いので、渡すとビルドが止まります。",
+  en: "How long the function may run, and where, goes to `vercel()`. `maxDuration` is the seconds one request may take (`'max'` for the plan’s maximum), and `regions` is the Vercel regions the function is deployed to. There is one function, so one value answers every route. Left out, they stay at the plan’s default and the project’s setting. Static mode has no function, and the build stops when given either.",
+});
+
 export const vercelBundle = message({
   ja: 'Vercelの関数は自分のディレクトリの中身しか持てません。ハンドラは依存をすべてバンドルしているので、そのまま関数になります。`resolve.external`で外した依存は関数に入らないので、Vercelでは動きません。',
   en: 'A Vercel function holds nothing but its own directory. The handler has every dependency bundled in, so it becomes the function as it is. A dependency left out with `resolve.external` is not in the function, and does not work on Vercel.',

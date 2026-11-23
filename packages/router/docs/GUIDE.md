@@ -73,6 +73,8 @@ export const routes = defineRoutes({
   and a child key of `'/'` is the branch's own index page.
 - **`/:name`** captures a segment, decoded. **`/*`** matches whatever nothing
   before it did.
+- **`/:name+`** is a rest param: it captures every remaining segment, one or
+  more, as an array ([Rest params](#rest-params)).
 - **`/(name)`** is a route group: it structures the table — its own layout, its
   own subtree — without contributing a URL segment. It exists because `'/'` can
   only appear once in an object, so two sections at the same depth could not
@@ -99,6 +101,41 @@ defineRoutes({ '/about': About, '/:slug': Article }); // /about → About
 ```
 
 Put `/*` last, for the same reason.
+
+### Rest params
+
+`/:name+` ends a pattern and takes every segment left — one or more, never
+zero — as an array, each segment decoded on its own:
+
+```ts
+const routes = defineRoutes({
+  '/files': FileIndex,
+  '/files/:path+': FilePage,
+});
+
+routes.match('/files/a/b')?.params; // { path: ['a', 'b'] }
+routes.match('/files/a%2Fb/c')?.params; // { path: ['a/b', 'c'] }
+routes.match('/files')?.pattern; // '/files' — zero segments is not a match
+```
+
+A link takes the same array, and escapes each segment before joining them
+with `/`:
+
+```ts
+href('/files/:path+', { path: ['a/b', 'c'] }); // '/files/a%2Fb/c'
+href('/files/:path+', { path: [] }); // ✗ throws: at least one segment
+href('/files/:path+', { path: ['a', ''] }); // ✗ throws: an empty segment
+```
+
+`navigateTo` and `bindParams` take it the same way, and `useParams`,
+`useMatch` and `matchPath` hand back the array. In the types, `ParamsOf`
+gives `{ path: readonly string[] }`, a link takes an array of anything with
+one spelling, and `PathFor<'/files/:path+'>` is `` `/files/${string}` ``.
+
+It also takes the one segment a `/:name` beside it takes, so order decides
+between them as between everything else: declare `/files/:id` first, or it
+never matches. There is no optional form (`:name*`, `:name?`): a pattern for
+the prefix itself — `/files` above — is what answers zero segments.
 
 ### What fails at definition time
 
@@ -199,6 +236,7 @@ import { matchPath, useMatch } from '@k8ordo/router';
 useMatch('/products/:id'); // { id } when that page is showing, else null
 useMatch('/products/*'); // {} anywhere under /products, else null
 matchPath('/products/:id', pathname); // the same, pure, for a pathname in hand
+useMatch('/files/:path+'); // { path: ['a', 'b'] } on /files/a/b
 ```
 
 `useMatch` takes a pattern from the table, or a table pattern followed by
@@ -397,7 +435,8 @@ is. `NavigablePath<typeof routes, Path>` is that check, for any other
 typed-path consumer: `Path` itself when one of the table's linkable patterns
 matches it segment by segment — a literal segment spelled as the pattern
 spells it, a `:param` taking any one non-empty segment, a `${string}` from a
-template literal included — and `never` when none does. A trailing slash is
+template literal included, a rest param (`:name+`) taking one or more — and
+`never` when none does. A trailing slash is
 refused: matching treats `/products/` as `/products`, but a path built for a
 link is spelled the one canonical way.
 

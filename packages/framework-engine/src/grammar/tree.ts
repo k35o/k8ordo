@@ -12,13 +12,17 @@ export type Problem = {
   readonly message: string;
 };
 
-export type RouteDirKind = 'root' | 'literal' | 'param' | 'group';
+/**
+ * `rest` is a `[...name]` directory: its parameter takes every segment left,
+ * one or more, so it is always the last directory of its path.
+ */
+export type RouteDirKind = 'root' | 'literal' | 'param' | 'rest' | 'group';
 
 export type RouteDir = {
-  /** The directory as written: `''` (root), `products`, `[id]`, `(docs)`. */
+  /** The directory as written: `''` (root), `products`, `[id]`, `[...path]`, `(docs)`. */
   readonly name: string;
   readonly kind: RouteDirKind;
-  /** The table key this directory contributes: `/`, `/products`, `/:id`. */
+  /** The table key this directory contributes: `/`, `/products`, `/:id`, `/:path+`. */
   readonly key: string;
   /** Path of this directory relative to the routes root. */
   readonly path: string;
@@ -71,6 +75,7 @@ export const ROUTE_FILES = Object.keys(CONVENTION).join(', ');
 export type Slot = (typeof CONVENTION)[keyof typeof CONVENTION];
 
 const PARAM = /^\[([A-Za-z_][A-Za-z0-9_]*)\]$/u;
+const REST = /^\[\.\.\.([A-Za-z_][A-Za-z0-9_]*)\]$/u;
 const GROUP = /^\(([A-Za-z0-9_-]+)\)$/u;
 const LITERAL = /^[A-Za-z0-9._~-]+$/u;
 
@@ -93,6 +98,20 @@ export const slotOf = (file: string): Slot | null => {
   const basename = segments.at(-1);
   if (basename === undefined) return null;
   return (CONVENTION as Record<string, Slot | undefined>)[basename] ?? null;
+};
+
+/**
+ * The `[...name]` directory a route file sits in, relative to the routes
+ * root — `null` for a file in none, or one the grammar does not read. One
+ * module at a time, like `slotOf`.
+ */
+export const restDirOf = (file: string): string | null => {
+  const segments = file.split('/').filter((segment) => segment !== '');
+  if (segments.some((segment) => isHidden(segment))) return null;
+  const index = segments
+    .slice(0, -1)
+    .findIndex((segment) => REST.test(segment));
+  return index === -1 ? null : segments.slice(0, index + 1).join('/');
 };
 
 type RawDir = {
@@ -136,10 +155,24 @@ const classify = (
       param: param[1] as string,
     };
   }
+  const rest = REST.exec(name);
+  if (rest !== null) {
+    // URLPattern の「1 個以上」の修飾子。0 個は親ディレクトリの URL
+    return {
+      kind: 'rest',
+      key: `/:${rest[1] as string}+`,
+      param: rest[1] as string,
+    };
+  }
   if (GROUP.exec(name) !== null) {
     return { kind: 'group', key: `/${name}`, param: null };
   }
-  if (name.startsWith('[') || name.endsWith(']')) {
+  if (name.startsWith('[...')) {
+    problems.push({
+      path,
+      message: `"${name}" is not a valid rest directory — use [...name] with a letter or underscore first`,
+    });
+  } else if (name.startsWith('[') || name.endsWith(']')) {
     problems.push({
       path,
       message: `"${name}" is not a valid param directory — use [name] with a letter or underscore first`,
@@ -207,8 +240,21 @@ const convert = (
     });
   }
 
+  if (kind === 'rest' && slots.notFound !== undefined) {
+    problems.push({
+      path: slots.notFound,
+      message: `not-found.tsx answers what nothing below its directory did, and nothing is below "${here}" — [...${name.slice(4, -1)}] takes the rest of the pathname; move it one directory up`,
+    });
+  }
+
   const children = [...raw.dirs.entries()].map(([childName, childRaw]) => {
     const childPath = path === '' ? childName : `${path}/${childName}`;
+    if (kind === 'rest') {
+      problems.push({
+        path: childPath,
+        message: `"${name}" takes the rest of the pathname, so it is the last directory of its path — move "${childName}" out of "${here}"`,
+      });
+    }
     const classified = classify(childName, childPath, problems);
     return convert(
       childRaw,
@@ -219,6 +265,15 @@ const convert = (
       problems,
     );
   });
+
+  // 同じ親の下の [...a] と [...b] は同じ URL を取り合う。先の 1 つを残して名指しする
+  const rests = children.filter((child) => child.kind === 'rest');
+  for (const other of rests.slice(1)) {
+    problems.push({
+      path: other.path,
+      message: `"${other.name}" cannot sit beside "${rests[0]?.name ?? ''}" — each takes the rest of the pathname below "${here}"; keep one`,
+    });
+  }
 
   return {
     name,
@@ -237,6 +292,13 @@ const convert = (
     paths: slots.paths ?? null,
     children,
   };
+};
+
+/** The param a directory names — `id` for `[id]`, `path` for `[...path]` — or `null`. */
+const paramOf = (dir: RouteDir): string | null => {
+  if (dir.kind === 'param') return dir.key.slice(2);
+  if (dir.kind === 'rest') return dir.key.slice(2, -1);
+  return null;
 };
 
 const declaresRoute = (dir: RouteDir): boolean =>
@@ -330,6 +392,11 @@ const checkFallback = (
   const refuse = (message: string): FallbackCheck => ({
     problem: { path: file, message },
   });
+  if (dir.kind === 'rest') {
+    return refuse(
+      `fallback.tsx is the shell a build into files answers a parameter's unwritten values with, and "${here}" is a [...name] directory, which no build into files writes; remove it`,
+    );
+  }
   if (dir.page === null) {
     return refuse(
       `fallback.tsx stands in for the page.tsx beside it, and "${here}" has none`,
@@ -380,8 +447,8 @@ const checkFallbacks = (tree: RouteDir): FallbackCheck[] => {
   ): void => {
     if (!declaresRoute(dir)) return;
     const here = dir.kind === 'root' ? '' : prefix;
-    const params =
-      dir.kind === 'param' ? [...inherited, dir.key.slice(2)] : inherited;
+    const own = paramOf(dir);
+    const params = own === null ? inherited : [...inherited, own];
     if (dir.fallback !== null) {
       found.push(
         checkFallback(
@@ -420,8 +487,8 @@ export const fallbackShapes = (tree: RouteDir): FallbackShape[] =>
 const validate = (root: RouteDir, problems: Problem[]): void => {
   const walk = (dir: RouteDir, inherited: readonly string[]): void => {
     let params = inherited;
-    if (dir.kind === 'param') {
-      const name = dir.key.slice(2);
+    const name = paramOf(dir);
+    if (name !== null) {
       if (params.includes(name)) {
         problems.push({
           path: dir.path,
