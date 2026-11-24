@@ -21,6 +21,8 @@ src/routes/
     page.tsx            /products
     [id]/page.tsx       /products/:id
     [id]/fallback.tsx   the ids a static build did not write (static mode)
+  files/
+    [...path]/route.ts  /files/a, /files/a/b, … every segment left (server mode)
   (docs)/               a route group: its own layout, no URL segment
     layout.tsx
     guide/page.tsx      /guide
@@ -31,7 +33,8 @@ src/lib/                every other module, flat
 - `page.tsx`, `layout.tsx`, `not-found.tsx`, `error.tsx`, `loading.tsx`,
   `fallback.tsx`, `paths.ts`, `redirect.ts`, `guard.ts` and `route.ts` are
   the only filenames the grammar accepts. `mode: 'static'` refuses
-  `guard.ts` ([Choosing a mode](../GUIDE.md#what-static-mode-refuses)), and
+  `guard.ts`, and a `[...name]` directory with whatever it holds
+  ([Choosing a mode](../GUIDE.md#what-static-mode-refuses)), and
   `mode: 'server'` never renders `fallback.tsx` and never reads `paths.ts`,
   though it checks where each sits
   ([Values the build did not write](#values-the-build-did-not-write)). Any
@@ -42,7 +45,8 @@ src/lib/                every other module, flat
   skipped, so a `.DS_Store` or an editor's swap file does not break the
   build.
 - A directory name is a literal URL segment of letters, digits, `.`, `_`, `~`
-  and `-`; `[name]` is a parameter and `(name)` is a group. `_` is an
+  and `-`; `[name]` is a parameter, `[...name]` a rest parameter
+  ([Rest parameters](#rest-parameters)) and `(name)` is a group. `_` is an
   ordinary character, so `_drafts/page.tsx` answers `/_drafts`. A name that
   starts with `.` is never read, so `/.well-known` cannot be declared as a
   route.
@@ -226,9 +230,15 @@ Every problem is reported, not just the first, and each names the file:
 | `about/page.tsx` and `about/fallback.tsx`                                 | `fallback.tsx stands in for values the build did not write, and "/about" has no parameter; remove it`                                                                                                               |
 | `[locale]/layout.tsx` above `[locale]/about/fallback.tsx`                 | `fallback.tsx has nothing to leave to the browser — [locale]/layout.tsx receives every parameter of "/:locale/about"; remove fallback.tsx and return the values from a paths.ts`                                    |
 | `posts/paths.ts`                                                          | `paths.ts gives the values of its directory's parameter, and "posts" is not a [param] directory — move it into the parameter's directory`                                                                           |
+| `files/[...path]/raw/page.tsx`                                            | `"[...path]" takes the rest of the pathname, so it is the last directory of its path — move "raw" out of "files/[...path]"`                                                                                         |
+| `files/[...a]/page.tsx` and `files/[...b]/page.tsx`                       | `"[...b]" cannot sit beside "[...a]" — each takes the rest of the pathname below "files"; keep one`                                                                                                                 |
+| `[...1]/page.tsx`                                                         | `"[...1]" is not a valid rest directory — use [...name] with a letter or underscore first`                                                                                                                          |
+| `files/[...path]/not-found.tsx`                                           | `not-found.tsx answers what nothing below its directory did, and nothing is below "files/[...path]" — [...path] takes the rest of the pathname; move it one directory up`                                           |
+| `files/[...path]/fallback.tsx`                                            | `fallback.tsx is the shell a build into files answers a parameter's unwritten values with, and "files/[...path]" is a [...name] directory, which no build into files writes; remove it`                             |
 
-The generated table lists literal segments before parameters, so `about/`
-beside `[slug]/` is reachable without saying anything. A route group holds
+The generated table lists literal segments before parameters, and a
+parameter before a rest parameter, so `about/` beside `[slug]/` — and
+`[slug]/` beside `[...path]/` — is reachable without saying anything. A route group holds
 both kinds under one key and the table cannot interleave across it, which is
 the one shape where a declared route can still be shadowed — so it is reported
 rather than shipped.
@@ -241,6 +251,61 @@ parameter no `paths.ts` gives values to
 ([Routes with parameters](params.md#routes-with-parameters)), and a shell
 standing where it cannot
 ([What else stops the build](params.md#what-else-stops-the-build)).
+
+## Rest parameters
+
+Server mode only. A `[...name]` directory takes every segment left of the
+pathname — one or more — where `[name]` takes exactly one:
+
+```ts
+// src/routes/files/[...path]/route.ts
+import type { RouteContext } from '@k8ordo/framework';
+
+export function GET({ params }: RouteContext<'/files/:path+'>) {
+  return Response.json({ name: params.path.at(-1) });
+}
+```
+
+`/files/reports/2026/summary.pdf` reaches it with
+`params.path` as `['reports', '2026', 'summary.pdf']`.
+
+- **Its pattern is `/files/:path+`** — what `PageProps`, `LayoutProps`,
+  `RouteContext`, `Guard` and `href` name it by.
+- **The value is an array of segments**, each decoded on its own:
+  `/files/a%2Fb/c` is `['a/b', 'c']`. A `page.tsx`, a `layout.tsx`, a
+  `route.ts` and a `guard.ts` in the directory all receive it, and a
+  `paramsSchema` there validates the array and may replace it
+  ([Parameters](params.md#rest-parameters)).
+- **A link takes the same array**: `href('/files/:path+', { path: ['a/b', 'c'] })`
+  is `/files/a%2Fb/c`. An empty array, or an empty segment, throws.
+- **Zero segments is not its URL.** `/files` is answered by `files/page.tsx`
+  (or `route.ts`, or `redirect.ts`) when there is one and by the nearest
+  `not-found.tsx` when there is not. There is no optional form:
+  `[[...name]]` is not a directory name the grammar reads.
+- **It is the last directory of its path.** Nothing sits below it, a route
+  group included, and one parent holds one. It may hold `page.tsx`,
+  `layout.tsx`, `error.tsx`, `loading.tsx`, `guard.ts`, `route.ts` and
+  `redirect.ts`; not `not-found.tsx`, which would have nothing below it to
+  answer for, nor `fallback.tsx` or `paths.ts`.
+- **It is tried after what is more specific.** Beside it, a literal
+  directory answers first, then a `[name]`, then the `[...name]`, and the
+  `not-found.tsx` of the directory above only after all of them. So
+  `files/readme/page.tsx` keeps `/files/readme`, and `files/[id]/page.tsx`
+  keeps every single segment its `paramsSchema` accepts, leaving the rest —
+  and the ones it refused — to `files/[...path]/`.
+- **A `redirect.ts` moves it with the same spelling.**
+  `old/[...path]/redirect.ts` exporting `'/files/:path+'` sends
+  `/old/a/b` to `/files/a/b`, every segment as the URL spelled it.
+
+`mode: 'static'` refuses a `[...name]` directory, in the build before
+anything is compiled and in `vite dev` as a file in it is compiled: it
+answers a pathname of any depth, which only a request names.
+
+```
+static build cannot write a [...name] directory — it answers a pathname of any depth, which only a request names, and this is one:
+  src/routes/files/[...path]
+this application wants mode: 'server'
+```
 
 ## The values of a parameter
 
@@ -372,7 +437,9 @@ A directory answers from a `route.ts` or renders a `page.tsx` (or redirects),
 never two of them, and the layouts above a `route.ts` do not wrap it —
 nothing renders. It takes its place in the table's order the way a page does,
 literals before params, so `api/[id]/route.ts` beside `api/latest/page.tsx`
-leaves `/api/latest` to the page. A client navigation to it gets no payload,
+leaves `/api/latest` to the page. An `api/[...rest]/route.ts` answers every
+URL below `/api` that nothing more specific does
+([Rest parameters](#rest-parameters)). A client navigation to it gets no payload,
 and loads the document instead.
 
 ### Under server mode
@@ -384,7 +451,10 @@ The guards above it run first. A `POST` to a `route.ts` is not held to the
 same-origin rule a Server Action is — what posts to one, a webhook, is not a
 form on this site — so it checks what it needs itself. It answers the request
 as much as a guard does: [`cookies()`](guards.md#cookies),
-`responseHeaders()` and `requestHeaders()` work inside it.
+`responseHeaders()` and `requestHeaders()` work inside it, and
+[`waitUntil()`](guards.md#work-after-the-answer) keeps the host running for
+what it goes on with after answering — from inside a stream it answered
+with, too.
 
 ### Under static mode
 

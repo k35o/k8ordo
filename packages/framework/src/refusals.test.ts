@@ -27,6 +27,7 @@ describe('a static build that cannot be written', () => {
       ['not-found-throws'],
       ['no-boundary'],
       ['guard'],
+      ['rest'],
       ['route-methods'],
       ['search'],
       ['request'],
@@ -85,6 +86,16 @@ describe('a static build that cannot be written', () => {
     );
   });
 
+  it('refuses a [...name] directory, naming every one and the mode that answers them', () => {
+    expect(said('rest')).toContain(
+      "static build cannot write a [...name] directory — it answers a pathname of any depth, which only a request names, and these are:\n  src/routes/api/[...rest]\n  src/routes/files/[...path]\nthis application wants mode: 'server'",
+    );
+  });
+
+  it('refuses a [...name] directory before anything is built', () => {
+    expect(existsSync(buildOf('rest').client)).toBe(false);
+  });
+
   it('refuses a route.ts that answers a method a file cannot, naming it and the method', () => {
     expect(said('route-methods')).toContain(
       'static build writes a route.ts as the file its GET answers, and a file cannot answer another method — these export one:\n  src/routes/api/route.ts (POST)',
@@ -103,9 +114,9 @@ describe('a static build that cannot be written', () => {
     );
   });
 
-  it('refuses the request API, naming every module that imports it', () => {
+  it('refuses the request API, waitUntil() included, naming every module that imports it', () => {
     expect(said('request')).toContain(
-      "static build cannot answer a request — a file is written once for every visitor, and these import @k8ordo/framework/server:\n  src/home.ts\n  src/routes/page.tsx\n  src/visits.ts\nthis application wants mode: 'server'",
+      "static build cannot answer a request — a file is written once for every visitor, and these import @k8ordo/framework/server:\n  src/home.ts\n  src/later.ts\n  src/routes/page.tsx\n  src/visits.ts\nthis application wants mode: 'server'",
     );
   });
 
@@ -145,7 +156,7 @@ describe('vite dev in static mode', () => {
   const servers = new Map<string, ViteDevServer>();
 
   beforeAll(async () => {
-    for (const name of ['server-only', 'guard', 'route-methods']) {
+    for (const name of ['server-only', 'guard', 'rest', 'route-methods']) {
       servers.set(name, await devServer(name));
     }
   }, 180_000);
@@ -188,6 +199,14 @@ describe('vite dev in static mode', () => {
     );
   });
 
+  it('refuses a module that imports waitUntil, naming it', async () => {
+    await expect(
+      transform('server-only', 'rsc', '/src/later.ts'),
+    ).rejects.toThrow(
+      /static build cannot answer a request[\s\S]*src\/later\.ts/u,
+    );
+  });
+
   it('leaves every other module alone', async () => {
     await expect(
       transform('server-only', 'rsc', '/src/routes/page.tsx'),
@@ -200,6 +219,20 @@ describe('vite dev in static mode', () => {
     ).rejects.toThrow(
       /static build cannot run guard\.ts[\s\S]*src\/routes\/admin\/guard\.ts/u,
     );
+  });
+
+  it('refuses a file of a [...name] directory the moment it is compiled, naming the directory', async () => {
+    await expect(
+      transform('rest', 'rsc', '/src/routes/files/[...path]/page.tsx'),
+    ).rejects.toThrow(
+      "static build cannot write a [...name] directory — it answers a pathname of any depth, which only a request names, and this is one:\n  src/routes/files/[...path]\nthis application wants mode: 'server'",
+    );
+  });
+
+  it('leaves a page beside a [...name] directory alone', async () => {
+    await expect(
+      transform('rest', 'rsc', '/src/routes/files/page.tsx'),
+    ).resolves.not.toBeNull();
   });
 
   it('refuses a route.ts that answers a method a file cannot, the moment it is compiled', async () => {

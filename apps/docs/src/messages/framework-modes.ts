@@ -129,8 +129,8 @@ export const refusedTitle = message({
 });
 
 export const refusedLead = message({
-  ja: "staticモードのビルドは、リクエストに応答する次のコードをエラーにします。見つけたファイルは、種類ごとにまとめて挙げます。`guard.ts`と`search`、`route.ts`のメソッドは、コンパイルの前に調べます。`@k8ordo/framework/server`のimportと`'use server'`は、コンパイルの後に調べます。前の段階のエラーを直すと、次のビルドで後の段階のエラーが出ることがあります。",
-  en: "A static mode build fails on the following code, which responds to a request. It lists the files it finds, one list per kind. A `guard.ts`, `search` and a `route.ts`'s methods are checked before compiling; imports of `@k8ordo/framework/server` and `'use server'` after it. Fixing the first can reveal the second on the next build.",
+  ja: "staticモードのビルドは、リクエストに応答する次のコードをエラーにします。見つけたファイルは、種類ごとにまとめて挙げます。`[...name]`のディレクトリと`guard.ts`、`search`、`route.ts`のメソッドは、コンパイルの前に調べます。`@k8ordo/framework/server`のimportと`'use server'`は、コンパイルの後に調べます。前の段階のエラーを直すと、次のビルドで後の段階のエラーが出ることがあります。",
+  en: "A static mode build fails on the following code, which responds to a request. It lists the files it finds, one list per kind. A `[...name]` directory, a `guard.ts`, `search` and a `route.ts`'s methods are checked before compiling; imports of `@k8ordo/framework/server` and `'use server'` after it. Fixing the first can reveal the second on the next build.",
 });
 
 export const refusedList = [
@@ -145,6 +145,10 @@ export const refusedList = [
   message({
     ja: '`guard.ts`',
     en: 'A `guard.ts`',
+  }),
+  message({
+    ja: '`[...name]`のディレクトリ',
+    en: 'A `[...name]` directory',
   }),
   message({
     ja: '`search`をexportするページ',

@@ -10,13 +10,15 @@
 > changes. Pick `server` when the application needs the request — Server
 > Actions, `guard.ts`, the `request` prop, cookies, a page that exports
 > `search`, parameter values with no list rendered on the server (static
-> mode has only a `fallback.tsx`'s shell for those, drawn in the browser) —
-> and `static` otherwise; static mode refuses all of those by name, in the
+> mode has only a `fallback.tsx`'s shell for those, drawn in the browser), a
+> `[...name]` directory — and `static` otherwise; static mode refuses all of those by name, in the
 > build and in `vite dev` (`this application wants mode: 'server'`).
 > `src/routes/` is the pathname space and holds nothing else
 > (page/layout/not-found/error/loading/fallback/paths/redirect/guard/route
 > files,
-> `[param]` and `(group)` directories; `_` is an ordinary character in
+> `[param]` and `(group)` directories, and under server mode `[...name]`,
+> which takes every remaining segment — one or more — as an array
+> (`/files/:path+`); `_` is an ordinary character in
 > a segment and a name starting with `.` is not read, so `/.well-known` cannot
 > be a route; components live outside it in `src/components/` and every
 > other module in `src/lib/`); a page or layout may
@@ -64,7 +66,11 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 ## References
 
 - [Routing](references/routing.md): the `routes/` grammar and every refusal
-  the build names, where a `fallback.tsx` may sit, how a page is sent in
+  the build names, rest parameters (`[...name]`, server mode only: the
+  pattern `/files/:path+`, an array of decoded segments for the page, layout,
+  `route.ts` and `guard.ts`, never zero segments, always the last directory,
+  tried after a literal and a `[name]` beside it and before the
+  `not-found.tsx`), where a `fallback.tsx` may sit, how a page is sent in
   each mode (each page loads only its own client components and CSS, what
   every page loads comes in at most two files — the entry's and the frame's,
   which sets the client build's `codeSplitting` — and the browser renders
@@ -84,7 +90,8 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   an `.mdx` file imports reaches the pages rendering it, with no query),
   and counting page views (`navigatesuccess`, not `usePathname()`).
 - [Parameters](references/params.md): `paramsSchema` — a refused value is a
-  pathname the pattern does not answer — and, under static mode, `paths.ts`:
+  pathname the pattern does not answer; a `[...name]` directory's receives
+  the array of segments — and, under static mode, `paths.ts`:
   the values of its directory's parameter (`Paths<Pattern>`), given the
   params above it, for every page, `route.ts` and `redirect.ts` below it,
   and what fails the build; and `fallback.tsx` for the values it does not
@@ -107,12 +114,14 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   page that exports `search` under server mode — and forms.
 - [Server Actions](references/actions.md): server mode only. `'use server'`
   against `server-only`, `cookies()` / `responseHeaders()` /
-  `requestHeaders()` in an action, the page context an action runs in, forms
-  before JavaScript, and ending with `redirect()`.
+  `requestHeaders()` / `waitUntil()` in an action, the page context an
+  action runs in, forms before JavaScript, and ending with `redirect()`.
 - [Guards, cookies and the request](references/guards.md): server mode only.
   `guard.ts` (outer first; a `Response` ends the request),
-  `responseHeaders()`, `cookies()` and its defaults, and the read-only
-  `request` a page receives.
+  `responseHeaders()`, `cookies()` and its defaults, `waitUntil(promise)`
+  for work that goes on after the answer (what it means, where it may be
+  called, a rejection logged once), and the read-only `request` a page
+  receives.
 - [Content Security Policy](references/csp.md): `nonce()` in a header a
   guard writes under server mode, in `style-src` too for the framework's
   one `<style>`; the `csp` option and `colorSchemeScriptHash()` under static
@@ -128,8 +137,12 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   under server mode, a `dist/` that runs on its own with
   `node dist/server.js` (`PORT`, `HOST`, every dependency bundled in, and
   `resolve.external` for one that cannot be), `serve` (compression, `ETag`,
-  `Range`), the request handler under Node.js, Bun, Deno and Cloudflare
-  Workers, the same-origin rule for a `POST`, and `vercel()` in either mode,
+  `Range`, `close()` waiting for what `waitUntil()` was handed), the request
+  handler under Node.js, Bun, Deno and Cloudflare Workers and the
+  `HandlerContext` it takes as a second argument, the same-origin rule for a
+  `POST`, and `vercel()` in either mode (under server mode its function's
+  `maxDuration` and `regions`, and `@vercel/functions` installed for
+  `waitUntil()`),
   with routes of your own under static mode;
   a tab opened before a deploy, and Vite's `base`.
 
@@ -170,7 +183,13 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   a `guard.ts`, a `route.ts` or a Server Action, and they throw anywhere
   else; `nonce()` is the nonce this answer's inline scripts carry, new per
   request and readable anywhere the request is answered, the render
-  included; `Guard<P>` is the type of what a `guard.ts` default-exports
+  included; `waitUntil(promise)` keeps the host from stopping until
+  `promise` settles, for work that goes on after the answer — callable
+  anywhere the request is in progress, the render included, a rejection
+  logged once and never left unhandled; `HandlerContext`
+  (`{ waitUntil?: (promise: Promise<unknown>) => void }`) is the type of
+  the second argument the built handler takes from a runtime that calls it;
+  `Guard<P>` is the type of what a `guard.ts` default-exports
   (`({ request, params }) => Response | void`) and `GuardContext<P>` its
   argument; `RedirectTarget` is the type of what a `redirect.ts`
   default-exports, and `RouteRequest` the type of the `request` prop.
@@ -178,7 +197,9 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   `serve({ dist?, port?, host? })` (`ServeOptions`: `dist` defaults to
   `dist` under the working directory, `port` to `3000`, `host` to
   `localhost`) serves a build and returns a `Server`, `{ port, url, close }`
-  (`port: 0` takes a free port): for a server build, the client build's
+  (`port: 0` takes a free port; `close()` resolves once the answers under
+  way are written and what `waitUntil()` was handed has settled): for a
+  server build, the client build's
   files as they are and everything else through the request handler; for a
   static build, as a static host does — files, the `_redirects` rewrites,
   `404.html` under 404, never the handler. `dist/server.js` runs it under
@@ -186,8 +207,9 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   `dependencies`.
 - `dist/server.js` — under server mode, what the build writes to start
   `serve` on the build it sits in: `node dist/server.js`, listening on
-  `PORT` (default `3000`) and `HOST` (default `localhost`), closing and
-  exiting with `0` on `SIGTERM` or `SIGINT`. `serve` and every
+  `PORT` (default `3000`) and `HOST` (default `localhost`), closing —
+  after the work handed to `waitUntil()` — and exiting with `0` on `SIGTERM`
+  or `SIGINT`. `serve` and every
   dependency of the handler are bundled into `dist/`, with
   `dist/package.json` (written in either mode) marking it ES modules, so
   `dist/` runs with nothing installed and the framework is a dev
@@ -223,6 +245,6 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   the problems the build names under
   `routes/ is not a valid pathname space:` fails it the same way (exit
   code 1), with nothing written. What `mode: 'static'` refuses on top of
-  those — a `guard.ts`, a `route.ts` answering more than `GET`, a page
+  those — a `[...name]` directory, a `guard.ts`, a `route.ts` answering more than `GET`, a page
   reading `search`, an `export *`, a Server Action, whatever a `paths.ts`
   returns — it does not check, so its success is not the build's.

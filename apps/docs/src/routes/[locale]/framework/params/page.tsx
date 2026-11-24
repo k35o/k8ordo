@@ -95,6 +95,17 @@ export default function ProductsPage() {
   );
 }`;
 
+const REST = `import type { PageProps } from '@k8ordo/framework';
+import * as z from 'zod/mini';
+
+export const paramsSchema = z.object({
+  path: z.array(z.string().check(z.regex(/^[a-z0-9-]+$/u))),
+});
+
+export default function DocPage({ params }: PageProps<'/docs/:path+'>) {
+  return <h1>{params.path.join(' / ')}</h1>;
+}`;
+
 const PATHS = `import type { Paths } from '@k8ordo/framework';
 
 import { listProducts } from '../../../lib/catalog.server';
@@ -333,6 +344,28 @@ export default function FrameworkParamsPage() {
         </p>
         <p>
           <Rich>{t.layoutValue()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection id="rest" title={t.restTitle}>
+        <CodeBlock
+          code={REST}
+          lang="tsx"
+          marks={{ 4: 'highlight', 5: 'highlight', 6: 'highlight' }}
+          title="src/routes/docs/[...path]/page.tsx"
+        />
+        <p>
+          <Rich>{t.restArray()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.restRefused()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.restGrammarBefore()}</Rich>
+          <LocaleAnchor path="/:locale/framework/routing">
+            {m.framework.navRouting()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
         </p>
       </DocSection>
 

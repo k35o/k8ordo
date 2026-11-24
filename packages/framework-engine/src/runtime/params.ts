@@ -1,5 +1,7 @@
 import { AsyncLocalStorage, AsyncResource } from 'node:async_hooks';
 
+import type { Match } from '@k8ordo/router';
+
 /**
  * A route file's `paramsSchema` export, in the one shape every validation library
  * agrees on (Standard Schema). The framework runs it; the router only types
@@ -27,8 +29,8 @@ export type ParsedParams = {
 
 /**
  * Runs the schemas along a matched stack — outer layouts first, the page
- * last — over the raw params, each replacing the strings it names with what
- * it produced. `null` means some schema refused, which is the pattern not
+ * last — over the raw params (a string each, a rest param its segments), each
+ * replacing the ones it names with what it produced. `null` means some schema refused, which is the pattern not
  * answering this pathname at all.
  *
  * A schema may write to the async context it runs in — `@k8ordo/i18n`
@@ -40,7 +42,7 @@ export type ParsedParams = {
  */
 export const parseParams = (
   schemas: readonly ParamsSchema[],
-  raw: Readonly<Record<string, string>>,
+  raw: Match['params'],
 ): ParsedParams | null =>
   new AsyncResource('k8ordo.params').runInAsyncScope(() => {
     const current: Record<string, unknown> = { ...raw };
@@ -72,7 +74,7 @@ export const parseParams = (
  */
 export const parseCatchAllParams = (
   schemas: readonly ParamsSchema[],
-  raw: Readonly<Record<string, string>>,
+  raw: Match['params'],
 ): ParsedParams => ({
   params: raw,
   enter: parseParams(schemas, raw)?.enter ?? ((fn) => fn()),

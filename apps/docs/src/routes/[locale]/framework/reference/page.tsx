@@ -330,6 +330,39 @@ export default function FrameworkReferencePage() {
       />
 
       <ApiEntry
+        caveats={t.waitUntilCaveats}
+        from={SERVER}
+        id="wait-until"
+        name="waitUntil"
+        params={[
+          {
+            name: 'promise',
+            type: 'Promise<unknown>',
+            description: t.waitUntilPromise,
+          },
+        ]}
+        signature="waitUntil(promise: Promise<unknown>): void"
+        summary={t.waitUntilSummary}
+      />
+
+      <ApiEntry
+        fields={[
+          {
+            name: 'waitUntil',
+            type: '(promise: Promise<unknown>) => void',
+            description: t.handlerContextWaitUntil,
+          },
+        ]}
+        from={SERVER}
+        id="handler-context"
+        name="HandlerContext"
+        signature={`type HandlerContext = {
+  readonly waitUntil?: (promise: Promise<unknown>) => void;
+};`}
+        summary={t.handlerContextSummary}
+      />
+
+      <ApiEntry
         fields={[
           { name: 'request', type: 'Request', description: t.guardRequest },
           {

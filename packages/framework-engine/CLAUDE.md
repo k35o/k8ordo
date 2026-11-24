@@ -91,8 +91,29 @@ pnpm check         # check:write to auto-fix
 - **Declaration order is load-bearing.** `not-found.tsx` is emitted last in
   its branch because the router matches in declaration order; every route the
   app actually declared has to out-rank the catch-all. Literal directories are
-  emitted before parameters for the same reason — a directory tree has no
+  emitted before parameters, and a parameter before a rest parameter, for the
+  same reason — a directory tree has no
   order of its own, and the alphabet would put `[slug]` before `about`.
+- **A `[...name]` directory is a rest parameter, and the last directory of
+  its path.** `kind: 'rest'`, key `/:name+` — the router's one-or-more — so
+  it answers one segment or more below its parent and never the parent's own
+  URL. Not "catch-all" in the code or the docs: that word is taken by a
+  not-found's `/*`. The grammar refuses a directory below one (a route group
+  included), a second one under the same parent, a name an ancestor took, and
+  the files that would mean nothing there: `not-found.tsx` (nothing is below
+  it), and `fallback.tsx` and `paths.ts` (a build into files writes none of
+  it). There is no optional form: `[[...name]]` is a malformed `[name]`.
+  `rank` orders it after a `[name]` beside it and before a not-found, since
+  it also takes the one segment `[name]` takes. The handler needs nothing of
+  its own: the router hands the param over as its segments, each decoded, and
+  `Match['params']` is the type everything between the match and the route
+  file carries (the schemas, a guard, a shell's known params) — a
+  `paramsSchema` receives the array and may replace it. A `redirect.ts`
+  target moves one with the same spelling, `:name+`, every segment as the URL
+  spelled it; `:name` there has no value. Mode-free here: what refuses it
+  under `'static'` is `@k8ordo/framework`, through `restDirOf`.
+  `grammar/tree.test.ts` holds the grammar, `generate/emit.integration.test.ts`
+  the order, and `runtime/rest.test.ts` the built handler.
 - **Shadowing is checked only on a grammatical tree.** `unreachableRoutes`
   builds URLPatterns from directory names, and a name the grammar rejected is
   not a pattern — running it on a broken tree throws instead of reporting. So
@@ -706,6 +727,28 @@ pnpm check         # check:write to auto-fix
   `Set-Cookie` line, the last one per name, path and domain. Static mode refuses
   `guard.ts` (by name at build, per module in `vite dev`), reading the slot
   through `slotOf`.
+- **`waitUntil()` hands the host a promise that cannot reject, and the
+  handler's second argument is the host.** The handler is
+  `(request, host?: HandlerContext)`, and `withRequest` keeps `host` in the
+  request's scope. `waitUntil(promise)` (`runtime/request-scope.ts`, on
+  `./server`) runs nothing — the work has started — and attaches the one
+  rejection handler, which logs `k8ordo: waitUntil() of %s %s failed` with
+  the method and pathname as arguments, then calls `host.waitUntil` with the
+  promise that handler returned: a host never sees a rejection, and with no
+  host (the build, `vite dev`, `vite preview`, a runtime that passed none)
+  nothing is left unhandled either. It is called as the host's own method,
+  since a Worker's `ctx.waitUntil` breaks once taken off `ctx`. Unlike the
+  response API it is allowed in every phase, the render included: it writes
+  nothing to the response, which is all the phase rule protects. It refuses
+  outside a request and inside `writingFile`, as `nonce()` does. A stream's
+  `pull` runs in the async context of whoever reads it — the host writing
+  the answer, which is in no request — so `runRoute` wraps the body a
+  `route.ts` answered with in `readInRequest`, which reads it inside the
+  request's scope; without it a `waitUntil()` from a later `pull` finds no
+  request. Only a `route.ts` body is wrapped: a page's stream is React's,
+  whose work continues from promises made inside the request.
+  `runtime/wait-until.test.ts` builds `fixtures/wait-until/` and calls the
+  handler as a host would, with and without one.
 - **A `route.ts` holds its place in the table and answers outside it.**
   It is a slot of the grammar that answers its directory's URL, so it
   conflicts with a `page.tsx` or a `redirect.ts` there and counts as a
@@ -867,8 +910,8 @@ pnpm check         # check:write to auto-fix
   its trees is on screen; `reportCaught` stays quiet about a not-found it
   answered. `app-router.browser.test.tsx` holds each of these.
 - **One pattern walk.** `declaredPatterns(tree)` is the order the matcher
-  tries patterns — pages and redirects, literals before params, the
-  catch-all last in its branch — and everything that asks "which URLs does
+  tries patterns — pages and redirects, literals before params, params
+  before a rest param, the catch-all last in its branch — and everything that asks "which URLs does
   this site have" reads it: the shadow check here, `patternsOf` in
   `@k8ordo/framework`'s static mode. `decodePathname` is likewise the one
   decoding both modes use before a pathname may name a file.
@@ -937,11 +980,11 @@ src/
   runtime/pathname.ts        decodePathname, before a pathname may name a file
   runtime/redirect.ts        redirect(), what a Server Action throws; where a redirect.ts sends a pathname the table matched to it
   runtime/request.ts         the read-only request a page receives
-  runtime/request-scope.ts   the request in progress: phases, cookies() / responseHeaders() / requestHeaders(), nonce(), answer()
+  runtime/request-scope.ts   the request in progress: phases, cookies() / responseHeaders() / requestHeaders(), nonce(), answer(); waitUntil() and the host it hands promises to (HandlerContext), readInRequest
   runtime/server.ts          the request API, which is @k8ordo/framework/server: the framework points that entry here
   runtime/cookies.ts         the per-request cookie jar and its Set-Cookie lines
   runtime/guard.ts           Guard / GuardContext, runGuards (outer first, first Response ends it)
-  runtime/route.ts           ROUTE_METHODS, which export answers a method, 405, running it in the route phase
+  runtime/route.ts           ROUTE_METHODS, which export answers a method, 405, running it in the route phase, its body read inside the request
   runtime/render.tsx         the matched stack, nested through children; the framework's own not-found, inside the root layout
   runtime/page-watch.ts      a page called as the render calls it, its answer watched
   runtime/page-boundary.tsx  a navigation's late notFound() → a document load; anything else on to error.tsx
@@ -963,6 +1006,10 @@ fixtures/
                              runtime/not-found.test.ts opens in each engine
   redirect-beside-literal/routes/  a [slug]/redirect.ts beside about/page.tsx,
                              whose handler runtime/redirect-order.test.ts calls
+  rest/routes/               [...name] directories holding a page under a
+                             layout, a page with a schema, a route.ts under a
+                             guard and a redirect.ts, beside a literal and a
+                             [name], whose handler runtime/rest.test.ts calls
   fallback/routes/           pages with a fallback.tsx (a server one, one that
                              says notFound(), a 'use client' one, one with a
                              not-found.tsx beside it) under a layout whose
@@ -1011,6 +1058,12 @@ fixtures/
                              through a glob, each .mdx importing CSS, which
                              runtime/mdx-css.test.ts builds with a stand-in
                              MDX compiler
+  wait-until/routes/         a route.ts calling waitUntil() (with a promise
+                             that settles or, asked with ?fail, rejects),
+                             one calling it from a late pull of the stream
+                             it answered with, and a page calling it as it
+                             renders, which runtime/wait-until.test.ts
+                             builds and calls with and without a host
   head-scripts/routes/       a layout writing an inline script in <head> and
                              importing CSS, which runtime/head-scripts.test.ts
                              opens in each engine with the CSS held back

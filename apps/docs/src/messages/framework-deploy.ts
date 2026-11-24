@@ -433,8 +433,13 @@ export const startEnv = [
 ] as const;
 
 export const startStop = message({
-  ja: '`SIGTERM`か`SIGINT`を受けると、新しい接続を断り、処理中の応答を返し終えてから終了コード`0`で終わります。コンテナの最初のプロセスとして起動しても、止める指示ですぐに止まります。',
-  en: 'On `SIGTERM` or `SIGINT` it stops taking connections, finishes the answers already under way, and exits with `0`. Started as a container’s first process, it still stops as soon as it is told to.',
+  ja: '`SIGTERM`か`SIGINT`を受けると、新しい接続を断ります。処理中の応答を返し、`waitUntil()`に渡された処理が終わってから、終了コード`0`で終わります。コンテナの最初のプロセスとして起動しても、止める指示で止まります。',
+  en: 'On `SIGTERM` or `SIGINT` it stops taking connections. It finishes the answers already under way and the work handed to `waitUntil()`, then exits with `0`. Started as a container’s first process, it still stops when it is told to.',
+});
+
+export const startWait = message({
+  ja: '`waitUntil()`の処理を待つ時間に上限はありません。決着しないPromiseを渡すと、コンテナの猶予が切れるまでプロセスが残ります。',
+  en: 'There is no limit on how long it waits for that work. A promise that never settles keeps the process until the container’s grace period runs out.',
 });
 
 export const externalTitle = message({
@@ -482,6 +487,11 @@ export const serveReturn = message({
   en: 'The return value has `url`, `port` and `close()`, so a test can start a server against the build and stop it when done.',
 });
 
+export const serveClose = message({
+  ja: '`close()`は新しい接続を断ります。返すPromiseは、処理中の応答を返し、`waitUntil()`に渡された処理が終わってから解決します。',
+  en: '`close()` stops taking connections. Its promise resolves once the answers under way are written and the work handed to `waitUntil()` has finished.',
+});
+
 export const answersTitle = message({
   ja: '`serve()`の応答',
   en: 'How `serve()` responds',
@@ -526,13 +536,18 @@ export const handlerTitle = message({
 });
 
 export const handlerExport = message({
-  ja: '`dist/rsc/index.js`は、`(request: Request) => Promise<Response>`の関数をdefault exportしています。ハンドラは隣の`dist/ssr/`を読み込むので、2つは同じ場所に置きます。依存はバンドル済みなので、インストールは要りません。',
-  en: '`dist/rsc/index.js` default-exports a function of type `(request: Request) => Promise<Response>`. The handler loads `dist/ssr/` from beside itself, so keep the two in the same place. Its dependencies are bundled in, so nothing needs installing.',
+  ja: '`dist/rsc/index.js`は、`(request: Request, context?: HandlerContext) => Promise<Response>`の関数をdefault exportしています。ハンドラは隣の`dist/ssr/`を読み込むので、2つは同じ場所に置きます。依存はバンドル済みなので、インストールは要りません。',
+  en: '`dist/rsc/index.js` default-exports a function of type `(request: Request, context?: HandlerContext) => Promise<Response>`. The handler loads `dist/ssr/` from beside itself, so keep the two in the same place. Its dependencies are bundled in, so nothing needs installing.',
 });
 
 export const handlerRuntime = message({
   ja: 'Webの`Request`と`Response`、ストリームのほかに、ハンドラが実行環境に求めるのは`node:async_hooks`の`AsyncLocalStorage`だけです。Node.jsとBunとDeno、`nodejs_compat`を付けたCloudflare Workersで、importしたハンドラをそのまま渡せます。',
   en: 'Beyond the web’s `Request`, `Response` and streams, the only thing the handler needs from its runtime is `AsyncLocalStorage` from `node:async_hooks`. Node.js, Bun, Deno, and Cloudflare Workers with `nodejs_compat` all take the imported handler as it is.',
+});
+
+export const handlerContext = message({
+  ja: '第2引数の`waitUntil`には、ランタイムの`waitUntil`を渡します。アプリが`waitUntil()`に渡したPromiseを、ハンドラがそこへ渡します。Workersの`ctx`はそのまま渡せます。第2引数を省くとハンドラがPromiseを保持するだけなので、応答のあともプロセスが残るランタイムで省けます。',
+  en: 'Pass the runtime’s `waitUntil` as `waitUntil` of the second argument. The handler hands it every promise the application passed to `waitUntil()`. A Worker’s `ctx` fits as it is. Without the second argument the handler only holds the promises, which is enough on a runtime whose process outlives the response.',
 });
 
 export const handlerFiles = message({
@@ -580,9 +595,24 @@ export const vercelFunction = message({
   en: 'The client build becomes static files on Vercel’s CDN, and every request that matches no file goes to one Node.js function, which is the request handler. The copies compressed for `serve()` are left out.',
 });
 
+export const vercelSettings = message({
+  ja: "関数の実行時間の上限とリージョンは、`vercel()`に渡します。`maxDuration`は1つのリクエストにかけられる秒数（`'max'`ならプランの上限）、`regions`は関数を置くVercelのリージョンです。関数は1つなので、どのルートにも同じ値が効きます。渡さなければ、プランの既定とプロジェクトの設定のままです。staticモードには関数が無いので、渡すとビルドが止まります。",
+  en: "How long the function may run, and where, goes to `vercel()`. `maxDuration` is the seconds one request may take (`'max'` for the plan’s maximum), and `regions` is the Vercel regions the function is deployed to. There is one function, so one value answers every route. Left out, they stay at the plan’s default and the project’s setting. Static mode has no function, and the build stops when given either.",
+});
+
 export const vercelBundle = message({
   ja: 'Vercelの関数は自分のディレクトリの中身しか持てません。ハンドラは依存をすべてバンドルしているので、そのまま関数になります。`resolve.external`で外した依存は関数に入らないので、Vercelでは動きません。',
   en: 'A Vercel function holds nothing but its own directory. The handler has every dependency bundled in, so it becomes the function as it is. A dependency left out with `resolve.external` is not in the function, and does not work on Vercel.',
+});
+
+export const vercelWaitUntil = message({
+  ja: '`waitUntil()`を使うアプリは、`@vercel/functions`をインストールします。Vercelは応答を返し終えた関数を止めるので、ビルドがこのパッケージの`waitUntil`を関数に同梱し、ハンドラに渡します。アプリのコードで`@vercel/functions`をimportする必要はありません。',
+  en: 'An application that uses `waitUntil()` installs `@vercel/functions`. Vercel stops a function once its response ends, so the build bundles that package’s `waitUntil` into the function and hands it to the handler. Nothing in the application has to import `@vercel/functions`.',
+});
+
+export const vercelWaitUntilMissing = message({
+  ja: '`@vercel/functions`が無いと、ビルドは`waitUntil`をimportしているファイルを挙げて止まります。エラー文は`the build for Vercel cannot keep the function running after its answer`で始まります。`waitUntil`をimportしないアプリには要りません。',
+  en: 'Without `@vercel/functions` the build stops, naming the files that import `waitUntil`, with an error that starts `the build for Vercel cannot keep the function running after its answer`. An application that never imports `waitUntil` does not need the package.',
 });
 
 export const headersTitle = message({

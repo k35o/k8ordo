@@ -3,6 +3,8 @@
 What a route parameter arrives as, and — under `mode: 'static'` — how the
 build learns which values to render, and what answers the ones it did not.
 Under `mode: 'server'` a value comes with the request and needs no list.
+A `[...name]` directory's parameter arrives as an array of segments
+([Rest parameters](#rest-parameters)), under `mode: 'server'` only.
 
 ## Parameters with a schema
 
@@ -68,6 +70,50 @@ A layout receives its params as strings whatever it declared — under
 be a lie, and a not-found receives strings for the same reason. A layout that
 wants the parsed value beside the page's parses it itself, or declares the
 schema and lets the pages below it receive the result.
+
+## Rest parameters
+
+Server mode only. The parameter of a `[...name]` directory
+([Rest parameters](routing.md#rest-parameters)) arrives as the segments it
+took, one or more, each decoded — `readonly string[]`, where a `[name]`
+gives a string:
+
+```tsx
+// src/routes/docs/[...path]/page.tsx
+import type { PageProps } from '@k8ordo/framework';
+
+export default function DocPage({ params }: PageProps<'/docs/:path+'>) {
+  return <h1>{params.path.join(' / ')}</h1>; // /docs/guide/intro → guide / intro
+}
+```
+
+A `paramsSchema` receives that array and validates it as any other value: a
+refusal is a pathname the directory does not answer, and what the schema
+returns is what the page receives and what a link takes.
+
+```tsx
+// src/routes/docs/[...path]/page.tsx
+import type { PageProps } from '@k8ordo/framework';
+import * as z from 'zod/mini';
+
+const SLUG = /^[a-z0-9-]+$/u;
+
+export const paramsSchema = z.object({
+  path: z.array(z.string().check(z.regex(SLUG))).check(z.maxLength(4)),
+});
+
+export default function DocPage({ params }: PageProps<'/docs/:path+'>) {
+  return <h1>{params.path.join(' / ')}</h1>;
+}
+```
+
+`/docs/Guide` and `/docs/a/b/c/d/e` are then pathnames nothing answers here,
+and go on to the nearest `not-found.tsx`. The layout in the directory, a
+`guard.ts` and the `not-found.tsx` above receive the array as the pathname
+carried it, as they receive every parameter.
+
+`mode: 'static'` refuses the directory itself, so none of the sections below
+— `paths.ts`, `fallback.tsx` — applies to one.
 
 ## Routes with parameters
 

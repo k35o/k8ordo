@@ -137,6 +137,58 @@ describe('literal siblings of a parameter', () => {
   });
 });
 
+describe('a [...name] directory in the table', () => {
+  // ファイル名順では `[...path]` が `[id]` より前、どちらもリテラルより前に来る
+  const routes = tableFor([
+    'page.tsx',
+    'not-found.tsx',
+    'files/page.tsx',
+    'files/[...path]/page.tsx',
+    'files/[id]/page.tsx',
+    'files/readme/page.tsx',
+    'api/[...rest]/route.ts',
+  ]);
+
+  it('takes every remaining segment as an array', () => {
+    expect(routes.match('/files/a/b/c')).toMatchObject({
+      pattern: '/files/:path+',
+      params: { path: ['a', 'b', 'c'] },
+      stack: [stub('files/[...path]/page.tsx')],
+    });
+  });
+
+  it('leaves zero segments to the directory above it', () => {
+    expect(routes.match('/files')?.pattern).toBe('/files');
+    expect(routes.match('/api')?.pattern).toBe('/*');
+  });
+
+  it('comes after a literal and a [name] beside it, and before the not-found', () => {
+    expect(
+      [...routes.matchAll('/files/readme')].map((found) => found.pattern),
+    ).toStrictEqual(['/files/readme', '/files/:id', '/files/:path+', '/*']);
+  });
+
+  it('holds the place of a route.ts', () => {
+    expect(routes.match('/api/v1/users')).toMatchObject({
+      pattern: '/api/:rest+',
+      params: { rest: ['v1', 'users'] },
+      stack: [stub('api/[...rest]/route.ts')],
+    });
+  });
+
+  it('comes after a [name] that a group beside it holds', () => {
+    const grouped = tableFor([
+      'page.tsx',
+      '[...path]/page.tsx',
+      '(shop)/[slug]/page.tsx',
+      '(shop)/not-found.tsx',
+    ]);
+    expect(
+      [...grouped.matchAll('/shoes')].map((found) => found.pattern),
+    ).toStrictEqual(['/:slug', '/*', '/:path+']);
+  });
+});
+
 describe('a route.ts in the table', () => {
   const routes = tableFor([
     'page.tsx',

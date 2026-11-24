@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import {
   answer,
@@ -8,6 +8,7 @@ import {
   requestHeaders,
   responseHeaders,
   signingNonce,
+  waitUntil,
   withRequest,
   writingFile,
 } from './request-scope';
@@ -206,6 +207,73 @@ describe('nonce()', () => {
   });
 });
 
+describe('waitUntil()', () => {
+  it('reports what it was handed failing even when it refuses the call, leaving no rejection unhandled', async () => {
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {
+      // 出したことは呼び出しで確かめる
+    });
+    const failure = new Error('the save failed');
+    const work = Promise.reject(failure);
+
+    expect(() => {
+      waitUntil(work);
+    }).toThrow('waitUntil() needs a request');
+    // 付けた受け手が走るのを待つ。work は reject 済みなので 1 回の await で届く
+    await Promise.allSettled([work]);
+    await Promise.resolve();
+    const { calls } = logged.mock;
+    logged.mockRestore();
+
+    expect(calls).toStrictEqual([
+      ['k8ordo: what a refused waitUntil() was handed failed', failure],
+    ]);
+  });
+
+  it('refuses outside a request, naming where it belongs', () => {
+    expect(() => {
+      waitUntil(Promise.resolve());
+    }).toThrow('waitUntil() needs a request — call it while one is answered');
+  });
+
+  it.each(['guard', 'route', 'action', 'render'] as const)(
+    'hands the host one promise in a %s of the request',
+    (phase) => {
+      const held: Array<Promise<unknown>> = [];
+      withRequest(
+        request,
+        () => {
+          inPhase(phase, () => {
+            waitUntil(Promise.resolve('done'));
+          });
+        },
+        {
+          waitUntil: (promise) => {
+            held.push(promise);
+          },
+        },
+      );
+      expect(held).toHaveLength(1);
+    },
+  );
+
+  it('calls the host as its own method, as a Worker’s ctx has to be', () => {
+    const host = {
+      held: 0,
+      waitUntil(this: { held: number }): void {
+        this.held += 1;
+      },
+    };
+    withRequest(
+      request,
+      () => {
+        waitUntil(Promise.resolve());
+      },
+      host,
+    );
+    expect(host.held).toBe(1);
+  });
+});
+
 describe('a request answered into a file', () => {
   const REFUSAL =
     /answers a request, and under mode: 'static' a file is written once for every visitor[\s\S]*this application wants mode: 'server'$/u;
@@ -215,6 +283,12 @@ describe('a request answered into a file', () => {
     ['cookies()', cookies],
     ['requestHeaders()', requestHeaders],
     ['nonce()', nonce],
+    [
+      'waitUntil()',
+      () => {
+        waitUntil(Promise.resolve());
+      },
+    ],
   ])('%s', (name, api) => {
     it.each(['route', 'render'] as const)(
       'refuses in a %s, naming static mode, rather than writing one visitor’s answer for all',

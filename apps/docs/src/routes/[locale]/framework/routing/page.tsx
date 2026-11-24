@@ -28,6 +28,16 @@ const TREE = `src/routes/
     guide/
       page.tsx`;
 
+const REST = `import type { PageProps } from '@k8ordo/framework';
+
+export default function FilePage({ params }: PageProps<'/files/:path+'>) {
+  return <h1>{params.path.join(' / ')}</h1>;
+}`;
+
+const REST_LINK = `import { href } from '@k8ordo/framework';
+
+href('/files/:path+', { path: ['a/b', 'c'] }); // '/files/a%2Fb/c'`;
+
 const PAGE_PROPS = `import type { PageProps } from '@k8ordo/framework';
 
 export default function ProductPage({
@@ -304,9 +314,43 @@ export default function FrameworkRoutingPage() {
           <Rich>{t.namesLead()}</Rich>
         </p>
         <Items items={t.namesList} />
+      </DocSection>
+
+      <DocSection id="rest" title={t.restTitle}>
+        <CodeBlock
+          code={REST}
+          lang="tsx"
+          marks={{ 3: 'highlight' }}
+          title="src/routes/files/[...path]/page.tsx"
+        />
         <p>
-          <Rich>{t.namesNoRest()}</Rich>
+          <Rich>{t.restValue()}</Rich>
         </p>
+        <p>
+          <Rich>{t.restDecode()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.restOne()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.restLast()}</Rich>
+        </p>
+        <CodeBlock code={REST_LINK} lang="ts" />
+        <p>
+          <Rich>{t.restLink()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.restSchemaBefore()}</Rich>
+          <LocaleAnchor path="/:locale/framework/params">
+            {m.framework.navParams()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
+        </p>
+        <Pitfall>
+          <p>
+            <Rich>{t.restStatic()}</Rich>
+          </p>
+        </Pitfall>
       </DocSection>
 
       <DocSection id="files" title={t.filesTitle}>

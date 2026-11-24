@@ -18,7 +18,8 @@ const LAUNCHER = 'virtual:k8ordo/launcher';
  */
 // SIGTERM を待つのは、コンテナの PID 1 の Node がハンドラの無いシグナルを
 // 無視するから。docker stop が猶予を使い切って SIGKILL で切ることになる。
-// close は処理中の答えを書き終えてから閉じる
+// close は処理中の答えを書き終え、waitUntil() に渡された処理が決着してから
+// 解決する
 const launcher = `import { serve } from ${JSON.stringify(SERVE)};
 
 const server = await serve({

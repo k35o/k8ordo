@@ -124,4 +124,38 @@ describe('vercel', () => {
       );
     },
   );
+
+  it.each([
+    ['maxDuration', { maxDuration: 800 }],
+    ['regions', { regions: ['hnd1'] }],
+  ])(
+    "refuses %s under mode: 'static', where there is no function",
+    async (_name, options) => {
+      await expect(
+        resolved([framework({ mode: 'static' }), vercel(options)]),
+      ).rejects.toThrow(
+        "vercel() takes maxDuration and regions under mode: 'server' only — under mode: 'static' there is no function for them to configure",
+      );
+    },
+  );
+
+  it.each([0, -1, 1.5, Number.NaN])(
+    'refuses a maxDuration of %s, which is not a whole number of seconds',
+    async (maxDuration) => {
+      await expect(
+        resolved([framework({ mode: 'server' }), vercel({ maxDuration })]),
+      ).rejects.toThrow(
+        "vercel() takes maxDuration as a whole number of seconds or 'max'",
+      );
+    },
+  );
+
+  it("takes maxDuration and regions under mode: 'server'", async () => {
+    await expect(
+      resolved([
+        framework({ mode: 'server' }),
+        vercel({ maxDuration: 'max', regions: ['hnd1'] }),
+      ]),
+    ).resolves.toBeDefined();
+  });
 });

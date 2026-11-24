@@ -91,6 +91,7 @@
     "@types/mime-types": "3.0.1",
     "@types/range-parser": "1.2.7",
     "@types/react": "catalog:",
+    "@vercel/functions": "3.7.6",
     "oxc-transform-react": "catalog:",
     "publint": "catalog:",
     "react": "catalog:",
@@ -102,12 +103,16 @@
   },
   "peerDependencies": {
     "@k8ordo/router": "workspace:^",
+    "@vercel/functions": "^3.0.0",
     "oxc-transform-react": ">=0.152.0 <0.157.0",
     "react": ">=19.3.0",
     "react-dom": ">=19.3.0",
     "vite": ">=8.1.0"
   },
   "peerDependenciesMeta": {
+    "@vercel/functions": {
+      "optional": true
+    },
     "oxc-transform-react": {
       "optional": true
     }
