@@ -80,6 +80,14 @@ dark values of the colors (`:root color-scheme: dark`), the
 and their dark values
 (`@media (prefers-contrast: more) :root color-scheme: dark`).
 
+`@k8ordo/ui/tokens.css` is the tokens as a stylesheet of their own: the
+declarations at `:root`, the `prefers-contrast: more` overrides, and the base
+layer's `color-scheme` rules (`light` on `:root`, `dark` under `.dark`, `light`
+again in print), with no reset and no page-wide defaults. A page that loads
+only this file reads the tokens and darkens them with the `dark` class; to
+follow the OS setting instead, it sets `color-scheme: light dark` on `:root`
+outside any layer.
+
 [better-css-modules](https://github.com/k35o/better-css-modules) holds CSS
 Modules to these tokens: list `@k8ordo/ui/styles.css` in its `globalCss`, and
 its `check` reports a raw value, a misspelt token, or a palette color in your
