@@ -3,24 +3,6 @@
  */
 
 @layer base {
-  /* `light dark` にしないのは、配色を prefers-color-scheme ではなく .dark で
-     切り替えるから。OS がダークでも .dark が無ければ、トークンもネイティブ部品も
-     明るいままにする */
-  :root {
-    color-scheme: light;
-  }
-
-  .dark {
-    color-scheme: dark;
-  }
-
-  /* ブラウザは既定で背景を刷らないので、印刷ではトークンもネイティブ部品もライトに戻す */
-  @media print {
-    .dark:where(:not(:has(.print-as-shown))) {
-      color-scheme: light;
-    }
-  }
-
   body:has(dialog[open]) {
     overflow: hidden;
   }

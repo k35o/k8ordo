@@ -52,6 +52,42 @@ const unlayeredStyles = (nodes: ChildNode[]): ChildNode[] =>
     );
   });
 
+type UnlayeredToken = { place: string; name: string; value: string };
+
+const unlayeredTokens = (nodes: ChildNode[]): UnlayeredToken[] =>
+  nodes.flatMap((node) => {
+    const media =
+      node.type === 'atrule' && node.name === 'media' ? node : undefined;
+    return (media?.nodes ?? [node])
+      .filter((rule): rule is Rule => rule.type === 'rule')
+      .flatMap((rule) =>
+        rule.nodes.filter(isTokenDeclaration).map(({ prop, value }) => ({
+          place: media
+            ? `@media ${media.params} ${rule.selector}`
+            : rule.selector,
+          name: prop,
+          value,
+        })),
+      );
+  });
+
+const lightDarkTokens = (nodes: ChildNode[]): string[] =>
+  unlayeredTokens(nodes)
+    .filter(({ value }) => value.includes('light-dark('))
+    .map(({ place, name }) => `${place} ${name}`);
+
+// toString() で比べると、ビルドが入れる空白と改行まで期待値に書くことになる
+const outline = (node: ChildNode): string => {
+  if (node.type === 'decl') return `${node.prop}: ${node.value}`;
+  if (node.type === 'rule') {
+    return `${node.selector} { ${node.nodes.map(outline).join('; ')} }`;
+  }
+  if (node.type === 'atrule') {
+    return `@${node.name} ${node.params} { ${(node.nodes ?? []).map(outline).join(' ')} }`;
+  }
+  return '';
+};
+
 // components レイヤーのブロックと、中身のないレイヤーの宣言文のほかにあるもの
 const outsideComponents = (nodes: ChildNode[]): ChildNode[] =>
   nodes.filter((node) => {
@@ -131,6 +167,7 @@ const lightDarkNamesIn = (media: string | undefined): string[] => {
 
 describe('dist', () => {
   const styles = path.join('styles', 'index.css');
+  const tokensCss = path.join('styles', 'tokens.css');
   const components = filesIn('.css').filter(
     (file) => !file.startsWith(`styles${path.sep}`),
   );
@@ -219,5 +256,47 @@ describe('dist', () => {
 
     expect(layerOrder(root.nodes)).toStrictEqual(LAYERS);
     expect(unlayeredStyles(root.nodes)).toStrictEqual([]);
+  });
+
+  it('tokens.css は、styles.css がレイヤーの外に置くトークンを --writing のほかすべて同じ値で持つ', () => {
+    // --writing は縦書きの部品が読む目印で、トークンではない
+    const inStyles = unlayeredTokens(parse(styles).nodes).filter(
+      ({ name }) => name !== '--writing',
+    );
+
+    expect(inStyles.length).toBeGreaterThan(200);
+    expect(unlayeredTokens(parse(tokensCss).nodes)).toStrictEqual(inStyles);
+  });
+
+  it('tokens.css は、トークンのほかに base レイヤーの color-scheme の規則だけを持つ', () => {
+    const root = parse(tokensCss);
+
+    expect(unlayeredStyles(root.nodes)).toStrictEqual([]);
+    expect(
+      root.nodes.filter((node) => layerOf(node) !== undefined).map(outline),
+    ).toStrictEqual([
+      [
+        '@layer base {',
+        ':root { color-scheme: light }',
+        '.dark { color-scheme: dark }',
+        '@media print { .dark:where(:not(:has(.print-as-shown))) { color-scheme: light } }',
+        '}',
+      ].join(' '),
+    ]);
+  });
+
+  it('tokens.css は、light-dark() で書いた値を置き換えずに持つ', () => {
+    // Lightning CSS は古い target に向けると light-dark() を --lightningcss-light /
+    // -dark の変数に置き換え、html のほかに付けた .dark の中が暗くならなくなる
+    const source = postcss.parse(
+      readFileSync(path.join(import.meta.dirname, 'tokens.css'), 'utf8'),
+    );
+    const root = parse(tokensCss);
+
+    expect(lightDarkTokens(source.nodes).length).toBeGreaterThan(40);
+    expect(lightDarkTokens(root.nodes)).toStrictEqual(
+      lightDarkTokens(source.nodes),
+    );
+    expect(root.toString()).not.toContain('--lightningcss');
   });
 });

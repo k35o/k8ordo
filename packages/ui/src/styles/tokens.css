@@ -341,3 +341,28 @@
     --color-secondary-border: light-dark(var(--cyan-700), var(--cyan-300));
   }
 }
+
+/* ページの既定を置く base.css でなくここに書くのは、このファイルだけを読んだ
+   ページ（@k8ordo/ui/tokens.css）でも .dark の中を暗くするため。色は
+   light-dark() なので、color-scheme が無いと暗い側にならない。レイヤーの中に
+   置くのは、OS に従わせたいページがレイヤーなしの
+   :root { color-scheme: light dark; } で上書きできるように */
+@layer base {
+  /* `light dark` にしないのは、配色を prefers-color-scheme ではなく .dark で
+     切り替えるから。OS がダークでも .dark が無ければ、トークンもネイティブ部品も
+     明るいままにする */
+  :root {
+    color-scheme: light;
+  }
+
+  .dark {
+    color-scheme: dark;
+  }
+
+  /* ブラウザは既定で背景を刷らないので、印刷ではトークンもネイティブ部品もライトに戻す */
+  @media print {
+    .dark:where(:not(:has(.print-as-shown))) {
+      color-scheme: light;
+    }
+  }
+}
