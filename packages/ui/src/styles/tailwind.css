@@ -151,7 +151,7 @@
 }
 
 /* .dark の中を印刷で分けるのは、トークンが印刷では .print-as-shown を含む .dark
-   でだけダークのままになり、それ以外はライトに戻るから（base.css の color-scheme） */
+   でだけダークのままになり、それ以外はライトに戻るから（tokens.css の color-scheme） */
 @custom-variant dark {
   @media not print {
     &:where(.dark, .dark *) {

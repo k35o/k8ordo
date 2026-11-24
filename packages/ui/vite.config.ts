@@ -132,6 +132,9 @@ export default defineConfig({
     entry: [
       // styles.css。@import をたどって 1 枚にまとめる
       'src/styles/index.css',
+      // tokens.css。index.css にもまとまるが、変数だけを読むページのために
+      // 単独でも出す
+      'src/styles/tokens.css',
       'src/**/*.{ts,tsx}',
       '!src/**/*.stories.tsx',
       '!src/**/*.test.{ts,tsx}',
@@ -233,6 +236,25 @@ export default defineConfig({
         color: 'cyan',
         context: { contrast: 'more' },
       }),
+      // tokens.css だけを読んだページは、OS がダークでも .dark が無ければ明るく、
+      // ページが color-scheme を上書きしたときだけ OS に従う。どちらも OS が
+      // ダークでないと確かめられないので、contextOptions でダークを敷く
+      {
+        extends: true,
+        test: {
+          name: { label: 'tokens-css', color: 'white' },
+          include: ['src/styles/tokens-css.test.tsx'],
+          browser: {
+            enabled: true,
+            instances: browsers.map((browser) => ({ browser })),
+            provider: playwright({
+              contextOptions: { reducedMotion: 'reduce', colorScheme: 'dark' },
+            }),
+            headless: true,
+            screenshotFailures: false,
+          },
+        },
+      },
       {
         extends: true,
         test: {

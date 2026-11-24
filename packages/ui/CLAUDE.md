@@ -21,6 +21,7 @@ pnpm test --project=components-contrast-more # Stories tagged contrast-more, und
 pnpm test --project=forced-colors            # Screenshot comparisons under forced colors (src/styles/forced-colors.test.tsx)
 pnpm test --project=print                    # Tokens and color-scheme under print media (src/styles/print.test.tsx)
 pnpm test --project=print-contrast-more      # The same under prefers-contrast: more
+pnpm test --project=tokens-css               # The built tokens.css alone on a page, with the OS set to dark (src/styles/tokens-css.test.tsx)
 pnpm test --project=form                     # Form checks a story's play cannot make, and FormValue (Playwright)
 pnpm test --project=hooks src/internal/focus-trap.test.tsx # Single test file (needs its project)
 TEST_BROWSER=webkit pnpm test --project=hooks # One engine only (chromium / firefox / webkit)
@@ -391,9 +392,9 @@ at `:root`, and is dark under a nested `.dark` too.
 
 ### Dark Mode
 
-Dark mode is class-based (`.dark` on `html`, put there by `@k8ordo/color-scheme`; the library never adds it). `base.css` sets `color-scheme` from the class (`light` on `:root`, `dark` on `.dark`), not `light dark`, so the OS setting alone changes nothing. The color tokens' `light-dark()` follows `color-scheme`, so it follows `.dark`, and components never branch on it. A page that should follow the OS setting instead sets `color-scheme: light dark` on `:root` in its own CSS.
+Dark mode is class-based (`.dark` on `html`, put there by `@k8ordo/color-scheme`; the library never adds it). `tokens.css` sets `color-scheme` from the class (`light` on `:root`, `dark` on `.dark`), not `light dark`, so the OS setting alone changes nothing. The color tokens' `light-dark()` follows `color-scheme`, so it follows `.dark`, and components never branch on it. A page that should follow the OS setting instead sets `color-scheme: light dark` on `:root` in its own CSS.
 
-Under `@media print` a `.dark` that contains no `.print-as-shown` goes back to light: `base.css` sets `color-scheme: light` on it, so every `light-dark()` gives its light value (the light `prefers-contrast: more` values included), and the bridge's `dark:` / `light:` variants split on the same condition.
+Under `@media print` a `.dark` that contains no `.print-as-shown` goes back to light: `tokens.css` sets `color-scheme: light` on it, so every `light-dark()` gives its light value (the light `prefers-contrast: more` values included), and the bridge's `dark:` / `light:` variants split on the same condition.
 
 ### High Contrast and Forced Colors
 
@@ -427,13 +428,16 @@ The stylesheet follows `prefers-contrast: more` and `forced-colors: active`; `@k
 - The OS color settings cannot be switched per story, so they get projects of their own: `components-forced-colors` (Playwright `forcedColors: 'active'`) runs only stories tagged `forced-colors`, `components-contrast-more` (`contrast: 'more'`) only those tagged `contrast-more`, and `components` excludes both tags. `components-forced-colors-contrast-more` runs the `forced-colors` stories again with both settings, as a Windows contrast theme sets them: a `prefers-contrast: more` rule can then win over a `forced-colors: active` one. Those stories live in `src/styles/high-contrast.stories.tsx`, hidden from the sidebar (`!dev`) and from Chromatic. Browser context options go in `playwright({ contextOptions })`; Vitest 5 ignores `instances[].context`.
 - A focus mark a play function cannot read (a range thumb is a pseudo-element; WebKit emulates forced colors as the media query alone, so a transparent outline still reads as transparent) is compared as screenshots, with and without focus, in `src/styles/forced-colors.test.tsx`, run by the `forced-colors` project (plain Vitest browser tests under `forcedColors: 'active'`). WebKit keeps the `box-shadow` ring, so those tests catch a regression only in Chromium and Firefox.
 - Print media has no Playwright context option either, so `src/styles/print.test.tsx` runs in a `print` project of its own and switches the page with the `emulateMedia` command defined there (`page.emulateMedia` on the Playwright side). It reads the names of the `light-dark()` tokens from the loaded stylesheet and compares the colors they give in print with the ones measured on screen, so it never copies a token value. `prefers-contrast: more` is not switched by that command: `print-contrast-more` runs the same file with `contrast: 'more'` as a context option, because Firefox's emulation never restyles the page when only the contrast changes (`matchMedia` flips, computed styles do not).
+- `./tokens.css` is checked on a page that loads nothing else: `src/styles/tokens-css.test.tsx` puts the built `dist/styles/tokens.css` into an iframe and compares the colors the tokens give there with the ones an element gets under its own `color-scheme`. Its `tokens-css` project sets the OS to dark as a context option (`colorScheme: 'dark'`): only then does a page without `.dark` staying light, or a page that overrides `color-scheme` turning dark, show anything. It reads `dist/`, so build first.
 - a11y addon fails a story on violations (`test: 'error'`), `color-contrast` included. Only overlay stories that axe misreads while they fade in turn `color-contrast` off for themselves: every `Modal` story, and one story each in `Dialog` and `Popover`.
 - Mock date is set to `2023-01-02 12:34:56` in Storybook.
 
 ## Build Pipeline
 
-1. `vp pack` — tsdown emits every `src/**/*.{ts,tsx}` except stories and tests file by file (`unbundle`) → ESM with `.d.mts` type declarations, keeping the directory layout under `dist/`; in-source tests are dropped by defining `import.meta.vitest` as `undefined`. Each `*.module.css` becomes `*.module.mjs` plus a compiled `.css` it imports (`pack.css.inject`), wrapped in `@layer components` by the better-css-modules plugin; class names are hashed from the path under this directory (`css.lightningcss.projectRoot`). `src/styles/index.css` is an entry too and becomes `dist/styles/index.css` (`./styles.css`) with its `@import`s inlined; `src/styles/tailwind.css` is copied as is.
+1. `vp pack` — tsdown emits every `src/**/*.{ts,tsx}` except stories and tests file by file (`unbundle`) → ESM with `.d.mts` type declarations, keeping the directory layout under `dist/`; in-source tests are dropped by defining `import.meta.vitest` as `undefined`. Each `*.module.css` becomes `*.module.mjs` plus a compiled `.css` it imports (`pack.css.inject`), wrapped in `@layer components` by the better-css-modules plugin; class names are hashed from the path under this directory (`css.lightningcss.projectRoot`). `src/styles/index.css` is an entry too and becomes `dist/styles/index.css` (`./styles.css`) with its `@import`s inlined, and so is `src/styles/tokens.css`, one of those imports, which becomes `dist/styles/tokens.css` (`./tokens.css`); `src/styles/tailwind.css` is copied as is.
 2. `node scripts/build-tokens.ts` — writes `dist/styles/tokens.mjs` / `.d.mts` (`./tokens`) from `exportTokens(await loadConfig())`.
+
+`./tokens.css` is for a page that reads the variables and nothing else: the tokens outside any layer, and the three `color-scheme` rules. Those rules live in `tokens.css` rather than in `base.css` for its sake — the colors are `light-dark()`, so without them such a page would not turn dark under `.dark` — and they stay in `@layer base`, so a page that should follow the OS overrides them with an unlayered `:root { color-scheme: light dark; }`. `--writing` is not a token and stays in `base.css`. `dist.test.ts` holds the file to the tokens `styles.css` declares outside a layer (all but `--writing`), those three rules and nothing else, with every `light-dark()` left as written.
 
 `src/styles/dist.test.ts` holds the output to the contract: every component CSS file is in `@layer components` after the full layer statement, every `.module.mjs` imports its CSS, `styles.css` puts nothing but tokens outside a layer, and `tokens.mjs` is the DTCG document. It reads `dist/`, so build first.
 
@@ -460,5 +464,6 @@ The authoritative list is the `exports` map in `package.json`.
 @k8ordo/ui/tokens              design tokens as a DTCG resolver document
 @k8ordo/ui/props.json          machine-readable component props (docs/props.generated.json)
 @k8ordo/ui/styles.css          layer order, tokens, reset and base (each component imports its own CSS)
+@k8ordo/ui/tokens.css          the tokens and the color-scheme rules of styles.css alone (no reset, no base)
 @k8ordo/ui/tailwind.css        Tailwind CSS 4 bridge, imported after tailwindcss (styles.css + utilities for the tokens)
 ```

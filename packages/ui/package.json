@@ -84,6 +84,7 @@
       "default": "./dist/i18n/index.mjs"
     },
     "./styles.css": "./dist/styles/index.css",
+    "./tokens.css": "./dist/styles/tokens.css",
     "./tailwind.css": "./dist/styles/tailwind.css"
   },
   "publishConfig": {
@@ -95,7 +96,7 @@
     "generate:props": "node scripts/generate-icons.ts && node scripts/extract-props.ts && node scripts/generate-component-docs.ts",
     "check:props": "node scripts/generate-icons.ts --check && node scripts/extract-props.ts --check && node scripts/generate-component-docs.ts --check",
     "check:dist": "node scripts/check-dist-tests.ts",
-    "check:package": "publint && attw --pack . --profile esm-only --exclude-entrypoints ./styles.css ./tailwind.css && pnpm check:dist",
+    "check:package": "publint && attw --pack . --profile esm-only --exclude-entrypoints ./styles.css ./tokens.css ./tailwind.css && pnpm check:dist",
     "storybook": "storybook dev -p 6006 --no-open",
     "build-storybook": "storybook build",
     "test:vrt": "VRT=1 TEST_BROWSER=chromium vitest run --project=components",

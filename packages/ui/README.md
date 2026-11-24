@@ -397,6 +397,7 @@ Optional features live behind dedicated subpath exports:
 | `@k8ordo/ui/openui`               | OpenUI library (`'use client'`)                                                           |
 | `@k8ordo/ui/openui/prompt`        | OpenUI prompt generation (server-safe)                                                    |
 | `@k8ordo/ui/styles.css`           | Layer order, tokens, reset and base (required)                                            |
+| `@k8ordo/ui/tokens.css`           | The tokens and the `color-scheme` rules of `styles.css` alone, with no reset and no base  |
 | `@k8ordo/ui/tailwind.css`         | Tailwind CSS 4 bridge, imported after Tailwind: `styles.css` and utilities for the tokens |
 
 ## AI Chat Components

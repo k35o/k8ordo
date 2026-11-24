@@ -74,7 +74,7 @@ const annotate = (
   },
 });
 
-// 色は light-dark() で出す。base.css が .dark で color-scheme を切り替えるので、
+// 色は light-dark() で出す。tokens.css が .dark で color-scheme を切り替えるので、
 // ライトとダークの 2 つのテーマを、クラスの切り替えだけで出し分けられる
 export const highlight = (code: string, options: Options): Promise<string> =>
   codeToHtml(code, {
