@@ -15,8 +15,6 @@ export default defineConfig({
     }),
     betterCssModules(),
   ],
-  // CSS Modules の @scope (&) は Lightning CSS でしか組めない。target は
-  // @k8ordo/ui と同じく新しいブラウザにして、:dir() などを書き換えさせない
+  // CSS Modules の @scope (&) は Lightning CSS でしか組めない
   css: { transformer: 'lightningcss' },
-  build: { cssTarget: ['chrome146', 'edge146', 'firefox151', 'safari26'] },
 });

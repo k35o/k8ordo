@@ -6,6 +6,9 @@ import { defineConfig } from 'vite-plus';
 // ここに @tailwindcss/vite を足したらテストの意味がなくなる。
 export default defineConfig({
   plugins: [react()],
+  // 既定の target では Lightning CSS が ui の light-dark() と :dir() を
+  // 書き換え、意味が変わる。ui の GUIDE のとおり、ui が組まれている版に向ける
+  build: { cssTarget: ['chrome146', 'edge146', 'firefox151', 'safari26'] },
   test: {
     fsModuleCache: true,
   },

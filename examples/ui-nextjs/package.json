@@ -25,5 +25,11 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "tailwindcss": "catalog:"
-  }
+  },
+  "browserslist": [
+    "chrome >= 146",
+    "edge >= 146",
+    "firefox >= 151",
+    "safari >= 26"
+  ]
 }

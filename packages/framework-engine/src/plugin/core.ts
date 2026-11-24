@@ -18,6 +18,7 @@ import { FRAMEWORK } from '../host';
 import type { EngineOptions, Mode } from '../host';
 import { mdxCss } from './mdx-css';
 import { sharedDir } from './shared-dir';
+import { newlyAvailableTargets } from './targets';
 
 /** What the framework tells the engine about the application it is building. */
 export type EngineHost = {
@@ -151,6 +152,7 @@ export const engine = (
   // The frame's reference groups, which the client build's chunking reads.
   // Filled at the client build's buildEnd, before it splits anything.
   const frame = new Set<string>();
+  const targets = newlyAvailableTargets();
   const runtime = (name: string): string =>
     path.join(host.runtimeDir, `${name}.mjs`);
   const routesModule = (): string => path.join(outDir, 'routes.gen.ts');
@@ -178,8 +180,19 @@ export const engine = (
     // to resolve to the generated file before anything else claims it.
     enforce: 'pre',
 
-    config(_config, env) {
+    config(config, env) {
       return {
+        // Vite は config フックが返した値でアプリの値を上書きするので、アプリが
+        // 決めていないものだけを返す。CSS の target を最上位に置くのは、RSC
+        // プラグインが sharedConfigBuild を立て、どの環境の CSS も最上位の
+        // build.cssTarget（無ければ build.target）で圧縮されるから
+        ...(config.build?.target === undefined &&
+        config.build?.cssTarget === undefined
+          ? { build: { cssTarget: targets.build } }
+          : {}),
+        ...(config.css?.lightningcss?.targets === undefined
+          ? { css: { lightningcss: { targets: targets.lightningcss } } }
+          : {}),
         // React's entry picks its build from `process.env.NODE_ENV` at
         // require time. Left unresolved, both builds end up in the bundle
         // and the copy that renders is not always the copy the renderer set
@@ -268,7 +281,7 @@ export const engine = (
       };
     },
 
-    configEnvironment(_name, config) {
+    configEnvironment(name, config) {
       // The RSC plugin is the framework's dependency, not the application's,
       // so the entries it asks the optimizer to prebundle cannot be resolved
       // from the project root. Pointing them through the framework is how it
@@ -283,6 +296,13 @@ export const engine = (
               : entry,
           ),
         };
+      }
+      // rsc と ssr のコードはサーバーが読むので、ブラウザの版には向けない。
+      // サーバーの JavaScript が読めない構文が、そのまま残ってしまう
+      const consumer =
+        config.consumer ?? (name === 'client' ? 'client' : 'server');
+      if (consumer === 'client' && config.build?.target === undefined) {
+        config.build = { ...config.build, target: targets.build };
       }
     },
 

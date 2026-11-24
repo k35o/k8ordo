@@ -146,6 +146,10 @@ export const guaranteesList = [
     ja: '`<head>`に書いたインラインスクリプトのうち`src`も`type`も無いものは、そこのどのスタイルシートよりも前に移します。書いた順は変えません。どちらのモードでも、`vite dev`でも同じです。',
     en: 'An inline script written in `<head>` with no `src` and no `type` is moved ahead of every stylesheet there, in the order it was written. That holds under either mode and under `vite dev`.',
   }),
+  message({
+    ja: 'ブラウザで動くJavaScriptとCSSは、Baseline newly availableの機能にすべて対応したブラウザ向けにビルドします。CSSの`light-dark()`と`:dir()`は、書いたまま残ります。アプリが書いた`build.target`と`build.cssTarget`と`css.lightningcss.targets`は、そのまま使います。',
+    en: 'The JavaScript and CSS the browser runs are built for the browsers that support every Baseline newly available feature, so `light-dark()` and `:dir()` in the CSS stay as written. A `build.target`, `build.cssTarget` or `css.lightningcss.targets` the application sets is used as set.',
+  }),
 ] as const;
 
 export const nonGuaranteesTitle = message({

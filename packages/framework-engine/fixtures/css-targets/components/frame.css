@@ -1,0 +1,12 @@
+:root {
+  color-scheme: light;
+  --ink: light-dark(#111, #eee);
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+[data-flip]:dir(rtl) {
+  scale: -1 1;
+}

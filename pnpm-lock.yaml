@@ -705,6 +705,9 @@ importers:
       '@vitejs/plugin-rsc':
         specifier: 0.5.39
         version: 0.5.39(@voidzero-dev/vite-plus-core@1.6.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.25)(typescript@7.0.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      baseline-browser-mapping:
+        specifier: 2.11.35
+        version: 2.11.35
       compressible:
         specifier: 2.0.18
         version: 2.0.18
@@ -784,6 +787,9 @@ importers:
       '@vitejs/plugin-rsc':
         specifier: 0.5.39
         version: 0.5.39(@voidzero-dev/vite-plus-core@1.6.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.25)(typescript@7.0.2))(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      baseline-browser-mapping:
+        specifier: 2.11.35
+        version: 2.11.35
       rsc-html-stream:
         specifier: 0.0.8
         version: 0.0.8
