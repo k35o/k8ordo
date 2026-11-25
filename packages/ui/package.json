@@ -144,7 +144,7 @@
     "storybook-addon-determinism": "0.2.1",
     "storybook-addon-mock-date": "3.2.1",
     "storybook-addon-vrt": "0.4.2",
-    "streamdown": "2.7.1",
+    "streamdown": "2.8.0",
     "typescript": "catalog:",
     "vite": "catalog:",
     "vite-plus": "catalog:",
