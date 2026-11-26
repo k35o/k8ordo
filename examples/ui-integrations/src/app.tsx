@@ -1,3 +1,4 @@
+import { A2uiDemo } from './a2ui/demo';
 import { AiSdkChatDemo } from './ai-sdk/demo';
 import { JsonRenderDemo } from './json-render/demo';
 import { OpenUiDemo } from './openui/demo';
@@ -25,7 +26,7 @@ function Section({
 function App() {
   return (
     <div className="mx-auto flex min-h-screen max-w-xl flex-col gap-8 p-8">
-      <h1 className="text-2xl font-bold">k8ordo UI × Generative UI アダプタ</h1>
+      <h1 className="text-2xl font-bold">k8ordo UI × 生成 UI のつなぎ</h1>
 
       <Section
         title="json-render"
@@ -39,6 +40,13 @@ function App() {
         description="OpenUI Lang(DSL) 文字列を <Renderer> に渡して描画。同じ Button / Stack アダプタで、href は同様に <a> になります。"
       >
         <OpenUiDemo />
+      </Section>
+
+      <Section
+        title="A2UI 1.0"
+        description="A2UI のメッセージ（createSurface、updateComponents、updateDataModel）を MessageProcessor に渡して描画。入力欄の値は @path でデータモデルに結んであり、下の行に書き込まれた値が出ます。"
+      >
+        <A2uiDemo />
       </Section>
 
       <Section

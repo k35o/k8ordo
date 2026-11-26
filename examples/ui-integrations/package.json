@@ -12,6 +12,8 @@
     "check:write": "vp check --fix"
   },
   "dependencies": {
+    "@a2ui/react": "0.16.1",
+    "@a2ui/web_core": "0.16.1",
     "@ai-sdk/react": "4.0.180",
     "@json-render/core": "catalog:",
     "@json-render/react": "catalog:",
