@@ -715,6 +715,6 @@ strings whatever the schemas say, since `not-found.tsx` renders under a layout
 whether or not its schemas accepted. In server mode the generated `Register` also carries
 the `request`, so both types gain `request` there and a page that reads it
 fails to type-check under a build into files. A route file may equally declare
-its props inline — the generated table checks them at the import either way —
-and a layout whose pattern has no page of its own has to: `LayoutProps` takes
-only a pattern the table has a page at.
+its props inline — the generated table checks them at the import either way.
+`PageProps` takes a pattern the table has a page at, and `LayoutProps` any
+pattern, a layout's with no page of its own included.

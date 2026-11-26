@@ -119,3 +119,26 @@ export const one: string = ({} as PageProps<'/files/:path+'>).params.path;
     );
   }, 60_000);
 });
+
+describe('LayoutProps', () => {
+  it('takes the pattern of a layout with no page of its own, where PageProps does not', async () => {
+    const output = await diagnosticsOf(`
+import { defineRoutes } from '@k8ordo/router';
+import type { LayoutProps, PageProps } from '@k8ordo/router';
+
+const Page = () => null;
+const routes = defineRoutes({ '/blog/:slug/comments': Page });
+
+declare module '@k8ordo/router' {
+  interface Register { routes: typeof routes }
+}
+
+export const slug: string = ({} as LayoutProps<'/blog/:slug'>).params.slug;
+export type Props = PageProps<'/blog/:slug'>;
+`);
+    expect(output.split('\n')).toHaveLength(1);
+    expect(output).toContain(
+      `Type '"/blog/:slug"' does not satisfy the constraint '"/blog/:slug/comments"'`,
+    );
+  }, 60_000);
+});

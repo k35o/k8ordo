@@ -174,8 +174,8 @@ export const propsReceive = message({
 });
 
 export const propsTypes = message({
-  ja: '`@k8ordo/framework`の`PageProps`と`LayoutProps`は、このpropsをパターンから引いた型です。生成されたルート表を読むので、型引数にはパターンの文字列だけを渡します。`LayoutProps`に渡せるのはページのあるパターンだけです。`products/page.tsx`が無いなら、`/products`のレイアウトはpropsの型を自分で書きます。',
-  en: '`PageProps` and `LayoutProps` from `@k8ordo/framework` are these props looked up by pattern. They read the generated route table, so the pattern string is the only type argument. `LayoutProps` takes only a pattern that has a page: without `products/page.tsx`, the layout for `/products` writes its props type itself.',
+  ja: '`@k8ordo/framework`の`PageProps`と`LayoutProps`は、このpropsをパターンから引いた型です。生成されたルート表を読むので、型引数にはパターンの文字列だけを渡します。`PageProps`に渡せるのはページのあるパターンだけで、`LayoutProps`には`products/page.tsx`が無くても`/products`のレイアウトのパターンを渡せます。',
+  en: '`PageProps` and `LayoutProps` from `@k8ordo/framework` are these props looked up by pattern. They read the generated route table, so the pattern string is the only type argument. `PageProps` takes only a pattern that has a page, while `LayoutProps` takes the pattern of the layout for `/products` even without `products/page.tsx`.',
 });
 
 export const propsRequest = message({

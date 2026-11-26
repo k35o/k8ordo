@@ -719,7 +719,7 @@ export default function RouterReferencePage() {
         from={FROM}
         id="layout-props"
         name="LayoutProps"
-        signature={`type LayoutProps<P extends RegisteredPattern> = {
+        signature={`type LayoutProps<P extends string> = {
   readonly params: ParamsOf<P>;
   readonly pathname: string;
   readonly children: ReactNode;

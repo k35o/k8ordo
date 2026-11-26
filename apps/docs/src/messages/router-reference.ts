@@ -653,8 +653,8 @@ export const pagePropsSearch = message({
 });
 
 export const layoutPropsSummary = message({
-  ja: '`@k8ordo/framework`のレイアウトが受け取るpropsの型です。型引数には、ページのあるパターンだけを渡せます。',
-  en: 'The props a layout under `@k8ordo/framework` receives. The type argument must be a pattern the table has a page at.',
+  ja: '`@k8ordo/framework`のレイアウトが受け取るpropsの型です。型引数には、レイアウトのディレクトリのパターンを渡します。そこにページが無くても構いません。',
+  en: 'The props a layout under `@k8ordo/framework` receives. The type argument is the pattern of the layout’s directory, whether or not a page is there.',
 });
 
 export const layoutPropsParams = message({

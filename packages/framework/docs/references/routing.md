@@ -77,30 +77,27 @@ export default async function ProductPage({
 }
 ```
 
-`PageProps<P>` and `LayoutProps<P>` take a pattern the table has a page at.
-A layout whose directory holds no `page.tsx` of its own — `blog/[slug]/`
-with only `comments/page.tsx` below it — has no such pattern, so it declares
-its props inline. Its params are strings, and under `mode: 'server'` it may
-add `request: RouteRequest` (from `@k8ordo/framework/server`) to read the
-request:
+`PageProps<P>` takes a pattern the table has a page at. `LayoutProps<P>`
+takes any pattern, so a layout whose directory holds no `page.tsx` of its
+own — `blog/[slug]/` with only `comments/page.tsx` below it — names its own
+pattern all the same. Its params are strings, and under `mode: 'server'` it
+receives `request` too:
 
 ```tsx
 // src/routes/blog/[slug]/layout.tsx
-import type { ReactNode } from 'react';
+import type { LayoutProps } from '@k8ordo/framework';
 
 export default function PostLayout({
   params,
   children,
-}: {
-  params: { slug: string };
-  children: ReactNode;
-}) {
+}: LayoutProps<'/blog/:slug'>) {
   return <article data-slug={params.slug}>{children}</article>;
 }
 ```
 
-The generated table checks those props against the pattern at the import,
-as it checks every route file's.
+The generated table checks those props against the layout's own pattern at
+the import, as it checks every route file's, so a pattern that names other
+params fails there.
 
 **A layout marks the current link with `matchPath`.** It receives `pathname`
 in the table's terms, and `matchPath` is a pure function a Server Component
