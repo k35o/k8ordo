@@ -13,7 +13,8 @@ When installed via npm, these docs live under `node_modules/@k8ordo/form/docs/`.
 ## Guide
 
 - [Design Guide](GUIDE.md): the server/client split, writing a form end to end,
-  what the package guarantees, what it does not do yet, and how it pairs with
+  telling the person a submission worked (an inline message that works
+  without JavaScript, or a toast that needs it), what the package guarantees, what it does not do yet, and how it pairs with
   `@k8ordo/ui` without depending on it.
 
 ## Not supported

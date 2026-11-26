@@ -231,6 +231,69 @@ Focus carries the message rather than a live region because focus moves on
 every response: a live region already holding the same text announces nothing
 when the same failure comes back.
 
+## Telling the person it worked
+
+When the action does not redirect, say so on the page, from the state the
+action returns. `FormState` has no success flag of its own; extend it with
+one, and keep handing the Server Action to `useActionState` as it is:
+
+```ts
+// src/lib/actions.ts
+'use server';
+
+export type ContactState = FormState & { accepted?: true };
+
+export async function sendContact(
+  _prev: ContactState,
+  formData: FormData,
+): Promise<ContactState> {
+  const parsed = parseForm(contactSchema, formData);
+  if (!parsed.success) return parsed.state;
+
+  const delivered = await deliver(parsed.data);
+  if (!delivered) {
+    return { ...parsed.state, formError: '送信できませんでした' };
+  }
+  return { accepted: true };
+}
+```
+
+```tsx
+const [state, formAction] = useActionState(sendContact, {});
+const form = useForm(fields, state);
+
+<form {...form.props} action={formAction}>
+  {state.accepted === true && <p role="status">送信しました</p>}
+  {/* … */}
+</form>;
+```
+
+The message is part of the page the action's result renders, so it shows
+without JavaScript too, and React's reset after the action empties the
+fields. A failure found after the schema passed — the mail server is down,
+the slot was taken — goes back as `{ ...parsed.state, formError }`: the
+submitted values and the `token` stay, so the fields keep what was typed and
+focus moves to the form-level message. With `@k8ordo/ui`, an inline
+`<Alert message="…" tone="success" />` draws the success the same way.
+
+A toast is the other choice, and it needs JavaScript: it is opened from a
+client function that wraps the action and reads its result. Handing that
+wrapper to `useActionState` makes the form's action a client function, so
+without JavaScript the form has nothing to submit to. Choose it only when the
+page already needs JavaScript to work.
+
+```tsx
+const { open } = useToast(); // @k8ordo/ui
+const [state, formAction] = useActionState(
+  async (previous: ContactState, formData: FormData) => {
+    const next = await sendContact(previous, formData);
+    if (next.accepted === true) open('success', '送信しました');
+    return next;
+  },
+  {},
+);
+```
+
 ## What it guarantees
 
 **The wording cannot drift.** Client messages are obtained by running the
