@@ -9,7 +9,13 @@ import {
   useRef,
   useState,
 } from 'react';
-import type { FC, FocusEvent, PropsWithChildren, ReactElement } from 'react';
+import type {
+  FC,
+  FocusEvent,
+  PropsWithChildren,
+  ReactElement,
+  ReactNode,
+} from 'react';
 
 import { readWritingMode, useControllableState } from '../../../hooks';
 import type { WritingMode } from '../../../hooks';
@@ -25,13 +31,10 @@ import {
 } from './hooks';
 import type { PopoverContentProps, PopoverTriggerProps } from './hooks';
 
+import highContrast from '../../_internal/high-contrast.module.css';
 import styles from './popover.module.css';
 
-export {
-  useOpenContext,
-  type PopoverContentProps,
-  type PopoverTriggerProps,
-} from './hooks';
+export { useOpenContext, type PopoverTriggerProps } from './hooks';
 
 export const Root: FC<
   PropsWithChildren<{
@@ -198,3 +201,51 @@ export const Content: FC<{
 export const Trigger: FC<{
   renderItem: (props: PopoverTriggerProps) => ReactElement;
 }> = ({ renderItem }) => renderItem(usePopoverTrigger());
+
+export const PublicRoot: FC<
+  PropsWithChildren<{
+    placement?: Placement;
+    flipDisabled?: boolean;
+    isOpen?: boolean;
+    defaultOpen?: boolean;
+    onChange?: (isOpen: boolean) => void;
+  }>
+> = ({
+  children,
+  placement = 'bottom-start',
+  flipDisabled = false,
+  isOpen,
+  defaultOpen = false,
+  onChange,
+}) => (
+  <Root
+    defaultOpen={defaultOpen}
+    flipDisabled={flipDisabled}
+    isOpen={isOpen}
+    onChange={onChange}
+    placement={placement}
+    role="dialog"
+  >
+    {children}
+  </Root>
+);
+
+export const PublicContent: FC<{
+  /** パネルの名前。`aria-label` になる。 */
+  label: string;
+  children: ReactNode;
+}> = ({ label, children }) => (
+  <Content
+    renderItem={({ id, ref }) => (
+      <div
+        aria-label={label}
+        className={clsx(styles.surface, highContrast.edge)}
+        id={id}
+        ref={ref}
+        role="dialog"
+      >
+        {children}
+      </div>
+    )}
+  />
+);

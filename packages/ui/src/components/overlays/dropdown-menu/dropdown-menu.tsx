@@ -8,7 +8,7 @@ import { Button } from '../../buttons/button';
 import { IconButton } from '../../buttons/icon-button';
 import { ChevronIcon } from '../../icons/chevron';
 import { useListNavigation } from '../_internal';
-import { Popover, useOpenContext } from '../popover';
+import { PopoverBase, useOpenContext } from '../popover';
 import { MenuContextProvider, useMenuContent, useMenuItem } from './hooks';
 import { itemClass, panelClass } from './shared';
 
@@ -26,7 +26,7 @@ export const Root: FC<
   defaultOpen,
   onChange,
 }) => (
-  <Popover.Root
+  <PopoverBase.Root
     defaultOpen={defaultOpen}
     isOpen={isOpen}
     onChange={onChange}
@@ -34,7 +34,7 @@ export const Root: FC<
     role="menu"
   >
     <MenuProvider>{children}</MenuProvider>
-  </Popover.Root>
+  </PopoverBase.Root>
 );
 
 const MenuProvider: FC<PropsWithChildren> = ({ children }) => {
@@ -59,7 +59,7 @@ export const Content: FC<PropsWithChildren> = ({ children }) => {
   const { contentProps } = useMenuContent();
 
   return (
-    <Popover.Content
+    <PopoverBase.Content
       renderItem={(props) => (
         <div {...props} {...contentProps} className={panelClass}>
           {children}
@@ -90,7 +90,7 @@ export const Trigger: FC<{
   size?: ComponentProps<typeof Button>['size'];
   variant?: ComponentProps<typeof Button>['variant'];
 }> = ({ label, size = 'md', variant = 'solid' }) => (
-  <Popover.Trigger
+  <PopoverBase.Trigger
     renderItem={(props) => (
       <Button
         {...props}
@@ -110,7 +110,7 @@ export const IconTrigger: FC<{
   icon: ReactNode;
   label: string;
 }> = ({ icon, label }) => (
-  <Popover.Trigger
+  <PopoverBase.Trigger
     renderItem={(props) => (
       <IconButton
         color="base"

@@ -2301,37 +2301,44 @@ Props:
 
 ### Popover
 
-A popover built on CSS Anchor Positioning, as a compound component.
+A panel that opens next to its trigger, placed with CSS Anchor Positioning, as
+a compound component. It is always a dialog: `Popover.Content` renders
+`role="dialog"` named by `label`, opening moves focus into it, and a click
+outside, Escape, or tabbing out closes it. The content draws the surface — the
+raised ground, the corners, the shadow, and an outline under high contrast —
+and no padding, so the padding comes from what you put inside.
 
 ```tsx
 import { Popover } from '@k8ordo/ui';
 
 <Popover.Root placement="bottom">
   <Popover.Trigger renderItem={(props) => <Button {...props}>Open</Button>} />
-  <Popover.Content
-    renderItem={(props) => <div {...props}>Popover content</div>}
-  />
+  <Popover.Content label="Filters">
+    <Stack gap="sm" padding="md">
+      …
+    </Stack>
+  </Popover.Content>
 </Popover.Root>;
 ```
+
+A menu, a listbox, and a tooltip are their own components (`DropdownMenu`,
+`ListBox`, `Tooltip`); they are built on the same positioning.
 
 Props (Root):
 
 - `children`: `ReactNode`
-- `closeOnClickAway`: `boolean` (default: `true`)
 - `defaultOpen`: `boolean` (default: `false`)
 - `flipDisabled`: `boolean` (default: `false`)
 - `isOpen`: `boolean`
 - `onChange`: `(isOpen: boolean) => void`
 - `placement`: `Placement` (default: `'bottom-start'`)
-- `role`: `'dialog'` | `'menu'` | `'listbox'` (default: `'menu'`)
-- `trapFocus`: `boolean` (default: `true`)
 
 Escape closes **only the innermost one** when they are nested.
 
 Props (Popover.Content):
 
-- `renderItem`: `(props: PopoverContentProps) => ReactElement` (required)
-- `animation`: `'scale'` | `'fade'` (default: `'scale'`)
+- `children`: `ReactNode` (required)
+- `label`: `string` (required)
 
 Props (Popover.Trigger):
 

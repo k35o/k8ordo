@@ -1,12 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
-import type { ComponentProps, FC } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
 
 import { Dialog } from '.';
 import { Button } from '../../buttons/button';
 import { Modal } from '../modal';
-import { Popover, useOpenContext } from '../popover';
 
 const meta: Meta<typeof Dialog.Root> = {
   title: 'components/overlays/dialog',
@@ -27,48 +25,6 @@ export const Default: Story = {
     await expect(
       canvas.getByRole('dialog', { name: 'ダイアログ' }),
     ).toBeInTheDocument();
-  },
-};
-
-const StoryDialog: FC<ComponentProps<typeof Dialog.Root>> = (props) => {
-  const { onClose } = useOpenContext();
-  return (
-    <Dialog.Root {...props}>
-      <Dialog.Header onClose={onClose} title="ダイアログ" />
-      <Dialog.Content>こんにちはこんにちはこんにちはこんにちは</Dialog.Content>
-    </Dialog.Root>
-  );
-};
-
-export const PopoverDialog: Story = {
-  render: () => (
-    <Popover.Root role="dialog">
-      <Popover.Trigger
-        renderItem={(props) => (
-          <Button {...props} size="md" type="button">
-            ポップオーバー
-          </Button>
-        )}
-      />
-      <Popover.Content
-        // Popover.Content の role 集合（dialog | menu | listbox）は Dialog.Root の
-        // 集合（dialog | alertdialog）より広いため、この構成では dialog に固定する
-        renderItem={(props) => <StoryDialog {...props} role="dialog" />}
-      />
-    </Popover.Root>
-  ),
-  // Popover 配下（Modal の外）では Dialog.Root 自身が dialog ロールと名前を持つ
-  play: async ({ canvas, userEvent }) => {
-    const trigger = canvas.getByRole('button', {
-      name: 'ポップオーバー',
-    });
-    trigger.focus();
-    await userEvent.keyboard('{Enter}');
-    await waitFor(() => {
-      expect(
-        canvas.getByRole('dialog', { name: 'ダイアログ' }),
-      ).toBeInTheDocument();
-    });
   },
 };
 

@@ -1,5 +1,9 @@
 .panel {
   padding: calc(var(--spacing) * 4);
+}
+
+.layer {
+  padding: calc(var(--spacing) * 4);
   background-color: var(--color-bg-raised);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);

@@ -1229,8 +1229,8 @@ export const modal = {
 
 export const popover = {
   description: message({
-    ja: 'トリガーの要素の近くに開くポップオーバーです。位置はCSS Anchor Positioningで決めます。',
-    en: 'A popover that opens next to its trigger. CSS Anchor Positioning places it.',
+    ja: 'トリガーの要素の近くに開くパネルです。いつも`role="dialog"`で開き、`label`が名前になります。地と角丸と影は`Popover.Content`が描くので、中身の余白は中に置く要素で作ります。位置はCSS Anchor Positioningで決めます。',
+    en: 'A panel that opens next to its trigger. It always opens as `role="dialog"`, named by `label`. `Popover.Content` draws the ground, the corners and the shadow, so the padding comes from what you put inside. CSS Anchor Positioning places it.',
   }),
   placementTitle: message({
     ja: '配置',

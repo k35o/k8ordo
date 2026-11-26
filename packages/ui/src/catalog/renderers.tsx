@@ -1077,13 +1077,9 @@ export function renderPopover(
           </Button>
         )}
       />
-      <Popover.Content
-        renderItem={({ id, ref }) => (
-          <div className={styles.popover} id={id} ref={ref}>
-            {children}
-          </div>
-        )}
-      />
+      <Popover.Content label={props.triggerLabel}>
+        <div className={styles.popover}>{children}</div>
+      </Popover.Content>
     </Popover.Root>
   );
 }

@@ -3729,16 +3729,16 @@
       "category": "overlays",
       "props": [
         {
-          "name": "renderItem",
-          "types": ["(props: PopoverContentProps) => ReactElement"],
+          "name": "children",
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": true
         },
         {
-          "name": "animation",
-          "types": ["'scale'", "'fade'"],
-          "defaultValue": "'scale'",
-          "required": false
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": true
         }
       ],
       "inherits": null,
@@ -3752,12 +3752,6 @@
           "name": "children",
           "types": ["ReactNode"],
           "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "closeOnClickAway",
-          "types": ["boolean"],
-          "defaultValue": "true",
           "required": false
         },
         {
@@ -3788,18 +3782,6 @@
           "name": "placement",
           "types": ["Placement"],
           "defaultValue": "'bottom-start'",
-          "required": false
-        },
-        {
-          "name": "role",
-          "types": ["'dialog'", "'menu'", "'listbox'"],
-          "defaultValue": "'menu'",
-          "required": false
-        },
-        {
-          "name": "trapFocus",
-          "types": ["boolean"],
-          "defaultValue": "true",
           "required": false
         }
       ],

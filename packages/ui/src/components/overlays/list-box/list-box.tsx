@@ -15,7 +15,7 @@ import { IconButton } from '../../buttons/icon-button';
 import { CheckIcon } from '../../icons/check';
 import { ChevronIcon } from '../../icons/chevron';
 import { useListNavigation } from '../_internal/use-list-navigation';
-import { Popover, useOpenContext } from '../popover';
+import { PopoverBase, useOpenContext } from '../popover';
 import {
   MenuContextProvider,
   useMenuContent,
@@ -57,7 +57,7 @@ export const Root: FC<
   });
 
   return (
-    <Popover.Root flipDisabled placement={placement} role="listbox">
+    <PopoverBase.Root flipDisabled placement={placement} role="listbox">
       <MenuProvider
         onChange={setSelectedValue}
         options={options}
@@ -65,7 +65,7 @@ export const Root: FC<
       >
         {children}
       </MenuProvider>
-    </Popover.Root>
+    </PopoverBase.Root>
   );
 };
 
@@ -111,7 +111,7 @@ export const Content: FC<{
   const helpId = useId();
 
   return (
-    <Popover.Content
+    <PopoverBase.Content
       // helpContent は role="listbox" の直下に置くと aria-required-children 違反に
       // なるため listbox の外へ出す。ref（外側クリック判定）は最外周に置く。
       renderItem={({ ref, ...listProps }) => (
@@ -179,7 +179,7 @@ export const Trigger: FC<{
   const { valueLabel, labelId, valueId, labelledBy } = useTriggerLabels(label);
 
   return (
-    <Popover.Trigger
+    <PopoverBase.Trigger
       renderItem={(props) => (
         <>
           {label !== undefined && (
@@ -213,7 +213,7 @@ export const IconTrigger: FC<{
   const { valueLabel, labelId, valueId, labelledBy } = useTriggerLabels(label);
 
   return (
-    <Popover.Trigger
+    <PopoverBase.Trigger
       renderItem={(props) => (
         <>
           {label !== undefined && (

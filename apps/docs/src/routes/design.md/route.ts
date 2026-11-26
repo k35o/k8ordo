@@ -420,7 +420,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Modal** — \`isOpen?\`/\`onClose?\`/\`defaultOpen?\`, \`side: 'center'|'bottom'|'right'|'left'\`（\`ModalSide\`）
 - **Dialog**（compound: \`Root\` / \`Header\` / \`Content\`）
 - **Drawer** — \`title\`, \`isOpen\`, \`onClose\`, \`side: 'left'|'right'\`（\`DrawerSide\`。Modal の \`side\` の部分集合）
-- **Popover**（compound: \`Root\` / \`Trigger\` / \`Content\`、\`placement\`, \`role\`）
+- **Popover**（compound: \`Root\` / \`Trigger\` / \`Content\`、\`placement\`。いつも dialog で、\`Content\` は \`label\` を名前にして面（地・角丸・影）を描く。余白は中身で作る）
 - **Tooltip**（compound: \`Root\` / \`Trigger\` / \`Content\`、\`placement\`）
 - **DropdownMenu**（compound: \`Root\`(\`placement\`) / \`Trigger\`(\`label\`) / \`IconTrigger\`(\`icon\`, \`label\`) / \`Content\` / \`Item\`(\`label\`)）
 - **ListBox**（compound: \`Root\` / \`Trigger\` / \`IconTrigger\` / \`Content\`、\`options\` / \`value\` / \`onChange\`）
