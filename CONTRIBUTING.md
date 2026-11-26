@@ -71,13 +71,13 @@ To expose the component from the package root, add a re-export to `src/component
 
 ### Generative UI schema key order is public ABI
 
-The prop schemas under `src/integrations/_shared/schemas.ts` are not just validation. OpenUI Lang serializes component calls as **fully positional arguments**, mapped back to named props by the schema's key order. So, for those schemas:
+The catalog's prop schemas (`packages/ui/src/catalog/schemas.ts`) are not just validation. A format with positional arguments — OpenUI Lang serializes component calls that way — maps them back to named props by the schema's key order. So, for those schemas:
 
-- **Renaming a key is safe for OpenUI only** — positions are unchanged, but json-render specs name every prop, so a stored spec's old key becomes an unknown prop.
-- **Deleting or reordering keys is breaking** — every stored spec shifts by one.
+- **Renaming a key is safe only for a positional format** — positions are unchanged, but a format that names every prop (json-render, A2UI) sees a stored spec's old key as an unknown prop.
+- **Deleting or reordering keys is breaking** — every stored positional spec shifts by one.
 - **New keys must be appended at the end**, never inserted in the middle.
 
-`validateGeneratedSpec()` reports keys it does not recognize, so specs saved against an older schema surface as explicit unknown-key findings rather than silently dropped props.
+`catalogPropIssues()` reports keys it does not recognize, so specs saved against an older schema surface as explicit unknown-key findings rather than silently dropped props.
 
 ### Documentation ships with the package
 

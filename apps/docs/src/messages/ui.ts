@@ -134,7 +134,7 @@ export const claimAgentsBody = [
     en: 'The design guide and the references ship inside the npm package. An agent reads the installed version from `node_modules/@k8ordo/ui/docs/`.',
   }),
   message({
-    ja: 'LLMに画面を組み立てさせるときは、json-renderかOpenUIのカタログを使います。カタログはコンポーネントのpropsの型と照合しているので、実装と食い違いません。',
-    en: 'To let an LLM compose a screen, use the json-render or OpenUI catalog. The catalog is checked against the components’ prop types, so it cannot drift from the implementation.',
+    ja: 'LLMに画面を組み立てさせるときは、コンポーネントのカタログを使います。カタログはコンポーネントのpropsの型と照合しているので、実装と食い違いません。',
+    en: 'To let an LLM compose a screen, use the components’ catalog. The catalog is checked against the components’ prop types, so it cannot drift from the implementation.',
   }),
 ] as const;

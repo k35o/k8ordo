@@ -52,7 +52,7 @@ A story that needs layout of its own puts it in `<name>.stories.module.css`.
 
 4. On the docs site: a page under `apps/docs/src/routes/[locale]/ui/components/<name>/`, its entry in `pages` (`src/data/components-nav.ts`; `src/data/component-groups.ts` groups it by the generated category on the server), its `description` in `src/messages/components.ts`, and a preview in `src/components/component-previews.tsx`, which fails to type-check until there is one.
 
-5. Wording the component draws itself goes through the dictionary (see [Built-in wording](#built-in-wording)), and `src/integrations/coverage.test.ts` fails until the component is either in the generative-UI catalog or left out with a reason.
+5. Wording the component draws itself goes through the dictionary (see [Built-in wording](#built-in-wording)), and `src/catalog/coverage.test.ts` fails until the component is either in the generative-UI catalog or left out with a reason. A catalog entry is one item in `catalog` (`src/catalog/index.ts`: description, props schema, `children`, `value`) and one in `renderers` (`src/catalog/render.tsx`); a format's glue in `examples/ui-integrations` picks it up with no change of its own.
 
 ## Props Naming Conventions
 
@@ -261,7 +261,7 @@ and fill a shape only where a line would not read (a dot, a half).
   `icons` index, so its output depends only on the icons it draws.
 - **Run `pnpm generate:props` after adding a file.** `scripts/generate-icons.ts`
   writes the `@k8ordo/ui/icons` entry (`icons/index.ts`) and the generative-UI
-  catalog's icon list (`integrations/_shared/icon-names.ts`, `icon-map.ts`)
+  catalog's icon list (`catalog/icon-names.ts`, `icon-map.ts`)
   from the files; `check:props` fails in CI while any of them is stale. The
   catalog must not import a component, so its names live in a module of their
   own.
@@ -455,12 +455,9 @@ The authoritative list is the `exports` map in `package.json`.
 @k8ordo/ui/i18n                ja / en, registerMessages, getMessages, messageUsage, and the Messages type
 @k8ordo/ui/ai                  AI chat components
 @k8ordo/ui/ai/response         Response renderer only
-@k8ordo/ui/ai-sdk              AI SDK adapter
 @k8ordo/ui/code-block          CodeBlock (Server Component; shiki and server-only are dependencies)
-@k8ordo/ui/json-render         json-render catalog
-@k8ordo/ui/json-render/registry
-@k8ordo/ui/openui              OpenUI component library
-@k8ordo/ui/openui/prompt
+@k8ordo/ui/catalog             the generative-UI catalog, for no format in particular (server-safe)
+@k8ordo/ui/catalog/render      how each catalog component is drawn ('use client')
 @k8ordo/ui/tokens              design tokens as a DTCG resolver document
 @k8ordo/ui/props.json          machine-readable component props (docs/props.generated.json)
 @k8ordo/ui/styles.css          layer order, tokens, reset and base (each component imports its own CSS)

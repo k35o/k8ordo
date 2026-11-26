@@ -1,16 +1,18 @@
-# @k8ordo/ui × Generative UI adapters
+# @k8ordo/ui × json-render, OpenUI, and the AI SDK
 
-This example belongs to `@k8ordo/ui` and exists to exercise its **generative UI adapters**. Vite is just the host. In a Vite + React app: an LLM-style spec is rendered with k8ordo UI components via both [json-render](https://json-render.dev) and [OpenUI](https://www.openui.com), and an [AI SDK](https://ai-sdk.dev) chat is rendered with `@k8ordo/ui/ai` through `@k8ordo/ui/ai-sdk`.
+This example belongs to `@k8ordo/ui` and keeps the **glue** between its catalog and the formats an application connects it to. `@k8ordo/ui` describes its components for a model (`@k8ordo/ui/catalog`) and draws them (`@k8ordo/ui/catalog/render`), and depends on no format; the glue for [json-render](https://json-render.dev), [OpenUI](https://www.openui.com), and the [AI SDK](https://ai-sdk.dev) lives here, under test, for an application to copy and own. Vite is just the host.
 
 ## Overview
 
 This example showcases:
 
 - k8ordo UI setup in a Vite project (Vite+ / `vp` toolchain)
-- **json-render**: a typed `UISpec` rendered with the pre-wired `<JsonRenderUI />`
-- **OpenUI**: an OpenUI-Lang DSL string rendered with `library` + `Renderer`
-- **AI SDK**: `useChat` messages mapped onto the chat components with `mapMessageParts` — tool approval, attachments, sources, a `data-ui` part rendered as generative UI, and copy / regenerate / feedback — driven by a scripted transport, so no server or API key is needed
+- **json-render glue** (`src/json-render/`): the catalog, the registry, and `validateGeneratedSpec`, built by mapping over `@k8ordo/ui/catalog`; a typed `UISpec` rendered with `<JsonRenderUI />`
+- **OpenUI glue** (`src/openui/`): the library and the React-free `prompt()`, built the same way; an OpenUI-Lang DSL string rendered with `library` + `Renderer`
+- **AI SDK glue** (`src/ai-sdk/map-parts.ts`): `mapMessageParts`, which maps `useChat` messages onto the chat components — tool approval, attachments, sources, a `data-ui` part rendered as generative UI, and copy / regenerate / feedback — driven by a scripted transport, so no server or API key is needed
 - Tailwind CSS 4 integration and TypeScript
+
+No piece of glue names a component. A component added to `@k8ordo/ui`'s catalog reaches every format here with no change to this directory.
 
 ## Getting Started
 
@@ -45,16 +47,26 @@ The application will be available at `http://localhost:5173`.
 examples/ui-integrations/
 ├── src/
 │   ├── app.tsx                    # Hosts the json-render, OpenUI, and AI SDK demos
+│   ├── prompt-language.test.ts    # The prompts the glue builds are English and say how a field binds
 │   ├── ai-sdk/
+│   │   ├── map-parts.ts           # Glue: UIMessage.parts → parts for the chat components
+│   │   ├── map-parts.test.ts      # Every part kind maps, in order
 │   │   ├── demo.tsx               # useChat rendered with @k8ordo/ui/ai via mapMessageParts
 │   │   ├── scripted-transport.ts  # A ChatTransport that streams fixed replies instead of a model
 │   │   ├── demo.test.ts           # The SDK-assembled reply keeps its approval id; the data-ui spec validates
 │   │   └── demo.browser.test.tsx  # Approve / deny, attach, regenerate, and feedback through the real useChat
 │   ├── json-render/
+│   │   ├── catalog.ts             # Glue: the json-render catalog, UISpec, validateGeneratedSpec (server-safe)
+│   │   ├── catalog.test.ts        # What validateGeneratedSpec accepts and reports
+│   │   ├── registry.tsx           # Glue: the registry and <JsonRenderUI /> ('use client')
 │   │   ├── demo.tsx               # Typed UISpec rendered with <JsonRenderUI />
 │   │   ├── demo.test.ts           # The spec passes validateGeneratedSpec with no fixes
 │   │   └── demo.browser.test.tsx  # The spec renders and keeps form state in a real browser
 │   ├── openui/
+│   │   ├── defs.ts                # Glue: builds the OpenUI library from the catalog
+│   │   ├── library.tsx            # Glue: the library with renderers ('use client')
+│   │   ├── prompt.ts              # Glue: the system prompt, without React
+│   │   ├── library.test.ts        # Every container takes every container as a child
 │   │   ├── demo.tsx               # OpenUI-Lang DSL rendered with library + Renderer
 │   │   ├── demo.test.ts           # The DSL parses and every statement reaches the tree
 │   │   └── demo.browser.test.tsx  # The DSL renders and keeps form state in a real browser
@@ -69,14 +81,24 @@ examples/ui-integrations/
 
 ## What's Included
 
-### json-render demo (`src/json-render/demo.tsx`)
+### The shape of the glue
+
+Each piece of glue maps over `catalog` from `@k8ordo/ui/catalog` and does three
+things: it registers every component with the format, by name, with its
+`description` and `props`; it binds each field's `value.prop` to the format's
+state (json-render's `$bindState`, OpenUI's form state by `name`), starting from
+`value.initial(props)`; and it draws every component through `renderers` from
+`@k8ordo/ui/catalog/render`.
+
+### json-render (`src/json-render/`)
 
 A hand-written UI tree is typed with `satisfies UISpec` (so a typo in a component
-name or prop is a compile error) and rendered with the pre-wired client component:
+name or prop is a compile error) and rendered with the glue's pre-wired client
+component:
 
 ```tsx
-import type { UISpec } from '@k8ordo/ui/json-render';
-import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
+import type { UISpec } from './catalog';
+import { JsonRenderUI } from './registry';
 
 const spec = {/* ... */} satisfies UISpec;
 
@@ -85,20 +107,21 @@ export function JsonRenderDemo() {
 }
 ```
 
-### OpenUI demo (`src/openui/demo.tsx`)
+### OpenUI (`src/openui/`)
 
-An OpenUI-Lang DSL string is rendered with the k8ordo UI `library`:
+An OpenUI-Lang DSL string is rendered with the glue's `library`:
 
 ```tsx
-import { library } from '@k8ordo/ui/openui';
 import { Renderer } from '@openuidev/react-lang';
+
+import { library } from './library';
 
 export function OpenUiDemo() {
   return <Renderer library={library} response={openuiLangString} />;
 }
 ```
 
-### AI SDK demo (`src/ai-sdk/demo.tsx`)
+### AI SDK (`src/ai-sdk/`)
 
 `useChat` owns the conversation; `mapMessageParts` turns each `UIMessage` into
 parts that map onto `Message`, `Reasoning`, `ToolInvocation`, `Attachment`,
@@ -128,17 +151,17 @@ message chunks a server would, so the demo runs without a backend.
 ### Dependencies
 
 - `@k8ordo/ui` (workspace)
-- `@json-render/core`, `@json-render/react` (json-render demo)
-- `@openuidev/react-lang`, `@openuidev/lang-core` (OpenUI demo)
-- `ai`, `@ai-sdk/react` (AI SDK demo)
-- `zod` (shared by both adapters)
+- `@json-render/core`, `@json-render/react` (json-render glue)
+- `@openuidev/react-lang`, `@openuidev/lang-core` (OpenUI glue)
+- `ai`, `@ai-sdk/react` (AI SDK glue)
+- `zod` (the catalog's schemas)
 - `tailwindcss`, `@tailwindcss/vite` (Tailwind CSS 4)
 
 ## Available Scripts
 
 - `pnpm dev` - Start the development server (`vp dev`)
 - `pnpm build` - Build for production (`vp build`)
-- `pnpm test` - Run the tests (`vp test`): the `spec` project checks the demo spec and DSL against the adapters and the scripted replies against the AI SDK, and the `render` project mounts the demos in headless Chromium, Firefox, and WebKit
+- `pnpm test` - Run the tests (`vp test`): the `spec` project checks the glue, the demo spec and DSL, and the scripted replies against the AI SDK, and the `render` project mounts the demos in headless Chromium, Firefox, and WebKit
 - `pnpm typecheck` - Run TypeScript type checking
 - `pnpm check` - Run Oxlint/Oxfmt linting/formatting checks (`vp check`)
 - `pnpm check:write` - Run `vp check --fix` to auto-fix issues
@@ -168,7 +191,7 @@ Full TypeScript support with strict configuration for type safety.
 ## Related Documentation
 
 - [k8ordo UI Main Documentation](../../packages/ui/README.md)
-- [Generative UI integrations](../../packages/ui/README.md#generative-ui-integrations)
+- [Generative UI](../../packages/ui/README.md#generative-ui)
 - [Vite Documentation](https://vitejs.dev/)
 - [React Documentation](https://react.dev/)
 - [Tailwind CSS Documentation](https://tailwindcss.com/)

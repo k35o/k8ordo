@@ -204,11 +204,12 @@ const ACTIONS = `<Message.Root avatar={avatar} from="assistant">
   </Message.Actions>
 </Message.Root>`;
 
-const AI_SDK = `import { mapMessageParts } from '@k8ordo/ui/ai-sdk';
-import { Attachment, Reasoning, Source, ToolInvocation } from '@k8ordo/ui/ai';
+const AI_SDK = `import { Attachment, Reasoning, Source, ToolInvocation } from '@k8ordo/ui/ai';
 import { Response } from '@k8ordo/ui/ai/response';
-import { validateGeneratedSpec } from '@k8ordo/ui/json-render';
-import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
+
+import { mapMessageParts } from './ai-sdk/map-parts';
+import { validateGeneratedSpec } from './json-render/catalog';
+import { JsonRenderUI } from './json-render/registry';
 
 const parts = mapMessageParts(message);
 const files = parts.filter((part) => part.kind === 'file');
@@ -271,7 +272,8 @@ const sources = parts.filter((part) => part.kind === 'source');
 
 const JSON_RENDER = `'use client';
 import { Message } from '@k8ordo/ui/ai';
-import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
+
+import { JsonRenderUI } from './json-render/registry';
 
 <Message.Root from="assistant">
   <Message.Content>
@@ -465,16 +467,16 @@ export default function AiChat() {
         <CodeBlock
           code={AI_SDK}
           lang="tsx"
-          marks={{ 7: 'highlight', 8: 'highlight', 9: 'highlight' }}
+          marks={{ 8: 'highlight', 9: 'highlight', 10: 'highlight' }}
         />
+        <p className={page.mute}>
+          <Rich>{t.aiSdkTypes()}</Rich>
+        </p>
         <p className={page.mute}>
           <Rich>{t.aiSdkMap()}</Rich>
         </p>
         <p className={page.mute}>
           <Rich>{t.aiSdkRender()}</Rich>
-        </p>
-        <p className={page.mute}>
-          <Rich>{t.aiSdkVersion(peerVersionOf('@k8ordo/ui', 'ai'))}</Rich>
         </p>
       </section>
       <Separator color="mute" />

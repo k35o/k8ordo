@@ -170,21 +170,19 @@ export const aiSdkTitle = message({
   en: 'AI SDK integration',
 });
 
+export const aiSdkTypes = message({
+  ja: '`@k8ordo/ui/ai`の型は、AI SDKの値と同じ形です。そのためAI SDKの値をそのまま部品に渡せ、`@k8ordo/ui`はAI SDKに依存しません。',
+  en: 'The types of `@k8ordo/ui/ai` take the AI SDK’s own shapes. The SDK’s values pass to the components as they are, and `@k8ordo/ui` does not depend on the SDK.',
+});
+
 export const aiSdkMap = message({
-  ja: '`@k8ordo/ui/ai-sdk`の`mapMessageParts`は、AI SDKの`UIMessage.parts`を表示しやすい1次元の配列に変えます。パートは種類にかかわらず元の順に並びます。',
-  en: '`mapMessageParts` from `@k8ordo/ui/ai-sdk` turns the AI SDK’s `UIMessage.parts` into a single array that is easy to render. Parts of every kind stay in their original order.',
+  ja: '`mapMessageParts`は、`UIMessage.parts`を表示しやすい1次元の配列に変えます。リポジトリの`examples/ui-integrations`にあるので、アプリに写して使います。',
+  en: '`mapMessageParts` turns `UIMessage.parts` into a single array that is easy to render. It lives in `examples/ui-integrations` in the repository; copy it into your app.',
 });
 
 export const aiSdkRender = message({
   ja: 'ツールのパートは`approval`も含むので、`ToolInvocation`にそのまま渡せます。ファイルと出典は`filter`で先に取り出し、それぞれ1つの一覧にまとめます。`data`のパートは`name`で選び、中身を検証してから表示します。',
   en: 'A tool part carries its `approval`, so it can be handed to `ToolInvocation` as it is. Pull the files and sources out with `filter` first and show each as one list. Pick `data` parts by `name` and validate their contents before rendering them.',
-});
-
-export const aiSdkVersion = message({
-  ja: (version: string) =>
-    `\`ai\`は任意のpeer dependencyです。${version}以上を入れます。`,
-  en: (version) =>
-    `\`ai\` is an optional peer dependency. Install ${version} or later.`,
 });
 
 export const jsonRenderTitle = message({
@@ -193,13 +191,13 @@ export const jsonRenderTitle = message({
 });
 
 export const jsonRenderDescription = message({
-  ja: '`Message.Content`の子要素は自由です。LLMがツールの結果として返したUIのspecを、json-renderのアダプタで吹き出しの中に表示できます。',
-  en: '`Message.Content` takes any children. A UI spec the model returned as a tool result can be rendered inside the bubble with the json-render adapter.',
+  ja: '`Message.Content`の子要素は自由です。LLMがツールの結果として返したUIのspecを、json-renderのつなぎで吹き出しの中に表示できます。',
+  en: '`Message.Content` takes any children. A UI spec the model returned as a tool result can be rendered inside the bubble with the json-render glue.',
 });
 
 export const jsonRenderAdapter = message({
-  ja: 'アダプタの使い方は',
-  en: 'For how to use the adapter, see ',
+  ja: 'つなぎの作り方は',
+  en: 'For how to connect a format, see ',
 });
 
 export const see = message({

@@ -13,7 +13,7 @@ Every package here commits to the same four things:
 
 | Package                                         | What it is                                                                                                                                                                               |
 | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [`@k8ordo/ui`](packages/ui)                     | React UI components with semantic design tokens, i18n, and generative-UI adapters                                                                                                        |
+| [`@k8ordo/ui`](packages/ui)                     | React UI components with semantic design tokens, i18n, and a generative-UI catalog                                                                                                       |
 | [`@k8ordo/form`](packages/form)                 | HTML constraint attributes, messages, and server-side validation from one zod schema                                                                                                     |
 | [`@k8ordo/state`](packages/state)               | State declared by where it lives — URL, history entry, localStorage, sessionStorage, a cookie (one zod schema each), memory (a typed box)                                                |
 | [`@k8ordo/router`](packages/router)             | The URL's pathname axis: one route table, typed paths, over the Navigation API                                                                                                           |
@@ -66,7 +66,7 @@ packages/
   i18n/                  # @k8ordo/i18n
   color-scheme/          # @k8ordo/color-scheme
 examples/
-  ui-integrations/       # @k8ordo/ui × generative UI adapters (Vite)
+  ui-integrations/       # @k8ordo/ui × json-render, OpenUI, and the AI SDK (Vite)
   ui-nextjs/             # @k8ordo/ui × Next.js
   ui-css-modules/        # @k8ordo/ui with CSS Modules, no Tailwind
   static-basic/          # an application on @k8ordo/framework, mode: 'static'
