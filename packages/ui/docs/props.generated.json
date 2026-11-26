@@ -645,12 +645,6 @@
           "required": false
         },
         {
-          "name": "isActive",
-          "types": ["boolean"],
-          "defaultValue": "false",
-          "required": false
-        },
-        {
           "name": "renderAnchor",
           "types": ["(props: RenderAnchorProps<T>) => ReactNode"],
           "defaultValue": null,

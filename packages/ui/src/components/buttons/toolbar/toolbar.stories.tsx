@@ -4,6 +4,7 @@ import type { ComponentProps } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
 
 import { Toolbar } from '.';
+import { tokenColor } from '../../../../.storybook/tokens';
 import { CopyIcon } from '../../icons/copy';
 import { LinkIcon } from '../../icons/link';
 import { ListIcon } from '../../icons/list';
@@ -153,6 +154,55 @@ export const Vertical: Story = {
     // 縦に並ぶときは左右の矢印では動かない
     await userEvent.keyboard('{ArrowRight}');
     await expect(canvas.getByRole('button', { name: 'リンク' })).toHaveFocus();
+  },
+};
+
+/**
+ * ツールバーは押した項目を濃い地（`bg-emphasize`）で示し、文字をその地と対に
+ * なる `fg-base` にする。スケルトンの `Button` がツールバーの外で使う info の
+ * 文字色にはしない。無効な項目は無効の見た目のまま。
+ */
+export const PressedItems: Story = {
+  render: () => (
+    <Toolbar.Root aria-label="書式">
+      <Toolbar.Item
+        renderItem={(props) => (
+          <Button {...props} aria-pressed size="sm" variant="skeleton">
+            太字
+          </Button>
+        )}
+      />
+      <Toolbar.Item
+        renderItem={(props) => (
+          <IconButton {...props} aria-pressed label="箇条書き" tooltipDisabled>
+            <ListIcon size="sm" />
+          </IconButton>
+        )}
+      />
+      <Toolbar.Item
+        renderItem={(props) => (
+          <Button {...props} aria-pressed disabled size="sm" variant="skeleton">
+            斜体
+          </Button>
+        )}
+      />
+    </Toolbar.Root>
+  ),
+  play: async ({ canvas }) => {
+    const ground = tokenColor('--color-bg-emphasize');
+    const text = tokenColor('--color-fg-base');
+    const bold = getComputedStyle(canvas.getByRole('button', { name: '太字' }));
+    const list = getComputedStyle(
+      canvas.getByRole('button', { name: '箇条書き' }),
+    );
+
+    await expect(bold.backgroundColor).toBe(ground);
+    await expect(bold.color).toBe(text);
+    await expect(list.backgroundColor).toBe(ground);
+    await expect(list.color).toBe(text);
+    await expect(
+      getComputedStyle(canvas.getByRole('button', { name: '斜体' })).color,
+    ).toBe(tokenColor('--color-fg-mute'));
   },
 };
 

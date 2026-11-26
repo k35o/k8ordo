@@ -33,7 +33,6 @@ type Look = {
   color?: 'primary' | 'secondary' | 'base';
   variant?: 'solid' | 'outline' | 'skeleton';
   fullWidth?: boolean;
-  isActive?: boolean;
   startIcon?: ReactNode;
   endIcon?: ReactNode;
   children?: ReactNode;
@@ -111,7 +110,6 @@ export const Button: ButtonComponent = <T extends string>({
   color = 'primary',
   variant = 'solid',
   fullWidth = false,
-  isActive = false,
   disabled = false,
   startIcon,
   endIcon,
@@ -144,7 +142,6 @@ export const Button: ButtonComponent = <T extends string>({
     hasStartIcon && !hasEndIcon && variant !== 'skeleton'
       ? styles.iconsCentered
       : hasEndIcon && styles.iconsApart,
-    isActive && styles.active,
     isDisabled && styles.disabled,
   );
   const content = (

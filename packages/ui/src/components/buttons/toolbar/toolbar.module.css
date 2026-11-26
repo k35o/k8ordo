@@ -14,6 +14,10 @@
     & > [aria-pressed='true']:active {
       background-color: var(--color-bg-emphasize);
     }
+
+    & > [aria-pressed='true']:not(:disabled, [aria-disabled='true']) {
+      color: var(--color-fg-base);
+    }
   }
 }
 

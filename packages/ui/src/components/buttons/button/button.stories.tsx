@@ -435,3 +435,61 @@ export const ResetWhileSubmitting: Story = {
     });
   },
 };
+
+/**
+ * スケルトンは、押された状態（`aria-pressed`）と今のページ（`aria-current`）を
+ * 文字色で示す。状態は ARIA の属性で渡し、見た目はそこから作る。塗りと枠線は
+ * 押した状態の見た目を持たず、呼び出し側が `variant` と `color` で選ぶ。
+ */
+export const Pressed: Story = {
+  render: () => (
+    <>
+      <Button aria-pressed variant="skeleton">
+        押した状態
+      </Button>
+      <Button aria-pressed={false} variant="skeleton">
+        押していない
+      </Button>
+      <Button aria-current="page" href="#current" variant="skeleton">
+        今のページ
+      </Button>
+      <Button aria-current="false" href="#other" variant="skeleton">
+        他のページ
+      </Button>
+      <Button aria-pressed variant="solid">
+        塗りの押した状態
+      </Button>
+      <Button aria-pressed variant="outline">
+        枠線の押した状態
+      </Button>
+    </>
+  ),
+  play: async ({ canvas }) => {
+    const info = tokenColor('--color-fg-info');
+    const mute = tokenColor('--color-fg-mute');
+    const primary = tokenColor('--color-primary-fg');
+
+    await expect(
+      getComputedStyle(canvas.getByRole('button', { name: '押した状態' }))
+        .color,
+    ).toBe(info);
+    await expect(
+      getComputedStyle(canvas.getByRole('button', { name: '押していない' }))
+        .color,
+    ).toBe(mute);
+    await expect(
+      getComputedStyle(canvas.getByRole('link', { name: '今のページ' })).color,
+    ).toBe(info);
+    await expect(
+      getComputedStyle(canvas.getByRole('link', { name: '他のページ' })).color,
+    ).toBe(mute);
+    await expect(
+      getComputedStyle(canvas.getByRole('button', { name: '塗りの押した状態' }))
+        .color,
+    ).toBe(primary);
+    await expect(
+      getComputedStyle(canvas.getByRole('button', { name: '枠線の押した状態' }))
+        .color,
+    ).toBe(primary);
+  },
+};

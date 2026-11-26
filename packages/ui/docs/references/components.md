@@ -73,7 +73,6 @@ import { Button } from '@k8ordo/ui';
   startIcon={<Icon />}
   endIcon={<Icon />}
   disabled={false}
-  isActive={false}
   action={async () => {}}
 >
   Button
@@ -89,7 +88,6 @@ Props:
 - `endIcon`: `ReactNode`
 - `fullWidth`: `boolean` (default: `false`)
 - `href`: `T`
-- `isActive`: `boolean` (default: `false`)
 - `renderAnchor`: `(props: RenderAnchorProps<T>) => ReactNode`
 - `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
 - `startIcon`: `ReactNode`
@@ -108,6 +106,14 @@ order. A synchronous update a user may press again at once belongs in
 `onClick`, since `action` ignores presses while its transition is pending. Only
 `type="submit"` follows the form's pending state; `type="reset"` resets the
 form it belongs to.
+
+A skeleton `Button` shows its state in the text color. A toggle passes
+`aria-pressed` and a link to the current page passes `aria-current`; the text
+then takes the info color. The state lives in the ARIA attribute, so assistive
+technology hears what the color shows. Inside a `Toolbar` the toolbar shows a
+pressed item by its ground instead, and the text is `fg-base` (see
+[Toolbar](#toolbar)). A solid or outline toggle has no pressed look of its own;
+switch its `variant` or `color` with the state.
 
 With `href`, `Button` renders an `<a>` with the same look. That form takes
 anchor attributes (`target`, `rel`, `download`, `data-*`) and no `type` or
@@ -213,8 +219,10 @@ skipped. Tab leaves the toolbar, and coming back lands on the item last focused.
 
 Each item is a slot: `Toolbar.Item`'s `renderItem` receives `ref`, `tabIndex`,
 and `onFocus` (`ToolbarItemProps`) to spread onto a `Button`, an `IconButton`,
-or any other button. A toggle item sets `aria-pressed`; the toolbar shades a
-pressed item. The root needs a name (`aria-label` or `aria-labelledby`).
+or any other button. A toggle item sets `aria-pressed`; the toolbar shows a
+pressed item on the `bg-emphasize` ground with `fg-base` text (a disabled item
+keeps its disabled text). The root needs a name (`aria-label` or
+`aria-labelledby`).
 Items are meant to be buttons: a control that uses the arrow keys itself (a text
 field, a slider) would fight the toolbar for them.
 

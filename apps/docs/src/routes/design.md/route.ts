@@ -353,6 +353,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **CopyButton** — \`value\`（文字列、または押したときに呼ぶ関数。Promise も可）, \`label\`, \`iconOnly\`, \`size\`。押すとアイコンがチェックに変わり、結果を読み上げる。コピーは IconButton と自前のクリップボード処理ではなくこれを使う
 - リンクとして描画するときは Button / IconButton に \`href\` を渡すと \`<a>\` を描く。Next.js の \`Link\` などのリンク部品は \`renderAnchor\` で受け取った props を展開して描く
 - 押したときの非同期処理は \`action\`（transition の中で走り、終わるまで保留を表示する）。続けて押す同期の更新は \`onClick\`
+- スケルトンの Button は、押された状態・今のページを \`aria-pressed\` / \`aria-current\` で渡すと文字色が変わる。塗りと枠線のトグルは \`variant\` や \`color\` を状態で切り替える。Toolbar の中では、押した項目を Toolbar が濃い地で示し、文字は fg-base になる
 
 ### Data display
 

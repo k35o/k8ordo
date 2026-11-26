@@ -401,6 +401,10 @@ import { Button } from '@k8ordo/ui';
 
 Put a synchronous update a user may press again at once (a counter, a slide
 change) in `onClick`: `action` ignores presses while its transition is pending.
+A skeleton toggle passes `aria-pressed`, and a skeleton link to the current
+page `aria-current`; the text then takes the info color. A solid or outline
+toggle switches its `variant` or `color` with the state instead. Inside a
+`Toolbar`, the toolbar shows a pressed item by its ground, with `fg-base` text.
 
 ### IconButton
 

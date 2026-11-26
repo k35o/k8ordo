@@ -58,7 +58,7 @@ A story that needs layout of its own puts it in `<name>.stories.module.css`.
 
 ### Boolean Props
 
-- **A boolean that describes state** → prefix with `is`: `isOpen`, `isActive`, `isStreaming`
+- **A boolean that describes state** → prefix with `is`: `isOpen`, `isStreaming`
 - **A boolean that selects a mode or variant** → no prefix: `interactive`, `animate`, `current`, `fullWidth`, `multiple`
 - **A boolean that maps 1:1 onto a native HTML attribute or ARIA state** → keep the native name: `disabled`, `checked`, `required`, `invalid` (it is forwarded straight to `aria-invalid`, so no `is` prefix)
 

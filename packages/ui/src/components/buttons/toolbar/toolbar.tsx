@@ -166,8 +166,9 @@ export const Root: FC<
         {...rest}
         aria-orientation={visualOrientation}
         className={clsx(
-          // 押した状態のトグル（aria-pressed）は地を濃くして見せる。IconButton や
-          // Button 自身は押した状態の見た目を持たない
+          // 押したトグル（aria-pressed）は、ツールバーが地を濃くし、文字を fg-base
+          // にして見せる。スケルトンの Button が外で使う info の文字色は、ダーク
+          // ではこの地の上でコントラストが足りない
           styles.root,
           orientation === 'vertical' && styles.vertical,
         )}
