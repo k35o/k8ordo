@@ -32,7 +32,6 @@ import {
   Grid,
   Heading,
   IconButton,
-  InView,
   Kbd,
   ListBox,
   NumberField,
@@ -45,7 +44,6 @@ import {
   RadioCard,
   RangeSlider,
   Select,
-  Resize,
   ResizablePanels,
   Separator,
   SideNav,
@@ -74,7 +72,7 @@ import {
   TableIcon,
 } from '@k8ordo/ui/icons';
 import type { ReactNode } from 'react';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 
 import type { ComponentNavName } from '../data/components-nav';
 
@@ -600,8 +598,6 @@ export const componentPreviews = {
       </ResizablePanels.Root>
     </div>
   ),
-  InView: <InViewPreview />,
-  Resize: <ResizePreview />,
   Icons: (
     <div className={styles.icons}>
       <SparklesIcon size="lg" />
@@ -628,34 +624,4 @@ function PaginationPreview(): ReactNode {
 
 function PasswordInputPreview(): ReactNode {
   return <PasswordInput defaultValue="password" />;
-}
-
-function InViewPreview(): ReactNode {
-  const [isInView, setIsInView] = useState(false);
-  return (
-    <InView onChange={setIsInView}>
-      <Badge
-        label={isInView ? 'In view' : 'Out of view'}
-        tone={isInView ? 'success' : 'neutral'}
-      />
-    </InView>
-  );
-}
-
-function ResizePreview(): ReactNode {
-  const box = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState<number | null>(null);
-  return (
-    <div className={styles.resize}>
-      <Resize
-        onChange={() => {
-          setWidth(box.current?.offsetWidth ?? null);
-        }}
-      >
-        <div className={styles.resizeBox} ref={box}>
-          {width === null ? '—' : `${String(width)}px wide`}
-        </div>
-      </Resize>
-    </div>
-  );
 }

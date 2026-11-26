@@ -561,8 +561,8 @@ directly on APIs a browser has and jsdom does not: `ResizeObserver`,
 `IntersectionObserver`, `matchMedia`, `HTMLDialogElement`'s `showModal` /
 `close`, and the Popover API. None of them is called through a support check,
 so under jsdom `Tooltip`, `IconButton` (unless `tooltipDisabled`), `Tabs`,
-`Autocomplete`, `Combobox`, `Toolbar`, `ResizablePanels`, `InView`, `Resize`,
-and `Conversation` throw as soon as they mount; `Dialog`, `CommandPalette`,
+`Autocomplete`, `Combobox`, `Toolbar`, `ResizablePanels`, and `Conversation`
+throw as soon as they mount; `Dialog`, `CommandPalette`,
 `Drawer`, `Popover`, `DropdownMenu`, `ContextMenu`, `ListBox`, and `DatePicker`
 throw the moment they open (a `DropdownMenu` holding a `SubMenu` already at
 mount); and a `clearable` `FileField.ItemList` throws once it lists a file.

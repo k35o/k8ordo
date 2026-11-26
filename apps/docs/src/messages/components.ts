@@ -40,11 +40,6 @@ export const categoryLayout = message({
   en: 'Layout',
 });
 
-export const categoryObservers = message({
-  ja: 'Observers',
-  en: 'Observers',
-});
-
 export const categoryIcons = message({
   ja: 'Icons',
   en: 'Icons',
@@ -1450,40 +1445,6 @@ export const tableOfContents = {
   activeDescription: message({
     ja: '見出しの`scroll-margin-block-start`の位置を基準に、そこを最後に越えた見出しを現在の見出しとします。固定ヘッダーの高さを見出しの`scroll-margin`に指定しておけば、目次から飛んだ見出しがそのまま選ばれます。文書の終わりまで来たときは、最後の節が短くても最後の見出しを選びます。縦書きの文書では読む向きで決めます。`vertical-rl`なら右から左、`vertical-lr`なら左から右です。',
     en: 'The current heading is the last one whose `scroll-margin-block-start` position has scrolled past the top. Give the headings the scroll margin your sticky header needs, and a heading reached from the contents becomes current. At the end of the document the last heading is current even if its section is short. A vertical document is read in its own direction: right to left for `vertical-rl`, left to right for `vertical-lr`.',
-  }),
-};
-
-export const inView = {
-  description: message({
-    ja: '子要素が画面やスクロール領域に入っているかを知らせます。遅延読み込みや、スクロールに合わせた表示に使います。',
-    en: 'Reports whether its children are in the viewport or a scroll container. Use it for lazy loading or scroll-triggered reveals.',
-  }),
-  onceTitle: message({
-    ja: '`once`',
-    en: '`once`',
-  }),
-  onceDescription: message({
-    ja: '`once`を付けると、最初に見えた時点で観測をやめます。その後に外れても`false`を知らせません。',
-    en: 'With `once`, observation stops the first time the children are in view. Leaving afterwards reports nothing.',
-  }),
-  multipleTitle: message({
-    ja: '複数の子要素',
-    en: 'Multiple children',
-  }),
-  multipleDescription: message({
-    ja: '要素が複数あるときは、どれか1つでも見えていれば`true`になります。後から増えたり外れたりした要素にも追従します。見えていた要素が外れて見えているものが無くなれば、`false`を知らせます。観測する要素がまだ1つも無い間は`onChange`を呼びません。',
-    en: 'With several elements, it is `true` while any of them is in view. It follows elements that mount or unmount later: when a visible element unmounts and nothing else is in view, it reports `false`. Until there is an element to observe, `onChange` is not called.',
-  }),
-};
-
-export const resize = {
-  description: message({
-    ja: '子要素の大きさが変わったときに`onChange`を呼びます。',
-    en: 'Calls `onChange` when the size of its children changes.',
-  }),
-  initialNotice: message({
-    ja: '`onChange`は観測を始めた時点でも1回呼ばれます。引数は無いので、必要な値はハンドラの中でDOMから読んでください。',
-    en: '`onChange` is also called once when observation starts. It takes no argument; read what you need from the DOM in the handler.',
   }),
 };
 

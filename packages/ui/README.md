@@ -270,11 +270,6 @@ entry in [docs/references/components.md](docs/references/components.md).
 - [Separator](docs/references/components.md#separator)
 - [Stack](docs/references/components.md#stack)
 
-### Observers
-
-- [InView](docs/references/components.md#inview)
-- [Resize](docs/references/components.md#resize)
-
 ### Icons
 
 - [Icons](docs/references/components.md#icons) — decorative icons from `@k8ordo/ui/icons` (`XIcon`, `ChevronIcon`, …)
@@ -494,8 +489,8 @@ Components in the catalog:
 - **Overlays (self-contained widgets)**: `Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`, `DropdownMenuItem`, `Toast`
 - **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `RangeSlider`, `DateField`, `DatePicker`, `Calendar`, `ColorPicker`, `Combobox`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`
 
-The rest of the exports — `CommandPalette`, `ContextMenu`, `ResizablePanels`, the
-observers, the providers, and the AI chat components — are left out on purpose;
+The rest of the exports — `CommandPalette`, `ContextMenu`, `ResizablePanels`,
+and the AI chat components among them — are left out on purpose;
 [docs/references/generative-ui.md](docs/references/generative-ui.md#what-the-catalog-leaves-out)
 says why.
 

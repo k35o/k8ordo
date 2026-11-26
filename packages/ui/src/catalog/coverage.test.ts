@@ -26,8 +26,6 @@ const COMPOSED_IN_CATALOG: ReadonlyMap<string, readonly string[]> = new Map([
   ['Modal', ['Dialog', 'Drawer']],
 ]);
 
-const OBSERVER =
-  'コールバックに報告するだけで自分では何も描かない。spec には報告を受け取るコードが無い';
 const CHAT =
   '生成 UI を載せる側のチャット。アプリがメッセージの流れから組み立てるもので、spec が置くものではない';
 
@@ -36,8 +34,6 @@ const LEFT_OUT: ReadonlyMap<string, string> = new Map([
     'ContextMenu',
     '右クリックという見えない操作で開くので、生成 UI に置くと操作が見つけられなくなる。アプリが自分の中身（ファイルや行）に付けるもの',
   ],
-  ['InView', OBSERVER],
-  ['Resize', OBSERVER],
 
   ['Conversation', CHAT],
   ['Message', CHAT],

@@ -63,8 +63,6 @@ export {
   type TableOfContentsItem,
 } from './navigation/table-of-contents';
 export { Tabs } from './navigation/tabs';
-export { InView } from './observers/in-view';
-export { Resize } from './observers/resize';
 export {
   CommandPalette,
   type CommandPaletteItem,

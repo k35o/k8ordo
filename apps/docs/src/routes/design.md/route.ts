@@ -401,11 +401,6 @@ import { ToastProvider, Button, Card } from '@k8ordo/ui';
 - **Grid** — グリッドレイアウト
 - **Separator** — \`color: 'base'|'mute'|'subtle'\`, \`orientation: 'horizontal'|'vertical'\`
 
-### Observers
-
-- **InView** — 子要素が見えているかを知らせる。\`onChange(isInView)\`, \`root?\`, \`rootMargin?\`, \`threshold?\`, \`once?\`
-- **Resize** — 子要素の大きさが変わると知らせる。\`onChange()\`
-
 ### Navigation
 
 - **Anchor** — テキストリンク。http(s) の絶対 URL と \`//\` で始まる URL は外部リンクとして新しいタブで開き、アイコンと読み上げ専用の「新しいタブで開きます」を添える。\`href\`, \`openInNewTab?\`, \`renderAnchor?\`

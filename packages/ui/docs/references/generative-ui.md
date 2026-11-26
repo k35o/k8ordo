@@ -243,8 +243,6 @@ These exports are left out on purpose, so a model cannot place them:
 - `ContextMenu` — it opens on a right-click, which nothing on screen invites,
   so actions put in it would be hidden in a generated UI. It belongs on your
   application's own content (a file, a row).
-- `InView`, `Resize` — they report to a callback and draw nothing of their own,
-  and a spec has no code to receive the report.
 - `Conversation`, `Message`, `PromptInput`, `Reasoning`, `Suggestion`,
   `ToolInvocation`, `Attachment`, and `Source` from `@k8ordo/ui/ai`, and
   `Response` from

@@ -3,14 +3,15 @@ import { useState } from 'react';
 import type { FC } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
 
-import { Resize } from '.';
-import { afterRenderingUpdate } from '../../../../.storybook/rendering';
+import { afterRenderingUpdate } from '../../../.storybook/rendering';
+import { Resize } from './resize';
 
 const meta: Meta<typeof Resize> = {
-  title: 'components/observers/resize',
+  title: 'internal/resize',
   component: Resize,
+  tags: ['!dev', '!autodocs'],
   // 自分では何も描かないので、スクリーンショットで確かめられることが無い
-  parameters: { vrt: { skip: true } },
+  parameters: { chromatic: { disableSnapshot: true }, vrt: { skip: true } },
 };
 
 export default meta;

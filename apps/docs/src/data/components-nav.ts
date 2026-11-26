@@ -154,10 +154,6 @@ export const pages = {
     description: m.components.icons.description,
     component: 'CheckIcon',
   },
-  InView: {
-    path: '/:locale/ui/components/in-view',
-    description: m.components.inView.description,
-  },
   Kbd: {
     path: '/:locale/ui/components/kbd',
     description: m.components.kbd.description,
@@ -205,10 +201,6 @@ export const pages = {
   ResizablePanels: {
     path: '/:locale/ui/components/resizable-panels',
     description: m.components.resizablePanels.description,
-  },
-  Resize: {
-    path: '/:locale/ui/components/resize',
-    description: m.components.resize.description,
   },
   Select: {
     path: '/:locale/ui/components/select',
@@ -296,7 +288,6 @@ export const categoryTitles = {
   feedback: m.components.categoryFeedback,
   overlays: m.components.categoryOverlays,
   layout: m.components.categoryLayout,
-  observers: m.components.categoryObservers,
   icons: m.components.categoryIcons,
 } as const satisfies Record<string, Message>;
 

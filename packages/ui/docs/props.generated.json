@@ -2867,50 +2867,6 @@
       "omitted": []
     },
     {
-      "name": "InView",
-      "category": "observers",
-      "props": [
-        {
-          "name": "children",
-          "types": ["ReactNode"],
-          "defaultValue": null,
-          "required": true
-        },
-        {
-          "name": "onChange",
-          "types": ["(isInView: boolean) => void"],
-          "defaultValue": null,
-          "required": true
-        },
-        {
-          "name": "once",
-          "types": ["boolean"],
-          "defaultValue": "false",
-          "required": false
-        },
-        {
-          "name": "root",
-          "types": ["Element", "null"],
-          "defaultValue": "null",
-          "required": false
-        },
-        {
-          "name": "rootMargin",
-          "types": ["string"],
-          "defaultValue": "'0px'",
-          "required": false
-        },
-        {
-          "name": "threshold",
-          "types": ["number"],
-          "defaultValue": "0",
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
       "name": "Kbd",
       "category": "data-display",
       "props": [
@@ -4328,26 +4284,6 @@
       ],
       "inherits": "HTMLAttributes<HTMLDivElement>",
       "omitted": ["className", "style"]
-    },
-    {
-      "name": "Resize",
-      "category": "observers",
-      "props": [
-        {
-          "name": "children",
-          "types": ["ReactNode"],
-          "defaultValue": null,
-          "required": true
-        },
-        {
-          "name": "onChange",
-          "types": ["() => void"],
-          "defaultValue": null,
-          "required": true
-        }
-      ],
-      "inherits": null,
-      "omitted": []
     },
     {
       "name": "Response",
