@@ -63,9 +63,9 @@ you render.
   `aria-labelledby`, which with `openInNewTab` also points at the hidden
   new-tab wording.
 
-**Filling a slot** — `renderInput` on `FormControl`, `renderItem` on
-`Popover.Trigger`, `Tooltip.Trigger`, `FileField.Trigger`, and `Alert`'s
-`action`. Here the component owns no element of its own. It computes wiring —
+**Filling a slot** — `renderInput` on `FormControl`, and `renderItem` on
+`Popover.Trigger`, `Tooltip.Trigger` and `FileField.Trigger`. Here the
+component owns no element of its own. It computes wiring —
 ids, ARIA relationships, open/close handlers — and you supply the element that
 wiring belongs to. Those bags carry only the wiring, and they are required
 rather than optional.
@@ -2037,14 +2037,22 @@ Props:
 
 - `message`: `string` | `string[]` (required)
 - `tone`: `Status` (required)
-- `action`: `AlertAction`
+- `action`: `ReactNode`
 - `closeLabel`: `string`
 - `onClose`: `() => void`
 - Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `children` / `role` / `className` / `style`.
 
-`action` is an `AlertAction`, `{ label: string; renderItem: (props: { children: ReactNode }) => ReactNode }`.
-`renderItem` receives `label` as `children`; render your own button or link
-around it.
+`action` is the link or button you render — an `Anchor`, a `Button`, a
+framework's `<Link>` — and `Alert` only decides where it goes: after a
+one-line message, or below a list. A Server Component can pass it as well.
+
+```tsx
+<Alert
+  action={<Anchor href="/settings">Open settings</Anchor>}
+  message="Your profile setup is incomplete."
+  tone="warning"
+/>
+```
 
 ### Callout
 
@@ -2119,7 +2127,7 @@ close(syncingId);
 
 What `useToast()` returns:
 
-- `open`: `(tone: Status, message: string, options?: ToastOptions) => string` (returns the toast's id; `ToastOptions` is `{ duration?: number; action?: ToastAction }`. `duration` is in milliseconds and defaults to `5000`; `Number.POSITIVE_INFINITY` keeps the toast until it is closed. `ToastAction` is the same type as `AlertAction`.)
+- `open`: `(tone: Status, message: string, options?: ToastOptions) => string` (returns the toast's id; `ToastOptions` is `{ duration?: number; action?: ReactNode }`. `duration` is in milliseconds and defaults to `5000`; `Number.POSITIVE_INFINITY` keeps the toast until it is closed. `action` is a `ReactNode` placed as `Alert`'s `action` is.)
 - `close`: `(id: string) => void` (closes only the toast with the id `open` returned)
 - `closeAll`: `() => void`
 

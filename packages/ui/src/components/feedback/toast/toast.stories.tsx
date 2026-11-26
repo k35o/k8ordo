@@ -306,12 +306,7 @@ export const WithAction: Story = {
     <ToastTrigger
       message="下書きを削除しました"
       options={{
-        action: {
-          label: '元に戻す',
-          renderItem: ({ children }) => (
-            <Anchor href="#undo">{children}</Anchor>
-          ),
-        },
+        action: <Anchor href="#undo">元に戻す</Anchor>,
         duration: Number.POSITIVE_INFINITY,
       }}
     />

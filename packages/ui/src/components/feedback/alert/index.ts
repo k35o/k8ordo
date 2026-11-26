@@ -1,1 +1,1 @@
-export { Alert, type AlertAction } from './alert';
+export { Alert } from './alert';

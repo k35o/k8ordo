@@ -98,7 +98,7 @@
         },
         {
           "name": "action",
-          "types": ["AlertAction"],
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         },

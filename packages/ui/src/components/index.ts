@@ -18,18 +18,13 @@ export { Kbd } from './data-display/kbd';
 export { Prose } from './data-display/prose';
 export { type CellAlign, Table } from './data-display/table';
 export { Tree, type TreeItem } from './data-display/tree';
-export { Alert, type AlertAction } from './feedback/alert';
+export { Alert } from './feedback/alert';
 export { Callout } from './feedback/callout';
 export { EmptyState } from './feedback/empty-state';
 export { Progress } from './feedback/progress';
 export { Skeleton } from './feedback/skeleton';
 export { Spinner } from './feedback/spinner';
-export {
-  type ToastAction,
-  type ToastOptions,
-  ToastProvider,
-  useToast,
-} from './feedback/toast';
+export { type ToastOptions, ToastProvider, useToast } from './feedback/toast';
 export { Autocomplete } from './form/autocomplete';
 export { Calendar } from './form/calendar';
 export { Checkbox } from './form/checkbox';

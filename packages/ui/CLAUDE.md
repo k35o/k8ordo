@@ -140,7 +140,7 @@ handler that calls `preventDefault()`, since `disabled` does nothing on an
 `<a>`.
 
 **Filling a slot** (`FormControl` `renderInput`, `Popover.Trigger` /
-`Tooltip.Trigger` / `FileField.Trigger` / `Alert` `action.renderItem`). The
+`Tooltip.Trigger` / `FileField.Trigger`). The
 component owns no element; the bag is wiring only — ids, ARIA relationships,
 open/close handlers — and the prop is required rather than optional.
 
