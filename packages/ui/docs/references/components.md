@@ -1929,14 +1929,17 @@ Props:
 
 ### Accordion
 
-A collapsible section, as a compound component.
+A collapsible section, as a compound component. `Accordion.Button` takes the
+heading `level` it sits at (required, the same words as `Heading`) and draws
+the button inside that heading element, as the WAI-ARIA accordion pattern
+asks; do not wrap it in a heading of your own.
 
 ```tsx
 import { Accordion } from '@k8ordo/ui';
 
 <Accordion.Root>
   <Accordion.Item>
-    <Accordion.Button>Section 1</Accordion.Button>
+    <Accordion.Button level="h3">Section 1</Accordion.Button>
     <Accordion.Panel>Content</Accordion.Panel>
   </Accordion.Item>
 </Accordion.Root>;
@@ -1944,6 +1947,7 @@ import { Accordion } from '@k8ordo/ui';
 
 Props (Accordion.Button):
 
+- `level`: `'h2'` | `'h3'` | `'h4'` | `'h5'` | `'h6'` (required)
 - `children`: `ReactNode`
 
 Props (Accordion.Item):

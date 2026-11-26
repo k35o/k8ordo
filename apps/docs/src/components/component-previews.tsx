@@ -362,9 +362,7 @@ export const componentPreviews = {
     <div className={styles.accordion}>
       <Accordion.Root>
         <Accordion.Item>
-          <h3>
-            <Accordion.Button>What is k8ordo UI?</Accordion.Button>
-          </h3>
+          <Accordion.Button level="h3">What is k8ordo UI?</Accordion.Button>
           <Accordion.Panel>
             <p>A React UI component library.</p>
           </Accordion.Panel>

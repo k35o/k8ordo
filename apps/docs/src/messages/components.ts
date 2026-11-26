@@ -735,8 +735,8 @@ export const form = {
 
 export const accordion = {
   description: message({
-    ja: '開閉できる節です。見出しを押すと本文が開きます。',
-    en: 'A collapsible section. Pressing its heading opens the body.',
+    ja: '開閉できる節です。見出しを押すと本文が開きます。`Accordion.Button`は`level`の見出しの中にボタンを描きます。',
+    en: 'A collapsible section. Pressing its heading opens the body. `Accordion.Button` draws its button inside a heading of the given `level`.',
   }),
   defaultOpenTitle: message({
     ja: '既定で開く',

@@ -357,7 +357,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 
 ### Data display
 
-- **Accordion**（compound: \`Root\` / \`Item\`(\`defaultOpen?\`) / \`Button\` / \`Panel\`）
+- **Accordion**（compound: \`Root\` / \`Item\`(\`defaultOpen?\`) / \`Button\`(\`level\`。その見出しの中にボタンを描く) / \`Panel\`）
 - **Avatar** — \`src\` / \`name\`（イニシャル）/ \`fallback\`, \`size\`
 - **Badge** — \`label\`, \`tone: 'neutral'|'info'|'success'|'warning'|'error'\`, \`variant: 'solid'|'outline'\`, \`size\`, \`interactive\`
 - **Card** — \`width: 'full'|'fit'\`, \`variant: 'shadow'|'outline'\`, \`href\` / \`renderAnchor\` / \`openInNewTab\`（カード全体がリンク）, \`action\`（カード全体がボタン）, \`interactive\`（見た目だけ）

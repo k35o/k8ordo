@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
+import { expect } from 'storybook/test';
 
 import { Accordion } from '.';
 
@@ -29,11 +30,9 @@ const ControlledAccordion = () => {
             setOpenId(open ? item.id : null);
           }}
         >
-          <h3>
-            <Accordion.Button>
-              <p className={styles.title}>{item.title}</p>
-            </Accordion.Button>
-          </h3>
+          <Accordion.Button level="h3">
+            <span className={styles.title}>{item.title}</span>
+          </Accordion.Button>
           <Accordion.Panel>
             <p>{item.body}</p>
           </Accordion.Panel>
@@ -53,14 +52,21 @@ type Story = StoryObj<typeof Accordion.Root>;
 
 export const Primary: Story = {
   args: {},
+  play: async ({ canvas }) => {
+    const heading = canvas.getByRole('heading', {
+      level: 3,
+      name: '雨ニモマケズ',
+    });
+    await expect(heading.firstElementChild).toBe(
+      canvas.getByRole('button', { name: '雨ニモマケズ' }),
+    );
+  },
   render: () => (
     <Accordion.Root>
       <Accordion.Item>
-        <h3>
-          <Accordion.Button>
-            <p className={styles.title}>雨ニモマケズ</p>
-          </Accordion.Button>
-        </h3>
+        <Accordion.Button level="h3">
+          <span className={styles.title}>雨ニモマケズ</span>
+        </Accordion.Button>
         <Accordion.Panel>
           <p>雨ニモマケズ</p>
           <p>風ニモマケズ</p>
@@ -95,11 +101,9 @@ export const Primary: Story = {
         </Accordion.Panel>
       </Accordion.Item>
       <Accordion.Item>
-        <h3>
-          <Accordion.Button>
-            <p className={styles.title}>あどけない話</p>
-          </Accordion.Button>
-        </h3>
+        <Accordion.Button level="h3">
+          <span className={styles.title}>あどけない話</span>
+        </Accordion.Button>
         <Accordion.Panel>
           <p>智恵子は東京に空が無いといふ、</p>
           <p>ほんとの空が見たいといふ。</p>
@@ -117,11 +121,9 @@ export const Primary: Story = {
         </Accordion.Panel>
       </Accordion.Item>
       <Accordion.Item>
-        <h3>
-          <Accordion.Button>
-            <p className={styles.title}>かなしみ</p>
-          </Accordion.Button>
-        </h3>
+        <Accordion.Button level="h3">
+          <span className={styles.title}>かなしみ</span>
+        </Accordion.Button>
         <Accordion.Panel>
           <div className={styles.stanzas}>
             <div>

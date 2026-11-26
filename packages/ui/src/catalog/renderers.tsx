@@ -826,7 +826,7 @@ export function renderAccordion(props: AccordionProps): ReactNode {
     <Accordion.Root>
       {props.items.map((item) => (
         <Accordion.Item defaultOpen={u(item.defaultOpen)} key={item.title}>
-          <Accordion.Button>{item.title}</Accordion.Button>
+          <Accordion.Button level="h3">{item.title}</Accordion.Button>
           <Accordion.Panel>{item.content}</Accordion.Panel>
         </Accordion.Item>
       ))}
