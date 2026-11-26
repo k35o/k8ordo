@@ -10,7 +10,9 @@ import {
   generate,
   localeSetOf,
   pagesReadingSearch,
+  readExports,
   REEXPORTS_ALL,
+  scanRoutes,
   silentRoutes,
 } from './write';
 
@@ -413,5 +415,52 @@ describe('generate, for an application with a locale set', () => {
     expect(warnings).toStrictEqual([
       "src/i18n.ts does not export `locales` by name (`export *` and a type-only export do not count), so @k8ordo/i18n's Register is not generated and a message missing a locale compiles — export the locale set from it as `locales`",
     ]);
+  });
+});
+
+describe('reading the application', () => {
+  it('refuses a missing routes directory by name, rather than building an empty site', async () => {
+    const root = await mkdtemp(path.join(tmpdir(), 'k8ordo-no-routes-'));
+    try {
+      const routesDir = path.join(root, 'src/routes');
+      await expect(scanRoutes(routesDir)).rejects.toThrow(
+        `the route files live in src/routes/, and ${routesDir} does not exist`,
+      );
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('throws on a route file it cannot read, rather than taking it for one that exports nothing', async () => {
+    const root = await mkdtemp(path.join(tmpdir(), 'k8ordo-unread-'));
+    try {
+      await expect(readExports(root, ['page.tsx'])).rejects.toThrow(/ENOENT/u);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a package.json that is not JSON, rather than taking it for one that lists nothing', async () => {
+    const root = await mkdtemp(path.join(tmpdir(), 'k8ordo-broken-manifest-'));
+    try {
+      await mkdir(path.join(root, 'src/routes'), { recursive: true });
+      await writeFile(path.join(root, 'package.json'), '{ "dependencies": ');
+      await writeFile(
+        path.join(root, 'src/routes/page.tsx'),
+        'export default function Page() { return null; }\n',
+      );
+      await expect(
+        generate({
+          root,
+          routesDir: path.join(root, 'src/routes'),
+          outDir: path.join(root, '.k8ordo'),
+          mode: 'server',
+        }),
+      ).rejects.toThrow(
+        `${path.join(root, 'package.json')} is not JSON, so which packages the application depends on cannot be read`,
+      );
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
   });
 });

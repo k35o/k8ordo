@@ -34,7 +34,11 @@ pnpm check         # check:write to auto-fix
 
 - **The filesystem stays at the edge.** `parseRouteTree` is a pure function
   over a list of paths, so the grammar's rules are what get tested, never the
-  disk. Anything that reads directories is a thin wrapper around it.
+  disk. Anything that reads directories is a thin wrapper around it, and
+  says what it could not read rather than reading it as nothing: a missing
+  `src/routes/` is named (`scanRoutes`), and a route file that cannot be
+  read or a `package.json` that is not JSON is thrown — taken for empty,
+  each built a site with every URL a 404, or a `Register` silently short.
 - **`routes/` has no private names.** Every directory is a URL segment, a
   `_`-prefixed one included, and every file is a route file or an error;
   components, data and helpers live outside `routes/`. Only `.`-prefixed

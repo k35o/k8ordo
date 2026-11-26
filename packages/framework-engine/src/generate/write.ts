@@ -13,6 +13,7 @@ import {
   emitRegisterModule,
   emitRoutesModule,
   LOCALES_MODULE,
+  ROUTES_DIR,
   unreachableRoutes,
 } from './emit';
 
@@ -32,8 +33,17 @@ export const scanRoutes = async (dir: string): Promise<string[]> => {
   };
   try {
     return (await walk('')).toSorted();
-  } catch {
-    return [];
+  } catch (error) {
+    if (
+      (error as NodeJS.ErrnoException).code === 'ENOENT' &&
+      (error as NodeJS.ErrnoException).path === dir
+    ) {
+      throw new Error(
+        `the route files live in ${ROUTES_DIR}/, and ${dir} does not exist`,
+        { cause: error },
+      );
+    }
+    throw error;
   }
 };
 
@@ -98,10 +108,7 @@ export const exportsOf = (
 /** The route files whose exports say something: pages, layouts, route.ts. */
 const READS_EXPORTS = new Set(['page', 'layout', 'route']);
 
-/**
- * What each page, layout and route.ts exports, by file. A file that cannot be
- * read exports nothing.
- */
+/** What each page, layout and route.ts exports, by file. */
 export const readExports = async (
   routesDir: string,
   files: readonly string[],
@@ -110,20 +117,10 @@ export const readExports = async (
     await Promise.all(
       files
         .filter((file) => READS_EXPORTS.has(slotOf(file) ?? ''))
-        .map(async (file): Promise<[string, ReadonlySet<string>]> => {
-          try {
-            return [
-              file,
-              exportsOf(
-                await readFile(path.join(routesDir, file), 'utf8'),
-                file,
-              ),
-            ];
-          } catch {
-            // 読めないファイルは何も export しないものとして扱う
-            return [file, new Set()];
-          }
-        }),
+        .map(async (file): Promise<[string, ReadonlySet<string>]> => [
+          file,
+          exportsOf(await readFile(path.join(routesDir, file), 'utf8'), file),
+        ]),
     ),
   );
 
@@ -169,21 +166,30 @@ export const silentRoutes = (
 
 /** Whether the application's manifest lists `name`. */
 const dependsOn = async (root: string, name: string): Promise<boolean> => {
+  let text: string;
   try {
-    const manifest = JSON.parse(
-      await readFile(path.join(root, 'package.json'), 'utf8'),
-    ) as {
-      dependencies?: Record<string, string>;
-      devDependencies?: Record<string, string>;
-    };
-    // どちらに置くかはアプリの流儀で、意味は変わらない
-    return (
-      name in (manifest.dependencies ?? {}) ||
-      name in (manifest.devDependencies ?? {})
-    );
-  } catch {
-    return false;
+    text = await readFile(path.join(root, 'package.json'), 'utf8');
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return false;
+    throw error;
   }
+  let manifest: {
+    dependencies?: Record<string, string>;
+    devDependencies?: Record<string, string>;
+  };
+  try {
+    manifest = JSON.parse(text) as typeof manifest;
+  } catch (error) {
+    throw new Error(
+      `${path.join(root, 'package.json')} is not JSON, so which packages the application depends on cannot be read`,
+      { cause: error },
+    );
+  }
+  // どちらに置くかはアプリの流儀で、意味は変わらない
+  return (
+    name in (manifest.dependencies ?? {}) ||
+    name in (manifest.devDependencies ?? {})
+  );
 };
 
 /** {@link LOCALES_MODULE} of an application that uses `@k8ordo/i18n`. */
