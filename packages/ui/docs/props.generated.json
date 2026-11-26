@@ -2720,8 +2720,8 @@
         },
         {
           "name": "color",
-          "types": ["'transparent'", "'base'", "'primary'", "'secondary'"],
-          "defaultValue": "'transparent'",
+          "types": ["'primary'", "'secondary'", "'base'"],
+          "defaultValue": "'primary'",
           "required": false
         },
         {
@@ -2764,6 +2764,12 @@
           "name": "type",
           "types": ["'button'", "'submit'", "'reset'"],
           "defaultValue": "'button'",
+          "required": false
+        },
+        {
+          "name": "variant",
+          "types": ["'solid'", "'skeleton'"],
+          "defaultValue": "'skeleton'",
           "required": false
         }
       ],

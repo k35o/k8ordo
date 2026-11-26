@@ -4,6 +4,7 @@ import { useRef, useState } from 'react';
 import { expect, fn, screen, waitFor } from 'storybook/test';
 
 import { afterRenderingUpdate } from '../../../../.storybook/rendering';
+import { tokenColor } from '../../../../.storybook/tokens';
 import { CopyIcon } from '../../icons/copy';
 import { IconButton } from './icon-button';
 
@@ -92,21 +93,77 @@ export const PendingKeepsFocus: Story = {
   },
 };
 
-export const ColorBase: Story = {
+export const SolidBase: Story = {
   args: {
+    variant: 'solid',
     color: 'base',
+  },
+  play: async ({ canvas }) => {
+    await expect(
+      getComputedStyle(canvas.getByRole('button', { name: 'コピー' }))
+        .backgroundColor,
+    ).toBe(tokenColor('--color-bg-base'));
   },
 };
 
-export const ColorPrimary: Story = {
+export const SolidPrimary: Story = {
   args: {
+    variant: 'solid',
     color: 'primary',
   },
 };
 
-export const ColorSecondary: Story = {
+export const SolidSecondary: Story = {
+  args: {
+    variant: 'solid',
+    color: 'secondary',
+  },
+};
+
+/** `skeleton`（既定）は地を塗らない。`color` は `solid` の地の色を選ぶ。 */
+export const SkeletonIgnoresColor: Story = {
   args: {
     color: 'secondary',
+  },
+  play: async ({ canvas }) => {
+    await expect(
+      getComputedStyle(canvas.getByRole('button', { name: 'コピー' }))
+        .backgroundColor,
+    ).toBe('rgba(0, 0, 0, 0)');
+  },
+};
+
+/**
+ * tooltip は名前と同じ文なので、説明（`aria-describedby`）にはしない。
+ * 利用者が渡した `aria-describedby` はそのまま残る。
+ */
+export const TooltipIsNotDescription: Story = {
+  render: () => (
+    <>
+      <IconButton label="コピー">
+        <CopyIcon />
+      </IconButton>
+      <IconButton aria-describedby="copy-note" label="共有">
+        <CopyIcon />
+      </IconButton>
+      <p id="copy-note">リンクをコピーします</p>
+    </>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    const copy = canvas.getByRole('button', { name: 'コピー' });
+
+    await userEvent.tab();
+    await expect(copy).toHaveFocus();
+    await expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'コピー',
+    );
+    await expect(copy).not.toHaveAttribute('aria-describedby');
+    await expect(copy).toHaveAccessibleDescription('');
+
+    await userEvent.tab();
+    await expect(
+      canvas.getByRole('button', { name: '共有' }),
+    ).toHaveAccessibleDescription('リンクをコピーします');
   },
 };
 

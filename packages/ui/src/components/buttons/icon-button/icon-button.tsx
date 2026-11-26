@@ -38,8 +38,7 @@ type RenderAnchorProps<T extends string> = {
   'aria-disabled': true | undefined;
 } & Omit<AnchorAttributes, 'aria-label' | 'onClick' | 'ref'>;
 
-const COLOR = {
-  transparent: styles.transparent,
+const SOLID = {
   base: styles.base,
   primary: styles.primary,
   secondary: styles.secondary,
@@ -49,7 +48,8 @@ const SIZE = { sm: styles.sm, md: styles.md, lg: styles.lg } as const;
 
 type Look = {
   size?: 'sm' | 'md' | 'lg';
-  color?: 'transparent' | 'base' | 'primary' | 'secondary';
+  variant?: 'solid' | 'skeleton';
+  color?: 'primary' | 'secondary' | 'base';
   label: string;
   tooltipPlacement?: Placement;
   tooltipDisabled?: boolean;
@@ -91,27 +91,19 @@ type IconButtonComponent = {
   (props: ButtonProps): ReactNode;
 };
 
-type ButtonRest = Omit<
-  ButtonProps,
-  keyof Look | 'type' | 'action' | 'aria-describedby'
->;
+type ButtonRest = Omit<ButtonProps, keyof Look | 'type' | 'action'>;
 type LinkRest<T extends string> = Omit<
   LinkProps<T>,
-  keyof Look | 'type' | 'action' | 'aria-describedby'
+  keyof Look | 'type' | 'action'
 >;
 
 const isLink = <T extends string>(
   rest: ButtonRest | LinkRest<T>,
 ): rest is LinkRest<T> => rest.href !== undefined;
 
-type Wiring = Partial<TooltipTriggerProps>;
-
-const joinIds = (
-  ...ids: ReadonlyArray<string | undefined>
-): string | undefined => {
-  const filtered = ids.filter(Boolean);
-  return filtered.length === 0 ? undefined : filtered.join(' ');
-};
+// Tooltip の aria-describedby は受け取らない。中身は label と同じ文で、名前は
+// aria-label がすでに持つので、説明として繰り返し読ませないため。
+type Wiring = Omit<Partial<TooltipTriggerProps>, 'aria-describedby'>;
 
 // Stable module-level reference so it is not re-created on every render
 // (default prop function expressions break referential equality).
@@ -141,7 +133,8 @@ const Item: FC<{
 
 export const IconButton: IconButtonComponent = <T extends string>({
   size = 'md',
-  color = 'transparent',
+  variant = 'skeleton',
+  color = 'primary',
   label,
   tooltipPlacement = 'top',
   tooltipDisabled = false,
@@ -149,7 +142,6 @@ export const IconButton: IconButtonComponent = <T extends string>({
   children,
   type = 'button',
   action,
-  'aria-describedby': describedBy,
   ...rest
 }: ButtonProps | LinkProps<T>): ReactNode => {
   const [transitionPending, startTransition] = useTransition();
@@ -160,7 +152,7 @@ export const IconButton: IconButtonComponent = <T extends string>({
   const className = clsx(
     styles.root,
     focusRing.ring,
-    COLOR[color],
+    variant === 'skeleton' ? styles.skeleton : SOLID[color],
     SIZE[size],
     isDisabled && styles.disabled,
   );
@@ -189,7 +181,6 @@ export const IconButton: IconButtonComponent = <T extends string>({
         children,
         'aria-label': label,
         'aria-disabled': disabled || undefined,
-        'aria-describedby': joinIds(describedBy, wiring['aria-describedby']),
         // <a> には disabled が無いので、無効なあいだはクリックで遷移させない。
         onClick: disabled
           ? (event: MouseEvent<HTMLAnchorElement>) => {
@@ -248,7 +239,6 @@ export const IconButton: IconButtonComponent = <T extends string>({
       <button
         {...buttonRest}
         aria-busy={isPending || undefined}
-        aria-describedby={joinIds(describedBy, wiring['aria-describedby'])}
         aria-disabled={isDisabled || undefined}
         aria-label={label}
         className={className}

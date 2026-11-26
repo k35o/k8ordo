@@ -90,29 +90,29 @@ export default function IconButtonPage() {
             <Rich>{m.components.iconButton.backgroundsTitle()}</Rich>
           </Heading>
           <ComponentPreview
-            code={`<IconButton color="transparent" label="Close">
+            code={`<IconButton label="Close">
   <XIcon size="sm" />
 </IconButton>
-<IconButton color="base" label="Close">
+<IconButton color="base" label="Close" variant="solid">
   <XIcon size="sm" />
 </IconButton>
-<IconButton color="primary" label="Close">
+<IconButton color="primary" label="Close" variant="solid">
   <XIcon size="sm" />
 </IconButton>
-<IconButton color="secondary" label="Close">
+<IconButton color="secondary" label="Close" variant="solid">
   <XIcon size="sm" />
 </IconButton>`}
           >
-            <IconButton color="transparent" label="Close">
+            <IconButton label="Close">
               <XIcon size="sm" />
             </IconButton>
-            <IconButton color="base" label="Close">
+            <IconButton color="base" label="Close" variant="solid">
               <XIcon size="sm" />
             </IconButton>
-            <IconButton color="primary" label="Close">
+            <IconButton color="primary" label="Close" variant="solid">
               <XIcon size="sm" />
             </IconButton>
-            <IconButton color="secondary" label="Close">
+            <IconButton color="secondary" label="Close" variant="solid">
               <XIcon size="sm" />
             </IconButton>
           </ComponentPreview>

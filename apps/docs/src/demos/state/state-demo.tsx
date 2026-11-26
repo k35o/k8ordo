@@ -41,6 +41,7 @@ export function StateDemo() {
           </span>
           <IconButton
             color="base"
+            variant="solid"
             label={m.state.demoPrevious()}
             onClick={() => {
               update({ page: current.page - 1 }, { history: 'push' });
@@ -52,6 +53,7 @@ export function StateDemo() {
           <span className={styles.page}>{current.page}</span>
           <IconButton
             color="base"
+            variant="solid"
             label={m.state.demoNext()}
             onClick={() => {
               update({ page: current.page + 1 }, { history: 'push' });

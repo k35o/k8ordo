@@ -19,7 +19,6 @@ const SIZE = {
 export type IconRenderProps = {
   className: string;
   'aria-hidden': true;
-  focusable: 'false';
 };
 
 export const BaseIcon: FC<
@@ -31,5 +30,4 @@ export const BaseIcon: FC<
     className: SIZE[size],
     // アイコンは装飾扱い(意味を持たせる場合は利用側が sr-only テキストで名前を付ける)
     'aria-hidden': true,
-    focusable: 'false',
   });

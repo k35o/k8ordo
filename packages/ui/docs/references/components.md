@@ -134,13 +134,19 @@ kept in the bag, so a typed route stays typed.
 
 ### IconButton
 
-An icon-only button. Styling is controlled by the `color` prop.
+An icon-only button. `variant` picks the ground: `skeleton` (the default) has
+none, and `solid` fills it with the `color` family, as `Button` does. `label`
+is the accessible name and the tooltip; the tooltip is not added as a
+description, since it would repeat the name.
 
 ```tsx
 import { IconButton } from '@k8ordo/ui';
 
-<IconButton label="Close" color="transparent" size="md">
+<IconButton label="Close" size="md">
   <XIcon />
+</IconButton>;
+<IconButton color="primary" label="Send" variant="solid">
+  <SendIcon />
 </IconButton>;
 ```
 
@@ -149,7 +155,7 @@ Props:
 - `label`: `string` (required)
 - `action`: `() => void | Promise<void>`
 - `children`: `ReactNode`
-- `color`: `'transparent'` | `'base'` | `'primary'` | `'secondary'` (default: `'transparent'`)
+- `color`: `'primary'` | `'secondary'` | `'base'` (default: `'primary'`)
 - `disabled`: `boolean` (default: `false`)
 - `href`: `T`
 - `renderAnchor`: `(props: RenderAnchorProps<T>) => ReactNode`
@@ -157,6 +163,7 @@ Props:
 - `tooltipDisabled`: `boolean` (default: `false`)
 - `tooltipPlacement`: `Placement` (default: `'top'`)
 - `type`: `'button'` | `'submit'` | `'reset'` (default: `'button'`)
+- `variant`: `'solid'` | `'skeleton'` (default: `'skeleton'`)
 - Other props are forwarded to `ComponentPropsWithRef<'button'> | ComponentPropsWithRef<'a'>`, except `className` / `style` / `aria-disabled`.
 
 `action` keeps the button busy the way `Button`'s does — `aria-busy`,
@@ -170,7 +177,7 @@ tooltip. `renderAnchor` replaces that `<a>` under the same contract as
 `ref`, so spreading it keeps the tooltip.
 
 ```tsx
-<IconButton color="base" href="/contact" label="Mail">
+<IconButton href="/contact" label="Mail">
   <MailIcon />
 </IconButton>
 ```
@@ -181,7 +188,7 @@ A button that copies text to the clipboard and shows that it did: its icon
 turns into a check for two seconds (an error icon if the write fails), and a
 live region beside it announces `copied` / `copyFailed` from the dictionary. The
 button's name stays the same throughout. By default it is an outline `Button`
-with its `label` as text; `iconOnly` makes it a transparent `IconButton` whose
+with its `label` as text; `iconOnly` makes it a skeleton `IconButton` whose
 `label` is the tooltip.
 
 ```tsx
@@ -2733,7 +2740,7 @@ Props:
 ## Icons
 
 Decorative icons, from `@k8ordo/ui/icons` (the root entry does not export
-them). Each renders an `<svg>` with `aria-hidden` and `focusable="false"`, so
+them). Each renders an `<svg>` with `aria-hidden`, so
 the accessible name belongs to the control around it — an `IconButton`'s
 `label`, for example. They are drawn as lines in `currentColor`, so an icon
 takes the text color of where it sits.
@@ -2807,7 +2814,7 @@ export const BrandIcon = ({ size = 'md' }: Partial<BaseIconProps>) => (
 ```
 
 `renderItem` receives `IconRenderProps`
-(`{ className: string; 'aria-hidden': true; focusable: 'false' }`); the types
+(`{ className: string; 'aria-hidden': true }`); the types
 `BaseIconProps` (`{ size }`) and `IconRenderProps` are exported as well.
 
 ## Providers

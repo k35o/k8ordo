@@ -130,8 +130,8 @@ export const iconButton = {
     en: 'Sizes',
   }),
   backgroundsTitle: message({
-    ja: '色',
-    en: 'Colors',
+    ja: 'バリアントと色',
+    en: 'Variants and colors',
   }),
   disabledTitle: message({
     ja: '無効',
@@ -157,8 +157,8 @@ export const copyButton = {
     en: 'Icon only',
   }),
   iconOnlyDescription: message({
-    ja: '`iconOnly`を付けると透明な`IconButton`になります。`label`はツールチップと読み上げの名前になります。',
-    en: 'With `iconOnly` it becomes a transparent `IconButton`. `label` becomes its tooltip and accessible name.',
+    ja: '`iconOnly`を付けるとスケルトンの`IconButton`になります。`label`はツールチップと読み上げの名前になります。',
+    en: 'With `iconOnly` it becomes a skeleton `IconButton`. `label` becomes its tooltip and accessible name.',
   }),
   lazyValueTitle: message({
     ja: '押したときに作るテキスト',

@@ -22,7 +22,7 @@ const isDecorative = async (canvasElement: HTMLElement) => {
   await Promise.all(
     svgs.flatMap((svg) => [
       expect(svg).toHaveAttribute('aria-hidden', 'true'),
-      expect(svg).toHaveAttribute('focusable', 'false'),
+      expect(svg).not.toHaveAttribute('focusable'),
     ]),
   );
 };

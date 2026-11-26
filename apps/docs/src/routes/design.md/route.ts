@@ -349,7 +349,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 ### Buttons
 
 - **Button** — \`size: 'sm'|'md'|'lg'\`, \`color: 'primary'|'secondary'|'base'\`, \`variant: 'solid'|'outline'|'skeleton'\`, \`fullWidth\`, \`startIcon\`, \`endIcon\`, \`disabled\`
-- **IconButton** — \`label\`（必須・aria-label）, \`color: 'transparent'|'base'|'primary'|'secondary'\`, \`size\`
+- **IconButton** — \`label\`（必須・aria-label。ツールチップにもなる）, \`variant: 'skeleton'|'solid'\`（既定は skeleton。地を塗らない）, \`color: 'primary'|'secondary'|'base'\`（solid の地の色）, \`size\`
 - **CopyButton** — \`value\`（文字列、または押したときに呼ぶ関数。Promise も可）, \`label\`, \`iconOnly\`, \`size\`。押すとアイコンがチェックに変わり、結果を読み上げる。コピーは IconButton と自前のクリップボード処理ではなくこれを使う
 - リンクとして描画するときは Button / IconButton に \`href\` を渡すと \`<a>\` を描く。Next.js の \`Link\` などのリンク部品は \`renderAnchor\` で受け取った props を展開して描く
 - 押したときの非同期処理は \`action\`（transition の中で走り、終わるまで保留を表示する）。続けて押す同期の更新は \`onClick\`

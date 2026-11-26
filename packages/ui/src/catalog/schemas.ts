@@ -119,13 +119,15 @@ type IconButtonIntegrationProps = {
   icon: z.infer<typeof iconName>;
   label: ComponentProps<typeof IconButton>['label'];
   size?: ComponentProps<typeof IconButton>['size'];
+  variant?: ComponentProps<typeof IconButton>['variant'];
   color?: ComponentProps<typeof IconButton>['color'];
 };
 export const iconButtonProps = z.object({
   icon: iconName,
   label: z.string(),
   size: z.enum(['sm', 'md', 'lg']).optional(),
-  color: z.enum(['transparent', 'base', 'primary', 'secondary']).optional(),
+  variant: z.enum(['solid', 'skeleton']).optional(),
+  color: z.enum(['base', 'primary', 'secondary']).optional(),
 }) satisfies z.ZodType<IconButtonIntegrationProps>;
 
 type CopyButtonIntegrationProps = {
@@ -1266,6 +1268,12 @@ export type _EnumCoverage = [
     CoversComponent<
       ComponentProps<typeof IconButton>['size'],
       IconButtonProps['size']
+    >
+  >,
+  AssertCovered<
+    CoversComponent<
+      ComponentProps<typeof IconButton>['variant'],
+      IconButtonProps['variant']
     >
   >,
   AssertCovered<

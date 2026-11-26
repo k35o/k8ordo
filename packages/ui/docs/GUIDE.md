@@ -408,17 +408,20 @@ toggle switches its `variant` or `color` with the state instead. Inside a
 
 ### IconButton
 
-Styling is controlled by `color` (not `variant`). `label` is required.
+`variant` picks the ground: `skeleton` (the default) has none, and `solid`
+fills it with the `color` family, as `Button` does. `label` is required; it is
+the accessible name and the tooltip, and the tooltip is not read again as a
+description.
 
 ```tsx
 import { IconButton } from '@k8ordo/ui';
 import { CopyIcon, HomeIcon, SendIcon } from '@k8ordo/ui/icons';
 
-<IconButton color="transparent" label="Copy"><CopyIcon /></IconButton>
-<IconButton color="primary" label="Send"><SendIcon /></IconButton>
+<IconButton label="Copy"><CopyIcon /></IconButton>
+<IconButton color="primary" label="Send" variant="solid"><SendIcon /></IconButton>
 
 // A link: href renders an <a>, named by label and with the same tooltip
-<IconButton color="base" href="/home" label="Home">
+<IconButton href="/home" label="Home">
   <HomeIcon />
 </IconButton>
 ```

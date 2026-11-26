@@ -112,7 +112,13 @@ export const IconTrigger: FC<{
 }> = ({ icon, label }) => (
   <Popover.Trigger
     renderItem={(props) => (
-      <IconButton color="base" label={label} tooltipDisabled {...props}>
+      <IconButton
+        color="base"
+        label={label}
+        tooltipDisabled
+        variant="solid"
+        {...props}
+      >
         {icon}
       </IconButton>
     )}

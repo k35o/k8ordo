@@ -177,7 +177,7 @@ export const Feedback: FC<FeedbackProps> = ({
     <>
       <IconButton
         aria-pressed={feedback === 'positive'}
-        color={feedback === 'positive' ? 'primary' : 'transparent'}
+        variant={feedback === 'positive' ? 'solid' : 'skeleton'}
         label={messages.feedbackPositive}
         onClick={() => {
           toggle('positive');
@@ -190,7 +190,7 @@ export const Feedback: FC<FeedbackProps> = ({
       </IconButton>
       <IconButton
         aria-pressed={feedback === 'negative'}
-        color={feedback === 'negative' ? 'primary' : 'transparent'}
+        variant={feedback === 'negative' ? 'solid' : 'skeleton'}
         label={messages.feedbackNegative}
         onClick={() => {
           toggle('negative');

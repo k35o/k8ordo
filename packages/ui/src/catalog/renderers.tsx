@@ -722,6 +722,7 @@ export function renderIconButton(
       color={u(props.color)}
       label={props.label}
       size={u(props.size)}
+      variant={u(props.variant)}
     >
       <IconComponent size={u(props.size) ?? 'md'} />
     </IconButton>

@@ -190,7 +190,6 @@ const CalendarBody: FC<Props> = ({
     <div className={clsx('writing-h', styles.root)}>
       <div className={styles.header}>
         <IconButton
-          color="transparent"
           disabled={!canGoPrevious}
           label={messages.calendarPreviousMonth}
           onClick={() => {
@@ -205,7 +204,6 @@ const CalendarBody: FC<Props> = ({
           {monthFormat.format(formatDate(focused))}
         </p>
         <IconButton
-          color="transparent"
           disabled={!canGoNext}
           label={messages.calendarNextMonth}
           onClick={() => {
