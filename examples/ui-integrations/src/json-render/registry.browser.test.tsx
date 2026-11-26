@@ -120,3 +120,24 @@ it('json-render の組み込みの setState は、アプリを通らず画面の
   await expect.element(screen.getByPlaceholder('ニックネーム')).toHaveValue('');
   expect(toAssistant).not.toHaveBeenCalled();
 });
+
+it('onToAssistant を描き直しで差し替えると、差し替えたほうが呼ばれる', async () => {
+  const first = vi.fn();
+  const second = vi.fn();
+  const spec = withButton({ action: 'toAssistant', params: { event: 'save' } });
+  const screen = await render(
+    <UIProvider>
+      <JsonRenderUI onToAssistant={first} spec={spec} />
+    </UIProvider>,
+  );
+  await screen.rerender(
+    <UIProvider>
+      <JsonRenderUI onToAssistant={second} spec={spec} />
+    </UIProvider>,
+  );
+
+  await screen.getByRole('button', { name: '保存' }).click();
+
+  await expect.poll(() => second.mock.calls.length).toBe(1);
+  expect(first).not.toHaveBeenCalled();
+});

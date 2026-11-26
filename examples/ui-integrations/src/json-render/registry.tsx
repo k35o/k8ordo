@@ -11,7 +11,7 @@ import type { BaseComponentProps } from '@json-render/react';
 import { catalog as k8ordo } from '@k8ordo/ui/catalog';
 import type { CatalogName } from '@k8ordo/ui/catalog';
 import { renderers } from '@k8ordo/ui/catalog/render';
-import { Children, useState } from 'react';
+import { Children, useEffect, useMemo, useRef, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 
 import { componentsCatalog, TO_ASSISTANT } from './catalog';
@@ -97,20 +97,32 @@ export const JsonRenderProvider: FC<{
   onStateChange?: (changes: StateChanges) => void;
   onToAssistant?: ToAssistant;
   children: ReactNode;
-}> = ({ spec, onStateChange, onToAssistant, children }) => (
-  <JSONUIProvider
-    handlers={
-      onToAssistant === undefined
-        ? undefined
-        : { [TO_ASSISTANT]: onToAssistant }
-    }
-    initialState={spec?.state ?? undefined}
-    onStateChange={onStateChange}
-    registry={registry}
-  >
-    {children}
-  </JSONUIProvider>
-);
+}> = ({ spec, onStateChange, onToAssistant, children }) => {
+  // json-render の ActionProvider は最初に渡された handlers を握ったまま
+  // 差し替えを読まない。最新の onToAssistant を呼ぶ handler を 1 つだけ渡す
+  const latest = useRef(onToAssistant);
+  useEffect(() => {
+    latest.current = onToAssistant;
+  });
+  const handlers = useMemo(
+    () => ({
+      [TO_ASSISTANT]: async (params: Record<string, unknown>) => {
+        await latest.current?.(params);
+      },
+    }),
+    [],
+  );
+  return (
+    <JSONUIProvider
+      handlers={handlers}
+      initialState={spec?.state ?? undefined}
+      onStateChange={onStateChange}
+      registry={registry}
+    >
+      {children}
+    </JSONUIProvider>
+  );
+};
 
 /**
  * Draws a spec with `@k8ordo/ui`: `JsonRenderProvider` and `Renderer` wired to
