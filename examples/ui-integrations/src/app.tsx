@@ -2,6 +2,7 @@ import { A2uiDemo } from './a2ui/demo';
 import { AiSdkChatDemo } from './ai-sdk/demo';
 import { JsonRenderDemo } from './json-render/demo';
 import { OpenUiDemo } from './openui/demo';
+import { Playground } from './playground/playground';
 
 function Section({
   title,
@@ -27,6 +28,13 @@ function App() {
   return (
     <div className="mx-auto flex min-h-screen max-w-xl flex-col gap-8 p-8">
       <h1 className="text-2xl font-bold">k8ordo UI × 生成 UI のつなぎ</h1>
+
+      <Section
+        title="試し打ち"
+        description="Claude（claude-opus-5-5）に、選んだ形式で k8ordo の部品だけを使った画面を作らせます。fnox exec -P anthropic -- pnpm dev で起動したときだけ動きます。"
+      >
+        <Playground />
+      </Section>
 
       <Section
         title="json-render"

@@ -9,6 +9,22 @@
       "autoPort": true
     },
     {
+      "name": "ui-playground",
+      "runtimeExecutable": "fnox",
+      "runtimeArgs": [
+        "exec",
+        "-P",
+        "anthropic",
+        "--",
+        "pnpm",
+        "--filter",
+        "example-ui-integrations",
+        "dev"
+      ],
+      "port": 5173,
+      "autoPort": true
+    },
+    {
       "name": "css-modules-example",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "example-ui-css-modules", "dev"],
