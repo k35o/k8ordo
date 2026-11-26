@@ -11,10 +11,10 @@ This example showcases:
 - **json-render glue** (`src/json-render/`): the catalog, the registry, and `validateGeneratedSpec`, built by mapping over `@k8ordo/ui/catalog`; a typed `UISpec` rendered with `<JsonRenderUI />`
 - **OpenUI glue** (`src/openui/`): the library and the React-free `prompt()`, built the same way; an OpenUI-Lang DSL string rendered with `library` + `Renderer`
 - **AI SDK glue** (`src/ai-sdk/map-parts.ts`): `mapMessageParts`, which maps `useChat` messages onto the chat components — tool approval, attachments, sources, a `data-ui` part rendered as generative UI, and copy / regenerate / feedback — driven by a scripted transport, so no server or API key is needed
-- **Playground** (`src/playground/`): ask Claude (`claude-opus-5-5`) for a screen in any of the three formats and watch it render as it streams — see [Trying it with a real model](#trying-it-with-a-real-model)
+- **Playground** (`src/playground/`), the page this example serves: ask Claude (`claude-opus-5-5`) for a screen in any of the three formats and watch it render as it streams, next to whether it keeps to the catalog, the state its fields write to, and what the model wrote — see [Trying it with a real model](#trying-it-with-a-real-model)
 - Tailwind CSS 4 integration and TypeScript
 
-No piece of glue names a component. A component added to `@k8ordo/ui`'s catalog reaches every format here with no change to this directory.
+The scripted demos of each piece of glue are test fixtures: the tests mount them, and the page does not. No piece of glue names a component. A component added to `@k8ordo/ui`'s catalog reaches every format here with no change to this directory.
 
 ## Getting Started
 
@@ -51,14 +51,14 @@ The playground calls Claude through `/api/generate`, an endpoint only the dev se
 fnox exec -P anthropic -- pnpm dev
 ```
 
-The endpoint refuses requests from another origin, since it spends the key. Every other demo, and the tests, run without a key.
+The endpoint refuses requests from another origin, since it spends the key. The tests run without a key: they stand in for the endpoint with fixed answers.
 
 ## Project Structure
 
 ```
 examples/ui-integrations/
 ├── src/
-│   ├── app.tsx                    # Hosts the json-render, OpenUI, and AI SDK demos
+│   ├── app.tsx                    # Hosts the playground
 │   ├── prompt-language.test.ts    # The prompts the glue builds are English and say how a field binds
 │   ├── a2ui/
 │   │   ├── catalog.ts             # Glue: the A2UI catalog document (server-safe)
@@ -72,8 +72,10 @@ examples/ui-integrations/
 │   │   ├── server.ts              # /api/generate: streams Claude's answer as NDJSON (dev server only)
 │   │   ├── request.ts             # Checks a request before the key is used
 │   │   ├── stream.ts              # Reads the NDJSON in the browser
-│   │   ├── playground.tsx         # The form and the preview for each format
-│   │   └── playground.browser.test.tsx  # Messages split across chunks render; no endpoint is reported
+│   │   ├── playground.tsx         # The form, and the stream fed to the result
+│   │   ├── results.tsx            # Each format: what it draws, its state, and its check
+│   │   ├── panes.tsx              # The drawing, the check, the state, and the output side by side
+│   │   └── playground.browser.test.tsx  # Each format renders, writes input to its state, and reports its check
 │   ├── ai-sdk/
 │   │   ├── map-parts.ts           # Glue: UIMessage.parts → parts for the chat components
 │   │   ├── map-parts.test.ts      # Every part kind maps, in order
@@ -195,7 +197,7 @@ message chunks a server would, so the demo runs without a backend.
 
 - `pnpm dev` - Start the development server (`vp dev`)
 - `pnpm build` - Build for production (`vp build`)
-- `pnpm test` - Run the tests (`vp test`): the `spec` project checks the glue, the demo spec and DSL, and the scripted replies against the AI SDK, and the `render` project mounts the demos in headless Chromium, Firefox, and WebKit
+- `pnpm test` - Run the tests (`vp test`): the `spec` project checks the glue, the demo spec and DSL, and the scripted replies against the AI SDK, and the `render` project mounts the demos and the playground in headless Chromium, Firefox, and WebKit
 - `pnpm typecheck` - Run TypeScript type checking
 - `pnpm check` - Run Oxlint/Oxfmt linting/formatting checks (`vp check`)
 - `pnpm check:write` - Run `vp check --fix` to auto-fix issues
