@@ -2,6 +2,10 @@
 
 How to build UI with the `@k8ordo/ui` design system.
 
+Like every k8ordo package it assumes React 19 and Server Components, uses only
+what has reached Baseline newly available, and ships no polyfills or legacy
+fallbacks.
+
 ## Setup
 
 ```bash

@@ -5,7 +5,8 @@ tokens, built-in wording that follows `@k8ordo/i18n` (Japanese and English inclu
 that lets an LLM compose on-brand UIs through any generative-UI format.
 
 Like every k8ordo package it assumes React 19 and Server Components, uses only
-what has reached Baseline, and ships no polyfills or legacy fallbacks.
+what has reached Baseline newly available, and ships no polyfills or legacy
+fallbacks.
 
 - **Documentation**: https://ordo.k8o.me/ui
 - **Storybook**: https://main--687a213c85e2e4589d8db1bb.chromatic.com
@@ -46,12 +47,6 @@ it. Install one when you import the entry it belongs to.
 | `shiki`            | ≥4.6.0  | optional | `@k8ordo/ui/code-block`                           |
 
 <!-- /peers -->
-
-The generative-UI peers are 0.x, where a minor bump is a breaking release, so
-the declared range stops at the next minor: `@k8ordo/ui` only claims the line it
-is tested against. Resolve exactly **one copy** of each — the adapters read the
-framework's own React context, so two copies let every schema check and the
-build pass while the form views throw at render time.
 
 The components need no CSS tooling of their own: they are written in CSS Modules
 and ship compiled CSS, which each component imports. The package does not
@@ -549,10 +544,9 @@ pnpm check:write
 
 ## Browser Support
 
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
+The browsers that ship what Baseline has newly available. The CSS is compiled
+for them, and [docs/GUIDE.md](docs/GUIDE.md) lists the versions to give your
+bundler as its CSS target.
 
 ## License
 

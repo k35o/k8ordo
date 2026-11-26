@@ -2,7 +2,7 @@
 
 `@k8ordo/ui` — the React component library in k8ordo. This file covers the
 package itself. The shared discipline (React 19 / RSC assumed,
-Baseline only, no polyfills) and how a new package joins are in the repository
+Baseline newly available only, no polyfills) and how a new package joins are in the repository
 root's [`CLAUDE.md`](../../CLAUDE.md).
 
 ## Package Commands
