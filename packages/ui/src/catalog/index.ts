@@ -23,11 +23,24 @@ export type CatalogEntry<P extends z.ZodObject = z.ZodObject, V = never> = {
   children?: true;
   /** Present when the component is a field whose value a format can bind to its state. */
   value?: CatalogValue<z.infer<P>, V>;
+  /**
+   * What the user can do to the component that the application hears about,
+   * by name, each described for the model. A format binds an event to its own
+   * action (A2UI's `action`, json-render's `on`, an OpenUI action), and the
+   * renderer receives the bound ones as `on`.
+   */
+  events?: Readonly<Record<string, string>>;
 };
 
-const entry = <P extends z.ZodObject, V = never>(
-  definition: CatalogEntry<P, V>,
-): CatalogEntry<P, V> => definition;
+const entry = <
+  P extends z.ZodObject,
+  V = never,
+  const E extends Readonly<Record<string, string>> = never,
+>(
+  definition: CatalogEntry<P, V> & { events?: E },
+): CatalogEntry<P, V> & { events?: E } => definition;
+
+const press = (description: string) => ({ press: description }) as const;
 
 const firstOption = (props: {
   defaultValue?: string | undefined;
@@ -65,12 +78,14 @@ export const catalog = {
   }),
   Card: entry({
     description:
-      'Card that groups content (a container). size (sm/md/lg, default md) sets its inner padding, so a Stack inside it needs no padding of its own. interactive makes it scale up on hover.',
+      'Card that groups content (a container). size (sm/md/lg, default md) sets its inner padding, so a Stack inside it needs no padding of its own. With href the whole card is a link; binding press makes the whole card a button instead. Links and buttons inside it stay pressable on their own.',
     props: s.cardProps,
     children: true,
+    events: press('The user pressed the card.'),
   }),
   Form: entry({
-    description: 'Wrapper for form elements (a vertical layout).',
+    description:
+      'Wrapper for form elements (a vertical layout). It submits nothing by itself, Enter included: report a submission with the press of a Button inside it.',
     props: s.formProps,
     children: true,
   }),
@@ -81,13 +96,16 @@ export const catalog = {
     children: true,
   }),
   Button: entry({
-    description: 'Action button. With href it renders as a link (<a>).',
+    description:
+      'Action button. With href it renders as a link (<a>) and reports no press.',
     props: s.buttonProps,
+    events: press('The user pressed the button.'),
   }),
   IconButton: entry({
     description:
       'Icon-only button (label is required and shown as its tooltip).',
     props: s.iconButtonProps,
+    events: press('The user pressed the button.'),
   }),
   CopyButton: entry({
     description:
@@ -221,8 +239,16 @@ export const catalog = {
     props: s.tooltipProps,
   }),
   DropdownMenu: entry({
-    description: 'Dropdown menu.',
+    description:
+      'Dropdown menu that a button labeled triggerLabel opens. Its children are its items, each a DropdownMenuItem.',
     props: s.dropdownMenuProps,
+    children: true,
+  }),
+  DropdownMenuItem: entry({
+    description:
+      'One item of a DropdownMenu; place it only as a child of a DropdownMenu.',
+    props: s.dropdownMenuItemProps,
+    events: press('The user chose the item.'),
   }),
   Toast: entry({
     description: 'Toast notification that a button labeled triggerLabel shows.',
@@ -392,6 +418,10 @@ export const catalog = {
     description:
       'Field with a label and help or error text (text/textarea/password).',
     props: s.formControlProps,
+    value: {
+      prop: 'defaultValue',
+      initial: (props) => props.defaultValue ?? '',
+    },
   }),
 };
 
@@ -402,6 +432,14 @@ export type CatalogName = keyof typeof catalog;
 export type CatalogProps<N extends CatalogName> = z.infer<
   (typeof catalog)[N]['props']
 >;
+
+/** The events the component `N` reports (`never` for a component with none). */
+export type CatalogEventOf<N extends CatalogName> =
+  (typeof catalog)[N] extends { events?: infer E }
+    ? [E] extends [undefined]
+      ? never
+      : keyof NonNullable<E> & string
+    : never;
 
 /** The value of the field `N` (`never` for a component that is not a field). */
 export type CatalogValueOf<N extends CatalogName> =

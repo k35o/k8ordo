@@ -52,3 +52,10 @@
   display: flex;
   gap: calc(var(--spacing) * 2);
 }
+
+.tag {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+  color: var(--color-primary-fg);
+  text-decoration: underline;
+}

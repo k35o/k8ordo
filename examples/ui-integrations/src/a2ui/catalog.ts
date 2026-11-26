@@ -39,6 +39,7 @@ const componentOf = (name: CatalogName) => {
     props: z.ZodObject;
     children?: true;
     value?: { prop: string };
+    events?: Readonly<Record<string, string>>;
   };
   const json = z.toJSONSchema(entry.props, { io: 'input' }) as JsonSchema;
   const properties: Record<string, unknown> = {
@@ -64,6 +65,12 @@ const componentOf = (name: CatalogName) => {
       description: 'The ids of the components inside, in order.',
     };
     required.add('children');
+  }
+  for (const [event, description] of Object.entries(entry.events ?? {})) {
+    properties[event] = {
+      $ref: `${COMMON_TYPES}/Action`,
+      description: `${description} To report it to the assistant, set it to {"event": {"name": "...", "context": {...}}}.`,
+    };
   }
 
   return {
@@ -92,6 +99,7 @@ export const catalogDocument = {
   instructions: [
     'Build the surface from these components only. Lay them out with Stack and Grid.',
     'Bind the value of every field to the data model with {"@path": "/..."}, and give the values it starts from with updateDataModel.',
+    'A component that the user acts on has a property per event (press). Leave it out when nothing should happen; set it to an event to report what the user did, with context values read from the data model by {"@path": "/..."}.',
     ...catalogRules,
   ].join('\n'),
   components: Object.fromEntries(

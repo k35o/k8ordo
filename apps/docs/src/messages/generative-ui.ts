@@ -30,6 +30,11 @@ export const catalogValue = message({
   en: '`value.prop` names the prop that holds the value. `value.initial(props)` is the value when nothing is bound to it.',
 });
 
+export const catalogEvents = message({
+  ja: '`events`は、アプリに伝える利用者の操作です。`Button`、`IconButton`、`Card`、`DropdownMenuItem`が`press`を持ちます。',
+  en: '`events` lists what the user does that the application hears about. `Button`, `IconButton`, `Card`, and `DropdownMenuItem` have `press`.',
+});
+
 export const catalogServer = message({
   ja: '`@k8ordo/ui/catalog`はReactを読まないので、サーバーで読み込めます。Server Componentやサーバーの処理からプロンプトを作れます。',
   en: '`@k8ordo/ui/catalog` imports no React, so it loads on the server. A Server Component or any server code can build the prompt from it.',
@@ -50,6 +55,11 @@ export const renderValue = message({
   en: 'A field also takes its value and a function that sets it. Where the value lives is up to the glue.',
 });
 
+export const renderEvents = message({
+  ja: '`events`を持つコンポーネントには、モデルが結び付けた操作の関数を`on`で渡します。結び付いていない`Card`は、押せる形になりません。',
+  en: 'A component with `events` also takes `on`, the function of each event the model bound. A `Card` with nothing bound is not pressable.',
+});
+
 export const glueTitle = message({
   ja: '形式とのつなぎ',
   en: 'Connecting a format',
@@ -63,6 +73,11 @@ export const glueDescription = message({
 export const glueBinding = message({
   ja: '入力欄の値は、形式の状態に結び付けます。json-renderなら`$bindState`で、OpenUIなら`name`で、A2UIなら`@path`でデータモデルに結び付けます。',
   en: 'Each field’s value is bound to the format’s state: with `$bindState` in json-render, by `name` in OpenUI, and with `@path` into the data model in A2UI.',
+});
+
+export const glueEvents = message({
+  ja: '利用者の操作は、形式の操作に結び付けます。A2UIなら`press`の`event`、json-renderなら`on.press`、OpenUIなら`press`の引数です。',
+  en: 'Each event is bound to the format’s own action: an `event` in `press` in A2UI, `on.press` in json-render, and the `press` argument in OpenUI.',
 });
 
 export const glueExample = message({

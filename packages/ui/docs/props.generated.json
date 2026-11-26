@@ -761,9 +761,33 @@
           "required": false
         },
         {
+          "name": "href",
+          "types": ["T"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
           "name": "interactive",
           "types": ["boolean"],
           "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "onAction",
+          "types": ["() => void | Promise<void>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "openInNewTab",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "renderAnchor",
+          "types": ["(props: CardRenderAnchorProps<T>) => ReactNode"],
+          "defaultValue": "defaultRenderAnchor",
           "required": false
         },
         {

@@ -6,16 +6,20 @@ import type { Format } from './request';
 
 export type Phase = 'idle' | 'streaming' | 'done';
 
+export type LogEntry = { label: string; text: string };
+
 const STATE_CAPTIONS = {
   a2ui: 'surface ごとのデータモデル。入力欄は {"@path": …} でここに結ばれています。',
   'json-render': 'spec の state。入力欄は $bindState でここに結ばれています。',
   openui: 'フォームの状態。入力欄は name でここに結ばれています。',
 } as const satisfies Record<Format, string>;
 
-const OUTPUT_CAPTIONS = {
-  a2ui: 'A2UI のメッセージ。1 行に 1 つの JSON です。',
-  'json-render': 'spec を組み立てる JSON Patch。1 行に 1 つです。',
-  openui: 'OpenUI Lang のプログラム。',
+const LOG_CAPTIONS = {
+  a2ui: '頼みごと、Claude の返事、返した操作の順です。返事は A2UI のメッセージで、1 行に 1 つの JSON です。',
+  'json-render':
+    '頼みごと、Claude の返事、返した操作の順です。返事は spec を組み立てる JSON Patch で、1 行に 1 つです。',
+  openui:
+    '頼みごと、Claude の返事、返した操作の順です。返事は OpenUI Lang の文で、同じ名前の文は前のものを置き換えます。',
 } as const satisfies Record<Format, string>;
 
 function Pane({
@@ -91,22 +95,29 @@ export function Panes({
   view,
   issues,
   state,
-  text,
+  log,
 }: {
   format: Format;
   phase: Phase;
   view: ReactNode;
   issues: readonly string[];
   state: string;
-  text: string;
+  log: readonly LogEntry[];
 }) {
+  const isBusy = phase === 'streaming';
   return (
     <div className="grid items-start gap-10 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
       <Pane
-        caption="書かれた分から、@k8ordo/ui の部品で描きます。ボタンを押しても、まだ Claude には何も返りません。"
+        caption="書かれた分から、@k8ordo/ui の部品で描きます。ボタンなどを押すと、何をしたかと状態を Claude に返し、返事をこの画面に重ねます。"
         title="描画"
       >
-        <div className="bg-bg-subtle rounded-2xl p-6">{view}</div>
+        <div
+          aria-busy={isBusy}
+          className="bg-bg-subtle rounded-2xl p-6"
+          inert={isBusy}
+        >
+          {view}
+        </div>
       </Pane>
       <div className="flex flex-col gap-8">
         <Pane
@@ -122,11 +133,21 @@ export function Panes({
             <Source>{state}</Source>
           )}
         </Pane>
-        <Pane caption={OUTPUT_CAPTIONS[format]} title="Claude の出力">
-          {phase === 'idle' ? (
+        <Pane caption={LOG_CAPTIONS[format]} title="やり取り">
+          {log.length === 0 ? (
             <Placeholder>まだありません。</Placeholder>
           ) : (
-            <Source>{text}</Source>
+            <ol className="flex flex-col gap-4">
+              {log.map((entry, index) => (
+                // oxlint-disable-next-line react/no-array-index-key -- 後ろに足すだけで並べ替えない記録
+                <li className="flex flex-col gap-1" key={index}>
+                  <span className="text-fg-mute text-xs font-bold">
+                    {entry.label}
+                  </span>
+                  <Source>{entry.text}</Source>
+                </li>
+              ))}
+            </ol>
           )}
         </Pane>
       </div>

@@ -19,6 +19,41 @@
   width: fit-content;
 }
 
+.pressable {
+  position: relative;
+}
+
+.target {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  cursor: pointer;
+
+  &[aria-busy='true'] {
+    cursor: progress;
+  }
+}
+
+/* The target is drawn over the content, so a link or a field inside the card
+   is lifted above it to stay pressable on its own. */
+.content {
+  @scope (&) {
+    :is(
+      a,
+      button,
+      input,
+      select,
+      textarea,
+      label,
+      summary,
+      [tabindex]:not([tabindex='-1'])
+    ) {
+      position: relative;
+      z-index: var(--z-index-raised);
+    }
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .interactive {
     transition-property: transform, translate, scale, rotate;

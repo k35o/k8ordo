@@ -2,13 +2,19 @@
 
 import type { ReactNode } from 'react';
 
-import type { CatalogName, CatalogProps, CatalogValueOf } from './index';
+import type {
+  CatalogEventOf,
+  CatalogName,
+  CatalogProps,
+  CatalogValueOf,
+} from './index';
 import * as ui from './renderers';
 
 /**
  * What a format hands the renderer of the component `N`: the props the model
- * wrote, the children the format drew, and — for a field — its value and the
- * setter the format's state is written through.
+ * wrote, the children the format drew, for a field its value and the setter
+ * the format's state is written through, and for a component with events the
+ * handlers of the ones the model bound.
  */
 export type RenderArgs<N extends CatalogName> = {
   props: CatalogProps<N>;
@@ -19,7 +25,17 @@ export type RenderArgs<N extends CatalogName> = {
   : {
       value: CatalogValueOf<N>;
       setValue: (next: CatalogValueOf<N>) => void;
-    });
+    }) &
+  ([CatalogEventOf<N>] extends [never]
+    ? unknown
+    : {
+        /**
+         * The handler of each event the model bound, by name. An event left out
+         * is unbound, and the component draws as if it had no such event: a
+         * card is not pressable, a button presses to no effect.
+         */
+        on?: Partial<Record<CatalogEventOf<N>, () => void | Promise<void>>>;
+      });
 
 /** Draws the component `N` with `@k8ordo/ui`. */
 export type Renderer<N extends CatalogName> = (
@@ -43,11 +59,11 @@ export type Renderer<N extends CatalogName> = (
 export const renderers: { [N in CatalogName]: Renderer<N> } = {
   Stack: ({ props, children }) => ui.renderStack(props, children),
   Grid: ({ props, children }) => ui.renderGrid(props, children),
-  Card: ({ props, children }) => ui.renderCard(props, children),
+  Card: ({ props, children, on }) => ui.renderCard(props, children, on?.press),
   Form: ({ props, children }) => ui.renderForm(props, children),
   Carousel: ({ props, children }) => ui.renderCarousel(props, children),
-  Button: ({ props }) => ui.renderButton(props),
-  IconButton: ({ props }) => ui.renderIconButton(props),
+  Button: ({ props, on }) => ui.renderButton(props, on?.press),
+  IconButton: ({ props, on }) => ui.renderIconButton(props, on?.press),
   CopyButton: ({ props }) => ui.renderCopyButton(props),
   Toolbar: ({ props }) => ui.renderToolbar(props),
   Anchor: ({ props }) => ui.renderAnchor(props),
@@ -87,7 +103,9 @@ export const renderers: { [N in CatalogName]: Renderer<N> } = {
   ),
   Popover: ({ props, children }) => ui.renderPopover(props, children),
   Tooltip: ({ props }) => ui.renderTooltip(props),
-  DropdownMenu: ({ props }) => ui.renderDropdownMenu(props),
+  DropdownMenu: ({ props, children }) => ui.renderDropdownMenu(props, children),
+  DropdownMenuItem: ({ props, on }) =>
+    ui.renderDropdownMenuItem(props, on?.press),
   Toast: ({ props }) => <ui.ToastWidget props={props} />,
   TextField: ({ props, value, setValue }) =>
     ui.renderTextField(props, value, setValue),
@@ -129,5 +147,6 @@ export const renderers: { [N in CatalogName]: Renderer<N> } = {
   Autocomplete: ({ props, value, setValue }) =>
     ui.renderAutocomplete(props, value, setValue),
   FileField: ({ props }) => <ui.FileFieldWidget props={props} />,
-  FormControl: ({ props }) => <ui.FormControlWidget props={props} />,
+  FormControl: ({ props, value, setValue }) =>
+    ui.renderFormControl(props, value, setValue),
 };

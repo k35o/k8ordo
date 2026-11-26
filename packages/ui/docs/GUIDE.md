@@ -457,8 +457,9 @@ import { Card } from '@k8ordo/ui';
   <div className={styles.body}>Card content</div>
 </Card>
 
-// Clickable card (interactive scales it up on hover)
-<Card variant="shadow" interactive>
+// The whole card is a link (href) or a button (onAction); links and
+// buttons inside it stay pressable on their own
+<Card href="/articles/1">
   <div className={styles.body}>Content</div>
 </Card>
 ```

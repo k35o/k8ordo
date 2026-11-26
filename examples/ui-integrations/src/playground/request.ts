@@ -2,7 +2,10 @@ export const FORMATS = ['a2ui', 'json-render', 'openui'] as const;
 
 export type Format = (typeof FORMATS)[number];
 
-export type GenerateRequest = { format: Format; prompt: string };
+/** One turn of the conversation. A user turn is the request or a report of what the user did. */
+export type Turn = { role: 'user' | 'assistant'; content: string };
+
+export type GenerateRequest = { format: Format; messages: Turn[] };
 
 /** One line of the NDJSON the endpoint streams back. */
 export type GenerateEvent =
@@ -13,6 +16,21 @@ export type GenerateEvent =
 
 const isFormat = (value: unknown): value is Format =>
   FORMATS.some((format) => format === value);
+
+const isConversation = (value: unknown): value is Turn[] =>
+  Array.isArray(value) &&
+  value.length % 2 === 1 &&
+  value.every((turn: unknown, index) => {
+    if (typeof turn !== 'object' || turn === null) {
+      return false;
+    }
+    const { role, content } = turn as Record<string, unknown>;
+    return (
+      role === (index % 2 === 0 ? 'user' : 'assistant') &&
+      typeof content === 'string' &&
+      content.trim() !== ''
+    );
+  });
 
 /**
  * Checks a request to the endpoint before anything is spent on it. A request
@@ -35,15 +53,19 @@ export const parseGenerateRequest = (
   if (typeof body !== 'object' || body === null) {
     return { status: 400, message: 'The body must be a JSON object.' };
   }
-  const { format, prompt } = body as Record<string, unknown>;
+  const { format, messages } = body as Record<string, unknown>;
   if (!isFormat(format)) {
     return {
       status: 400,
       message: `format must be one of ${FORMATS.join(', ')}.`,
     };
   }
-  if (typeof prompt !== 'string' || prompt.trim() === '') {
-    return { status: 400, message: 'prompt must be a non-empty string.' };
+  if (!isConversation(messages)) {
+    return {
+      status: 400,
+      message:
+        'messages must alternate user and assistant turns of non-empty text, from a user turn to a user turn.',
+    };
   }
-  return { format, prompt };
+  return { format, messages };
 };
