@@ -58,6 +58,7 @@ import { renderMatch, renderNotFound } from './render';
 import { fileRequest, routeRequestOf } from './request';
 import {
   answer,
+  currentCookies,
   inPhase,
   signingNonce,
   withRequest,
@@ -524,7 +525,7 @@ const respond = async (request: Request): Promise<Response> => {
   }
   const routeRequest =
     import.meta.env.K8ORDO_MODE === 'server'
-      ? routeRequestOf(request)
+      ? routeRequestOf(request, currentCookies())
       : fileRequest;
   const ssr = await import.meta.viteRsc.loadModule<typeof SsrEntry>(
     'ssr',

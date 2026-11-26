@@ -67,8 +67,11 @@ export async function signIn(_previous: FormState, formData: FormData) {
 
 What an action writes goes on its answer: the page it re-rendered, the `303`
 to where it redirected, or the payload the client runtime applies. The page
-re-rendered after it sees the cookies the request carried in `request`, not
-what the action wrote.
+re-rendered after it reads what the action wrote: `request.cookies` is the
+request's cookies with every write of the guards and the action laid over
+them, so a preference changed by a form posted without JavaScript is drawn
+with its new value in that very answer. `request.headers.get('cookie')`
+stays the header as it arrived.
 
 **An action runs in the context of the page it was posted to.** A call
 posts to the URL of the page on screen, whose params schemas run for that

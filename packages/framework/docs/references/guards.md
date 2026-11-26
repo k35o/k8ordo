@@ -120,8 +120,10 @@ RFC 6265's token characters throws.
 `delete` takes the `path` and `domain` the cookie was set with
 (`CookieScope`), since those are what a browser keys it by.
 
-A page never writes a cookie: it reads `request.cookies` from its props, the
-cookies the request carried.
+A page never writes a cookie: it reads `request.cookies` from its props —
+the cookies the request carried, with what the guards and a Server Action
+wrote earlier in the same request, so a write is seen by the render that
+answers it.
 
 ## Work after the answer
 
@@ -175,7 +177,9 @@ hands it its own `waitUntil`: [Running the build](deploy.md#running-the-build),
 ## Reading the request
 
 A page and a layout receive `request` beside `params` and `pathname`: the
-headers, and the cookies parsed by name, both read-only.
+headers as they arrived, and the cookies by name — what the request carried,
+with what a guard or a Server Action wrote earlier in the same request —
+both read-only.
 
 ```tsx
 // src/routes/layout.tsx

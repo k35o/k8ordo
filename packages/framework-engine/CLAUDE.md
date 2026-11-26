@@ -740,7 +740,11 @@ pnpm check         # check:write to auto-fix
   guard or an action adds goes onto whatever the handler answers
   (`answer()`, a new `Response`, since a redirect's headers cannot be
   written); the cookie jar (`runtime/cookies.ts`) is one per request, so a
-  guard's write is what an action after it reads, and each write is one
+  guard's write is what an action after it reads, and what the render
+  reads too: the page's `request.cookies` is the jar as the guards and the
+  action left it (`currentCookies`), its `headers` the request's as they
+  arrived — the answer to a form posted without JavaScript draws what the
+  action wrote. Each write is one
   `Set-Cookie` line, the last one per name, path and domain. Static mode refuses
   `guard.ts` (by name at build, per module in `vite dev`), reading the slot
   through `slotOf`.

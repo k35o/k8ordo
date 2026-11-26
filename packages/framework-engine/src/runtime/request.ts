@@ -33,10 +33,15 @@ export const parseCookies = (
   return cookies;
 };
 
-export const routeRequestOf = (request: Request): RouteRequest => ({
-  headers: request.headers,
-  cookies: parseCookies(request.headers.get('cookie')),
-});
+/**
+ * The request a page receives: the headers as they arrived, and the cookies
+ * as the guards and the Server Action left them, so the answer to an action
+ * renders what the action wrote.
+ */
+export const routeRequestOf = (
+  request: Request,
+  cookies: ReadonlyMap<string, string>,
+): RouteRequest => ({ headers: request.headers, cookies });
 
 const unreadable = (name: keyof RouteRequest) => ({
   get: (): never => {
