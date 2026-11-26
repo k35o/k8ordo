@@ -5,28 +5,49 @@ import { parseGenerateRequest } from './request';
 
 const SAME_ORIGIN = { origin: 'http://localhost:5173', host: 'localhost:5173' };
 
+const ask = { role: 'user', content: 'フォーム' } as const;
+const answer = { role: 'assistant', content: '{}' } as const;
+const pressed = { role: 'user', content: '押した' } as const;
+
 describe('parseGenerateRequest', () => {
-  it('同じオリジンからの形式と依頼を受け取る', () => {
+  it('同じオリジンからの形式とやり取りを受け取る', () => {
     expect(
-      parseGenerateRequest(SAME_ORIGIN, { format: 'a2ui', prompt: 'フォーム' }),
-    ).toStrictEqual({ format: 'a2ui', prompt: 'フォーム' });
+      parseGenerateRequest(SAME_ORIGIN, {
+        format: 'a2ui',
+        messages: [ask, answer, pressed],
+      }),
+    ).toStrictEqual({ format: 'a2ui', messages: [ask, answer, pressed] });
   });
 
   it('別のオリジンからの依頼は鍵を使う前に断る', () => {
     expect(
       parseGenerateRequest(
         { origin: 'https://example.com', host: 'localhost:5173' },
-        { format: 'a2ui', prompt: 'フォーム' },
+        { format: 'a2ui', messages: [ask] },
       ),
     ).toMatchObject({ status: 403 });
   });
 
   it('知らない形式と空の依頼を断る', () => {
     expect(
-      parseGenerateRequest(SAME_ORIGIN, { format: 'html', prompt: 'x' }),
+      parseGenerateRequest(SAME_ORIGIN, { format: 'html', messages: [ask] }),
     ).toMatchObject({ status: 400 });
     expect(
-      parseGenerateRequest(SAME_ORIGIN, { format: 'openui', prompt: ' ' }),
+      parseGenerateRequest(SAME_ORIGIN, {
+        format: 'openui',
+        messages: [{ role: 'user', content: ' ' }],
+      }),
+    ).toMatchObject({ status: 400 });
+  });
+
+  it.for([
+    ['空', []],
+    ['assistant で終わる', [ask, answer]],
+    ['assistant から始まる', [answer]],
+    ['user が続く', [ask, pressed]],
+  ] as const)('%s やり取りを断る', ([, messages]) => {
+    expect(
+      parseGenerateRequest(SAME_ORIGIN, { format: 'a2ui', messages }),
     ).toMatchObject({ status: 400 });
   });
 });

@@ -1,14 +1,14 @@
 import { createLineBuffer } from './lines';
-import type { Format, GenerateEvent } from './request';
+import type { Format, GenerateEvent, Turn } from './request';
 
 export async function* generate(
   format: Format,
-  prompt: string,
+  messages: readonly Turn[],
 ): AsyncGenerator<GenerateEvent> {
   const response = await fetch('/api/generate', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ format, prompt }),
+    body: JSON.stringify({ format, messages }),
   });
   if (!response.ok || response.body === null) {
     yield {

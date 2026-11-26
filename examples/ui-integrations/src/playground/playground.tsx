@@ -14,8 +14,8 @@ import { createLineBuffer } from './lines';
 import { Panes } from './panes';
 import { FORMATS } from './request';
 import type { Format } from './request';
-import { Result, startOutput, withA2uiLines } from './results';
-import type { Output } from './results';
+import { Result, startSession, withA2uiLines } from './results';
+import type { Session } from './results';
 import { generate } from './stream';
 
 const FORMAT_LABELS = {
@@ -24,54 +24,103 @@ const FORMAT_LABELS = {
   openui: 'OpenUI',
 } as const satisfies Record<Format, string>;
 
+const reportOf = (action: unknown, state: unknown): string =>
+  [
+    'The user acted on the UI.',
+    `Action: ${JSON.stringify(action)}`,
+    `State of the UI now: ${JSON.stringify(state)}`,
+  ].join('\n');
+
 export function Playground() {
   const [format, setFormat] = useState<Format>('a2ui');
   const [prompt, setPrompt] = useState(
     '会員登録のフォームを作って。名前、メールアドレス、プラン（無料とプロ）、規約への同意を入れて。',
   );
-  const [output, setOutput] = useState<Output | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const run = (event: SubmitEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const converse = (start: Session) => {
     startTransition(async () => {
-      let current = startOutput(format, null);
+      let current = start;
       let lines = createLineBuffer();
-      const show = (next: Output) => {
+      const show = (next: Session) => {
         current = next;
-        setOutput(next);
+        setSession(next);
       };
       show(current);
 
-      for await (const streamed of generate(format, prompt)) {
+      for await (const streamed of generate(current.format, current.turns)) {
         switch (streamed.type) {
           case 'text':
             show(
               withA2uiLines(
-                { ...current, text: current.text + streamed.text },
+                { ...current, reply: current.reply + streamed.text },
                 lines.push(streamed.text),
               ),
             );
             break;
           case 'restart':
             lines = createLineBuffer();
+            show({
+              ...(current.turns.length === 1
+                ? startSession(current.format, prompt)
+                : current),
+              reply: '',
+              notice: `${streamed.model} が最初から書き直しています。`,
+            });
+            break;
+          case 'done': {
+            const done = withA2uiLines(current, lines.flush());
             show(
-              startOutput(
-                format,
-                `${streamed.model} が最初から生成し直しています。`,
-              ),
+              done.reply.trim() === ''
+                ? {
+                    ...done,
+                    isStreaming: false,
+                    error: 'Claude の返事が空でした。',
+                  }
+                : {
+                    ...done,
+                    isStreaming: false,
+                    turns: [
+                      ...done.turns,
+                      { role: 'assistant', content: done.reply },
+                    ],
+                    reply: '',
+                  },
             );
             break;
-          case 'done':
-            show(
-              withA2uiLines({ ...current, isStreaming: false }, lines.flush()),
-            );
-            break;
+          }
           case 'error':
             show({ ...current, isStreaming: false, error: streamed.message });
             break;
         }
       }
+    });
+  };
+
+  const run = (event: SubmitEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    converse(startSession(format, prompt));
+  };
+
+  const respond = (action: unknown, state: unknown) => {
+    if (
+      session === null ||
+      session.isStreaming ||
+      session.error !== null ||
+      session.turns.at(-1)?.role !== 'assistant'
+    ) {
+      return;
+    }
+    converse({
+      ...session,
+      turns: [
+        ...session.turns,
+        { role: 'user', content: reportOf(action, state) },
+      ],
+      reply: '',
+      isStreaming: true,
+      notice: null,
     });
   };
 
@@ -114,20 +163,20 @@ export function Playground() {
         </div>
       </form>
 
-      {output !== null && output.notice !== null && (
-        <Alert message={output.notice} tone="info" />
+      {session !== null && session.notice !== null && (
+        <Alert message={session.notice} tone="info" />
       )}
-      {output !== null && output.error !== null && (
-        <Alert message={output.error} tone="error" />
+      {session !== null && session.error !== null && (
+        <Alert message={session.error} tone="error" />
       )}
 
-      {output === null ? (
+      {session === null ? (
         <Panes
           format={format}
           issues={[]}
+          log={[]}
           phase="idle"
           state=""
-          text=""
           view={
             <EmptyState
               description="頼みごとを書いて「Claude に作らせる」を押すと、ここに描かれます。"
@@ -136,7 +185,7 @@ export function Playground() {
           }
         />
       ) : (
-        <Result key={output.id} output={output} />
+        <Result key={session.id} onReport={respond} session={session} />
       )}
     </Stack>
   );

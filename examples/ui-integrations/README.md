@@ -11,7 +11,7 @@ This example showcases:
 - **json-render glue** (`src/json-render/`): the catalog, the registry, and `validateGeneratedSpec`, built by mapping over `@k8ordo/ui/catalog`; a typed `UISpec` rendered with `<JsonRenderUI />`
 - **OpenUI glue** (`src/openui/`): the library and the React-free `prompt()`, built the same way; an OpenUI-Lang DSL string rendered with `library` + `Renderer`
 - **AI SDK glue** (`src/ai-sdk/map-parts.ts`): `mapMessageParts`, which maps `useChat` messages onto the chat components — tool approval, attachments, sources, a `data-ui` part rendered as generative UI, and copy / regenerate / feedback — driven by a scripted transport, so no server or API key is needed
-- **Playground** (`src/playground/`), the page this example serves: ask Claude (`claude-opus-5-5`) for a screen in any of the three formats and watch it render as it streams, next to whether it keeps to the catalog, the state its fields write to, and what the model wrote — see [Trying it with a real model](#trying-it-with-a-real-model)
+- **Playground** (`src/playground/`), the page this example serves: ask Claude (`claude-opus-5-5`) for a screen in any of the three formats and watch it render as it streams, next to whether it keeps to the catalog, the state its fields write to, and the conversation. Press what it drew, and the action goes back to Claude with the state of every field; its answer is laid over the same screen — see [Trying it with a real model](#trying-it-with-a-real-model)
 - Tailwind CSS 4 integration and TypeScript
 
 The scripted demos of each piece of glue are test fixtures: the tests mount them, and the page does not. No piece of glue names a component. A component added to `@k8ordo/ui`'s catalog reaches every format here with no change to this directory.
@@ -73,10 +73,10 @@ examples/ui-integrations/
 │   │   ├── server.ts              # /api/generate: streams Claude's answer as NDJSON (dev server only)
 │   │   ├── request.ts             # Checks a request before the key is used
 │   │   ├── stream.ts              # Reads the NDJSON in the browser
-│   │   ├── playground.tsx         # The form, and the stream fed to the result
-│   │   ├── results.tsx            # Each format: what it draws, its state, and its check
-│   │   ├── panes.tsx              # The drawing, the check, the state, and the output side by side
-│   │   └── playground.browser.test.tsx  # Each format renders, writes input to its state, and reports its check
+│   │   ├── playground.tsx         # The form, the conversation, and an action sent back as the next turn
+│   │   ├── results.tsx            # Each format: what it draws, its state, its check, and the actions it hears
+│   │   ├── panes.tsx              # The drawing, the check, the state, and the conversation side by side
+│   │   └── playground.browser.test.tsx  # Each format renders, reports its check, and sends a press back for an answer laid over it
 │   ├── ai-sdk/
 │   │   ├── map-parts.ts           # Glue: UIMessage.parts → parts for the chat components
 │   │   ├── map-parts.test.ts      # Every part kind maps, in order
