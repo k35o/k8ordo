@@ -71,7 +71,8 @@
     },
     "./styles.css": "./dist/styles/index.css",
     "./tokens.css": "./dist/styles/tokens.css",
-    "./tailwind.css": "./dist/styles/tailwind.css"
+    "./tailwind.css": "./dist/styles/tailwind.css",
+    "./package.json": "./package.json"
   },
   "publishConfig": {
     "access": "public",

@@ -486,4 +486,5 @@ The authoritative list is the `exports` map in `package.json`.
 @k8ordo/ui/styles.css          layer order, tokens, reset and base (each component imports its own CSS)
 @k8ordo/ui/tokens.css          the tokens and the color-scheme rules of styles.css alone (no reset, no base)
 @k8ordo/ui/tailwind.css        Tailwind CSS 4 bridge, imported after tailwindcss (styles.css + utilities for the tokens)
+@k8ordo/ui/package.json        the manifest, for tools that read it
 ```
