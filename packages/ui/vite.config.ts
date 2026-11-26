@@ -282,6 +282,7 @@ export default defineConfig({
           include: [
             'src/components/form/**/*.test.tsx',
             'src/components/_internal/**/*.test.tsx',
+            'src/components/buttons/**/*.test.tsx',
           ],
           // ストーリーの play では確かめられないものだけを、Playwright の本物の
           // 入力で操作する。Firefox はファイルごとのページを並べると、押された

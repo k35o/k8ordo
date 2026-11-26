@@ -22,7 +22,7 @@ pnpm test --project=forced-colors            # Screenshot comparisons under forc
 pnpm test --project=print                    # Tokens and color-scheme under print media (src/styles/print.test.tsx)
 pnpm test --project=print-contrast-more      # The same under prefers-contrast: more
 pnpm test --project=tokens-css               # The built tokens.css alone on a page, with the OS set to dark (src/styles/tokens-css.test.tsx)
-pnpm test --project=form                     # Form checks a story's play cannot make, and FormValue (Playwright)
+pnpm test --project=form                     # Checks a story's play cannot make (real input, real :hover), FormValue included (Playwright)
 pnpm test --project=hooks src/internal/focus-trap.test.tsx # Single test file (needs its project)
 TEST_BROWSER=webkit pnpm test --project=hooks # One engine only (chromium / firefox / webkit)
 pnpm build                                   # vp pack + the DTCG tokens
@@ -235,7 +235,12 @@ wrapped into `@layer components` by its plugin, in Vite and in `vp pack` alike.
   layer; join classes in JS). `&` gives a rule inside `@scope` no
   specificity, so `svg` there is (0,0,1) and loses to any class on the
   element: the icons' size classes are `:where()` for that reason, so a
-  component that sizes the icons inside it wins.
+  component that sizes the icons inside it wins. When a scoped rule must tie
+  with a class on the element it styles (`Toolbar`'s pressed ground over a
+  solid `Button`'s `:hover` and `:active` grounds), write `&:scope >`:
+  `:scope` adds one class of specificity, and on a tie the scoped rule wins
+  by proximity. A bare `:scope >` gets an `&` prepended by Lightning CSS and
+  matches nothing.
 - **Hover** is `@media (hover: hover) { .x:hover { … } }`, as Tailwind wrote it.
 - **Vertical writing**: prefer logical properties; where an element must
   change in vertical text, use `@container style(--writing: vertical) { … }`,
@@ -422,7 +427,7 @@ The stylesheet follows `prefers-contrast: more` and `forced-colors: active`; `@k
 - **Component tests** rely on Storybook stories as test fixtures via `@storybook/addon-vitest`. Writing a story IS writing a test.
 - **Hook tests** use `vitest-browser-react` for rendering hooks in a real browser.
 - **Form wiring** is a story too: every form field has a `WithForm` story that spreads `@k8ordo/form`'s `formFields` output onto it inside `ActionForm` (`.storybook/action-form.tsx`), whose action calls `parseForm` the way a Server Action would. Its play submits, fails on the server (`MemoField` refuses `却下`), resets, and reads `isDirty` from the `変更あり` / `変更なし` line. `parseForm` echoes the submitted values on success as well, so after any submission they are the fields' defaults and a reset goes back to them. `storybook/test`'s `userEvent` remembers what it typed and a form reset restores only the DOM, so type into a field with `fill` from the same file, which clears it first. `@k8ordo/form` is a devDependency and resolves from its `dist/`, so build it first on a fresh checkout.
-- A play's typing is a script's assignment, not a user edit, and the browser flags `tooShort` / `tooLong` only for a user edit. That check, and `FormValue`'s own tests, live in the `form` project (`src/components/form/**/*.test.tsx`, `src/components/_internal/**/*.test.tsx`): plain Vitest browser tests with Playwright's real input, one file at a time (`fileParallelism: false`), since Firefox hands focus between pages that run side by side. `styles.css` is not loaded there, so a visually hidden input (`srOnly`) cannot be clicked: press its label, as a user does; a test that reads the look imports `src/styles/index.css` itself.
+- A play's typing is a script's assignment, not a user edit, and the browser flags `tooShort` / `tooLong` only for a user edit; a play's pointer is synthetic, so it never puts an element under `:hover`. Those checks — the length flags, and a pressed `Toolbar` item keeping its ground under a real `:hover` — live with `FormValue`'s own tests in the `form` project (`src/components/form/**/*.test.tsx`, `src/components/_internal/**/*.test.tsx`, `src/components/buttons/**/*.test.tsx`): plain Vitest browser tests with Playwright's real input and pointer, one file at a time (`fileParallelism: false`), since Firefox hands focus between pages that run side by side. `styles.css` is not loaded there, so a visually hidden input (`srOnly`) cannot be clicked: press its label, as a user does; a test that reads the look imports `src/styles/index.css` itself.
 - **Helper tests** are standard unit tests, no browser needed.
 - **There is no jsdom project, and components are not written to survive one.** They call `ResizeObserver`, `matchMedia`, `dialog.showModal`, and the Popover API directly — no support checks, no null branches. Consumers are told to test in a real browser (`docs/GUIDE.md`); do not reintroduce a guard layer to make a synthetic DOM work.
 - Storybook preview wraps all stories in `UIProvider` with light/dark theme toggle, and defines a `@k8ordo/i18n` locale set (`.storybook/locales.ts`, default `ja`) so the built-in wording is Japanese; a story renders in English with `beforeEach: inEnglish` from the same file.
