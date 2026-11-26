@@ -1,6 +1,6 @@
-import { validateGeneratedSpec } from '@k8ordo/ui/json-render';
 import { expect, test } from 'vite-plus/test';
 
+import { validateGeneratedSpec } from './catalog';
 import { jsonRenderSpec } from './demo';
 
 test('デモの spec は現行スキーマで検証を通り、自動修正も要らない', () => {

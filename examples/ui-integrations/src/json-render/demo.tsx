@@ -1,5 +1,5 @@
-import type { UISpec } from '@k8ordo/ui/json-render';
-import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
+import type { UISpec } from './catalog';
+import { JsonRenderUI } from './registry';
 
 export const jsonRenderSpec = {
   root: 'root',

@@ -569,12 +569,6 @@ importers:
 
   examples/ui-nextjs:
     dependencies:
-      '@json-render/core':
-        specifier: 'catalog:'
-        version: 0.23.1(zod@4.6.7)
-      '@json-render/react':
-        specifier: 'catalog:'
-        version: 0.23.1(react@19.3.1)(zod@4.6.7)
       '@k8ordo/ui':
         specifier: workspace:^
         version: link:../../packages/ui
@@ -587,9 +581,6 @@ importers:
       react-dom:
         specifier: 'catalog:'
         version: 19.3.1(react@19.3.1)
-      zod:
-        specifier: 'catalog:'
-        version: 4.6.7
     devDependencies:
       '@tailwindcss/postcss':
         specifier: 'catalog:'
@@ -981,24 +972,12 @@ importers:
       '@chromatic-com/storybook':
         specifier: 5.6.0
         version: 5.6.0(storybook@10.6.7(@types/react@19.3.0)(react@19.3.1)(vite-plus@1.6.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.6)(@vitest/browser-playwright@5.1.0)(@vitest/coverage-v8@5.1.0)(@vitest/ui@5.1.0)(esbuild@0.28.2)(jiti@2.7.0)(playwright@1.65.1)(publint@0.3.25)(typescript@7.0.2)))
-      '@json-render/core':
-        specifier: 'catalog:'
-        version: 0.23.1(zod@4.6.7)
-      '@json-render/react':
-        specifier: 'catalog:'
-        version: 0.23.1(react@19.3.1)(zod@4.6.7)
       '@k8ordo/form':
         specifier: workspace:^
         version: link:../form
       '@k8ordo/i18n':
         specifier: workspace:^
         version: link:../i18n
-      '@openuidev/lang-core':
-        specifier: 'catalog:'
-        version: 1.1.1(zod@4.6.7)
-      '@openuidev/react-lang':
-        specifier: 'catalog:'
-        version: 1.1.1(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(zod@4.6.7)
       '@storybook/addon-a11y':
         specifier: 10.6.7
         version: 10.6.7(storybook@10.6.7(@types/react@19.3.0)(react@19.3.1)(vite-plus@1.6.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.6)(@vitest/browser-playwright@5.1.0)(@vitest/coverage-v8@5.1.0)(@vitest/ui@5.1.0)(esbuild@0.28.2)(jiti@2.7.0)(playwright@1.65.1)(publint@0.3.25)(typescript@7.0.2)))
@@ -1032,9 +1011,6 @@ importers:
       '@vitest/ui':
         specifier: 5.1.0
         version: 5.1.0(vitest@5.1.0)
-      ai:
-        specifier: 'catalog:'
-        version: 7.0.176(zod@4.6.7)
       postcss:
         specifier: 'catalog:'
         version: 8.5.33

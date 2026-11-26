@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { catalog, validateGeneratedSpec } from './catalog';
+import { validateGeneratedSpec } from './catalog';
 
 const specWithTarget = (element: Record<string, unknown>) => ({
   root: 'root',
@@ -178,23 +178,5 @@ describe('validateGeneratedSpec', () => {
     expect(messages(result)).toContainEqual(
       expect.stringContaining('Unknown component type "Marquee"'),
     );
-  });
-});
-
-// 未知キー検出は props スキーマから shape を取れることに依存している。
-// いずれかが .refine() や .transform() で包まれて shape を失うと、
-// そのコンポーネントだけ検出が無言でスキップされる（この機能が防ごうと
-// している「壊れたことに気づけない」失敗モードそのもの）
-describe('カタログの props スキーマ', () => {
-  it('すべて shape を持ち、未知キー検出が働く', () => {
-    const components = catalog.data.components as Record<
-      string,
-      { props: object }
-    >;
-    const withoutShape = Object.entries(components)
-      .filter(([, def]) => !('shape' in def.props))
-      .map(([name]) => name);
-
-    expect(withoutShape).toStrictEqual([]);
   });
 });

@@ -1,5 +1,6 @@
-import { library } from '@k8ordo/ui/openui';
 import { Renderer } from '@openuidev/react-lang';
+
+import { library } from './library';
 
 /**
  * 注: OpenUI は型付き子要素。Card は Stack を内包できる（root を Card にして全体を包む）。

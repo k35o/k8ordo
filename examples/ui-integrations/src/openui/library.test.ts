@@ -16,10 +16,14 @@ const CONTAINERS = [
 const spec = library.toSpec();
 
 // LLM が読むのはシグネチャの型注釈だけなので、子に置ける名前もそこから読む
+const signatureOf = (name: string): string =>
+  Object.entries(spec.components).find(([key]) => key === name)?.[1]
+    .signature ?? '';
+
 const childrenOf = (name: string): string[] =>
   /children: \((?<names>[^)]+)\)\[\]/u
-    .exec(spec.components[name]?.signature ?? '')
-    ?.groups?.names?.split(' | ') ?? [];
+    .exec(signatureOf(name))
+    ?.groups?.names.split(' | ') ?? [];
 
 const reachableFromRoot = (): string[] => {
   const reached = new Set([String(spec.root)]);

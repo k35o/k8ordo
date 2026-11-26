@@ -1,8 +1,8 @@
-import { library } from '@k8ordo/ui/openui';
 import { createParser } from '@openuidev/react-lang';
 import { expect, test } from 'vite-plus/test';
 
 import { openUiResponse } from './demo';
+import { library } from './library';
 
 // OpenUI Lang は完全な位置引数なので、シグネチャとずれた DSL も型エラーにならず、
 // パーサが要素を丸ごと落として無言で何も描画しなくなる。<Renderer> が内部で使うのと

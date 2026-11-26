@@ -1,8 +1,8 @@
 # @k8ordo/ui
 
 React components from [k8ordo](https://ordo.k8o.me) — semantic design
-tokens, built-in wording that follows `@k8ordo/i18n` (Japanese and English included), and adapters that let an LLM generate
-on-brand UIs.
+tokens, built-in wording that follows `@k8ordo/i18n` (Japanese and English included), and a catalog of these components
+that lets an LLM compose on-brand UIs through any generative-UI format.
 
 Like every k8ordo package it assumes React 19 and Server Components, uses only
 what has reached Baseline, and ships no polyfills or legacy fallbacks.
@@ -33,21 +33,16 @@ it. Install one when you import the entry it belongs to.
 
 <!-- peers -->
 
-| Package                 | Version         | Required | Needed for                                        |
-| ----------------------- | --------------- | -------- | ------------------------------------------------- |
-| `react`                 | ≥19.3.0         | yes      | the components and hooks                          |
-| `react-dom`             | ≥19.3.0         | yes      | portals and `useFormStatus`                       |
-| `@k8ordo/i18n`          | ^4.0.0          | yes      | the locale the components' own wording is read in |
-| `typescript`            | ≥7.0.0          | optional | the shipped type declarations                     |
-| `@types/react`          | ≥19.3.0         | optional | the shipped type declarations                     |
-| `@types/react-dom`      | ≥19.3.0         | optional | the shipped type declarations                     |
-| `zod`                   | ^4.6.6          | optional | generative-UI schemas                             |
-| `@json-render/core`     | ≥0.22.0 <0.23.0 | optional | `@k8ordo/ui/json-render`                          |
-| `@json-render/react`    | ≥0.22.0 <0.23.0 | optional | `@k8ordo/ui/json-render`                          |
-| `@openuidev/lang-core`  | ^1.0.0          | optional | `@k8ordo/ui/openui`, `@k8ordo/ui/openui/prompt`   |
-| `@openuidev/react-lang` | ^1.0.0          | optional | `@k8ordo/ui/openui`                               |
-| `ai`                    | ≥7.0.51         | optional | `@k8ordo/ui/ai-sdk`                               |
-| `streamdown`            | ≥2.5.0          | optional | `@k8ordo/ui/ai/response`                          |
+| Package            | Version | Required | Needed for                                        |
+| ------------------ | ------- | -------- | ------------------------------------------------- |
+| `react`            | ≥19.3.0 | yes      | the components and hooks                          |
+| `react-dom`        | ≥19.3.0 | yes      | portals and `useFormStatus`                       |
+| `@k8ordo/i18n`     | ^4.0.0  | yes      | the locale the components' own wording is read in |
+| `typescript`       | ≥7.0.0  | optional | the shipped type declarations                     |
+| `@types/react`     | ≥19.3.0 | optional | the shipped type declarations                     |
+| `@types/react-dom` | ≥19.3.0 | optional | the shipped type declarations                     |
+| `zod`              | ^4.6.6  | optional | generative-UI schemas                             |
+| `streamdown`       | ≥2.5.0  | optional | `@k8ordo/ui/ai/response`                          |
 
 <!-- /peers -->
 
@@ -381,24 +376,21 @@ import { Button, Card, Stack } from '@k8ordo/ui';
 
 Optional features live behind dedicated subpath exports:
 
-| Subpath                           | Contents                                                                                  |
-| --------------------------------- | ----------------------------------------------------------------------------------------- |
-| `@k8ordo/ui`                      | Core UI components, their types, and provider hooks                                       |
-| `@k8ordo/ui/icons`                | Line icons, one module each, and `BaseIcon` for drawing your own                          |
-| `@k8ordo/ui/tokens`               | Design tokens as a DTCG resolver document                                                 |
-| `@k8ordo/ui/props.json`           | Every component's props as JSON, generated from the types                                 |
-| `@k8ordo/ui/i18n`                 | `ja` / `en`, `registerMessages`, `getMessages`, `messageUsage`, and the `Messages` type   |
-| `@k8ordo/ui/ai`                   | AI chat components                                                                        |
-| `@k8ordo/ui/ai/response`          | `Response` Markdown renderer (needs optional peer `streamdown`)                           |
-| `@k8ordo/ui/ai-sdk`               | AI SDK adapter (needs optional peer `ai`)                                                 |
-| `@k8ordo/ui/code-block`           | `CodeBlock`, highlighted on the server with shiki (Server Component)                      |
-| `@k8ordo/ui/json-render`          | json-render catalog (server-safe)                                                         |
-| `@k8ordo/ui/json-render/registry` | json-render registry (`'use client'`)                                                     |
-| `@k8ordo/ui/openui`               | OpenUI library (`'use client'`)                                                           |
-| `@k8ordo/ui/openui/prompt`        | OpenUI prompt generation (server-safe)                                                    |
-| `@k8ordo/ui/styles.css`           | Layer order, tokens, reset and base (required)                                            |
-| `@k8ordo/ui/tokens.css`           | The tokens and the `color-scheme` rules of `styles.css` alone, with no reset and no base  |
-| `@k8ordo/ui/tailwind.css`         | Tailwind CSS 4 bridge, imported after Tailwind: `styles.css` and utilities for the tokens |
+| Subpath                     | Contents                                                                                  |
+| --------------------------- | ----------------------------------------------------------------------------------------- |
+| `@k8ordo/ui`                | Core UI components, their types, and provider hooks                                       |
+| `@k8ordo/ui/icons`          | Line icons, one module each, and `BaseIcon` for drawing your own                          |
+| `@k8ordo/ui/tokens`         | Design tokens as a DTCG resolver document                                                 |
+| `@k8ordo/ui/props.json`     | Every component's props as JSON, generated from the types                                 |
+| `@k8ordo/ui/i18n`           | `ja` / `en`, `registerMessages`, `getMessages`, `messageUsage`, and the `Messages` type   |
+| `@k8ordo/ui/ai`             | AI chat components                                                                        |
+| `@k8ordo/ui/ai/response`    | `Response` Markdown renderer (needs optional peer `streamdown`)                           |
+| `@k8ordo/ui/code-block`     | `CodeBlock`, highlighted on the server with shiki (Server Component)                      |
+| `@k8ordo/ui/catalog`        | The generative-UI catalog: each component described for a model (server-safe)             |
+| `@k8ordo/ui/catalog/render` | How each catalog component is drawn (`'use client'`)                                      |
+| `@k8ordo/ui/styles.css`     | Layer order, tokens, reset and base (required)                                            |
+| `@k8ordo/ui/tokens.css`     | The tokens and the `color-scheme` rules of `styles.css` alone, with no reset and no base  |
+| `@k8ordo/ui/tailwind.css`   | Tailwind CSS 4 bridge, imported after Tailwind: `styles.css` and utilities for the tokens |
 
 ## AI Chat Components
 
@@ -414,13 +406,10 @@ Optional features live behind dedicated subpath exports:
 - **Source** (`List` / `Item`) - The sources a response cites, as links (http(s) only) or document titles
 - **Response** (from `@k8ordo/ui/ai/response`) - Streaming-safe Markdown renderer built on streamdown
 
-Two of these need optional peer dependencies:
+`Response` needs an optional peer dependency:
 
 ```bash
-# Response (@k8ordo/ui/ai/response)
 pnpm add streamdown
-# AI SDK adapter (@k8ordo/ui/ai-sdk)
-pnpm add ai
 ```
 
 Minimal chat UI:
@@ -478,22 +467,37 @@ import { Response } from '@k8ordo/ui/ai/response';
 <Response linkSafety={{ enabled: true }}>{markdownText}</Response>
 ```
 
-With the [AI SDK](https://ai-sdk.dev), `mapMessageParts` from `@k8ordo/ui/ai-sdk` converts a `UIMessage` into a flat array of `{ kind: 'text' | 'reasoning' | 'tool' | 'file' | 'source' | 'data', ... }` parts that map onto `Response`, `Reasoning`, `ToolInvocation`, `Attachment`, and `Source`; `data` parts are yours to render. A tool part keeps its `approval`, so `onApprovalResponse={addToolApprovalResponse}` answers the SDK directly.
+The types (`ChatStatus`, `ToolState`, `ToolApproval`, `ToolApprovalResponse`) take the [AI SDK](https://ai-sdk.dev)'s own shapes, so the SDK's values pass to the components as they are — `onApprovalResponse={addToolApprovalResponse}` answers the SDK directly — and the package does not depend on the SDK. To turn a `UIMessage`'s parts into rows of components, copy `mapMessageParts` from [`examples/ui-integrations`](https://github.com/k35o/k8ordo/tree/main/examples/ui-integrations/src/ai-sdk) into your application.
 
-## Generative UI integrations
+## Generative UI
 
-k8ordo UI ships official adapters so an LLM can generate UIs using these components, via either [json-render](https://json-render.dev) or [OpenUI](https://www.openui.com). Each adapter constrains the model to k8ordo UI components with prop schemas locked to the design tokens, so generated UIs stay on-brand. Component-specific `renderItem` render props are bridged internally — the model only ever sees flat data (e.g. `href`).
+`@k8ordo/ui/catalog` describes these components for an LLM, for no generative-UI format in particular: what each one is, the props a model may write (zod schemas locked to the design tokens, so a generated UI stays on-brand), whether it holds children, and which prop holds a field's value. `@k8ordo/ui/catalog/render` draws each of them. Component-specific `renderItem` render props are bridged internally — the model only ever sees flat data (e.g. `href`).
 
-These integrations are exposed as optional subpath exports. Install the framework you use (they are optional peer dependencies):
+The package ties itself to no format and depends on none. Connecting [json-render](https://json-render.dev), [OpenUI](https://www.openui.com), [A2UI](https://a2ui.org), or a format of your own is a small piece of glue that maps over the catalog: register each component, bind each field's value to the format's state, and draw through `renderers`. [`examples/ui-integrations`](https://github.com/k35o/k8ordo/tree/main/examples/ui-integrations) keeps working glue for json-render and OpenUI, run in a real browser on every change — copy the one you use into your application.
 
 ```bash
-# json-render
-pnpm add @json-render/core @json-render/react zod
-# OpenUI (both entries import lang-core directly, so install both packages)
-pnpm add @openuidev/react-lang @openuidev/lang-core zod
+pnpm add zod
 ```
 
-Supported components (both frameworks):
+```ts
+// Server-safe: build the format's system prompt from it
+import { catalog, catalogPropIssues, catalogRules } from '@k8ordo/ui/catalog';
+
+catalog.Button.description; // 'Action button. With href it renders as a link (<a>).'
+catalog.TextField.value; // { prop: 'defaultValue', initial: (props) => … }
+catalogPropIssues('Button', { label: 'OK', colour: 'primary' });
+// ['Button: Unknown prop "colour". Allowed props: label, variant, …']
+```
+
+```tsx
+// Client: draw what the format resolved
+'use client';
+import { renderers } from '@k8ordo/ui/catalog/render';
+
+renderers.Button({ props: { label: 'Save' }, children: [] });
+```
+
+Components in the catalog:
 
 - **Layout / containers**: `Stack`, `Grid`, `Card`, `Form`, `Carousel`
 - **Buttons / nav**: `Button`, `IconButton`, `CopyButton`, `Toolbar`, `Anchor`, `Breadcrumb`, `Pagination`, `Stepper`, `SideNav`
@@ -506,98 +510,11 @@ observers, the providers, and the AI chat components — are left out on purpose
 [docs/references/generative-ui.md](docs/references/generative-ui.md#what-the-catalog-leaves-out)
 says why.
 
-Overlays are exposed as **self-contained widgets**: a `Modal`/`Dialog`/`Drawer`/`Popover` declares its own trigger button via `triggerLabel`, manages open/close internally, and renders the supplied children inside the surface. This lets a model generate UIs that include overlays without modelling imperative open/close state. `Tooltip`/`DropdownMenu`/`Toast` follow the same self-contained pattern (trigger + content).
-
-### json-render (RSC-ready)
-
-The catalog (schemas / prompt) and the registry (rendering) are split so the catalog is **server-safe** — generate the system prompt in a React Server Component, and render on the client.
-
-```tsx
-// Server Component: prompt generation
-import { catalog, uiRules } from '@k8ordo/ui/json-render';
-
-// `customRules` injects cross-cutting constraints the model tends to break
-// (Table cell counts match columns, href format, text-only Tabs/Accordion content).
-const systemPrompt = catalog.prompt({ customRules: [...uiRules] });
-```
-
-```tsx
-// Client Component: rendering.
-// `JsonRenderUI` wires JSONUIProvider + Renderer and the registry for you —
-// just pass a spec. Pass `onStateChange` to collect form values.
-'use client';
-import type { UISpec } from '@k8ordo/ui/json-render';
-import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
-
-export function GenUi({ spec }: { spec: UISpec }) {
-  return <JsonRenderUI spec={spec} />;
-}
-```
-
-Validate (and repair) LLM output before rendering. `validateGeneratedSpec` runs auto-fixes, structural checks, and per-component prop validation, returning a ready-to-resend repair prompt on failure:
-
-```tsx
-import { validateGeneratedSpec } from '@k8ordo/ui/json-render';
-
-const result = validateGeneratedSpec(JSON.parse(llmOutput));
-if (result.ok) {
-  return <JsonRenderUI spec={result.spec} />; // result.fixes lists auto-applied fixes
-}
-const retried = await llm(result.repairPrompt); // ask the model to fix, then retry
-```
-
-Hand-written or LLM specs can be typed with `satisfies UISpec` so component names and props are checked at compile time (no `as unknown as Spec`):
-
-```tsx
-import type { UISpec } from '@k8ordo/ui/json-render';
-
-const spec = {
-  root: 'root',
-  elements: {
-    root: { type: 'Stack', props: { direction: 'column' }, children: ['ok'] },
-    ok: { type: 'Button', props: { label: 'OK' } }, // typo in `type`/props → compile error
-  },
-} satisfies UISpec;
-```
-
-For advanced setups (custom `navigate` / `handlers` / `validationFunctions`), pass the lower-level `registry` to `JSONUIProvider` and `Renderer` from `@json-render/react` directly.
-
-| Export                            | Side           | Contents                                                                                                                  |
-| --------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `@k8ordo/ui/json-render`          | server-safe    | `catalog` (schemas + `prompt()`), `validateGeneratedSpec`, `uiRules`, types (`UISpec`, `ComponentName`, `ComponentProps`) |
-| `@k8ordo/ui/json-render/registry` | `'use client'` | `JsonRenderUI` (pre-wired), `registry` (low-level)                                                                        |
-
-### OpenUI
-
-```tsx
-'use client';
-import { library } from '@k8ordo/ui/openui';
-import { Renderer } from '@openuidev/react-lang';
-
-export function GenUi({ response }: { response: string }) {
-  return <Renderer library={library} response={response} />;
-}
-```
-
-Generate the system prompt on the **server** with the dedicated server-safe entry (symmetric with json-render's `catalog.prompt()`):
-
-```tsx
-import { prompt } from '@k8ordo/ui/openui/prompt';
-
-const systemPrompt = prompt(); // server-safe, no React — call it from an RSC or API route
-```
-
-To generate the prompt inside the client bundle instead, `library.prompt()` still works.
-
-| Export                     | Side           | Contents                              |
-| -------------------------- | -------------- | ------------------------------------- |
-| `@k8ordo/ui/openui`        | `'use client'` | `library` (rendering)                 |
-| `@k8ordo/ui/openui/prompt` | server-safe    | `prompt()` (system prompt generation) |
+Overlays are **self-contained widgets**: a `Modal`/`Dialog`/`Drawer`/`Popover` declares its own trigger button via `triggerLabel`, manages open/close internally, and renders the supplied children inside the surface. This lets a model generate UIs that include overlays without modelling imperative open/close state. `Tooltip`/`DropdownMenu`/`Toast` follow the same self-contained pattern (trigger + content).
 
 > **Notes**
 >
 > - Make sure `@k8ordo/ui/styles.css` (or `tailwind.css` in Tailwind CSS 4 projects) is loaded and the app is wrapped in `UIProvider`.
-> - Both OpenUI entries need `@openuidev/lang-core` — `openui/prompt` is the React-free one, and `openui` builds its component library with it. Install it alongside `@openuidev/react-lang`: pnpm will not resolve it for you just because `react-lang` depends on it.
 > - `Tabs` panels are text content (`tabs: [{ label, content }]`); rich-component panels are a future enhancement.
 
 ## Accessibility

@@ -307,7 +307,7 @@ export default defineConfig({
             'src/helpers/**/*.test.{ts,tsx}',
             'src/internal/**/*.test.ts',
             'src/components/**/*.test.ts',
-            'src/integrations/**/*.test.{ts,tsx}',
+            'src/catalog/**/*.test.{ts,tsx}',
             'src/i18n/**/*.test.ts',
             'src/styles/**/*.test.ts',
             'scripts/**/*.test.ts',
