@@ -155,6 +155,39 @@ const loadingFor = (
   return Loading;
 };
 
+const PARAM_NAME = /^[\p{ID_Start}$_][\p{ID_Continue}$\u200C\u200D]*$/u;
+
+const SYNTAX = /[:*?+{}()\\]/u;
+
+const GRAMMAR =
+  'a segment is a literal holding none of : * ? + { } ( ) \\, a ":name", or — last — a ":name+" or a "*"';
+
+// キーごとではなく結合した葉のパターンで読む。枝のキーに書いた rest や
+// wildcard の後ろには、子のキーが続く
+const grammarProblem = (pattern: string): string | null => {
+  if (pattern === '/') return null;
+  const segments = pattern.slice(1).split('/');
+  const last = segments.length - 1;
+  for (const [index, segment] of segments.entries()) {
+    if (segment === '') {
+      return `route pattern "${pattern}" has an empty segment — ${GRAMMAR}`;
+    }
+    const isParam = segment.startsWith(':');
+    const isRest = isParam && segment.endsWith('+');
+    const isWildcard = segment === '*';
+    const fits = isParam
+      ? PARAM_NAME.test(segment.slice(1, isRest ? -1 : undefined))
+      : isWildcard || !SYNTAX.test(segment);
+    if (!fits) {
+      return `route pattern "${pattern}" has the segment "${segment}", which is not part of the grammar — ${GRAMMAR}`;
+    }
+    if ((isRest || isWildcard) && index !== last) {
+      return `route pattern "${pattern}" puts "${segment}" before the end — ${isRest ? 'a rest param' : 'a wildcard'} must be the last segment`;
+    }
+  }
+  return null;
+};
+
 export function defineRoutes<R extends RoutesRecord>(record: R): Routes<R> {
   const entries: Entry[] = [];
   const seen = new Set<string>();
@@ -196,6 +229,8 @@ export function defineRoutes<R extends RoutesRecord>(record: R): Routes<R> {
         ];
         walk(node.children, pattern === '/' ? '' : pattern, below);
       } else {
+        const problem = grammarProblem(pattern);
+        if (problem !== null) throw new TypeError(problem);
         if (seen.has(pattern)) {
           throw new TypeError(`route pattern "${pattern}" is declared twice`);
         }

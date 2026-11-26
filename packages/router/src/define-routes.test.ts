@@ -261,8 +261,79 @@ describe('defineRoutes', () => {
     ).toThrow(/declared twice/u);
   });
 
-  it('rejects a pattern URLPattern cannot parse, at definition time', () => {
-    expect(() => defineRoutes({ '/a{b': Home })).toThrow(TypeError);
+  it.each([
+    ['/:id?', ':id?'],
+    ['/files/:path*', ':path*'],
+    ['/foo-:bar', 'foo-:bar'],
+    ['/files/*.pdf', '*.pdf'],
+    ['/a{b}?', 'a{b}?'],
+    ['/a+b', 'a+b'],
+    ['/a\\b', 'a\\b'],
+    ['/:', ':'],
+    ['/:a-b', ':a-b'],
+  ])(
+    'rejects %s, a segment outside the grammar, naming the pattern and the segment',
+    (pattern, segment) => {
+      expect(() => defineRoutes({ [pattern]: Home })).toThrow(
+        new TypeError(
+          `route pattern "${pattern}" has the segment "${segment}", which is not part of the grammar — a segment is a literal holding none of : * ? + { } ( ) \\, a ":name", or — last — a ":name+" or a "*"`,
+        ),
+      );
+    },
+  );
+
+  it('rejects an empty segment', () => {
+    expect(() => defineRoutes({ '/a//b': Home })).toThrow(
+      /route pattern "\/a\/\/b" has an empty segment/u,
+    );
+    expect(() => defineRoutes({ '/a/': Home })).toThrow(
+      /route pattern "\/a\/" has an empty segment/u,
+    );
+  });
+
+  it('rejects a rest param anywhere but at the end of the full pattern', () => {
+    expect(() => defineRoutes({ '/files/:path+/edit': Home })).toThrow(
+      new TypeError(
+        'route pattern "/files/:path+/edit" puts ":path+" before the end — a rest param must be the last segment',
+      ),
+    );
+  });
+
+  it('rejects a rest param that ends a branch key with children after it', () => {
+    expect(() =>
+      defineRoutes({ '/files/:path+': { children: { '/edit': Home } } }),
+    ).toThrow(/"\/files\/:path\+\/edit" puts ":path\+" before the end/u);
+  });
+
+  it('rejects a wildcard anywhere but at the end of the full pattern', () => {
+    expect(() => defineRoutes({ '/*/edit': Home })).toThrow(
+      new TypeError(
+        'route pattern "/*/edit" puts "*" before the end — a wildcard must be the last segment',
+      ),
+    );
+    expect(() =>
+      defineRoutes({ '/docs/*': { children: { '/edit': Home } } }),
+    ).toThrow(/"\/docs\/\*\/edit" puts "\*" before the end/u);
+  });
+
+  it('takes a rest param or a wildcard that a branch puts last', () => {
+    const table = defineRoutes({
+      '/files/:path+': { layout: Home, children: { '/': First } },
+      '/docs': { children: { '/(guide)': { children: { '/*': Second } } } },
+    });
+    expect(table.match('/files/a/b')?.params).toStrictEqual({
+      path: ['a', 'b'],
+    });
+    expect(table.match('/docs/any/thing')?.stack).toStrictEqual([Second]);
+  });
+
+  it('takes a param named as a JavaScript identifier, as URLPattern reads it', () => {
+    const table = defineRoutes({ '/:$id/:_part/:café': Home });
+    expect(table.match('/1/2/3')?.params).toStrictEqual({
+      $id: '1',
+      _part: '2',
+      café: '3',
+    });
   });
 
   it('rejects parentheses that are not exactly a group', () => {

@@ -287,6 +287,16 @@ pnpm check         # check:write to auto-fix
 - **The type mirrors the runtime walk.** `Below` resets a branch that landed
   on the root, exactly as `walk` does; without it every route under a root
   layout types as `//products`. Any change to one has to change the other.
+- **The grammar is enforced, not described.** `defineRoutes` refuses, by
+  pattern and rule, every leaf pattern outside it: a segment is a literal
+  with none of `: * ? + { } ( ) \`, a `:name` (a JavaScript identifier, as
+  URLPattern reads one), or — last — a `:name+` or a `*`; plus `/(name)`
+  groups, and no empty segment. The position is read on the joined leaf
+  pattern, never key by key, since a branch's key is followed by its
+  children's. The types (`SegParam`, `SegmentsFit`) and the runtime
+  (`readParams`, `buildHref`) both assume this grammar and read anything
+  else differently — `/:id?` types as `{ 'id?': string }` and matches as
+  `{ id }` — so a new form is added to both and to the check, or to none.
 - **A rest param is `:name+`, and its value is its segments.** URLPattern's
   one-or-more modifier is the only one the grammar reads: `/files/:path+`
   takes one segment or more, never zero (`/files` is another pattern's), and
@@ -299,8 +309,8 @@ pnpm check         # check:write to auto-fix
   pattern does not match. The types say the same: `ParamsOf` gives
   `readonly string[]`, a link takes `readonly ParamValue[]`, `PathFor` a
   `${string}` (which spans slashes), and `PathMatching` reads `:name+` only
-  where it ends the pattern, which is where `@k8ordo/framework`'s grammar
-  puts it. Where it sits among other patterns is declaration order, as for
+  where it ends the pattern, the one place `defineRoutes` accepts it. Where
+  it sits among other patterns is declaration order, as for
   everything else; the framework's generator is what orders it after a
   `:param`.
 - **A typed path is checked, never enumerated.** `NavigablePath` matches the

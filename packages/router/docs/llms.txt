@@ -26,7 +26,11 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
 
 ## Entry point
 
-- `@k8ordo/router` — `defineRoutes(record)` returns a table that answers
+- `@k8ordo/router` — `defineRoutes(record)` throws a `TypeError` naming the
+  pattern and the rule for any leaf pattern outside the grammar (a segment is
+  a literal without `: * ? + { } ( ) \`, a `:name`, or — last in the full
+  pattern — a `:name+` or a `*`; plus `/(name)` groups; `:id?`, `:path*` and
+  `foo-:bar` are refused), and returns a table that answers
   `match(pathname)`, the first pattern that fits, and `matchAll(pathname)`,
   every one in declaration order — the framework walks the second and passes
   over a fit whose param a schema refused; `<Router routes>` mounts it on the Navigation API and

@@ -134,20 +134,34 @@ one spelling, and `PathFor<'/files/:path+'>` is `` `/files/${string}` ``.
 
 It also takes the one segment a `/:name` beside it takes, so order decides
 between them as between everything else: declare `/files/:id` first, or it
-never matches. There is no optional form (`:name*`, `:name?`): a pattern for
-the prefix itself — `/files` above — is what answers zero segments.
+never matches. There is no optional form — `:name*` and `:name?` are refused
+when the table is defined: a pattern for the prefix itself — `/files` above —
+is what answers zero segments.
 
 ### What fails at definition time
 
-A table is checked when the module loads, not when someone first navigates:
+A table is checked when the module loads, not when someone first navigates.
+The grammar is the forms above and nothing more: a literal segment, a
+`:name` (a JavaScript identifier, as URLPattern reads one), and — as the
+last segment of the full pattern — a `:name+` or a `*`, plus `/(name)`
+groups. URLPattern reads much more (`:id?`, `:path*`, `{…}`, a param inside
+a segment), and the types would read those differently from the matching,
+so every other spelling is refused:
 
-| written                                                   | error                                                                                                             |
-| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| the same full pattern twice, wherever the copies nest     | `route pattern "/x" is declared twice`                                                                            |
-| a group with no children (it would redeclare the index)   | `route group "/(oops)" must have children`                                                                        |
-| a key not starting with `/`                               | `route pattern "x" must start with "/"`                                                                           |
-| parentheses that are not exactly a group (`/(admin)/new`) | `route group "/(admin)/new" must be "/(name)" and nothing else — a regular expression is not part of the grammar` |
-| a pattern URLPattern cannot parse                         | URLPattern's own `TypeError`                                                                                      |
+| written                                                                               | error                                                                                                                   |
+| ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| a segment outside the grammar (`/:id?`, `/files/:path*`, `/foo-:bar`, `/files/*.pdf`) | `route pattern "/:id?" has the segment ":id?", which is not part of the grammar — …`, followed by what a segment may be |
+| a rest param or a wildcard before the end of the full pattern                         | `route pattern "/files/:path+/edit" puts ":path+" before the end — a rest param must be the last segment`               |
+| an empty segment (`/a//b`, `/a/`)                                                     | `route pattern "/a/" has an empty segment — …`                                                                          |
+| the same full pattern twice, wherever the copies nest                                 | `route pattern "/x" is declared twice`                                                                                  |
+| a group with no children (it would redeclare the index)                               | `route group "/(oops)" must have children`                                                                              |
+| a key not starting with `/`                                                           | `route pattern "x" must start with "/"`                                                                                 |
+| parentheses that are not exactly a group (`/(admin)/new`)                             | `route group "/(admin)/new" must be "/(name)" and nothing else — a regular expression is not part of the grammar`       |
+
+The position is read on the full pattern, not on the key:
+`'/files/:path+': { children: { '/edit': FileEditor } }` is refused as
+`/files/:path+/edit`, while a branch whose children are only its `'/'` index
+keeps the rest param last.
 
 ## Mounting it
 
