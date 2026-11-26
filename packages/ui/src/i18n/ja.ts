@@ -53,6 +53,8 @@ export const ja: Messages = {
 
   listBoxPlaceholder: '選択してください',
 
+  opensInNewTab: '新しいタブで開きます',
+
   breadcrumb: 'パンくずリスト',
   tabList: 'タブ',
 

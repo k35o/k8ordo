@@ -99,6 +99,31 @@ export const WholeCardLink: Story = {
 };
 
 /**
+ * `openInNewTab` で新しいタブに開くリンクは、`Anchor` と同じ辞書の文言
+ * （`opensInNewTab`）をリンクの名前の終わりに添えて、新しいタブで開くことを
+ * 読み上げに伝える。文言は画面には出さない。
+ */
+export const WholeCardLinkNewTab: Story = {
+  render: () => (
+    <Card href="https://example.com/articles/1" openInNewTab>
+      <div className={styles.body}>
+        <h3 className={styles.title}>記事タイトル</h3>
+      </div>
+    </Card>
+  ),
+  play: async ({ canvas }) => {
+    const card = canvas.getByRole('link');
+
+    await expect(card).toHaveAccessibleName(
+      '記事タイトル 新しいタブで開きます',
+    );
+    await expect(card).toHaveAttribute('target', '_blank');
+    await expect(card).toHaveAttribute('rel', 'noopener noreferrer');
+    await expect(canvas.getByText('新しいタブで開きます')).not.toBeVisible();
+  },
+};
+
+/**
  * `action` で、カード全体が 1 つのボタンになる。キーボードでも押せ、中の
  * ボタンはその上で別に押せる。
  */

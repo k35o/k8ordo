@@ -58,6 +58,8 @@ export const messageUsage: Readonly<Record<keyof Messages, readonly string[]>> =
 
     listBoxPlaceholder: ['ListBox'],
 
+    opensInNewTab: ['Anchor', 'Card'],
+
     breadcrumb: ['Breadcrumb'],
     tabList: ['Tabs (generative UI)'],
 

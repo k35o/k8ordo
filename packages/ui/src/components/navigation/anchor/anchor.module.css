@@ -18,8 +18,9 @@
   border-radius: var(--radius-sm);
 }
 
-.external {
+/* リンクは行の流れに乗せたまま、アイコンだけを文字の高さの中ほどにそろえる */
+.icon {
   display: inline-flex;
-  align-items: center;
-  gap: calc(var(--spacing) * 0.5);
+  margin-inline-start: calc(var(--spacing) * 0.5);
+  vertical-align: middle;
 }

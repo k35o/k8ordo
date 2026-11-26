@@ -105,7 +105,7 @@ be blurred.
 
 **Replacing the element** (`renderAnchor` on `Button` / `IconButton` with
 `href`, `Anchor`, `Breadcrumb.Link`, `SideNav.Link`, `DropdownMenu.Item` /
-`ContextMenu.Item` with `href`). The bag is _everything the
+`ContextMenu.Item` with `href`, `Card` with `href`). The bag is _everything the
 component would have put on its own `<a>`_. For `Button` / `IconButton` that is
 `href`, the resolved `className`, the composed `children` (icons included),
 `ref`, the click handler, `aria-disabled`, and the caller's remaining anchor
@@ -121,7 +121,10 @@ attributes, plus `kind` (`'internal' | 'external'`), which is not an attribute;
 the caller's remaining anchor attributes; `DropdownMenu.Item` /
 `ContextMenu.Item`'s bag is `href` / `className` / `children` / `role` and the
 keyboard wiring (`id` / `ref` / `tabIndex` / `onFocus` / `onClick` /
-`onKeyDown`), all of which must be spread. Build that
+`onKeyDown`), all of which must be spread; `Card`'s bag is `href` /
+`className` / `aria-labelledby` and, with `openInNewTab`, `target` / `rel`,
+with no `children`, since the link takes its name from the content and the
+hidden new-tab wording through `aria-labelledby`. Build that
 object once and hand the same one to both branches — the render prop and the
 component's own element — so the two can never drift. A render prop that quietly
 drops `onClick` or `aria-disabled` hands the caller a dead, undisabled element with
@@ -343,7 +346,7 @@ which looks the dictionary up in `@k8ordo/i18n`'s `currentLocale()` — English
 when the application has defined no locale set. It is a plain function, not a
 hook, so wording never makes a component a client module:
 `src/components/compound-rsc.test.ts` keeps the ones that only read wording
-(`Spinner`, `Breadcrumb`, `Code`, `Alert`, `Callout`, `Reasoning`, `ToolInvocation`) free
+(`Spinner`, `Anchor`, `Card`, `Breadcrumb`, `Code`, `Alert`, `Callout`, `Reasoning`, `ToolInvocation`) free
 of `'use client'`. A new key goes into `messages.ts`, `ja.ts`, `en.ts`, and
 `usage.ts` (the components that draw it); there is no provider and no context.
 `pnpm generate:props` writes the key list in `docs/references/components.md`

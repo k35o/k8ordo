@@ -172,8 +172,8 @@ export const copyButton = {
 
 export const anchor = {
   description: message({
-    ja: 'テキストのリンクです。外部のリンクには新しいタブのアイコンが付きます。',
-    en: 'A text link. An external link gets a new-tab icon.',
+    ja: 'テキストのリンクです。`https://`や`//`で始まる外部のリンクは新しいタブで開き、アイコンと読み上げ専用の「新しいタブで開きます」が付きます。',
+    en: 'A text link. An external link, one starting with `https://` or `//`, opens in a new tab with an icon and visually hidden “opens in a new tab” wording.',
   }),
   openInNewTabTitle: message({
     ja: '新しいタブで開くリンク',

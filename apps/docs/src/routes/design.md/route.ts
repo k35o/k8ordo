@@ -408,7 +408,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 
 ### Navigation
 
-- **Anchor** — テキストリンク。外部リンクに自動で新規タブアイコン。\`href\`, \`openInNewTab?\`, \`renderAnchor?\`
+- **Anchor** — テキストリンク。http(s) の絶対 URL と \`//\` で始まる URL は外部リンクとして新しいタブで開き、アイコンと読み上げ専用の「新しいタブで開きます」を添える。\`href\`, \`openInNewTab?\`, \`renderAnchor?\`
 - **Breadcrumb**（compound: \`List\` / \`Item\` / \`Link\`(\`current?\`) / \`Separator\`）
 - **Pagination** — ページネーション
 - **SideNav**（compound: \`Root\`(\`label\`) / \`Group\`(\`title\`) / \`Link\`(\`href\`, \`current?\`, \`renderAnchor?\`)）— 今のページを傍線で示す

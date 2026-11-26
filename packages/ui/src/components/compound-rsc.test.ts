@@ -24,10 +24,12 @@ const SERVER_COMPONENTS = [
   'ai/reasoning/reasoning.tsx',
   'ai/source/source.tsx',
   'ai/tool-invocation/tool-invocation.tsx',
+  'data-display/card/card.tsx',
   'data-display/code/code.tsx',
   'feedback/alert/alert.tsx',
   'feedback/callout/callout.tsx',
   'feedback/spinner/spinner.tsx',
+  'navigation/anchor/anchor.tsx',
   'navigation/breadcrumb/breadcrumb.tsx',
 ];
 

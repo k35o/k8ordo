@@ -79,6 +79,9 @@ export type Messages = {
   /** ListBox の未選択時に Trigger が示す値 */
   listBoxPlaceholder: string;
 
+  /** Anchor と Card が新しいタブで開くリンクに添える読み上げ専用の文言 */
+  opensInNewTab: string;
+
   /** Breadcrumb の nav ランドマーク名 */
   breadcrumb: string;
   tabList: string;

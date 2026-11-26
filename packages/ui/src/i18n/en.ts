@@ -53,6 +53,8 @@ export const en: Messages = {
 
   listBoxPlaceholder: 'Select an option',
 
+  opensInNewTab: 'opens in a new tab',
+
   breadcrumb: 'Breadcrumb',
   tabList: 'Tabs',
 

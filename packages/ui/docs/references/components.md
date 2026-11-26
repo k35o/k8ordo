@@ -27,8 +27,8 @@ Two different contracts are spelled `render*`, and mixing them up is the usual
 source of surprise.
 
 **Replacing the element** — `renderAnchor` on `Button` and `IconButton` (with
-`href`), `Anchor`, `Breadcrumb.Link`, `SideNav.Link`, and `DropdownMenu.Item` /
-`ContextMenu.Item` (with `href`). The component computes
+`href`), `Anchor`, `Breadcrumb.Link`, `SideNav.Link`, `DropdownMenu.Item` /
+`ContextMenu.Item` (with `href`), and `Card` (with `href`). The component computes
 everything and hands back the exact props it would have put on its own `<a>`,
 so substituting a framework `<Link>` loses nothing. Spread the bag onto whatever
 you render.
@@ -38,8 +38,9 @@ you render.
   anchor attribute the caller passed. `IconButton` adds `aria-label` and the
   tooltip's handlers, chained with any the caller passed. While `disabled`, the
   supplied `onClick` calls `preventDefault()`, so the link does not navigate.
-- `Anchor` hands back `href`, `className`, `children` (with the new-tab icon on
-  an external link), `target` / `rel` on an external link, and every other
+- `Anchor` hands back `href`, `className`, `children` (with the new-tab icon
+  and the visually hidden new-tab wording on an external link), `target` /
+  `rel` on an external link, and every other
   anchor attribute the caller passed, plus `kind` (`'internal'` |
   `'external'`). `kind` is not an attribute: destructure it away before
   spreading, or use it to choose between a framework `<Link>` and a plain `<a>`.
@@ -55,6 +56,11 @@ you render.
   (`id`, `ref`, `tabIndex`, `onFocus`, `onClick`, `onKeyDown`). Spread all of
   it: the wiring is what moves the arrow keys onto the item, closes the menu
   when it is chosen, and lets Space choose it.
+- `Card` hands back `href`, `className`, `aria-labelledby`, and `target` /
+  `rel` with `openInNewTab` (`CardRenderAnchorProps`). There are no
+  `children`: the link lies over the card's content and takes its name from
+  `aria-labelledby`, which with `openInNewTab` also points at the hidden
+  new-tab wording.
 
 **Filling a slot** — `renderInput` on `FormControl`, `renderItem` on
 `Popover.Trigger`, `Tooltip.Trigger`, `FileField.Trigger`, and `Alert`'s
@@ -559,7 +565,14 @@ Props (Tabs.Tab):
 
 ### Anchor
 
-A text link. External links automatically get a new-tab icon.
+A text link. A link is external when its URL is an absolute `http:` / `https:`
+URL or starts with `//` (or `/\`, which browsers read the same); a relative
+path, a `?…`-only URL, and other schemes such as `mailto:` stay internal. An
+external link, or one with `openInNewTab`, opens in a new tab with
+`rel="noopener noreferrer"`, shows the new-tab icon, and says so to assistive
+technology with visually hidden wording (`opensInNewTab`: "opens in a new
+tab" in `en`, 「新しいタブで開きます」 in `ja`). The link stays inline, so a
+long one wraps with the text around it.
 
 ```tsx
 import { Anchor } from '@k8ordo/ui';
@@ -1967,9 +1980,13 @@ content, named by the content's text, so a keyboard reaches it and a screen
 reader announces it. Links, buttons, and fields inside the card are raised
 above it and stay pressable on their own. `action` runs in a transition, as
 `Button`'s does: while a promise it returned is pending, the card is busy and
-ignores presses. Pass `renderAnchor` to draw the link with your router's
-component; it receives `href`, `className`, `aria-labelledby`, and `target` /
-`rel` with `openInNewTab`.
+ignores presses. With `openInNewTab` the link opens in a new tab and says so
+to assistive technology the way `Anchor` does: its name ends with the
+dictionary's `opensInNewTab` wording ("opens in a new tab" in `en`,
+「新しいタブで開きます」 in `ja`), which the card keeps in a `hidden` element
+that `aria-labelledby` also points to. Pass `renderAnchor` to draw the link
+with your router's component; it receives `href`, `className`,
+`aria-labelledby`, and `target` / `rel` with `openInNewTab`.
 
 Either one gives the card the pressable look: it scales to 1.02 on hover and to
 0.98 while pressed. `interactive` gives that look alone, for a card whose
@@ -2976,6 +2993,7 @@ the same mapping `messageUsage` exports. All values are `string`.
 - ColorPicker: `colorPickerHue`, `colorPickerSaturation`, `colorPickerLightness`, `colorPickerSwatches`, `colorPickerOpen`
 - PasswordInput: `passwordShow`, `passwordHide`
 - ListBox: `listBoxPlaceholder`
+- Anchor / Card: `opensInNewTab`
 - Breadcrumb: `breadcrumb`
 - Tabs (generative UI): `tabList`
 - Pagination: `paginationLabel`, `paginationPrevious`, `paginationNext`
