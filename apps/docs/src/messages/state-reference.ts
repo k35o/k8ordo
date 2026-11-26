@@ -368,8 +368,8 @@ export const versioningCaveats = [
     en: 'What it returns passes the schema field by field. A field the schema rejects falls back to its default.',
   }),
   message({
-    ja: '`migrate`の中で例外が起きると、何も保存されていないものとして読みます。保存した値には触りません。',
-    en: 'A `migrate` that throws reads as nothing stored. The stored value is left as it is.',
+    ja: '`migrate`の中で例外が起きると、何も保存されていないものとして読み、例外を知らせます（ブラウザでは`reportError`、`parseCookies`ではキーを添えた`console.error`）。保存した値には触らず、`update()`も上書きせずにハンドルをその例外でrejectします。',
+    en: 'A `migrate` that throws reads as nothing stored, and the error is reported (`reportError` in the browser, `console.error` with the key from `parseCookies`). The stored value is left as it is: an `update()` does not overwrite it and rejects its handle with that error.',
   }),
 ] as const;
 

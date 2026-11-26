@@ -169,7 +169,16 @@ pnpm check         # check:write to auto-fix
   migrates but never writes.
   Newer rows are salvaged and never written back (the newer tab owns them),
   and a throwing `migrate` reads as nothing stored and leaves the row for a
-  fixed `migrate` to retry. Session state takes no version by design.
+  fixed `migrate` to retry. `RowCodec.read` returns it as `failed` with the
+  error: the browser stores hand that to `reportError` once per raw row text
+  (at the first read, or at a `storage` / `change` event that reads a row not
+  reported yet — events re-read the same row), and `parseCookies` logs it
+  with the key (`reportError` is not Node's). A flush that reads a failed row
+  writes nothing and rejects its handle with the error, and an event that
+  reads one applies nothing, so the echo stays in memory either way — a row
+  it could not read is neither overwritten with defaults plus the patch nor
+  read as defaults over the values on screen, the rule refused Web Storage
+  follows. Session state takes no version by design.
 - **A url value is canonicalized by the road it comes back on.** The url
   codec's `salvage` is `parse(new URLSearchParams(search(values)))`, not a
   parse of the typed values: a one-way spelling (`z.stringbool()`'s

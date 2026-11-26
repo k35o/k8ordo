@@ -65,19 +65,41 @@ describe('version and migrate', () => {
     expect(values).toStrictEqual({ view: 'table', pageSize: 20 });
   });
 
-  it('reads a row a failing migrate cannot turn as nothing stored', () => {
+  it('reads a row a failing migrate cannot turn as nothing stored, and says so with the key', () => {
+    const thrown = new Error('unexpected shape');
     const failing = defineCookieState('failing', viewSchema, {
       version: 2,
       migrate: () => {
-        throw new Error('unexpected shape');
+        throw thrown;
       },
     });
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    const values = failing.parseCookies(
-      new Map([[failing.cookieName, '[1,{"layout":"list"}]']]),
-    );
+    try {
+      const values = failing.parseCookies(
+        new Map([[failing.cookieName, '[1,{"layout":"list"}]']]),
+      );
 
-    expect(values).toStrictEqual({ view: 'grid', pageSize: 20 });
+      expect(values).toStrictEqual({ view: 'grid', pageSize: 20 });
+      expect(logged).toHaveBeenCalledExactlyOnceWith(
+        expect.stringContaining('"failing"'),
+        thrown,
+      );
+    } finally {
+      logged.mockRestore();
+    }
+  });
+
+  it('says nothing of a row migrate turns', () => {
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    try {
+      viewCookie.parseCookies(cookiesWith([1, { layout: 'list' }]));
+
+      expect(logged).not.toHaveBeenCalled();
+    } finally {
+      logged.mockRestore();
+    }
   });
 
   it('salvages a row a newer version wrote without migrating it', () => {

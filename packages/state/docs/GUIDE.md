@@ -217,9 +217,13 @@ export const prefs = defineLocalState(
 - **A newer row is left alone.** A row a newer version wrote — a tab that
   loaded the next deploy first — is salvaged without `migrate` and never
   written back, so it stays the newer tab's.
-- **A throwing `migrate` loses nothing.** It reads as nothing stored: the
-  defaults show, and the row stays as it was for a fixed `migrate` to try
-  again.
+- **A throwing `migrate` loses nothing, and says so.** It reads as nothing
+  stored: the defaults show, and the error is reported — handed to
+  `reportError` in the browser, so `window`'s `error` event and error
+  monitoring see it, and logged with the key by `parseCookies` on the
+  server. The row stays as it was for a fixed `migrate` to try again: an
+  `update()` writes nothing over it and rejects its handle with the same
+  error, while the value it set stays in memory until the next load.
 - **Adopting a version changes the row's shape.** A tab still running code
   from before reads `[version, values]` as nothing stored until it reloads.
 - **`inlineRead()` hands out only the current version.** Neither the schema

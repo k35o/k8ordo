@@ -10,7 +10,7 @@ type Stored = Pick<LocalState | SessionState, 'kind' | 'key' | 'storageKey'>;
 
 type Area = Pick<Storage, 'getItem' | 'setItem'>;
 
-type Row = ReturnType<RowCodec['read']>;
+type Row = ReturnType<RowCodec['read']> & { text: string | null };
 
 // サイトのデータを止めたブラウザでは、置き場所を読むだけで投げる。ストアには
 // getItem や setItem が投げるときと同じに見せ、失敗の扱いを 1 か所にまとめる
@@ -45,10 +45,16 @@ const createStorageStore = (
       // Corrupt JSON is stale data like any other: reset, don't crash.
       row = undefined;
     }
-    return codec.read(row);
+    return { ...codec.read(row), text };
   };
 
-  const read = (): StateValues => readRow().values;
+  // storage イベントは同じ行を何度でも読み直すので、知らせるのは行ごとに 1 度
+  let reported: string | null | undefined;
+  const reportFailed = (text: string | null, error: unknown): void => {
+    if (text === reported) return;
+    reported = text;
+    reportError(error);
+  };
 
   // 古い版の行は、移行した値を今の版で書き戻す。ストアは描画中に作られるので
   // その場では書かず、マイクロタスクで行を読み直してからまだ古ければ書く。
@@ -69,10 +75,11 @@ const createStorageStore = (
     first = readRow();
   } catch {
     // ストアは描画の中で作られるので、ここで投げるとページごとエラーの境界に落ちる
-    first = codec.read(undefined);
+    first = { ...codec.read(undefined), text: null };
   }
   const core = createStoreCore(codec.keys, first.values);
   if (first.stale) upgrade();
+  if (first.failed) reportFailed(first.text, first.error);
 
   let pending: StateValues | null = null;
   let handle: Handle | null = null;
@@ -88,6 +95,11 @@ const createStorageStore = (
       row = readRow();
     } catch {
       // 読めない行を既定値と読むと、画面の値まで巻き戻してしまう
+      return;
+    }
+    // migrate が読めなかった行も、既定値と読めば画面の値を巻き戻す
+    if (row.failed) {
+      reportFailed(row.text, row.error);
       return;
     }
     const { values: fresh, stale } = row;
@@ -107,7 +119,14 @@ const createStorageStore = (
     try {
       // Base the write on what storage holds now, not on the snapshot — a
       // foreign tab may have written between the echo and this flush.
-      const target = codec.salvage({ ...read(), ...patch });
+      const row = readRow();
+      // migrate が読めなかった行を既定値とパッチで書くと、直した migrate が
+      // やり直す行が消える。読めない Web Storage と同じく echo だけを残す
+      if (row.failed) {
+        current.fail(row.error);
+        return;
+      }
+      const target = codec.salvage({ ...row.values, ...patch });
       const values: StateValues = {};
       for (const key of codec.keys) values[key] = target[key];
       write(values);
