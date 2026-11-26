@@ -101,3 +101,7 @@
 .area {
   height: calc(var(--spacing) * 60);
 }
+
+.ownAnchor {
+  anchor-name: --own-anchor;
+}

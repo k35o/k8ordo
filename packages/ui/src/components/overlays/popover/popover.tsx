@@ -21,7 +21,7 @@ import { readWritingMode, useControllableState } from '../../../hooks';
 import type { WritingMode } from '../../../hooks';
 import { useFocusTrap } from '../../../internal/focus-trap';
 import type { Placement } from '../../../types/variables';
-import { getContentAnchorStyle, toAnchorName } from './anchor-positioning';
+import { getContentAnchorStyle } from './anchor-positioning';
 import { pushEscapeLayer } from './escape-stack';
 import {
   PopoverProvider,
@@ -75,18 +75,10 @@ export const Root: FC<
     setIsOpen((prev) => !prev);
   }, [setIsOpen]);
 
-  const anchorName = toAnchorName(id);
   const triggerRef = useRef<HTMLElement | null>(null);
-
-  const setTriggerRef = useCallback(
-    (node: HTMLElement | null) => {
-      triggerRef.current = node;
-      if (node) {
-        node.style.setProperty('anchor-name', anchorName);
-      }
-    },
-    [anchorName],
-  );
+  const setTriggerRef = useCallback((node: HTMLElement | null) => {
+    triggerRef.current = node;
+  }, []);
 
   // 開いている間だけレイヤースタックに積む。Escape は最上位の 1 枚だけが消費する。
   useEffect(() => {
@@ -108,7 +100,6 @@ export const Root: FC<
         onOpen: open,
         onClose: close,
         placement,
-        anchorName,
         flipDisabled,
         triggerRef,
         setTriggerRef,
@@ -123,8 +114,11 @@ export const Content: FC<{
   renderItem: (props: PopoverContentProps) => ReactElement;
   // 開閉アニメーション。scale=ポップ（既定）、fade=フェード（Tooltip 用）。
   animation?: 'scale' | 'fade';
-}> = ({ renderItem, animation = 'scale' }) => {
-  const { isOpen, trapFocus, anchorName, placement, flipDisabled, itemProps } =
+  // 位置を決める popover の要素そのものに付けるクラス。暗黙のアンカーを
+  // 継ぐ疑似要素（Tooltip のブリッジ）を描くためにだけ使う。
+  anchoredClassName?: string;
+}> = ({ renderItem, animation = 'scale', anchoredClassName }) => {
+  const { isOpen, trapFocus, placement, flipDisabled, itemProps } =
     usePopoverContent();
   const { triggerRef, onClose } = usePopoverContext();
 
@@ -154,12 +148,15 @@ export const Content: FC<{
     }
     // 現在の表示状態を :popover-open で確かめてから呼ぶ。showPopover /
     // hidePopover は既にその状態のときに InvalidStateError を投げる。
+    // source に trigger を渡すと、trigger が content の暗黙のアンカーになる。
+    // trigger に anchor-name を書き込まないので、同じ要素を trigger にする
+    // 別の Popover や Tooltip、利用者の anchor-name と取り合わない。
     if (isOpen && !el.matches(':popover-open')) {
-      el.showPopover();
+      el.showPopover({ source: triggerRef.current ?? undefined });
     } else if (!isOpen && el.matches(':popover-open')) {
       el.hidePopover();
     }
-  }, [isOpen]);
+  }, [isOpen, triggerRef]);
 
   useFocusTrap(contentWrapperRef, triggerRef, isOpen && trapFocus);
 
@@ -187,11 +184,12 @@ export const Content: FC<{
         styles.root,
         animation === 'fade' ? styles.fade : styles.scale,
         writingClass,
+        anchoredClassName,
       )}
       onBlur={handleFocusOut}
       popover="manual"
       ref={contentWrapperRef}
-      style={getContentAnchorStyle(anchorName, placement, flipDisabled)}
+      style={getContentAnchorStyle(placement, flipDisabled)}
     >
       {renderItem(itemProps)}
     </div>

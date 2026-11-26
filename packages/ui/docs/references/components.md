@@ -2324,6 +2324,13 @@ import { Popover } from '@k8ordo/ui';
 A menu, a listbox, and a tooltip are their own components (`DropdownMenu`,
 `ListBox`, `Tooltip`); they are built on the same positioning.
 
+The trigger is the content's implicit anchor: the content opens with
+`showPopover({ source: trigger })` and positions itself with
+`position-anchor: auto`. Nothing is written to the trigger's `anchor-name`, so
+one element can be the trigger of a popover and of a tooltip at once (an
+`IconButton` as a `Popover.Trigger`), and a trigger keeps an `anchor-name` of
+its own.
+
 Props (Root):
 
 - `children`: `ReactNode`

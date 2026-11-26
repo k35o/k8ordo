@@ -7,9 +7,11 @@ import { expect, fn, screen, waitFor } from 'storybook/test';
 import { Popover, PopoverBase } from '.';
 import { afterRenderingUpdate } from '../../../../.storybook/rendering';
 import { tokenColor } from '../../../../.storybook/tokens';
+import { mergeRefs } from '../../../helpers/merge-refs';
 import type { Placement } from '../../../types/variables';
 import { Button } from '../../buttons/button';
 import { Modal } from '../modal';
+import { Tooltip } from '../tooltip';
 
 import styles from './popover.stories.module.css';
 
@@ -526,5 +528,100 @@ export const FollowsWritingMode: Story = {
     await waitFor(() => {
       expect(content).toHaveClass('writing-v');
     });
+  },
+};
+
+const openWrapperOf = async (content: Element): Promise<Element> =>
+  waitFor(() => {
+    const wrapper = content.closest('[popover]');
+    if (!wrapper?.matches(':popover-open')) {
+      throw new Error('popover did not open');
+    }
+    for (const animation of wrapper.getAnimations()) {
+      animation.finish();
+    }
+    return wrapper;
+  });
+
+/**
+ * trigger に anchor-name を書き込まない。trigger が自分の anchor-name を
+ * 持っていてもそのまま残り、content は trigger の下に並ぶ。
+ */
+export const KeepsTriggerAnchorName: Story = {
+  render: () => (
+    <div className={styles.centered}>
+      <Popover.Root placement="bottom">
+        <Popover.Trigger
+          renderItem={(props) => (
+            <button {...props} className={styles.ownAnchor} type="button">
+              開く
+            </button>
+          )}
+        />
+        <Popover.Content label="ポップオーバー">
+          <div className={styles.panel}>
+            <p>中身</p>
+          </div>
+        </Popover.Content>
+      </Popover.Root>
+    </div>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    const trigger = canvas.getByRole('button', { name: '開く' });
+    await userEvent.click(trigger);
+
+    const wrapper = await openWrapperOf(
+      await screen.findByRole('dialog', { name: 'ポップオーバー' }),
+    );
+    await expect(getComputedStyle(trigger).anchorName).toBe('--own-anchor');
+    await expect(trigger.style.getPropertyValue('anchor-name')).toBe('');
+    assertPlacement('bottom', trigger, wrapper);
+  },
+};
+
+/**
+ * ポップオーバーと tooltip の trigger が同じ要素（IconButton を trigger にした
+ * ときの形）でも、どちらも trigger を暗黙のアンカーにするので取り合わない。
+ */
+export const SharedTriggerWithTooltip: Story = {
+  render: () => (
+    <div className={styles.centered}>
+      <Popover.Root defaultOpen placement="bottom">
+        <Popover.Trigger
+          renderItem={(popoverProps) => (
+            <Tooltip.Root defaultOpen placement="top">
+              <Tooltip.Trigger
+                renderItem={(tooltipProps) => (
+                  <button
+                    {...popoverProps}
+                    {...tooltipProps}
+                    ref={mergeRefs(popoverProps.ref, tooltipProps.ref)}
+                    type="button"
+                  >
+                    共有
+                  </button>
+                )}
+              />
+              <Tooltip.Content>共有</Tooltip.Content>
+            </Tooltip.Root>
+          )}
+        />
+        <Popover.Content label="共有の設定">
+          <div className={styles.panel}>
+            <p>中身</p>
+          </div>
+        </Popover.Content>
+      </Popover.Root>
+    </div>
+  ),
+  play: async ({ canvas }) => {
+    const trigger = canvas.getByRole('button', { name: '共有' });
+    const dialog = await openWrapperOf(
+      await screen.findByRole('dialog', { name: '共有の設定' }),
+    );
+    const tooltip = await openWrapperOf(await screen.findByRole('tooltip'));
+
+    assertPlacement('bottom', trigger, dialog);
+    assertPlacement('top', trigger, tooltip);
   },
 };

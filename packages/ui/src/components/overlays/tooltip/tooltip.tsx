@@ -1,6 +1,5 @@
 'use client';
 
-import { clsx } from 'clsx';
 import { useMemo } from 'react';
 import type {
   FC,
@@ -126,11 +125,12 @@ export const Content: FC<PropsWithChildren> = ({ children }) => {
 
   return (
     <PopoverBase.Content
+      anchoredClassName={bridgeClass(popover.placement)}
       animation="fade"
       renderItem={({ id, ref }) => (
         // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- WCAG 1.4.13 のため tooltip 自身へのホバー/フォーカス中は表示を維持する
         <div
-          className={clsx(styles.content, bridgeClass(popover.placement))}
+          className={styles.content}
           id={id}
           onBlur={popover.onClose}
           onFocus={popover.onOpen}
