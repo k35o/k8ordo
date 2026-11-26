@@ -12,13 +12,13 @@ import {
   $ZodPrefault,
   $ZodReadonly,
   safeEncode,
+  safeParse,
   toJSONSchema,
 } from 'zod/v4/core';
 import type { $ZodType } from 'zod/v4/core';
 
 import { controlKindOf, emptySubmissionOf } from '../derive/attributes';
 import type { ControlKind, LeafSchema } from '../derive/attributes';
-import { asProbe } from './object-schema';
 import type { ObjectSchema } from './object-schema';
 
 export type Api = 'formFields' | 'parseForm';
@@ -140,7 +140,7 @@ const checkedValueOf = ($schema: $ZodType): string | undefined => {
 const rejectsEmptySubmission = (
   kind: ControlKind,
   $schema: $ZodType,
-): boolean => !asProbe($schema).safeParse(emptySubmissionOf(kind)).success;
+): boolean => !safeParse($schema, emptySubmissionOf(kind)).success;
 
 /**
  * Strings a text control could plausibly submit. One is never enough: a schema
@@ -156,7 +156,7 @@ const COERCING: Partial<Record<string, string>> = {
 };
 
 const rejectsAsWrongType = ($schema: $ZodType, value: unknown): boolean => {
-  const probed = asProbe($schema).safeParse(value);
+  const probed = safeParse($schema, value);
   return (
     !probed.success &&
     probed.error.issues.some((issue) => issue.code === 'invalid_type')
@@ -183,7 +183,7 @@ const refusalOf = (
   if (kind === 'string-checkbox') {
     // チェックを外したボックスは何も送らない。それを true と読むスキーマ
     // （`.default(true)`）では、外した操作が黙って捨てられる
-    return asProbe($schema).safeParse(undefined).data === true
+    return safeParse($schema, undefined).data === true
       ? 'an unchecked box submits nothing, and this schema (.default(true) and the like) reads nothing as true, so the box can never submit false; word the field so that checking it means true'
       : undefined;
   }
@@ -191,14 +191,14 @@ const refusalOf = (
   // 拒むかどうかは文字列の欄として確かめる
   const control = controlKindOf(json);
   if (control === 'number') {
-    const asText = asProbe($schema).safeParse('1');
+    const asText = safeParse($schema, '1');
     if (asText.success) {
       return undefined;
     }
     // `z.literal(1)` reports `invalid_value` rather than `invalid_type`, so
     // the type code alone would miss it: what settles it is that the same
     // value as a number is accepted while its string form is not.
-    return asProbe($schema).safeParse(1).success ||
+    return safeParse($schema, 1).success ||
       asText.error.issues.some((issue) => issue.code === 'invalid_type')
       ? 'form values arrive as strings, so this schema fails on every submission; use z.coerce.number()'
       : undefined;

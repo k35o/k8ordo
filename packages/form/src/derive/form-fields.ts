@@ -1,11 +1,10 @@
-import { $ZodCheckStringFormat } from 'zod/v4/core';
+import { $ZodCheckStringFormat, safeParse } from 'zod/v4/core';
 import type { $ZodCheckStringFormatDef, $ZodType } from 'zod/v4/core';
 
 import { asDefinition } from '../rules/define-form';
 import type { FormDefinition } from '../rules/define-form';
 import { deriveRule } from '../rules/rules';
 import type { DerivedRule } from '../rules/rules';
-import { asProbe } from '../schema/object-schema';
 import type { ObjectSchema } from '../schema/object-schema';
 import { schemaMap, unwrap } from '../schema/walk';
 import type {
@@ -62,11 +61,9 @@ const DATETIME_LOCAL_PROBE = '2000-01-01T00:00';
  * cannot produce.
  */
 const refusesDatetimeLocal = (schema: $ZodType): boolean =>
-  asProbe(schema)
-    .safeParse(DATETIME_LOCAL_PROBE)
-    .error?.issues.some(
-      (issue) => issue.code === 'invalid_format' && issue.format === 'datetime',
-    ) ?? false;
+  safeParse(schema, DATETIME_LOCAL_PROBE).error?.issues.some(
+    (issue) => issue.code === 'invalid_format' && issue.format === 'datetime',
+  ) ?? false;
 
 /**
  * zod's own wording for a checkbox group with `count` boxes checked, as the
@@ -79,16 +76,15 @@ const countMessage = (
   count: number,
   code: 'too_small' | 'too_big',
 ): string | undefined =>
-  asProbe(array)
-    .safeParse(
-      Array.from(
-        { length: count },
-        (_, index) => options[index % options.length],
-      ),
-    )
-    .error?.issues.find(
-      (issue) => issue.code === code && issue.path.length === 0,
-    )?.message;
+  safeParse(
+    array,
+    Array.from(
+      { length: count },
+      (_, index) => options[index % options.length],
+    ),
+  ).error?.issues.find(
+    (issue) => issue.code === code && issue.path.length === 0,
+  )?.message;
 
 const boxesChecked = (count: number): string =>
   `${String(count)} ${count === 1 ? 'box is' : 'boxes are'} checked`;

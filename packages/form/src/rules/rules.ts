@@ -74,8 +74,6 @@ const holds = (rule: Rule | DerivedRule, values: Values): boolean => {
         first(values, rule.when) !== rule.equals ||
         first(values, rule.field) !== ''
       );
-    default:
-      return true;
   }
 };
 

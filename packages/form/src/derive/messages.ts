@@ -1,6 +1,6 @@
+import { safeParse } from 'zod/v4/core';
 import type { $ZodType } from 'zod/v4/core';
 
-import { asProbe } from '../schema/object-schema';
 import type { AnyFieldInput, ValidityFlag } from '../types';
 
 /**
@@ -122,7 +122,7 @@ export const messagesFor = (
   const messages: Partial<Record<ValidityFlag, string>> = {};
 
   for (const probe of probesFor(input, required, emptySubmission)) {
-    const result = asProbe(schema).safeParse(probe.value);
+    const result = safeParse(schema, probe.value);
     if (result.success) {
       continue;
     }

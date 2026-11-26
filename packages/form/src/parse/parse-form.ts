@@ -1,10 +1,10 @@
+import { safeParse } from 'zod/v4/core';
 import type { output } from 'zod/v4/core';
 
 import type { ControlKind } from '../derive/attributes';
 import { asDefinition } from '../rules/define-form';
 import type { FormDefinition } from '../rules/define-form';
 import { breachOf } from '../rules/rules';
-import { asProbe } from '../schema/object-schema';
 import type { ObjectSchema } from '../schema/object-schema';
 import { INDEX, schemaMap } from '../schema/walk';
 import type { ArrayNode } from '../schema/walk';
@@ -163,7 +163,7 @@ export const parseForm = <Shape extends ObjectSchema>(
     );
   }
 
-  const result = asProbe(schema).safeParse(raw);
+  const result = safeParse(schema, raw);
 
   // Evaluated against the submitted values, exactly as the browser evaluates
   // them against the live form. Same function, same inputs, same verdict —
@@ -210,7 +210,7 @@ export const parseForm = <Shape extends ObjectSchema>(
   if (result.success && Object.keys(breaches).length === 0) {
     return {
       success: true,
-      data: result.data as output<Shape>,
+      data: result.data,
       state: { values, rows, token },
     };
   }
