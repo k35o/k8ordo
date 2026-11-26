@@ -59,7 +59,7 @@ const LEFT_OUT: ReadonlyMap<string, string> = new Map([
   ],
   [
     'CommandPalette',
-    '項目ごとに onSelect の関数を持ち、アプリがショートカットで開く枠組み。spec は関数を書けず、会話の中に置くものでもない（その場の操作は Button や DropdownMenu）',
+    '項目ごとに onAction の関数を持ち、アプリがショートカットで開く枠組み。spec は関数を書けず、会話の中に置くものでもない（その場の操作は Button や DropdownMenu）',
   ],
   [
     'ResizablePanels',

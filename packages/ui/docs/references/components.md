@@ -349,12 +349,12 @@ Props:
 - `currentPage`: `number` (required)
 - `onChange`: `(page: number) => void` (required)
 - `totalPages`: `number` (required)
-- `aria-label`: `string`
 - `disabled`: `boolean` (default: `false`)
+- `label`: `string`
 - `nextLabel`: `string`
 - `prevLabel`: `string`
 - `ref`: `Ref<HTMLElement>`
-- Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style` / `children`.
+- Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style` / `children` / `aria-label`.
 
 ### Stepper
 
@@ -1900,7 +1900,7 @@ import { Tree } from '@k8ordo/ui';
 ```
 
 - Which parents are open is controllable (`expandedIds` / `defaultExpandedIds`
-  / `onExpandedChange`), and so is the selected node (`selectedId` /
+  / `onExpandedIdsChange`, called with a new array), and so is the selected node (`selectedId` /
   `defaultSelectedId` / `onChange`, called with the node's `id`).
 - Keyboard: Down / Up move between the visible nodes; Right opens a closed
   parent, then moves to its first child; Left closes an open parent, or moves
@@ -1923,7 +1923,7 @@ Props:
 - `defaultSelectedId`: `string` | `null` (default: `null`)
 - `expandedIds`: `readonly string[]`
 - `onChange`: `(id: string) => void`
-- `onExpandedChange`: `(ids: readonly string[]) => void`
+- `onExpandedIdsChange`: `(ids: string[]) => void`
 - `selectedId`: `string` | `null`
 - Other props are forwarded to `HTMLAttributes<HTMLUListElement>`, except `children` / `className` / `style` / `role` / `aria-label`.
 
@@ -2270,7 +2270,7 @@ under `isOpen` when they should start over. `ref` is the `<dialog>` element.
 A command palette: a modal dialog holding a search field and the list of commands it
 filters. Typing matches each item's `label` and `keywords`, case-insensitively.
 `ArrowDown` / `ArrowUp` move through the matches and wrap around, `Enter` or a
-click runs the item's `onSelect` after closing the palette, and `Escape` closes
+click runs the item's `onAction` after closing the palette, and `Escape` closes
 it; focus stays in the search field throughout (the WAI-ARIA combobox, with the
 list always shown). Items that share a `group` are gathered under that heading,
 in the order the group first appears, and `shortcut` keys are drawn with `Kbd`.
@@ -2290,13 +2290,13 @@ import { CommandPalette } from '@k8ordo/ui';
       label: 'New file',
       group: 'File',
       shortcut: ['⌘', 'N'],
-      onSelect: createFile,
+      onAction: createFile,
     },
     {
       id: 'theme',
       label: 'Toggle theme',
       keywords: ['dark', 'light'],
-      onSelect: toggleTheme,
+      onAction: toggleTheme,
     },
   ]}
 />;
@@ -2305,9 +2305,9 @@ import { CommandPalette } from '@k8ordo/ui';
 Props:
 
 - `items`: `readonly CommandPaletteItem[]` (required)
-- `aria-label`: `string`
 - `defaultOpen`: `boolean`
 - `isOpen`: `boolean`
+- `label`: `string`
 - `onClose`: `() => void`
 - `placeholder`: `string`
 - `ref`: `Ref<HTMLDialogElement>`
@@ -2949,7 +2949,7 @@ A regional tag without a dictionary of its own (`en-US`) reads its language's (`
 
 **Component prop > registered dictionary > built-in dictionary**.
 
-A component with a wording prop of its own — `Spinner`'s `label`, `Alert`'s `closeLabel`, `PasswordInput`'s `showLabel` / `hideLabel`, `Pagination`'s `prevLabel` / `nextLabel` — takes that prop over the dictionary.
+A component with a wording prop of its own — `Spinner`'s `label`, `Alert`'s `closeLabel`, `PasswordInput`'s `showLabel` / `hideLabel`, `Pagination`'s `label` / `prevLabel` / `nextLabel`, `CommandPalette`'s `label` — takes that prop over the dictionary.
 
 ```tsx
 // Whatever the locale, this one Spinner reads 「保存中」

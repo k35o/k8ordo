@@ -1493,12 +1493,6 @@
           "required": true
         },
         {
-          "name": "aria-label",
-          "types": ["string"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
           "name": "defaultOpen",
           "types": ["boolean"],
           "defaultValue": null,
@@ -1507,6 +1501,12 @@
         {
           "name": "isOpen",
           "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "label",
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
@@ -3485,15 +3485,15 @@
           "required": true
         },
         {
-          "name": "aria-label",
-          "types": ["string"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
           "name": "disabled",
           "types": ["boolean"],
           "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "label",
+          "types": ["string"],
+          "defaultValue": null,
           "required": false
         },
         {
@@ -3516,7 +3516,7 @@
         }
       ],
       "inherits": "HTMLAttributes<HTMLElement>",
-      "omitted": ["className", "style", "children"]
+      "omitted": ["className", "style", "children", "aria-label"]
     },
     {
       "name": "PaintBucketIcon",
@@ -5781,8 +5781,8 @@
           "required": false
         },
         {
-          "name": "onExpandedChange",
-          "types": ["(ids: readonly string[]) => void"],
+          "name": "onExpandedIdsChange",
+          "types": ["(ids: string[]) => void"],
           "defaultValue": null,
           "required": false
         },

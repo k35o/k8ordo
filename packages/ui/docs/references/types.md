@@ -88,7 +88,7 @@ code around it:
 | `GapSize` / `PaddingSize`                     | The `none`–`xl` scale of `gap` (Stack, Grid) and `padding` (Stack)                                      |
 | `PopoverTriggerProps` / `TooltipTriggerProps` | What `renderItem` receives on `Popover.Trigger` / `Tooltip.Trigger`                                     |
 | `ToolbarItemProps`                            | What `renderItem` receives on `Toolbar.Item`: `ref`, `tabIndex`, `onFocus`                              |
-| `CommandPaletteItem`                          | A command in `CommandPalette`: `id`, `label`, `onSelect`, plus `group`, `keywords`, `shortcut`          |
+| `CommandPaletteItem`                          | A command in `CommandPalette`: `id`, `label`, `onAction`, plus `group`, `keywords`, `shortcut`          |
 | `ToastOptions`                                | What a toast takes besides its message: `duration`, and an `action` node                                |
 | `ColorPickerSwatch`                           | A preset in `ColorPicker`'s `swatches`: `value` (`#rrggbb`) and `label`, the color's name               |
 | `ComboboxSearch`                              | `Combobox`'s `search`: `(query, { signal }) => Promise<readonly Option[]>`                              |

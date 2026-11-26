@@ -70,7 +70,8 @@ library. Reuse `useControllableState`.
 
 - **State (controlled)**: `isOpen` for open/closed; a meaningful name such as `selectedId` or `value` for a selection.
 - **Initial value (uncontrolled)**: `defaultOpen` / `defaultValue` / `defaultSelectedId`.
-- **Change notification**: `onChange?: (next) => void` (a close-only action is `onClose?`).
+- **Change notification**: the component's main state notifies through `onChange?: (next) => void` (a close-only action is `onClose?`); any other state notifies through `on<Prop>Change`, named after its prop (`expandedIds` → `onExpandedIdsChange`, `selectedIds` → `onSelectedIdsChange`).
+- **Arrays**: a prop that takes an array takes it `readonly` (`readonly string[]`), and a notification hands over a new `string[]`, so a `useState<string[]>` setter can be passed as it is.
 
 For example: `Dialog` and `Drawer` take `isOpen?` + `defaultOpen?` + `onClose?`;
 `Tabs.Root` takes `selectedId` + `onChange?`, or `defaultSelectedId` when uncontrolled;
@@ -89,7 +90,7 @@ For example: `Dialog` and `Drawer` take `isOpen?` + `defaultOpen?` + `onClose?`;
 | `side`      | Placement against a viewport edge                   | `center` / `bottom` / `right` / `left`                                                   |
 | `placement` | Placement relative to an anchor (`Placement`)       | `bottom-start`, …                                                                        |
 | `action`    | Work a press runs in a transition, shown as pending | `() => void \| Promise<void>` (`Button` / `IconButton` / `Card` / `Message.Action`)      |
-| `onAction`  | Activating an item (no event arg), called as is     | `() => void` (`DropdownMenu.Item` / `ContextMenu.Item`)                                  |
+| `onAction`  | Activating an item (no event arg), called as is     | `() => void` (`DropdownMenu.Item` / `ContextMenu.Item` / `CommandPaletteItem`)           |
 
 `type` is reserved for HTML attributes only (`button` / `submit` / `reset`, input types).
 Render props take a verb+noun form: `renderItem` / `renderAnchor` / `renderInput`.
@@ -161,6 +162,7 @@ The rest pass the value only, even when a real `<input>` is underneath:
 - `Slider`: `(value: number) => void`
 - `NumberField`: `(value: number | null) => void` (`null` is an empty field)
 - `CheckboxGroup.Root` / `CheckboxCard` / `Autocomplete`: `(value: string[]) => void`
+- `Tree`'s `onExpandedIdsChange`: `(ids: string[]) => void`
 - `RadioCard` (notifies per group rather than per option input): `(value: string) => void`
 - `ListBox`: `(value) => void`
 

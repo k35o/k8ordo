@@ -14,7 +14,7 @@ import styles from './command-palette.module.css';
 export type CommandPaletteItem = Readonly<{
   id: string;
   label: string;
-  onSelect: () => void;
+  onAction: () => void;
   /** 見出しの付いたまとまり。同じ `group` の項目は最初に現れた位置にまとめる */
   group?: string;
   /** 表示名のほかに、検索で当てる語 */
@@ -29,7 +29,7 @@ type Props = {
   defaultOpen?: boolean;
   onClose?: () => void;
   placeholder?: string;
-  'aria-label'?: string;
+  label?: string;
   ref?: Ref<HTMLDialogElement>;
 };
 
@@ -68,7 +68,7 @@ export const CommandPalette: FC<Props> = ({
   defaultOpen,
   onClose,
   placeholder,
-  'aria-label': ariaLabel,
+  label,
   ref,
 }) => {
   const messages = getMessages();
@@ -99,7 +99,7 @@ export const CommandPalette: FC<Props> = ({
   // 閉じるのは dialog 自身に任せる。onClose は閉じたときに Modal から届く
   const run = (item: CommandPaletteItem) => {
     dialogRef.current?.close();
-    item.onSelect();
+    item.onAction();
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -162,7 +162,7 @@ export const CommandPalette: FC<Props> = ({
     <Modal
       defaultOpen={defaultOpen}
       isOpen={isOpen}
-      label={ariaLabel ?? messages.commandPalette}
+      label={label ?? messages.commandPalette}
       onClose={() => {
         // 次に開いたときは空の検索から始める
         setQuery('');
@@ -200,7 +200,7 @@ export const CommandPalette: FC<Props> = ({
             </p>
           ) : null}
           <div
-            aria-label={ariaLabel ?? messages.commandPalette}
+            aria-label={label ?? messages.commandPalette}
             // 項目の無い listbox は役割を満たさないので隠す。aria-controls の参照先は残す
             hidden={ordered.length === 0}
             id={listboxId}

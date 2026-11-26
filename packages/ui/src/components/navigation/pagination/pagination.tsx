@@ -15,11 +15,11 @@ type Props = {
   disabled?: boolean;
   prevLabel?: string;
   nextLabel?: string;
-  'aria-label'?: string;
+  label?: string;
   ref?: Ref<HTMLElement>;
 } & Omit<
   HTMLAttributes<HTMLElement>,
-  'className' | 'style' | 'onChange' | 'children'
+  'className' | 'style' | 'onChange' | 'children' | 'aria-label'
 >;
 
 export const Pagination: FC<Props> = ({
@@ -29,7 +29,7 @@ export const Pagination: FC<Props> = ({
   disabled = false,
   prevLabel,
   nextLabel,
-  'aria-label': ariaLabel,
+  label,
   ref,
   ...rest
 }) => {
@@ -40,7 +40,7 @@ export const Pagination: FC<Props> = ({
   const isLast = safeCurrent >= safeTotal;
 
   return (
-    <nav {...rest} aria-label={ariaLabel ?? messages.paginationLabel} ref={ref}>
+    <nav {...rest} aria-label={label ?? messages.paginationLabel} ref={ref}>
       <div className={styles.row}>
         <Button
           color="base"

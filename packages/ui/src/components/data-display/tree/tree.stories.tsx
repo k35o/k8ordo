@@ -138,7 +138,7 @@ const ControlledTree = () => {
         items={FILES}
         label="ファイル"
         onChange={setSelectedId}
-        onExpandedChange={setExpandedIds}
+        onExpandedIdsChange={setExpandedIds}
         selectedId={selectedId}
       />
       <p>選択中: {selectedId}</p>
