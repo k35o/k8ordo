@@ -95,8 +95,7 @@
   },
   "dependencies": {
     "clsx": "2.1.1",
-    "server-only": "catalog:",
-    "shiki": "4.6.0"
+    "server-only": "catalog:"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "catalog:",
@@ -121,6 +120,7 @@
     "publint": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
+    "shiki": "4.6.0",
     "storybook": "10.6.7",
     "storybook-addon-determinism": "0.2.1",
     "storybook-addon-mock-date": "3.2.1",
@@ -139,6 +139,7 @@
     "@types/react-dom": ">=19.3.0",
     "react": ">=19.3.0",
     "react-dom": ">=19.3.0",
+    "shiki": ">=4.6.0",
     "streamdown": ">=2.5.0",
     "typescript": ">=7.0.0",
     "zod": "^4.6.6"
@@ -148,6 +149,9 @@
       "optional": true
     },
     "@types/react-dom": {
+      "optional": true
+    },
+    "shiki": {
       "optional": true
     },
     "streamdown": {

@@ -1598,7 +1598,12 @@ A block of code, highlighted on the server with shiki, with a copy button.
 It is an async Server Component on its own subpath, `@k8ordo/ui/code-block`,
 and imports `server-only`: the highlighter never reaches the browser, and
 importing it from a Client Component fails the build. Only the copy button is a
-client module.
+client module. shiki is an optional peer, installed by the application that
+imports `@k8ordo/ui/code-block`:
+
+```bash
+pnpm add shiki
+```
 
 ```tsx
 import { CodeBlock } from '@k8ordo/ui/code-block';

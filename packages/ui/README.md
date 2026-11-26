@@ -43,6 +43,7 @@ it. Install one when you import the entry it belongs to.
 | `@types/react-dom` | ≥19.3.0 | optional | the shipped type declarations                     |
 | `zod`              | ^4.6.6  | optional | generative-UI schemas                             |
 | `streamdown`       | ≥2.5.0  | optional | `@k8ordo/ui/ai/response`                          |
+| `shiki`            | ≥4.6.0  | optional | `@k8ordo/ui/code-block`                           |
 
 <!-- /peers -->
 
@@ -360,21 +361,21 @@ import { Button, Card, Stack } from '@k8ordo/ui';
 
 Optional features live behind dedicated subpath exports:
 
-| Subpath                     | Contents                                                                                  |
-| --------------------------- | ----------------------------------------------------------------------------------------- |
-| `@k8ordo/ui`                | Core UI components, their types, and provider hooks                                       |
-| `@k8ordo/ui/icons`          | Line icons, one module each, and `BaseIcon` for drawing your own                          |
-| `@k8ordo/ui/tokens`         | Design tokens as a DTCG resolver document                                                 |
-| `@k8ordo/ui/props.json`     | Every component's props, and the components each wording key is drawn by, as JSON         |
-| `@k8ordo/ui/i18n`           | `ja` / `en`, `registerMessages`, `getMessages`, and the `Messages` type                   |
-| `@k8ordo/ui/ai`             | AI chat components                                                                        |
-| `@k8ordo/ui/ai/response`    | `Response` Markdown renderer (needs optional peer `streamdown`)                           |
-| `@k8ordo/ui/code-block`     | `CodeBlock`, highlighted on the server with shiki (Server Component)                      |
-| `@k8ordo/ui/catalog`        | The generative-UI catalog: each component described for a model (server-safe)             |
-| `@k8ordo/ui/catalog/render` | How each catalog component is drawn (`'use client'`)                                      |
-| `@k8ordo/ui/styles.css`     | Layer order, tokens, reset and base (required)                                            |
-| `@k8ordo/ui/tokens.css`     | The tokens and the `color-scheme` rules of `styles.css` alone, with no reset and no base  |
-| `@k8ordo/ui/tailwind.css`   | Tailwind CSS 4 bridge, imported after Tailwind: `styles.css` and utilities for the tokens |
+| Subpath                     | Contents                                                                                          |
+| --------------------------- | ------------------------------------------------------------------------------------------------- |
+| `@k8ordo/ui`                | Core UI components, their types, and provider hooks                                               |
+| `@k8ordo/ui/icons`          | Line icons, one module each, and `BaseIcon` for drawing your own                                  |
+| `@k8ordo/ui/tokens`         | Design tokens as a DTCG resolver document                                                         |
+| `@k8ordo/ui/props.json`     | Every component's props, and the components each wording key is drawn by, as JSON                 |
+| `@k8ordo/ui/i18n`           | `ja` / `en`, `registerMessages`, `getMessages`, and the `Messages` type                           |
+| `@k8ordo/ui/ai`             | AI chat components                                                                                |
+| `@k8ordo/ui/ai/response`    | `Response` Markdown renderer (needs optional peer `streamdown`)                                   |
+| `@k8ordo/ui/code-block`     | `CodeBlock`, highlighted on the server with shiki (Server Component; needs optional peer `shiki`) |
+| `@k8ordo/ui/catalog`        | The generative-UI catalog: each component described for a model (server-safe)                     |
+| `@k8ordo/ui/catalog/render` | How each catalog component is drawn (`'use client'`)                                              |
+| `@k8ordo/ui/styles.css`     | Layer order, tokens, reset and base (required)                                                    |
+| `@k8ordo/ui/tokens.css`     | The tokens and the `color-scheme` rules of `styles.css` alone, with no reset and no base          |
+| `@k8ordo/ui/tailwind.css`   | Tailwind CSS 4 bridge, imported after Tailwind: `styles.css` and utilities for the tokens         |
 
 ## AI Chat Components
 

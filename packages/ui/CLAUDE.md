@@ -478,7 +478,7 @@ The authoritative list is the `exports` map in `package.json`.
 @k8ordo/ui/i18n                ja / en, registerMessages, getMessages, and the Messages type
 @k8ordo/ui/ai                  AI chat components
 @k8ordo/ui/ai/response         Response renderer only
-@k8ordo/ui/code-block          CodeBlock (Server Component; shiki and server-only are dependencies)
+@k8ordo/ui/code-block          CodeBlock (Server Component; shiki is an optional peer, server-only a dependency)
 @k8ordo/ui/catalog             the generative-UI catalog, for no format in particular (server-safe)
 @k8ordo/ui/catalog/render      how each catalog component is drawn ('use client')
 @k8ordo/ui/tokens              design tokens as a DTCG resolver document

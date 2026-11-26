@@ -820,6 +820,12 @@ export const codeBlock = {
     ja: 'ハイライトはサーバーで済ませるので、shikiはブラウザに送られません。`server-only`をimportしているので、Client Componentから読み込むとビルドがエラーになります。',
     en: 'Highlighting happens on the server, so shiki never reaches the browser. It imports `server-only`, so importing it from a Client Component fails the build.',
   }),
+  install: message({
+    ja: (version: string) =>
+      `shikiは任意のpeerなので、\`@k8ordo/ui/code-block\`を使うアプリが\`shiki\`の${version}以上を入れます。`,
+    en: (version) =>
+      `shiki is an optional peer: the application that uses \`@k8ordo/ui/code-block\` installs \`shiki\` ${version} or later.`,
+  }),
   titleTitle: message({
     ja: 'ファイル名',
     en: 'File name',
