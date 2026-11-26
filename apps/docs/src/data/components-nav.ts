@@ -166,10 +166,6 @@ export const pages = {
     path: '/:locale/ui/components/list-box',
     description: m.components.listBox.description,
   },
-  Modal: {
-    path: '/:locale/ui/components/modal',
-    description: m.components.modal.description,
-  },
   NumberField: {
     path: '/:locale/ui/components/number-field',
     description: m.components.numberField.description,

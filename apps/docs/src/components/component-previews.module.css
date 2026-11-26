@@ -32,11 +32,6 @@
 .radioCard,
 .autocomplete,
 .formControl,
-.dialog {
-  width: 100%;
-  max-width: 20rem;
-}
-
 .tree {
   width: calc(var(--spacing) * 44);
 }

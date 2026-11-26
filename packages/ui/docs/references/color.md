@@ -49,19 +49,19 @@ the browser maps them to what the display can show.
 
 ## Semantic colors (background)
 
-| Token                  | Light      | Dark       | Use                                                                         |
-| ---------------------- | ---------- | ---------- | --------------------------------------------------------------------------- |
-| `--color-bg-base`      | white      | gray-800   | Card background                                                             |
-| `--color-bg-raised`    | white      | gray-800   | Overlays (Modal, Dialog, DropdownMenu, ListBox, Autocomplete's option list) |
-| `--color-bg-surface`   | gray-50    | gray-950   | Outermost ground: lighter than `bg-subtle` in light, darker in dark         |
-| `--color-bg-subtle`    | gray-100   | gray-900   | Page background                                                             |
-| `--color-bg-mute`      | gray-200   | gray-700   | For the hover state                                                         |
-| `--color-bg-emphasize` | gray-300   | gray-600   | For the active state                                                        |
-| `--color-bg-inverse`   | gray-900   | white      | Inverted background                                                         |
-| `--color-bg-info`      | blue-100   | blue-900   | Information ground                                                          |
-| `--color-bg-success`   | green-100  | green-900  | Success ground                                                              |
-| `--color-bg-warning`   | yellow-100 | yellow-900 | Warning ground                                                              |
-| `--color-bg-error`     | red-100    | red-900    | Error ground                                                                |
+| Token                  | Light      | Dark       | Use                                                                          |
+| ---------------------- | ---------- | ---------- | ---------------------------------------------------------------------------- |
+| `--color-bg-base`      | white      | gray-800   | Card background                                                              |
+| `--color-bg-raised`    | white      | gray-800   | Overlays (Dialog, Drawer, DropdownMenu, ListBox, Autocomplete's option list) |
+| `--color-bg-surface`   | gray-50    | gray-950   | Outermost ground: lighter than `bg-subtle` in light, darker in dark          |
+| `--color-bg-subtle`    | gray-100   | gray-900   | Page background                                                              |
+| `--color-bg-mute`      | gray-200   | gray-700   | For the hover state                                                          |
+| `--color-bg-emphasize` | gray-300   | gray-600   | For the active state                                                         |
+| `--color-bg-inverse`   | gray-900   | white      | Inverted background                                                          |
+| `--color-bg-info`      | blue-100   | blue-900   | Information ground                                                           |
+| `--color-bg-success`   | green-100  | green-900  | Success ground                                                               |
+| `--color-bg-warning`   | yellow-100 | yellow-900 | Warning ground                                                               |
+| `--color-bg-error`     | red-100    | red-900    | Error ground                                                                 |
 
 ## Semantic colors (border)
 
@@ -176,7 +176,7 @@ In dark, `bg-emphasize` moves a step darker as well, because white text on the
 usual gray-600 would stay near 5:1.
 
 Surfaces outlined only by a shadow or a ground — `Card`'s `shadow` variant,
-`Modal`, `Drawer`, `Dialog`, `Alert`, `Callout` and `Toast`, a user `Message` — gain a
+`Dialog`, `Drawer`, `Alert`, `Callout` and `Toast`, a user `Message` — gain a
 1px `border-base` outline, as do the `Switch` track and thumb and the `Slider`
 and `Progress` tracks. A focused `DropdownMenu` or `ListBox` item and the
 active `Autocomplete` option draw a 2px outline on top of their ground.

@@ -353,7 +353,7 @@ const inheritsOf = (
   };
 };
 
-/** Resolves a compound member (`Dialog.Root`) back to the `const Root` it aliases. */
+/** Resolves a compound member (`Tabs.Root`) back to the `const Root` it aliases. */
 const resolveDeclaration = (symbol: TsSymbol): Node | undefined => {
   const declaration = declarationOf(symbol);
   if (!declaration) return undefined;

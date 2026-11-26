@@ -24,7 +24,6 @@ import {
   DataTable,
   DateField,
   DatePicker,
-  Dialog,
   DropdownMenu,
   EmptyState,
   FileField,
@@ -127,7 +126,7 @@ export type ServerPreviewName = 'CodeBlock';
  *
  * Most entries render the real component in a representative static state.
  * Transient/overlay components that would otherwise cover the page or require
- * open state (Drawer, Modal, Toast, Popover, DropdownMenu, ...) are shown via
+ * open state (Dialog, Drawer, Toast, Popover, DropdownMenu, ...) are shown via
  * their closed trigger instead.
  */
 export const componentPreviews = {
@@ -492,16 +491,8 @@ export const componentPreviews = {
       <Progress max={100} value={60} />
     </div>
   ),
-  Dialog: (
-    <div className={styles.dialog}>
-      <Dialog.Root>
-        <Dialog.Header onClose={() => undefined} title="Dialog Title" />
-        <Dialog.Content>Dialog content here</Dialog.Content>
-      </Dialog.Root>
-    </div>
-  ),
+  Dialog: <Button>Open Dialog</Button>,
   Drawer: <Button>Open Drawer</Button>,
-  Modal: <Button>Open Modal</Button>,
   Popover: (
     <Popover.Root>
       <Popover.Trigger

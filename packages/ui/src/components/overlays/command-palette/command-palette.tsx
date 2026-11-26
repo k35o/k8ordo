@@ -160,9 +160,9 @@ export const CommandPalette: FC<Props> = ({
 
   return (
     <Modal
-      aria-label={ariaLabel ?? messages.commandPalette}
       defaultOpen={defaultOpen}
       isOpen={isOpen}
+      label={ariaLabel ?? messages.commandPalette}
       onClose={() => {
         // 次に開いたときは空の検索から始める
         setQuery('');

@@ -260,7 +260,6 @@ entry in [docs/references/components.md](docs/references/components.md).
 - [Drawer](docs/references/components.md#drawer)
 - [DropdownMenu](docs/references/components.md#dropdownmenu)
 - [ListBox](docs/references/components.md#listbox)
-- [Modal](docs/references/components.md#modal)
 - [Popover](docs/references/components.md#popover)
 - [Tooltip](docs/references/components.md#tooltip)
 
@@ -338,8 +337,7 @@ import { Button } from '@k8ordo/ui';
 ### Dialog
 
 ```tsx
-import { Dialog } from '@k8ordo/ui';
-import { Button } from '@k8ordo/ui';
+import { Button, Dialog } from '@k8ordo/ui';
 import { useState } from 'react';
 
 function MyComponent() {
@@ -348,18 +346,14 @@ function MyComponent() {
   return (
     <>
       <Button onClick={() => setIsOpen(true)}>Open Dialog</Button>
-      {isOpen && (
-        <Dialog.Root>
-          <Dialog.Header
-            title="Confirm Action"
-            onClose={() => setIsOpen(false)}
-          />
-          <Dialog.Content>
-            <p>Are you sure you want to continue?</p>
-            <Button onClick={() => setIsOpen(false)}>Confirm</Button>
-          </Dialog.Content>
-        </Dialog.Root>
-      )}
+      <Dialog
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        title="Confirm Action"
+      >
+        <p>Are you sure you want to continue?</p>
+        <Button onClick={() => setIsOpen(false)}>Confirm</Button>
+      </Dialog>
     </>
   );
 }

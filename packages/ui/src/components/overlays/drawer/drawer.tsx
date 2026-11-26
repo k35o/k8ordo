@@ -1,73 +1,69 @@
 'use client';
 
-import { clsx } from 'clsx';
-import { useId, useRef } from 'react';
-import type { FC, PropsWithChildren, ReactNode } from 'react';
+import { useId, useMemo, useRef } from 'react';
+import type { FC, PropsWithChildren, ReactNode, Ref } from 'react';
 
-import { getMessages } from '../../../i18n/current';
+import { mergeRefs } from '../../../helpers/merge-refs';
 import type { DrawerSide } from '../../../types/variables';
-import { IconButton } from '../../buttons/icon-button';
-import { Heading } from '../../data-display/heading';
-import { XIcon } from '../../icons/x';
+import { ModalHeader } from '../_internal/modal-header';
 import { Modal } from '../modal';
 
 import styles from './drawer.module.css';
 
 export const Drawer: FC<
   PropsWithChildren<{
+    /** The heading (`h2`) drawn with a close button. It names the drawer. */
     title: ReactNode;
+    side?: DrawerSide;
+    /** Drawn above the children; the only text the drawer is described by. */
+    description?: ReactNode;
     isOpen?: boolean;
     defaultOpen?: boolean;
+    /** Called when the drawer closes while it is meant to be open, never when `isOpen` turns false. */
     onClose?: () => void;
-    side?: DrawerSide;
+    ref?: Ref<HTMLDialogElement>;
   }>
-> = ({ title, isOpen, defaultOpen, onClose, side = 'right', children }) => {
-  const messages = getMessages();
-  const rootId = useId();
+> = ({
+  title,
+  side = 'right',
+  description,
+  isOpen,
+  defaultOpen,
+  onClose,
+  ref,
+  children,
+}) => {
+  const id = useId();
+  const titleId = `${id}-title`;
+  const descriptionId = `${id}-description`;
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const mergedRef = useMemo(() => mergeRefs(dialogRef, ref), [ref]);
 
   return (
     <Modal
-      aria-describedby={`${rootId}-content`}
-      aria-labelledby={`${rootId}-title`}
+      aria-describedby={description === undefined ? undefined : descriptionId}
+      aria-labelledby={titleId}
       defaultOpen={defaultOpen}
       isOpen={isOpen}
       onClose={onClose}
-      ref={dialogRef}
+      ref={mergedRef}
       side={side}
     >
-      {/* section にすると名前付き region ランドマークになるため div。
-          名前は外側の <dialog> が aria-labelledby で受け持つ */}
-      <div className={styles.root} id={rootId}>
-        <div className={styles.header}>
-          {typeof title === 'string' ? (
-            <Heading id={`${rootId}-title`} level="h3">
-              {title}
-            </Heading>
-          ) : (
-            // labelledby の参照先 id を持たせつつ flex レイアウトに影響させないための contents ラッパー
-            <div className={styles.title} id={`${rootId}-title`}>
-              {title}
+      <div className={styles.root}>
+        <ModalHeader
+          closeSide={side}
+          onClose={() => {
+            dialogRef.current?.close();
+          }}
+          title={title}
+          titleId={titleId}
+        />
+        <div className={styles.content}>
+          {description === undefined ? null : (
+            <div className={styles.description} id={descriptionId}>
+              {description}
             </div>
           )}
-          <div
-            className={clsx(
-              styles.close,
-              side === 'left' ? styles.closeLeft : styles.closeRight,
-            )}
-          >
-            <IconButton
-              label={messages.close}
-              onClick={() => {
-                dialogRef.current?.close();
-              }}
-              tooltipDisabled
-            >
-              <XIcon size="sm" />
-            </IconButton>
-          </div>
-        </div>
-        <div className={styles.content} id={`${rootId}-content`}>
           {children}
         </div>
       </div>

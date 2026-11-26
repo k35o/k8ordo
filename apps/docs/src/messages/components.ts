@@ -1165,12 +1165,48 @@ export const tooltip = {
 
 export const dialog = {
   description: message({
-    ja: '`Modal`の中に置く見出しと本文、閉じるボタンの組です。',
-    en: 'A heading, a body and a close button, placed inside `Modal`.',
+    ja: '画面の中央か下から開くモーダルのダイアログです。`title`は閉じるボタンの付いた見出しになり、ダイアログの名前になります。',
+    en: 'A modal dialog that opens in the center or from the bottom of the screen. `title` becomes a heading with a close button, and names the dialog.',
   }),
   alertDialogTitle: message({
     ja: 'アラートダイアログ',
     en: 'Alert dialog',
+  }),
+  alertDialogDescription: message({
+    ja: '`role="alertdialog"`は`<dialog>`自身に付きます。`description`は子の上に描かれ、ダイアログの説明として読み上げられるのはこの文だけです。ボタンやフォームの入った本文は説明になりません。',
+    en: '`role="alertdialog"` goes on the `<dialog>` itself. `description` is drawn above the children, and it is the only text read out as the dialog’s description; a body that holds buttons or a form never is.',
+  }),
+  sideTitle: message({
+    ja: '下から開く',
+    en: 'From the bottom',
+  }),
+  sideDescription: message({
+    ja: '`side="bottom"`で、画面の下から出るシートになります。左右から出すパネルには`Drawer`を使います。',
+    en: '`side="bottom"` makes it a sheet that slides up from the bottom of the screen. For a panel from the left or the right, use `Drawer`.',
+  }),
+  labelTitle: message({
+    ja: '見出しのないダイアログ',
+    en: 'Without a heading',
+  }),
+  labelDescription: message({
+    ja: '見出しを描かないときは、`title`の代わりに`label`で名前を付けます。閉じるボタンも描かないので、閉じる操作を中に置くか、Escapeと枠外のクリックに任せます。',
+    en: 'A dialog that draws no heading is named by `label` instead of `title`. It draws no close button either, so put a way to close it inside, or leave it to Escape and a click outside.',
+  }),
+  closingTitle: message({
+    ja: '閉じたときの動き',
+    en: 'Closing',
+  }),
+  closingDescription: message({
+    ja: '`onClose`は、開いているはずのダイアログが閉じたときに呼ばれます。Escape、枠外のクリック、閉じるボタン、`<form method="dialog">`、`<Activity>`で隠れたときです。`isOpen`を`false`にして自分で閉じたときは呼ばれないので、`onClose`で前のページへ戻るダイアログが2回戻ることはありません。閉じている間も子は外れず、制御していない入力欄は次に開くまで値を保ちます。開くたびに初めからにしたいときは、`isOpen`を条件にして子を描きます。',
+    en: '`onClose` is called when the dialog closes while it is meant to be open: Escape, a click outside, the close button, a `<form method="dialog">`, or `<Activity>` hiding it. It is not called when you set `isOpen` to `false` yourself, so a dialog that goes back a page in `onClose` never goes back twice. The children stay mounted while the dialog is closed, and an uncontrolled field keeps its value until the next opening. To start over on every opening, render the children under `isOpen`.',
+  }),
+  portalRootTitle: message({
+    ja: 'トップレイヤーとポータル',
+    en: 'Top layer and portals',
+  }),
+  portalRootDescription: message({
+    ja: '`Dialog`と`Drawer`はブラウザのトップレイヤーの`<dialog>`に表示されます。そのため、`document.body`にポータルした要素はダイアログの後ろに隠れます。ダイアログは自分の`<dialog>`をポータルのルートとしてコンテキストで渡しています。`usePortalRoot`で取り出してポータル先にすれば、ダイアログの中でも前面に出ます。',
+    en: '`Dialog` and `Drawer` render in a `<dialog>` in the browser’s top layer, so anything portaled to `document.body` ends up behind them. They provide their own `<dialog>` as the portal root through context. Read it with `usePortalRoot` and portal there, and floating UI stays on top inside the dialog.',
   }),
 };
 
@@ -1182,6 +1218,14 @@ export const drawer = {
   customContentTitle: message({
     ja: '独自の中身',
     en: 'Custom content',
+  }),
+  sideTitle: message({
+    ja: '左から出す',
+    en: 'From the left',
+  }),
+  sideDescription: message({
+    ja: '`side="left"`で左の端から出ます。`title`は閉じるボタンの付いた見出しになり、`description`は子の上に描かれて説明として読み上げられます。',
+    en: '`side="left"` slides it in from the left edge. `title` becomes a heading with a close button, and `description` is drawn above the children and read out as the description.',
   }),
 };
 
@@ -1199,31 +1243,8 @@ export const commandPalette = {
     en: 'Opening and closing from a key',
   }),
   shortcutDescription: message({
-    ja: '開閉は`Modal`と同じく`isOpen`と`onClose`で行います。⌘KやCtrl+Kのようなキーは、アプリ側で割り当てます。閉じるとフォーカスは開く前の場所へ戻り、次に開いたときは空の検索から始まります。',
-    en: 'Open and close it like `Modal`, with `isOpen` and `onClose`. A key such as ⌘K or Ctrl+K is the application’s to wire. Closing returns focus to where it was, and the next opening starts from an empty search.',
-  }),
-};
-
-export const modal = {
-  description: message({
-    ja: '`<dialog>`で画面の前面に開くオーバーレイです。`Dialog`と`Drawer`の土台で、中身を自由に置くときは直接使います。',
-    en: 'An overlay opened in a `<dialog>`. `Dialog` and `Drawer` build on it; use it directly for content of your own.',
-  }),
-  sideTitle: message({
-    ja: '出る位置',
-    en: 'Side',
-  }),
-  defaultOpenTitle: message({
-    ja: '既定で開く',
-    en: 'Open by default',
-  }),
-  portalRootTitle: message({
-    ja: 'トップレイヤーとポータル',
-    en: 'Top layer and portals',
-  }),
-  portalRootDescription: message({
-    ja: '`Modal`はブラウザのトップレイヤーの`<dialog>`に表示されます。そのため、`document.body`にポータルした要素は`Modal`の後ろに隠れます。`Modal`は自分の`<dialog>`をポータルのルートとしてコンテキストで渡しています。`usePortalRoot`で取り出してポータル先にすれば、`Modal`の中でも前面に出ます。`Modal`の中の`useToast`はこの仕組みを使うので、対応が要るのは自前のポータルだけです。',
-    en: '`Modal` renders in a `<dialog>` in the browser’s top layer, so anything portaled to `document.body` ends up behind it. `Modal` provides its own `<dialog>` as the portal root through context. Read it with `usePortalRoot` and portal there, and floating UI stays on top inside the `Modal`. `useToast` inside a `Modal` already uses this, so only portals of your own need it.',
+    ja: '開閉は`Dialog`と同じく`isOpen`と`onClose`で行います。⌘KやCtrl+Kのようなキーは、アプリ側で割り当てます。閉じるとフォーカスは開く前の場所へ戻り、次に開いたときは空の検索から始まります。',
+    en: 'Open and close it like `Dialog`, with `isOpen` and `onClose`. A key such as ⌘K or Ctrl+K is the application’s to wire. Closing returns focus to where it was, and the next opening starts from an empty search.',
   }),
 };
 

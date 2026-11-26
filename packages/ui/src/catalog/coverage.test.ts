@@ -20,8 +20,10 @@ const RENAMED_IN_CATALOG: ReadonlyMap<string, string> = new Map([
   ['useToast', 'Toast'],
 ]);
 
-const PARTS_IN_CATALOG: ReadonlyMap<string, string> = new Map([
-  ['DropdownMenuItem', 'DropdownMenu'],
+// 公開の部品の名前ではない項目と、それを描く部品。side で Dialog と Drawer を描き分ける
+const COMPOSED_IN_CATALOG: ReadonlyMap<string, readonly string[]> = new Map([
+  ['DropdownMenuItem', ['DropdownMenu']],
+  ['Modal', ['Dialog', 'Drawer']],
 ]);
 
 const OBSERVER =
@@ -115,7 +117,9 @@ const unreachedEntries = (): string[] => {
     .filter(
       (name) =>
         !reached.has(name) &&
-        !exported.includes(PARTS_IN_CATALOG.get(name) ?? ''),
+        !(COMPOSED_IN_CATALOG.get(name) ?? []).some((part) =>
+          reached.has(part),
+        ),
     )
     .toSorted();
 };
@@ -124,10 +128,16 @@ const staleTableEntries = (): string[] => [
   ...[...RENAMED_IN_CATALOG.keys(), ...LEFT_OUT.keys()].filter(
     (name) => !exported.includes(name),
   ),
-  ...[...RENAMED_IN_CATALOG.values(), ...PARTS_IN_CATALOG.keys()].filter(
+  ...[...RENAMED_IN_CATALOG.values()].filter(
     (name) => !catalogNames.includes(name),
   ),
   ...[...LEFT_OUT.keys()].filter((name) => catalogNames.includes(name)),
+  ...[...COMPOSED_IN_CATALOG.keys()].filter(
+    (name) => !catalogNames.includes(name),
+  ),
+  ...[...COMPOSED_IN_CATALOG.values()]
+    .flat()
+    .filter((part) => !exported.includes(part)),
 ];
 
 const readDoc = (path: string): string =>

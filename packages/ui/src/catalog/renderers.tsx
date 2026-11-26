@@ -64,7 +64,6 @@ import { Dialog } from '../components/overlays/dialog';
 import { Drawer } from '../components/overlays/drawer';
 import { DropdownMenu } from '../components/overlays/dropdown-menu';
 import { ListBox } from '../components/overlays/list-box';
-import { Modal } from '../components/overlays/modal';
 import { Popover } from '../components/overlays/popover';
 import { Tooltip } from '../components/overlays/tooltip';
 import { getMessages } from '../i18n/current';
@@ -987,23 +986,29 @@ const OverlayWidget: FC<{
       >
         {triggerLabel}
       </Button>
-      <Modal
-        isOpen={isOpen}
-        onClose={() => {
-          setIsOpen(false);
-        }}
-        side={side}
-      >
-        <Dialog.Root>
-          <Dialog.Header
-            onClose={() => {
-              setIsOpen(false);
-            }}
-            title={title}
-          />
-          <Dialog.Content>{children}</Dialog.Content>
-        </Dialog.Root>
-      </Modal>
+      {side === 'left' || side === 'right' ? (
+        <Drawer
+          isOpen={isOpen}
+          onClose={() => {
+            setIsOpen(false);
+          }}
+          side={side}
+          title={title}
+        >
+          {children}
+        </Drawer>
+      ) : (
+        <Dialog
+          isOpen={isOpen}
+          onClose={() => {
+            setIsOpen(false);
+          }}
+          side={side}
+          title={title}
+        >
+          {children}
+        </Dialog>
+      )}
     </>
   );
 };

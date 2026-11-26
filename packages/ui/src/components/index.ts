@@ -79,7 +79,6 @@ export { Dialog } from './overlays/dialog';
 export { Drawer } from './overlays/drawer';
 export { DropdownMenu } from './overlays/dropdown-menu';
 export { ListBox } from './overlays/list-box';
-export { Modal } from './overlays/modal';
 export { Popover, type PopoverTriggerProps } from './overlays/popover';
 export { Tooltip, type TooltipTriggerProps } from './overlays/tooltip';
 export { UIProvider, PortalRootProvider, usePortalRoot } from './providers';

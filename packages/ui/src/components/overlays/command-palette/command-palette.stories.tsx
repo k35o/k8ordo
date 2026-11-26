@@ -46,7 +46,7 @@ const meta: Meta<typeof CommandPalette> = {
   title: 'components/overlays/command-palette',
   component: CommandPalette,
   parameters: {
-    // Modal と同じく、開くときの透明度の変化を axe がコントラスト不足と読み違える
+    // Dialog と同じく、開くときの透明度の変化を axe がコントラスト不足と読み違える
     a11y: {
       options: {
         rules: {

@@ -10,7 +10,7 @@ import { tokenColor } from '../../../../.storybook/tokens';
 import { mergeRefs } from '../../../helpers/merge-refs';
 import type { Placement } from '../../../types/variables';
 import { Button } from '../../buttons/button';
-import { Modal } from '../modal';
+import { Dialog } from '../dialog';
 import { Tooltip } from '../tooltip';
 
 import styles from './popover.stories.module.css';
@@ -287,7 +287,7 @@ export const EscapeClosesOnlyTopLayer: Story = {
 };
 
 const EscapeInModalRender = () => (
-  <Modal aria-label="モーダル" defaultOpen>
+  <Dialog defaultOpen label="モーダル">
     <div className={styles.modalBody}>
       <Popover.Root>
         <Popover.Trigger
@@ -304,10 +304,10 @@ const EscapeInModalRender = () => (
         </Popover.Content>
       </Popover.Root>
     </div>
-  </Modal>
+  </Dialog>
 );
 
-// Modal の中で開いた Popover の Escape は preventDefault され、
+// Dialog の中で開いた Popover の Escape は preventDefault され、
 // ネイティブ dialog の close request まで届かない。
 export const EscapeInModal: Story = {
   render: () => <EscapeInModalRender />,
@@ -336,7 +336,7 @@ export const EscapeInModal: Story = {
       await expect(prevented).toEqual([true]);
       await expect(dialog.hasAttribute('open')).toBe(true);
 
-      // ポップオーバーが閉じたあとの Escape は誰も消費しない（Modal に届く）
+      // ポップオーバーが閉じたあとの Escape は誰も消費しない（Dialog に届く）
       await userEvent.keyboard('{Escape}');
       await expect(prevented).toEqual([true, false]);
     } finally {

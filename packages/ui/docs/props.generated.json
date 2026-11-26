@@ -1893,41 +1893,7 @@
       "omitted": ["className", "style", "type", "children"]
     },
     {
-      "name": "Dialog.Content",
-      "category": "overlays",
-      "props": [
-        {
-          "name": "children",
-          "types": ["ReactNode"],
-          "defaultValue": null,
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
-      "name": "Dialog.Header",
-      "category": "overlays",
-      "props": [
-        {
-          "name": "onClose",
-          "types": ["() => void"],
-          "defaultValue": null,
-          "required": true
-        },
-        {
-          "name": "title",
-          "types": ["ReactNode"],
-          "defaultValue": null,
-          "required": true
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
-      "name": "Dialog.Root",
+      "name": "Dialog",
       "category": "overlays",
       "props": [
         {
@@ -1937,14 +1903,38 @@
           "required": false
         },
         {
-          "name": "id",
+          "name": "defaultOpen",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "description",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "isOpen",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "label",
           "types": ["string"],
           "defaultValue": null,
           "required": false
         },
         {
+          "name": "onClose",
+          "types": ["() => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
           "name": "ref",
-          "types": ["Ref<HTMLElement>"],
+          "types": ["Ref<HTMLDialogElement>"],
           "defaultValue": null,
           "required": false
         },
@@ -1955,8 +1945,14 @@
           "required": false
         },
         {
-          "name": "tabIndex",
-          "types": ["number"],
+          "name": "side",
+          "types": ["DialogSide"],
+          "defaultValue": "'center'",
+          "required": false
+        },
+        {
+          "name": "title",
+          "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
         }
@@ -2001,6 +1997,12 @@
           "required": false
         },
         {
+          "name": "description",
+          "types": ["ReactNode"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
           "name": "isOpen",
           "types": ["boolean"],
           "defaultValue": null,
@@ -2009,6 +2011,12 @@
         {
           "name": "onClose",
           "types": ["() => void"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "ref",
+          "types": ["Ref<HTMLDialogElement>"],
           "defaultValue": null,
           "required": false
         },
@@ -3338,68 +3346,6 @@
           "name": "size",
           "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
-      "name": "Modal",
-      "category": "overlays",
-      "props": [
-        {
-          "name": "aria-describedby",
-          "types": ["string"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "aria-label",
-          "types": ["string"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "aria-labelledby",
-          "types": ["string"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "children",
-          "types": ["ReactNode"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "defaultOpen",
-          "types": ["boolean"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "isOpen",
-          "types": ["boolean"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "onClose",
-          "types": ["() => void"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "ref",
-          "types": ["Ref<HTMLDialogElement>"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "side",
-          "types": ["ModalSide"],
-          "defaultValue": "'center'",
           "required": false
         }
       ],

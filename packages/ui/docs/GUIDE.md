@@ -544,7 +544,7 @@ Avoid the traits that make a UI recognizably AI-generated at a glance.
 ## Implementation principles
 
 - **Use the existing components**: look for a @k8ordo/ui component before building custom UI
-- **Render from Server Components**: every component, compound ones included (`Dialog.Root`, `Tabs.Root`, …), can be placed in a Server Component; only the interactive parts are client modules
+- **Render from Server Components**: every component, compound ones included (`Tabs.Root`, `Accordion.Item`, …), can be placed in a Server Component; only the interactive parts are client modules
 - **Keep placed state in `@k8ordo/state`**: state that lives in the URL, a history entry, localStorage, or memory is `defineLocalState` and friends, not a hook from this package
 - **Browser-only rendering is React's**: a component that can only render in a browser calls `use(browser())` (`browser` from `react-dom`) under a `<Suspense>`; there is no `useClient` here and no "mounted" flag
 - **Use semantic tokens**: tokens (`--color-primary-bg`), never raw color values or the palette (`--teal-500`)
@@ -562,7 +562,7 @@ directly on APIs a browser has and jsdom does not: `ResizeObserver`,
 `close`, and the Popover API. None of them is called through a support check,
 so under jsdom `Tooltip`, `IconButton` (unless `tooltipDisabled`), `Tabs`,
 `Autocomplete`, `Combobox`, `Toolbar`, `ResizablePanels`, `InView`, `Resize`,
-and `Conversation` throw as soon as they mount; `Modal`, `CommandPalette`,
+and `Conversation` throw as soon as they mount; `Dialog`, `CommandPalette`,
 `Drawer`, `Popover`, `DropdownMenu`, `ContextMenu`, `ListBox`, and `DatePicker`
 throw the moment they open (a `DropdownMenu` holding a `SubMenu` already at
 mount); and a `clearable` `FileField.ItemList` throws once it lists a file.

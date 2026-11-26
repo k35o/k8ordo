@@ -72,7 +72,7 @@ library. Reuse `useControllableState`.
 - **Initial value (uncontrolled)**: `defaultOpen` / `defaultValue` / `defaultSelectedId`.
 - **Change notification**: `onChange?: (next) => void` (a close-only action is `onClose?`).
 
-For example: `Modal` and `Drawer` take `isOpen?` + `defaultOpen?` + `onClose?`;
+For example: `Dialog` and `Drawer` take `isOpen?` + `defaultOpen?` + `onClose?`;
 `Tabs.Root` takes `selectedId?` + `defaultSelectedId?` + `onChange?`;
 `Accordion.Item` takes `isOpen?` + `defaultOpen?` + `onChange?`.
 
@@ -85,7 +85,7 @@ For example: `Modal` and `Drawer` take `isOpen?` + `defaultOpen?` + `onClose?`;
 | `tone`      | Status semantics (this prop only)                   | `neutral` / `info` / `success` / `warning` / `error`                                     |
 | `size`      | Size                                                | `sm` / `md` / `lg`                                                                       |
 | `label`     | Visible text or accessible name                     | —                                                                                        |
-| `role`      | Which ARIA role to use                              | `dialog` / `menu` / `listbox`                                                            |
+| `role`      | Which ARIA role to use                              | `dialog` / `alertdialog`                                                                 |
 | `side`      | Placement against a viewport edge                   | `center` / `bottom` / `right` / `left`                                                   |
 | `placement` | Placement relative to an anchor (`Placement`)       | `bottom-start`, …                                                                        |
 | `action`    | Work a press runs in a transition, shown as pending | `() => void \| Promise<void>` (`Button` / `IconButton` / `Card` / `Message.Action`)      |
@@ -282,7 +282,7 @@ and fill a shape only where a line would not read (a dot, a half).
   catalog must not import a component, so its names live in a module of their
   own.
 
-### Compound Component (Dialog, Tabs, FileField pattern)
+### Compound Component (Tabs, Accordion, FileField pattern)
 
 The parts live in the `'use client'` module and are exported one by one; the
 `X.Root` object is assembled in `index.ts`, which has no directive.
@@ -418,7 +418,7 @@ Under `@media print` a `.dark` that contains no `.print-as-shown` goes back to l
 The stylesheet follows `prefers-contrast: more` and `forced-colors: active`; `@k8ordo/color-scheme` is not involved, since the OS owns both settings.
 
 - `tokens.css` redefines text and border tokens (and the dark `bg-emphasize`) inside `@media (prefers-contrast: more)` on `:root`, each as a `light-dark()` pair, so a consumer's later `:root` override still wins. A name only one side changes keeps the other side's usual value.
-- A surface outlined only by a shadow or a ground takes `highContrast.edge` (`src/components/_internal/high-contrast.module.css`): an inset outline under either setting, `--color-border-base` under `prefers-contrast: more` and `CanvasText` under forced colors. Every part of it, color and offset included, sits behind those media queries and `:not(:focus-visible)`, so a surface that takes focus itself (`Modal`'s `<dialog>`) keeps the browser's own focus ring untouched.
+- A surface outlined only by a shadow or a ground takes `highContrast.edge` (`src/components/_internal/high-contrast.module.css`): an inset outline under either setting, `--color-border-base` under `prefers-contrast: more` and `CanvasText` under forced colors. Every part of it, color and offset included, sits behind those media queries and `:not(:focus-visible)`, so a surface that takes focus itself (the `<dialog>` of `Dialog` and `Drawer`) keeps the browser's own focus ring untouched.
 - Under forced colors only system colors survive and shadows are dropped. Paint selected state with `var(--color-system-highlight)` / `var(--color-system-canvas-text)` inside `@media (forced-colors: active)`, never rely on `box-shadow` for a boundary or focus, and hide with `visibility: hidden`, not a transparent color (a transparent color is repainted).
 - A part that keeps its own colors with `forced-color-adjust: none` (`Code`'s color swatch, `ColorPicker`'s preview and tracks) is not repainted at all: its border, outline and focus ring keep whatever color the cascade gives them, a transparent one included, and its `box-shadow` stays. Give each of them a `--color-system-*` color inside `@media (forced-colors: active)` (`CanvasText`, the color the browser paints the others), and drop the shadow there. `ForcedColorsOwnColors` in `src/styles/high-contrast.stories.tsx` checks the three.
 
@@ -446,7 +446,7 @@ The stylesheet follows `prefers-contrast: more` and `forced-colors: active`; `@k
 - A focus mark a play function cannot read (a range thumb is a pseudo-element; WebKit emulates forced colors as the media query alone, so a transparent outline still reads as transparent) is compared as screenshots, with and without focus, in `src/styles/forced-colors.test.tsx`, run by the `forced-colors` project (plain Vitest browser tests under `forcedColors: 'active'`). WebKit keeps the `box-shadow` ring, so those tests catch a regression only in Chromium and Firefox.
 - Print media has no Playwright context option either, so `src/styles/print.test.tsx` runs in a `print` project of its own and switches the page with the `emulateMedia` command defined there (`page.emulateMedia` on the Playwright side). It reads the names of the `light-dark()` tokens from the loaded stylesheet and compares the colors they give in print with the ones measured on screen, so it never copies a token value. `prefers-contrast: more` is not switched by that command: `print-contrast-more` runs the same file with `contrast: 'more'` as a context option, because Firefox's emulation never restyles the page when only the contrast changes (`matchMedia` flips, computed styles do not).
 - `./tokens.css` is checked on a page that loads nothing else: `src/styles/tokens-css.test.tsx` puts the built `dist/styles/tokens.css` into an iframe and compares the colors the tokens give there with the ones an element gets under its own `color-scheme`. Its `tokens-css` project sets the OS to dark as a context option (`colorScheme: 'dark'`): only then does a page without `.dark` staying light, or a page that overrides `color-scheme` turning dark, show anything. It reads `dist/`, so build first.
-- a11y addon fails a story on violations (`test: 'error'`), `color-contrast` included. Only overlay stories that axe misreads while they fade in turn `color-contrast` off for themselves: every `Modal` story, and one story each in `Dialog` and `Popover`.
+- a11y addon fails a story on violations (`test: 'error'`), `color-contrast` included. Only overlay stories that axe misreads while they fade in turn `color-contrast` off for themselves: every `Dialog` and `CommandPalette` story, and one story in `Popover`.
 - Mock date is set to `2023-01-02 12:34:56` in Storybook.
 
 ## Build Pipeline

@@ -19,14 +19,14 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 
 ## References
 
-- [Components](references/components.md): full component list, import paths, props, and i18n — every component, compound ones included (`Dialog.Root`, `Tabs.Root`, …), renders from a Server Component — component wording comes from the dictionary of `@k8ordo/i18n`'s current locale (English when the app defines no locale set); `@k8ordo/ui/i18n` exports `ja` / `en` / the `Messages` type, `registerMessages(locale, messages)` for any other locale or a replacement (per-component wording props win over any dictionary), and `getMessages()` — not a hook — to read the wording in effect in your own elements.
+- [Components](references/components.md): full component list, import paths, props, and i18n — every component, compound ones included (`Tabs.Root`, `Accordion.Item`, …), renders from a Server Component — component wording comes from the dictionary of `@k8ordo/i18n`'s current locale (English when the app defines no locale set); `@k8ordo/ui/i18n` exports `ja` / `en` / the `Messages` type, `registerMessages(locale, messages)` for any other locale or a replacement (per-component wording props win over any dictionary), and `getMessages()` — not a hook — to read the wording in effect in your own elements.
 - [AI chat](references/ai-chat.md): AI chat components from `@k8ordo/ui/ai` (Conversation / Message / PromptInput / Reasoning / Suggestion / ToolInvocation / Attachment / Source) — tool approval, attachments, sources, and message actions included, streaming Markdown `Response` from `@k8ordo/ui/ai/response` (optional peer `streamdown`), with types that take the AI SDK's own shapes and the AI SDK glue (`mapMessageParts`) to copy from `examples/ui-integrations`.
 - [Generative UI](references/generative-ui.md): the catalog an LLM composes UIs from — `catalog` from `@k8ordo/ui/catalog` (server-safe: each component's description, props schema, children, and field value), `renderers` from `@k8ordo/ui/catalog/render` (client), `catalogPropIssues()` (check what a model wrote), `catalogRules`, how to connect json-render / OpenUI / A2UI by mapping over the catalog, and which exports the catalog leaves out on purpose.
 - [Typography](references/typography.md): type scale and usage.
 - [Color](references/color.md): semantic token system and dark mode.
 - [Spacing & layout](references/spatial-design.md): spacing scale and layout patterns.
 - [Interaction](references/interaction-design.md): motion and interaction guidelines.
-- [Types](references/types.md): the shared types for typing component props (`Status` / `Direction` / `Placement` / `ModalSide` / `DrawerSide` / `Option`).
+- [Types](references/types.md): the shared types for typing component props (`Status` / `Direction` / `Placement` / `DialogSide` / `DrawerSide` / `Option`).
 
 ## Data exports
 

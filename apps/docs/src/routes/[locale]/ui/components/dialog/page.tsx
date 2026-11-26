@@ -10,7 +10,8 @@ import { propsOf } from '../../../../../data/component-props';
 import {
   AlertDialogPreview,
   DialogBasicPreview,
-  DialogWithModalPreview,
+  DialogBottomPreview,
+  DialogLabelPreview,
 } from '../../../../../demos/ui/components/dialog-previews';
 import * as m from '../../../../../messages';
 
@@ -40,11 +41,7 @@ export default function DialogPage() {
         <Heading level="h2">
           <Rich>{m.components.common.importTitle()}</Rich>
         </Heading>
-        <CodeBlock
-          code={`import { Dialog } from '@k8ordo/ui';
-import { Modal } from '@k8ordo/ui';`}
-          lang="ts"
-        />
+        <CodeBlock code="import { Dialog } from '@k8ordo/ui';" lang="ts" />
       </section>
       <Separator color="mute" />
 
@@ -53,14 +50,6 @@ import { Modal } from '@k8ordo/ui';`}
           <Heading level="h2">
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
-          <ComponentPreview
-            code={`<Dialog.Root>
-  <Dialog.Header onClose={handleClose} title="Dialog Title" />
-  <Dialog.Content>Dialog content here</Dialog.Content>
-</Dialog.Root>`}
-          >
-            <DialogBasicPreview />
-          </ComponentPreview>
         </div>
 
         <div className={page.stack}>
@@ -70,26 +59,16 @@ import { Modal } from '@k8ordo/ui';`}
           <ComponentPreview
             code={`const [isOpen, setIsOpen] = useState(false);
 
-<Button onClick={() => setIsOpen(true)}>
-  Open Dialog
-</Button>
-<Modal
+<Button onClick={() => setIsOpen(true)}>Open Dialog</Button>
+<Dialog
   isOpen={isOpen}
   onClose={() => setIsOpen(false)}
-  side="center"
+  title="Confirmation"
 >
-  <Dialog.Root>
-    <Dialog.Header
-      onClose={() => setIsOpen(false)}
-      title="Confirmation"
-    />
-    <Dialog.Content>
-      <p>Are you sure you want to proceed?</p>
-    </Dialog.Content>
-  </Dialog.Root>
-</Modal>`}
+  <p>Are you sure you want to proceed?</p>
+</Dialog>`}
           >
-            <DialogWithModalPreview />
+            <DialogBasicPreview />
           </ComponentPreview>
         </div>
 
@@ -97,44 +76,72 @@ import { Modal } from '@k8ordo/ui';`}
           <Heading level="h3">
             <Rich>{m.components.dialog.alertDialogTitle()}</Rich>
           </Heading>
+          <p className={page.mute}>
+            <Rich>{m.components.dialog.alertDialogDescription()}</Rich>
+          </p>
           <ComponentPreview
-            code={`const [isOpen, setIsOpen] = useState(false);
-
-<Button onClick={() => setIsOpen(true)}>Delete Item</Button>
-<Modal
+            code={`<Dialog
+  description="This action cannot be undone."
   isOpen={isOpen}
   onClose={() => setIsOpen(false)}
-  side="center"
+  role="alertdialog"
+  title="Delete this item?"
 >
-  <Dialog.Root role="alertdialog">
-    <Dialog.Header
-      onClose={() => setIsOpen(false)}
-      title="Delete Confirmation"
-    />
-    <Dialog.Content>
-      <div className={styles.body}>
-        <p>
-          Are you sure you want to delete this item?
-          This action cannot be undone.
-        </p>
-        <div className={styles.actions}>
-          <Button
-            color="base"
-            onClick={() => setIsOpen(false)}
-            variant="outline"
-          >
-            Cancel
-          </Button>
-          <Button onClick={() => setIsOpen(false)}>
-            Delete
-          </Button>
-        </div>
-      </div>
-    </Dialog.Content>
-  </Dialog.Root>
-</Modal>`}
+  <div className={styles.actions}>
+    <Button
+      color="base"
+      onClick={() => setIsOpen(false)}
+      variant="outline"
+    >
+      Cancel
+    </Button>
+    <Button onClick={() => setIsOpen(false)}>Delete</Button>
+  </div>
+</Dialog>`}
           >
             <AlertDialogPreview />
+          </ComponentPreview>
+        </div>
+
+        <div className={page.stack}>
+          <Heading level="h3">
+            <Rich>{m.components.dialog.sideTitle()}</Rich>
+          </Heading>
+          <p className={page.mute}>
+            <Rich>{m.components.dialog.sideDescription()}</Rich>
+          </p>
+          <ComponentPreview
+            code={`<Dialog
+  isOpen={isOpen}
+  onClose={() => setIsOpen(false)}
+  side="bottom"
+  title="Share"
+>
+  <p>Slides up from the bottom of the screen.</p>
+</Dialog>`}
+          >
+            <DialogBottomPreview />
+          </ComponentPreview>
+        </div>
+
+        <div className={page.stack}>
+          <Heading level="h3">
+            <Rich>{m.components.dialog.labelTitle()}</Rich>
+          </Heading>
+          <p className={page.mute}>
+            <Rich>{m.components.dialog.labelDescription()}</Rich>
+          </p>
+          <ComponentPreview
+            code={`<Dialog isOpen={isOpen} label="Notice" onClose={() => setIsOpen(false)}>
+  <div className={styles.body}>
+    <p>The maintenance starts at 22:00.</p>
+    <div className={styles.actions}>
+      <Button onClick={() => setIsOpen(false)}>OK</Button>
+    </div>
+  </div>
+</Dialog>`}
+          >
+            <DialogLabelPreview />
           </ComponentPreview>
         </div>
       </section>
@@ -142,14 +149,40 @@ import { Modal } from '@k8ordo/ui';`}
 
       <section className={page.stack}>
         <Heading level="h2">
+          <Rich>{m.components.dialog.closingTitle()}</Rich>
+        </Heading>
+        <p className={page.mute}>
+          <Rich>{m.components.dialog.closingDescription()}</Rich>
+        </p>
+      </section>
+      <Separator color="mute" />
+
+      <section className={page.stack}>
+        <Heading level="h2">
+          <Rich>{m.components.dialog.portalRootTitle()}</Rich>
+        </Heading>
+        <p className={page.mute}>
+          <Rich>{m.components.dialog.portalRootDescription()}</Rich>
+        </p>
+        <CodeBlock
+          code={`import { usePortalRoot } from '@k8ordo/ui';
+import { createPortal } from 'react-dom';
+
+function FloatingLayer({ children }) {
+  // Inside a Dialog or a Drawer this is the top-layer <dialog>; outside it is undefined.
+  const portalRoot = usePortalRoot();
+  return createPortal(children, portalRoot?.current ?? document.body);
+}`}
+          lang="tsx"
+        />
+      </section>
+      <Separator color="mute" />
+
+      <section className={page.stack}>
+        <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
-        <Heading level="h3">Dialog.Root</Heading>
-        <PropsTable items={propsOf('Dialog.Root')} />
-        <Heading level="h3">Dialog.Header</Heading>
-        <PropsTable items={propsOf('Dialog.Header')} />
-        <Heading level="h3">Dialog.Content</Heading>
-        <PropsTable items={propsOf('Dialog.Content')} />
+        <PropsTable items={propsOf('Dialog')} />
       </section>
     </div>
   );

@@ -27,6 +27,10 @@ export const Default: Story = {
     await expect(dialog).toBeInstanceOf(HTMLDialogElement);
     await expect(canvas.queryAllByRole('region')).toHaveLength(0);
     await expect(canvas.getAllByRole('dialog')).toHaveLength(1);
+    await expect(
+      canvas.getByRole('heading', { level: 2, name: 'メニュー' }),
+    ).toBeInTheDocument();
+    await expect(dialog).toHaveAccessibleDescription('');
   },
   args: {
     isOpen: true,
@@ -76,6 +80,20 @@ export const Left: Story = {
         </a>
       </nav>
     ),
+  },
+};
+
+export const Description: Story = {
+  args: {
+    defaultOpen: true,
+    title: 'フィルター',
+    description: '一覧に出す項目を選びます。',
+    children: <p>中身</p>,
+  },
+  play: async ({ canvas }) => {
+    await expect(
+      canvas.getByRole('dialog', { name: 'フィルター' }),
+    ).toHaveAccessibleDescription('一覧に出す項目を選びます。');
   },
 };
 

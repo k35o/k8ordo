@@ -17,7 +17,7 @@ import { CheckIcon } from '@k8ordo/ui/icons';
 ```
 
 Every component can be rendered from a Server Component, compound ones
-included: `Dialog.Root`, `Tabs.Root`, `Popover.Trigger`, and the rest are
+included: `Tabs.Root`, `Accordion.Item`, `Popover.Trigger`, and the rest are
 composed outside the client modules, so the parts resolve on the server. Only
 the interactive parts carry `'use client'`.
 
@@ -2193,80 +2193,70 @@ Props:
 
 ## Overlays
 
-### Modal
+### Dialog
 
-The base overlay component. It uses the `<dialog>` element.
+A modal dialog, opened in a `<dialog>` in the browser's top layer from the
+center of the screen or, with `side="bottom"`, as a sheet from the bottom.
+`title` is drawn as an `h2` heading with a close button, and it names the
+dialog; a dialog that draws no heading is named by `label` instead (one or the
+other, never both). `description` is drawn above the children and is the only
+text the dialog is described by: the body — a form, the buttons — is never
+read out as its description. `role="alertdialog"` goes on the `<dialog>`
+itself, for a confirmation that interrupts.
 
 ```tsx
-import { Modal } from '@k8ordo/ui';
+import { Dialog } from '@k8ordo/ui';
 
-<Modal isOpen={open} onClose={onClose} side="center">
+<Dialog isOpen={open} onClose={() => setOpen(false)} title="Confirm">
   Content
-</Modal>;
+</Dialog>;
+
+<Dialog
+  description="A deleted file cannot be restored."
+  isOpen={open}
+  onClose={() => setOpen(false)}
+  role="alertdialog"
+  title="Delete the file?"
+>
+  <Button onClick={remove}>Delete</Button>
+</Dialog>;
+
+<Dialog isOpen={open} label="Image preview" onClose={() => setOpen(false)}>
+  <img alt="" src={src} />
+</Dialog>;
 ```
 
 Props:
 
-- `aria-describedby`: `string`
-- `aria-label`: `string`
-- `aria-labelledby`: `string`
 - `children`: `ReactNode`
 - `defaultOpen`: `boolean`
+- `description`: `ReactNode`
 - `isOpen`: `boolean`
+- `label`: `string`
 - `onClose`: `() => void`
 - `ref`: `Ref<HTMLDialogElement>`
-- `side`: `ModalSide` (default: `'center'`)
-
-Name resolution goes `aria-label` / `aria-labelledby` first, then the heading registered by a `Dialog.Root` inside. With neither, the dialog is unnamed — so pass `aria-label` when you place content directly without a `Dialog`.
-
-```tsx
-<Modal aria-label="Image preview" isOpen={open} onClose={onClose}>
-  <img alt="" src={src} />
-</Modal>
-```
-
-### Dialog
-
-A compound component, used together with Modal.
-
-```tsx
-import { Modal, Dialog } from '@k8ordo/ui';
-
-<Modal isOpen={open} onClose={onClose}>
-  <Dialog.Root>
-    <Dialog.Header title="Confirm" onClose={onClose} />
-    <Dialog.Content>Content</Dialog.Content>
-  </Dialog.Root>
-</Modal>;
-```
-
-Props (Dialog.Content):
-
-- `children`: `ReactNode`
-
-Props (Dialog.Header):
-
-- `onClose`: `() => void` (required)
-- `title`: `ReactNode` (required)
-
-Props (Dialog.Root):
-
-- `children`: `ReactNode`
-- `id`: `string`
-- `ref`: `Ref<HTMLElement>`
 - `role`: `'dialog'` | `'alertdialog'`
-- `tabIndex`: `number`
+- `side`: `DialogSide` (default: `'center'`)
+- `title`: `ReactNode`
+
+`onClose` is called when the dialog closes while it is meant to be open —
+Escape, a click on the backdrop, the close button, a `<form method="dialog">`,
+or `<Activity>` hiding it — and never when you set `isOpen` to `false`
+yourself, so a route-bound dialog that goes back in `onClose` does not go back
+twice. The children stay mounted while the dialog is closed, so an
+uncontrolled field keeps what was typed until the next opening; render them
+under `isOpen` when they should start over. `ref` is the `<dialog>` element.
 
 ### CommandPalette
 
-A command palette: a `Modal` holding a search field and the list of commands it
+A command palette: a modal dialog holding a search field and the list of commands it
 filters. Typing matches each item's `label` and `keywords`, case-insensitively.
 `ArrowDown` / `ArrowUp` move through the matches and wrap around, `Enter` or a
 click runs the item's `onSelect` after closing the palette, and `Escape` closes
 it; focus stays in the search field throughout (the WAI-ARIA combobox, with the
 list always shown). Items that share a `group` are gathered under that heading,
 in the order the group first appears, and `shortcut` keys are drawn with `Kbd`.
-Each opening starts from an empty search. Open and close it like `Modal`
+Each opening starts from an empty search. Open and close it like `Dialog`
 (`isOpen` / `defaultOpen` / `onClose`); a key such as ⌘K / Ctrl+K is the
 application's to wire.
 
@@ -2306,12 +2296,18 @@ Props:
 
 ### Drawer
 
-A side panel. It uses Modal internally.
+A panel that slides in from the left or right edge of the screen, in a
+`<dialog>` like `Dialog`. `title` is drawn as an `h2` heading with a close
+button and names the drawer, and `description`, drawn above the children, is
+the only text it is described by. The body scrolls on its own below the
+heading. `onClose` and the children follow `Dialog`'s rules: it is called only
+when the drawer closes while it is meant to be open, and the children stay
+mounted while it is closed.
 
 ```tsx
 import { Drawer } from '@k8ordo/ui';
 
-<Drawer title="Menu" isOpen={open} onClose={onClose} side="right">
+<Drawer isOpen={open} onClose={() => setOpen(false)} side="left" title="Menu">
   Content
 </Drawer>;
 ```
@@ -2321,8 +2317,10 @@ Props:
 - `title`: `ReactNode` (required)
 - `children`: `ReactNode`
 - `defaultOpen`: `boolean`
+- `description`: `ReactNode`
 - `isOpen`: `boolean`
 - `onClose`: `() => void`
+- `ref`: `Ref<HTMLDialogElement>`
 - `side`: `DrawerSide` (default: `'right'`)
 
 ### Popover
@@ -2892,8 +2890,9 @@ Props:
 A context that shares a portal container with your own `createPortal` calls;
 read it with `usePortalRoot()`. The library's overlays do not read it — they
 open in the top layer (`<dialog>`, the Popover API), and toasts go where
-`ToastProvider`'s `portalRef` points. `Modal` passes its own `<dialog>` as the
-value, so a portal placed through `usePortalRoot()` inside a modal stays in it.
+`ToastProvider`'s `portalRef` points. `Dialog` and `Drawer` pass their own
+`<dialog>` as the value, so a portal placed through `usePortalRoot()` inside
+one stays in it.
 
 ```tsx
 import { PortalRootProvider, usePortalRoot } from '@k8ordo/ui';

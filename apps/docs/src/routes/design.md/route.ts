@@ -283,7 +283,7 @@ font-family: 'Noto Sans JP', 'M PLUS 2', sans-serif;
 | --- | --- |
 | Button / Avatar / IconButton / Badge / Progress | \`--radius-full\`（ピル型） |
 | Input / Textarea / Select / Card / CheckboxCard / RadioCard | \`--radius-xl\` |
-| Alert / Dialog / Modal | \`--radius-lg\` |
+| Alert / Dialog / Drawer | \`--radius-lg\` |
 | Checkbox | \`--radius-md\` |`,
 
     `## エレベーション（シャドウ）
@@ -297,7 +297,7 @@ font-family: 'Noto Sans JP', 'M PLUS 2', sans-serif;
       `\`--shadow-inset-${n}\``,
       `\`${v}\``,
     ]),
-    `利用指針: Card（\`variant="shadow"\`）= \`--shadow-sm\` / Modal・Dialog・Tooltip・Dropdown・ListBox = \`--shadow-md\` / Button = なし / Card（\`variant="outline"\`）= 1px の \`--color-border-mute\` の線。フォーカスの輪も影のトークン（\`--shadow-ring-info\`）で、面の影と重ねるときは輪を先に書く。`,
+    `利用指針: Card（\`variant="shadow"\`）= \`--shadow-sm\` / Dialog・Drawer・Tooltip・Dropdown・ListBox = \`--shadow-md\` / Button = なし / Card（\`variant="outline"\`）= 1px の \`--color-border-mute\` の線。フォーカスの輪も影のトークン（\`--shadow-ring-info\`）で、面の影と重ねるときは輪を先に書く。`,
 
     `## モーション
 
@@ -417,9 +417,8 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 
 ### Overlays
 
-- **Modal** — \`isOpen?\`/\`onClose?\`/\`defaultOpen?\`, \`side: 'center'|'bottom'|'right'|'left'\`（\`ModalSide\`）
-- **Dialog**（compound: \`Root\` / \`Header\` / \`Content\`）
-- **Drawer** — \`title\`, \`isOpen\`, \`onClose\`, \`side: 'left'|'right'\`（\`DrawerSide\`。Modal の \`side\` の部分集合）
+- **Dialog** — \`title\`（h2 の見出しと閉じるボタン）か \`label\`, \`description?\`, \`role?: 'dialog'|'alertdialog'\`, \`isOpen?\`/\`defaultOpen?\`/\`onClose?\`, \`side: 'center'|'bottom'\`（\`DialogSide\`）。onClose は閉じる操作のときだけ呼ばれ、閉じても子は残る
+- **Drawer** — \`title\`, \`description?\`, \`isOpen?\`/\`defaultOpen?\`/\`onClose?\`, \`side: 'left'|'right'\`（\`DrawerSide\`）
 - **Popover**（compound: \`Root\` / \`Trigger\` / \`Content\`、\`placement\`。いつも dialog で、\`Content\` は \`label\` を名前にして面（地・角丸・影）を描く。余白は中身で作る）
 - **Tooltip**（compound: \`Root\` / \`Trigger\` / \`Content\`、\`placement\`）
 - **DropdownMenu**（compound: \`Root\`(\`placement\`) / \`Trigger\`(\`label\`, \`size\`, \`variant\`, \`color\`) / \`IconTrigger\`(\`icon\`, \`label\`, \`size\`, \`variant\`, \`color\`) / \`Content\` / \`Item\`(\`label\` と \`onAction\`、またはリンクなら \`href\`)）
