@@ -30,7 +30,8 @@ pnpm check         # check:write to auto-fix
   schemas (a memory definition: its initial values) and pure functions. The
   live store is created lazily by the first `useAppState`, in a registry keyed
   by `kind + string key` — that is what survives HMR and what
-  `resetStateRegistry()` clears for tests. Nothing in the package touches
+  `resetStateRegistry()` (the `./testing` entry, never the main one) clears
+  for tests. Nothing in the package touches
   `navigation`/`location`/`localStorage`/`sessionStorage`/`document.cookie`/
   `cookieStore` at import time.
 - **A definition brings its own store.** Each `define*State` binds, in
@@ -236,7 +237,7 @@ src/
   store/cookie-store.ts Cookie Store API wiring, change-event sync, in-flight guard
   store/memory-store.ts
   use-app-state.ts     the client hook ('use client'); the store its definition bound
-  testing.ts           mountPageUrl(): the ./testing entry, a router stand-in for tests
+  testing.ts           the ./testing entry: mountPageUrl() (a router stand-in) + resetStateRegistry()
   traversal.test.ts    serves fixtures/traversal with Vite and opens it top-level
 fixtures/
   traversal/           a page on useAppState, for going back

@@ -26,7 +26,7 @@ test('a compact cookie reads back as compact', () => {
   expect(density.parseCookies(cookies).density).toBe('compact');
 });`;
 
-const RESET = `import { resetStateRegistry } from '@k8ordo/state';
+const RESET = `import { resetStateRegistry } from '@k8ordo/state/testing';
 import { afterEach } from 'vitest';
 
 import { density, prefs } from './state';

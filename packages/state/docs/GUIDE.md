@@ -766,6 +766,17 @@ shows the defaults, and the submitted values appear once the page hydrates.
 
 ## Testing
 
+Both helpers come from `@k8ordo/state/testing`, an entry of its own, so
+nothing of them reaches an application's bundle.
+
+```ts
+import { resetStateRegistry } from '@k8ordo/state/testing';
+
+afterEach(() => {
+  resetStateRegistry();
+});
+```
+
 `resetStateRegistry()` clears the provider-less store registry between tests.
 Unmount components first — mounted hooks keep their store through closures.
 Clear stored rows by the definition's `storageKey` (in its own storage area)
@@ -790,5 +801,4 @@ moved — and adds `search` to the params the page already has, in the spelling
 given (a test runner and Storybook keep params of their own there). The
 function it returns is the cleanup: it calls `resetStateRegistry()`, which
 also drops a thinned write still waiting, then puts back the URL and the
-entry state it found. It is not part of the main entry, so nothing of it
-reaches an application's bundle.
+entry state it found.

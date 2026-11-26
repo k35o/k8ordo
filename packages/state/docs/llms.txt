@@ -94,5 +94,6 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   it — rejects them with its error;
   `{ history: 'push' }` exists only on page state and takes effect only when
   a url value changes).
+  `@k8ordo/state/testing` is the entry for tests, kept out of the main one:
   `resetStateRegistry()` clears stores between tests, and `mountPageUrl()`
-  from `@k8ordo/state/testing` stands in for a router there.
+  stands in for a router there.

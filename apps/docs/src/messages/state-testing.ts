@@ -46,8 +46,8 @@ export const resetTitle = message({
 });
 
 export const resetRegistry = message({
-  ja: 'ストアはProviderの下にはなく、モジュールの中の登録表に残ります。`resetStateRegistry()`で登録表を空にしないと、前のテストの状態が次のテストに持ち越されます。',
-  en: 'Stores live in a registry inside the module, not under a Provider. Unless `resetStateRegistry()` empties it, one test’s state carries into the next.',
+  ja: 'ストアはProviderの下にはなく、モジュールの中の登録表に残ります。`resetStateRegistry()`で登録表を空にしないと、前のテストの状態が次のテストに持ち越されます。`resetStateRegistry()`はテスト用の入り口`@k8ordo/state/testing`から読むので、アプリのバンドルには入りません。',
+  en: 'Stores live in a registry inside the module, not under a Provider. Unless `resetStateRegistry()` empties it, one test’s state carries into the next. It comes from `@k8ordo/state/testing`, the entry for tests, so nothing of it reaches the application’s bundle.',
 });
 
 export const resetStored = message({

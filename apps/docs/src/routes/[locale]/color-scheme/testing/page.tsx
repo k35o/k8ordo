@@ -7,7 +7,7 @@ import * as m from '../../../../messages';
 
 const t = m.colorSchemeTesting;
 
-const RESET = `import { resetStateRegistry } from '@k8ordo/state';
+const RESET = `import { resetStateRegistry } from '@k8ordo/state/testing';
 import { beforeEach } from 'vitest';
 
 beforeEach(() => {

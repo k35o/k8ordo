@@ -322,7 +322,7 @@ useAppState(def, keys, options?): [Pick<state, Key>, update]`}
 
       <ApiEntry
         caveats={t.resetCaveats}
-        from={FROM}
+        from={`${FROM}/testing`}
         id="reset-state-registry"
         name="resetStateRegistry"
         signature="resetStateRegistry(): void"
