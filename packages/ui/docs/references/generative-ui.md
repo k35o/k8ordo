@@ -41,6 +41,9 @@ import { renderers } from '@k8ordo/ui/catalog/render';
 - `value`: present on a field. `value.prop` is the prop that carries the value
   the field starts from (`defaultValue`, `defaultChecked`, or `defaultPage`), and
   `value.initial(props)` is what it starts from when nothing is bound to it.
+- `events`: present on a component the user acts on in a way the application
+  should hear about. It maps each event's name to a description for the model.
+  `Button`, `IconButton`, `Card`, and `DropdownMenuItem` have one, `press`.
 
 ```ts
 catalog.TextField;
@@ -52,8 +55,9 @@ catalog.TextField;
 ```
 
 The types follow the table: `CatalogName` is the union of the names,
-`CatalogProps<'Button'>` the props of one component, and `CatalogValueOf<'Slider'>`
-the value of one field (`never` for a component that is not a field).
+`CatalogProps<'Button'>` the props of one component, `CatalogValueOf<'Slider'>`
+the value of one field (`never` for a component that is not a field), and
+`CatalogEventOf<'Card'>` the events of one component (`never` for none).
 
 The key order of every `props` schema is part of the contract. A format with
 positional arguments (OpenUI Lang) maps the arguments back to props by that
@@ -64,13 +68,21 @@ order, so keys are only ever appended.
 `renderers` has the same names as `catalog`. Call one with the props the format
 resolved and the children it drew — one node per child, keyed; `Children.toArray`
 keys them. A field also takes its value and a setter, so the format decides
-where the value lives: in its own state, or in the component's.
+where the value lives: in its own state, or in the component's. A component
+with events takes `on`, the handler of each event the model bound. Leave an
+event out of `on` when the model bound nothing to it: an unbound `Card` is not
+pressable, and an unbound button presses to no effect. A handler may return a
+promise; the button or card is busy until it settles.
 
 ```tsx
 'use client';
 import { renderers } from '@k8ordo/ui/catalog/render';
 
-renderers.Button({ props: { label: 'Save' }, children: [] });
+renderers.Button({
+  props: { label: 'Save' },
+  children: [],
+  on: { press: () => sendToAgent('save') },
+});
 renderers.TextField({
   props: { name: 'title' },
   children: [],
@@ -78,6 +90,10 @@ renderers.TextField({
   setValue,
 });
 ```
+
+`Form` submits nothing, not even on Enter in a field: a submission is the press
+of a `Button` inside it. A `Button` or `Card` with `href` is a link and reports
+no press.
 
 ## Connecting a format
 
@@ -90,6 +106,10 @@ The glue for a format does three things, each by mapping over `catalog`:
 2. **Bind** each field: read the format's state at `value.prop` (json-render's
    `$bindState`, OpenUI's form state by `name`, A2UI's `{"@path": ...}` into
    the data model), starting from `value.initial(props)` when nothing is bound.
+   Bind each of `events` to the format's own action — A2UI's `action` prop,
+   json-render's `on`, an OpenUI action prop — and hand the bound ones to the
+   renderer as `on`. What an action does then (report to the agent, or change
+   the format's own state) is the format's.
 3. **Draw** each component through `renderers`.
 
 Since no step names a component, a component added to `@k8ordo/ui` reaches
@@ -203,7 +223,9 @@ model instead:
   toast.
 - **Overlays** (`Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`,
   `DropdownMenu`) are self-contained widgets too. Each declares its own trigger
-  with `triggerLabel` and handles opening and closing itself.
+  with `triggerLabel` and handles opening and closing itself. The items of a
+  `DropdownMenu` are its children, each a `DropdownMenuItem` with its own
+  `press`, so the menu needs no event of its own to say which item was chosen.
 - **Compound components** (`Tabs`, `Accordion`, `Table`, `Breadcrumb`, …) are
   one entry each, with their parts flattened into data such as
   `tabs: [{ label, content }]`. `Carousel` is one container entry whose

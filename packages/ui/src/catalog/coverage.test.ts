@@ -20,6 +20,10 @@ const RENAMED_IN_CATALOG: ReadonlyMap<string, string> = new Map([
   ['useToast', 'Toast'],
 ]);
 
+const PARTS_IN_CATALOG: ReadonlyMap<string, string> = new Map([
+  ['DropdownMenuItem', 'DropdownMenu'],
+]);
+
 const OBSERVER =
   'コールバックに報告するだけで自分では何も描かない。spec には報告を受け取るコードが無い';
 const CHAT =
@@ -107,14 +111,20 @@ const unaccounted = (): string[] =>
 
 const unreachedEntries = (): string[] => {
   const reached = new Set(exported.map((name) => entryOf(name)));
-  return catalogNames.filter((name) => !reached.has(name)).toSorted();
+  return catalogNames
+    .filter(
+      (name) =>
+        !reached.has(name) &&
+        !exported.includes(PARTS_IN_CATALOG.get(name) ?? ''),
+    )
+    .toSorted();
 };
 
 const staleTableEntries = (): string[] => [
   ...[...RENAMED_IN_CATALOG.keys(), ...LEFT_OUT.keys()].filter(
     (name) => !exported.includes(name),
   ),
-  ...[...RENAMED_IN_CATALOG.values()].filter(
+  ...[...RENAMED_IN_CATALOG.values(), ...PARTS_IN_CATALOG.keys()].filter(
     (name) => !catalogNames.includes(name),
   ),
   ...[...LEFT_OUT.keys()].filter((name) => catalogNames.includes(name)),

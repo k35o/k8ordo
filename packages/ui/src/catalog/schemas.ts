@@ -353,16 +353,16 @@ export const treeProps = z.object({
 type CardIntegrationProps = {
   width?: ComponentProps<typeof Card>['width'];
   variant?: ComponentProps<typeof Card>['variant'];
-  interactive?: ComponentProps<typeof Card>['interactive'];
   // Integration-only: the bare Card has no padding, so `size` drives the
   // generated card's inner padding (sm/md/lg).
   size?: 'sm' | 'md' | 'lg';
+  href?: string;
 };
 export const cardProps = z.object({
   width: z.enum(['full', 'fit']).optional(),
   variant: z.enum(['shadow', 'outline']).optional(),
-  interactive: z.boolean().optional(),
   size: z.enum(['sm', 'md', 'lg']).optional(),
+  href: safeUrl.optional().describe('Makes the whole card a link to this URL'),
 }) satisfies z.ZodType<CardIntegrationProps>;
 
 type AlertIntegrationProps = {
@@ -1017,12 +1017,7 @@ export const formControlProps = z.object({
   invalid: z.boolean().optional(),
 }) satisfies z.ZodType<FormControlIntegrationProps>;
 
-type FormIntegrationProps = { action?: string };
-export const formProps = z.object({
-  // href と同じく `javascript:` 等を弾く必要がある
-  // （`<form action="javascript:...">` も submit 時にスクリプトを実行する）。
-  action: safeUrl.optional().describe('URL the form submits to (optional)'),
-}) satisfies z.ZodType<FormIntegrationProps>;
+export const formProps = z.object({});
 
 // 本体側は isOpen/onClose の命令的 API なので、ここでは triggerLabel +
 // children のみを zod に乗せる。
@@ -1090,17 +1085,15 @@ export const toolbarProps = z.object({
   orientation: z.enum(['horizontal', 'vertical']).optional(),
 }) satisfies z.ZodType<ToolbarIntegrationProps>;
 
-type DropdownMenuIntegrationProps = {
-  triggerLabel: string;
-  items: ReadonlyArray<{ label: string }>;
-};
+type DropdownMenuIntegrationProps = { triggerLabel: string };
 export const dropdownMenuProps = z.object({
   triggerLabel: z.string(),
-  items: z
-    .array(z.object({ label: z.string() }))
-    .min(1)
-    .describe('Menu items'),
 }) satisfies z.ZodType<DropdownMenuIntegrationProps>;
+
+type DropdownMenuItemIntegrationProps = { label: string };
+export const dropdownMenuItemProps = z.object({
+  label: z.string(),
+}) satisfies z.ZodType<DropdownMenuItemIntegrationProps>;
 
 export type ButtonProps = z.infer<typeof buttonProps>;
 export type BadgeProps = z.infer<typeof badgeProps>;
@@ -1158,6 +1151,7 @@ export type DrawerProps = z.infer<typeof drawerProps>;
 export type PopoverProps = z.infer<typeof popoverProps>;
 export type TooltipProps = z.infer<typeof tooltipProps>;
 export type DropdownMenuProps = z.infer<typeof dropdownMenuProps>;
+export type DropdownMenuItemProps = z.infer<typeof dropdownMenuItemProps>;
 export type ToolbarProps = z.infer<typeof toolbarProps>;
 export type ToastProps = z.infer<typeof toastProps>;
 export type ListBoxProps = z.infer<typeof listBoxProps>;

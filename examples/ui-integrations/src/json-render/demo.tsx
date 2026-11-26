@@ -31,10 +31,17 @@ export const jsonRenderSpec = {
     },
     dropdown: {
       type: 'DropdownMenu',
-      props: {
-        triggerLabel: 'メニュー',
-        items: [{ label: '編集' }, { label: '削除' }],
-      },
+      props: { triggerLabel: 'メニュー' },
+      children: ['edit', 'remove'],
+    },
+    edit: {
+      type: 'DropdownMenuItem',
+      props: { label: '編集' },
+      children: [],
+    },
+    remove: {
+      type: 'DropdownMenuItem',
+      props: { label: '削除' },
       children: [],
     },
     toast: {

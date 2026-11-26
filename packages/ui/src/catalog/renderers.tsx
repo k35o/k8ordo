@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useId, useState } from 'react';
-import type { ComponentProps, FC, ReactNode } from 'react';
+import type { ComponentProps, FC, ReactNode, SubmitEvent } from 'react';
 
 import { Button } from '../components/buttons/button';
 import { CopyButton } from '../components/buttons/copy-button';
@@ -95,6 +95,7 @@ import type {
   GridProps,
   DialogProps,
   DrawerProps,
+  DropdownMenuItemProps,
   DropdownMenuProps,
   EmptyStateProps,
   FileFieldProps,
@@ -152,14 +153,18 @@ import styles from './renderers.module.css';
 const u = <T,>(value: T | null | undefined): T | undefined =>
   value ?? undefined;
 
-export function renderButton(props: ButtonProps): ReactNode {
+type Press = (() => void | Promise<void>) | undefined;
+
+export function renderButton(props: ButtonProps, onPress: Press): ReactNode {
   const { label, href } = props;
+  const isLink = href !== undefined && href !== '';
   return (
     <Button
       color={u(props.color)}
       fullWidth={u(props.fullWidth)}
+      onAction={isLink ? undefined : onPress}
       renderItem={
-        href !== undefined && href !== ''
+        isLink
           ? ({ className, children }) => (
               <a className={className} href={href}>
                 {children}
@@ -222,11 +227,16 @@ const CARD_PADDING_CLASS = {
   lg: styles.cardLg,
 } as const satisfies Record<'sm' | 'md' | 'lg', string>;
 
-export function renderCard(props: CardProps, children: ReactNode): ReactNode {
+export function renderCard(
+  props: CardProps,
+  children: ReactNode,
+  onPress: Press,
+): ReactNode {
   return (
     <Card
+      href={props.href === '' ? undefined : props.href}
+      onAction={onPress}
       variant={u(props.variant)}
-      interactive={u(props.interactive)}
       width={u(props.width)}
     >
       <div className={CARD_PADDING_CLASS[props.size ?? 'md']}>{children}</div>
@@ -705,10 +715,18 @@ export function renderStatusIcon(props: StatusIconProps): ReactNode {
   return <AlertIcon size={u(props.size) ?? 'md'} status={props.status} />;
 }
 
-export function renderIconButton(props: IconButtonProps): ReactNode {
+export function renderIconButton(
+  props: IconButtonProps,
+  onPress: Press,
+): ReactNode {
   const IconComponent = iconMap[props.icon];
   return (
-    <IconButton color={u(props.color)} label={props.label} size={u(props.size)}>
+    <IconButton
+      color={u(props.color)}
+      label={props.label}
+      onAction={onPress}
+      size={u(props.size)}
+    >
       <IconComponent size={u(props.size) ?? 'md'} />
     </IconButton>
   );
@@ -946,8 +964,12 @@ export function renderTable(props: TableProps): ReactNode {
   );
 }
 
-export function renderForm(props: FormProps, children: ReactNode): ReactNode {
-  return <Form action={u(props.action)}>{children}</Form>;
+const submitNothing = (event: SubmitEvent<HTMLFormElement>): void => {
+  event.preventDefault();
+};
+
+export function renderForm(_props: FormProps, children: ReactNode): ReactNode {
+  return <Form onSubmit={submitNothing}>{children}</Form>;
 }
 
 const OverlayWidget: FC<{
@@ -1112,22 +1134,29 @@ export function renderToolbar(props: ToolbarProps): ReactNode {
   );
 }
 
-export function renderDropdownMenu(props: DropdownMenuProps): ReactNode {
+export function renderDropdownMenu(
+  props: DropdownMenuProps,
+  children: ReactNode,
+): ReactNode {
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger label={props.triggerLabel} />
-      <DropdownMenu.Content>
-        {props.items.map((item) => (
-          <DropdownMenu.Item
-            key={item.label}
-            label={item.label}
-            onAction={() => {
-              /* no-op: 生成 UI ではローカルメニューのみ */
-            }}
-          />
-        ))}
-      </DropdownMenu.Content>
+      <DropdownMenu.Content>{children}</DropdownMenu.Content>
     </DropdownMenu.Root>
+  );
+}
+
+const chooseNothing = (): void => {};
+
+export function renderDropdownMenuItem(
+  props: DropdownMenuItemProps,
+  onPress: Press,
+): ReactNode {
+  return (
+    <DropdownMenu.Item
+      label={props.label}
+      onAction={onPress ?? chooseNothing}
+    />
   );
 }
 
