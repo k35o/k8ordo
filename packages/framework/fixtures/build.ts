@@ -12,7 +12,9 @@ import { vi } from 'vite-plus/test';
 import { framework } from '../dist/vite.mjs';
 import type { StaticOptions } from '../dist/vite.mjs';
 
-type Options = Omit<StaticOptions, 'mode'>;
+type Options = Partial<Omit<StaticOptions, 'mode'>>;
+
+const SITE = 'https://example.test';
 
 const rootOf = (name: string): string =>
   fileURLToPath(new URL(`./${name}/`, import.meta.url));
@@ -57,7 +59,7 @@ export const failedBuild = async (
           reported.push(message);
         },
       },
-      plugins: [framework({ mode: 'static', ...options })],
+      plugins: [framework({ mode: 'static', site: SITE, ...options })],
     });
     await builder.buildApp();
   } catch (error) {
@@ -86,7 +88,7 @@ export const staticBuild = async (name: string): Promise<string> => {
     root,
     configFile: false,
     logLevel: 'error',
-    plugins: [framework({ mode: 'static' })],
+    plugins: [framework({ mode: 'static', site: SITE })],
   });
   await builder.buildApp();
   return path.join(out, 'client');
@@ -107,7 +109,7 @@ export const compiledBuild = async (
     root,
     configFile: false,
     logLevel: 'error',
-    plugins: [framework({ mode: 'static', reactCompiler: true })],
+    plugins: [framework({ mode: 'static', site: SITE, reactCompiler: true })],
     build: { sourcemap: true },
   });
   await builder.buildApp();
@@ -133,6 +135,6 @@ export const devServer = (
     cacheDir: path.join(rootOf(name), 'node_modules', '.vite'),
     configFile: false,
     logLevel: 'silent',
-    plugins: [framework({ mode })],
+    plugins: [framework(mode === 'static' ? { mode, site: SITE } : { mode })],
     server: { port: 0 },
   });

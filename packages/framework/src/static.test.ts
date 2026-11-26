@@ -152,11 +152,11 @@ const recordingLogger = () => {
 };
 
 const hooks = (
-  options: Omit<StaticOptions, 'mode'> = {},
+  options: Partial<Omit<StaticOptions, 'mode'>> = {},
   resolvedBase = '/',
 ) => {
   const plugin = staticMode(
-    { mode: 'static', ...options },
+    { mode: 'static', site: 'https://example.com', ...options },
     { runtimeDir: RUNTIME_DIR },
   ).find(({ name }) => name === 'k8ordo:static');
   if (plugin === undefined) throw new Error('no k8ordo:static plugin');
@@ -472,7 +472,7 @@ describe('the shells a build writes', () => {
       'static build could not render /posts/:id — see the error above',
     );
     expect(logged).toHaveBeenCalledWith(
-      'k8ordo: http://k8ordo.localhost/posts/!fallback — the shell threw',
+      'k8ordo: https://example.com/posts/!fallback — the shell threw',
     );
     await expect(clientFile('posts/!fallback/index.html')).rejects.toThrow(
       /ENOENT/u,
@@ -680,20 +680,7 @@ describe('a route.ts at a file the build writes itself', () => {
   });
 
   describe('正常系', () => {
-    it('leaves sitemap.xml to a route.ts that writes it, "site" given or not: the application’s own list is the site’s', async () => {
-      await routeFiles(['sitemap.xml/route.ts']);
-      await handlerAnswering(
-        home({ '/sitemap.xml': { body: '<urlset>own</urlset>' } }),
-      );
-      const { build, said } = hooks({ site: 'https://example.com' });
-
-      await build();
-
-      expect(await clientFile('sitemap.xml')).toBe('<urlset>own</urlset>');
-      expect(said.info).toStrictEqual(['k8ordo: wrote 2 routes']);
-    });
-
-    it('writes a route.ts at sitemap.xml as its own file when no "site" is given', async () => {
+    it('leaves sitemap.xml to a route.ts that writes it: the application’s own list is the site’s', async () => {
       await routeFiles(['sitemap.xml/route.ts']);
       await handlerAnswering(
         home({ '/sitemap.xml': { body: '<urlset>own</urlset>' } }),
@@ -704,6 +691,18 @@ describe('a route.ts at a file the build writes itself', () => {
 
       expect(await clientFile('sitemap.xml')).toBe('<urlset>own</urlset>');
       expect(said.info).toStrictEqual(['k8ordo: wrote 2 routes']);
+    });
+
+    it('lists the pages at the origin of site, as URL spells it', async () => {
+      await routeFiles([]);
+      await handlerAnswering(home());
+      const { build } = hooks({ site: 'https://Example.org:443/' });
+
+      await build();
+
+      expect(await clientFile('sitemap.xml')).toContain(
+        '<url><loc>https://example.org/</loc></url>',
+      );
     });
 
     it('writes its sitemap beside a route.ts that writes another file', async () => {
@@ -998,7 +997,7 @@ describe('the _redirects a build writes', () => {
     await build();
 
     await expect(clientFile('_redirects')).rejects.toThrow(/ENOENT/u);
-    expect(said.info).toStrictEqual(['k8ordo: wrote 2 routes']);
+    expect(said.info).toStrictEqual(['k8ordo: wrote 2 routes and sitemap.xml']);
   });
 });
 

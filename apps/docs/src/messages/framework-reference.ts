@@ -62,8 +62,8 @@ export const frameworkReactCompiler = message({
 });
 
 export const frameworkSite = message({
-  ja: 'staticモードだけ。サイトの配信元です（`https://example.com`）。渡すと、ビルドが`sitemap.xml`も書きます。`route.ts`が受け取る`request.url`のoriginにもなります。`sitemap.xml`を書く`route.ts`もあると、ビルドが止まります。',
-  en: 'Static mode only. The origin the site is served from, such as `https://example.com`. With it, the build also writes `sitemap.xml`. It is also the origin of the `request.url` a `route.ts` receives. A `route.ts` that writes `sitemap.xml` as well stops the build.',
+  ja: 'staticモードでは必須。サイトの配信元のoriginで、パスは含めません（`https://example.com`）。ビルドがページと`route.ts`に頼むリクエストのoriginになり、`route.ts`が受け取る`request.url`のoriginもこの値です。ビルドは書いたページをこのoriginで並べた`sitemap.xml`も書きます。`sitemap.xml`を書く`route.ts`があれば、ビルドはそちらを使います。',
+  en: 'Required under static mode. The origin the site is served from, with no path, such as `https://example.com`. Every request the build makes to a page or a `route.ts` is under it, so it is the origin of the `request.url` a `route.ts` receives. The build also writes `sitemap.xml`, listing the pages it wrote at this origin; a `route.ts` that writes `sitemap.xml` is used instead.',
 });
 
 export const frameworkCsp = message({

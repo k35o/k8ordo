@@ -17,7 +17,7 @@ const pluginNames = (options: FrameworkOptions): string[] =>
 
 describe('framework', () => {
   it('writes files in static mode, and nothing it would serve them with', () => {
-    const names = pluginNames({ mode: 'static' });
+    const names = pluginNames({ mode: 'static', site: 'https://example.test' });
     expect(names).toContain('k8ordo:static');
     expect(names).not.toContain('k8ordo:server');
   });
@@ -30,8 +30,12 @@ describe('framework', () => {
 
   it('refuses a key it does not take, naming the ones the mode takes, rather than ignoring it', () => {
     expect(() =>
-      // @ts-expect-error the route files always live in src/routes
-      framework({ mode: 'static', routesDir: 'app/routes' }),
+      framework({
+        mode: 'static',
+        site: 'https://example.test',
+        // @ts-expect-error the route files always live in src/routes
+        routesDir: 'app/routes',
+      }),
     ).toThrow(
       "framework() takes no routesDir — under mode: 'static' it takes mode, reactCompiler, headers, site, csp",
     );
@@ -50,6 +54,73 @@ describe('framework', () => {
     expectTypeOf<
       Exclude<keyof ServerOptions, (typeof TAKEN.server)[number]>
     >().toBeNever();
+  });
+
+  it('refuses static mode without the origin it is served from, rather than asking for its pages under one of its own', () => {
+    expect(() =>
+      // @ts-expect-error a build into files asks for its pages under site
+      framework({ mode: 'static' }),
+    ).toThrow(
+      "mode: 'static' needs site, the origin the site is served from, like 'https://example.com' — and got none",
+    );
+  });
+
+  it.each([
+    ['example.com', 'is not a URL'],
+    ['ftp://example.com', 'is served over ftp:, not http: or https:'],
+    [
+      'https://example.com/docs',
+      "has a path, /docs — where under the origin the site sits is Vite's base",
+    ],
+    ['https://example.com/?lang=ja', 'has a query, ?lang=ja'],
+    ['https://example.com/#top', 'has a fragment, #top'],
+  ])('says what keeps %s from being an origin', (site, reason) => {
+    expect(() => framework({ mode: 'static', site })).toThrow(
+      `mode: 'static' needs site, the origin the site is served from, like 'https://example.com' — and '${site}' ${reason}`,
+    );
+  });
+
+  it.each([
+    'https://user:secret@example.com',
+    'https://user@example.com/docs',
+    'ftp://user:secret@example.com',
+    'user:secret@example.com',
+    'https://user:secret@exa mple.com',
+  ])(
+    'never writes a site that may carry a username or a password, nor any part of it, into the error: %s',
+    (site) => {
+      expect(() => framework({ mode: 'static', site })).toThrow(
+        new Error(
+          "mode: 'static' needs site, the origin the site is served from, like 'https://example.com' — and the site has an @, which no origin has (a username or a password comes before one, so the value is left out)",
+        ),
+      );
+    },
+  );
+
+  it.each([
+    [42, 'a number'],
+    [null, 'null'],
+    [['https://example.com'], 'an array'],
+    [new URL('https://example.com'), 'an object'],
+  ])('says what a site that is not a string is: %o', (site, kind) => {
+    expect(() =>
+      // @ts-expect-error site is the origin as a string
+      framework({ mode: 'static', site }),
+    ).toThrow(
+      `mode: 'static' needs site, the origin the site is served from, like 'https://example.com' — and the value is not a string but ${kind}`,
+    );
+  });
+
+  it('takes an origin however URL respells it', () => {
+    for (const site of [
+      'https://example.com/',
+      'https://Example.com',
+      'https://example.com:443',
+      'http://localhost:4173',
+      'https://例え.jp',
+    ]) {
+      expect(pluginNames({ mode: 'static', site })).toContain('k8ordo:static');
+    }
   });
 
   it('takes site and csp only in static mode, where there are files to describe', () => {
@@ -116,14 +187,14 @@ const peerOf = (manifest: Manifest, name: string): unknown => ({
 });
 
 describe('reactCompiler', () => {
-  it.each(['static', 'server'] as const)(
-    'turns React Compiler on under mode: %s',
-    (mode) => {
-      expect(pluginNames({ mode, reactCompiler: true })).toContain(
-        'vite:react-compiler',
-      );
-    },
-  );
+  it.each([
+    { mode: 'static', site: 'https://example.test' },
+    { mode: 'server' },
+  ] as const)('turns React Compiler on under mode: $mode', (options) => {
+    expect(pluginNames({ ...options, reactCompiler: true })).toContain(
+      'vite:react-compiler',
+    );
+  });
 
   it('declares oxc-transform-react with the range @vitejs/plugin-react asks', async () => {
     const ours = await manifestAt(new URL('../package.json', import.meta.url));

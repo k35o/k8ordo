@@ -260,7 +260,10 @@ import mdx from '@mdx-js/rollup';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [{ enforce: 'pre', ...mdx() }, framework({ mode: 'static' })],
+  plugins: [
+    { enforce: 'pre', ...mdx() },
+    framework({ mode: 'static', site: 'https://example.com' }),
+  ],
 });`;
 
 const MDX_PAGE = `import { notFound } from '@k8ordo/framework';
@@ -673,7 +676,7 @@ export default function FrameworkRoutingPage() {
         <CodeBlock
           code={MDX_CONFIG}
           lang="ts"
-          marks={{ 6: 'highlight' }}
+          marks={{ 7: 'highlight' }}
           title="vite.config.ts"
         />
         <p>

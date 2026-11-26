@@ -24,7 +24,7 @@ dist/
         index.rsc
     404.html              not-found.tsx, rendered
     client-files.json     what each page loads beyond its payload, for a navigation to link ahead
-    sitemap.xml           every page above, when `site` is set
+    sitemap.xml           every page above, at `site`'s origin
     _redirects            how a host reaches the shells, when there are any
     assets/…              the client bundle
   rsc/  ssr/              the machinery that produced the above
@@ -628,7 +628,7 @@ const acceptsMarkdown = [
 
 export default defineConfig({
   plugins: [
-    framework({ mode: 'static' }),
+    framework({ mode: 'static', site: 'https://example.com' }),
     vercel({
       beforeFiles: [
         {
@@ -743,6 +743,7 @@ export default defineConfig({
   plugins: [
     framework({
       mode: 'static',
+      site: 'https://example.com',
       headers: {
         'X-Content-Type-Options': 'nosniff',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
@@ -812,7 +813,7 @@ An application served below the root of its origin — `https://example.com/docs
 // vite.config.ts
 export default defineConfig({
   base: '/docs/',
-  plugins: [framework({ mode: 'static' })],
+  plugins: [framework({ mode: 'static', site: 'https://example.com' })],
 });
 ```
 

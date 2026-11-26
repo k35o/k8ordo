@@ -55,7 +55,7 @@ export default defineConfig({
   plugins: [
     framework({
       mode: 'static',
-      site: 'https://example.com', // writes a sitemap.xml too
+      site: 'https://example.com', // the origin it is served from: its URLs, sitemap.xml
     }),
   ],
 });

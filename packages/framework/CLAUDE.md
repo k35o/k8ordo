@@ -84,12 +84,23 @@ pnpm check         # check:write to auto-fix
   and `serve` loads the same handler compiled for `mode: 'server'`. If a page
   renders differently under the two modes, something has leaked.
 - **`site` and `csp` are static mode's options, in the type and when the
-  config loads.** `FrameworkOptions` is
+  config loads, and `site` is required there.** `FrameworkOptions` is
   `StaticOptions | ServerOptions`, discriminated by `mode`, which has no
   default. `framework()` checks the same at run time, because a
-  `vite.config.js` is never type-checked and neither mistake fails on its
-  own: a mode other than `'static'` would build no files, and a `csp` under
-  `mode: 'server'` would be a policy nobody serves. Any other key the mode
+  `vite.config.js` is never type-checked and none of the mistakes fails on
+  its own: a mode other than `'static'` would build no files, a `csp` under
+  `mode: 'server'` would be a policy nobody serves, and a static build
+  with no `site`, or one with a path or no scheme, would ask for its pages
+  under an origin nobody serves them from. `site` has to be an origin, read
+  as a URL rather than compared as text (`notAnOrigin`: `http:` or
+  `https:`, pathname `/`, no query, fragment or credentials, and the error
+  names which one fails — never quoting a value with an `@`, nor any part
+  of it, since a username or a password comes before one and `URL` does
+  not read every such spelling as one (`user:secret@example.com` is a
+  `user:` scheme); that is checked first, on the string itself, and the
+  kind of a value that is not a string is named), so `https://Example.com:443` is taken; past the check,
+  everything uses `new URL(site).origin`.
+  Any other key the mode
   does not take throws too, naming the keys it does — a key spelt wrong, or
   one left over from an option that is gone, would otherwise build with it
   ignored — so no option is removed with a migration message of its own.
@@ -321,7 +332,7 @@ pnpm check         # check:write to auto-fix
   page saying `notFound()`; the handler marks the second with
   `NOT_FOUND_HEADER`, and the build names each kind in its own message.
 - **Under static mode a route.ts is a file.** The build calls its `GET` once
-  per pathname (with `site`'s origin in the URL when given) and writes the
+  per pathname (under `site`'s origin, as every page) and writes the
   body at the pathname — `answersOf` asks the declared patterns once, in the
   matcher's order, which of them answers each pathname. Anything but a
   `200` stops the build. It is not a page: no `index.rsc`, not in the
@@ -382,10 +393,14 @@ pnpm check         # check:write to auto-fix
   computation, `src/static.test.ts` the wiring and the refusal, and
   `examples/static-basic`'s `build.test.ts` the built list and the site
   that reads it.
-- **`site` is the only reason the build writes a sitemap, and a `route.ts`
-  at `sitemap.xml` is the reason it does not.** Without the origin a
-  sitemap would list relative URLs, which is not a sitemap; with it every
-  page the build wrote is listed, redirects and the not-found excluded.
+- **One origin for every request the build makes and for the sitemap, and
+  a `route.ts` at `sitemap.xml` is the reason the build writes none.**
+  `staticMode` reads `new URL(site).origin` once: `Render.urlFor` puts it
+  in front of every pathname the handler is asked for, so a `route.ts`
+  building absolute URLs from `request.url` builds them at `site`, and the
+  sitemap lists every page the build wrote at the same origin, redirects
+  and the not-found excluded. There is no origin of the framework's own: a
+  sentinel would land unseen in every file that writes an absolute URL.
   Where a `route.ts` answers `/sitemap.xml` (`SITEMAP_PATHNAME`, asked of
   `answersOf`, so one a `[file]/route.ts` writes counts too) the file is the
   application's — its own `lastmod`, its own order — and the build writes

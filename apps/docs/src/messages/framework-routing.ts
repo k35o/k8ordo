@@ -443,8 +443,8 @@ export const routeStaticTitle = message({
 });
 
 export const routeStatic = message({
-  ja: 'ビルドがURLごとに`GET`を1回呼び、返った`Response`をそのURLのファイルとして書き出します。`feed.xml/route.ts`なら`dist/client/feed.xml`です。パラメータを持つ`route.ts`は、ページと同じく上の`paths.ts`が返した値ごとに書き出されます。`framework()`に`site`を渡していれば、`request.url`のoriginはその値です。',
-  en: 'The build calls `GET` once per URL and writes the `Response` it returns as the file at that URL: `feed.xml/route.ts` becomes `dist/client/feed.xml`. A `route.ts` with parameters is written once per value the `paths.ts` files above it return, as a page is. With `site` given to `framework()`, the origin of `request.url` is that value.',
+  ja: 'ビルドがURLごとに`GET`を1回呼び、返った`Response`をそのURLのファイルとして書き出します。`feed.xml/route.ts`なら`dist/client/feed.xml`です。パラメータを持つ`route.ts`は、ページと同じく上の`paths.ts`が返した値ごとに書き出されます。`request.url`のoriginは、`framework()`に渡した`site`です。',
+  en: 'The build calls `GET` once per URL and writes the `Response` it returns as the file at that URL: `feed.xml/route.ts` becomes `dist/client/feed.xml`. A `route.ts` with parameters is written once per value the `paths.ts` files above it return, as a page is. The origin of `request.url` is the `site` given to `framework()`.',
 });
 
 export const routeRefusedLead = message({

@@ -70,7 +70,10 @@ import { vercel } from '@k8ordo/framework/vercel';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [framework({ mode: 'static' }), vercel()],
+  plugins: [
+    framework({ mode: 'static', site: 'https://example.com' }),
+    vercel(),
+  ],
 });`;
 
 const VERCEL_ROUTES = `import { framework } from '@k8ordo/framework/vite';
@@ -83,7 +86,7 @@ const acceptsMarkdown = [
 
 export default defineConfig({
   plugins: [
-    framework({ mode: 'static' }),
+    framework({ mode: 'static', site: 'https://example.com' }),
     vercel({
       beforeFiles: [
         {
@@ -208,6 +211,7 @@ export default defineConfig({
   plugins: [
     framework({
       mode: 'static',
+      site: 'https://example.com',
       headers: {
         'X-Content-Type-Options': 'nosniff',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
@@ -223,7 +227,7 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   base: '/docs/',
-  plugins: [framework({ mode: 'static' })],
+  plugins: [framework({ mode: 'static', site: 'https://example.com' })],
 });`;
 
 const Items = ({ items }: { items: readonly Message[] }) => (
@@ -296,7 +300,7 @@ export default function FrameworkDeployPage() {
           <CodeBlock
             code={SITE}
             lang="ts"
-            marks={{ 9: 'highlight' }}
+            marks={{ 8: 'highlight' }}
             title="vite.config.ts"
           />
           <CodeBlock
@@ -308,7 +312,7 @@ export default function FrameworkDeployPage() {
             <Rich>{t.sitemapWrite()}</Rich>
           </p>
           <p>
-            <Rich>{t.sitemapNone()}</Rich>
+            <Rich>{t.sitemapSite()}</Rich>
           </p>
         </DocSubsection>
         <DocSubsection id="redirects" title={t.redirectsTitle}>
@@ -539,10 +543,10 @@ export default function FrameworkDeployPage() {
           code={HEADERS}
           lang="ts"
           marks={{
-            8: 'highlight',
             9: 'highlight',
             10: 'highlight',
             11: 'highlight',
+            12: 'highlight',
           }}
           title="vite.config.ts"
         />

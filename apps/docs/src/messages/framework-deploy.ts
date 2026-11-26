@@ -47,8 +47,8 @@ export const outputList = [
     en: '`client-files.json`: the files each page loads beyond its payload, which a client navigation starts fetching beside the payload.',
   }),
   message({
-    ja: '`sitemap.xml`：`site`を渡したときだけ書かれます。',
-    en: '`sitemap.xml`: written only when `site` is given.',
+    ja: '`sitemap.xml`：書き出したページを`site`のoriginで並べたものです。',
+    en: '`sitemap.xml`: every page written, listed at the origin of `site`.',
   }),
   message({
     ja: '`assets/`：クライアントのスクリプトとスタイルです。',
@@ -142,13 +142,13 @@ export const sitemapTitle = message({
 });
 
 export const sitemapWrite = message({
-  ja: '`framework()`の`site`にサイトの配信元を渡すと、ビルドは書いたページをすべて並べた`sitemap.xml`も書きます。リダイレクトと`route.ts`の応答、`404.html`はページではないので載りません。`sitemap.xml`を自分の`route.ts`で書くと、ビルドは`sitemap.xml`を書かず、そのファイルを使います。`site`は渡したままで構いません。',
-  en: 'Give `site` the origin the site is served from, and the build also writes `sitemap.xml`, listing every page it wrote. Redirects, `route.ts` responses and `404.html` are not pages, and are left out. Write `sitemap.xml` from a `route.ts` of your own, and the build writes none and uses that file. `site` can stay.',
+  ja: 'ビルドは、書いたページをすべて`framework()`の`site`のoriginで並べた`sitemap.xml`も書きます。リダイレクトと`route.ts`の応答、`404.html`はページではないので載りません。`sitemap.xml`を自分の`route.ts`で書くと、ビルドは`sitemap.xml`を書かず、そのファイルを使います。',
+  en: 'The build also writes `sitemap.xml`, listing every page it wrote at the origin of the `site` given to `framework()`. Redirects, `route.ts` responses and `404.html` are not pages, and are left out. Write `sitemap.xml` from a `route.ts` of your own, and the build writes none and uses that file.',
 });
 
-export const sitemapNone = message({
-  ja: '`site`を渡さなければ、`sitemap.xml`は書かれません。',
-  en: 'Without `site`, no `sitemap.xml` is written.',
+export const sitemapSite = message({
+  ja: "`site`はstaticモードでは必須で、パスを含まないoriginを渡します（`https://example.com`）。ビルドがページと`route.ts`に頼むリクエストのoriginにもなります。無いときや、パスを含むときは、設定を読んだ時点で`mode: 'static' needs site, …`のエラーになります。",
+  en: "`site` is required under static mode, and is an origin with no path (`https://example.com`). It is also the origin of every request the build makes to the pages and to a `route.ts`. Without it, or with a path in it, the config fails as it loads with `mode: 'static' needs site, …`.",
 });
 
 export const redirectsTitle = message({

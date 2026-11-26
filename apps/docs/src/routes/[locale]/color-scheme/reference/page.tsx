@@ -43,6 +43,7 @@ const STATE_EXAMPLE = `const [{ preference }] = useAppState(colorSchemeState);
 
 const HASH_EXAMPLE = `framework({
   mode: 'static',
+  site: 'https://example.com',
   csp: {
     'script-src': ["'self'", await colorSchemeScriptHash()],
   },

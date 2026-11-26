@@ -95,6 +95,7 @@ export default defineConfig({
   plugins: [
     framework({
       mode: 'static',
+      site: 'https://example.com',
       csp: {
         'script-src': ["'self'", await colorSchemeScriptHash()],
         'object-src': ["'none'"],

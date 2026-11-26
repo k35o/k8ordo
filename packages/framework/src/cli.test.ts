@@ -77,7 +77,9 @@ describe('k8ordo generate', { timeout: 30_000 }, () => {
     const root = await app(
       `import { framework } from '@k8ordo/framework/vite';
 
-export default { plugins: [framework({ mode: 'static' })] };
+export default {
+  plugins: [framework({ mode: 'static', site: 'https://example.test' })],
+};
 `,
       {
         'src/routes/layout.tsx': ROUTE,
@@ -127,7 +129,9 @@ export default { plugins: [framework({ mode: 'server' })] };
     const root = await app(
       `import { framework } from '@k8ordo/framework/vite';
 
-export default { plugins: [framework({ mode: 'static' })] };
+export default {
+  plugins: [framework({ mode: 'static', site: 'https://example.test' })],
+};
 `,
       {
         'src/routes/page.tsx': ROUTE,

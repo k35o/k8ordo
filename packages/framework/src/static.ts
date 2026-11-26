@@ -96,13 +96,14 @@ export type StaticOptions = EngineOptions & {
    */
   readonly mode: 'static';
   /**
-   * The origin the site is served from — `https://example.com`. With it the
-   * build also writes `sitemap.xml`, listing every page it rendered at its
-   * URL, Vite's `base` included; without it, no sitemap, because a sitemap of
-   * relative URLs is not one. A `route.ts` that writes `sitemap.xml` is the
-   * application's own list, and the build leaves the file to it.
+   * The origin the site is served from — `https://example.com`, with no
+   * path. The build asks for every page and `route.ts` under it, so it is
+   * the origin of the `request.url` a `route.ts` reads, and it writes
+   * `sitemap.xml`, listing every page it rendered at its URL, Vite's `base`
+   * included. A `route.ts` that writes `sitemap.xml` is the application's
+   * own list, and the build leaves the file to it.
    */
-  readonly site?: string;
+  readonly site: string;
   /**
    * The `Content-Security-Policy` every page carries, as directives and
    * their sources. The framework decides no policy: it writes this one into
@@ -182,8 +183,6 @@ const filesBelow = async (dir: string): Promise<string[]> =>
 
 const messageOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
-
-const ORIGIN = 'http://k8ordo.localhost';
 
 const WANTS_SERVER = "this application wants mode: 'server'";
 
@@ -277,6 +276,7 @@ export const staticMode = (
   host: { readonly runtimeDir: string },
 ): Plugin[] => {
   const { csp } = options;
+  const { origin } = new URL(options.site);
   const unwritablePolicy = csp === undefined ? [] : policyProblems(csp);
   if (unwritablePolicy.length > 0) {
     throw new Error(
@@ -406,7 +406,7 @@ export const staticMode = (
       return false;
     }
     // RSC プラグインと同じく originalUrl を読む。base はそちらに残っている
-    const url = new URL(request.originalUrl ?? request.url ?? '/', ORIGIN);
+    const url = new URL(request.originalUrl ?? request.url ?? '/', origin);
     const own = withoutBase(url.pathname, base);
     if (own === null) {
       return false;
@@ -604,7 +604,7 @@ export const staticMode = (
         request: Connect.IncomingMessage,
         response: ServerResponse,
       ): Promise<boolean> => {
-        const url = new URL(`${ORIGIN}${request.url ?? '/'}`);
+        const url = new URL(`${origin}${request.url ?? '/'}`);
         if (withoutBase(url.pathname, config.base) === null) return false;
         if (request.method !== 'GET' && request.method !== 'HEAD') {
           response.writeHead(405, { allow: 'GET, HEAD' }).end();
@@ -758,8 +758,6 @@ export const staticMode = (
 
         // outDir はすでに絶対パスのことがあるので resolve で受ける
         const clientDir = path.resolve(root, client.build.outDir);
-        const origin =
-          options.site === undefined ? ORIGIN : new URL(options.site).origin;
         const render: Render = {
           handler: built.default,
           payloadOf: built.payloadOf,
@@ -804,14 +802,11 @@ export const staticMode = (
             : [],
         );
         // アプリが route.ts で書いた sitemap.xml は、そのサイトの一覧。上書きしない
-        const listed =
-          answers.get(SITEMAP_PATHNAME)?.kind === 'route'
-            ? undefined
-            : options.site;
-        if (listed !== undefined) {
+        const listed = answers.get(SITEMAP_PATHNAME)?.kind !== 'route';
+        if (listed) {
           await writeSitemap(
             clientDir,
-            listed,
+            origin,
             plan.paths
               .filter((pathname) => !notPages.includes(pathname))
               .map((pathname) => withBase(pathname, base)),
@@ -856,7 +851,7 @@ export const staticMode = (
         builder.config.logger.info(
           `k8ordo: wrote ${summaryOf(plan, {
             notFound: notFoundAt !== null,
-            sitemap: listed !== undefined,
+            sitemap: listed,
           })}`,
         );
       },
@@ -1200,12 +1195,12 @@ const writeClientFiles = async (
 
 const writeSitemap = async (
   clientDir: string,
-  site: string,
+  origin: string,
   pathnames: readonly string[],
 ): Promise<void> => {
   await writeFile(
     path.join(clientDir, 'sitemap.xml'),
-    sitemap(site, pathnames),
+    sitemap(origin, pathnames),
   );
 };
 

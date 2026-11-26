@@ -35,6 +35,7 @@ misplaced one fails either build.
 
 Towards `mode: 'static'`:
 
+- add `site`, the origin the site is served from,
 - give every parameter's directory a `paths.ts` that returns its values —
   and, for values the build cannot know, put a `fallback.tsx` beside the
   page
@@ -133,7 +134,9 @@ exception, and puts the framework in `dependencies`
 import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
 
-export default defineConfig({ plugins: [framework({ mode: 'static' })] });
+export default defineConfig({
+  plugins: [framework({ mode: 'static', site: 'https://example.com' })],
+});
 // or framework({ mode: 'server' })
 ```
 
@@ -313,12 +316,15 @@ client component renders on the server, are left as written.
 Two more describe files, so only `mode: 'static'` takes them — passing
 them with `mode: 'server'` is a type error:
 
-- `site` — the origin the site is served from, `https://example.com`. With
-  it the build also writes `sitemap.xml`, listing every page it rendered;
-  without it there is no sitemap, because a sitemap of relative URLs is not
-  one. A `route.ts` that writes `sitemap.xml` is the application's own
-  list, and the build leaves the file to it
-  ([Routing](references/routing.md#under-static-mode)).
+- `site`, required — the origin the site is served from,
+  `https://example.com`, with no path (Vite's `base` says where under it).
+  The build asks for every page and `route.ts` under it, so it is the
+  origin of the `request.url` a `route.ts` reads, and writes
+  `sitemap.xml`, listing every page it rendered at that origin. A
+  `route.ts` that writes `sitemap.xml` is the application's own list, and
+  the build leaves the file to it
+  ([Routing](references/routing.md#under-static-mode)). A value that is not
+  an origin stops the config as it loads.
 - `csp` — the Content-Security-Policy each page carries
   ([Content Security Policy](references/csp.md#static-mode-hashes-in-a-meta)).
 

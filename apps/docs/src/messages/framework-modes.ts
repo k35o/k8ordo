@@ -109,8 +109,8 @@ export const switchOptions = message({
 });
 
 export const switchToStatic = message({
-  ja: 'staticモードへ移るときは、パラメータのディレクトリに`paths.ts`を置いて値を返すか、ページの横に`fallback.tsx`を置きます。下の拒まれる書き方と、ページの`request`を読むコードも消します。',
-  en: 'When moving to static mode, give each parameter’s directory a `paths.ts` that returns its values, or give the page a `fallback.tsx`. Remove the refused code below too, and any read of a page’s `request`.',
+  ja: 'staticモードへ移るときは、`site`にサイトの配信元を渡し、パラメータのディレクトリに`paths.ts`を置いて値を返すか、ページの横に`fallback.tsx`を置きます。下の拒まれる書き方と、ページの`request`を読むコードも消します。',
+  en: 'When moving to static mode, give `site` the origin the site is served from, and give each parameter’s directory a `paths.ts` that returns its values, or give the page a `fallback.tsx`. Remove the refused code below too, and any read of a page’s `request`.',
 });
 
 export const switchDeploy = message({
