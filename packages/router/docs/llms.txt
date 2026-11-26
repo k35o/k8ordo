@@ -71,7 +71,10 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   answer whether that pattern — or, with a trailing `/*`, anything strictly
   below it — is the pathname showing, with its params, table-free, so a
   sidebar can ask which section is open under the framework too, and
-  `{ inclusive: true }` on either counts a `/*` pattern's own index in;
+  `{ inclusive: true }` on either counts a `/*` pattern's own index in —
+  `matchPath` sits in a module with no directive, so a Server Component (a
+  framework layout, with its `pathname` prop) calls it, while `useMatch` is
+  for a client; never compare `pathname === href(…)` (the base differs);
   `normalizePathname(pathname)` is the router's own trailing-slash rule;
   under Vite's `base` (`import.meta.env.BASE_URL`, e.g. `/docs/`) `href`
   puts it in front of every link (so `href` returns a `string`

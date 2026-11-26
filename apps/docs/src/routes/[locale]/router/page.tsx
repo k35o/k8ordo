@@ -17,11 +17,12 @@ const HERO_LINK = `<a href={href('/products/:id', { id: product.id })}>
 </a>`;
 
 const CLAIM_ANCHOR = `export function ProductsLink({ children }: PropsWithChildren) {
-  const current = useMatch('/products/*', { inclusive: true });
+  const onProducts = useMatch('/products');
+  const inProducts = useMatch('/products/*', { inclusive: true });
 
   return (
     <a
-      aria-current={current ? 'page' : undefined}
+      aria-current={onProducts ? 'page' : inProducts ? 'true' : undefined}
       href={href('/products')}
     >
       {children}

@@ -25,9 +25,13 @@ const MATCH = `import { useMatch } from '@k8ordo/router';
 import { href } from '../links';
 
 export function DocsLink() {
-  const inDocs = useMatch('/:locale/docs/*') !== null;
+  const onDocs = useMatch('/:locale/docs') !== null;
+  const inDocs = useMatch('/:locale/docs/*', { inclusive: true }) !== null;
   return (
-    <a aria-current={inDocs ? 'page' : undefined} href={href('/:locale/docs')}>
+    <a
+      aria-current={onDocs ? 'page' : inDocs ? 'true' : undefined}
+      href={href('/:locale/docs')}
+    >
       Docs
     </a>
   );
@@ -73,7 +77,7 @@ export default function RouterBindParamsPage() {
         <CodeBlock
           code={MATCH}
           lang="tsx"
-          marks={{ 6: 'highlight' }}
+          marks={{ 6: 'highlight', 7: 'highlight' }}
           title="src/components/docs-link.tsx"
         />
         <p>

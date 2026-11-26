@@ -102,6 +102,43 @@ export default function PostLayout({
 The generated table checks those props against the pattern at the import,
 as it checks every route file's.
 
+**A layout marks the current link with `matchPath`.** It receives `pathname`
+in the table's terms, and `matchPath` is a pure function a Server Component
+calls, so the navigation renders on the server with its `aria-current`
+already right. `aria-current="page"` goes only on the link whose own URL is
+the page on screen, an exact match; a link to a section the page is inside
+gets `aria-current="true"`, an inclusive match:
+
+```tsx
+// src/routes/layout.tsx
+import { href, matchPath } from '@k8ordo/framework';
+import type { LayoutProps } from '@k8ordo/framework';
+
+export default function RootLayout({ children, pathname }: LayoutProps<'/'>) {
+  const onProducts = matchPath('/products', pathname) !== null;
+  const inProducts =
+    matchPath('/products/*', pathname, { inclusive: true }) !== null;
+  return (
+    <>
+      <nav>
+        <a
+          aria-current={onProducts ? 'page' : inProducts ? 'true' : undefined}
+          href={href('/products')}
+        >
+          Products
+        </a>
+      </nav>
+      {children}
+    </>
+  );
+}
+```
+
+A Client Component asks `useMatch('/products')` and
+`useMatch('/products/*', { inclusive: true })` instead. Never compare `pathname === href(…)`: `pathname` is in the table's
+terms and `href` returns the URL with Vite's `base` in front, so under a base
+the two never agree.
+
 ## How a page is sent
 
 **Each page loads its own.** `page.tsx`, `not-found.tsx`, `route.ts` and

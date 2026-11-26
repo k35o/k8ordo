@@ -233,6 +233,13 @@ pnpm check         # check:write to auto-fix
   `usePathname`, which is why it works under the framework where `useRoute`
   cannot; `/*` on a table pattern is the one extension of the grammar it
   accepts, meaning "and everything below".
+- **`matchPath` is server-safe.** `match.ts` carries no directive, so a
+  Server Component — a framework layout, holding `pathname` — calls
+  `matchPath` itself; `useMatch` beside it still needs a client, since the
+  `usePathname` it calls lives in `location.tsx`, which is `'use client'`.
+  `match.test.ts` reads `dist/match.mjs` to hold it. Never add the
+  directive back to `match.ts`: in an RSC environment every export of a
+  client module is a reference, and calling one from the server throws.
 - **Unmatched pathnames are not intercepted.** A real 404 is the server's.
 - **Reload, POST, download and hash are not ours.** `isOurs` says no before
   the table is consulted — and to anything the platform reports it cannot

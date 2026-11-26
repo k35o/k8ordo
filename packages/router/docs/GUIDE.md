@@ -247,6 +247,14 @@ matchPath('/products/:id', pathname); // the same, pure, for a pathname in hand
 useMatch('/files/:path+'); // { path: ['a', 'b'] } on /files/a/b
 ```
 
+**The current link is asked by pattern, never by URL.** In a Server
+Component — a framework layout, which receives `pathname` — ask
+`matchPath(pattern, pathname)`: it is a pure function in a module with no
+directive, so the server calls it itself. In a Client Component, ask
+`useMatch(pattern)`. Never compare `pathname === href(…)`: a pathname is in
+the table's terms and `href` returns the URL with Vite's `base` in front, so
+under a base the two never agree.
+
 `useMatch` takes a pattern from the table, or a table pattern followed by
 `/*` to mean "everything below it" — what a sidebar asks when it wants to
 know which section of the site is open. The pattern's own page is not below

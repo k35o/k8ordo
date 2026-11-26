@@ -57,9 +57,13 @@ const ROUTER_API = `'use client';
 import { href, useMatch } from '@k8ordo/framework';
 
 export function ProductsLink() {
-  const showing = useMatch('/products/*', { inclusive: true }) !== null;
+  const onProducts = useMatch('/products') !== null;
+  const inProducts = useMatch('/products/*', { inclusive: true }) !== null;
   return (
-    <a aria-current={showing ? 'page' : undefined} href={href('/products')}>
+    <a
+      aria-current={onProducts ? 'page' : inProducts ? 'true' : undefined}
+      href={href('/products')}
+    >
       Products
     </a>
   );
@@ -392,7 +396,12 @@ export default function FrameworkRoutingPage() {
         <CodeBlock
           code={ROUTER_API}
           lang="tsx"
-          marks={{ 3: 'highlight', 6: 'highlight', 8: 'highlight' }}
+          marks={{
+            3: 'highlight',
+            6: 'highlight',
+            7: 'highlight',
+            11: 'highlight',
+          }}
           title="src/components/products-link.tsx"
         />
         <p>
