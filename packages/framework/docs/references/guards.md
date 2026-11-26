@@ -25,7 +25,7 @@ const guard: Guard<'/admin'> = () => {
 export default guard;
 ```
 
-It receives `{ request, params }` — the `Request` as it arrived, and the
+It receives `{ request, params }` — the `Request` for the page, and the
 params of the pattern its directory puts it under, as the strings the URL
 carried (a `[...name]` directory's as an array of them): a guard runs above
 every layout, where no schema has typed them.
@@ -74,8 +74,9 @@ rewritten: a page streams, and its headers are on the wire before its body is
 written, so a guard decides before the page starts, never after.
 
 **What a guard covers.** A guard runs before every URL below its directory —
-each page, its payload for a client navigation, a `HEAD`, a Server Action
-posted to it, a `route.ts`, and a `not-found.tsx` below it; the root's also
+each page, its payload for a client navigation (handed to the guard under
+the page's URL, search included, so `new URL(request.url).pathname` is the
+page's either way), a `HEAD`, a Server Action posted to it, a `route.ts`, and a `not-found.tsx` below it; the root's also
 runs for a URL nothing answers. A `redirect.ts` is answered before any guard
 runs: the URL it answers has no page to guard, and the pages below its
 directory are guarded as usual. A guard does not protect a Server Action as

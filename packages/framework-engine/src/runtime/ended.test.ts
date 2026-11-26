@@ -57,6 +57,15 @@ describe('a guard that ends the request, answered by the built handler', () => {
   });
 });
 
+describe('the request a guard is handed', () => {
+  it('is the page’s, its search kept, for a client navigation’s payload request too', async () => {
+    const document = await answer('/seen?from=x');
+    const payload = await answer('/seen/index.rsc?from=x');
+    expect(document.headers.get('x-guard-saw')).toBe('/seen?from=x');
+    expect(payload.headers.get('x-guard-saw')).toBe('/seen?from=x');
+  });
+});
+
 describe('a route.ts that ends the request, answered by the built handler', () => {
   it('answers redirect() with a 303 to its URL', async () => {
     const response = await answer('/api/old');

@@ -481,7 +481,10 @@ const respond = async (request: Request): Promise<Response> => {
     leaf !== undefined &&
     routeModules[match.pattern] !== undefined
       ? await answerRoute(request, match, parsed, leaf, wantsPayload)
-      : await refusedBeforePage(request, url, found);
+      : await refusedBeforePage(
+          wantsPayload ? pageRequestOf(request, url, pathname) : request,
+          found,
+        );
   if (ended instanceof Response) return ended;
   const disowned = ended === SAID_NOT_FOUND;
 
@@ -724,15 +727,22 @@ const answerRoute = async (
   );
 };
 
+// guard は URL からページを判断し、戻り先を組む。クライアント遷移のペイロード
+// の要求にも、文書の要求と同じページの URL を見せる。本文のある要求は作り直さない
+const pageRequestOf = (request: Request, url: URL, pathname: string): Request =>
+  request.method === 'GET' || request.method === 'HEAD'
+    ? new Request(new URL(`${withBase(pathname)}${url.search}`, url), request)
+    : request;
+
 /**
  * What answers a page's request before anything renders, if anything does: a
  * method a page does not take, a Server Action from another origin, a guard.
  */
 const refusedBeforePage = async (
   request: Request,
-  url: URL,
   { match, parsed }: Found,
 ): Promise<Response | SaidNotFound | null> => {
+  const url = new URL(request.url);
   if (!METHODS.includes(request.method)) {
     return new Response('method not allowed', {
       status: 405,

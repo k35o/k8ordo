@@ -723,7 +723,11 @@ pnpm check         # check:write to auto-fix
   carries the root's, for a URL nothing answers), and the handler runs them
   after the params schemas matched — inside the answering pattern's `enter`
   — and before the Server Action and the render (`runtime/guard.ts`). A
-  `redirect.ts` is answered before them. A guard ends the request with a
+  `redirect.ts` is answered before them. A payload request is handed to
+  the guards as the page's (`pageRequestOf`: a `GET` or `HEAD` made again at
+  the page's URL, base and search kept), so a guard that builds a return
+  path or decides by the pathname reads the same URL for a document and a
+  client navigation. A guard ends the request with a
   `Response` it returns, or with what it throws (`endedBy`,
   `runtime/ended.ts`): `redirect()` as a `303`, `notFound()` as
   `SAID_NOT_FOUND`, which `respond` answers as it answers a URL nothing
@@ -1038,8 +1042,9 @@ fixtures/
                              guard and a redirect.ts, beside a literal and a
                              [name], whose handler runtime/rest.test.ts calls
   ended/src/routes/          a guard that says redirect() after writing a
-                             cookie, one that says notFound(), and a route.ts
-                             that says either, whose handler
+                             cookie, one that says notFound(), one that says
+                             which URL it was handed, and a route.ts that says
+                             redirect() or notFound(), whose handler
                              runtime/ended.test.ts calls
   fallback/src/routes/       pages with a fallback.tsx (a server one, one that
                              says notFound(), a 'use client' one, one with a

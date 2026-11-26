@@ -1,5 +1,5 @@
 {
   "private": true,
-  "description": "An application whose guards and route.ts end the request with redirect() and notFound(), whose handler runtime/ended.test.ts calls.",
+  "description": "An application whose guards and route.ts end the request with redirect() and notFound(), and whose guard reads the URL it is handed, which runtime/ended.test.ts calls.",
   "type": "module"
 }

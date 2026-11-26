@@ -5,10 +5,11 @@ import type { SaidNotFound } from './ended';
 import { inPhase } from './request-scope';
 
 /**
- * What a `guard.ts` receives: the request, and the params of the pattern its
- * directory puts it under, as the pathname carried them — a string each, a
- * rest param its segments — since a guard runs above the page and every
- * layout, where no schema has typed them.
+ * What a `guard.ts` receives: the request for the page — a client
+ * navigation's payload request too, under the page's URL — and the params of
+ * the pattern its directory puts it under, as the pathname carried them — a
+ * string each, a rest param its segments — since a guard runs above the page
+ * and every layout, where no schema has typed them.
  */
 export type GuardContext<P extends string = string> = {
   readonly request: Request;

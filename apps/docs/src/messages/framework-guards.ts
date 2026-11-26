@@ -61,8 +61,8 @@ export const endUrl = message({
 });
 
 export const endContext = message({
-  ja: 'guardは`{ request, params }`を受け取ります。`request`は受け取ったままの`Request`です。`params`はそのディレクトリのパターンのパラメータで、値はスキーマで変換される前のURLの文字列です。',
-  en: 'A guard receives `{ request, params }`. `request` is the `Request` as it arrived. `params` are the parameters of the directory’s pattern, still the raw strings from the URL.',
+  ja: 'guardは`{ request, params }`を受け取ります。`request`はページへの`Request`です。クライアント側の遷移でペイロードを取りに来たリクエストも、ページのURL（クエリも含む）に直して渡すので、`new URL(request.url).pathname`はどちらでもページのパスです。`params`はそのディレクトリのパターンのパラメータで、値はスキーマで変換される前のURLの文字列です。',
+  en: 'A guard receives `{ request, params }`. `request` is the `Request` for the page: a client navigation’s payload request is handed over under the page’s URL, query included, so `new URL(request.url).pathname` is the page’s path either way. `params` are the parameters of the directory’s pattern, still the raw strings from the URL.',
 });
 
 export const endType = message({
