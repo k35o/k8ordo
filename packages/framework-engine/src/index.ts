@@ -14,7 +14,7 @@ export {
   slotOf,
 } from './grammar/tree';
 export type { FallbackShape, PathsFile, RouteDir } from './grammar/tree';
-export { buildTable, declaredPatterns } from './generate/emit';
+export { buildTable, declaredPatterns, ROUTES_DIR } from './generate/emit';
 export type { DeclaredPattern } from './generate/emit';
 export {
   decodePathname,

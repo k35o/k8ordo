@@ -23,10 +23,10 @@ const SYMPTOMS: readonly Symptom[] = [
   },
   { id: 'paths', title: t.pathsTitle, cause: t.pathsCause, fix: t.pathsFix },
   {
-    id: 'paths-option',
-    title: t.pathsOptionTitle,
-    cause: t.pathsOptionCause,
-    fix: t.pathsOptionFix,
+    id: 'unknown-option',
+    title: t.optionTitle,
+    cause: t.optionCause,
+    fix: t.optionFix,
   },
   {
     id: 'paths-values',

@@ -154,11 +154,6 @@ export default function FrameworkReferencePage() {
             description: t.frameworkMode,
           },
           {
-            name: 'options.routesDir',
-            type: 'string',
-            description: t.frameworkRoutesDir,
-          },
-          {
             name: 'options.reactCompiler',
             type: 'boolean',
             description: t.frameworkReactCompiler,

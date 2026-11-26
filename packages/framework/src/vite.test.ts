@@ -1,9 +1,10 @@
 import { readFile } from 'node:fs/promises';
 
-import { describe, expect, it } from 'vite-plus/test';
+import { describe, expect, expectTypeOf, it } from 'vite-plus/test';
 
+import type { TAKEN } from './options';
 import { framework } from './vite';
-import type { FrameworkOptions } from './vite';
+import type { FrameworkOptions, ServerOptions, StaticOptions } from './vite';
 
 const pluginNames = (options: FrameworkOptions): string[] =>
   framework(options)
@@ -27,13 +28,28 @@ describe('framework', () => {
     expect(names).not.toContain('k8ordo:static');
   });
 
-  it('refuses paths, which a paths.ts in the parameter’s directory replaced, rather than writing no page with a value', () => {
+  it('refuses a key it does not take, naming the ones the mode takes, rather than ignoring it', () => {
     expect(() =>
-      // @ts-expect-error the values of a parameter come from routes/
-      framework({ mode: 'static', paths: () => ['/posts/1'] }),
+      // @ts-expect-error the route files always live in src/routes
+      framework({ mode: 'static', routesDir: 'app/routes' }),
     ).toThrow(
-      "framework() takes no paths — a parameter's values come from a paths.ts in its directory under routes/",
+      "framework() takes no routesDir — under mode: 'static' it takes mode, reactCompiler, headers, site, csp",
     );
+    expect(() =>
+      // @ts-expect-error a key spelt wrong is no option
+      framework({ mode: 'server', reactcompiler: true, paths: [] }),
+    ).toThrow(
+      "framework() takes no reactcompiler, paths — under mode: 'server' it takes mode, reactCompiler, headers",
+    );
+  });
+
+  it('takes every key its options types declare, so no option the type accepts is refused when the config loads', () => {
+    expectTypeOf<
+      Exclude<keyof StaticOptions, (typeof TAKEN.static)[number]>
+    >().toBeNever();
+    expectTypeOf<
+      Exclude<keyof ServerOptions, (typeof TAKEN.server)[number]>
+    >().toBeNever();
   });
 
   it('takes site and csp only in static mode, where there are files to describe', () => {

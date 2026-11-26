@@ -649,7 +649,7 @@ reads only the framework.
 clone — a CI checkout among them — has neither until something writes them.
 `k8ordo generate`, the package's command, writes them and stops there: it
 reads the Vite config in the working directory as `vite build` does, so the
-`mode` and `routesDir` given to `framework()` are the ones it uses, then
+`mode` given to `framework()` is the one it uses, then
 builds nothing and renders no page — no `paths.ts` is read, and nothing a
 page reads is touched. A `routes/` with the problems of
 [What the build refuses](#what-the-build-refuses) fails it as it fails the

@@ -12,7 +12,7 @@ import type {
   ViteDevServer,
 } from 'vite';
 
-import { LOCALES_MODULE } from '../generate/emit';
+import { LOCALES_MODULE, ROUTES_DIR } from '../generate/emit';
 import { generate } from '../generate/write';
 import { FRAMEWORK } from '../host';
 import type { EngineOptions, Mode } from '../host';
@@ -315,7 +315,7 @@ export const engine = (
         );
       }
       ({ root, logger } = config);
-      routesDir = path.resolve(root, options.routesDir ?? 'src/routes');
+      routesDir = path.resolve(root, ROUTES_DIR);
       localesModule = path.resolve(root, LOCALES_MODULE);
       outDir = path.resolve(root, OUT_DIR);
     },

@@ -89,9 +89,12 @@ pnpm check         # check:write to auto-fix
   default. `framework()` checks the same at run time, because a
   `vite.config.js` is never type-checked and neither mistake fails on its
   own: a mode other than `'static'` would build no files, and a `csp` under
-  `mode: 'server'` would be a policy nobody serves. A `paths` passed in
-  either mode throws too, naming the `paths.ts` that replaced the option: a
-  config left over from it would otherwise build with its values ignored.
+  `mode: 'server'` would be a policy nobody serves. Any other key the mode
+  does not take throws too, naming the keys it does — a key spelt wrong, or
+  one left over from an option that is gone, would otherwise build with it
+  ignored — so no option is removed with a migration message of its own.
+  The route files have no option: they live in `src/routes/` (the engine's
+  `ROUTES_DIR`), as `src/i18n.ts` is where the locale set is.
   `vite.test.ts` holds each case as both a `@ts-expect-error` and the error
   it throws.
 - **A parameter's values come from its own directory.** Under
@@ -164,9 +167,8 @@ pnpm check         # check:write to auto-fix
   directory as `vite build` does (`resolveConfig`, `'build'`,
   `'production'`), finds the engine's plugin by name and calls its
   `api.generate()` — the same function its `buildStart` awaits — because
-  `routesDir` and the mode exist only in the application's `framework()`
-  call, and reading them again from flags would be a second place for them
-  to disagree. No environment is built, so no `paths.ts` is read and the
+  the mode exists only in the application's `framework()` call, and
+  reading it again from a flag would be a second place for it to disagree. No environment is built, so no `paths.ts` is read and the
   data a page reads is never touched: a CI job with no database writes `.k8ordo/` for
   `tsc`. A config without `framework()` and a `routes/` with the problems
   the build names under `routes/ is not a valid pathname space:` both exit

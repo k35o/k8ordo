@@ -255,13 +255,7 @@ one error, with any page that failed to render, so fixing one does not reveal
 the next.
 
 `paths.ts` belongs in a `[param]` directory and nowhere else
-([What the build refuses](routing.md#what-the-build-refuses)), and
-`framework()` takes no `paths` option — passing one throws when the config
-loads:
-
-```
-framework() takes no paths — a parameter's values come from a paths.ts in its directory under routes/
-```
+([What the build refuses](routing.md#what-the-build-refuses)).
 
 Under `mode: 'server'` a `paths.ts` is never read and nothing of it is
 built in, so the same `routes/` works in both modes.

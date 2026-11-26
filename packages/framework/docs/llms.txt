@@ -161,8 +161,9 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   type of its own, `Paths<Pattern>`, what a `paths.ts` exports by default.
   Not `useParams` or `useRoute`: a page receives `params` as a prop.
 - `@k8ordo/framework/vite` — `framework(options)` returns the Vite plugins;
-  `options.mode` (`'static' | 'server'`) is required, `options.routesDir`
-  moves the route directory (default `src/routes`). Only with
+  `options.mode` (`'static' | 'server'`) is required; the route files
+  always live in `src/routes/`, and a key the mode does not take throws
+  as the config loads. Only with
   `mode: 'static'`: `options.site` (the origin) makes the build also write
   `sitemap.xml`, and
   `options.csp` (directives → sources, `ContentSecurityPolicy`) is the

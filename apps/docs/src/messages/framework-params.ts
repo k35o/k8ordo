@@ -277,10 +277,6 @@ export const stopsList = [
     ja: '`[param]`でないディレクトリに置いた`paths.ts`：`paths.ts gives the values of its directory\'s parameter, and "posts" is not a [param] directory — …`',
     en: 'A `paths.ts` in a directory that is not a `[param]` one: `paths.ts gives the values of its directory\'s parameter, and "posts" is not a [param] directory — …`',
   }),
-  message({
-    ja: "`framework()`に渡した`paths`：`framework() takes no paths — a parameter's values come from a paths.ts in its directory under routes/`",
-    en: "A `paths` passed to `framework()`: `framework() takes no paths — a parameter's values come from a paths.ts in its directory under routes/`",
-  }),
 ] as const;
 
 export const fallbackTitle = message({

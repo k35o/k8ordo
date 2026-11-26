@@ -1,4 +1,4 @@
-import { waitUntil } from '../../../../src/runtime/server';
+import { waitUntil } from '../../../../../src/runtime/server';
 
 const CHUNKS = ['first ', 'second ', 'last'];
 

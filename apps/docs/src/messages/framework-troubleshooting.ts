@@ -45,19 +45,19 @@ export const pathsFix = message({
   en: 'For each parameter of the patterns the error names, put a `paths.ts` in its directory and return the values. If the page should answer values the build cannot know, give it a `fallback.tsx`.',
 });
 
-export const pathsOptionTitle = message({
-  ja: '`framework() takes no paths — …`',
-  en: '`framework() takes no paths — …`',
+export const optionTitle = message({
+  ja: '`framework() takes no … — under mode: … it takes …`',
+  en: '`framework() takes no … — under mode: … it takes …`',
 });
 
-export const pathsOptionCause = message({
-  ja: '`framework()`に`paths`を渡しています。パラメータの値は、`vite.config.ts`ではなく`routes/`の`paths.ts`が返します。',
-  en: 'The config passes `paths` to `framework()`. A parameter’s values come from a `paths.ts` under `routes/`, not from `vite.config.ts`.',
+export const optionCause = message({
+  ja: '`framework()`に、そのモードが受け取らないキーを渡しています。綴りの誤りか、`routesDir`や`paths`のように無くなったオプションでよく起きます。型の検査を通らない`vite.config.js`でも、黙って無視せずに止めます。',
+  en: 'The config passes `framework()` a key its mode does not take: often a misspelling, or an option that no longer exists, such as `routesDir` or `paths`. It stops even in a `vite.config.js`, which is never type-checked, rather than ignoring the key.',
 });
 
-export const pathsOptionFix = message({
-  ja: '`paths`を消し、パラメータのディレクトリごとに`paths.ts`を置きます。`[locale]/paths.ts`なら`locales.all`を返します。',
-  en: 'Remove `paths`, and give each parameter’s directory a `paths.ts`. `[locale]/paths.ts` returns `locales.all`.',
+export const optionFix = message({
+  ja: 'エラーが挙げるキーだけを渡します。ルートのファイルは`src/routes/`に置き、パラメータの値はそのディレクトリの`paths.ts`で返します。',
+  en: 'Pass only the keys the error lists. Route files live in `src/routes/`, and a parameter’s values come from the `paths.ts` in its directory.',
 });
 
 export const valuesTitle = message({

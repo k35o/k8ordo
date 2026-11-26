@@ -1,4 +1,4 @@
-import { waitUntil } from '../../../../src/runtime/server';
+import { waitUntil } from '../../../../../src/runtime/server';
 
 export const GET = ({ request }: { request: Request }): Response => {
   waitUntil(

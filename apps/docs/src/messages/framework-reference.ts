@@ -56,11 +56,6 @@ export const frameworkMode = message({
   en: "`'static'` or `'server'`, with no default. `'static'` renders pages at build time, into an app that runs with no server. `'server'` renders pages per request, in an app that runs on a server.",
 });
 
-export const frameworkRoutesDir = message({
-  ja: 'ルートのディレクトリです。プロジェクトのルートからの相対パスで、既定は`src/routes`です。変えても、生成されるファイルは`.k8ordo/`に書かれます。',
-  en: 'The route directory, relative to the project root. `src/routes` by default. The generated files go to `.k8ordo/` either way.',
-});
-
 export const frameworkReactCompiler = message({
   ja: '両モードで使えます。`true`にすると、クライアントコンポーネントをReact Compiler（Rust版。`@vitejs/plugin-react`の`compiler`）で変換します。アプリに`oxc-transform-react`を入れておく必要があります。Server Componentと、クライアントコンポーネントをサーバーで描くHTMLには掛かりません。既定は`false`です。',
   en: 'Either mode. With `true`, client components are compiled with React Compiler (the Rust one, through `@vitejs/plugin-react`’s `compiler`). The application needs `oxc-transform-react` installed. Server Components, and the HTML a client component renders on the server, are left as written. `false` by default.',
@@ -87,8 +82,12 @@ export const frameworkCaveats = [
     en: "`site` or `csp` written beside `mode: 'server'` is a type error.",
   }),
   message({
-    ja: '`paths`というオプションはありません。渡すと、設定を読んだ時点で`framework() takes no paths — …`のエラーになります。パラメータの値は、そのディレクトリの`paths.ts`が返します。',
-    en: 'There is no `paths` option. Passing one fails when the config loads, with `framework() takes no paths — …`. A parameter’s values come from the `paths.ts` in its directory.',
+    ja: 'ルートのファイルは常に`src/routes/`に置きます。置き場を変えるオプションはありません。',
+    en: 'The route files always live in `src/routes/`. No option moves them.',
+  }),
+  message({
+    ja: "そのモードが受け取らないキーを渡すと、設定を読んだ時点で`framework() takes no routesDir — under mode: 'static' it takes mode, reactCompiler, headers, site, csp`のように、受け取るキーを挙げたエラーになります。",
+    en: "A key the mode does not take fails when the config loads, naming the keys it does: `framework() takes no routesDir — under mode: 'static' it takes mode, reactCompiler, headers, site, csp`.",
   }),
   message({
     ja: '`reactCompiler: true`で`oxc-transform-react`が入っていないと、`vite dev`も`vite build`も設定を読んだ時点で、Reactのプラグインのエラー`React Compiler requires the optional …`で止まります。エラーが名指す`react({ compiler: true })`は、`framework()`が代わりに渡しているオプションです。',

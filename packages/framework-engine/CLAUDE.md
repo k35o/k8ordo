@@ -1015,20 +1015,20 @@ fixtures/
                              dist-static/ — from this package's source, and
                              imports the handler it wrote; or serves it with
                              vite dev
-  bare-not-found/routes/     an application with no not-found.tsx, which
+  bare-not-found/src/routes/  an application with no not-found.tsx, which
                              runtime/not-found.test.ts opens in each engine
-  redirect-beside-literal/routes/  a [slug]/redirect.ts beside about/page.tsx,
+  redirect-beside-literal/src/routes/  a [slug]/redirect.ts beside about/page.tsx,
                              whose handler runtime/redirect-order.test.ts calls
-  rest/routes/               [...name] directories holding a page under a
+  rest/src/routes/           [...name] directories holding a page under a
                              layout, a page with a schema, a route.ts under a
                              guard and a redirect.ts, beside a literal and a
                              [name], whose handler runtime/rest.test.ts calls
-  fallback/routes/           pages with a fallback.tsx (a server one, one that
+  fallback/src/routes/       pages with a fallback.tsx (a server one, one that
                              says notFound(), a 'use client' one, one with a
                              not-found.tsx beside it) under a layout whose
                              schema refuses a value, which
                              runtime/fallback.test.ts builds in both modes
-  streaming/routes/          pages that await their data, with and without a
+  streaming/src/routes/      pages that await their data, with and without a
                              loading.tsx (and one under a loading.tsx already
                              on screen, one calling a Server Action, and ones
                              awaiting it under a client component's
@@ -1036,20 +1036,20 @@ fixtures/
                              never rendered), which runtime/streaming.test.ts
                              streams to each engine; state.ts stands in for
                              @k8ordo/state
-  client-css/routes/         a layout rendering a client component that imports
+  client-css/src/routes/     a layout rendering a client component that imports
                              CSS, whose HTML runtime/client-css.test.ts reads
-  css-targets/routes/        a layout importing CSS that uses light-dark() and
+  css-targets/src/routes/    a layout importing CSS that uses light-dark() and
                              :dir(), rendering a client component whose CSS
                              uses light-dark(), whose built CSS
                              plugin/css-targets.test.ts reads
-  chunks/routes/             two pages and a not-found, each with a client
+  chunks/src/routes/         two pages and a not-found, each with a client
                              component and a CSS Module of its own, under a
                              provider that renders again as it hydrates, which
                              runtime/chunks.test.ts builds and opens in each
                              engine with the components' chunks held back
-  page-throws/routes/        a page whose module throws as it is read, which
+  page-throws/src/routes/    a page whose module throws as it is read, which
                              runtime/page-throws.test.ts builds in both modes
-  ssr-deps/routes/           pages naming client components with a CSS Module
+  ssr-deps/src/routes/       pages naming client components with a CSS Module
                              of their own — rendered by a page, a not-found, a
                              module a Server Component imports, a boundary
                              that resolves after the shell, or only passed in
@@ -1062,22 +1062,22 @@ fixtures/
                              a page with a CSS Module beside one, which
                              runtime/ssr-deps.test.ts builds in both modes
                              and serves under vite dev
-  form-state/routes/         a form whose Server Action returns a client
+  form-state/src/routes/     a form whose Server Action returns a client
                              component, which runtime/form-state.test.ts
                              posts without JavaScript
-  file-payload/routes/       one page, which runtime/file-payload.test.ts
+  file-payload/src/routes/   one page, which runtime/file-payload.test.ts
                              builds into files and asks for its document
-  mdx-css/routes/            a page importing an .mdx and one reading another
+  mdx-css/src/routes/        a page importing an .mdx and one reading another
                              through a glob, each .mdx importing CSS, which
                              runtime/mdx-css.test.ts builds with a stand-in
                              MDX compiler
-  wait-until/routes/         a route.ts calling waitUntil() (with a promise
+  wait-until/src/routes/     a route.ts calling waitUntil() (with a promise
                              that settles or, asked with ?fail, rejects),
                              one calling it from a late pull of the stream
                              it answered with, and a page calling it as it
                              renders, which runtime/wait-until.test.ts
                              builds and calls with and without a host
-  head-scripts/routes/       a layout writing an inline script in <head> and
+  head-scripts/src/routes/   a layout writing an inline script in <head> and
                              importing CSS, which runtime/head-scripts.test.ts
                              opens in each engine with the CSS held back
 ```

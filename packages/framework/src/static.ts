@@ -23,6 +23,7 @@ import {
   readServerStylesheets,
   REEXPORTS_ALL,
   ROUTE_METHODS,
+  ROUTES_DIR,
   scanRoutes,
   SERVER_STYLESHEETS_HEADER,
   serverActionModules,
@@ -572,7 +573,7 @@ export const staticMode = (
 
     configResolved(config) {
       ({ root, plugins, base, logger } = config);
-      routesDir = path.resolve(root, options.routesDir ?? 'src/routes');
+      routesDir = path.resolve(root, ROUTES_DIR);
     },
 
     configureServer: {

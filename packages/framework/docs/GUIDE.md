@@ -289,8 +289,15 @@ dev dependencies.
 
 ## The options
 
-`framework()` takes `mode`, which is required, `routesDir`, the route
-directory (default `src/routes`), and `reactCompiler`, in either mode.
+`framework()` takes `mode`, which is required, and `reactCompiler`, in
+either mode. The route files always live in `src/routes/`. Any other key
+stops the config as it loads, naming the keys the mode takes — a
+`vite.config.js` is never type-checked, and a key spelt wrong would
+otherwise do nothing:
+
+```
+framework() takes no reactcompiler — under mode: 'static' it takes mode, reactCompiler, headers, site, csp
+```
 
 `reactCompiler: true` compiles the client components with React Compiler —
 the Rust one, `oxc-transform-react`, through `@vitejs/plugin-react`'s
