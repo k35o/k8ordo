@@ -100,14 +100,35 @@ pnpm check         # check:write to auto-fix
   that parameter takes, given the params of the directories above it.
   `suppliedFrom` walks the tree and asks each file once per combination of
   the values above, and the values multiply down to every page, `route.ts`
-  and `redirect.ts` below. A value is the segment as a visitor reads it;
-  `segmentOf` escapes it. A file that returns anything but non-empty
-  strings, or that sits below a parameter left open, is a problem the build
-  names with the plan's refusals. The values are data of the application,
+  and `redirect.ts` below. A value is what a link to the page takes —
+  `Paths` types it with the router's `RegisteredParams`, the schemas'
+  output where they declare one — and is spelled as `href` does
+  (`String(value)`), which `segmentOf` escapes. The params above are what
+  the layouts above the file's directory read — the shells' rule: their
+  `paramsSchema` exports, outer first, never the page beside the file or a
+  layout in its own directory, which may read the parameter being asked
+  for — and `Paths` types them as exactly that, from the generated
+  `pathsParams` the router's `Register` carries (`PathsSchemas`), with the
+  string for a parameter none of them reads. Two `paths.ts` in sibling
+  route groups share a pattern and so one type: the union of what each
+  receives, never narrower than one of them. `suppliedFrom` hands
+  `valuesOf` the spellings, and the engine's `pathValues` runs them through
+  those schemas (`paths[file].schemas`) with `parseParams`; when one
+  refuses it answers `null` instead of asking the file, and `suppliedFrom`
+  names every such place in one problem, as the build names the shells
+  standing under a refused value. `paths-above.test.ts` holds a `[year]`
+  read as a number with no page at `[year]/` and a page schema at
+  `[year]/[slug]/` that rewrites `year` and needs `slug`, built and under
+  `vite dev`, a refused `[year]` the file below is never asked under
+  (`fixtures/paths-above-refused`), and the type. A file that returns
+  anything but strings that are not empty, numbers, bigints and booleans,
+  or that sits below a parameter left open, is a problem the build names
+  with the plan's refusals. The values are data of the application,
   so the file runs where the pages do: the build asks through
   `pathValues`, exported by the built `dist/rsc/index.js`, and `vite dev`
-  through the RSC environment's module runner — never from the config,
-  where the application's aliases and `server-only` modules do not load.
+  through the same export of the handler's entry in the RSC environment's
+  module runner — never from the config, where the application's aliases
+  and `server-only` modules do not load.
   `mode: 'server'` reads no paths.ts and compiles none in.
 - **React's plugin is the framework's, and `reactCompiler` is all of it an
   application sets.** The engine returns `@vitejs/plugin-react`, and
@@ -572,8 +593,9 @@ src/
   cli.ts            bin k8ordo: `k8ordo generate`, .k8ordo/ from the resolved
                     config through the engine plugin's api, building nothing
 fixtures/
-  build.ts          failedBuild / compiledBuild / devServer — a fixture built or
-                    served with the built dist/vite.mjs, in this process
+  build.ts          failedBuild / staticBuild / compiledBuild / devServer — a
+                    fixture built or served with the built dist/vite.mjs, in
+                    this process
   <name>/           one application each, src/routes/ and what it imports
 ```
 

@@ -61,18 +61,18 @@ export const pathsOptionFix = message({
 });
 
 export const valuesTitle = message({
-  ja: '`… has to return an array of non-empty strings, …`',
-  en: '`… has to return an array of non-empty strings, …`',
+  ja: '`… has to return an array of the values of …`',
+  en: '`… has to return an array of the values of …`',
 });
 
 export const valuesCause = message({
-  ja: '`paths.ts`の関数が、空でない文字列の配列以外を返しました。数値のidや空文字列、配列でない値でよく起きます。',
-  en: 'The function in a `paths.ts` returned something other than an array of non-empty strings: often numeric ids, an empty string, or a value that is not an array.',
+  ja: '`paths.ts`の関数が、URLに綴れる値の配列以外を返しました。空文字列やオブジェクト、配列でない値でよく起きます。',
+  en: 'The function in a `paths.ts` returned something other than an array of values with a URL spelling: often an empty string, an object, or a value that is not an array.',
 });
 
 export const valuesFix = message({
-  ja: '数値は`String()`で文字列にし、空の値は外します。値はエスケープせずに返します。',
-  en: 'Turn numbers into strings with `String()`, and leave empty values out. Return each value unescaped.',
+  ja: '値は文字列、数値、bigint、真偽値のどれかにし、空の値は外します。オブジェクトはidなどの値に取り出してから返します。値はエスケープせずに返します。',
+  en: 'Return strings, numbers, bigints or booleans, and leave empty values out. Take the id or similar value out of an object before returning it. Return each value unescaped.',
 });
 
 export const aboveTitle = message({
@@ -88,6 +88,21 @@ export const aboveCause = message({
 export const aboveFix = message({
   ja: 'エラーが挙げたパスに残っているパラメータのディレクトリにも、`paths.ts`を置きます。',
   en: 'Give the directory of the parameter left in the path the error names a `paths.ts` too.',
+});
+
+export const pathsRefusedTitle = message({
+  ja: '`the paths.ts files stand where a params schema refuses the values above them, …`',
+  en: '`the paths.ts files stand where a params schema refuses the values above them, …`',
+});
+
+export const pathsRefusedCause = message({
+  ja: '上の`paths.ts`が返した値を、その`paths.ts`より上にあるレイアウトの`paramsSchema`が拒みました。ビルドはその値の下の`paths.ts`を呼びません。`/last/:slug`のように、年を数値として読むレイアウトと同じディレクトリの`paths.ts`が数字でない値を返したときに起きます。',
+  en: 'A layout’s `paramsSchema` above the `paths.ts` rejected a value a `paths.ts` above it returned, so the build did not call the one below for it. It happens as in `/last/:slug`, when the `paths.ts` beside a layout that reads the year as a number lists `last`.',
+});
+
+export const pathsRefusedFix = message({
+  ja: 'その値を上の`paths.ts`の戻り値から外すか、値を直します。',
+  en: 'Leave that value out of what the `paths.ts` above returns, or correct it.',
 });
 
 export const pathsPlaceTitle = message({

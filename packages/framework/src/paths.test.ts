@@ -16,6 +16,7 @@ import {
   shellPathname,
   suppliedFrom,
 } from './paths';
+import type { Asked } from './paths';
 
 const treeOf = (files: readonly string[]) => {
   const { tree, problems } = parseRouteTree(files);
@@ -474,10 +475,19 @@ describe('suppliedFrom', () => {
   const asked: Array<[string, Record<string, string>]> = [];
   const answering =
     (values: Record<string, (params: Record<string, string>) => unknown>) =>
-    (file: string, params: Readonly<Record<string, string>>): unknown => {
-      asked.push([file, { ...params }]);
-      return values[file]?.(params);
+    (file: string, above: Readonly<Record<string, string>>): Promise<Asked> => {
+      asked.push([file, { ...above }]);
+      return Promise.resolve({ values: values[file]?.(above) });
     };
+  const refusing =
+    (
+      refused: Readonly<Record<string, string>>,
+      asking: ReturnType<typeof answering>,
+    ) =>
+    (file: string, above: Readonly<Record<string, string>>): Promise<Asked> =>
+      Object.entries(refused).some(([name, value]) => above[name] === value)
+        ? Promise.resolve(null)
+        : asking(file, above);
 
   it('writes every page, route.ts and redirect.ts below a parameter for each of its values', async () => {
     const tree = treeOf([
@@ -620,20 +630,76 @@ describe('suppliedFrom', () => {
     ]);
   });
 
-  it('says so when a paths.ts returns anything but non-empty strings', async () => {
+  it('spells a value as a link does, and hands the paths.ts below that spelling, which is what its page reads', async () => {
+    asked.length = 0;
+    const tree = treeOf([
+      'page.tsx',
+      '(archive)/[year]/paths.ts',
+      '(archive)/[year]/[flag]/page.tsx',
+      '(archive)/[year]/[flag]/paths.ts',
+    ]);
+
+    const { locations, problems } = await suppliedFrom(
+      tree,
+      answering({
+        '(archive)/[year]/paths.ts': () => [2026, 2026n, '2026'],
+        '(archive)/[year]/[flag]/paths.ts': () => [true, false],
+      }),
+    );
+
+    expect(problems).toStrictEqual([]);
+    expect(asked).toStrictEqual([
+      ['(archive)/[year]/paths.ts', {}],
+      ['(archive)/[year]/[flag]/paths.ts', { year: '2026' }],
+    ]);
+    expect(locations).toStrictEqual(['/2026/true', '/2026/false']);
+  });
+
+  it('names the paths.ts files below values a schema above them refuses, and writes nothing under those values', async () => {
+    const tree = treeOf([
+      'page.tsx',
+      '[year]/paths.ts',
+      '[year]/[slug]/page.tsx',
+      '[year]/[slug]/paths.ts',
+    ]);
+
+    const { locations, problems } = await suppliedFrom(
+      tree,
+      refusing(
+        { year: 'last' },
+        answering({
+          '[year]/paths.ts': () => ['2024', 'last'],
+          '[year]/[slug]/paths.ts': () => ['entry'],
+        }),
+      ),
+    );
+
+    expect(locations).toStrictEqual(['/2024/entry']);
+    expect(problems).toStrictEqual([
+      'the paths.ts files stand where a params schema refuses the values above them, so they were not asked: /last/:slug ([year]/[slug]/paths.ts)',
+    ]);
+  });
+
+  it('says so when a paths.ts returns anything but values with a spelling', async () => {
     const tree = treeOf([
       'page.tsx',
       'tags/[tag]/page.tsx',
       'tags/[tag]/paths.ts',
+      'posts/[id]/page.tsx',
+      'posts/[id]/paths.ts',
     ]);
 
     const { problems } = await suppliedFrom(
       tree,
-      answering({ 'tags/[tag]/paths.ts': () => [1, ''] }),
+      answering({
+        'tags/[tag]/paths.ts': () => ['a', ''],
+        'posts/[id]/paths.ts': () => [1, { id: 2 }],
+      }),
     );
 
-    expect(problems).toStrictEqual([
-      'tags/[tag]/paths.ts has to return an array of non-empty strings, the values of :tag',
+    expect(problems.toSorted()).toStrictEqual([
+      'posts/[id]/paths.ts has to return an array of the values of :id, each a non-empty string, a number, a bigint or a boolean',
+      'tags/[tag]/paths.ts has to return an array of the values of :tag, each a non-empty string, a number, a bigint or a boolean',
     ]);
   });
 

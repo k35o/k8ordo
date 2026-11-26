@@ -300,7 +300,8 @@ type Belief = {
     | 'notFound'
     | 'error'
     | 'loading'
-    | 'fallback';
+    | 'fallback'
+    | 'paths';
   /** Schema-declaring files along the stack, outer-first, the file's own last. */
   readonly schemas: readonly string[];
 };
@@ -319,7 +320,9 @@ type Belief = {
  * the render's context and never refuse it — a catch-all answers what nothing
  * else did, so its params stay strings. A fallback's carries the layouts'
  * above it too: a shell runs them over the params it fills, and its page's
- * own never, since a shell has no value.
+ * own never, since a shell has no value. A paths.ts's carries only the
+ * layouts' above its directory: a layout in its own directory, and the page
+ * beside it, may read the parameter it is asked for, which has no value yet.
  */
 const beliefs = (
   tree: RouteDir,
@@ -373,6 +376,9 @@ const beliefs = (
         kind: 'fallback',
         schemas: layoutSchemas,
       });
+    }
+    if (dir.paths !== null) {
+      found.set(dir.paths, { pattern: own, kind: 'paths', schemas: inherited });
     }
     for (const child of dir.children) {
       walk(
@@ -483,7 +489,8 @@ export const emitRoutesModule = (
   for (const shape of shells) namer.take(shape.file);
   // Likewise the values of a parameter: only a build into files asks for
   // them, so a running server compiles no paths.ts in.
-  const supplies = options.mode === 'static' ? pathsFiles(tree) : [];
+  const typedSupplies = pathsFiles(tree);
+  const supplies = options.mode === 'static' ? typedSupplies : [];
   for (const supply of supplies) namer.take(supply.file);
   const guarded = guardsOf(tree);
   const guardStacks = new Map(
@@ -595,6 +602,26 @@ export const emitRoutesModule = (
     ({ pattern, file }) =>
       `${pad(1)}Checked<Loaded<typeof ${namer.take(file)}>['default'], Paths<'${pattern}'>>,`,
   );
+  const layoutSchemasOf = (file: string): string[] =>
+    (byFile.get(file) as Belief).schemas.map((layout) =>
+      schemaName(namer.take(layout)),
+    );
+  // 隣り合うルートグループの paths.ts は 1 つのパターンを分け合い、上のレイアウトが
+  // 違えば受け取るものも違う。Paths<Pattern> はパターンでしか引けないので、並びごとの
+  // タプルの合併にして、どの paths.ts が受け取るものより狭い型にもしない
+  const pathsSchemas = [
+    ...Map.groupBy(typedSupplies, ({ pattern }) => pattern),
+  ].map(([pattern, files]) => {
+    const tuples = new Set(
+      files.map(
+        ({ file }) =>
+          `[${layoutSchemasOf(file)
+            .map((schema) => `typeof ${schema}`)
+            .join(', ')}]`,
+      ),
+    );
+    return `${pad(1)}'${pattern}': ${[...tuples].join(' | ')};`;
+  });
   const hasChecks =
     schemaChecks.length +
       routeChecks.length +
@@ -843,9 +870,7 @@ export const emitRoutesModule = (
             `${pad(1)}'${pattern}': {`,
             `${pad(2)}load: ${namer.take(file)},`,
             `${pad(2)}open: [${open.map((param) => `'${param}'`).join(', ')}],`,
-            `${pad(2)}schemas: [${(byFile.get(file) as Belief).schemas
-              .map((layout) => schemaName(namer.take(layout)))
-              .join(', ')}],`,
+            `${pad(2)}schemas: [${layoutSchemasOf(file).join(', ')}],`,
             `${pad(1)}},`,
           ]),
           '} as const;',
@@ -867,11 +892,16 @@ export const emitRoutesModule = (
     ...(options.mode === 'static'
       ? [
           "// Per paths.ts, by its file: what reads the values its directory's",
-          '// parameter takes. Only the build asks.',
+          '// parameter takes, and the schemas of the layouts above its directory,',
+          '// which read the params above before it is asked. The build and',
+          '// `vite dev` ask through `pathValues`.',
           'export const paths = {',
-          ...supplies.map(
-            ({ file }) => `${pad(1)}'${file}': ${namer.take(file)},`,
-          ),
+          ...supplies.flatMap(({ file }) => [
+            `${pad(1)}'${file}': {`,
+            `${pad(2)}load: ${namer.take(file)},`,
+            `${pad(2)}schemas: [${layoutSchemasOf(file).join(', ')}],`,
+            `${pad(1)}},`,
+          ]),
           '} as const;',
           ...(pathsChecks.length > 0
             ? [
@@ -887,6 +917,12 @@ export const emitRoutesModule = (
           '// A running server renders whatever value arrives: no values to list.',
           'export const paths = {} as const;',
         ]),
+    '',
+    "// What a paths.ts receives, by its directory's pattern: the params above",
+    '// it as the layouts above its directory read them.',
+    'export type PathsSchemas = {',
+    ...pathsSchemas,
+    '};',
     '',
     'export const routes = defineRoutes({',
     ...body,
@@ -945,13 +981,15 @@ export const emitRegisterModule = (options: RegisterOptions): string => {
     ...(localesModule === null
       ? []
       : [`import type { locales } from '${localesModule}';`]),
-    `import type { ParamSchemas, routes, SearchReads } from '${options.routesModule}';`,
+    `import type { ParamSchemas, PathsSchemas, routes, SearchReads } from '${options.routesModule}';`,
     '',
     `declare module '${GENERATED_FROM}' {`,
     '  interface Register {',
     '    routes: typeof routes;',
     '    // A link takes a param as the page receives it — typed by its schema.',
     '    params: ParsedParamsMap<ParamSchemas>;',
+    '    // A paths.ts receives the params above it as the layouts above read them.',
+    '    pathsParams: ParsedParamsMap<PathsSchemas>;',
     '    // A page that exports `search` receives what it reads.',
     '    search: SearchReads;',
     ...(withRequest

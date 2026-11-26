@@ -72,7 +72,7 @@ import {
   SITEMAP_PATHNAME,
   suppliedFrom,
 } from './paths';
-import type { PathPlan, Shell } from './paths';
+import type { Asked, PathPlan, Shell } from './paths';
 import {
   builtRules,
   cloudflareCounts,
@@ -115,6 +115,11 @@ export type StaticOptions = EngineOptions & {
 };
 
 type Handler = (request: Request) => Promise<Response>;
+
+type PathValues = (
+  file: string,
+  above: Readonly<Record<string, string>>,
+) => Promise<Asked>;
 
 /**
  * What a host adapter writes a static build from, once every file is in
@@ -266,7 +271,10 @@ const READ_BY_NAME = new Set(['route', 'page']);
  * There is no server here, and the build refuses a Server Action, because a
  * file cannot receive one.
  */
-export const staticMode = (options: StaticOptions): Plugin[] => {
+export const staticMode = (
+  options: StaticOptions,
+  host: { readonly runtimeDir: string },
+): Plugin[] => {
   const { csp } = options;
   const unwritablePolicy = csp === undefined ? [] : policyProblems(csp);
   if (unwritablePolicy.length > 0) {
@@ -320,28 +328,24 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
     })());
 
   /**
-   * A paths.ts under `vite dev`, read through the RSC environment's runner —
-   * the graph the pages are in, so it sees the application's aliases and an
-   * edit to it, or to what it imports, is what the next call reads.
+   * A paths.ts under `vite dev`, asked through the handler's own entry in the
+   * RSC environment's runner — the graph the pages are in, so it sees the
+   * application's aliases, an edit to it, or to what it imports, is what the
+   * next call reads, and it receives the params above as the build hands them.
    */
   const devValues = async (
     file: string,
-    params: Readonly<Record<string, string>>,
-  ): Promise<unknown> => {
+    above: Readonly<Record<string, string>>,
+  ): Promise<Asked> => {
     const environment = devServer?.environments.rsc;
     if (environment === undefined || !('runner' in environment)) {
       throw new Error('the rsc environment cannot run a paths.ts');
     }
     const { runner } = environment as RunnableDevEnvironment;
-    const { default: values } = (await runner.import(
-      path.join(routesDir, file),
-    )) as { default?: unknown };
-    if (typeof values !== 'function') {
-      throw new TypeError(
-        `${fromRoot(file)} has to export default a function returning its parameter's values`,
-      );
-    }
-    return (values as (above: typeof params) => unknown)(params);
+    const { pathValues } = (await runner.import(
+      path.join(host.runtimeDir, 'entry.rsc.mjs'),
+    )) as { pathValues: PathValues };
+    return pathValues(file, above);
   };
 
   /**
@@ -728,10 +732,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
           pathToFileURL(path.resolve(root, rscOut, 'index.js')).href
         )) as {
           default: Handler;
-          pathValues: (
-            file: string,
-            params: Readonly<Record<string, string>>,
-          ) => Promise<unknown>;
+          pathValues: PathValues;
           payloadOf: (response: Response) => ArrayBuffer | undefined;
         };
         const supplied = await suppliedFrom(tree, built.pathValues);

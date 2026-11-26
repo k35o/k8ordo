@@ -200,6 +200,17 @@ describe('the emitted register', () => {
     expect(files).not.toContain('request');
   });
 
+  it.each(['static', 'server'] as const)(
+    'types what each paths.ts receives under mode: %s, so a paths.ts checks the same under both',
+    (mode) => {
+      const source = emitRegisterModule({ routesModule: './routes.gen', mode });
+      expect(source).toContain(
+        "import type { ParamSchemas, PathsSchemas, routes, SearchReads } from './routes.gen';",
+      );
+      expect(source).toContain('pathsParams: ParsedParamsMap<PathsSchemas>;');
+    },
+  );
+
   it('holds every message to the locale set the application declares', () => {
     const source = emitRegisterModule({
       routesModule: './routes.gen',
@@ -231,7 +242,7 @@ describe('the emitted register', () => {
     const source = emitRegisterModule({ routesModule: './routes.gen' });
     expect(source).toContain('params: ParsedParamsMap<ParamSchemas>;');
     expect(source).toContain(
-      "import type { ParamSchemas, routes, SearchReads } from './routes.gen';",
+      "import type { ParamSchemas, PathsSchemas, routes, SearchReads } from './routes.gen';",
     );
   });
 });
@@ -710,7 +721,7 @@ describe('fallback.tsx in the emitted table', () => {
     expect(source).not.toContain('/fallback');
   });
 
-  it('lists, under a build into files, what reads each paths.ts by its file, checked against the pattern of its directory', () => {
+  it('lists, under a build into files, what reads each paths.ts by its file with the schemas of the layouts above its directory, checked against the pattern of its directory', () => {
     const source = emitRoutesModule(
       parseRouteTree([...files, '[locale]/paths.ts']).tree,
       { importPrefix: './routes', mode: 'static', withParams },
@@ -721,8 +732,18 @@ describe('fallback.tsx in the emitted table', () => {
     expect(source).toContain(
       [
         'export const paths = {',
-        "  '[locale]/paths.ts': locale_paths,",
+        "  '[locale]/paths.ts': {",
+        '    load: locale_paths,',
+        '    schemas: [layout_params],',
+        '  },',
         '} as const;',
+      ].join('\n'),
+    );
+    expect(source).toContain(
+      [
+        'export type PathsSchemas = {',
+        "  '/:locale': [typeof layout_params];",
+        '};',
       ].join('\n'),
     );
     expect(source).toContain(
@@ -730,13 +751,100 @@ describe('fallback.tsx in the emitted table', () => {
     );
   });
 
-  it('lists no values and imports no paths.ts under a running server', () => {
+  it('hands a paths.ts no schema of a layout in its own directory or of the page beside it, which may read the parameter it is asked for', () => {
+    const source = emitRoutesModule(
+      parseRouteTree([
+        'layout.tsx',
+        'page.tsx',
+        '[locale]/layout.tsx',
+        '[locale]/paths.ts',
+        '[locale]/posts/[id]/layout.tsx',
+        '[locale]/posts/[id]/page.tsx',
+        '[locale]/posts/[id]/paths.ts',
+      ]).tree,
+      {
+        importPrefix: './routes',
+        mode: 'static',
+        withParams: new Set([
+          'layout.tsx',
+          '[locale]/layout.tsx',
+          '[locale]/posts/[id]/layout.tsx',
+          '[locale]/posts/[id]/page.tsx',
+        ]),
+      },
+    );
+    expect(source).toContain(
+      [
+        "  '[locale]/posts/[id]/paths.ts': {",
+        '    load: locale_posts_id_paths,',
+        '    schemas: [layout_params, locale_layout_params],',
+        '  },',
+      ].join('\n'),
+    );
+    expect(source).toContain(
+      "  '/:locale/posts/:id': [typeof layout_params, typeof locale_layout_params];",
+    );
+  });
+
+  it('types the paths.ts files that sibling groups put under one pattern by every distinct stack of layouts above them, so the type is what each receives', () => {
+    const source = emitRoutesModule(
+      parseRouteTree([
+        'page.tsx',
+        '[locale]/paths.ts',
+        '[locale]/(docs)/layout.tsx',
+        '[locale]/(docs)/[id]/page.tsx',
+        '[locale]/(docs)/[id]/paths.ts',
+        '[locale]/(blog)/[id]/edit/page.tsx',
+        '[locale]/(blog)/[id]/paths.ts',
+        '[locale]/(wiki)/[id]/history/page.tsx',
+        '[locale]/(wiki)/[id]/paths.ts',
+      ]).tree,
+      {
+        importPrefix: './routes',
+        mode: 'static',
+        withParams: new Set(['[locale]/(docs)/layout.tsx']),
+      },
+    );
+    expect(source).toContain(
+      [
+        'export type PathsSchemas = {',
+        "  '/:locale': [];",
+        "  '/:locale/:id': [typeof locale_docs_layout_params] | [];",
+        '};',
+      ].join('\n'),
+    );
+    expect(source).toContain(
+      [
+        "  '[locale]/(docs)/[id]/paths.ts': {",
+        '    load: locale_docs_id_paths,',
+        '    schemas: [locale_docs_layout_params],',
+        '  },',
+        "  '[locale]/(blog)/[id]/paths.ts': {",
+        '    load: locale_blog_id_paths,',
+        '    schemas: [],',
+        '  },',
+      ].join('\n'),
+    );
+  });
+
+  it('lists no values and imports no paths.ts under a running server, and still types what each receives', () => {
     const source = emitRoutesModule(
       parseRouteTree([...files, '[locale]/paths.ts']).tree,
       { importPrefix: './routes', mode: 'server', withParams },
     );
     expect(source).toContain('export const paths = {} as const;');
     expect(source).not.toContain('/paths');
+    expect(source).not.toContain('PathsChecks');
+    expect(source).toContain(
+      "import layout, { paramsSchema as layout_params } from './routes/layout';",
+    );
+    expect(source).toContain(
+      [
+        'export type PathsSchemas = {',
+        "  '/:locale': [typeof layout_params];",
+        '};',
+      ].join('\n'),
+    );
   });
 
   it('leaves the route table as it is without the fallback.tsx', () => {

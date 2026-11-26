@@ -79,6 +79,8 @@ export const framework = (options: FrameworkOptions): PluginOption[] => {
     // どの middleware より先に並べる。答えるものが何であれ、ヘッダーは付いている
     headersPlugin(valid.headers ?? {}),
     ...engine(valid, { mode: valid.mode, runtimeDir: RUNTIME_DIR }),
-    ...(valid.mode === 'static' ? staticMode(valid) : [serverMode()]),
+    ...(valid.mode === 'static'
+      ? staticMode(valid, { runtimeDir: RUNTIME_DIR })
+      : [serverMode()]),
   ];
 };

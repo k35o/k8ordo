@@ -96,7 +96,7 @@ export default async function ProductPage({
 import type { Paths } from '@k8ordo/framework';
 
 const paths: Paths<'/products/:id'> = async () =>
-  (await listProducts()).map((product) => String(product.id));
+  (await listProducts()).map((product) => product.id);
 
 export default paths;
 ```

@@ -181,8 +181,8 @@ export const fallbackNote = message({
 });
 
 export const pathsDefault = message({
-  ja: "default export：そのディレクトリのパラメータの値を、文字列の配列かそのPromiseで返す関数です。上のディレクトリのパラメータを引数として受け取ります。型は`Paths<'/:locale/posts/:id'>`のように、そのディレクトリまでのパターンで付けます。",
-  en: "Default export: a function that returns the values of its directory’s parameter, as an array of strings or a promise of one. It receives the parameters of the directories above it. Type it by the pattern down to its directory, as in `Paths<'/:locale/posts/:id'>`.",
+  ja: "default export：そのディレクトリのパラメータの値を、配列かそのPromiseで返す関数です。値の型はリンクの`href()`が受け取る型と同じです。上のディレクトリのパラメータを、そのディレクトリより上にあるレイアウトの`paramsSchema`が読んだ形で引数として受け取ります。型は`Paths<'/:locale/posts/:id'>`のように、そのディレクトリまでのパターンで付けます。",
+  en: "Default export: a function that returns the values of its directory’s parameter, as an array or a promise of one, typed as a link’s `href()` takes them. It receives the parameters of the directories above it as the `paramsSchema` exports of the layouts above its directory read them. Type it by the pattern down to its directory, as in `Paths<'/:locale/posts/:id'>`.",
 });
 
 export const pathsPlace = message({

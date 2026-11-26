@@ -92,8 +92,11 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 - [Parameters](references/params.md): `paramsSchema` — a refused value is a
   pathname the pattern does not answer; a `[...name]` directory's receives
   the array of segments — and, under static mode, `paths.ts`:
-  the values of its directory's parameter (`Paths<Pattern>`), given the
-  params above it, for every page, `route.ts` and `redirect.ts` below it,
+  the values of its directory's parameter (`Paths<Pattern>`, typed as a
+  link takes them, spelled as `href` spells them), given the params above
+  it as the layouts above its directory read them (their `paramsSchema`
+  exports; values one of them refuses fail the build), for every page,
+  `route.ts` and `redirect.ts` below it,
   and what fails the build; and `fallback.tsx` for the values it does not
   return — the shell it renders (no props, the layouts' schemas only, the
   shell's `pathname`), where a shell stands (below the values of the

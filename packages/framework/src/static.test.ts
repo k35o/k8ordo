@@ -74,6 +74,8 @@ type Previewed =
     }
   | { readonly passed: string };
 
+const RUNTIME_DIR = '/k8ordo-runtime';
+
 let root: string;
 
 beforeEach(async () => {
@@ -153,9 +155,10 @@ const hooks = (
   options: Omit<StaticOptions, 'mode'> = {},
   resolvedBase = '/',
 ) => {
-  const plugin = staticMode({ mode: 'static', ...options }).find(
-    ({ name }) => name === 'k8ordo:static',
-  );
+  const plugin = staticMode(
+    { mode: 'static', ...options },
+    { runtimeDir: RUNTIME_DIR },
+  ).find(({ name }) => name === 'k8ordo:static');
   if (plugin === undefined) throw new Error('no k8ordo:static plugin');
   const { logger, said } = recordingLogger();
   (
@@ -221,23 +224,21 @@ const hooks = (
             installed = middleware;
           },
         },
-        // RSC の環境の runner の代わり。paths.ts を読むと、テストが決めた値を返す
+        // RSC の環境の runner の代わり。ハンドラの入口の pathValues は、
+        // テストが決めた値を返す
         environments: {
           rsc: {
             runner: {
-              import: (file) => {
-                const values =
-                  listed[
-                    path
-                      .relative(path.join(root, 'src', 'routes'), file)
-                      .split(path.sep)
-                      .join('/')
-                  ];
+              import: (id) => {
+                if (id !== path.join(RUNTIME_DIR, 'entry.rsc.mjs')) {
+                  return Promise.reject(new Error(`no module ${id} here`));
+                }
                 return Promise.resolve({
-                  default: () => {
+                  pathValues: (file: string) => {
                     asked += 1;
+                    const values = listed[file];
                     if (values instanceof Error) throw values;
-                    return values;
+                    return { values };
                   },
                 });
               },
@@ -359,13 +360,14 @@ const handlerAnswering = async (
     path.join(dir, 'index.js'),
     `import { appendFileSync } from 'node:fs';
 const answers = ${JSON.stringify(answers)};
-export const pathValues = async (file) =>
-  JSON.parse(
+export const pathValues = async (file) => ({
+  values: JSON.parse(
     await (await import('node:fs/promises')).readFile(
       new URL('../../listed.json', import.meta.url),
       'utf8',
     ),
-  )[file];
+  )[file],
+});
 // 本物のハンドラは、文書を描いたペイロードを答えに持たせる。ここでは
 // <pathname>/index.rsc と書かれた答えの本文がそれ
 const payloads = new WeakMap();

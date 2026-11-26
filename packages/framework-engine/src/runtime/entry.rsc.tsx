@@ -141,26 +141,36 @@ const withDeclared = (response: Response): Response => {
 
 /**
  * What a `paths.ts` answers when asked for its parameter's values, given the
- * params above it. The build into files asks through here, from the built
- * bundle, so the file runs as the pages do — the application's aliases, and
- * the module instances the pages read their data through. Whatever it
- * returned is handed back as it is: the build is what says a value is not one.
+ * params above it as the build spelled them. The build into files, and
+ * `vite dev`, ask through here, from the RSC environment, so the file runs
+ * as the pages do — the application's aliases, and the module instances the
+ * pages read their data through. The params above are first read by the
+ * schemas of the layouts in the directories above the file's, and the file
+ * receives what they produced; when one of them refuses, the file is not
+ * asked and the answer is `null`. Otherwise whatever it returned is handed
+ * back as it is, as `values`: the build is what says a value is not one.
  */
 export const pathValues = async (
   file: string,
-  params: Readonly<Record<string, string>>,
-): Promise<unknown> => {
-  const load = paths[file];
-  if (load === undefined) {
+  above: Readonly<Record<string, string>>,
+): Promise<{ readonly values: unknown } | null> => {
+  const supply = paths[file];
+  if (supply === undefined) {
     throw new Error(`${file} is not a paths.ts of this build`);
   }
-  const { default: values } = await load();
+  const accepted = parseParams(supply.schemas, above);
+  if (accepted === null) return null;
+  const { default: values } = await supply.load();
   if (typeof values !== 'function') {
     throw new TypeError(
       `${file} has to export default a function returning its parameter's values`,
     );
   }
-  return (values as (above: typeof params) => unknown)(params);
+  return {
+    values: await (
+      values as (params: Readonly<Record<string, unknown>>) => unknown
+    )(accepted.params),
+  };
 };
 
 /** A request for a shell: the URL is the shell pathname itself. */

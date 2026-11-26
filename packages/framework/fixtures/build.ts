@@ -75,6 +75,24 @@ export const failedBuild = async (
 };
 
 /**
+ * Builds the application under `fixtures/<name>/` in static mode, and says
+ * where the files it wrote went.
+ */
+export const staticBuild = async (name: string): Promise<string> => {
+  const root = rootOf(name);
+  const out = path.join(root, 'dist');
+  await rm(out, { recursive: true, force: true });
+  const builder = await createBuilder({
+    root,
+    configFile: false,
+    logLevel: 'error',
+    plugins: [framework({ mode: 'static' })],
+  });
+  await builder.buildApp();
+  return path.join(out, 'client');
+};
+
+/**
  * Builds the application under `fixtures/<name>/` in static mode with
  * `reactCompiler` and source maps, and says where each environment's output
  * went.
@@ -110,6 +128,9 @@ export const devServer = (
 ): Promise<ViteDevServer> =>
   createServer({
     root: rootOf(name),
+    // 既定の置き場はこのパッケージの node_modules/.vite で、並べて走る別の
+    // テストファイルの dev サーバーと事前バンドルを書き換え合う
+    cacheDir: path.join(rootOf(name), 'node_modules', '.vite'),
     configFile: false,
     logLevel: 'silent',
     plugins: [framework({ mode })],

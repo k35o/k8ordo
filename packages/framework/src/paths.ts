@@ -14,6 +14,7 @@ import type {
   RouteDir,
 } from '@k8ordo/framework-engine';
 import { normalizePathname } from '@k8ordo/router';
+import type { ParamValue } from '@k8ordo/router';
 
 /**
  * Every pattern the table declares — pages, redirects and catch-alls — in
@@ -342,16 +343,26 @@ type At = {
  * characters this module reads a pathname by: `*`, and the `:` that would
  * make a value starting with one a parameter left open.
  */
-const segmentOf = (value: string): string =>
-  encodeURIComponent(value).replaceAll('*', '%2A').replaceAll(':', '%3A');
+const segmentOf = (spelling: string): string =>
+  encodeURIComponent(spelling).replaceAll('*', '%2A').replaceAll(':', '%3A');
 
-const valuesFrom = (returned: unknown): string[] | null =>
-  Array.isArray(returned) &&
-  returned.every(
-    (value): value is string => typeof value === 'string' && value !== '',
-  )
-    ? [...new Set(returned)]
+const isValue = (value: unknown): value is ParamValue =>
+  (typeof value === 'string' && value !== '') ||
+  typeof value === 'number' ||
+  typeof value === 'bigint' ||
+  typeof value === 'boolean';
+
+const spellingsFrom = (returned: unknown): string[] | null =>
+  Array.isArray(returned) && returned.every(isValue)
+    ? [...new Set(returned.map(String))]
     : null;
+
+/**
+ * What asking a `paths.ts` came to: what it returned, or `null` when a
+ * schema of a layout above its directory refused the values above it, so it
+ * was not asked.
+ */
+export type Asked = { readonly values: unknown } | null;
 
 /**
  * What the `paths.ts` files say the site holds: each is asked for its
@@ -367,16 +378,28 @@ const valuesFrom = (returned: unknown): string[] | null =>
  * keeps a shell for the rest. Everything else is left for `planPaths` to
  * call unresolved.
  *
- * A value is the segment as a visitor reads it, escaped here for the URL.
+ * A value is what a link to the page takes, and is spelled here as `href`
+ * spells it. A paths.ts below is handed the spellings above it, so
+ * `valuesOf` can read them as the layouts above its directory do — not the
+ * values as returned, which no page ever receives — and a paths.ts under
+ * values one of those refuses is a problem, as a shell there is.
  */
 export const suppliedFrom = async (
   tree: RouteDir,
-  valuesOf: (file: string, params: Readonly<Record<string, string>>) => unknown,
+  valuesOf: (
+    file: string,
+    above: Readonly<Record<string, string>>,
+  ) => Promise<Asked>,
 ): Promise<Supplied> => {
   const locations: string[] = [];
   const problems = new Set<string>();
+  const refused: string[] = [];
 
-  const walk = async (dir: RouteDir, ats: readonly At[]): Promise<void> => {
+  const walk = async (
+    dir: RouteDir,
+    ats: readonly At[],
+    pattern: string,
+  ): Promise<void> => {
     const answers = dir.page ?? dir.route ?? dir.redirect;
     const shell = dir.page !== null && dir.fallback !== null;
     if (answers !== null) {
@@ -389,11 +412,13 @@ export const suppliedFrom = async (
     }
     await Promise.all(
       dir.children.map(async (child) => {
-        if (child.kind === 'group') return walk(child, ats);
+        if (child.kind === 'group') return walk(child, ats, pattern);
+        const below = `${pattern === '/' ? '' : pattern}${child.key}`;
         if (child.kind !== 'param') {
           return walk(
             child,
             ats.map((at) => ({ ...at, path: `${at.path}${child.key}` })),
+            below,
           );
         }
         const name = child.key.slice(2);
@@ -403,8 +428,8 @@ export const suppliedFrom = async (
           open: true,
         });
         const { paths: file } = child;
-        if (file === null) return walk(child, ats.map(opened));
-        const below = await Promise.all(
+        if (file === null) return walk(child, ats.map(opened), below);
+        const reached = await Promise.all(
           ats.map(async (at): Promise<At[]> => {
             if (at.open) {
               problems.add(
@@ -412,17 +437,22 @@ export const suppliedFrom = async (
               );
               return [];
             }
-            const values = valuesFrom(await valuesOf(file, at.params));
-            if (values === null) {
+            const asked = await valuesOf(file, at.params);
+            if (asked === null) {
+              refused.push(`${at.path}/:${name} (${file})`);
+              return [];
+            }
+            const spellings = spellingsFrom(asked.values);
+            if (spellings === null) {
               problems.add(
-                `${file} has to return an array of non-empty strings, the values of :${name}`,
+                `${file} has to return an array of the values of :${name}, each a non-empty string, a number, a bigint or a boolean`,
               );
               return [];
             }
             return [
-              ...values.map((value) => ({
-                path: `${at.path}/${segmentOf(value)}`,
-                params: { ...at.params, [name]: value },
+              ...spellings.map((spelling) => ({
+                path: `${at.path}/${segmentOf(spelling)}`,
+                params: { ...at.params, [name]: spelling },
                 open: false,
               })),
               // 挙げなかった値には、このディレクトリのページの殻が答える
@@ -432,13 +462,23 @@ export const suppliedFrom = async (
             ];
           }),
         );
-        return walk(child, below.flat());
+        return walk(child, reached.flat(), below);
       }),
     );
   };
-  await walk(tree, [{ path: '', params: {}, open: false }]);
+  await walk(tree, [{ path: '', params: {}, open: false }], '/');
 
-  return { locations, problems: [...problems] };
+  return {
+    locations,
+    problems: [
+      ...problems,
+      ...(refused.length > 0
+        ? [
+            `the paths.ts files stand where a params schema refuses the values above them, so they were not asked: ${refused.toSorted().join(', ')}`,
+          ]
+        : []),
+    ],
+  };
 };
 
 export type ShadowedShell = {

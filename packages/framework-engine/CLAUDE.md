@@ -884,17 +884,30 @@ pnpm check         # check:write to auto-fix
   directory — anywhere else is a problem, in both modes — and
   `pathsFiles(tree)` lists them, outermost first, each with its directory's
   pattern. Under `'static'` the generated table lists `paths`, keyed by the
-  file, each a late `() => import()`, and checks every default export
-  against `Paths<pattern>` in a `PathsChecks` type; under `'server'` it is
-  `{}` and no paths.ts is compiled in. `entry.rsc` exports
-  `pathValues(file, params)`, which loads the file through that table and
-  calls its default export with the params above it, handing back whatever
-  it returned: the static build calls it from the built bundle, so a
-  paths.ts runs in the pages' module graph (the application's aliases,
+  file, each a late `() => import()` (`load`) with the schemas of the
+  layouts in the directories above the file's (`schemas` — the shells'
+  rule: not a layout in its own directory, nor the page beside it, since
+  either may read the parameter being asked for), and checks every default
+  export against `Paths<pattern>` in a `PathsChecks` type; under `'server'`
+  it is `{}` and no paths.ts is compiled in. Under either mode the table
+  types what each receives by its directory's pattern in `PathsSchemas`
+  (those layouts' `*_params`, imported with the table in both modes), which
+  the register writes into the router's `Register` as `pathsParams` for
+  `Paths` to read, so a paths.ts type-checks the same under both modes.
+  Where sibling route groups put two paths.ts under one pattern, the entry
+  is the union of one tuple per distinct stack (`[typeof a_params] | []`),
+  and the router's `ParsedParams` distributes over it, so `Paths` is the
+  union of what each receives.
+  `entry.rsc` exports `pathValues(file, above)`, which runs the spellings
+  the build wrote through those schemas (`parseParams`),
+  answers `null` without loading the file when one refuses, and otherwise
+  calls its default export with what they produced and hands back whatever
+  it returned as `values`: the static build calls it from the built bundle,
+  and `vite dev` from the same entry through the RSC environment's runner,
+  so a paths.ts runs in the pages' module graph (the application's aliases,
   `server-only` modules, the instances the pages read through), and what
-  counts as a value is the framework's to say (`suppliedFrom`). `vite dev`
-  reads the same files through the RSC environment's runner, in
-  `@k8ordo/framework`.
+  counts as a value, and how a refusal is named, is the framework's to say
+  (`suppliedFrom`).
 - **A shell carries its not-found, and shows it in place.** The nearest
   not-found is rendered into `Payload.notFound`, in the shell's render and
   context — the nearest that takes none of the params the shell leaves

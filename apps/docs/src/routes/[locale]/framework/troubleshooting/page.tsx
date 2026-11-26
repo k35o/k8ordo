@@ -41,6 +41,12 @@ const SYMPTOMS: readonly Symptom[] = [
     fix: t.aboveFix,
   },
   {
+    id: 'paths-refused',
+    title: t.pathsRefusedTitle,
+    cause: t.pathsRefusedCause,
+    fix: t.pathsRefusedFix,
+  },
+  {
     id: 'paths-place',
     title: t.pathsPlaceTitle,
     cause: t.pathsPlaceCause,
