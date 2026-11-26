@@ -63,3 +63,19 @@ it('action の無い Card は押せない', async () => {
     .toBeInTheDocument();
   expect(screen.getByRole('button').elements()).toHaveLength(0);
 });
+
+it('FormControl に入れた値も、フォームの状態に乗って届く', async () => {
+  const { screen, onAction } = await mount(
+    [
+      'root = Form([name, send])',
+      'name = FormControl("お名前", "text", "name", "山田 太郎")',
+      'send = Button("送信")',
+    ].join('\n'),
+  );
+
+  await screen.getByPlaceholder('山田 太郎').fill('テスト 花子');
+  await screen.getByRole('button', { name: '送信' }).click();
+
+  await expect.poll(() => onAction.mock.calls.length).toBe(1);
+  expect(JSON.stringify(onAction.mock.lastCall)).toContain('テスト 花子');
+});

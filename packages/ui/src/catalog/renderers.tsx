@@ -1352,10 +1352,11 @@ export const FileFieldWidget: FC<{ props: FileFieldProps }> = ({ props }) => {
   );
 };
 
-export const FormControlWidget: FC<{ props: FormControlProps }> = ({
-  props,
-}) => {
-  const [value, setValue] = useState(props.defaultValue ?? '');
+export function renderFormControl(
+  props: FormControlProps,
+  value: string,
+  setValue: (next: string) => void,
+): ReactNode {
   const fieldType = u(props.fieldType) ?? 'text';
   return (
     <FormControl
@@ -1399,4 +1400,4 @@ export const FormControlWidget: FC<{ props: FormControlProps }> = ({
       required={u(props.required)}
     />
   );
-};
+}

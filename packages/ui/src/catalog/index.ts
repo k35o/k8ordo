@@ -418,6 +418,10 @@ export const catalog = {
     description:
       'Field with a label and help or error text (text/textarea/password).',
     props: s.formControlProps,
+    value: {
+      prop: 'defaultValue',
+      initial: (props) => props.defaultValue ?? '',
+    },
   }),
 };
 
