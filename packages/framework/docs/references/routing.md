@@ -450,7 +450,10 @@ method it does not export gets a `405` whose `Allow` names the ones it does.
 The guards above it run first. A `POST` to a `route.ts` is not held to the
 same-origin rule a Server Action is — what posts to one, a webhook, is not a
 form on this site — so it checks what it needs itself. It answers the request
-as much as a guard does: [`cookies()`](guards.md#cookies),
+as much as a guard does, and ends it the same ways: `redirect(url)` answers
+with a `303`, and `notFound()` with the nearest `not-found.tsx` under a 404
+— a `route.ts` that wants a 404 of another shape, JSON say, returns its own
+`Response`. [`cookies()`](guards.md#cookies),
 `responseHeaders()` and `requestHeaders()` work inside it, and
 [`waitUntil()`](guards.md#work-after-the-answer) keeps the host running for
 what it goes on with after answering — from inside a stream it answered

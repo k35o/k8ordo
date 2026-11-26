@@ -1,3 +1,5 @@
+import { endedBy } from './ended';
+import type { SaidNotFound } from './ended';
 import { inPhase, readInRequest } from './request-scope';
 
 /** The request methods a `route.ts` answers by exporting a function named so. */
@@ -78,8 +80,13 @@ export const methodNotAllowed = (module: AnyRouteModule): Response =>
 export const runRoute = async (
   { handler, headOnly }: RouteAnswer,
   context: RouteContext,
-): Promise<Response> => {
-  const response = await inPhase('route', () => handler(context));
+): Promise<Response | SaidNotFound> => {
+  let response: unknown;
+  try {
+    response = await inPhase('route', () => handler(context));
+  } catch (error) {
+    return endedBy(error);
+  }
   if (!(response instanceof Response)) {
     throw new TypeError(
       `a route.ts ${context.request.method} answers with a Response, and this one returned something else`,

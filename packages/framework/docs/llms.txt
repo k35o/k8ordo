@@ -30,8 +30,9 @@
 > answers 307/308 (server) or is written as a page that sends the visitor on
 > (static), and a `route.ts` answers its URL with a `Response` (server: every
 > method it exports; static: written as the file its `GET` answers). Under
-> server mode a Server Action ends with `redirect()`, a `guard.ts` runs before
-> whatever answers below it, `cookies()` reads and writes cookies, and a page
+> server mode a Server Action, a `guard.ts` and a `route.ts` end the request
+> with `redirect(href(…))` (a `303` from a guard or a `route.ts`) or, the
+> last two, `notFound()`, a `guard.ts` runs before whatever answers below it, `cookies()` reads and writes cookies, and a page
 > receives `request`. Under static mode a parameter's values come from a
 > `paths.ts` in its directory (a function returning them, typed `Paths`,
 > run with the pages' own modules, applied to every route below it) —
@@ -108,8 +109,10 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   from it (what no `error.tsx` catches — the root layout's own components —
   and why there is no `global-error.tsx`), a Server Component that throws
   stopping a static build, `notFound()` and `not-found.tsx` (a document
-  waits for its page under server mode; under a `fallback.tsx`, shown in
-  place), and `redirect.ts` in each mode.
+  waits for its page under server mode; from a `guard.ts` or a `route.ts`,
+  the same 404; under a `fallback.tsx`, shown in place), and `redirect.ts`
+  in each mode — its `to` a pattern in the table's terms, where
+  `redirect()` takes a URL.
 - [Execution boundaries](references/boundaries.md): `'use client'`,
   `use(browser())` for a component that needs a browser (and `useMatch` /
   `usePathname` waiting for it on their own under a `fallback.tsx`),
@@ -120,7 +123,9 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   `requestHeaders()` / `waitUntil()` in an action, the page context an
   action runs in, forms before JavaScript, and ending with `redirect()`.
 - [Guards, cookies and the request](references/guards.md): server mode only.
-  `guard.ts` (outer first; a `Response` ends the request),
+  `guard.ts` (outer first; `redirect(href(…))` ends the request with a
+  `303`, `notFound()` with the nearest `not-found.tsx` under 404, a returned
+  `Response` — a `401` — as it is),
   `responseHeaders()`, `cookies()` and its defaults, `waitUntil(promise)`
   for work that goes on after the answer (what it means, where it may be
   called, a rejection logged once), and the read-only `request` a page
@@ -178,8 +183,10 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   `vite.config.ts` only.
 - `@k8ordo/framework/server` — server mode only; a static build refuses any
   module that imports a value from it. What code inside the request handler
-  imports, needing nothing from Node but `AsyncLocalStorage`: `redirect(to)`
-  ends a Server Action by sending the visitor to `to`; `responseHeaders()`
+  imports, needing nothing from Node but `AsyncLocalStorage`: `redirect(url)`
+  ends what answers the request — a Server Action, a `guard.ts` or a
+  `route.ts` (the last two with a `303`) — by sending the visitor to the URL
+  `href()` built, and throws by name while a page renders; `responseHeaders()`
   is the `Headers` the final response carries, `cookies()` the request's
   cookies to read and write (`get`, `has`, `set(name, value,
   CookieOptions)`, `delete(name, CookieScope)`; defaults `path: '/'`,

@@ -88,7 +88,8 @@ const HOME_TREE = `src/routes/
     layout.tsx
     page.tsx`;
 
-const HOME_GUARD = `import { withBase } from '@k8ordo/framework';
+const HOME_GUARD = `import { href } from '@k8ordo/framework';
+import { redirect } from '@k8ordo/framework/server';
 import type { Guard } from '@k8ordo/framework/server';
 
 import { locales } from '../../i18n';
@@ -97,10 +98,7 @@ const guard: Guard<'/'> = ({ request }) => {
   const locale = locales.negotiateRequest(request, {
     cookie: 'locale',
   });
-  return new Response(null, {
-    status: 307,
-    headers: { location: withBase(locales.localize('/', locale)) },
-  });
+  redirect(href('/:locale', { locale }));
 };
 
 export default guard;`;
@@ -443,12 +441,12 @@ export default function FrameworkRoutingPage() {
         <CodeBlock code={HOME_TREE} lang="text" />
         <CodeBlock
           callouts={{
-            7: t.rootServerChooseCallout(),
+            8: t.rootServerChooseCallout(),
             11: t.rootServerStatusCallout(),
           }}
           code={HOME_GUARD}
           lang="ts"
-          marks={{ 7: 'highlight', 11: 'highlight', 12: 'highlight' }}
+          marks={{ 8: 'highlight', 11: 'highlight' }}
           title="src/routes/(home)/guard.ts"
         />
         <CodeBlock

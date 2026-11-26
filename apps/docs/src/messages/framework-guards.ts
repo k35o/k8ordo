@@ -35,24 +35,29 @@ export const endTitle = message({
   en: 'Return value',
 });
 
+export const endRedirectCallout = message({
+  ja: '`redirect()`で303を返して打ち切る。`href()`がViteの`base`を付ける',
+  en: '`redirect()` ends it with a 303; `href()` adds Vite’s `base`',
+});
+
+export const endResponseCallout = message({
+  ja: '返した`Response`が、そのまま応答になる',
+  en: 'A returned `Response` is the response',
+});
+
 export const endPassCallout = message({
   ja: '何も返さないと、リクエストを通す',
   en: 'Returning nothing lets the request through',
 });
 
-export const endStopCallout = message({
-  ja: '`Response`を返すと、リクエストを打ち切る',
-  en: 'A `Response` ends the request',
-});
-
-export const endLocationCallout = message({
-  ja: '`href()`で作るとViteの`base`が付く',
-  en: '`href()` adds Vite’s `base`',
-});
-
 export const endResponse = message({
-  ja: '`Response`を返すと、それがそのまま応答になります。リダイレクトでも`401`でも`403`でも構いません。内側のguardもページも実行されません。',
-  en: 'A returned `Response` is sent as the response, whether a redirect, a `401` or a `403`. Guards further in and the page do not run.',
+  ja: 'guardがリクエストを打ち切る方法は3つです。`redirect(url)`は、そのURLへの`303`で応答します。`notFound()`は、いちばん近い`not-found.tsx`を404で返します。どちらも例外を投げるので、後の行は実行されません。`401`や`403`のようにリダイレクトでない応答は、`Response`を返します。どの方法でも内側のguardもページも実行されず、guardが先に書いたcookieとヘッダーは応答に付きます。',
+  en: 'A guard ends a request three ways. `redirect(url)` answers with a `303` to that URL. `notFound()` answers with the nearest `not-found.tsx` under a 404. Both throw, so the lines after them never run. An answer that is not a redirect, such as a `401` or a `403`, is a returned `Response`. Whichever way, guards further in and the page do not run, and the cookies and headers the guard wrote first go out with the answer.',
+});
+
+export const endUrl = message({
+  ja: '`redirect()`にはURLを渡します。`redirect.ts`の行き先のようなルート表のパターンではないので、リンクと同じく`href()`で作ります。`href()`の結果にはViteの`base`が付いています。ページの描画中に`redirect()`を呼ぶと、`redirect() ends what answers the request`で始まるエラーになります。',
+  en: '`redirect()` takes a URL, not a pattern in the route table’s terms like a `redirect.ts` target, so build it with `href()`, as a link does; the result carries Vite’s `base`. Called while a page renders, `redirect()` fails with an error that starts `redirect() ends what answers the request`.',
 });
 
 export const endContext = message({
@@ -66,8 +71,8 @@ export const endType = message({
 });
 
 export const endOther = message({
-  ja: '`Response`でも`undefined`でもない値を返すと、エラーになります。エラー文は`a guard.ts returns a Response to end the request, or nothing to let it through`です。',
-  en: 'Returning anything but a `Response` or `undefined` is an error: `a guard.ts returns a Response to end the request, or nothing to let it through`.',
+  ja: '`Response`でも`undefined`でもない値を返すと、エラーになります。エラー文は`a guard.ts ends the request with redirect() or notFound(), or by returning a Response, and returns nothing to let it through`です。',
+  en: 'Returning anything but a `Response` or `undefined` is an error: `a guard.ts ends the request with redirect() or notFound(), or by returning a Response, and returns nothing to let it through`.',
 });
 
 export const headersTitle = message({

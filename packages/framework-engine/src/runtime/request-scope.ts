@@ -73,6 +73,9 @@ export const withRequest = <T>(
   );
 };
 
+/** The phase of the request in progress; `undefined` outside one. */
+export const currentPhase = (): Phase | undefined => storage.getStore()?.phase;
+
 /** Runs `fn` as `phase` of the request in progress. */
 export const inPhase = <T>(phase: Phase, fn: () => T): T => {
   const current = storage.getStore();

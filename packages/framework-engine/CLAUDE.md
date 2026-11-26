@@ -392,7 +392,8 @@ pnpm check         # check:write to auto-fix
   the router; a URL outside it is a plain `404`) before anything else reads
   the pathname, so payload paths, redirects, the match and `pathname` never
   see it; a `redirect.ts` target gets it back in front (`locationOf`), while
-  a Server Action's `redirect(to)` is a URL and is sent as given. The client
+  `redirect(to)` from a guard, a route.ts or a Server Action is a URL and is
+  sent as given. The client
   claims only same-origin URLs under the base, and `renderedHere`
   (`runtime/mount.tsx`) compares the payload's `pathname` with `location`
   minus the base. `entry.rsc` exports
@@ -710,16 +711,24 @@ pnpm check         # check:write to auto-fix
   pattern, answers a `GET` or `HEAD` with it, before the guards, and anything
   else with a `405`; it reads the params again from the pathname
   (`resolveRedirects`), because the router hands them decoded and a target
-  moves a segment as the URL spelled it. A Server Action's
-  `redirect()` throws a `Redirect`, and the handler answers 303 (no
-  JavaScript) or a payload with `redirect`.
+  moves a segment as the URL spelled it. `redirect(url)` throws a
+  `Redirect`, a URL sent as given: from a Server Action the handler answers
+  303 (no JavaScript) or a payload with `redirect`, and from a guard or a
+  `route.ts` 303, the one status a form posted without JavaScript needs
+  (a guard runs before the action a `POST` carries). `redirect()` in the
+  `render` phase throws by name: a page is a render, not an answer.
 - **A guard answers or adds, never rewrites.** `guard.ts` is a slot of the
   grammar but not of the router's table: the generator lists, per pattern,
   the guards along its directories (`guards`, outer first; `/*` always
   carries the root's, for a URL nothing answers), and the handler runs them
   after the params schemas matched — inside the answering pattern's `enter`
   — and before the Server Action and the render (`runtime/guard.ts`). A
-  `redirect.ts` is answered before them. The request in progress lives in
+  `redirect.ts` is answered before them. A guard ends the request with a
+  `Response` it returns, or with what it throws (`endedBy`,
+  `runtime/ended.ts`): `redirect()` as a `303`, `notFound()` as
+  `SAID_NOT_FOUND`, which `respond` answers as it answers a URL nothing
+  matched — the nearest not-found, under 404, with no page and no action
+  run — and anything else thrown on. A `route.ts` ends the same ways. The request in progress lives in
   an `AsyncLocalStorage` (`runtime/request-scope.ts`). Its phase
   says what is running — `guard`, `action`, or the `render` — and the
   response API (`cookies()`, `responseHeaders()`, `requestHeaders()`) throws
@@ -995,12 +1004,13 @@ src/
   runtime/mount.tsx          hydrate the HTML as rendered; renderedHere, whether it was rendered where the browser is
   runtime/hydrating-pathname.ts  the pathname @k8ordo/i18n reads while HTML rendered elsewhere is hydrated, and when it is
   runtime/pathname.ts        decodePathname, before a pathname may name a file
-  runtime/redirect.ts        redirect(), what a Server Action throws; where a redirect.ts sends a pathname the table matched to it
+  runtime/redirect.ts        redirect(), what a guard, a route.ts or a Server Action throws; where a redirect.ts sends a pathname the table matched to it
+  runtime/ended.ts           what a guard or a route.ts that threw ended the request with: a 303, or the not-found
   runtime/request.ts         the read-only request a page receives
   runtime/request-scope.ts   the request in progress: phases, cookies() / responseHeaders() / requestHeaders(), nonce(), answer(); waitUntil() and the host it hands promises to (HandlerContext), readInRequest
   runtime/server.ts          the request API, which is @k8ordo/framework/server: the framework points that entry here
   runtime/cookies.ts         the per-request cookie jar and its Set-Cookie lines
-  runtime/guard.ts           Guard / GuardContext, runGuards (outer first, first Response ends it)
+  runtime/guard.ts           Guard / GuardContext, runGuards (outer first, the first that ends it ends it)
   runtime/route.ts           ROUTE_METHODS, which export answers a method, 405, running it in the route phase, its body read inside the request
   runtime/render.tsx         the matched stack, nested through children; the framework's own not-found, inside the root layout
   runtime/page-watch.ts      a page called as the render calls it, its answer watched
@@ -1027,6 +1037,10 @@ fixtures/
                              layout, a page with a schema, a route.ts under a
                              guard and a redirect.ts, beside a literal and a
                              [name], whose handler runtime/rest.test.ts calls
+  ended/src/routes/          a guard that says redirect() after writing a
+                             cookie, one that says notFound(), and a route.ts
+                             that says either, whose handler
+                             runtime/ended.test.ts calls
   fallback/src/routes/       pages with a fallback.tsx (a server one, one that
                              says notFound(), a 'use client' one, one with a
                              not-found.tsx beside it) under a layout whose

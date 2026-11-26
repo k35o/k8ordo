@@ -1,6 +1,8 @@
 import { normalizePathname } from '@k8ordo/router';
 
-/** A redirect thrown from a Server Action. */
+import { currentPhase } from './request-scope';
+
+/** What `redirect()` throws, for whatever answers the request to catch. */
 export class Redirect extends Error {
   constructor(readonly to: string) {
     super(`redirect to ${to}`);
@@ -9,15 +11,27 @@ export class Redirect extends Error {
 }
 
 /**
- * Ends a Server Action by sending the visitor somewhere else. Thrown, so an
- * action reads the way it did before the redirect was added — the lines
- * after it never run. A form posted without JavaScript is answered with a
- * `303` to `to`; one posted by the client runtime is answered with a
- * payload that tells the browser to navigate there.
+ * Ends what answers the request — a `guard.ts`, a `route.ts` or a Server
+ * Action — by sending the visitor to `to`, a URL: `href()`'s, with Vite's
+ * `base` in it. Thrown, so the lines after it never run, and the cookies
+ * and headers written before it go out with the redirect. A guard, a
+ * route.ts and a form posted without JavaScript are answered with a `303`
+ * to `to`; an action the client runtime posted, with a payload that tells
+ * the browser to navigate there. A page is a render, not an answer, so
+ * calling it while one renders throws by name.
  */
 export const redirect = (to: string): never => {
+  if (currentPhase() === 'render') {
+    throw new Error(
+      `redirect() ends what answers the request, and a page is a render — redirect from a guard.ts, a route.ts or a Server Action, or answer the URL with a redirect.ts (it was asked for ${to})`,
+    );
+  }
   throw new Redirect(to);
 };
+
+/** A redirect's answer: `to` in `location`, under `status`. */
+export const redirectResponse = (to: string, status: number): Response =>
+  new Response(null, { status, headers: { location: to } });
 
 /** What a `redirect.ts` route file default-exports. */
 export type RedirectTarget =

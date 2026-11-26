@@ -15,15 +15,11 @@ run outer first, one at a time:
 ```ts
 // src/routes/admin/guard.ts
 import { href } from '@k8ordo/framework';
-import { cookies } from '@k8ordo/framework/server';
+import { cookies, redirect } from '@k8ordo/framework/server';
 import type { Guard } from '@k8ordo/framework/server';
 
 const guard: Guard<'/admin'> = () => {
-  if (cookies().has('session')) return;
-  return new Response(null, {
-    status: 303,
-    headers: { location: href('/login') },
-  });
+  if (!cookies().has('session')) redirect(href('/login'));
 };
 
 export default guard;
@@ -37,15 +33,24 @@ every layout, where no schema has typed them.
 argument's), and the generated table checks each `guard.ts` against its
 directory's pattern either way.
 
-**A `Response` ends the request; nothing lets it through.** A redirect, a
-`401`, a `403` — whatever it returns is the answer, and the guards inside it
-and the page below never run. Returning nothing hands the request on to the
-next guard, and the last one to what answers the URL.
+**A guard ends the request three ways; returning nothing lets it through.**
+`redirect(url)` answers with a `303` to `url`; `notFound()` answers with
+the nearest `not-found.tsx` under a 404, as for a URL nothing answers; and
+a `Response` it returns — a `401`, a `403` — is the answer as it is. Both
+functions throw, so the lines after them never run, and the guards inside it
+and the page below never run either. What the guard wrote before it ended
+the request — a cookie deleted, a header — goes out on the answer. Returning
+nothing hands the request on to the next guard, and the last one to what
+answers the URL. A redirect is `redirect()`, never a `Response` with a
+`location` of your own: the one way an action ends with one too.
 
-A redirect's `location` goes out as the guard wrote it. It is a URL, not a
-pattern in the table's terms like a `redirect.ts` target, so build it with
-`href()`, which carries Vite's `base` when the application is served under
-one. A pathname built some other way gets its base from `withBase()`.
+`redirect()` takes a URL, not a pattern in the table's terms like a
+`redirect.ts` target, so build it with `href()`, which carries Vite's
+`base` when the application is served under one. A pathname built some
+other way gets its base from `withBase()`. A `303` is what a form posted
+without JavaScript needs — the browser follows it with a `GET`, and a
+guard runs before the Server Action a `POST` carries — and for a `GET` it
+is the same as a `307`.
 
 Letting a request through can still add to its answer. `responseHeaders()`
 is the `Headers` the final response will carry, whatever answers — the page,

@@ -234,13 +234,13 @@ export const rootServerChooseCallout = message({
 });
 
 export const rootServerStatusCallout = message({
-  ja: '訪問者ごとに答えが変わるので、308でなく307',
-  en: '307, not 308: the answer depends on who asks',
+  ja: 'guardの`redirect()`は303。`href()`がViteの`base`を付ける',
+  en: 'A guard’s `redirect()` answers 303; `href()` adds Vite’s `base`',
 });
 
 export const rootServerGuard = message({
-  ja: 'serverモードだけで使えます。`/`へのリクエストには、ページを描画する前に`(home)/guard.ts`が応答します。`negotiateRequest`でロケールを選び、そのロケールのURLへの`307`を返します。`localize`の結果にはViteの`base`が付かないので、`withBase`で付けます。',
-  en: 'Server mode only. Requests for `/` are answered by `(home)/guard.ts` before any page renders. It picks a locale with `negotiateRequest` and returns a `307` to that locale’s URL. `localize` leaves out Vite’s `base`, so `withBase` adds it.',
+  ja: "serverモードだけで使えます。`/`へのリクエストには、ページを描画する前に`(home)/guard.ts`が応答します。`negotiateRequest`でロケールを選び、`redirect(href('/:locale', { locale }))`でそのロケールのURLへ送ります。リダイレクトは`Response`を組まずに`redirect()`で書き、URLはリンクと同じく`href()`で作ります。",
+  en: "Server mode only. Requests for `/` are answered by `(home)/guard.ts` before any page renders. It picks a locale with `negotiateRequest` and sends the visitor to that locale’s URL with `redirect(href('/:locale', { locale }))`. A redirect is `redirect()`, not a `Response` built by hand, and its URL comes from `href()`, as a link’s does.",
 });
 
 export const rootServerGroup = message({

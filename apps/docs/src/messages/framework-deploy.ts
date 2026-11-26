@@ -689,8 +689,8 @@ export const baseList = [
 ] as const;
 
 export const baseRedirect = message({
-  ja: 'serverモードでServer Actionから呼ぶ`redirect()`と、`guard.ts`が返す`Response`の`location`：`base`を付けずにそのまま送ります。どちらもURLなので`href()`で作ります。ほかの方法で作ったパスには、`@k8ordo/framework`の`withBase()`で`base`を付けます。',
-  en: 'In server mode, `redirect()` from a Server Action and the `location` of a `Response` a `guard.ts` returns: sent as written, without the base. Both are URLs, so build them with `href()`. Give a path built some other way its base with `withBase()` from `@k8ordo/framework`.',
+  ja: 'serverモードでServer Actionや`guard.ts`、`route.ts`から呼ぶ`redirect()`：`base`を付けずにそのまま送ります。URLなので`href()`で作ります。ほかの方法で作ったパスには、`@k8ordo/framework`の`withBase()`で`base`を付けます。',
+  en: 'In server mode, `redirect()` from a Server Action, a `guard.ts` or a `route.ts`: sent as written, without the base. It takes a URL, so build it with `href()`. Give a path built some other way its base with `withBase()` from `@k8ordo/framework`.',
 });
 
 export const baseStatic = message({
