@@ -110,6 +110,8 @@ peerDependencyRules:
     storybook>vite-plus: '1.4'
 
 minimumReleaseAgeExclude:
+  # examples/ui-integrations だけが使う。A2UI 1.0 に対応した版がまだ 7 日を経ていない
+  - '@a2ui/*'
   - '@better-css-modules/*'
   - '@k8o/*'
   - 'storybook-addon-determinism'

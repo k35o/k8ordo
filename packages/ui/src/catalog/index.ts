@@ -1,4 +1,4 @@
-import type { z } from 'zod';
+import { z } from 'zod';
 
 import * as s from './schemas';
 
@@ -424,6 +424,16 @@ export const catalogRules: readonly string[] = [
 const isCatalogName = (type: string): type is CatalogName =>
   Object.hasOwn(catalog, type);
 
+/** Options of `catalogPropIssues`. */
+export type CatalogPropIssuesOptions = {
+  /**
+   * Props whose value the format resolves later, such as one a json-render
+   * spec binds with `{ "$bindState": "/form/name" }`. Their names are still
+   * checked; their values are not, and a required one may be among them.
+   */
+  unresolved?: readonly string[];
+};
+
 /**
  * Checks what a model wrote for one component and returns what is wrong with
  * it, in English, ready to send back to the model. An empty array means the
@@ -437,14 +447,37 @@ const isCatalogName = (type: string): type is CatalogName =>
  * catalogPropIssues('Button', { label: 'OK', colour: 'primary' });
  * // ['Button: Unknown prop "colour". Allowed props: label, variant, …']
  */
-export const catalogPropIssues = (type: string, props: unknown): string[] => {
+export const catalogPropIssues = (
+  type: string,
+  props: unknown,
+  options: CatalogPropIssuesOptions = {},
+): string[] => {
   if (!isCatalogName(type)) {
     return [
       `Unknown component type "${type}". Use one of: ${Object.keys(catalog).join(', ')}.`,
     ];
   }
-  const schema: z.ZodObject = catalog[type].props;
-  const parsed = schema.safeParse(props);
+  const full: z.ZodObject = catalog[type].props;
+  const unresolved = (options.unresolved ?? []).filter((key) =>
+    Object.hasOwn(full.shape, key),
+  );
+  const schema =
+    unresolved.length === 0
+      ? full
+      : z.object(
+          Object.fromEntries(
+            Object.entries(full.shape).filter(
+              ([key]) => !unresolved.includes(key),
+            ),
+          ),
+        );
+  const values =
+    typeof props === 'object' && props !== null
+      ? Object.fromEntries(
+          Object.entries(props).filter(([key]) => !unresolved.includes(key)),
+        )
+      : props;
+  const parsed = schema.safeParse(values);
   const issues = parsed.success
     ? []
     : parsed.error.issues.map((issue) => {
@@ -452,7 +485,7 @@ export const catalogPropIssues = (type: string, props: unknown): string[] => {
         return `${type}${path === '' ? '' : `.${path}`}: ${issue.message}`;
       });
 
-  const allowed = Object.keys(schema.shape);
+  const allowed = Object.keys(full.shape);
   const given =
     typeof props === 'object' && props !== null ? Object.keys(props) : [];
   for (const key of given) {

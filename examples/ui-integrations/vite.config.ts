@@ -1,7 +1,42 @@
+import type { IncomingMessage, ServerResponse } from 'node:http';
+
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
+import type { Plugin } from 'vite';
 import { defineConfig } from 'vite-plus';
+
+type GenerateModule = {
+  handleGenerate: (
+    request: IncomingMessage,
+    response: ServerResponse,
+  ) => Promise<void>;
+};
+
+// 鍵で Claude を呼ぶ口なので、配る build ではなく手元の dev サーバーにだけ置く。
+// ssrLoadModule で読み、プロンプトやつなぎの変更を再起動なしで反映する
+const generateEndpoint = (): Plugin => ({
+  name: 'ui-integrations:generate',
+  apply: 'serve',
+  configureServer(server) {
+    server.middlewares.use('/api/generate', (request, response, next) => {
+      if (request.method !== 'POST') {
+        next();
+        return;
+      }
+      void (async () => {
+        try {
+          const endpoint = (await server.ssrLoadModule(
+            '/src/playground/server.ts',
+          )) as GenerateModule;
+          await endpoint.handleGenerate(request, response);
+        } catch (error) {
+          next(error);
+        }
+      })();
+    });
+  },
+});
 
 // CI はエンジンごとにジョブを分けて並べるので、TEST_BROWSER で 1 つに絞れる
 const browsers = (['chromium', 'firefox', 'webkit'] as const).filter(
@@ -11,7 +46,7 @@ const browsers = (['chromium', 'firefox', 'webkit'] as const).filter(
 );
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), generateEndpoint()],
   // 既定の target では Lightning CSS が ui の light-dark() と :dir() を
   // 書き換え、意味が変わる。ui の GUIDE のとおり、ui が組まれている版に向ける
   build: { cssTarget: ['chrome146', 'edge146', 'firefox151', 'safari26'] },

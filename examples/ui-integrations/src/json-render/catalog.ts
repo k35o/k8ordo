@@ -67,6 +67,14 @@ export type ValidateGeneratedSpecResult =
   | { ok: true; spec: UISpec; fixes: string[] }
   | { ok: false; issues: GeneratedSpecIssue[]; repairPrompt: string };
 
+// `{ "$bindState": "/x" }` や `{ "$state": "/x" }` は描画のときに json-render が
+// 値に置き換えるので、この時点では値として確かめられない
+const isExpression = (value: unknown): boolean =>
+  typeof value === 'object' &&
+  value !== null &&
+  !Array.isArray(value) &&
+  Object.keys(value).some((key) => key.startsWith('$'));
+
 const buildRepairPrompt = (issues: GeneratedSpecIssue[]): string =>
   [
     'The generated UI spec is invalid. Fix the following issues and return the corrected spec:',
@@ -105,10 +113,11 @@ export const validateGeneratedSpec = (
       message: issue.message,
     })),
     ...Object.entries(spec.elements).flatMap(([elementKey, element]) =>
-      catalogPropIssues(element.type, element.props).map((message) => ({
-        elementKey,
-        message,
-      })),
+      catalogPropIssues(element.type, element.props, {
+        unresolved: Object.entries(element.props)
+          .filter(([, value]) => isExpression(value))
+          .map(([key]) => key),
+      }).map((message) => ({ elementKey, message })),
     ),
   ];
 

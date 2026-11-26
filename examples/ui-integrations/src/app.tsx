@@ -1,53 +1,24 @@
-import { AiSdkChatDemo } from './ai-sdk/demo';
-import { JsonRenderDemo } from './json-render/demo';
-import { OpenUiDemo } from './openui/demo';
+import { Code, Heading } from '@k8ordo/ui';
 
-function Section({
-  title,
-  description,
-  children,
-}: {
-  title: string;
-  description: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <section className="flex flex-col gap-3">
-      <div className="flex flex-col gap-1">
-        <h2 className="text-lg font-bold">{title}</h2>
-        <p className="text-fg-mute text-sm">{description}</p>
-      </div>
-      {children}
-    </section>
-  );
-}
+import { Playground } from './playground/playground';
 
 function App() {
   return (
-    <div className="mx-auto flex min-h-screen max-w-xl flex-col gap-8 p-8">
-      <h1 className="text-2xl font-bold">k8ordo UI × Generative UI アダプタ</h1>
-
-      <Section
-        title="json-render"
-        description="JSON spec を <JsonRenderUI> に渡して描画。ボタン行の3番目は href 付きなので renderItem 経由で <a> になります。"
-      >
-        <JsonRenderDemo />
-      </Section>
-
-      <Section
-        title="OpenUI"
-        description="OpenUI Lang(DSL) 文字列を <Renderer> に渡して描画。同じ Button / Stack アダプタで、href は同様に <a> になります。"
-      >
-        <OpenUiDemo />
-      </Section>
-
-      <Section
-        title="AI SDK"
-        description="useChat の UIMessage を mapMessageParts で部品に割り当てるチャット。ツールの許可・拒否、添付、出典、data パーツで届く生成 UI、コピー・再生成・フィードバックまで、台本どおりに返す transport で動かします。"
-      >
-        <AiSdkChatDemo />
-      </Section>
-    </div>
+    <main className="mx-auto flex min-h-screen max-w-6xl flex-col gap-10 px-6 py-10">
+      <header className="flex max-w-2xl flex-col gap-3">
+        <Heading level="h1">生成 UI の試し打ち</Heading>
+        <p className="text-fg-mute">
+          Claude に頼むと、選んだ形式で @k8ordo/ui
+          の部品だけを使った画面を書きます。書かれた分から描き、その横に、入力欄を触ったときに値が入る先と、部品の書き方がカタログに合っているかを並べます。
+        </p>
+        <p className="text-fg-mute text-sm">
+          本物の Claude を呼ぶので、
+          <Code>fnox exec -P anthropic -- pnpm dev</Code>
+          で起動したときだけ動きます。
+        </p>
+      </header>
+      <Playground />
+    </main>
   );
 }
 

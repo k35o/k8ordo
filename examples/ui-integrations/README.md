@@ -1,18 +1,20 @@
-# @k8ordo/ui × json-render, OpenUI, and the AI SDK
+# @k8ordo/ui × A2UI, json-render, OpenUI, and the AI SDK
 
-This example belongs to `@k8ordo/ui` and keeps the **glue** between its catalog and the formats an application connects it to. `@k8ordo/ui` describes its components for a model (`@k8ordo/ui/catalog`) and draws them (`@k8ordo/ui/catalog/render`), and depends on no format; the glue for [json-render](https://json-render.dev), [OpenUI](https://www.openui.com), and the [AI SDK](https://ai-sdk.dev) lives here, under test, for an application to copy and own. Vite is just the host.
+This example belongs to `@k8ordo/ui` and keeps the **glue** between its catalog and the formats an application connects it to. `@k8ordo/ui` describes its components for a model (`@k8ordo/ui/catalog`) and draws them (`@k8ordo/ui/catalog/render`), and depends on no format; the glue for [A2UI 1.0](https://a2ui.org), [json-render](https://json-render.dev), [OpenUI](https://www.openui.com), and the [AI SDK](https://ai-sdk.dev) lives here, under test, for an application to copy and own. Vite is just the host.
 
 ## Overview
 
 This example showcases:
 
 - k8ordo UI setup in a Vite project (Vite+ / `vp` toolchain)
+- **A2UI glue** (`src/a2ui/`): the A2UI 1.0 catalog document, built from `@k8ordo/ui/catalog` with zod's JSON Schema, and the React catalog for `@a2ui/react`'s `MessageProcessor`; scripted messages rendered with a field bound to the data model
 - **json-render glue** (`src/json-render/`): the catalog, the registry, and `validateGeneratedSpec`, built by mapping over `@k8ordo/ui/catalog`; a typed `UISpec` rendered with `<JsonRenderUI />`
 - **OpenUI glue** (`src/openui/`): the library and the React-free `prompt()`, built the same way; an OpenUI-Lang DSL string rendered with `library` + `Renderer`
 - **AI SDK glue** (`src/ai-sdk/map-parts.ts`): `mapMessageParts`, which maps `useChat` messages onto the chat components — tool approval, attachments, sources, a `data-ui` part rendered as generative UI, and copy / regenerate / feedback — driven by a scripted transport, so no server or API key is needed
+- **Playground** (`src/playground/`), the page this example serves: ask Claude (`claude-opus-5-5`) for a screen in any of the three formats and watch it render as it streams, next to whether it keeps to the catalog, the state its fields write to, and what the model wrote — see [Trying it with a real model](#trying-it-with-a-real-model)
 - Tailwind CSS 4 integration and TypeScript
 
-No piece of glue names a component. A component added to `@k8ordo/ui`'s catalog reaches every format here with no change to this directory.
+The scripted demos of each piece of glue are test fixtures: the tests mount them, and the page does not. No piece of glue names a component. A component added to `@k8ordo/ui`'s catalog reaches every format here with no change to this directory.
 
 ## Getting Started
 
@@ -41,13 +43,39 @@ pnpm dev
 
 The application will be available at `http://localhost:5173`.
 
+### Trying it with a real model
+
+The playground calls Claude through `/api/generate`, an endpoint only the dev server has (`vite.config.ts`). It reads the key the way the Anthropic SDK does: `ANTHROPIC_API_KEY`, or a profile from `ant auth login`. With fnox:
+
+```bash
+fnox exec -P anthropic -- pnpm dev
+```
+
+The endpoint refuses requests from another origin, since it spends the key. The tests run without a key: they stand in for the endpoint with fixed answers.
+
 ## Project Structure
 
 ```
 examples/ui-integrations/
 ├── src/
-│   ├── app.tsx                    # Hosts the json-render, OpenUI, and AI SDK demos
+│   ├── app.tsx                    # Hosts the playground
 │   ├── prompt-language.test.ts    # The prompts the glue builds are English and say how a field binds
+│   ├── a2ui/
+│   │   ├── catalog.ts             # Glue: the A2UI catalog document (server-safe)
+│   │   ├── catalog.test.ts        # The document holds every component and loads as an A2UI Catalog
+│   │   ├── prompt.ts              # Glue: the system prompt for A2UI messages (server-safe)
+│   │   ├── renderer.tsx           # Glue: the React catalog and <A2uiSurfaces /> ('use client')
+│   │   ├── demo.tsx               # Scripted messages, a field bound to the data model
+│   │   ├── demo.test.ts           # The messages pass validation; an unbound field does not
+│   │   └── demo.browser.test.tsx  # The surface renders and writes input back to the data model
+│   ├── playground/
+│   │   ├── server.ts              # /api/generate: streams Claude's answer as NDJSON (dev server only)
+│   │   ├── request.ts             # Checks a request before the key is used
+│   │   ├── stream.ts              # Reads the NDJSON in the browser
+│   │   ├── playground.tsx         # The form, and the stream fed to the result
+│   │   ├── results.tsx            # Each format: what it draws, its state, and its check
+│   │   ├── panes.tsx              # The drawing, the check, the state, and the output side by side
+│   │   └── playground.browser.test.tsx  # Each format renders, writes input to its state, and reports its check
 │   ├── ai-sdk/
 │   │   ├── map-parts.ts           # Glue: UIMessage.parts → parts for the chat components
 │   │   ├── map-parts.test.ts      # Every part kind maps, in order
@@ -58,7 +86,8 @@ examples/ui-integrations/
 │   ├── json-render/
 │   │   ├── catalog.ts             # Glue: the json-render catalog, UISpec, validateGeneratedSpec (server-safe)
 │   │   ├── catalog.test.ts        # What validateGeneratedSpec accepts and reports
-│   │   ├── registry.tsx           # Glue: the registry and <JsonRenderUI /> ('use client')
+│   │   ├── registry.tsx           # Glue: the registry, <JsonRenderProvider />, and <JsonRenderUI /> ('use client')
+│   │   ├── registry.browser.test.tsx  # The spec's state starts the bound fields and survives a streamed update
 │   │   ├── demo.tsx               # Typed UISpec rendered with <JsonRenderUI />
 │   │   ├── demo.test.ts           # The spec passes validateGeneratedSpec with no fixes
 │   │   └── demo.browser.test.tsx  # The spec renders and keeps form state in a real browser
@@ -107,6 +136,11 @@ export function JsonRenderDemo() {
 }
 ```
 
+The spec's `state` is where the bound fields start. To read the state beside
+the drawing, as the playground does, put json-render's `Renderer` (with the
+glue's `registry`) and a reader using `useStateStore` inside
+`<JsonRenderProvider spec={spec}>`.
+
 ### OpenUI (`src/openui/`)
 
 An OpenUI-Lang DSL string is rendered with the glue's `library`:
@@ -151,6 +185,8 @@ message chunks a server would, so the demo runs without a backend.
 ### Dependencies
 
 - `@k8ordo/ui` (workspace)
+- `@a2ui/react`, `@a2ui/web_core` (A2UI glue)
+- `@anthropic-ai/sdk` (the playground's endpoint, dev only)
 - `@json-render/core`, `@json-render/react` (json-render glue)
 - `@openuidev/react-lang`, `@openuidev/lang-core` (OpenUI glue)
 - `ai`, `@ai-sdk/react` (AI SDK glue)
@@ -161,7 +197,7 @@ message chunks a server would, so the demo runs without a backend.
 
 - `pnpm dev` - Start the development server (`vp dev`)
 - `pnpm build` - Build for production (`vp build`)
-- `pnpm test` - Run the tests (`vp test`): the `spec` project checks the glue, the demo spec and DSL, and the scripted replies against the AI SDK, and the `render` project mounts the demos in headless Chromium, Firefox, and WebKit
+- `pnpm test` - Run the tests (`vp test`): the `spec` project checks the glue, the demo spec and DSL, and the scripted replies against the AI SDK, and the `render` project mounts the demos and the playground in headless Chromium, Firefox, and WebKit
 - `pnpm typecheck` - Run TypeScript type checking
 - `pnpm check` - Run Oxlint/Oxfmt linting/formatting checks (`vp check`)
 - `pnpm check:write` - Run `vp check --fix` to auto-fix issues

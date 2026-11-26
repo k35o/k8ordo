@@ -88,15 +88,15 @@ The glue for a format does three things, each by mapping over `catalog`:
    gets the format's way of holding children — json-render's `slots`, a
    `children` prop in OpenUI.
 2. **Bind** each field: read the format's state at `value.prop` (json-render's
-   `$bindState`, OpenUI's form state by `name`), starting from
-   `value.initial(props)` when nothing is bound.
+   `$bindState`, OpenUI's form state by `name`, A2UI's `{"@path": ...}` into
+   the data model), starting from `value.initial(props)` when nothing is bound.
 3. **Draw** each component through `renderers`.
 
 Since no step names a component, a component added to `@k8ordo/ui` reaches
 every format without a change to the glue, and a new format is one new piece of
 glue.
 
-The repository keeps working glue for json-render, OpenUI, and the AI SDK in
+The repository keeps working glue for A2UI 1.0, json-render, OpenUI, and the AI SDK in
 [`examples/ui-integrations`](https://github.com/k35o/k8ordo/tree/main/examples/ui-integrations),
 run in a real browser on every change. Copy the one you use into your
 application and own it: the glue depends on the format's own release cycle, not
@@ -150,6 +150,20 @@ Unknown props are reported too. zod drops a key the schema does not know rather
 than failing, so a prop the model invented would otherwise pass and render as if
 it were not there. Run it on every element of a spec, after the format's own
 structural check, and send the issues back as a repair prompt.
+
+A prop the format resolves later, such as one a json-render spec binds with
+`{ "$bindState": "/form/name" }`, cannot be checked as a value yet. Name it in
+`unresolved`: its name is still checked, its value is not, and a required one
+is not reported missing.
+
+```ts
+catalogPropIssues(
+  'TextField',
+  { name: 'nickname', defaultValue: { $bindState: '/form/nickname' } },
+  { unresolved: ['defaultValue'] },
+);
+// []
+```
 
 ## Prompt language
 

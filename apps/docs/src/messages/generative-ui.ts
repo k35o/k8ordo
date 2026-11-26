@@ -61,13 +61,13 @@ export const glueDescription = message({
 });
 
 export const glueBinding = message({
-  ja: '入力欄の値は、形式の状態に結び付けます。json-renderなら`$bindState`で、OpenUIなら`name`で結び付けます。',
-  en: 'Each field’s value is bound to the format’s state: with `$bindState` in json-render, and by `name` in OpenUI.',
+  ja: '入力欄の値は、形式の状態に結び付けます。json-renderなら`$bindState`で、OpenUIなら`name`で、A2UIなら`@path`でデータモデルに結び付けます。',
+  en: 'Each field’s value is bound to the format’s state: with `$bindState` in json-render, by `name` in OpenUI, and with `@path` into the data model in A2UI.',
 });
 
 export const glueExample = message({
-  ja: 'json-render、OpenUI、AI SDKのつなぎは、リポジトリの`examples/ui-integrations`にあります。どれも変更のたびにブラウザで確かめています。',
-  en: 'Working glue for json-render, OpenUI and the AI SDK lives in `examples/ui-integrations` in the repository. Each runs in a real browser on every change.',
+  ja: 'A2UI、json-render、OpenUI、AI SDKのつなぎは、リポジトリの`examples/ui-integrations`にあります。どれも変更のたびにブラウザで確かめています。',
+  en: 'Working glue for A2UI, json-render, OpenUI and the AI SDK lives in `examples/ui-integrations` in the repository. Each runs in a real browser on every change.',
 });
 
 export const glueCopy = message({

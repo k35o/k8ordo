@@ -66,7 +66,7 @@ packages/
   i18n/                  # @k8ordo/i18n
   color-scheme/          # @k8ordo/color-scheme
 examples/
-  ui-integrations/       # @k8ordo/ui × json-render, OpenUI, and the AI SDK (Vite)
+  ui-integrations/       # @k8ordo/ui × A2UI, json-render, OpenUI, and the AI SDK (Vite)
   ui-nextjs/             # @k8ordo/ui × Next.js
   ui-css-modules/        # @k8ordo/ui with CSS Modules, no Tailwind
   static-basic/          # an application on @k8ordo/framework, mode: 'static'

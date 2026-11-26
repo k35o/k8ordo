@@ -37,6 +37,22 @@ describe('validateGeneratedSpec', () => {
     expect(result).toMatchObject({ ok: true });
   });
 
+  it('$bindState で状態に結んだ値は、描画前の形のまま受け入れる', () => {
+    const result = validateGeneratedSpec(
+      specWithTarget({
+        type: 'Checkbox',
+        props: {
+          name: 'agree',
+          label: '規約に同意する',
+          defaultChecked: { $bindState: '/form/agree' },
+        },
+        children: [],
+      }),
+    );
+
+    expect(result).toMatchObject({ ok: true });
+  });
+
   it('日付を YYYY-MM-DD 以外の書式で書いた spec を弾く', () => {
     const result = validateGeneratedSpec(
       specWithTarget({

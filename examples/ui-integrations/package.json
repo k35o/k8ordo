@@ -12,6 +12,8 @@
     "check:write": "vp check --fix"
   },
   "dependencies": {
+    "@a2ui/react": "0.16.1",
+    "@a2ui/web_core": "0.16.1",
     "@ai-sdk/react": "4.0.180",
     "@json-render/core": "catalog:",
     "@json-render/react": "catalog:",
@@ -24,6 +26,7 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "1.10.0",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
