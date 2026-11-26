@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+import type { ObjectSchema } from './schema/object-schema';
 import type { UseFormReturn } from './use-form';
 
 /**
@@ -22,7 +23,7 @@ export type AsyncCheck = {
 
 export const useAsyncCheck = (
   check: (value: string) => Promise<string | undefined>,
-  revalidate: UseFormReturn['revalidate'],
+  revalidate: UseFormReturn<ObjectSchema>['revalidate'],
 ): AsyncCheck => {
   const control = useRef<HTMLInputElement | null>(null);
   const latest = useRef(0);

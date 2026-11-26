@@ -5,6 +5,7 @@ export { defineForm } from './rules/define-form';
 export type { FormDefinition } from './rules/define-form';
 export { minChecked, requiredWhen, sameAs } from './rules/rules';
 export type { DerivedRule, Rule, RuleMessage } from './rules/rules';
+export type { ObjectSchema } from './schema/object-schema';
 export type {
   DerivedArray,
   DerivedField,

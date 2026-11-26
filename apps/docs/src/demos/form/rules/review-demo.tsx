@@ -12,12 +12,13 @@ import {
 import { useState } from 'react';
 
 import * as m from '../../../messages';
+import type { reviewDefinition } from './review-definition';
 
 import styles from './review-demo.module.css';
 
 type Props = {
   /** ページの Server Component が `formFields(reviewDefinition)` で導いたもの。 */
-  fields: FormFields<'decision' | 'reason' | 'aspects', never>;
+  fields: FormFields<typeof reviewDefinition>;
 };
 
 // 静的なサイトで送信先が無いので、送れる値になったところで止めて知らせる

@@ -12,12 +12,18 @@ import {
 } from 'react';
 import type { FocusEvent, Ref, SubmitEvent, SyntheticEvent } from 'react';
 
+import type { ArrayPathsOf, FieldInputsOf } from './paths';
+import type { FormDefinition } from './rules/define-form';
 import { breachOf } from './rules/rules';
+import type { DerivedRule } from './rules/rules';
+import type { ObjectSchema } from './schema/object-schema';
 import type {
+  DerivedArray,
   DerivedField,
   FieldInput,
-  FormFields,
+  FieldsBy,
   FormState,
+  SchemaOf,
   StringCheckboxInput,
   ValidityFlag,
 } from './types';
@@ -37,6 +43,12 @@ const FLAGS: ValidityFlag[] = [
 ];
 
 type Control = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+
+type Fields = {
+  fields: Record<string, DerivedField<StringCheckboxInput>>;
+  arrays: Record<string, DerivedArray>;
+  rules: DerivedRule[];
+};
 
 const isControl = (target: unknown): target is Control =>
   target instanceof HTMLInputElement ||
@@ -90,7 +102,7 @@ const messageFor = (
   return undefined;
 };
 
-export type FieldView<Input extends FieldInput = FieldInput> = {
+export type FieldView<Input = FieldInput> = {
   input: Input;
   error: string | undefined;
   invalid: boolean;
@@ -121,11 +133,17 @@ export type FormErrorView = {
   props: { id: string; tabIndex: -1 };
 };
 
-export type UseFormReturn<
-  FieldPath extends string = string,
-  ArrayPath extends string = string,
-  StringCheckboxPath extends string = never,
-> = {
+/**
+ * What `useForm` returns for the fields `formFields` derived from a schema or
+ * a `defineForm` definition: `UseFormReturn<typeof talkSchema>`.
+ */
+export type UseFormReturn<Source extends ObjectSchema | FormDefinition> =
+  UseFormReturnBy<
+    FieldInputsOf<SchemaOf<Source>>,
+    ArrayPathsOf<SchemaOf<Source>>
+  >;
+
+type UseFormReturnBy<Inputs, ArrayPath extends string> = {
   props: {
     onBlur: (event: FocusEvent<HTMLFormElement>) => void;
     onInput: (event: SyntheticEvent<HTMLFormElement>) => void;
@@ -133,10 +151,9 @@ export type UseFormReturn<
     onSubmit: (event: SubmitEvent<HTMLFormElement>) => void;
     ref: Ref<HTMLFormElement>;
   };
-  field: {
-    (path: StringCheckboxPath): FieldView<StringCheckboxInput>;
-    (path: FieldPath): FieldView;
-  };
+  field: <Path extends keyof Inputs & string>(
+    path: Path,
+  ) => FieldView<Inputs[Path]>;
   array: (path: ArrayPath) => ArrayView;
   formError: FormErrorView;
   /** True once any field differs from the value it was rendered with. */
@@ -150,7 +167,7 @@ export type UseFormReturn<
 };
 
 const rowCountsFor = (
-  fields: FormFields,
+  fields: Fields,
   state: FormState,
 ): Record<string, number> => {
   const counts: Record<string, number> = {};
@@ -206,7 +223,7 @@ type Notes = {
 const blankNotes = (
   result: string,
   arrived: boolean,
-  fields: FormFields,
+  fields: Fields,
   state: FormState,
   rowKeys?: Record<string, string[]>,
 ): Notes => {
@@ -290,15 +307,11 @@ const shiftSet = (
  * identity of each repeated row, one dirty flag, and the row counts adding or
  * removing a row is measured against.
  */
-export const useForm = <
-  FieldPath extends string,
-  ArrayPath extends string,
-  StringCheckboxPath extends string = never,
->(
-  fields: FormFields<FieldPath, ArrayPath, StringCheckboxPath>,
+export const useForm = <Inputs, ArrayPath extends string>(
+  fields: FieldsBy<Inputs, ArrayPath>,
   state: FormState = {},
-): UseFormReturn<FieldPath, ArrayPath, StringCheckboxPath> => {
-  const lookup = fields as FormFields<string, string, string>;
+): UseFormReturnBy<Inputs, ArrayPath> => {
+  const lookup = fields as Fields;
   const formRef = useRef<HTMLFormElement>(null);
   const nextKey = useRef(0);
   // Messages applyRules wrote, so it never erases one it does not own — an
@@ -666,7 +679,9 @@ export const useForm = <
 
   return {
     props,
-    field,
+    // 欄ごとの input の型はスキーマの型から決まり、実行時の表からは導けない。
+    // formFields が同じスキーマから両方を作っているので、ここで型を付け替える
+    field: field as UseFormReturnBy<Inputs, ArrayPath>['field'],
     array,
     formError,
     isDirty: domDirty || structuralDirty,
@@ -727,7 +742,7 @@ const firstFailed = (
  */
 const messagesIn = (
   form: HTMLFormElement,
-  fields: FormFields,
+  fields: Fields,
 ): Record<string, string> => {
   const messages: Record<string, string> = {};
   for (const element of form.elements) {
@@ -749,10 +764,7 @@ const messagesIn = (
 };
 
 /** Look up the derived field for a submitted name, row index included. */
-const fieldFor = (
-  fields: FormFields,
-  name: string,
-): DerivedField | undefined => {
+const fieldFor = (fields: Fields, name: string): DerivedField | undefined => {
   const direct = fields.fields[name];
   if (direct !== undefined) {
     return direct;
@@ -779,7 +791,7 @@ const fieldFor = (
  */
 const applyRules = (
   form: HTMLFormElement | null,
-  rules: FormFields['rules'],
+  rules: Fields['rules'],
   owned: Map<string, string>,
 ): void => {
   if (form === null) {
@@ -821,7 +833,7 @@ const applyRules = (
 
 const writeEchoToSelects = (
   form: HTMLFormElement | null,
-  fields: FormFields,
+  fields: Fields,
   values: FormState['values'],
 ): void => {
   if (form === null || values === undefined) {

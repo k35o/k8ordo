@@ -1,4 +1,7 @@
+import type { ArrayPathsOf, FieldInputsOf } from './paths';
+import type { FormDefinition } from './rules/define-form';
 import type { DerivedRule } from './rules/rules';
+import type { ObjectSchema } from './schema/object-schema';
 
 /** ValidityState flags a derived field can report a message for. */
 export type ValidityFlag =
@@ -42,7 +45,7 @@ export type StringCheckboxInput = FieldInput & {
  * One field as derived from the schema. Serializable on purpose: it crosses the
  * RSC boundary as props, which is what keeps zod out of the client bundle.
  */
-export type DerivedField<Input extends FieldInput = FieldInput> = {
+export type DerivedField<Input = FieldInput> = {
   input: Input;
   /** Message per ValidityState flag, taken from zod itself. */
   messages: Partial<Record<ValidityFlag, string>>;
@@ -68,18 +71,25 @@ export type DroppedCheck = {
   reason: string;
 };
 
+export type SchemaOf<Source extends ObjectSchema | FormDefinition> =
+  Source extends FormDefinition<infer Schema> ? Schema : Source;
+
 /**
- * `StringCheckboxPath` names the fields whose `input` carries `value`.
- * `formFields` fills it in from the schema; a type written by hand that leaves
- * it out still takes the derived fields, and only hides `value` from `field()`.
+ * What `formFields` derives from a schema or a `defineForm` definition, typed
+ * from that schema: `FormFields<typeof talkSchema>` is what `formFields`
+ * returns for it. The import is type-only, so zod stays out of the bundle.
  */
-export type FormFields<
-  FieldPath extends string = string,
-  ArrayPath extends string = string,
-  StringCheckboxPath extends string = never,
-> = {
-  fields: Record<FieldPath, DerivedField> &
-    Record<StringCheckboxPath, DerivedField<StringCheckboxInput>>;
+export type FormFields<Source extends ObjectSchema | FormDefinition> = FieldsBy<
+  FieldInputsOf<SchemaOf<Source>>,
+  ArrayPathsOf<SchemaOf<Source>>
+>;
+
+/**
+ * `FormFields` spelled out by what it holds rather than by the schema, so
+ * `useForm` can infer it from the structure of any value of that shape.
+ */
+export type FieldsBy<Inputs, ArrayPath extends string> = {
+  fields: { [Path in keyof Inputs]: DerivedField<Inputs[Path]> };
   arrays: Record<ArrayPath, DerivedArray>;
   /**
    * Checks HTML has no attribute for, each run by the same evaluator on both

@@ -6,12 +6,13 @@ import { Button, FormControl, TextField } from '@k8ordo/ui';
 import { useState } from 'react';
 
 import * as m from '../../../messages';
+import type { talkSchema } from './talk-schema';
 
 import styles from './talk-demo.module.css';
 
 type Props = {
   /** ページの Server Component が `formFields(talkSchema)` で導いたもの。 */
-  fields: FormFields<'title' | 'eventUrl' | 'minutes', never>;
+  fields: FormFields<typeof talkSchema>;
 };
 
 export function TalkDemo({ fields }: Props) {

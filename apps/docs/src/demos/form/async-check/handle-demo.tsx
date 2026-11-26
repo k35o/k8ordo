@@ -6,12 +6,13 @@ import { Button, FormControl, TextField } from '@k8ordo/ui';
 import { useState } from 'react';
 
 import * as m from '../../../messages';
+import type { handleSchema } from './handle-schema';
 
 import styles from './handle-demo.module.css';
 
 type Props = {
   /** ページの Server Component が `formFields(handleSchema)` で導いたもの。 */
-  fields: FormFields<'handle', never>;
+  fields: FormFields<typeof handleSchema>;
 };
 
 const TAKEN = new Set(['admin', 'k8o', 'ordo']);

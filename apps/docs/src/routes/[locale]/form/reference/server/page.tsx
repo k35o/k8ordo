@@ -54,8 +54,11 @@ export default function FormReferenceServerPage() {
             description: t.formFieldsInput,
           },
         ]}
-        returns={{ type: 'FormFields', description: t.formFieldsReturns }}
-        signature="formFields(input: ZodObject | FormDefinition): FormFields"
+        returns={{
+          type: 'FormFields<typeof input>',
+          description: t.formFieldsReturns,
+        }}
+        signature="formFields(input: ZodObject | FormDefinition): FormFields<typeof input>"
         summary={t.formFieldsSummary}
       />
 

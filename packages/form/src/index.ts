@@ -9,7 +9,9 @@ export type {
 export { useAsyncCheck } from './async-check';
 export type { AsyncCheck } from './async-check';
 export { HiddenValue } from './hidden-value';
+export type { FormDefinition } from './rules/define-form';
 export type { DerivedRule, Rule, RuleMessage } from './rules/rules';
+export type { ObjectSchema } from './schema/object-schema';
 export type {
   DerivedArray,
   DerivedField,

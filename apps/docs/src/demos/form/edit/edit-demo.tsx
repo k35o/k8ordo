@@ -6,12 +6,13 @@ import { Badge, Button, Checkbox, FormControl, TextField } from '@k8ordo/ui';
 import { useState } from 'react';
 
 import * as m from '../../../messages';
+import type { talkSchema } from './talk-schema';
 
 import styles from './edit-demo.module.css';
 
 type Props = {
   /** ページの Server Component が `formFields(talkSchema)` で導いたもの。 */
-  fields: FormFields<'title' | 'public', never>;
+  fields: FormFields<typeof talkSchema>;
 };
 
 // 編集する前の値。実際のアプリならデータベースから読んだ 1 件にあたる

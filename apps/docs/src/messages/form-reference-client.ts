@@ -305,8 +305,8 @@ export const formFieldsTypeDropped = message({
 
 export const formFieldsTypeCaveats = [
   message({
-    ja: '型引数は3つです。フィールドのパスと配列のパス、`z.stringbool()`のフィールドのパスです。`formFields`の戻り値から推論されるので、ふつうは書きません。',
-    en: 'It has three type arguments: the field paths, the array paths and the `z.stringbool()` field paths. They are inferred from what `formFields` returns, so you rarely write them.',
+    ja: '型引数は、スキーマか`defineForm`の定義を1つ取ります。propsの型は`FormFields<typeof talkSchema>`と書き、パスと各欄の`input`の型はスキーマから決まります。`useForm`の戻り値の型も、同じく`UseFormReturn<typeof talkSchema>`と書きます。',
+    en: 'Its one type argument is the schema or the `defineForm` definition. Type a prop as `FormFields<typeof talkSchema>`, and the paths and each field’s `input` type follow the schema. `useForm`’s return type is written the same way: `UseFormReturn<typeof talkSchema>`.',
   }),
   message({
     ja: '`@k8ordo/form`と`@k8ordo/form/server`のどちらからもimportできます。',

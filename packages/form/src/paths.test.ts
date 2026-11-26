@@ -3,10 +3,12 @@ import { z } from 'zod';
 
 import { formFields } from './derive/form-fields';
 import { defineForm } from './rules/define-form';
+import type { FormDefinition } from './rules/define-form';
 import { sameAs } from './rules/rules';
+import type { ObjectSchema } from './schema/object-schema';
 import type { FormFields } from './types';
 import { useForm } from './use-form';
-import type { UseFormReturn } from './use-form';
+import type { FieldView, UseFormReturn } from './use-form';
 
 const schema = z.object({
   title: z.string(),
@@ -58,7 +60,7 @@ describe('paths are derived from the schema', () => {
   });
 
   it('keeps the derived fields addressable without an undefined check', () => {
-    // Record<FieldPath, …> rather than Record<string, …>, so this is not
+    // Keyed by the schema's own paths rather than by string, so this is not
     // `possibly undefined` and a typo here fails the build too.
     expect(fields.title.input.name).toBe('title');
     expect(fields['user.email'].input.type).toBe('email');
@@ -92,18 +94,6 @@ describe('paths are derived from the schema', () => {
       // @ts-expect-error the stringbool box does carry a value
       const box: Uncontrolled = form.field('inStock').input;
 
-      // A type written by hand without the third argument still takes the
-      // derived fields; it only hides value from field().
-      const annotated: FormFields<
-        'title' | 'notify' | 'inStock' | 'address.gift',
-        never
-      > = settings;
-      // @ts-expect-error the annotation left the stringbool paths out
-      const hidden: unknown = useForm(annotated).field('inStock').input.value;
-
-      // A component that renders one field takes the whole form's return.
-      const titleOnly: UseFormReturn<'title', never> = form;
-
       expect([
         inStock,
         gift,
@@ -112,9 +102,78 @@ describe('paths are derived from the schema', () => {
         title,
         notify,
         box,
-        hidden,
-        titleOnly,
       ]).toBeDefined();
+    };
+
+    expect(useCompileTimeOnly).toBeTypeOf('function');
+  });
+});
+
+type Equal<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
+
+describe('FormFields and UseFormReturn are named by the schema', () => {
+  const definition = defineForm(schema, [
+    sameAs('title', 'user.email', '一致しません'),
+  ]);
+
+  it('types what formFields returns, for a schema and for a definition alike', () => {
+    const fromSchema: Equal<
+      ReturnType<typeof formFields<typeof schema>>,
+      FormFields<typeof schema>
+    > = true;
+    const fromDefinition: Equal<
+      ReturnType<typeof formFields<typeof definition>>,
+      FormFields<typeof definition>
+    > = true;
+    const sameEitherWay: Equal<
+      FormFields<typeof definition>,
+      FormFields<typeof schema>
+    > = true;
+
+    expect([fromSchema, fromDefinition, sameEitherWay]).toBeDefined();
+  });
+
+  it('lets a Client Component take the fields as props and keep every path typed', () => {
+    const useClientComponent = ({
+      fields: props,
+    }: {
+      fields: FormFields<typeof definition>;
+    }): UseFormReturn<typeof definition> => {
+      const form = useForm(props);
+      form.field('title');
+      // @ts-expect-error 'titel' is not a field in the schema
+      form.field('titel');
+      form.array('items');
+      // @ts-expect-error a checkbox group is a field, not repeated rows
+      form.array('tags');
+      return form;
+    };
+
+    expect(useClientComponent).toBeTypeOf('function');
+  });
+
+  it('passes one field to a child component as its FieldView', () => {
+    const TitleInput = ({ field }: { field: FieldView }): string =>
+      field.input.name;
+
+    const useCompileTimeOnly = (): string => {
+      const form = useForm(derived);
+      return TitleInput({ field: form.field('title') });
+    };
+
+    expect(useCompileTimeOnly).toBeTypeOf('function');
+  });
+
+  it('carries the schema through a component generic over it', () => {
+    const useGeneric = <Source extends ObjectSchema | FormDefinition>(
+      props: FormFields<Source>,
+    ): UseFormReturn<Source> => useForm(props);
+
+    const useCompileTimeOnly = (): void => {
+      const form = useGeneric(derived);
+      form.field('user.email');
+      // @ts-expect-error 'titel' is not a field in the schema
+      form.field('titel');
     };
 
     expect(useCompileTimeOnly).toBeTypeOf('function');

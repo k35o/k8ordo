@@ -103,6 +103,15 @@ report travel together.
 // src/components/talk-form.tsx
 'use client';
 
+import type { FormFields, FormState } from '@k8ordo/form';
+
+import type { talkSchema } from '../lib/schema';
+
+type TalkFormProps = {
+  action: (state: FormState, formData: FormData) => Promise<FormState>;
+  fields: FormFields<typeof talkSchema>;
+};
+
 export const TalkForm = ({ action, fields }: TalkFormProps) => {
   const [state, formAction] = useActionState(action, {});
   const form = useForm(fields, state);
@@ -116,6 +125,27 @@ export const TalkForm = ({ action, fields }: TalkFormProps) => {
   );
 };
 ```
+
+`FormFields<typeof talkSchema>` is the type `formFields(talkSchema)` returns,
+so the prop is typed from the schema itself: the paths `form.field()` accepts
+and the type of each field's `input` follow it. The import is type-only, so
+zod stays out of the client bundle. A `defineForm` definition is named the
+same way — `FormFields<typeof signup>` — and `UseFormReturn<typeof
+talkSchema>` names what `useForm` returns, for a hook that takes the whole
+form. A component that draws one field takes that field's `FieldView`:
+
+```tsx
+const TitleInput = ({ field }: { field: FieldView }) => (
+  <input {...field.input} />
+);
+
+<TitleInput field={form.field('title')} />;
+```
+
+Code generic over the form — a wrapper that owns the `<form>` element, say —
+takes the schema as a type parameter: `<Source extends ObjectSchema |
+FormDefinition>`, then `FormFields<Source>` and `UseFormReturn<Source>`. Both
+constraint types are exported from either entry.
 
 `form.props` attaches to the `<form>` and nowhere else. There is no per-field
 registration to forget. Its `onSubmit` checks the form
@@ -403,15 +433,12 @@ accepts it, and a bare `z.stringbool()` makes the box `required`.
 `.default(true)` is refused at derive time — nothing would read as `true`, so
 unchecking the box could never submit `false`.
 
-Only these fields carry `value` in their type. `formFields` names their paths
-in the third type argument of `FormFields` (`FormFields<FieldPath, ArrayPath,
-StringCheckboxPath>`), and `field()` types `input` as `StringCheckboxInput` for
+Only these fields carry `value` in their type. `field()` reads which ones they
+are from the schema's type, and types `input` as `StringCheckboxInput` for
 them and as `FieldInput`, with no `value`, for every other field — so the other
 fields spread onto a component that takes `value` only when it is controlled.
-A `FormFields` type written by hand can leave the third argument out: it still
-takes the derived fields, and the box still submits its `value`, but
-`input.value` no longer compiles. The same holds for a box inside repeated
-rows, which `row.field()` never types with `value`.
+A box inside repeated rows still submits its `value`, but `row.field()` never
+types it there.
 
 ## Checkbox groups
 

@@ -65,6 +65,14 @@ export default function Page() {
 // src/components/talk-form.tsx
 'use client';
 import { useForm } from '@k8ordo/form';
+import type { FormFields, FormState } from '@k8ordo/form';
+
+import type { talkSchema } from '../lib/schema'; // type-only: zod stays out
+
+type TalkFormProps = {
+  action: (state: FormState, formData: FormData) => Promise<FormState>;
+  fields: FormFields<typeof talkSchema>; // what formFields(talkSchema) returns
+};
 
 export const TalkForm = ({ action, fields }: TalkFormProps) => {
   const [state, formAction] = useActionState(action, {});

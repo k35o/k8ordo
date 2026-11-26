@@ -1,11 +1,6 @@
 import { $ZodCheckStringFormat } from 'zod/v4/core';
 import type { $ZodCheckStringFormatDef, $ZodType } from 'zod/v4/core';
 
-import type {
-  ArrayPathsOf,
-  FieldPathsOf,
-  StringCheckboxPathsOf,
-} from '../paths';
 import { asDefinition } from '../rules/define-form';
 import type { FormDefinition } from '../rules/define-form';
 import { deriveRule } from '../rules/rules';
@@ -112,14 +107,10 @@ const warnDropped = (
  * function message — so when one follows the request (its locale, say), call
  * it during the render, not at module scope.
  */
-export const formFields = <Schema extends ObjectSchema>(
-  input: FormDefinition<Schema> | Schema,
-): FormFields<
-  FieldPathsOf<Schema>,
-  ArrayPathsOf<Schema>,
-  StringCheckboxPathsOf<Schema>
-> => {
-  const { schema, rules } = asDefinition(input);
+export const formFields = <Source extends ObjectSchema | FormDefinition>(
+  input: Source,
+): FormFields<Source> => {
+  const { schema, rules } = asDefinition<ObjectSchema>(input);
   const map = schemaMap(schema);
   const fields: Record<string, DerivedField<StringCheckboxInput>> = {};
   const arrays: Record<string, DerivedArray> = {};
@@ -225,10 +216,12 @@ export const formFields = <Schema extends ObjectSchema>(
   }
 
   warnDropped(schema, dropped);
+  // 欄ごとの input の型はスキーマの型から決まり、実行時に組み立てた表からは
+  // 導けない。表は同じスキーマを歩いて作っているので、ここで型を付け替える
   return {
     fields,
     arrays,
     rules: rules.map((rule) => deriveRule(rule)),
     dropped,
-  };
+  } as FormFields<Source>;
 };

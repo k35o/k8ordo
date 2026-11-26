@@ -53,7 +53,7 @@ src/
   use-form.ts         useForm(): the client hook
   async-check.ts      useAsyncCheck(): a per-field check the server answers
   hidden-value.tsx    HiddenValue: a value from a component with no input
-  paths.ts            FieldPathsOf / ArrayPathsOf: paths from the schema type
+  paths.ts            FieldInputsOf / ArrayPathsOf: paths and input types from the schema type
   types.ts            the serializable shapes that cross to the client
   index.ts            client entry
   server.ts           server entry
