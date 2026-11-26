@@ -473,7 +473,7 @@ The types (`ChatStatus`, `ToolState`, `ToolApproval`, `ToolApprovalResponse`) ta
 
 `@k8ordo/ui/catalog` describes these components for an LLM, for no generative-UI format in particular: what each one is, the props a model may write (zod schemas locked to the design tokens, so a generated UI stays on-brand), whether it holds children, and which prop holds a field's value. `@k8ordo/ui/catalog/render` draws each of them. Component-specific `renderItem` render props are bridged internally — the model only ever sees flat data (e.g. `href`).
 
-The package ties itself to no format and depends on none. Connecting [json-render](https://json-render.dev), [OpenUI](https://www.openui.com), [A2UI](https://a2ui.org), or a format of your own is a small piece of glue that maps over the catalog: register each component, bind each field's value to the format's state, and draw through `renderers`. [`examples/ui-integrations`](https://github.com/k35o/k8ordo/tree/main/examples/ui-integrations) keeps working glue for json-render and OpenUI, run in a real browser on every change — copy the one you use into your application.
+The package ties itself to no format and depends on none. Connecting [json-render](https://json-render.dev), [OpenUI](https://www.openui.com), [A2UI](https://a2ui.org), or a format of your own is a small piece of glue that maps over the catalog: register each component, bind each field's value to the format's state, and draw through `renderers`. [`examples/ui-integrations`](https://github.com/k35o/k8ordo/tree/main/examples/ui-integrations) keeps working glue for A2UI 1.0, json-render, and OpenUI, run in a real browser on every change — copy the one you use into your application.
 
 ```bash
 pnpm add zod
