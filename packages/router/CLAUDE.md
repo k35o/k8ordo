@@ -308,7 +308,7 @@ pnpm check         # check:write to auto-fix
   URLPattern reads one), or — last — a `:name+` or a `*`; plus `/(name)`
   groups, and no empty segment. The position is read on the joined leaf
   pattern, never key by key, since a branch's key is followed by its
-  children's. The types (`SegParam`, `SegmentsFit`) and the runtime
+  children's. The types (`SegParam`, `SegListPath`) and the runtime
   (`readParams`, `buildHref`) both assume this grammar and read anything
   else differently — `/:id?` types as `{ 'id?': string }` and matches as
   `{ id }` — so a new form is added to both and to the check, or to none.
@@ -322,18 +322,14 @@ pnpm check         # check:write to auto-fix
   escaped, joined with `/` — and throws for anything but an array, for an
   empty one, and for an empty segment, since each would spell a pathname the
   pattern does not match. The types say the same: `ParamsOf` gives
-  `readonly string[]`, a link takes `readonly ParamValue[]`, `PathFor` a
-  `${string}` (which spans slashes), and `PathMatching` reads `:name+` only
-  where it ends the pattern, the one place `defineRoutes` accepts it. Where
+  `readonly string[]`, a link takes `readonly ParamValue[]`, and `PathFor`
+  a `${string}` (which spans slashes). Where
   it sits among other patterns is declaration order, as for
   everything else; the framework's generator is what orders it after a
   `:param`.
-- **A typed path is checked, never enumerated.** `NavigablePath` matches the
-  path it is handed against the table's patterns segment by segment
-  (`PathMatching` in `paths.ts`, a `:param` reading as URLPattern reads it:
-  one non-empty segment, a `:name+` one or more). Never go back to a union of `PathFor` each
-  pattern: a `/:locale` page puts `/${string}` in it, and that one member
-  takes every path there is.
+- **A path is never checked on its own.** A URL is built with `href` from a
+  pattern of the table, and that is where the check is; a hand-written path
+  has no type that vouches for it, by design (one way per URL).
 
 ## Layout
 
@@ -341,7 +337,7 @@ pnpm check         # check:write to auto-fix
 src/
   paths.ts          type derivation (ParamsOf / PathFor / Join) + string operations (readParams / buildHref)
   base.ts           withBase / withoutBase (Vite's base at the edges)
-  define-routes.ts  defineRoutes / match / matchAll / NavigablePath
+  define-routes.ts  defineRoutes / match / matchAll
   links.ts          href / bindParams (the side that needs no table)
   register.ts       Register (module augmentation) + PageProps / LayoutProps / RouteContext
   navigation.ts     useInterceptedNavigation (intercept and the commit contract), usePendingPathname

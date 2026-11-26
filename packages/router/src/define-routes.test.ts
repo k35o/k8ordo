@@ -3,9 +3,9 @@ import type { FC } from 'react';
 import { describe, expect, expectTypeOf, it } from 'vite-plus/test';
 
 import { defineRoutes } from './define-routes';
-import type { NavigablePath, PatternOf } from './define-routes';
+import type { PatternOf } from './define-routes';
 import { href } from './links';
-import type { ParamsOf, PathFor, PathMatching } from './paths';
+import type { ParamsOf, PathFor } from './paths';
 
 const Home: FC = () => null;
 const LocaleLayout: FC = () => null;
@@ -187,57 +187,6 @@ describe('href', () => {
     ).toEqualTypeOf<string>();
 
     expect(rejectedByTypes).toBeInstanceOf(Function);
-  });
-});
-
-describe('NavigablePath', () => {
-  it('takes a path a navigable pattern matches, segment by segment', () => {
-    expectTypeOf<NavigablePath<typeof routes, '/'>>().toEqualTypeOf<'/'>();
-    expectTypeOf<NavigablePath<typeof routes, '/ja'>>().toEqualTypeOf<'/ja'>();
-    expectTypeOf<
-      NavigablePath<typeof routes, '/ja/products/42'>
-    >().toEqualTypeOf<'/ja/products/42'>();
-  });
-
-  it('takes a param built into a template literal as one segment', () => {
-    expectTypeOf<
-      NavigablePath<typeof routes, `/${string}/products`>
-    >().toEqualTypeOf<`/${string}/products`>();
-  });
-
-  it('refuses a path no pattern matches, though a param stands first', () => {
-    // 和集合だった頃は '/:locale' が `/${string}` になり、これを通していた
-    expectTypeOf<NavigablePath<typeof routes, '/ja/nowhere'>>().toBeNever();
-    expectTypeOf<
-      NavigablePath<typeof routes, '/ja/products/42/reviews'>
-    >().toBeNever();
-  });
-
-  it('refuses a path only the wildcard matches — matched, never linked', () => {
-    expectTypeOf<
-      NavigablePath<typeof routes, '/ja/no/such/page'>
-    >().toBeNever();
-  });
-
-  it('refuses a trailing slash — a link is spelled the one way the table matches', () => {
-    // 実行時の match は末尾スラッシュを同じ pathname として受けるが、
-    // リンクとして組み立てるパスは正規形（末尾スラッシュなし）に揃えさせる
-    expectTypeOf<NavigablePath<typeof routes, '/ja/products/'>>().toBeNever();
-  });
-
-  it('refuses an empty segment where a param stands', () => {
-    expectTypeOf<NavigablePath<typeof routes, '//products'>>().toBeNever();
-  });
-
-  it('refuses a path that is not spelled from the root', () => {
-    expectTypeOf<NavigablePath<typeof routes, 'ja/products'>>().toBeNever();
-    expectTypeOf<NavigablePath<typeof routes, string>>().toBeNever();
-  });
-
-  it('keeps only the members of a union that match', () => {
-    expectTypeOf<
-      NavigablePath<typeof routes, '/ja' | '/ja/nowhere'>
-    >().toEqualTypeOf<'/ja'>();
   });
 });
 
@@ -473,29 +422,6 @@ describe('a rest param', () => {
     expectTypeOf<
       PathFor<'/files/:path+'>
     >().toEqualTypeOf<`/files/${string}`>();
-  });
-
-  it('takes a path of one segment or more, and none of zero', () => {
-    type Fits<Path extends string> = PathMatching<Path, '/files/:path+'>;
-    expectTypeOf<Fits<'/files/a'>>().toEqualTypeOf<'/files/a'>();
-    expectTypeOf<Fits<'/files/a/b/c'>>().toEqualTypeOf<'/files/a/b/c'>();
-    expectTypeOf<
-      Fits<`/files/${string}`>
-    >().toEqualTypeOf<`/files/${string}`>();
-    expectTypeOf<Fits<'/files'>>().toBeNever();
-    expectTypeOf<Fits<'/files/'>>().toBeNever();
-    expectTypeOf<Fits<'/files/a//b'>>().toBeNever();
-    expectTypeOf<Fits<'/files/a/'>>().toBeNever();
-    expectTypeOf<Fits<'/other/a'>>().toBeNever();
-  });
-
-  it('is a path a link can point at', () => {
-    expectTypeOf<
-      NavigablePath<typeof files, '/files/a/b'>
-    >().toEqualTypeOf<'/files/a/b'>();
-    expectTypeOf<
-      NavigablePath<typeof files, '/ja/docs/guide/intro'>
-    >().toEqualTypeOf<'/ja/docs/guide/intro'>();
   });
 });
 

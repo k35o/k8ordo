@@ -3,7 +3,6 @@ export type { ErrorComponent, ErrorProps } from './boundary';
 export { defineRoutes } from './define-routes';
 export type {
   Match,
-  NavigablePath,
   NavigablePatternOf,
   PatternOf,
   RouteComponent,

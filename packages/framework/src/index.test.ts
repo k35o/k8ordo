@@ -48,8 +48,6 @@ const WITHHELD: Readonly<Record<string, string>> = {
     "the patterns of a hand-written table; RegisteredPattern is the generated table's",
   NavigablePatternOf:
     "the linkable patterns of a hand-written table; RegisteredNavigablePattern is the generated table's",
-  NavigablePath:
-    'checks a path against a table type a framework application never holds',
   PathFor:
     'the path type a pattern spells; a link is written through href, against RegisteredNavigablePattern',
   ParamValue:

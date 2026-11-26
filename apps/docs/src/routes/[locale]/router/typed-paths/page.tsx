@@ -29,15 +29,6 @@ export type SitePath = Exclude<
   \`/:locale\${string}:\${string}\`
 >;`;
 
-const NAVIGABLE_PATH = `import type { NavigablePath } from '@k8ordo/router';
-
-type A = NavigablePath<typeof routes, '/products/42'>;
-// '/products/42'
-type B = NavigablePath<typeof routes, '/products/42/reviews'>;
-// never
-type C = NavigablePath<typeof routes, '/products/'>;
-// never`;
-
 export default function RouterTypedPathsPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/router/typed-paths">
@@ -129,16 +120,6 @@ export default function RouterTypedPathsPage() {
             <Rich>{t.typesSchemaAfter()}</Rich>
           </p>
         </Note>
-      </DocSection>
-
-      <DocSection id="navigable-path" title={t.navigablePathTitle}>
-        <CodeBlock code={NAVIGABLE_PATH} lang="ts" />
-        <p>
-          <Rich>{t.navigablePathRule()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.navigablePathSlash()}</Rich>
-        </p>
       </DocSection>
     </DocPage>
   );

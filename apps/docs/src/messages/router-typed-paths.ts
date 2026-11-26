@@ -134,18 +134,3 @@ export const stateLinkAfter = message({
   ja: 'を見てください。',
   en: ' of `@k8ordo/state`.',
 });
-
-export const navigablePathTitle = message({
-  ja: '`NavigablePath`',
-  en: '`NavigablePath`',
-});
-
-export const navigablePathRule = message({
-  ja: '`NavigablePath<typeof routes, Path>`は、パスがリンク先にできるパターンのどれかに合えばそのパスを返し、どれにも合わなければ`never`を返します。`:id`のようなparamの位置には、空でない1区間ならどれでも入ります。',
-  en: '`NavigablePath<typeof routes, Path>` gives back the path when one of the patterns a link can point at matches it, and `never` when none does. Where a pattern has a param such as `:id`, any one non-empty segment fits.',
-});
-
-export const navigablePathSlash = message({
-  ja: '末尾にスラッシュのあるパスは受け付けません。照合では`/products/`も`/products`と同じページになりますが、リンクに書くパスは1通りの書き方にそろえます。',
-  en: 'A path with a trailing slash is refused. Matching treats `/products/` as `/products`, but a link spells each path one way only.',
-});

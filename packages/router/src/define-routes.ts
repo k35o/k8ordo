@@ -10,7 +10,7 @@ import {
   normalizePathname,
   readParams,
 } from './paths';
-import type { Join, PathMatching } from './paths';
+import type { Join } from './paths';
 
 /**
  * Any component, whatever props it declares. The table is written once and
@@ -60,17 +60,6 @@ export type NavigablePatternOf<R extends RoutesRecord> = Exclude<
   PatternOf<R>,
   `${string}*${string}`
 >;
-
-/**
- * `Path` when one of the table's navigable patterns matches it, segment by
- * segment — a literal spelled as the pattern spells it, a `:param` taking any
- * one non-empty segment, a rest param (`:name+`) one or more — and `never`
- * when none does. For a consumer handed a path rather than a pattern.
- */
-export type NavigablePath<D, Path extends string> =
-  D extends Routes<infer R extends RoutesRecord>
-    ? PathMatching<Path, NavigablePatternOf<R>>
-    : never;
 
 export type Match = {
   /** The full pattern that won, as written in the table. */

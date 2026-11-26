@@ -692,22 +692,6 @@ export const navigablePatternOfSummary = message({
   en: 'The patterns in table `R` a link can point at, which excludes those with `/*`.',
 });
 
-export const navigablePathSummary = message({
-  ja: 'パス`Path`を、表のリンク先にできるパターンと区間ごとに比べます。どれかに合えば`Path`、合わなければ`never`です。',
-  en: 'Compares `Path` segment by segment with the table’s linkable patterns. It is `Path` when one fits, and `never` when none does.',
-});
-
-export const navigablePathCaveats = [
-  message({
-    ja: '`:param`の位置には、空でない区間が1つ入ります。',
-    en: 'Where a pattern has a `:param`, any one non-empty segment fits.',
-  }),
-  message({
-    ja: '末尾にスラッシュのあるパスは`never`です。',
-    en: 'A path with a trailing slash is `never`.',
-  }),
-] as const;
-
 export const paramsOfSummary = message({
   ja: 'パターンの文字列から作るparamの型です。値はすべて`string`です。',
   en: 'The params derived from a pattern string. Every value is a `string`.',

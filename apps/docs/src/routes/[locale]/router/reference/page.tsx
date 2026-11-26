@@ -38,11 +38,6 @@ const PARAMS_OF_EXAMPLE = `type Params = ParamsOf<'/:locale/products/:id'>;
 const PATH_FOR_EXAMPLE = `type Path = PathFor<'/:locale/products/:id'>;
 // \`/\${string}/products/\${string}\``;
 
-const NAVIGABLE_PATH_EXAMPLE = `type A = NavigablePath<typeof routes, '/products/42'>;
-// '/products/42'
-type B = NavigablePath<typeof routes, '/products/42/reviews'>;
-// never`;
-
 const HOST_EXAMPLE = `'use client';
 
 import {
@@ -765,17 +760,6 @@ export default function RouterReferencePage() {
         signature="type NavigablePatternOf<R extends RoutesRecord>"
         summary={t.navigablePatternOfSummary}
       />
-
-      <ApiEntry
-        caveats={t.navigablePathCaveats}
-        from={FROM}
-        id="navigable-path"
-        name="NavigablePath"
-        signature="type NavigablePath<D, Path extends string>"
-        summary={t.navigablePathSummary}
-      >
-        <CodeBlock code={NAVIGABLE_PATH_EXAMPLE} lang="ts" />
-      </ApiEntry>
 
       <ApiEntry
         from={FROM}

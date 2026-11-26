@@ -61,12 +61,8 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   `ErrorComponent` are the types the generated code imports); `useRoute()`
   is the untyped form. `@k8ordo/state` builds on the URL `href` returns
   (`listState.href(href('/products'), { page: 2 })`), with no `Register` of
-  its own; `NavigablePath<typeof routes, Path>` is `Path` when a linkable pattern
-  matches it segment by segment (a `:param` takes one non-empty segment, a
-  `:name+` one or more)
-  and `never` otherwise — a check of the path given, never a union of every
-  path, which a `/:locale` page would turn into `/${string}` — for a
-  consumer handed a path rather than a pattern. `usePathname()` reads the platform's
+  its own; a path is never checked on its own — a URL is built with `href`.
+  `usePathname()` reads the platform's
   pathname — never the search — so it works with or without a table, which
   makes it the location hook that also works under the framework;
   `useMatch(pattern, options?)` / `matchPath(pattern, pathname, options?)`
@@ -118,7 +114,7 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   that entry was left once the page loaded again is on screen.
   Exported types, by group — the table: `Routes` (`{ kind, record, match, matchAll }`),
   `RoutesRecord`, `RouteNode`, `RouteComponent`, `Match`, `ErrorComponent`,
-  `ErrorProps`; patterns: `PatternOf`, `NavigablePatternOf`, `NavigablePath`,
+  `ErrorProps`; patterns: `PatternOf`, `NavigablePatternOf`,
   `MatchablePattern`; registration: `Register`, `RegisteredPattern`,
   `RegisteredNavigablePattern`, `RegisteredParams` (what a link takes),
   `RegisteredPageParams` (what a page receives), `PageProps`, `LayoutProps`;

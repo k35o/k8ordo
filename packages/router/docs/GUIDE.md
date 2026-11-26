@@ -471,18 +471,8 @@ listState.href(href('/products'), { q, page: 2 }); // '/products?q=…&page=2'
 ```
 
 The pattern is checked once, here, against the table; state has no table of
-its own to register. `NavigablePath<typeof routes, Path>` is the same check
-for a consumer handed a path rather than a pattern: `Path` itself when one of the table's linkable patterns
-matches it segment by segment — a literal segment spelled as the pattern
-spells it, a `:param` taking any one non-empty segment, a `${string}` from a
-template literal included, a rest param (`:name+`) taking one or more — and
-`never` when none does. A trailing slash is
-refused: matching treats `/products/` as `/products`, but a path built for a
-link is spelled the one canonical way.
-
-The path is checked against the patterns rather than collected into a union
-of every path the table has: a `/:locale` page would put `/${string}` in such
-a union, and `/${string}` takes every path there is.
+its own to register. A path is never checked on its own: a URL is built with
+`href` from a pattern, so there is no type for a hand-written path to pass.
 
 ## What navigation guarantees
 
