@@ -6,7 +6,13 @@ import { defineForm } from './rules/define-form';
 import type { FormDefinition } from './rules/define-form';
 import { sameAs } from './rules/rules';
 import type { ObjectSchema } from './schema/object-schema';
-import type { FormFields } from './types';
+import type {
+  CheckboxInput,
+  FileInput,
+  FormFields,
+  NumberInput,
+  StringCheckboxInput,
+} from './types';
 import { useForm } from './use-form';
 import type { FieldView, UseFormReturn } from './use-form';
 
@@ -82,8 +88,8 @@ describe('paths are derived from the schema', () => {
     const useCompileTimeOnly = (): void => {
       const form = useForm(settings);
 
-      const inStock: string | undefined = form.field('inStock').input.value;
-      const gift: string | undefined = form.field('address.gift').input.value;
+      const inStock: string = form.field('inStock').input.value;
+      const gift: string = form.field('address.gift').input.value;
       // @ts-expect-error a text field submits what is typed, not a value of its own
       const titleValue: unknown = form.field('title').input.value;
       // @ts-expect-error a z.boolean() box is read as checked or not, whatever it submits
@@ -103,6 +109,50 @@ describe('paths are derived from the schema', () => {
         notify,
         box,
       ]).toBeDefined();
+    };
+
+    expect(useCompileTimeOnly).toBeTypeOf('function');
+  });
+
+  it('types each input by the control its schema derives', () => {
+    const kinds = formFields(
+      z.object({
+        title: z.string(),
+        plan: z.enum(['free', 'pro']),
+        quantity: z.coerce.number().int().min(1).optional(),
+        notify: z.boolean().default(false),
+        inStock: z.stringbool().optional(),
+        avatar: z.file(),
+        nullableNumber: z.coerce.number().nullable(),
+      }),
+    );
+
+    const useCompileTimeOnly = (): void => {
+      const form = useForm(kinds);
+
+      const types: [
+        Equal<FieldView, ReturnType<typeof form.field<'title'>>>,
+        Equal<FieldView, ReturnType<typeof form.field<'plan'>>>,
+        Equal<
+          FieldView<NumberInput>,
+          ReturnType<typeof form.field<'quantity'>>
+        >,
+        Equal<
+          FieldView<CheckboxInput>,
+          ReturnType<typeof form.field<'notify'>>
+        >,
+        Equal<
+          FieldView<StringCheckboxInput>,
+          ReturnType<typeof form.field<'inStock'>>
+        >,
+        Equal<FieldView<FileInput>, ReturnType<typeof form.field<'avatar'>>>,
+        Equal<FieldView, ReturnType<typeof form.field<'nullableNumber'>>>,
+      ] = [true, true, true, true, true, true, true];
+
+      // @ts-expect-error a file control cannot take a value back
+      const avatar: unknown = form.field('avatar').input.defaultValue;
+
+      expect([types, avatar]).toBeDefined();
     };
 
     expect(useCompileTimeOnly).toBeTypeOf('function');

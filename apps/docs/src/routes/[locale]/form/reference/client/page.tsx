@@ -117,7 +117,7 @@ export default function FormReferenceClientPage() {
       <ApiEntry
         caveats={t.fieldViewCaveats}
         fields={[
-          { name: 'input', type: 'FieldInput', description: t.fieldViewInput },
+          { name: 'input', type: 'Input', description: t.fieldViewInput },
           {
             name: 'error',
             type: 'string | undefined',
@@ -133,8 +133,8 @@ export default function FormReferenceClientPage() {
         from={FROM}
         id="field-view"
         name="FieldView"
-        signature={`type FieldView = {
-  input: FieldInput;
+        signature={`type FieldView<Input = FieldInput> = {
+  input: Input;
   error: string | undefined;
   invalid: boolean;
   required: boolean;

@@ -357,6 +357,26 @@ describe('parseForm', () => {
     expect(picked.state.values).toStrictEqual({});
   });
 
+  it('never echoes the file name a non-multipart form posts under a file field', () => {
+    const upload = z.object({
+      title: z.string(),
+      avatar: z.file(),
+      attachments: z.array(z.object({ file: z.file() })),
+    });
+
+    const result = parseForm(
+      upload,
+      formDataOf([
+        ['title', 'k8o'],
+        ['avatar', 'avatar.png'],
+        ['attachments[0].file', 'slides.pdf'],
+      ]),
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.state.values).toStrictEqual({ title: 'k8o' });
+  });
+
   it('routes an object-level issue to formError, not to a field', () => {
     const paired = z
       .object({

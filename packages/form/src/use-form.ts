@@ -18,13 +18,13 @@ import { breachOf } from './rules/rules';
 import type { DerivedRule } from './rules/rules';
 import type { ObjectSchema } from './schema/object-schema';
 import type {
+  AnyFieldInput,
   DerivedArray,
   DerivedField,
   FieldInput,
   FieldsBy,
   FormState,
   SchemaOf,
-  StringCheckboxInput,
   ValidityFlag,
 } from './types';
 
@@ -45,7 +45,7 @@ const FLAGS: ValidityFlag[] = [
 type Control = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
 type Fields = {
-  fields: Record<string, DerivedField<StringCheckboxInput>>;
+  fields: Record<string, DerivedField<AnyFieldInput>>;
   arrays: Record<string, DerivedArray>;
   rules: DerivedRule[];
 };
@@ -539,13 +539,13 @@ export const useForm = <Inputs, ArrayPath extends string>(
 
   const viewOf = useCallback(
     (
-      field: DerivedField<StringCheckboxInput>,
+      field: DerivedField<AnyFieldInput>,
       name: string,
-    ): FieldView<StringCheckboxInput> => {
+    ): FieldView<AnyFieldInput> => {
       const serverError = edited.has(name) ? undefined : state.errors?.[name];
       const error = clientErrors[name] ?? serverError;
       const value = state.values?.[name];
-      const input: StringCheckboxInput = { ...field.input, name };
+      const input: AnyFieldInput = { ...field.input, name };
 
       if (field.input.type === 'checkbox') {
         // An unchecked box is simply absent from the echo, so presence is the
@@ -570,7 +570,7 @@ export const useForm = <Inputs, ArrayPath extends string>(
   );
 
   const field = useCallback(
-    (path: string): FieldView<StringCheckboxInput> => {
+    (path: string): FieldView<AnyFieldInput> => {
       const derived = lookup.fields[path];
       if (derived === undefined) {
         throw new Error(

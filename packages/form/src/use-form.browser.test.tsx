@@ -193,11 +193,7 @@ const Choice: FC<{ state?: FormState }> = ({ state = NO_STATE }) => {
         <option value="red">red</option>
         <option value="blue">blue</option>
       </select>
-      <input
-        aria-label="agree"
-        type="checkbox"
-        {...form.field('agree').input}
-      />
+      <input aria-label="agree" {...form.field('agree').input} />
       <p data-testid="dirty">{String(form.isDirty)}</p>
     </form>
   );

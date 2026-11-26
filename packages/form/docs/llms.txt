@@ -52,8 +52,10 @@ row. Rules cannot target fields inside repeated rows.
   per-field checks and `HiddenValue` for components that render no input of
   their own. The types
   of the `formFields` result (`FormFields`, `DerivedField`, `DerivedArray`,
-  `DroppedCheck`, `FieldInput`, `StringCheckboxInput`, `ValidityFlag`, `Rule`,
-  `DerivedRule`, `RuleMessage`) are exported here as
+  `DroppedCheck`, `ValidityFlag`, `Rule`, `DerivedRule`, `RuleMessage`, and
+  the input types `field()` gives per control: `NumberInput`, `CheckboxInput`,
+  `StringCheckboxInput`, `FileInput`, and `FieldInput` for the rest) are
+  exported here as
   well, since the result crosses to the client as a prop, and so are
   `FormState` and the return types (`UseFormReturn`, `FieldView`, `ArrayView`,
   `RowView`, `FormErrorView`, `AsyncCheck`). `FormFields` and `UseFormReturn`
@@ -85,5 +87,6 @@ row. Rules cannot target fields inside repeated rows.
   `ParseResult`, `FormDefinition`, `ObjectSchema`, `Rule`, `RuleMessage`,
   `FormState`, and the
   `formFields` result's `FormFields`, `DerivedField`, `DerivedArray`,
-  `DerivedRule`, `DroppedCheck`, `FieldInput`, `StringCheckboxInput`,
-  `ValidityFlag`.
+  `DerivedRule`, `DroppedCheck`, `ValidityFlag`, and the input types
+  (`FieldInput`, `NumberInput`, `CheckboxInput`, `StringCheckboxInput`,
+  `FileInput`).

@@ -484,8 +484,8 @@ describe('formFields', () => {
     // required has to come from the same "nothing was entered" the parse sends.
     expect(fields.optional.input.required).toBeUndefined();
     // A byte bound is not minlength, and no attribute carries it.
-    expect(fields.attachment.input.minLength).toBeUndefined();
-    expect(fields.attachment.input.maxLength).toBeUndefined();
+    expect(fields.attachment.input).not.toHaveProperty('minLength');
+    expect(fields.attachment.input).not.toHaveProperty('maxLength');
     expect(
       dropped.find((entry) => entry.field === 'attachment')?.reason,
     ).toContain('ファイルサイズ');

@@ -1415,8 +1415,8 @@ Props:
 
 ### FileField
 
-File upload, as a composite pattern. A string `defaultValue` (the type
-`@k8ordo/form`'s derived attributes carry) is accepted and ignored.
+File upload, as a composite pattern. A string `defaultValue` is accepted and
+ignored.
 
 ```tsx
 import { FileField } from '@k8ordo/ui';

@@ -120,6 +120,10 @@ export const fieldViewCaveats = [
     en: 'A server error stays until the control is edited. An error from the browser’s check takes precedence over it.',
   }),
   message({
+    ja: '`input`の型は、スキーマから導く入力欄の種類で決まります。`z.coerce.number()`は`NumberInput`（`min`と`max`は数）、`z.boolean()`は`CheckboxInput`、`z.stringbool()`は`StringCheckboxInput`、`z.file()`は`FileInput`（`defaultValue`は無い）です。文字列や`z.enum()`、`.nullable()`や`z.union()`を通した欄は`FieldInput`です。',
+    en: 'The type of `input` follows the control the schema derives: `NumberInput` for `z.coerce.number()` (numeric `min` and `max`), `CheckboxInput` for `z.boolean()`, `StringCheckboxInput` for `z.stringbool()`, and `FileInput` for `z.file()` (no `defaultValue`). A string, a `z.enum()`, and anything read through `.nullable()` or `z.union()` get `FieldInput`.',
+  }),
+  message({
     ja: '`z.stringbool()`の入力欄だけは、`input`に`value`が入ります。チェックしたときに送る文字列です。',
     en: 'Only a `z.stringbool()` field has `value` in its `input`: the string a checked box submits.',
   }),

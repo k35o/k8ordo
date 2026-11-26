@@ -88,7 +88,8 @@ checks (`refine`) vanish from its output without a trace.
   `instanceof` by the traits a schema was built with, so a `zod/mini` schema
   matches the same classes; `zod-mini.test.ts` holds each of these for it.
   At the type level, `paths.ts` reads the same `_zod.def` shapes
-  (`innerType`, `element`, `entries` for an enum) off the schema's type.
+  (`innerType`, `element`, `entries` for an enum, and `type`, which picks a
+  leaf's input type) off the schema's type.
 - **A pairing the walk cannot make is a throw, not a skip.** A JSON node with
   no matching zod node (records, tuples, nullable objects, nested repeats,
   dotted keys) would parse to silently discarded input, which is the one

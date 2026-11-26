@@ -8,11 +8,11 @@ import { asProbe } from '../schema/object-schema';
 import type { ObjectSchema } from '../schema/object-schema';
 import { schemaMap, unwrap } from '../schema/walk';
 import type {
+  AnyFieldInput,
   DerivedArray,
   DerivedField,
   DroppedCheck,
   FormFields,
-  StringCheckboxInput,
 } from '../types';
 import { attributesFor, emptySubmissionOf, namesAControl } from './attributes';
 import { messagesFor } from './messages';
@@ -112,7 +112,7 @@ export const formFields = <Source extends ObjectSchema | FormDefinition>(
 ): FormFields<Source> => {
   const { schema, rules } = asDefinition<ObjectSchema>(input);
   const map = schemaMap(schema);
-  const fields: Record<string, DerivedField<StringCheckboxInput>> = {};
+  const fields: Record<string, DerivedField<AnyFieldInput>> = {};
   const arrays: Record<string, DerivedArray> = {};
   const dropped: DroppedCheck[] = [];
 
@@ -168,7 +168,7 @@ export const formFields = <Source extends ObjectSchema | FormDefinition>(
     if (secret) {
       attributes.input.type = 'password';
     }
-    const fieldInput: StringCheckboxInput =
+    const fieldInput: AnyFieldInput =
       leaf.checkedValue === undefined
         ? attributes.input
         : { ...attributes.input, value: leaf.checkedValue };
@@ -184,7 +184,7 @@ export const formFields = <Source extends ObjectSchema | FormDefinition>(
       });
     }
 
-    const derived: DerivedField<StringCheckboxInput> = {
+    const derived: DerivedField<AnyFieldInput> = {
       input: fieldInput,
       messages: messagesFor(
         leaf.zod,

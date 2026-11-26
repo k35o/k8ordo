@@ -95,7 +95,7 @@ export const parseForm = <Shape extends ObjectSchema>(
   const map = schemaMap(schema);
   const raw: Record<string, unknown> = {};
   const missing: string[] = [];
-  const secrets = new Set<string>();
+  const unechoed = new Set<string>();
   const groups = new Set<string>();
 
   const rows = rowCounts(formData, map.arrays);
@@ -116,8 +116,8 @@ export const parseForm = <Shape extends ObjectSchema>(
           );
 
     for (const name of names) {
-      if (leaf.json.input === 'password') {
-        secrets.add(name);
+      if (leaf.json.input === 'password' || leaf.kind === 'file') {
+        unechoed.add(name);
       }
 
       if (leaf.group !== undefined) {
@@ -187,7 +187,7 @@ export const parseForm = <Shape extends ObjectSchema>(
     values[name] = strings(name);
   }
   for (const [name, value] of formData.entries()) {
-    if (typeof value !== 'string' || secrets.has(name) || groups.has(name)) {
+    if (typeof value !== 'string' || unechoed.has(name) || groups.has(name)) {
       continue;
     }
     const existing = values[name];

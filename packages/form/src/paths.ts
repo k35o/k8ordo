@@ -10,7 +10,13 @@
  * where the walk refuses the schema outright, as it does a nullable object.
  */
 
-import type { FieldInput, StringCheckboxInput } from './types';
+import type {
+  CheckboxInput,
+  FieldInput,
+  FileInput,
+  NumberInput,
+  StringCheckboxInput,
+} from './types';
 
 type Join<Prefix extends string, Key extends string> = Prefix extends ''
   ? Key
@@ -68,7 +74,7 @@ type FieldEntriesOf<Schema, Prefix extends string = ''> =
           }[keyof Shape & string]
         : Prefix extends ''
           ? never
-          : [Prefix, LeafInputOf<Bare>]
+          : [Prefix, LeafInputOf<Schema>]
     : never;
 
 export type FieldPathsOf<Schema> = FieldEntriesOf<Schema>[0];
@@ -120,5 +126,32 @@ type EncodesTrueAsString<Schema> = Schema extends {
     : false
   : false;
 
+/**
+ * `Unwrap` without `.nullable()`, which turns a leaf's JSON node into a union
+ * and so the control into a bare text input — the leaf no longer derives the
+ * control its own type names.
+ */
+type UnwrapLeaf<Schema> = Schema extends {
+  _zod: { def: { type: 'nullable' } };
+}
+  ? Schema
+  : Schema extends { _zod: { def: { innerType: infer Inner } } }
+    ? UnwrapLeaf<Inner>
+    : Schema;
+
+type InputOfType<Type> = [Type] extends ['number']
+  ? NumberInput
+  : [Type] extends ['boolean']
+    ? CheckboxInput
+    : [Type] extends ['file']
+      ? FileInput
+      : FieldInput;
+
 type LeafInputOf<Schema> =
-  EncodesTrueAsString<Schema> extends true ? StringCheckboxInput : FieldInput;
+  UnwrapLeaf<Schema> extends infer Leaf
+    ? EncodesTrueAsString<Leaf> extends true
+      ? StringCheckboxInput
+      : Leaf extends { _zod: { def: { type: infer Type } } }
+        ? InputOfType<Type>
+        : FieldInput
+    : never;

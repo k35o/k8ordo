@@ -87,6 +87,24 @@ Each leaf derives the control that submits what it validates:
 | `z.array(z.enum([…]))`                           | no `type`: one checkbox per option ([Checkbox groups](#checkbox-groups))                               |
 | anything else (`z.uuid()`, `z.coerce.date()`, …) | `type="text"`                                                                                          |
 
+`form.field()` types each `input` by the control its schema derives, so a
+spread reaches a component that takes only what that control has:
+
+| Schema                                                                      | `input` type          |
+| --------------------------------------------------------------------------- | --------------------- |
+| `z.coerce.number()`                                                         | `NumberInput`         |
+| `z.boolean()`                                                               | `CheckboxInput`       |
+| `z.stringbool()`                                                            | `StringCheckboxInput` |
+| `z.file()`                                                                  | `FileInput`           |
+| a string, `z.enum([…])`, and anything behind `.nullable()`, a union, a pipe | `FieldInput`          |
+
+`NumberInput` has numeric `min` and `max` and always a `step`; `FileInput` has
+no `defaultValue`, since no browser lets a value be put back into a file
+control. `.optional()`, `.default()` and the other wrappers keep the leaf's
+control and its type; `.nullable()` does not — it turns the leaf into a union,
+which derives a bare text input — so it falls to `FieldInput`, the type that
+covers every control.
+
 ```tsx
 // src/routes/talks/new/page.tsx — Server Component
 const talkFields = formFields(talkSchema); // module scope: derived once
@@ -434,9 +452,10 @@ accepts it, and a bare `z.stringbool()` makes the box `required`.
 unchecking the box could never submit `false`.
 
 Only these fields carry `value` in their type. `field()` reads which ones they
-are from the schema's type, and types `input` as `StringCheckboxInput` for
-them and as `FieldInput`, with no `value`, for every other field — so the other
-fields spread onto a component that takes `value` only when it is controlled.
+are from the schema's type, and types `input` by the control each field
+derives ([the table above](#writing-a-form)): `StringCheckboxInput` is the one
+input type with a `value`, so every other field spreads onto a component that
+takes `value` only when it is controlled.
 A box inside repeated rows still submits its `value`, but `row.field()` never
 types it there.
 

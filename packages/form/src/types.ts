@@ -15,7 +15,12 @@ export type ValidityFlag =
   | 'typeMismatch'
   | 'valueMissing';
 
-/** Attributes spread onto the input element itself. */
+/**
+ * Attributes spread onto the input element itself, for a field whose control
+ * the schema's type does not settle: a string (`type` is `email`, `date`,
+ * `password` and the like, and absent for plain text), an enum, and anything
+ * read through a union, a pipe or a literal.
+ */
 export type FieldInput = {
   name: string;
   type?: string;
@@ -32,14 +37,49 @@ export type FieldInput = {
   defaultChecked?: boolean;
 };
 
+/** The input of a `z.coerce.number()` field. */
+export type NumberInput = {
+  name: string;
+  type: 'number';
+  required?: boolean;
+  min?: number;
+  max?: number;
+  /** From `.multipleOf()`; `1` after `.int()`, `'any'` otherwise. */
+  step: number | 'any';
+  /** The submitted text, echoed after a failed submission. */
+  defaultValue?: string;
+};
+
+/** The input of a checkbox read as checked or not (`z.boolean()`). */
+export type CheckboxInput = {
+  name: string;
+  type: 'checkbox';
+  required?: boolean;
+  defaultChecked?: boolean;
+};
+
 /**
  * The input of a checkbox whose schema reads the submitted string
  * (`z.stringbool()`): it also carries what a checked box submits.
  */
-export type StringCheckboxInput = FieldInput & {
+export type StringCheckboxInput = CheckboxInput & {
   /** The schema's own spelling of `true`. */
-  value?: string;
+  value: string;
 };
+
+/**
+ * The input of a `z.file()` field. It has no `defaultValue`: no browser lets
+ * a value be put back into a file control.
+ */
+export type FileInput = {
+  name: string;
+  type: 'file';
+  required?: boolean;
+  /** Comma-separated mime types, from `.mime()`. */
+  accept?: string;
+};
+
+export type AnyFieldInput = FieldInput & { value?: string };
 
 /**
  * One field as derived from the schema. Serializable on purpose: it crosses the
