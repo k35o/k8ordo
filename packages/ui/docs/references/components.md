@@ -2268,7 +2268,8 @@ under `isOpen` when they should start over. `ref` is the `<dialog>` element.
 ### CommandPalette
 
 A command palette: a modal dialog holding a search field and the list of commands it
-filters. Typing matches each item's `label` and `keywords`, case-insensitively.
+filters. Typing matches each item's `label` and `keywords`, case-insensitively
+in the language of `@k8ordo/i18n`'s current locale.
 `ArrowDown` / `ArrowUp` move through the matches and wrap around, `Enter` or a
 click runs the item's `onAction` after closing the palette, and `Escape` closes
 it; focus stays in the search field throughout (the WAI-ARIA combobox, with the

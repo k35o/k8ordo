@@ -1235,8 +1235,8 @@ export const commandPalette = {
     en: 'A palette that filters commands as you type and runs them from the keyboard.',
   }),
   usageDescription: message({
-    ja: '`label`と`keywords`を、大文字と小文字を区別せずに絞り込みます。`↓`と`↑`で移動し、端では反対側へ回ります。`Enter`かクリックでパレットを閉じてから`onAction`を呼びます。フォーカスは検索欄に置いたままです。同じ`group`の項目は見出しの下にまとまり、`shortcut`のキーは`Kbd`で添えます。',
-    en: 'It filters on `label` and `keywords`, ignoring case. `↓` and `↑` move through the matches and wrap around. `Enter` or a click closes the palette and then calls `onAction`. Focus stays in the search field. Items that share a `group` gather under its heading, and `shortcut` keys are drawn with `Kbd`.',
+    ja: '`label`と`keywords`を、アプリの言語の規則で大文字と小文字を区別せずに絞り込みます。`↓`と`↑`で移動し、端では反対側へ回ります。`Enter`かクリックでパレットを閉じてから`onAction`を呼びます。フォーカスは検索欄に置いたままです。同じ`group`の項目は見出しの下にまとまり、`shortcut`のキーは`Kbd`で添えます。',
+    en: 'It filters on `label` and `keywords`, ignoring case by the rules of the app’s language. `↓` and `↑` move through the matches and wrap around. `Enter` or a click closes the palette and then calls `onAction`. Focus stays in the search field. Items that share a `group` gather under its heading, and `shortcut` keys are drawn with `Kbd`.',
   }),
   shortcutTitle: message({
     ja: 'キーでの開閉',

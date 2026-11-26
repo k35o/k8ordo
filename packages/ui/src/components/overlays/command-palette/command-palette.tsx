@@ -5,7 +5,7 @@ import { useCallback, useId, useMemo, useRef, useState } from 'react';
 import type { FC, KeyboardEvent, Ref } from 'react';
 
 import { mergeRefs } from '../../../helpers/merge-refs';
-import { getMessages } from '../../../i18n/current';
+import { getLocale, getMessages } from '../../../i18n/current';
 import { Kbd } from '../../data-display/kbd';
 import { Modal } from '../modal';
 
@@ -38,9 +38,9 @@ type Section = {
   entries: Array<{ item: CommandPaletteItem; index: number }>;
 };
 
-const matches = (item: CommandPaletteItem, needle: string) =>
+const matches = (item: CommandPaletteItem, needle: string, locale: string) =>
   [item.label, ...(item.keywords ?? [])].some((text) =>
-    text.toLocaleLowerCase().includes(needle),
+    text.toLocaleLowerCase(locale).includes(needle),
   );
 
 // 一致した順を保ったまま、まとまりごとに集める。まとめると並びが入れ替わる
@@ -72,6 +72,7 @@ export const CommandPalette: FC<Props> = ({
   ref,
 }) => {
   const messages = getMessages();
+  const locale = getLocale();
   const baseId = useId();
   const listboxId = `${baseId}-listbox`;
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -79,9 +80,11 @@ export const CommandPalette: FC<Props> = ({
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const needle = query.trim().toLocaleLowerCase();
+  const needle = query.trim().toLocaleLowerCase(locale);
   const matched =
-    needle === '' ? items : items.filter((item) => matches(item, needle));
+    needle === ''
+      ? items
+      : items.filter((item) => matches(item, needle, locale));
   const sections = sectionsOf(matched);
   const ordered = sections.flatMap((section) =>
     section.entries.map(({ item }) => item),
