@@ -25,7 +25,7 @@ jobs:
   release:
     needs: ci
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 45 # npm の承認を最大 30 分待つ
     environment: release
     steps:
       - name: Generate token
@@ -49,7 +49,7 @@ jobs:
           build: none
 
       - name: Release
-        uses: k35o/pnpm-release-action@v0.2.2
+        uses: k35o/pnpm-release-action@v0.4.0
         with:
           # ルートの `pnpm build` は docs サイトまで組むので、サイトだけの失敗で
           # npm への公開が止まる。公開するパッケージだけを組む。
