@@ -2759,10 +2759,16 @@
           "types": ["Placement"],
           "defaultValue": "'top'",
           "required": false
+        },
+        {
+          "name": "type",
+          "types": ["'button'", "'submit'", "'reset'"],
+          "defaultValue": "'button'",
+          "required": false
         }
       ],
       "inherits": "ComponentPropsWithRef<'button'> | ComponentPropsWithRef<'a'>",
-      "omitted": ["className", "style", "type", "aria-disabled"]
+      "omitted": ["className", "style", "aria-disabled"]
     },
     {
       "name": "ImageIcon",

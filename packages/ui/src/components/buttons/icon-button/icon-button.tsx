@@ -59,6 +59,7 @@ type Look = {
 
 type ButtonProps = Look & {
   href?: undefined;
+  type?: 'button' | 'submit' | 'reset';
   /**
    * 押したときに transition の中で走らせる処理。返した Promise が解決するまで
    * `aria-busy` と `aria-disabled` を立て、押されても何もしない。ボタンは
@@ -76,6 +77,7 @@ type ButtonProps = Look & {
 type LinkProps<T extends string> = Look & {
   /** あれば `<button>` の代わりに `<a>` を描く。 */
   href: T;
+  type?: never;
   action?: never;
   /** `<a>` の代わりに描く要素。Next.js の `Link` などに受け取った props を展開する。 */
   renderAnchor?: (props: RenderAnchorProps<T>) => ReactNode;
@@ -89,10 +91,13 @@ type IconButtonComponent = {
   (props: ButtonProps): ReactNode;
 };
 
-type ButtonRest = Omit<ButtonProps, keyof Look | 'action' | 'aria-describedby'>;
+type ButtonRest = Omit<
+  ButtonProps,
+  keyof Look | 'type' | 'action' | 'aria-describedby'
+>;
 type LinkRest<T extends string> = Omit<
   LinkProps<T>,
-  keyof Look | 'action' | 'aria-describedby'
+  keyof Look | 'type' | 'action' | 'aria-describedby'
 >;
 
 const isLink = <T extends string>(
@@ -142,13 +147,14 @@ export const IconButton: IconButtonComponent = <T extends string>({
   tooltipDisabled = false,
   disabled = false,
   children,
+  type = 'button',
   action,
   'aria-describedby': describedBy,
   ...rest
 }: ButtonProps | LinkProps<T>): ReactNode => {
   const [transitionPending, startTransition] = useTransition();
   const { pending: formPending } = useFormStatus();
-  const isPending = transitionPending || formPending;
+  const isPending = transitionPending || (type === 'submit' && formPending);
   const isDisabled = disabled || isPending;
 
   const className = clsx(
@@ -268,7 +274,10 @@ export const IconButton: IconButtonComponent = <T extends string>({
           onMouseLeave,
         )}
         ref={mergedRef}
-        type="button"
+        // lint の button-has-type は変数の type を読めないので、値ごとにリテラルで書く。
+        type={
+          type === 'submit' ? 'submit' : type === 'reset' ? 'reset' : 'button'
+        }
       >
         {children}
       </button>

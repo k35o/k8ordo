@@ -156,10 +156,13 @@ Props:
 - `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
 - `tooltipDisabled`: `boolean` (default: `false`)
 - `tooltipPlacement`: `Placement` (default: `'top'`)
-- Other props are forwarded to `ComponentPropsWithRef<'button'> | ComponentPropsWithRef<'a'>`, except `className` / `style` / `type` / `aria-disabled`.
+- `type`: `'button'` | `'submit'` | `'reset'` (default: `'button'`)
+- Other props are forwarded to `ComponentPropsWithRef<'button'> | ComponentPropsWithRef<'a'>`, except `className` / `style` / `aria-disabled`.
 
 `action` keeps the button busy the way `Button`'s does — `aria-busy`,
-`aria-disabled`, presses ignored, focus kept — without the spinner.
+`aria-disabled`, presses ignored, focus kept — without the spinner. `type`
+takes `'button'`, `'submit'`, or `'reset'`, and only a submit button follows
+the form's pending state.
 
 With `href`, `IconButton` renders an `<a>`, named by `label` and with the same
 tooltip. `renderAnchor` replaces that `<a>` under the same contract as

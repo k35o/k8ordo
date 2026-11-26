@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import type { MouseEvent, MouseEventHandler } from 'react';
+import type { FC, MouseEvent, MouseEventHandler } from 'react';
 import { useRef, useState } from 'react';
 import { expect, fn, screen, waitFor } from 'storybook/test';
 
@@ -252,5 +252,53 @@ export const RenderAnchor: Story = {
     await expect(await screen.findByRole('tooltip')).toHaveTextContent(
       'コピー',
     );
+  },
+};
+
+const submitAction = fn(actionUntilFinished);
+
+const SubmitRender: FC = () => (
+  <form action={submitAction}>
+    <IconButton label="送信" type="submit">
+      <CopyIcon />
+    </IconButton>
+    <IconButton label="戻す" type="reset">
+      <CopyIcon />
+    </IconButton>
+    <IconButton label="ほかの操作">
+      <CopyIcon />
+    </IconButton>
+  </form>
+);
+
+/**
+ * `type="submit"` なら属するフォームの送信中に保留になる。送信ボタンでない
+ * IconButton は、同じフォームの中でも保留にならない。
+ */
+export const SubmitPending: Story = {
+  render: () => <SubmitRender />,
+  play: async ({ canvas, userEvent }) => {
+    const submit = canvas.getByRole('button', { name: '送信' });
+    const reset = canvas.getByRole('button', { name: '戻す' });
+    const other = canvas.getByRole('button', { name: 'ほかの操作' });
+
+    await expect(submit).toHaveAttribute('type', 'submit');
+    await expect(reset).toHaveAttribute('type', 'reset');
+    try {
+      await userEvent.click(submit);
+      await waitFor(() => {
+        expect(submit).toHaveAttribute('aria-busy', 'true');
+      });
+      await expect(reset).not.toHaveAttribute('aria-busy');
+      await expect(other).not.toHaveAttribute('aria-busy');
+      await expect(other).not.toHaveAttribute('aria-disabled');
+    } finally {
+      // 終わらない非同期の transition は、同じ React の後続の transition を
+      // すべて待たせる。途中で落ちても後のストーリーを巻き込まないよう片付ける
+      finishAction();
+    }
+    await waitFor(() => {
+      expect(submit).not.toHaveAttribute('aria-busy');
+    });
   },
 };
