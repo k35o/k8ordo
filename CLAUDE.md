@@ -16,7 +16,7 @@ Every package here shares the same discipline:
 
 - **React 19 and RSC are assumed.** No framework-agnostic core and no adapter layer for other frameworks — we would never use one, so building it would be an indirection nobody pays for.
 - **Anything at Baseline _newly available_ is fair game, and nothing else is carried.** Newly available, not widely available: a feature is usable the moment all four core browsers ship it, without waiting the further 30 months. No polyfills, no fallbacks, no legacy branches. This is not a decision to drop old browsers — a library built out of the newest features never ran on them in the first place. `pnpm check:no-polyfills` enforces the dependency half of this in CI; the rest is on the author, since checking Baseline usage itself (JS _and_ CSS) would take a linter of its own.
-- **Identifiers name what the package owns, never the scope.** The scope already says `k8ordo`, so `UIProvider`, not `OrdoProvider`.
+- **Identifiers name what the package owns, never the scope.** The scope already says `k8ordo`, so `ToastProvider`, not `OrdoToastProvider`.
 
 ## Adding a package
 

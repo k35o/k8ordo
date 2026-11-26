@@ -76,4 +76,3 @@ export { DropdownMenu } from './overlays/dropdown-menu';
 export { ListBox } from './overlays/list-box';
 export { Popover, type PopoverTriggerProps } from './overlays/popover';
 export { Tooltip, type TooltipTriggerProps } from './overlays/tooltip';
-export { UIProvider, PortalRootProvider, usePortalRoot } from './providers';

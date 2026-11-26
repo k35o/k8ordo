@@ -177,7 +177,7 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   `src/components/code-block.module.css` does to frame every `CodeBlock`
   (import `CodeBlock` from `src/components/code-block`, not from
   `@k8ordo/ui/code-block`, to get the frame)
-- **Root provider**: `UIProvider` wraps each locale subtree in
+- **Root provider**: `ToastProvider` wraps each locale subtree in
   `src/components/locale-shell.tsx`, for toasts. Component
   built-in strings follow the site locale on their own: `@k8ordo/ui` reads
   `@k8ordo/i18n`'s current locale, and the framework loads `src/i18n.ts` in

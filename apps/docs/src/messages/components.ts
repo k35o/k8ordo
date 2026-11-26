@@ -1205,8 +1205,8 @@ export const dialog = {
     en: 'Top layer and portals',
   }),
   portalRootDescription: message({
-    ja: '`Dialog`と`Drawer`はブラウザのトップレイヤーの`<dialog>`に表示されます。そのため、`document.body`にポータルした要素はダイアログの後ろに隠れます。ダイアログは自分の`<dialog>`をポータルのルートとしてコンテキストで渡しています。`usePortalRoot`で取り出してポータル先にすれば、ダイアログの中でも前面に出ます。',
-    en: '`Dialog` and `Drawer` render in a `<dialog>` in the browser’s top layer, so anything portaled to `document.body` ends up behind them. They provide their own `<dialog>` as the portal root through context. Read it with `usePortalRoot` and portal there, and floating UI stays on top inside the dialog.',
+    ja: '`Dialog`と`Drawer`はブラウザのトップレイヤーの`<dialog>`に表示され、後ろのページは操作できなくなります。そのため、`document.body`にポータルした要素はダイアログの後ろに隠れ、押せません。自分で浮かせるUIは、`popover`属性を付けてその場に描けばトップレイヤーに出ます。ポータルするライブラリには、`ref`で受け取った`<dialog>`をポータル先として渡します。奥の部品で要るときは、子の中に自分のContextを置きます。ダイアログの中の`useToast`は、トーストをその`<dialog>`の中に出し、閉じると一緒に消えます。',
+    en: '`Dialog` and `Drawer` render in a `<dialog>` in the browser’s top layer, and the page behind them goes inert, so anything portaled to `document.body` ends up behind them, out of reach. Floating UI of your own opens in place with the `popover` attribute, which reaches the top layer from where it is. Hand a library that portals the `<dialog>` you get from `ref` as its container; if a part deep inside needs it, put your own Context in the children. `useToast` inside a dialog opens the toast in that `<dialog>`, and it goes away when the dialog closes.',
   }),
 };
 

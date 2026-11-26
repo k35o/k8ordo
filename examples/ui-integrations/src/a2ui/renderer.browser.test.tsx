@@ -1,6 +1,6 @@
 import { MessageProcessor } from '@a2ui/web_core';
 import type { ActionPayload, ProcessableMessage } from '@a2ui/web_core';
-import { UIProvider } from '@k8ordo/ui';
+import { ToastProvider } from '@k8ordo/ui';
 import { expect, it, vi } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
 
@@ -36,9 +36,9 @@ const mount = async (components: object[]) => {
   const processor = new MessageProcessor([a2uiCatalog], actions);
   processor.processMessages(surfaceOf(components));
   const screen = await render(
-    <UIProvider>
+    <ToastProvider>
       <A2uiSurfaces processor={processor} />
-    </UIProvider>,
+    </ToastProvider>,
   );
   return { screen, actions };
 };

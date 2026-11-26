@@ -38,12 +38,7 @@ const LEFT_OUT: ReadonlyMap<string, string> = new Map([
   ],
   ['InView', OBSERVER],
   ['Resize', OBSERVER],
-  ['UIProvider', 'アプリが生成 UI も含めた全体の外側に 1 度だけ置く'],
-  [
-    'PortalRootProvider',
-    'アプリ自身の createPortal のための配線。生成 UI のオーバーレイは自分で面を開く',
-  ],
-  ['usePortalRoot', 'PortalRootProvider を読むだけの hook'],
+
   ['Conversation', CHAT],
   ['Message', CHAT],
   ['PromptInput', CHAT],

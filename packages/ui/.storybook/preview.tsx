@@ -1,7 +1,7 @@
 import { defineLocales } from '@k8ordo/i18n';
 import type { Preview } from '@storybook/react-vite';
 
-import { UIProvider } from '../src/components/providers';
+import { ToastProvider } from '../src/components/feedback/toast';
 import { definitions } from './locales';
 
 import '../src/styles/index.css';
@@ -67,13 +67,13 @@ const preview: Preview = {
         globals.writingMode ??
         ('horizontal' as 'horizontal' | 'vertical');
       return (
-        <UIProvider>
+        <ToastProvider>
           <div
             className={writingMode === 'vertical' ? 'writing-v story' : 'story'}
           >
             <Story />
           </div>
-        </UIProvider>
+        </ToastProvider>
       );
     },
   ],

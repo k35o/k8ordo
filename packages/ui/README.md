@@ -88,14 +88,14 @@ and `i`/`em` style unset, `body` typography defaults). Adding it to an existing
 app restyles more than the library components.
 
 ```tsx
-// In your app entry point
-import { UIProvider } from '@k8ordo/ui';
+// In your app entry point, when the app opens toasts with useToast
+import { ToastProvider } from '@k8ordo/ui';
 
 function App() {
   return (
-    <UIProvider>
+    <ToastProvider>
       <YourApp />
-    </UIProvider>
+    </ToastProvider>
   );
 }
 ```
@@ -278,11 +278,6 @@ entry in [docs/references/components.md](docs/references/components.md).
 ### Icons
 
 - [Icons](docs/references/components.md#icons) — decorative icons from `@k8ordo/ui/icons` (`XIcon`, `ChevronIcon`, …)
-
-### Providers
-
-- [PortalRootProvider](docs/references/components.md#portalrootprovider)
-- [UIProvider](docs/references/components.md#uiprovider)
 
 <!-- /generated:component-categories -->
 
@@ -508,7 +503,7 @@ Overlays are **self-contained widgets**: a `Modal`/`Dialog`/`Drawer`/`Popover` d
 
 > **Notes**
 >
-> - Make sure `@k8ordo/ui/styles.css` (or `tailwind.css` in Tailwind CSS 4 projects) is loaded and the app is wrapped in `UIProvider`.
+> - Make sure `@k8ordo/ui/styles.css` (or `tailwind.css` in Tailwind CSS 4 projects) is loaded.
 > - `Tabs` panels are text content (`tabs: [{ label, content }]`); rich-component panels are a future enhancement.
 
 ## Accessibility

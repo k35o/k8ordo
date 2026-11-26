@@ -11,14 +11,14 @@ npm install @k8ordo/ui
 ```tsx
 // 1. Load the stylesheet (once, at your entry point)
 import '@k8ordo/ui/styles.css';
-// 2. Wrap the app in the provider
-import { UIProvider } from '@k8ordo/ui';
+// 2. Wrap the app in ToastProvider if it opens toasts with useToast
+import { ToastProvider } from '@k8ordo/ui';
 
 function App() {
   return (
-    <UIProvider>
+    <ToastProvider>
       <YourApp />
-    </UIProvider>
+    </ToastProvider>
   );
 }
 

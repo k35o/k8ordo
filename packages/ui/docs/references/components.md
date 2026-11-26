@@ -6,8 +6,8 @@
 // The stylesheet (required). In a Tailwind CSS 4 project, a CSS file
 // imports 'tailwindcss' and then '@k8ordo/ui/tailwind.css' instead
 import '@k8ordo/ui/styles.css';
-// The provider (once, at the app root)
-import { UIProvider } from '@k8ordo/ui';
+// The provider for toasts (once, at the app root, when you use useToast)
+import { ToastProvider } from '@k8ordo/ui';
 // Components (all from the root entry)
 import { Button, Card, TextField } from '@k8ordo/ui';
 // And CodeBlock, which highlights on the server and has its own entry
@@ -2123,7 +2123,10 @@ const syncingId = open('info', 'Syncing…', {
 close(syncingId);
 ```
 
-`ToastProvider` is already inside `UIProvider`, so no extra wrapper is needed.
+`useToast` needs a `ToastProvider` above it, once at the app root. Inside a
+`Dialog` or a `Drawer`, `useToast` opens the toast in that `<dialog>`, since
+the top layer would cover one opened outside; it goes away when the dialog
+closes.
 
 What `useToast()` returns:
 
@@ -2133,21 +2136,21 @@ What `useToast()` returns:
 
 ### ToastProvider
 
-Wrap explicitly inside `UIProvider` only when you want to change where toasts appear or which Portal root they use.
+Holds the toasts `useToast` opens. Wrap the app root in it once; an
+application that opens no toasts needs no provider at all. The components'
+own wording needs none either: it follows `@k8ordo/i18n` (i18n, below).
 
 ```tsx
 import { ToastProvider } from '@k8ordo/ui';
 
-<ToastProvider position="absolute" portalRef={containerRef}>
-  {children}
+<ToastProvider>
+  <App />
 </ToastProvider>;
 ```
 
 Props:
 
 - `children`: `ReactNode`
-- `portalRef`: `RefObject<HTMLElement | null>` (default: `null`)
-- `position`: `'fixed'` | `'absolute'` (default: `'fixed'`)
 
 ### Progress
 
@@ -2264,6 +2267,13 @@ yourself, so a route-bound dialog that goes back in `onClose` does not go back
 twice. The children stay mounted while the dialog is closed, so an
 uncontrolled field keeps what was typed until the next opening; render them
 under `isOpen` when they should start over. `ref` is the `<dialog>` element.
+
+A dialog opens in the browser's top layer, and the page behind it is inert, so
+anything portaled to `document.body` ends up behind it and cannot be pressed.
+Floating UI of your own opens in place with the `popover` attribute, which
+reaches the top layer from where it is. A library that portals takes the
+dialog's `<dialog>` from `ref` as its container; if a part deep inside needs
+it, put your own Context in the children.
 
 ### CommandPalette
 
@@ -2885,44 +2895,6 @@ export const BrandIcon = ({ size = 'md' }: Partial<BaseIconProps>) => (
 `renderItem` receives `IconRenderProps`
 (`{ className: string; 'aria-hidden': true }`); the types
 `BaseIconProps` (`{ size }`) and `IconRenderProps` are exported as well.
-
-## Providers
-
-### UIProvider
-
-Wrap the app root once. It includes ToastProvider. The components' own wording needs no provider: it follows `@k8ordo/i18n` (i18n, below).
-
-```tsx
-import { UIProvider } from '@k8ordo/ui';
-
-<UIProvider>
-  <App />
-</UIProvider>;
-```
-
-Props:
-
-- `children`: `ReactNode`
-
-### PortalRootProvider
-
-A context that shares a portal container with your own `createPortal` calls;
-read it with `usePortalRoot()`. The library's overlays do not read it — they
-open in the top layer (`<dialog>`, the Popover API), and toasts go where
-`ToastProvider`'s `portalRef` points. `Dialog` and `Drawer` pass their own
-`<dialog>` as the value, so a portal placed through `usePortalRoot()` inside
-one stays in it.
-
-```tsx
-import { PortalRootProvider, usePortalRoot } from '@k8ordo/ui';
-
-<PortalRootProvider value={containerRef}>{children}</PortalRootProvider>;
-```
-
-Props:
-
-- `value`: `RefObject<HTMLElement | null>` (required)
-- `children`: `ReactNode`
 
 ## i18n (message dictionary)
 

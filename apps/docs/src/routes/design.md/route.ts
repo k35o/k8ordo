@@ -334,16 +334,16 @@ OS の \`prefers-contrast: more\` と \`forced-colors: active\` にはライブ�
 
     `## コンポーネント
 
-\`@k8ordo/ui\` から名前付きエクスポート。スタイルシートとプロバイダーが必要。
+\`@k8ordo/ui\` から名前付きエクスポート。スタイルシートが必要で、\`useToast\` を使うならルートに \`ToastProvider\` を置く。
 \`styles.css\` を 1 回読み込む（部品の CSS は部品が自分で読み込む）。Tailwind CSS 4 のプロジェクトは代わりに \`tailwindcss\` の後に \`tailwind.css\` を読み込むと、トークンを自分のマークアップのクラスとしても使える（\`@k8ordo/ui\` は Tailwind に依存しない）:
 
 \`\`\`tsx
 import '@k8ordo/ui/styles.css';
-import { UIProvider, Button, Card } from '@k8ordo/ui';
+import { ToastProvider, Button, Card } from '@k8ordo/ui';
 
-<UIProvider>
+<ToastProvider>
   <App />
-</UIProvider>;
+</ToastProvider>;
 \`\`\`
 
 ### Buttons
@@ -430,8 +430,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 
 ### Providers
 
-- **UIProvider** — アプリルートで 1 回
-- **PortalRootProvider** / **usePortalRoot** — ポータルのルート指定`,
+- **ToastProvider** — \`useToast\` を使うアプリのルートで 1 回。Dialog と Drawer の中の \`useToast\` は、その \`<dialog>\` の中にトーストを出す`,
 
     `## ボイス
 
@@ -450,7 +449,7 @@ npm install @k8ordo/ui
 import '@k8ordo/ui/styles.css';
 // Tailwind CSS 4 のプロジェクトは代わりに、CSS で @import 'tailwindcss'; の後に
 // @import '@k8ordo/ui/tailwind.css'; を書く（トークンを自分のマークアップのクラスとしても使える）
-import { UIProvider } from '@k8ordo/ui';
+import { ToastProvider } from '@k8ordo/ui';
 \`\`\`
 
 - Docs: <https://ordo.k8o.me>

@@ -105,7 +105,11 @@ const ToastItem: FC<
   );
 };
 
-export const ToastProvider: FC<
+/**
+ * The toasts of one layer. `Modal` opens its own inside its `<dialog>`, which
+ * the top layer would otherwise cover; the application's is `ToastProvider`.
+ */
+export const ToastLayer: FC<
   PropsWithChildren<{
     portalRef?: RefObject<HTMLElement | null>;
     position?: 'fixed' | 'absolute';
@@ -309,3 +313,7 @@ export const ToastProvider: FC<
     </ToastStoreContext>
   );
 };
+
+export const ToastProvider: FC<PropsWithChildren> = ({ children }) => (
+  <ToastLayer>{children}</ToastLayer>
+);

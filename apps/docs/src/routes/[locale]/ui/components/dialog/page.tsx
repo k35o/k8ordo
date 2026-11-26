@@ -165,14 +165,11 @@ export default function DialogPage() {
           <Rich>{m.components.dialog.portalRootDescription()}</Rich>
         </p>
         <CodeBlock
-          code={`import { usePortalRoot } from '@k8ordo/ui';
-import { createPortal } from 'react-dom';
+          code={`const [container, setContainer] = useState<HTMLDialogElement | null>(null);
 
-function FloatingLayer({ children }) {
-  // Inside a Dialog or a Drawer this is the top-layer <dialog>; outside it is undefined.
-  const portalRoot = usePortalRoot();
-  return createPortal(children, portalRoot?.current ?? document.body);
-}`}
+<Dialog isOpen={isOpen} onClose={close} ref={setContainer} title="Pick a date">
+  <ThirdPartyDatePicker portalContainer={container} />
+</Dialog>`}
           lang="tsx"
         />
       </section>

@@ -1,4 +1,4 @@
-import { UIProvider } from '@k8ordo/ui';
+import { ToastProvider } from '@k8ordo/ui';
 import { Renderer } from '@openuidev/react-lang';
 import type { ActionEvent } from '@openuidev/react-lang';
 import { expect, it, vi } from 'vite-plus/test';
@@ -9,9 +9,9 @@ import { library } from './library';
 const mount = async (program: string) => {
   const onAction = vi.fn<(event: ActionEvent) => void>();
   const screen = await render(
-    <UIProvider>
+    <ToastProvider>
       <Renderer library={library} onAction={onAction} response={program} />
-    </UIProvider>,
+    </ToastProvider>,
   );
   return { screen, onAction };
 };

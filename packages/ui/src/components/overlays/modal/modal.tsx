@@ -5,8 +5,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { FC, PropsWithChildren, Ref } from 'react';
 
 import type { ModalSide } from '../../../types/variables';
-import { ToastProvider } from '../../feedback/toast';
-import { PortalRootProvider } from '../../providers';
+import { ToastLayer } from '../../feedback/toast/provider';
 import { mergeRefs } from './../../../helpers/merge-refs';
 
 import highContrast from '../../_internal/high-contrast.module.css';
@@ -106,11 +105,9 @@ export const Modal: FC<
       ref={mergedRef}
       role={role === 'alertdialog' ? role : undefined}
     >
-      <PortalRootProvider value={dialogRef}>
-        <ToastProvider portalRef={dialogRef} position="absolute">
-          {children}
-        </ToastProvider>
-      </PortalRootProvider>
+      <ToastLayer portalRef={dialogRef} position="absolute">
+        {children}
+      </ToastLayer>
     </dialog>
   );
 };

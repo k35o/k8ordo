@@ -3761,26 +3761,6 @@
       "omitted": []
     },
     {
-      "name": "PortalRootProvider",
-      "category": "providers",
-      "props": [
-        {
-          "name": "value",
-          "types": ["RefObject<HTMLElement | null>"],
-          "defaultValue": null,
-          "required": true
-        },
-        {
-          "name": "children",
-          "types": ["ReactNode"],
-          "defaultValue": null,
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
       "name": "PresentationIcon",
       "category": "icons",
       "props": [
@@ -5514,18 +5494,6 @@
           "types": ["ReactNode"],
           "defaultValue": null,
           "required": false
-        },
-        {
-          "name": "portalRef",
-          "types": ["RefObject<HTMLElement | null>"],
-          "defaultValue": "null",
-          "required": false
-        },
-        {
-          "name": "position",
-          "types": ["'fixed'", "'absolute'"],
-          "defaultValue": "'fixed'",
-          "required": false
         }
       ],
       "inherits": null,
@@ -5804,20 +5772,6 @@
           "name": "size",
           "types": ["'xs'", "'sm'", "'md'", "'lg'", "'xl'", "'2xl'", "'3xl'"],
           "defaultValue": "'md'",
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
-      "name": "UIProvider",
-      "category": "providers",
-      "props": [
-        {
-          "name": "children",
-          "types": ["ReactNode"],
-          "defaultValue": null,
           "required": false
         }
       ],

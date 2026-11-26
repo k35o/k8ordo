@@ -66,8 +66,8 @@ export const providerTitle = message({
 });
 
 export const providerRoot = message({
-  ja: 'アプリのルートを`UIProvider`で1回だけ囲みます。トーストを表示するには、このプロバイダが必要です。',
-  en: 'Wrap the application root in `UIProvider`, once. Toasts need it in order to show.',
+  ja: '`useToast`でトーストを出すなら、アプリのルートを`ToastProvider`で1回だけ囲みます。トーストを出さないアプリには、プロバイダは要りません。',
+  en: 'If the application opens toasts with `useToast`, wrap its root in `ToastProvider`, once. An application that opens no toasts needs no provider.',
 });
 
 export const providerWordingBefore = message({
