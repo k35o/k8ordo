@@ -353,8 +353,8 @@ hook, so wording never makes a component a client module:
 of `'use client'`. A new key goes into `messages.ts`, `ja.ts`, `en.ts`, and
 `usage.ts` (the components that draw it); there is no provider and no context.
 `pnpm generate:props` writes the key list in `docs/references/components.md`
-from `usage.ts`, and the docs site's i18n page reads it through the exported
-`messageUsage`.
+from `usage.ts`, and the same mapping into `docs/props.generated.json`
+(`messages`), which the docs site's i18n page reads.
 
 ### Pending state
 
@@ -475,14 +475,14 @@ The authoritative list is the `exports` map in `package.json`.
 ```
 @k8ordo/ui                     core UI components and public types (AI chat is under /ai, icons under /icons)
 @k8ordo/ui/icons               line icons (one module each) and BaseIcon
-@k8ordo/ui/i18n                ja / en, registerMessages, getMessages, messageUsage, and the Messages type
+@k8ordo/ui/i18n                ja / en, registerMessages, getMessages, and the Messages type
 @k8ordo/ui/ai                  AI chat components
 @k8ordo/ui/ai/response         Response renderer only
 @k8ordo/ui/code-block          CodeBlock (Server Component; shiki and server-only are dependencies)
 @k8ordo/ui/catalog             the generative-UI catalog, for no format in particular (server-safe)
 @k8ordo/ui/catalog/render      how each catalog component is drawn ('use client')
 @k8ordo/ui/tokens              design tokens as a DTCG resolver document
-@k8ordo/ui/props.json          machine-readable component props (docs/props.generated.json)
+@k8ordo/ui/props.json          machine-readable component props and wording keys (docs/props.generated.json)
 @k8ordo/ui/styles.css          layer order, tokens, reset and base (each component imports its own CSS)
 @k8ordo/ui/tokens.css          the tokens and the color-scheme rules of styles.css alone (no reset, no base)
 @k8ordo/ui/tailwind.css        Tailwind CSS 4 bridge, imported after tailwindcss (styles.css + utilities for the tokens)

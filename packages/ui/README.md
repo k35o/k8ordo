@@ -365,8 +365,8 @@ Optional features live behind dedicated subpath exports:
 | `@k8ordo/ui`                | Core UI components, their types, and provider hooks                                       |
 | `@k8ordo/ui/icons`          | Line icons, one module each, and `BaseIcon` for drawing your own                          |
 | `@k8ordo/ui/tokens`         | Design tokens as a DTCG resolver document                                                 |
-| `@k8ordo/ui/props.json`     | Every component's props as JSON, generated from the types                                 |
-| `@k8ordo/ui/i18n`           | `ja` / `en`, `registerMessages`, `getMessages`, `messageUsage`, and the `Messages` type   |
+| `@k8ordo/ui/props.json`     | Every component's props, and the components each wording key is drawn by, as JSON         |
+| `@k8ordo/ui/i18n`           | `ja` / `en`, `registerMessages`, `getMessages`, and the `Messages` type                   |
 | `@k8ordo/ui/ai`             | AI chat components                                                                        |
 | `@k8ordo/ui/ai/response`    | `Response` Markdown renderer (needs optional peer `streamdown`)                           |
 | `@k8ordo/ui/code-block`     | `CodeBlock`, highlighted on the server with shiki (Server Component)                      |

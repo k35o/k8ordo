@@ -2866,7 +2866,6 @@ import {
   en,
   getMessages,
   ja,
-  messageUsage,
   registerMessages,
   type Messages,
 } from '@k8ordo/ui/i18n';
@@ -2892,7 +2891,8 @@ function DismissButton({ onDismiss }) {
 ### Key list
 
 Every key in the `Messages` type, grouped by the components that draw it —
-the same mapping `messageUsage` exports. All values are `string`.
+the same mapping `@k8ordo/ui/props.json` carries under `messages`. All values
+are `string`.
 
 <!-- generated:message-keys -->
 

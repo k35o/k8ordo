@@ -3,7 +3,9 @@
  * exported component, used by both `docs/references/components.md` and the docs
  * site's `PropsTable`. Each component also carries its category: the folder
  * under `src/components/` it is declared in, which the README, components.md,
- * and the docs site's navigation are grouped by.
+ * and the docs site's navigation are grouped by. The file also carries the
+ * built-in wording's keys with the components that draw each
+ * (`src/i18n/usage.ts`), which the docs site's i18n page lists.
  *
  * Single source of truth:
  *   src/**\/*.tsx (the types themselves) ──(this)──► docs/props.generated.json
@@ -50,6 +52,8 @@ import {
   TypeFlags,
 } from 'typescript/unstable/sync';
 import type { Symbol as TsSymbol, Type } from 'typescript/unstable/sync';
+
+import { messageUsage } from '../src/i18n/usage.ts';
 
 const PACKAGE_DIR = fileURLToPath(new URL('..', import.meta.url));
 const TSCONFIG = fileURLToPath(new URL('../tsconfig.json', import.meta.url));
@@ -493,14 +497,19 @@ api.close();
 
 components.sort((a, b) => a.name.localeCompare(b.name));
 
-const output = `${JSON.stringify({ components }, null, 2)}\n`;
+const messages = Object.entries(messageUsage).map(([key, usedBy]) => ({
+  key,
+  usedBy,
+}));
+const generated = { components, messages };
+const output = `${JSON.stringify(generated, null, 2)}\n`;
 
 if (process.argv.includes('--check')) {
   // Compared as data, not as text: the committed file goes through the
   // formatter after this script writes it, so the bytes legitimately differ.
   const current = await readFile(OUT_PATH, 'utf8').catch(() => 'null');
   const same =
-    JSON.stringify(JSON.parse(current)) === JSON.stringify({ components });
+    JSON.stringify(JSON.parse(current)) === JSON.stringify(generated);
   if (!same) {
     console.error(
       'docs/props.generated.json is stale. Run `pnpm generate:props`.',

@@ -31,4 +31,4 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 ## Data exports
 
 - `@k8ordo/ui/tokens`: the design tokens as data — `tokens`, a DTCG resolver document (Resolver Module 2025.10) whose set is the `:root` tokens and whose modifiers are the modes (the dark values of the colors, `prefers-contrast: more`, and its dark values).
-- `@k8ordo/ui/props.json`: every component's props as JSON (`docs/props.generated.json`), generated from the types — the same data as the Props blocks in components.md.
+- `@k8ordo/ui/props.json`: every component's props as JSON (`docs/props.generated.json`), generated from the types — the same data as the Props blocks in components.md — and, under `messages`, each built-in wording key with the components that draw it.

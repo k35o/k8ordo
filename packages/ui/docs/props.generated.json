@@ -5784,5 +5784,431 @@
       "inherits": null,
       "omitted": []
     }
+  ],
+  "messages": [
+    {
+      "key": "close",
+      "usedBy": ["Alert", "Dialog", "Drawer", "Response"]
+    },
+    {
+      "key": "required",
+      "usedBy": ["FormControl"]
+    },
+    {
+      "key": "loading",
+      "usedBy": ["Spinner", "Progress", "Combobox"]
+    },
+    {
+      "key": "avatar",
+      "usedBy": ["Avatar"]
+    },
+    {
+      "key": "color",
+      "usedBy": ["Code"]
+    },
+    {
+      "key": "alertSuccess",
+      "usedBy": ["Alert", "Callout"]
+    },
+    {
+      "key": "alertInfo",
+      "usedBy": ["Alert", "Callout"]
+    },
+    {
+      "key": "alertWarning",
+      "usedBy": ["Alert", "Callout"]
+    },
+    {
+      "key": "alertError",
+      "usedBy": ["Alert", "Callout"]
+    },
+    {
+      "key": "toastRegion",
+      "usedBy": ["ToastProvider"]
+    },
+    {
+      "key": "copy",
+      "usedBy": ["CopyButton", "Message.Copy"]
+    },
+    {
+      "key": "copied",
+      "usedBy": ["CopyButton", "CodeBlock", "Message.Copy"]
+    },
+    {
+      "key": "copyFailed",
+      "usedBy": ["CopyButton", "CodeBlock", "Message.Copy"]
+    },
+    {
+      "key": "autocompletePlaceholder",
+      "usedBy": ["Autocomplete"]
+    },
+    {
+      "key": "autocompleteRemoveTag",
+      "usedBy": ["Autocomplete"]
+    },
+    {
+      "key": "autocompleteClear",
+      "usedBy": ["Autocomplete"]
+    },
+    {
+      "key": "autocompleteEmpty",
+      "usedBy": ["Autocomplete"]
+    },
+    {
+      "key": "comboboxToggle",
+      "usedBy": ["Combobox"]
+    },
+    {
+      "key": "comboboxEmpty",
+      "usedBy": ["Combobox"]
+    },
+    {
+      "key": "comboboxFailed",
+      "usedBy": ["Combobox"]
+    },
+    {
+      "key": "fileFieldRemove",
+      "usedBy": ["FileField"]
+    },
+    {
+      "key": "fileFieldTrigger",
+      "usedBy": ["FileField.Dropzone", "FileField (generative UI)"]
+    },
+    {
+      "key": "fileFieldDrop",
+      "usedBy": ["FileField.Dropzone", "FileField (generative UI)"]
+    },
+    {
+      "key": "numberFieldIncrement",
+      "usedBy": ["NumberField"]
+    },
+    {
+      "key": "numberFieldDecrement",
+      "usedBy": ["NumberField"]
+    },
+    {
+      "key": "numberFieldRangeUnderflow",
+      "usedBy": ["NumberField"]
+    },
+    {
+      "key": "numberFieldRangeOverflow",
+      "usedBy": ["NumberField"]
+    },
+    {
+      "key": "rangeSliderStart",
+      "usedBy": ["RangeSlider"]
+    },
+    {
+      "key": "rangeSliderEnd",
+      "usedBy": ["RangeSlider"]
+    },
+    {
+      "key": "calendarPreviousMonth",
+      "usedBy": ["Calendar", "DatePicker"]
+    },
+    {
+      "key": "calendarNextMonth",
+      "usedBy": ["Calendar", "DatePicker"]
+    },
+    {
+      "key": "datePickerOpen",
+      "usedBy": ["DatePicker"]
+    },
+    {
+      "key": "datePickerDialog",
+      "usedBy": ["DatePicker"]
+    },
+    {
+      "key": "colorPickerHue",
+      "usedBy": ["ColorPicker"]
+    },
+    {
+      "key": "colorPickerSaturation",
+      "usedBy": ["ColorPicker"]
+    },
+    {
+      "key": "colorPickerLightness",
+      "usedBy": ["ColorPicker"]
+    },
+    {
+      "key": "colorPickerSwatches",
+      "usedBy": ["ColorPicker"]
+    },
+    {
+      "key": "colorPickerOpen",
+      "usedBy": ["ColorPicker"]
+    },
+    {
+      "key": "passwordShow",
+      "usedBy": ["PasswordInput"]
+    },
+    {
+      "key": "passwordHide",
+      "usedBy": ["PasswordInput"]
+    },
+    {
+      "key": "listBoxPlaceholder",
+      "usedBy": ["ListBox"]
+    },
+    {
+      "key": "opensInNewTab",
+      "usedBy": ["Anchor", "Card"]
+    },
+    {
+      "key": "breadcrumb",
+      "usedBy": ["Breadcrumb"]
+    },
+    {
+      "key": "tabList",
+      "usedBy": ["Tabs (generative UI)"]
+    },
+    {
+      "key": "paginationLabel",
+      "usedBy": ["Pagination"]
+    },
+    {
+      "key": "paginationPrevious",
+      "usedBy": ["Pagination"]
+    },
+    {
+      "key": "paginationNext",
+      "usedBy": ["Pagination"]
+    },
+    {
+      "key": "stepperComplete",
+      "usedBy": ["Stepper"]
+    },
+    {
+      "key": "dataTableColumns",
+      "usedBy": ["DataTable"]
+    },
+    {
+      "key": "dataTableSelectAll",
+      "usedBy": ["DataTable"]
+    },
+    {
+      "key": "dataTableSelectRow",
+      "usedBy": ["DataTable"]
+    },
+    {
+      "key": "codeBlockCopy",
+      "usedBy": ["CodeBlock"]
+    },
+    {
+      "key": "carousel",
+      "usedBy": ["Carousel"]
+    },
+    {
+      "key": "carouselSlide",
+      "usedBy": ["Carousel.Slide"]
+    },
+    {
+      "key": "carouselPrevious",
+      "usedBy": ["Carousel"]
+    },
+    {
+      "key": "carouselNext",
+      "usedBy": ["Carousel"]
+    },
+    {
+      "key": "resizablePanelsHandle",
+      "usedBy": ["ResizablePanels.Handle"]
+    },
+    {
+      "key": "tableOfContents",
+      "usedBy": ["TableOfContents"]
+    },
+    {
+      "key": "commandPalette",
+      "usedBy": ["CommandPalette"]
+    },
+    {
+      "key": "commandPaletteSearch",
+      "usedBy": ["CommandPalette"]
+    },
+    {
+      "key": "commandPaletteEmpty",
+      "usedBy": ["CommandPalette"]
+    },
+    {
+      "key": "chat",
+      "usedBy": ["Conversation.Messages"]
+    },
+    {
+      "key": "scrollToLatest",
+      "usedBy": ["Conversation.ScrollButton"]
+    },
+    {
+      "key": "reasoning",
+      "usedBy": ["Reasoning"]
+    },
+    {
+      "key": "reasoningStreaming",
+      "usedBy": ["Reasoning"]
+    },
+    {
+      "key": "suggestions",
+      "usedBy": ["Suggestion.List"]
+    },
+    {
+      "key": "send",
+      "usedBy": ["PromptInput"]
+    },
+    {
+      "key": "stop",
+      "usedBy": ["PromptInput"]
+    },
+    {
+      "key": "attach",
+      "usedBy": ["PromptInput.Attach"]
+    },
+    {
+      "key": "attachments",
+      "usedBy": ["Attachment.List", "PromptInput.Attachments"]
+    },
+    {
+      "key": "attachmentRemove",
+      "usedBy": ["PromptInput.Attachments"]
+    },
+    {
+      "key": "attachmentImage",
+      "usedBy": ["Attachment.Item", "PromptInput.Attachments"]
+    },
+    {
+      "key": "sources",
+      "usedBy": ["Source.List"]
+    },
+    {
+      "key": "messageActions",
+      "usedBy": ["Message.Actions"]
+    },
+    {
+      "key": "regenerate",
+      "usedBy": ["Message.Regenerate"]
+    },
+    {
+      "key": "feedbackPositive",
+      "usedBy": ["Message.Feedback"]
+    },
+    {
+      "key": "feedbackNegative",
+      "usedBy": ["Message.Feedback"]
+    },
+    {
+      "key": "toolInput",
+      "usedBy": ["ToolInvocation"]
+    },
+    {
+      "key": "toolOutput",
+      "usedBy": ["ToolInvocation"]
+    },
+    {
+      "key": "toolError",
+      "usedBy": ["ToolInvocation"]
+    },
+    {
+      "key": "toolDenied",
+      "usedBy": ["ToolInvocation"]
+    },
+    {
+      "key": "toolApprovalRequest",
+      "usedBy": ["ToolInvocation"]
+    },
+    {
+      "key": "toolApprove",
+      "usedBy": ["ToolInvocation"]
+    },
+    {
+      "key": "toolDeny",
+      "usedBy": ["ToolInvocation"]
+    },
+    {
+      "key": "responseCopied",
+      "usedBy": ["Response"]
+    },
+    {
+      "key": "responseCopyCode",
+      "usedBy": ["Response"]
+    },
+    {
+      "key": "responseCopyLink",
+      "usedBy": ["Response"]
+    },
+    {
+      "key": "responseCopyTable",
+      "usedBy": ["Response"]
+    },
+    {
+      "key": "responseCopyTableAsCsv",
+      "usedBy": ["Response"]
+    },
+    {
+      "key": "responseCopyTableAsMarkdown",
+      "usedBy": ["Response"]
+    },
+    {
+      "key": "responseCopyTableAsTsv",
+      "usedBy": ["Response"]
+    },
+    {
+      "key": "responseDownloadDiagram",
+      "usedBy": ["Response"]
+    },
+    {
+      "key": "responseDownloadDiagramAsMmd",
+      "usedBy": ["Response"]
+    },
+    {
+      "key": "responseDownloadDiagramAsPng",
+      "usedBy": ["Response"]
+    },
+    {
+      "key": "responseDownloadDiagramAsSvg",
+      "usedBy": ["Response"]
+    },
+    {
+      "key": "responseDownloadFile",
+      "usedBy": ["Response"]
+    },
+    {
+      "key": "responseDownloadImage",
+      "usedBy": ["Response"]
+    },
+    {
+      "key": "responseDownloadTable",
+      "usedBy": ["Response"]
+    },
+    {
+      "key": "responseDownloadTableAsCsv",
+      "usedBy": ["Response"]
+    },
+    {
+      "key": "responseDownloadTableAsMarkdown",
+      "usedBy": ["Response"]
+    },
+    {
+      "key": "responseExitFullscreen",
+      "usedBy": ["Response"]
+    },
+    {
+      "key": "responseViewFullscreen",
+      "usedBy": ["Response"]
+    },
+    {
+      "key": "responseImageNotAvailable",
+      "usedBy": ["Response"]
+    },
+    {
+      "key": "responseOpenExternalLink",
+      "usedBy": ["Response"]
+    },
+    {
+      "key": "responseExternalLinkWarning",
+      "usedBy": ["Response"]
+    },
+    {
+      "key": "responseOpenLink",
+      "usedBy": ["Response"]
+    }
   ]
 }

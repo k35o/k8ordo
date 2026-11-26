@@ -2,7 +2,8 @@ import type { Messages } from './messages';
 
 /**
  * Where each key is drawn: the component, or the part of one, by the name it
- * is imported under.
+ * is imported under. Not exported from the package: `scripts/extract-props.ts`
+ * writes it into `docs/props.generated.json`.
  */
 export const messageUsage: Readonly<Record<keyof Messages, readonly string[]>> =
   {
