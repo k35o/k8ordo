@@ -84,7 +84,8 @@ examples/ui-integrations/
 │   ├── json-render/
 │   │   ├── catalog.ts             # Glue: the json-render catalog, UISpec, validateGeneratedSpec (server-safe)
 │   │   ├── catalog.test.ts        # What validateGeneratedSpec accepts and reports
-│   │   ├── registry.tsx           # Glue: the registry and <JsonRenderUI /> ('use client')
+│   │   ├── registry.tsx           # Glue: the registry, <JsonRenderProvider />, and <JsonRenderUI /> ('use client')
+│   │   ├── registry.browser.test.tsx  # The spec's state starts the bound fields and survives a streamed update
 │   │   ├── demo.tsx               # Typed UISpec rendered with <JsonRenderUI />
 │   │   ├── demo.test.ts           # The spec passes validateGeneratedSpec with no fixes
 │   │   └── demo.browser.test.tsx  # The spec renders and keeps form state in a real browser
@@ -132,6 +133,11 @@ export function JsonRenderDemo() {
   return <JsonRenderUI spec={spec} />;
 }
 ```
+
+The spec's `state` is where the bound fields start. To read the state beside
+the drawing, as the playground does, put json-render's `Renderer` (with the
+glue's `registry`) and a reader using `useStateStore` inside
+`<JsonRenderProvider spec={spec}>`.
 
 ### OpenUI (`src/openui/`)
 

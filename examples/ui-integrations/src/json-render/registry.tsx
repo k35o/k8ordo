@@ -59,16 +59,38 @@ export const { registry } = defineRegistry(catalog, {
   ) as Record<CatalogName, ComponentFn>,
 });
 
+type StateChanges = Array<{ path: string; value: unknown }>;
+
 /**
- * Draws a spec with `@k8ordo/ui`: `JSONUIProvider` and `Renderer` wired to the
- * registry. Pass `onStateChange` to collect the form values.
+ * `JSONUIProvider` wired to the registry, starting from the spec's `state`.
+ * Put `Renderer` inside it, and anything that reads the state with
+ * `useStateStore`. While a spec streams in, a value the spec changes replaces
+ * the one in the state; the others keep what the user entered.
+ */
+export const JsonRenderProvider: FC<{
+  spec: Spec | null;
+  onStateChange?: (changes: StateChanges) => void;
+  children: ReactNode;
+}> = ({ spec, onStateChange, children }) => (
+  <JSONUIProvider
+    initialState={spec?.state ?? undefined}
+    onStateChange={onStateChange}
+    registry={registry}
+  >
+    {children}
+  </JSONUIProvider>
+);
+
+/**
+ * Draws a spec with `@k8ordo/ui`: `JsonRenderProvider` and `Renderer` wired to
+ * the registry. Pass `onStateChange` to collect the form values.
  */
 export const JsonRenderUI: FC<{
   spec: Spec | null;
   loading?: boolean;
-  onStateChange?: (changes: Array<{ path: string; value: unknown }>) => void;
+  onStateChange?: (changes: StateChanges) => void;
 }> = ({ spec, loading, onStateChange }) => (
-  <JSONUIProvider onStateChange={onStateChange} registry={registry}>
+  <JsonRenderProvider onStateChange={onStateChange} spec={spec}>
     <Renderer loading={loading} registry={registry} spec={spec} />
-  </JSONUIProvider>
+  </JsonRenderProvider>
 );
