@@ -51,15 +51,16 @@ export type ParamsSchemaFor<Pattern extends string> = StandardSchemaLike<
 >;
 
 type MergedOutput<Schemas extends readonly unknown[]> =
-  Schemas extends readonly [infer Head, ...infer Tail]
-    ? Omit<MergedOutput<Tail>, keyof SchemaOutput<Head>> & SchemaOutput<Head>
+  Schemas extends readonly [...infer Init, infer Last]
+    ? Omit<MergedOutput<Init>, keyof SchemaOutput<Last>> & SchemaOutput<Last>
     : object;
 
 /**
  * A pattern's params after the schemas along its stack have run — outer
- * layouts first, the page last — each replacing the strings it names with
- * what it produced. Params no schema names stay strings. A union of stacks
- * gives the union of what each one produces.
+ * layouts first, the page last — each replacing what it names with what it
+ * produced, so of two schemas that name one param, the later one's output is
+ * what the page receives. Params no schema names stay strings. A union of
+ * stacks gives the union of what each one produces.
  */
 export type ParsedParams<
   Pattern extends string,

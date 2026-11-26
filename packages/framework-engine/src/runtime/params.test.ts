@@ -39,6 +39,13 @@ describe('parseParams', () => {
     ).toStrictEqual({ locale: 'en', id: 7 });
   });
 
+  it('gives a param two schemas name the value of the later one', () => {
+    const idAsText = schema((value) => ({ id: `#${String(value.id)}` }));
+    expect(
+      parseParams([numericId, idAsText], { id: '7' })?.params,
+    ).toStrictEqual({ id: '#7' });
+  });
+
   it('answers null the moment a schema refuses', () => {
     expect(
       parseParams([knownLocale, numericId], { locale: 'fr', id: '7' }),
