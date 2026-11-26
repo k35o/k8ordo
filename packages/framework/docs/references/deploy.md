@@ -822,7 +822,8 @@ export default defineConfig({
 in the address bar. What crosses between the two gains or loses the base on
 the way:
 
-- A link built with `href()` or `navigateTo()` carries it. A page receives
+- A link built with `href()` carries it, and so does a navigation started
+  from code with `navigation.navigate(href(…))`. A page receives
   `pathname` without it, and `usePathname()` returns it without it.
 - A page's payload sits beside it — `/docs/products/index.rsc` — and the
   client build's files are under `/docs/assets/`.

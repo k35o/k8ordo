@@ -76,8 +76,8 @@ export const restType = message({
 });
 
 export const restLink = message({
-  ja: '`href`と`navigateTo`には同じ配列を渡します。区間ごとにエスケープして`/`でつなぎます。空の配列と空文字の区間は`TypeError`になります。',
-  en: '`href` and `navigateTo` take the same array, escape each segment and join them with `/`. An empty array or an empty segment throws a `TypeError`.',
+  ja: '`href`には同じ配列を渡します。区間ごとにエスケープして`/`でつなぎます。空の配列と空文字の区間は`TypeError`になります。',
+  en: '`href` takes the same array, escapes each segment and joins them with `/`. An empty array or an empty segment throws a `TypeError`.',
 });
 
 export const wildcardTitle = message({

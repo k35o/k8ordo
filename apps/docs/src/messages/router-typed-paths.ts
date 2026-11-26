@@ -21,8 +21,8 @@ export const paramsMisspelled = message({
 });
 
 export const paramsInferred = message({
-  ja: '`href`と`navigateTo`、`useParams`は、渡したパターンの文字列からparamの型を作ります。何も設定しなくても、paramの渡し忘れや名前の書き間違いは型エラーになります。',
-  en: '`href`, `navigateTo` and `useParams` derive the type of the params from the pattern string they are given. With no setup at all, a missing or misspelled param is a type error.',
+  ja: '`href`と`useParams`は、渡したパターンの文字列からparamの型を作ります。何も設定しなくても、paramの渡し忘れや名前の書き間違いは型エラーになります。',
+  en: '`href` and `useParams` derive the type of the params from the pattern string they are given. With no setup at all, a missing or misspelled param is a type error.',
 });
 
 export const registerTitle = message({
@@ -46,8 +46,8 @@ export const registerEffect = message({
 });
 
 export const registerEffectLink = message({
-  ja: '`href`、`navigateTo`：リンク先にできるパターン',
-  en: '`href`, `navigateTo`: the patterns a link can point at',
+  ja: '`href`：リンク先にできるパターン',
+  en: '`href`: the patterns a link can point at',
 });
 
 export const registerEffectParams = message({

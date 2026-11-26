@@ -18,7 +18,7 @@ import type { ParamsOf, ParamValue } from './paths';
  * }
  * ```
  *
- * and `href` / `navigateTo` / `useParams` verify their pattern against the
+ * and `href` / `useParams` verify their pattern against the
  * table everywhere — without any component importing the table's value.
  * Only `<Router>` touches the value; everything else needs just the string
  * pattern, so the routes-module → pages → routes-module import cycle never

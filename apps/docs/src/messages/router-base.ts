@@ -26,8 +26,8 @@ export const linksTitle = message({
 });
 
 export const linksPrefix = message({
-  ja: '`href`と`navigateTo`は、作るURLの先頭にベースパスを付けます。そのため、`href`の戻り値の型はルート表のパスでなく`string`です。',
-  en: '`href` and `navigateTo` put the base path in front of the URL they build. So `href` returns a `string`, not a path in the route table.',
+  ja: '`href`は、作るURLの先頭にベースパスを付けます。そのため、戻り値の型はルート表のパスでなく`string`です。コードから移るときも、このURLを`navigation.navigate()`に渡します。',
+  en: '`href` puts the base path in front of the URL it builds. So it returns a `string`, not a path in the route table. A navigation from code hands the same URL to `navigation.navigate()`.',
 });
 
 export const frameworkBefore = message({

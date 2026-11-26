@@ -687,8 +687,8 @@ export const baseConfig = message({
 
 export const baseList = [
   message({
-    ja: '`href()`と`navigateTo()`：`href()`が返すURLと、`navigateTo()`の遷移先には`base`が付きます。',
-    en: '`href()` and `navigateTo()`: `href()` returns the URL with the base, and `navigateTo()` navigates to it with the base.',
+    ja: '`href()`：返すURLには`base`が付きます。コードからの遷移も、このURLを`navigation.navigate()`に渡すので`base`の下へ移ります。',
+    en: '`href()`: the URL it returns carries the base. A navigation from code hands that URL to `navigation.navigate()`, so it lands under the base too.',
   }),
   message({
     ja: '`pathname`と`usePathname()`：`base`を外した値です。',

@@ -26,7 +26,7 @@ pnpm check         # check:write to auto-fix
   (the framework, for a page that exports `search`) says so through the
   handler's `refresh(url)`, and the hook loads in place for it — the router
   itself still reads nothing of the search.
-- **Pages never import the table.** `href` / `navigateTo` / `useParams` work
+- **Pages never import the table.** `href` / `useParams` work
   from the pattern string; `Register` supplies the check. Only `<Router>`
   holds the table's value, which is why the routes-module → pages →
   routes-module cycle cannot form. Keep it that way.
@@ -266,7 +266,15 @@ pnpm check         # check:write to auto-fix
 - **A bound param is a param, not a concept.** `bindParams` knows a name and
   a source function; that the name is `locale` and the source is
   `@k8ordo/i18n` is the application's `links.ts`. Nothing locale-shaped
-  belongs here.
+  belongs here. It returns the bound `href` itself.
+- **A page change from code is the platform's call.** There is no
+  `navigateTo`: `navigation.navigate(href(…))` goes to the same URL a link
+  does, and `href` already holds the typing and the base. A wrapper would be
+  a second way to write the same thing — the reason there is no `<Link>` —
+  and its params and options, both plain objects, had to be told apart at
+  run time from the pattern string. The docs' rule is: a page change is
+  `navigation.navigate(href(…))`, a state change is `@k8ordo/state`'s
+  `update()`.
 - **`PageProps` reads `Register`, never the mode.** `request` appears only
   because the generator wrote it into `Register` in server mode; the type
   has no idea which mode did.
@@ -276,7 +284,7 @@ pnpm check         # check:write to auto-fix
   fails until a new export here is either re-exported there or listed in its
   `WITHHELD`, with the reason.
 - **The table is written from the root; Vite's `base` lives at the edges.**
-  `withBase` (in `href` / `navigateTo` / `bindParams`) puts
+  `withBase` (in `href` and a bound `href`) puts
   `import.meta.env.BASE_URL` in front of what leaves for the browser, and
   `withoutBase` (in `usePathname`, `<Router>`'s match and claim) takes it off
   what comes back; nothing between ever sees it. `href` returns `string`
@@ -327,7 +335,7 @@ src/
   paths.ts          type derivation (ParamsOf / PathFor / Join) + string operations (readParams / buildHref)
   base.ts           withBase / withoutBase (Vite's base at the edges)
   define-routes.ts  defineRoutes / match / matchAll / NavigablePath
-  links.ts          href / navigateTo / bindParams (the side that needs no table)
+  links.ts          href / bindParams (the side that needs no table)
   register.ts       Register (module augmentation) + PageProps / LayoutProps / RouteContext
   navigation.ts     useInterceptedNavigation (intercept and the commit contract), usePendingPathname
   left-at.ts        the position each entry was left at (kept to 100, mirrored into sessionStorage)

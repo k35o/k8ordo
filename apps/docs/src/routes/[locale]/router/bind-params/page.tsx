@@ -1,4 +1,3 @@
-import { Pitfall } from '../../../../components/callout';
 import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
@@ -11,19 +10,15 @@ const LINKS = `import { bindParams } from '@k8ordo/router';
 
 import { locales } from './i18n';
 
-export const { href, navigateTo } = bindParams(() => ({
+export const href = bindParams(() => ({
   locale: locales.getLocale(),
 }));`;
 
-const USAGE = `import { href, navigateTo } from './links';
+const USAGE = `import { href } from './links';
 
 href('/:locale/products/:id', { id: '42' }); // '/ja/products/42'
 href('/:locale', { locale: 'en' }); // '/en'
-navigateTo('/:locale/products');`;
-
-const OPTIONS = `navigateTo('/:locale', undefined, { history: 'replace' });
-navigateTo('/:locale', { locale: 'en' }, { history: 'replace' });
-navigateTo('/:locale', { history: 'replace' });`;
+navigation.navigate(href('/:locale/products'));`;
 
 const MATCH = `import { useMatch } from '@k8ordo/router';
 
@@ -103,26 +98,6 @@ export default function RouterBindParamsPage() {
         <p>
           <Rich>{t.sourceAgnostic()}</Rich>
         </p>
-      </DocSection>
-
-      <DocSection id="options" title={t.optionsTitle}>
-        <CodeBlock
-          callouts={{ 1: t.optionsUndefined(), 3: t.optionsSecond() }}
-          code={OPTIONS}
-          lang="ts"
-          marks={{ 1: 'highlight', 3: 'highlight' }}
-        />
-        <p>
-          <Rich>{t.optionsThird()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.optionsWhy()}</Rich>
-        </p>
-        <Pitfall>
-          <p>
-            <Rich>{t.optionsPitfall()}</Rich>
-          </p>
-        </Pitfall>
       </DocSection>
     </DocPage>
   );

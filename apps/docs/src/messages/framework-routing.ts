@@ -259,8 +259,8 @@ export const rootStaticTitle = message({
 });
 
 export const rootStaticPage = message({
-  ja: 'staticモードでは`guard.ts`を置けないので、`/`のページがブラウザで移動します。`navigator.languages`からロケールを選び、`navigateTo`でそのロケールのURLへ移ります。ページ自体は何も描画しません。',
-  en: 'Static mode refuses a `guard.ts`, so the `/` page moves the visitor in the browser: it picks a locale from `navigator.languages` and goes to that locale’s URL with `navigateTo`. The page itself renders nothing.',
+  ja: 'staticモードでは`guard.ts`を置けないので、`/`のページがブラウザで移動します。`navigator.languages`からロケールを選び、`navigation.navigate(href(…))`でそのロケールのURLへ移ります。ページ自体は何も描画しません。',
+  en: 'Static mode refuses a `guard.ts`, so the `/` page moves the visitor in the browser: it picks a locale from `navigator.languages` and goes to that locale’s URL with `navigation.navigate(href(…))`. The page itself renders nothing.',
 });
 
 export const rootStaticEffect = message({

@@ -152,7 +152,7 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   the text as children and renders its backtick spans as `<Code>`. The
   bundler keeps only the messages a client module names — measure it with
   `grep -c "ja:" dist/client/assets/*.js` after a build; a Server Component's
-  text never reaches the client. Every link is `href` / `navigateTo` from
+  text never reaches the client. Every link is `href` from
   `src/links.ts` — the router's `bindParams` with the locale supplied by
   `locales.getLocale()` — so a path is a `/:locale/…` pattern of the
   generated table (`SitePath` for the ones navigation data may name) and a
@@ -160,7 +160,7 @@ pnpm check:write       # Oxlint/Oxfmt lint/format auto-fix
   switcher, which takes the pathname in hand to another locale;
   `delocalize` also reads the locale off the URL where no accepted param
   is in hand — the root layout's `<html lang>` and the 404 shell. The `/` page negotiates with
-  `locales.negotiate(navigator.languages)` and `navigateTo('/:locale', …)`; `switch` is a reserved word, so
+  `locales.negotiate(navigator.languages)` and `navigation.navigate(href('/:locale', …))`, and a page change from code anywhere is `navigation.navigate(href(…))`; `switch` is a reserved word, so
   that one component's group is `switchInput`.
 - **Styling**: CSS Modules on `@k8ordo/ui`'s tokens, checked by
   `better-css-modules check` (`better-css-modules.config.ts`; the modules go in
@@ -213,7 +213,7 @@ src/
     ui/components/     # the catalog's interactive previews, <name>-previews.tsx
   data/                # PACKAGES (packages.ts), which packages ship docs (shipped-docs), the sidebars (components-nav, ai-nav), generated props (component-props)
   i18n.ts              # defineLocales — the locale set (its Register is generated)
-  links.ts             # href / navigateTo with the locale bound; SitePath
+  links.ts             # href with the locale bound; SitePath
   messages/            # message() per export, one file per area, index.ts re-exports namespaces
   styles/              # globals.css (the CSS entry), page.module.css, pages/<path>.module.css
   theme/               # state.ts (writing-mode defineLocalState) + its context, design-tokens.ts (/ui/theming and /design.md)

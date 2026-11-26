@@ -11,8 +11,8 @@ export type {
   Routes,
   RoutesRecord,
 } from './define-routes';
-export { bindParams, href, navigateTo } from './links';
-export type { BoundLinks, BoundParams } from './links';
+export { bindParams, href } from './links';
+export type { BoundParams } from './links';
 export { BrowserPathname, PathnameProvider, usePathname } from './location';
 export { matchPath, useMatch } from './match';
 export { isNotFound, notFound } from './not-found';
@@ -23,7 +23,6 @@ export {
   usePendingPathname,
 } from './navigation';
 export type { NavigationHandler } from './navigation';
-export type { NavigateToOptions } from './links';
 export { normalizePathname } from './paths';
 export type {
   ParamsOf,

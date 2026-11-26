@@ -31,7 +31,7 @@ routes.ts        defineRoutes({ … })      the pathname schema, one place
    ↓ mounted once
 <Router routes>  match → stack → render   layouts wrap through <Outlet />
    ↑ never imported by pages
-pages            href / navigateTo / useParams
+pages            href / useParams
                  take the pattern string; Register supplies the check
 ```
 
@@ -127,7 +127,7 @@ href('/files/:path+', { path: [] }); // ✗ throws: at least one segment
 href('/files/:path+', { path: ['a', ''] }); // ✗ throws: an empty segment
 ```
 
-`navigateTo` and `bindParams` take it the same way, and `useParams`,
+A bound `href` (`bindParams`) takes it the same way, and `useParams`,
 `useMatch` and `matchPath` hand back the array. In the types, `ParamsOf`
 gives `{ path: readonly string[] }`, a link takes an array of anything with
 one spelling, and `PathFor<'/files/:path+'>` is `` `/files/${string}` ``.
@@ -220,19 +220,13 @@ layout, or around the lazy component itself.
 ## Links and navigation
 
 ```tsx
-import {
-  href,
-  navigateTo,
-  useParams,
-  usePathname,
-  useRoute,
-} from '@k8ordo/router';
+import { href, useParams, usePathname, useRoute } from '@k8ordo/router';
 
 <a href={href('/products/:id', { id })}>…</a>;
 <a href={href('/products')}>…</a>; // no params, no second argument
 
-navigateTo('/products/:id', { id }); // pushes: the back button undoes it
-navigateTo('/products', { history: 'replace' });
+navigation.navigate(href('/products/:id', { id })); // the same URL, from code
+navigation.navigate(href('/products'), { history: 'replace' });
 
 const { id } = useParams('/products/:id');
 const { pattern } = useRoute(); // untyped: the winning pattern and its params
@@ -277,8 +271,8 @@ is going — `null` when none is — set as the navigation starts and cleared on
 the new page is on screen or the navigation is given up; a state change sets
 nothing, unless the host loads the page again for it (a framework page that
 reads the search), which is a load in progress like any other. The caller that
-started it can instead await `navigateTo`'s `finished` — it resolves when the
-tree is on screen (below).
+started it can instead await the `finished` its `navigation.navigate()`
+returned — it resolves when the tree is on screen (below).
 
 `usePathname` reads the platform rather than the table, which is why it is the
 one that also works under the framework, where the browser holds no table at
@@ -303,39 +297,40 @@ import { bindParams } from '@k8ordo/router';
 
 import { locales } from './i18n';
 
-export const { href, navigateTo } = bindParams(() => ({
+export const href = bindParams(() => ({
   locale: locales.getLocale(),
 }));
 ```
 
 ```tsx
 href('/:locale/products/:id', { id }); // locale from the source, id as before
-navigateTo('/:locale', { locale: 'en' }, { history: 'replace' }); // or overridden
-navigateTo('/:locale', undefined, { history: 'replace' }); // options stay third
+href('/:locale', { locale: 'en' }); // or overridden
 ```
 
-Patterns keep their full spelling, so the table's types apply unchanged; the
-source is read at each call, so a value that differs per request or per URL
-is read where it is current. Options still come after the params whenever
-the pattern names one, even when the source supplies them all — params and
-options are both plain objects, and the pattern alone decides which is which —
-so the params slot is passed as `undefined`, as in the last line above. Which
-package supplies the value is the application's business — the router knows a
-param name, nothing more.
+`bindParams` returns the bound `href` itself. Patterns keep their full
+spelling, so the table's types apply unchanged; the source is read at each
+call, so a value that differs per request or per URL is read where it is
+current. Which package supplies the value is the application's business — the
+router knows a param name, nothing more. Import `href` from that one module
+everywhere, so no link reaches for the unbound one by accident.
 `normalizePathname` is the router's own reading of a pathname — a trailing
 slash dropped, root excepted — for code that compares pathnames the way the
 table does.
 
-`navigateTo` returns the platform's own `{ committed, finished }`. `finished`
-resolves once the new page is on screen, so an async action can await it and
-let `isPending` cover the wait:
+**A page change from code is the platform's own call.**
+`navigation.navigate(href(…))` goes to the same URL the link would, and the
+router intercepts it the same way. There is no wrapper: `href` already does
+the typing and the base, and a second function would be a second way to
+write the same thing, as `<Link>` would. The call returns the platform's
+`{ committed, finished }`, and `finished` resolves once the new page is on
+screen, so an async action can await it and let `isPending` cover the wait:
 
 ```tsx
 const [isPending, startTransition] = useTransition();
 
 startTransition(async () => {
   try {
-    await navigateTo('/products/:id', { id }).finished;
+    await navigation.navigate(href('/products/:id', { id })).finished;
   } catch (error) {
     // overtaken by another navigation
     if (!(error instanceof DOMException && error.name === 'AbortError')) {
@@ -352,10 +347,13 @@ wait. An event handler can await it the same way. A page change started while
 some unrelated action is still pending reaches the screen without waiting for
 that action either.
 
-Its default is `push`, the opposite of `@k8ordo/state`'s `update()`, and for
-the same reason: going to a page is what the back button should undo, while
-refining what is on the page is not. **Changing pages goes through
-`navigateTo`; changing state goes through `update`.**
+Its default, `'auto'`, pushes an entry for another URL and replaces the
+current one for the same URL, as following a link does — the opposite of
+`@k8ordo/state`'s `update()`, which replaces by default, and for the same
+reason: going to a page is what the back button should undo, while refining
+what is on the page is not. **Changing pages is
+`navigation.navigate(href(…))`, the same URL as `<a href>`; changing state
+is `update()`.**
 
 ## Served under a base
 
@@ -364,7 +362,7 @@ the application is served below one — Vite's
 [`base`](https://vite.dev/config/shared-options#base), `base: '/docs/'`. The
 router reads it from `import.meta.env.BASE_URL` and does the rest:
 
-- `href` and `navigateTo` put it in front of every link: `href('/products')`
+- `href` puts it in front of every link: `href('/products')`
   is `/docs/products`, and `href('/')` is `/docs/`.
 - `usePathname` takes it off, so what it returns compares with the patterns:
   `/products` at `/docs/products`. `useMatch` follows, and `<Router>` matches
@@ -412,9 +410,9 @@ answer to a question already answered. Hand-write it in a client application
 that mounts `<Router>` itself.
 
 The framework's generated `Register` also carries `params`: per pattern, the
-type the route file's `paramsSchema` produces. With it, `href` and
-`navigateTo` take a param as the page receives it — `{ id: 42 }` for a
-schema that said number — and spell it the one way the schema reads back. A
+type the route file's `paramsSchema` produces. With it, `href`
+takes a param as the page receives it — `{ id: 42 }` for a
+schema that said number — and spells it the one way the schema reads back. A
 value with no URL spelling (an object) is refused. Before `Register` is
 augmented — or for a pattern no schema along its stack covers — a link takes
 any value with one spelling (a string, a number, a bigint, a boolean), so a
@@ -685,8 +683,8 @@ a class, since a page and the framework may hold two copies of this package.
 Under a client `<Router>` there is no status to answer with, and `notFound()`
 is an error like any other.
 
-What carries across unchanged is everything that needs no table: `href`,
-`navigateTo` and `bindParams`, `usePathname`, `useMatch` and `matchPath`, and
+What carries across unchanged is everything that needs no table: `href` and
+`bindParams`, `usePathname`, `useMatch` and `matchPath`, and
 `normalizePathname` — an application on the framework imports them from
 `@k8ordo/framework`, which re-exports them by name, and never names this
 package. `usePathname` needs one thing on the server,

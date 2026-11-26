@@ -163,12 +163,12 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 ## Entry points
 
 - `@k8ordo/framework` — what application code imports, re-exported from
-  `@k8ordo/router` (which stays a peer, one copy): `href`, `navigateTo`,
+  `@k8ordo/router` (which stays a peer, one copy): `href`,
   `bindParams`, `notFound`, `isNotFound`, `usePathname`,
   `usePendingPathname`, `useMatch`, `matchPath`, `normalizePathname`,
   `withBase`, and the types `PageProps`, `LayoutProps`, `RouteContext`,
-  `ErrorProps`, `BoundLinks`, `BoundParams`, `MatchablePattern`,
-  `MatchOptions`, `NavigateToOptions` and the `Registered*` types; and two
+  `ErrorProps`, `BoundParams`, `MatchablePattern`,
+  `MatchOptions` and the `Registered*` types; and two
   types of its own, `Paths<Pattern>`, what a `paths.ts` exports by default,
   and `RedirectTarget`, what a `redirect.ts` does.
   Not `useParams` or `useRoute`: a page receives `params` as a prop.

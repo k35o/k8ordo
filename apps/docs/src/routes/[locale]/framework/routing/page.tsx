@@ -109,16 +109,17 @@ const HOME_PAGE = `export default function HomePage() {
 
 const HOME_STATIC = `'use client';
 
-import { navigateTo } from '@k8ordo/framework';
+import { href } from '@k8ordo/framework';
 import { useEffect } from 'react';
 
 import { locales } from '../i18n';
 
 export default function HomePage() {
   useEffect(() => {
-    navigateTo(
-      '/:locale',
-      { locale: locales.negotiate(navigator.languages) },
+    navigation.navigate(
+      href('/:locale', {
+        locale: locales.negotiate(navigator.languages),
+      }),
       { history: 'replace' },
     );
   }, []);
@@ -128,14 +129,13 @@ export default function HomePage() {
 
 const HOME_COOKIE = `useEffect(() => {
   void cookieStore.get('locale').then((saved) => {
-    navigateTo(
-      '/:locale',
-      {
+    navigation.navigate(
+      href('/:locale', {
         locale: locales.negotiate([
           ...(saved?.value === undefined ? [] : [saved.value]),
           ...navigator.languages,
         ]),
-      },
+      }),
       { history: 'replace' },
     );
   });
@@ -469,7 +469,7 @@ export default function FrameworkRoutingPage() {
         <CodeBlock
           code={HOME_STATIC}
           lang="tsx"
-          marks={{ 12: 'highlight', 13: 'highlight' }}
+          marks={{ 12: 'highlight', 14: 'highlight' }}
           title="src/routes/page.tsx"
         />
         <p>
@@ -487,7 +487,7 @@ export default function FrameworkRoutingPage() {
           <CodeBlock
             code={HOME_COOKIE}
             lang="tsx"
-            marks={{ 2: 'highlight', 6: 'highlight', 7: 'highlight' }}
+            marks={{ 2: 'highlight', 5: 'highlight', 6: 'highlight' }}
             title="src/routes/page.tsx"
           />
           <p>

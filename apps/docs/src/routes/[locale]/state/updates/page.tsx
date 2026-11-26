@@ -105,7 +105,7 @@ export default function StateUpdatesPage() {
           <Rich>{t.historyPageOnly()}</Rich>
         </p>
         <p>
-          <Rich>{t.historyNavigateTo()}</Rich>
+          <Rich>{t.historyPageChange()}</Rich>
         </p>
       </DocSection>
 

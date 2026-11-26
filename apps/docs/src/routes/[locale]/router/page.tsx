@@ -44,7 +44,7 @@ href('/products/:id');`;
 const CLAIM_NAVIGATION_WAIT = `const [isPending, startTransition] = useTransition();
 
 startTransition(async () => {
-  await navigateTo('/products/:id', { id }).finished;
+  await navigation.navigate(href('/products/:id', { id })).finished;
 });`;
 
 const CLAIM_NAVIGATION_ANIMATE = `<ViewTransition

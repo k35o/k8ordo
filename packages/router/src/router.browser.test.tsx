@@ -20,7 +20,7 @@ import {
 import { render } from 'vitest-browser-react';
 
 import { defineRoutes } from './define-routes';
-import { bindParams, href, navigateTo } from './links';
+import { bindParams, href } from './links';
 import { usePathname } from './location';
 import { useMatch } from './match';
 import { useInterceptedNavigation, usePendingPathname } from './navigation';
@@ -132,7 +132,7 @@ afterEach(async () => {
 
 it('renders the matched stack, layouts wrapping the leaf through Outlet', async () => {
   const screen = await render(<Router routes={routes} />);
-  await navigateTo('/products', { history: 'replace' }).finished;
+  await navigation.navigate(href('/products'), { history: 'replace' }).finished;
 
   await expect.element(screen.getByTestId('shell')).toBeInTheDocument();
   await expect.element(screen.getByTestId('list')).toBeInTheDocument();
@@ -140,9 +140,9 @@ it('renders the matched stack, layouts wrapping the leaf through Outlet', async 
 
 it('resolves finished only after the new tree is on screen', async () => {
   await render(<Router routes={routes} />);
-  await navigateTo('/', { history: 'replace' }).finished;
+  await navigation.navigate(href('/'), { history: 'replace' }).finished;
 
-  await navigateTo('/about').finished;
+  await navigation.navigate(href('/about')).finished;
 
   // finished 解決後に waitFor なしで存在する = commit が先である証明
   expect(document.querySelector('[data-testid="about"]')).not.toBeNull();
@@ -151,11 +151,11 @@ it('resolves finished only after the new tree is on screen', async () => {
 
 it('resolves finished awaited inside an async action, with the page on screen', async () => {
   await render(<Router routes={routes} />);
-  await navigateTo('/', { history: 'replace' }).finished;
+  await navigation.navigate(href('/'), { history: 'replace' }).finished;
 
   const onScreen = new Promise<boolean>((resolve) => {
     startTransition(async () => {
-      await navigateTo('/about').finished;
+      await navigation.navigate(href('/about')).finished;
       resolve(document.querySelector('[data-testid="about"]') !== null);
     });
   });
@@ -167,7 +167,7 @@ it('resolves finished awaited inside an async action, with the page on screen', 
 
 it('puts a page on screen while an unrelated async action is still pending', async () => {
   await render(<Router routes={routes} />);
-  await navigateTo('/', { history: 'replace' }).finished;
+  await navigation.navigate(href('/'), { history: 'replace' }).finished;
   let release!: () => void;
   const action = new Promise<void>((resolve) => {
     release = resolve;
@@ -177,7 +177,7 @@ it('puts a page on screen while an unrelated async action is still pending', asy
   });
 
   try {
-    await navigateTo('/about').finished;
+    await navigation.navigate(href('/about')).finished;
 
     expect(document.querySelector('[data-testid="about"]')).not.toBeNull();
   } finally {
@@ -204,10 +204,10 @@ it('keeps the previous page on screen while the next one suspends', async () => 
     '/': { layout: Loading, children: { '/': HomePage, '/slow': Slow } },
   });
   const screen = await render(<Router routes={suspending} />);
-  await navigateTo('/', { history: 'replace' }).finished;
+  await navigation.navigate(href('/'), { history: 'replace' }).finished;
   await expect.element(screen.getByTestId('home')).toBeInTheDocument();
 
-  const slow = navigateTo('/slow');
+  const slow = navigation.navigate(href('/slow'));
   await slow.committed;
   // 新しい木を描き始めて chunk で止まるまでの猶予
   await new Promise((resolve) => {
@@ -224,7 +224,7 @@ it('keeps the previous page on screen while the next one suspends', async () => 
 
 it('turns a plain anchor into a client navigation', async () => {
   const screen = await render(<Router routes={routes} />);
-  await navigateTo('/', { history: 'replace' }).finished;
+  await navigation.navigate(href('/'), { history: 'replace' }).finished;
 
   await screen.getByRole('link', { name: 'to about' }).click();
 
@@ -233,9 +233,9 @@ it('turns a plain anchor into a client navigation', async () => {
 
 it('feeds typed params to the leaf and restores them across back', async () => {
   const screen = await render(<Router routes={routes} />);
-  await navigateTo('/about', { history: 'replace' }).finished;
+  await navigation.navigate(href('/about'), { history: 'replace' }).finished;
 
-  await navigateTo('/products/:id', { id: 'a/b' }).finished;
+  await navigation.navigate(href('/products/:id', { id: 'a/b' })).finished;
   await expect
     .element(screen.getByTestId('detail'))
     .toHaveTextContent('/products/:id:a/b');
@@ -246,7 +246,7 @@ it('feeds typed params to the leaf and restores them across back', async () => {
 
 it('leaves the route tree alone when only the search moves', async () => {
   await render(<Router routes={routes} />);
-  await navigateTo('/products', { history: 'replace' }).finished;
+  await navigation.navigate(href('/products'), { history: 'replace' }).finished;
   // finished は commit で settle し、ページの passive effect はその後に走る
   await vi.waitFor(() => {
     expect(listMounts).toBe(1);
@@ -271,12 +271,12 @@ it('renders nothing when mounted on a pathname outside the table', async () => {
 
 it('reports the pathname the browser is on, without consulting the table', async () => {
   const screen = await render(<Router routes={routes} />);
-  await navigateTo('/products', { history: 'replace' }).finished;
+  await navigation.navigate(href('/products'), { history: 'replace' }).finished;
   await expect
     .element(screen.getByTestId('pathname'))
     .toHaveTextContent('/products');
 
-  await navigateTo('/products/:id', { id: 'shoes' }).finished;
+  await navigation.navigate(href('/products/:id', { id: 'shoes' })).finished;
   await expect
     .element(screen.getByTestId('pathname'))
     .toHaveTextContent('/products/shoes');
@@ -284,7 +284,7 @@ it('reports the pathname the browser is on, without consulting the table', async
 
 it('holds the pathname still when only the search moves', async () => {
   const screen = await render(<Router routes={routes} />);
-  await navigateTo('/products', { history: 'replace' }).finished;
+  await navigation.navigate(href('/products'), { history: 'replace' }).finished;
 
   const url = new URL(location.href);
   url.searchParams.set('q', 'shoes');
@@ -297,11 +297,11 @@ it('holds the pathname still when only the search moves', async () => {
 
 it('shows the navigation that won, not the one it overtook', async () => {
   const screen = await render(<Router routes={routes} />);
-  await navigateTo('/', { history: 'replace' }).finished;
+  await navigation.navigate(href('/'), { history: 'replace' }).finished;
 
   // 追い越された側は abort される。その木が後から画面に出てはいけない。
-  const overtaken = navigateTo('/products');
-  const winner = navigateTo('/products/:id', { id: 'shoes' });
+  const overtaken = navigation.navigate(href('/products'));
+  const winner = navigation.navigate(href('/products/:id', { id: 'shoes' }));
   await expect(overtaken.finished).rejects.toThrow(/abort/iu);
   await winner.finished;
 
@@ -314,19 +314,19 @@ it('shows the navigation that won, not the one it overtook', async () => {
 
 it('starts a new page at the top, whatever the previous page had scrolled to', async () => {
   const screen = await render(<Router routes={routes} />);
-  await navigateTo('/tall', { history: 'replace' }).finished;
+  await navigation.navigate(href('/tall'), { history: 'replace' }).finished;
   await expect.element(screen.getByTestId('tall')).toBeInTheDocument();
   window.scrollTo(0, 3000);
   expect(window.scrollY).toBeGreaterThan(0);
 
-  await navigateTo('/about').finished;
+  await navigation.navigate(href('/about')).finished;
 
   expect(window.scrollY).toBe(0);
 });
 
 it('scrolls to the fragment the new URL names', async () => {
   const screen = await render(<Router routes={routes} />);
-  await navigateTo('/about', { history: 'replace' }).finished;
+  await navigation.navigate(href('/about'), { history: 'replace' }).finished;
 
   await navigation.navigate(`${location.origin}/tall#target`).finished;
 
@@ -336,7 +336,7 @@ it('scrolls to the fragment the new URL names', async () => {
 
 it('stays in the document, where it was, when the fragment is dropped from the URL', async () => {
   const screen = await render(<Router routes={routes} />);
-  await navigateTo('/about', { history: 'replace' }).finished;
+  await navigation.navigate(href('/about'), { history: 'replace' }).finished;
   await navigation.navigate(`${location.origin}/tall#target`).finished;
   await expect.element(screen.getByTestId('tall')).toBeInTheDocument();
   const tall = screen.getByTestId('tall').element();
@@ -352,7 +352,7 @@ it('stays in the document, where it was, when the fragment is dropped from the U
 
 it('keeps the scroll position when only the search moves', async () => {
   const screen = await render(<Router routes={routes} />);
-  await navigateTo('/tall', { history: 'replace' }).finished;
+  await navigation.navigate(href('/tall'), { history: 'replace' }).finished;
   await expect.element(screen.getByTestId('tall')).toBeInTheDocument();
   window.scrollTo(0, 3000);
   const reading = window.scrollY;
@@ -366,12 +366,12 @@ it('keeps the scroll position when only the search moves', async () => {
 
 it('moves focus to the top of the document on a page change, the way a document load does', async () => {
   const screen = await render(<Router routes={routes} />);
-  await navigateTo('/products', { history: 'replace' }).finished;
+  await navigation.navigate(href('/products'), { history: 'replace' }).finished;
   const filter = screen.getByRole('textbox', { name: 'filter' }).element();
   (filter as HTMLInputElement).focus();
   expect(document.activeElement).toBe(filter);
 
-  await navigateTo('/products/:id', { id: 'shoes' }).finished;
+  await navigation.navigate(href('/products/:id', { id: 'shoes' })).finished;
 
   // 絞り込み欄はレイアウトごと残っている。それでもフォーカスは離れる
   expect(screen.getByRole('textbox', { name: 'filter' }).element()).toBe(
@@ -382,7 +382,7 @@ it('moves focus to the top of the document on a page change, the way a document 
 
 it('leaves focus where it was when only the search moves', async () => {
   const screen = await render(<Router routes={routes} />);
-  await navigateTo('/products', { history: 'replace' }).finished;
+  await navigation.navigate(href('/products'), { history: 'replace' }).finished;
   const filter = screen.getByRole('textbox', { name: 'filter' }).element();
   (filter as HTMLInputElement).focus();
 
@@ -395,10 +395,10 @@ it('leaves focus where it was when only the search moves', async () => {
 
 it('answers which section is showing without a table in hand', async () => {
   const screen = await render(<Router routes={routes} />);
-  await navigateTo('/products', { history: 'replace' }).finished;
+  await navigation.navigate(href('/products'), { history: 'replace' }).finished;
   await expect.element(screen.getByTestId('section')).toHaveTextContent('out');
 
-  await navigateTo('/products/:id', { id: '1' }).finished;
+  await navigation.navigate(href('/products/:id', { id: '1' })).finished;
   await expect.element(screen.getByTestId('section')).toHaveTextContent('in');
 });
 
@@ -486,7 +486,8 @@ it('shows the error component inside the layout when what is below throws', asyn
   const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
   try {
     const screen = await render(<Router routes={guarded} />);
-    await navigateTo('/area/boom', { history: 'replace' }).finished;
+    await navigation.navigate(href('/area/boom'), { history: 'replace' })
+      .finished;
 
     await expect.element(screen.getByTestId('frame')).toBeInTheDocument();
     await expect.element(screen.getByTestId('oops')).toHaveTextContent('boom');
@@ -499,10 +500,11 @@ it('leaves the failure behind when the pathname changes', async () => {
   const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
   try {
     const screen = await render(<Router routes={guarded} />);
-    await navigateTo('/area/boom', { history: 'replace' }).finished;
+    await navigation.navigate(href('/area/boom'), { history: 'replace' })
+      .finished;
     await expect.element(screen.getByTestId('oops')).toBeInTheDocument();
 
-    await navigateTo('/area/fine').finished;
+    await navigation.navigate(href('/area/fine')).finished;
 
     await expect.element(screen.getByTestId('fine')).toBeInTheDocument();
     expect(document.querySelector('[data-testid="oops"]')).toBeNull();
@@ -513,10 +515,11 @@ it('leaves the failure behind when the pathname changes', async () => {
 
 it('keeps a layout inside the boundary mounted when the page changes', async () => {
   const screen = await render(<Router routes={guarded} />);
-  await navigateTo('/area/inner/fine', { history: 'replace' }).finished;
+  await navigation.navigate(href('/area/inner/fine'), { history: 'replace' })
+    .finished;
   const inner = screen.getByTestId('inner').element();
 
-  await navigateTo('/area/inner/about').finished;
+  await navigation.navigate(href('/area/inner/about')).finished;
 
   await expect.element(screen.getByTestId('about')).toBeInTheDocument();
   expect(screen.getByTestId('inner').element()).toBe(inner);
@@ -546,10 +549,10 @@ it('tags the transition that applies a new tree with the navigation kind', async
     },
   });
   const screen = await render(<Router routes={animated} />);
-  await navigateTo('/', { history: 'replace' }).finished;
+  await navigation.navigate(href('/'), { history: 'replace' }).finished;
   await expect.element(screen.getByTestId('home')).toBeInTheDocument();
 
-  await navigateTo('/about').finished;
+  await navigation.navigate(href('/about')).finished;
 
   await expect.element(screen.getByTestId('about')).toBeInTheDocument();
   await vi.waitFor(() => {
@@ -557,28 +560,20 @@ it('tags the transition that applies a new tree with the navigation kind', async
   });
 });
 
-it('navigates with a bound param supplied by its source, and honours the options', async () => {
+it('renders the page a bound href names, its param supplied by the source', async () => {
   const screen = await render(<Router routes={routes} />);
-  await navigateTo('/products', { history: 'replace' }).finished;
+  await navigation.navigate(href('/products'), { history: 'replace' }).finished;
   const bound = bindParams(() => ({ id: 'bound' }));
 
-  await bound.navigateTo('/products/:id').finished;
+  await navigation.navigate(bound('/products/:id')).finished;
 
   await expect
     .element(screen.getByTestId('detail'))
     .toHaveTextContent('/products/:id:bound');
   expect(location.pathname).toBe('/products/bound');
 
-  // Every param is bound, so the options come second, after an omitted
-  // params argument — and are not mistaken for params.
-  const index = navigation.currentEntry?.index;
-  await bound.navigateTo(
-    '/products/:id',
-    { id: 'other' },
-    { history: 'replace' },
-  ).finished;
+  await navigation.navigate(bound('/products/:id', { id: 'other' })).finished;
   expect(location.pathname).toBe('/products/other');
-  expect(navigation.currentEntry?.index).toBe(index);
 });
 
 describe('under a base', () => {
@@ -605,7 +600,7 @@ describe('under a base', () => {
     await navigateOutsideTheTable('/docs/products');
     const screen = await render(<Router routes={routes} />);
 
-    await navigateTo('/products/:id', { id: '7' }).finished;
+    await navigation.navigate(href('/products/:id', { id: '7' })).finished;
 
     expect(location.pathname).toBe('/docs/products/7');
     await expect
@@ -653,9 +648,9 @@ it('shows the loading component of a branch while the page below it first loads'
     '/area': { loading: Spinner, children: { '/slow': Slow } },
   });
   const screen = await render(<Router routes={table} />);
-  await navigateTo('/', { history: 'replace' }).finished;
+  await navigation.navigate(href('/'), { history: 'replace' }).finished;
 
-  const slow = navigateTo('/area/slow');
+  const slow = navigation.navigate(href('/area/slow'));
   // 新しく現れた Suspense は、中身が来るまで loading を出す
   await expect.element(screen.getByTestId('spinner')).toBeInTheDocument();
 
@@ -683,10 +678,10 @@ it('names the page a navigation is loading, and nothing once it is on screen', a
     },
   });
   const screen = await render(<Router routes={table} />);
-  await navigateTo('/', { history: 'replace' }).finished;
+  await navigation.navigate(href('/'), { history: 'replace' }).finished;
   await expect.element(screen.getByTestId('pending')).toHaveTextContent('none');
 
-  const slow = navigateTo('/slow');
+  const slow = navigation.navigate(href('/slow'));
 
   // 前のページは画面に残ったまま、行き先が名指される
   await expect
@@ -704,7 +699,7 @@ it('names nothing for a state change, which is not a page change', async () => {
     '/': { layout: Framed, children: { '/': HomePage } },
   });
   const screen = await render(<Router routes={table} />);
-  await navigateTo('/', { history: 'replace' }).finished;
+  await navigation.navigate(href('/'), { history: 'replace' }).finished;
   const probe = screen.getByTestId('pending').element();
   const seen: Array<string | null> = [];
   const observer = new MutationObserver(() => {
@@ -830,10 +825,10 @@ it('names the pathname each tree was applied for, the old one until the next tre
     },
   });
   const screen = await render(<Router routes={suspending} />);
-  await navigateTo('/', { history: 'replace' }).finished;
+  await navigation.navigate(href('/'), { history: 'replace' }).finished;
   await expect.element(screen.getByTestId('first-tree')).toHaveTextContent('/');
 
-  const slow = navigateTo('/slow/');
+  const slow = navigation.navigate(href('/slow/'));
   await slow.committed;
   // 新しい木を描き始めて chunk で止まるまでの猶予
   await new Promise((resolve) => {

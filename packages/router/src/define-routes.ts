@@ -91,7 +91,7 @@ export type Routes<R extends RoutesRecord = RoutesRecord> = {
    * Matches a pathname in declaration order, first match wins — precedence
    * is what you wrote, not a specificity ranking to second-guess. The one
    * operation that needs the table's value: links and navigation build from
-   * the pattern string alone (`href` / `navigateTo`), so only `<Router>`
+   * the pattern string alone (`href`), so only `<Router>`
    * ever holds this object.
    */
   match: (pathname: string) => Match | null;

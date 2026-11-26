@@ -6,7 +6,7 @@ import { locales } from './i18n';
 // ロケールはどのリンクにも要る区間なので、ここで 1 回だけ束ねる。i18n も
 // router も互いを知らず、結ぶのはこの 1 行。パターンは `/:locale/…` と
 // 綴ったままなので、生成された表の型がそのまま効く。
-export const { href, navigateTo } = bindParams(() => ({
+export const href = bindParams(() => ({
   locale: locales.getLocale(),
 }));
 

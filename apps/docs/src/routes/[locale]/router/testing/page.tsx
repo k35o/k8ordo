@@ -20,7 +20,7 @@ it('reads the id of a product page', () => {
   expect(found?.params).toStrictEqual({ id: '42' });
 });`;
 
-const BROWSER = `import { navigateTo, Router } from '@k8ordo/router';
+const BROWSER = `import { href, Router } from '@k8ordo/router';
 import { expect, it } from 'vitest';
 import { render } from 'vitest-browser-react';
 
@@ -29,7 +29,7 @@ import { routes } from './routes';
 it('shows the product page once finished resolves', async () => {
   await render(<Router routes={routes} />);
 
-  await navigateTo('/products/:id', { id: '1' }).finished;
+  await navigation.navigate(href('/products/:id', { id: '1' })).finished;
 
   const heading = document.querySelector('h1');
   expect(heading?.textContent).toBe('Product 1');

@@ -90,7 +90,7 @@ export type Props = PageProps<'/membrs'>;
 describe('a rest param in the registered table', () => {
   it('reaches a page, a route.ts and useMatch as an array, and a link takes one', async () => {
     const output = await diagnosticsOf(`
-import { defineRoutes, href, matchPath, navigateTo } from '@k8ordo/router';
+import { defineRoutes, href, matchPath } from '@k8ordo/router';
 import type { PageProps, RouteContext } from '@k8ordo/router';
 
 const Page = () => null;
@@ -102,7 +102,7 @@ declare module '@k8ordo/router' {
 
 const segments: readonly string[] = ['a', 'b'];
 href('/files/:path+', { path: segments });
-navigateTo('/files/:path+', { path: ['a', 1] }, { history: 'replace' });
+href('/files/:path+', { path: ['a', 1] });
 export const page: readonly string[] = ({} as PageProps<'/files/:path+'>).params.path;
 export const route: readonly string[] = ({} as RouteContext<'/files/:path+'>).params.path;
 export const matched: readonly string[] | undefined = matchPath('/files/:path+', '/files/a')?.path;

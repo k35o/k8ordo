@@ -75,9 +75,9 @@ export const historyPageOnly = message({
   en: 'The option exists only on `definePageState`’s `update()`, and takes effect only when a `url` value changes. An update that changes only `entry` values rewrites the current history entry in place. If any call in a batch asks for `push`, the batch’s navigation is a push.',
 });
 
-export const historyNavigateTo = message({
-  ja: 'ページを移るときは、`@k8ordo/router`の`navigateTo`を使います。こちらは既定で`push`です。',
-  en: 'To move to another page, use `@k8ordo/router`’s `navigateTo`. It pushes by default.',
+export const historyPageChange = message({
+  ja: 'ページを移るときは、`@k8ordo/router`の`href`で作ったURLを`navigation.navigate()`に渡します。別のURLへの移動は既定で`push`です。',
+  en: 'To move to another page, hand a URL from `@k8ordo/router`’s `href` to `navigation.navigate()`. Going to another URL pushes by default.',
 });
 
 export const batchTitle = message({
