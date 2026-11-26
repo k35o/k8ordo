@@ -9,6 +9,10 @@ rather than bundling, so an application's import and the handler are one
 module — beside it, then tells the engine where they landed
 (`EngineHost.runtimeDir`) and which mode the application chose
 (`EngineHost.mode`). Nothing outside this repository can resolve the name.
+`./redirect` (`runtime/redirect.ts`) is the third entry, for types only:
+the framework's root re-exports `RedirectTarget` from it, since a type
+taken from `.` brings the plugin's chunk, and with it Vite's and React's
+types, into the root's declarations.
 
 The framework's job is to make the application's structure a checkable form:
 `routes/` is the pathname space and holds nothing else, execution boundaries

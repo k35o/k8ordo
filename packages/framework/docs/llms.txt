@@ -157,8 +157,9 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   `usePendingPathname`, `useMatch`, `matchPath`, `normalizePathname`,
   `withBase`, and the types `PageProps`, `LayoutProps`, `RouteContext`,
   `ErrorProps`, `BoundLinks`, `BoundParams`, `MatchablePattern`,
-  `MatchOptions`, `NavigateToOptions` and the `Registered*` types; and one
-  type of its own, `Paths<Pattern>`, what a `paths.ts` exports by default.
+  `MatchOptions`, `NavigateToOptions` and the `Registered*` types; and two
+  types of its own, `Paths<Pattern>`, what a `paths.ts` exports by default,
+  and `RedirectTarget`, what a `redirect.ts` does.
   Not `useParams` or `useRoute`: a page receives `params` as a prop.
 - `@k8ordo/framework/vite` — `framework(options)` returns the Vite plugins;
   `options.mode` (`'static' | 'server'`) is required; the route files
@@ -196,8 +197,7 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   the second argument the built handler takes from a runtime that calls it;
   `Guard<P>` is the type of what a `guard.ts` default-exports
   (`({ request, params }) => Response | void`) and `GuardContext<P>` its
-  argument; `RedirectTarget` is the type of what a `redirect.ts`
-  default-exports, and `RouteRequest` the type of the `request` prop.
+  argument; `RouteRequest` is the type of the `request` prop.
 - `@k8ordo/framework/serve` — the Node.js server for a build.
   `serve({ dist?, port?, host? })` (`ServeOptions`: `dist` defaults to
   `dist` under the working directory, `port` to `3000`, `host` to

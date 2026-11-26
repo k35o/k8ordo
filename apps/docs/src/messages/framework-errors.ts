@@ -222,6 +222,6 @@ export const redirectServer = message({
 });
 
 export const redirectType = message({
-  ja: "default exportの型は、`@k8ordo/framework/server`の`RedirectTarget`です。`export default '/products' satisfies RedirectTarget`と書くと、その場で形を検査できます。`import type`で読み込めば、`@k8ordo/framework/server`を使えないstaticモードでもビルドは通ります。",
-  en: "The default export’s type is `RedirectTarget` from `@k8ordo/framework/server`. Write `export default '/products' satisfies RedirectTarget` to check the shape where it is written. Static mode refuses `@k8ordo/framework/server`, but an `import type` of it passes a static build.",
+  ja: "default exportの型は、`@k8ordo/framework`の`RedirectTarget`です。`export default '/products' satisfies RedirectTarget`と書くと、その場で形を検査できます。`redirect.ts`はどちらのモードでも使うファイルなので、型もどちらのモードでも読めるルートから出ています。",
+  en: "The default export’s type is `RedirectTarget` from `@k8ordo/framework`. Write `export default '/products' satisfies RedirectTarget` to check the shape where it is written. A `redirect.ts` works in either mode, so its type comes from the root, which either mode reads.",
 });

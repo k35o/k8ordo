@@ -20,6 +20,10 @@
       "types": "./dist/runtime/server.d.mts",
       "default": "./dist/runtime/server.mjs"
     },
+    "./redirect": {
+      "types": "./dist/runtime/redirect.d.mts",
+      "default": "./dist/runtime/redirect.mjs"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {

@@ -230,8 +230,8 @@ export const rootTitle = message({
 });
 
 export const rootDescription = message({
-  ja: 'どれも`@k8ordo/router`のexportを、名前で再exportしています。`paths.ts`のdefault exportの型`Paths`だけは、フレームワーク自身のものです。`useParams`と`useRoute`は、フレームワークが描画しない`<Router>`を読むので含みません。ページは`params`をpropsで受け取ります。それぞれの説明は`@k8ordo/router`の',
-  en: 'Each is an export of `@k8ordo/router`, re-exported by name, except `Paths`: the framework’s own type for the default export of a `paths.ts`. `useParams` and `useRoute` are not among them: they read a `<Router>` the framework never renders. A page receives `params` as a prop instead. Each one is described on the ',
+  ja: 'どれも`@k8ordo/router`のexportを、名前で再exportしています。`paths.ts`のdefault exportの型`Paths`と、`redirect.ts`のdefault exportの型`RedirectTarget`だけは、フレームワーク自身のものです。`useParams`と`useRoute`は、フレームワークが描画しない`<Router>`を読むので含みません。ページは`params`をpropsで受け取ります。それぞれの説明は`@k8ordo/router`の',
+  en: 'Each is an export of `@k8ordo/router`, re-exported by name, except `Paths` and `RedirectTarget`: the framework’s own types for the default export of a `paths.ts` and of a `redirect.ts`. `useParams` and `useRoute` are not among them: they read a `<Router>` the framework never renders. A page receives `params` as a prop instead. Each one is described on the ',
 });
 
 export const rootLinkTail = message({
@@ -459,8 +459,8 @@ export const routeRequestCookies = message({
 });
 
 export const redirectTargetSummary = message({
-  ja: '`redirect.ts`がdefault exportする値の型です。`satisfies RedirectTarget`と書くと、書いたその場で形を検査できます。型だけのimportなので、staticモードでも使えます。',
-  en: 'The type of what a `redirect.ts` default-exports. Write `satisfies RedirectTarget` to check the shape where it is written. It is a type-only import, so static mode may use it too.',
+  ja: '`redirect.ts`がdefault exportする値の型です。`satisfies RedirectTarget`と書くと、書いたその場で形を検査できます。`redirect.ts`はどちらのモードでも使うファイルなので、型も`@k8ordo/framework`からimportします。',
+  en: 'The type of what a `redirect.ts` default-exports. Write `satisfies RedirectTarget` to check the shape where it is written. A `redirect.ts` works in either mode, so its type is imported from `@k8ordo/framework`.',
 });
 
 export const serveSummary = message({

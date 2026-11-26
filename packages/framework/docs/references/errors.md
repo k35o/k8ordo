@@ -172,12 +172,10 @@ send to `/:locale/new`, and `old/[...path]/redirect.ts` can send to
 spelled it (server mode only, as every `[...name]` directory is). A redirect holds its place in the table as a page
 does, so a literal directory beside a `[slug]/redirect.ts` keeps its URL; a
 directory that redirects has no page to render, so it cannot hold both. The
-generated table checks the default export's shape; `RedirectTarget` is that
-type, for a file that wants the error where it is written
-(`export default '/products' satisfies RedirectTarget`, with
-`import type { RedirectTarget } from '@k8ordo/framework/server'`, which
-`mode: 'static'` lets through; `import { type RedirectTarget }` is kept as an
-import of the module under `verbatimModuleSyntax`, and refused).
+generated table checks the default export's shape; `RedirectTarget`, on the
+root `@k8ordo/framework` as every type a file of either mode is written
+against, is that type, for a file that wants the error where it is written
+(`export default '/products' satisfies RedirectTarget`).
 
 **Under `mode: 'server'`** the answer to a `GET` or `HEAD` is a `307`, or a
 `308` when `permanent`, and any other method gets a `405`; a client

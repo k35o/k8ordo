@@ -261,7 +261,9 @@ The package is split by where the code runs.
   `navigateTo`, `bindParams`, `notFound`, `usePathname`,
   `usePendingPathname`, `useMatch`, `matchPath`, `withBase`, and the types
   `PageProps`, `LayoutProps`, `RouteContext` and `ErrorProps`, re-exported
-  from `@k8ordo/router`. `useParams` and `useRoute` are not among them: they
+  from `@k8ordo/router`, with the two types of its own a route file of
+  either mode is written against: `Paths` (a `paths.ts`) and
+  `RedirectTarget` (a `redirect.ts`). `useParams` and `useRoute` are not among them: they
   read a `<Router>` the framework never renders, and a page receives
   `params` as a prop instead.
 - `@k8ordo/framework/vite` — `framework()`, for `vite.config.ts` only. It
@@ -269,8 +271,7 @@ The package is split by where the code runs.
 - `@k8ordo/framework/server` — server mode only. What code inside the
   request handler imports: `cookies()`, `responseHeaders()`,
   `requestHeaders()`, `redirect()`, `nonce()`, `waitUntil()`, and the types
-  `Guard`, `GuardContext`, `RouteRequest`, `RedirectTarget` and
-  `HandlerContext`.
+  `Guard`, `GuardContext`, `RouteRequest` and `HandlerContext`.
 - `@k8ordo/framework/serve` — `serve`, the Node.js server for a build: what
   `dist/server.js` runs, for a server of your own to import. A static build
   it serves as a static host does, its `_redirects` applied.

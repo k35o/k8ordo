@@ -166,8 +166,8 @@ export const refusedWants = message({
 });
 
 export const refusedTypes = message({
-  ja: '`import type`はビルドの前に消えるので、エラーになりません。`RedirectTarget`のような型は、staticモードでも`@k8ordo/framework/server`から読めます。`import { type RedirectTarget }`と書くとエラーになります。`verbatimModuleSyntax`の設定では、モジュールを読み込むimportとして残るためです。',
-  en: '`import type` is erased before the build sees it, so it passes. A type such as `RedirectTarget` can be imported from `@k8ordo/framework/server` in static mode too. `import { type RedirectTarget }` is refused, though: under `verbatimModuleSyntax` it stays behind as an import of the module.',
+  ja: '`import type`はビルドの前に消えるので、エラーになりません。`RouteRequest`のような型は、staticモードでも`@k8ordo/framework/server`から読めます。`import { type RouteRequest }`と書くとエラーになります。`verbatimModuleSyntax`の設定では、モジュールを読み込むimportとして残るためです。',
+  en: '`import type` is erased before the build sees it, so it passes. A type such as `RouteRequest` can be imported from `@k8ordo/framework/server` in static mode too. `import { type RouteRequest }` is refused, though: under `verbatimModuleSyntax` it stays behind as an import of the module.',
 });
 
 export const refusedBeyond = message({

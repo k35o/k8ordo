@@ -49,6 +49,7 @@ import type {
   NavigateToOptions,
   PageProps,
   Paths,
+  RedirectTarget,
   RegisteredNavigablePattern,
   RegisteredPageParams,
   RegisteredParams,
@@ -203,6 +204,16 @@ export default function FrameworkReferencePage() {
           <Rich>{t.rootLinkTail()}</Rich>
         </p>
       </DocSection>
+
+      <ApiEntry
+        from="@k8ordo/framework"
+        id="redirect-target"
+        name="RedirectTarget"
+        signature={`type RedirectTarget =
+  | string
+  | { to: string; permanent?: boolean };`}
+        summary={t.redirectTargetSummary}
+      />
 
       <ApiEntry
         caveats={t.cookiesCaveats}
@@ -396,16 +407,6 @@ export default function FrameworkReferencePage() {
   readonly cookies: ReadonlyMap<string, string>;
 };`}
         summary={t.routeRequestSummary}
-      />
-
-      <ApiEntry
-        from={SERVER}
-        id="redirect-target"
-        name="RedirectTarget"
-        signature={`type RedirectTarget =
-  | string
-  | { to: string; permanent?: boolean };`}
-        summary={t.redirectTargetSummary}
       />
 
       <ApiEntry

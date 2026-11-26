@@ -153,14 +153,16 @@ pnpm check         # check:write to auto-fix
   the plugin is bumped. Without it the plugin fails while Vite resolves the
   config, with its own error, which names `react({ compiler: true })`; the
   framework does not restate it, and the guide quotes it.
-- **The root re-exports the router by name, plus one type of its own.**
+- **The root re-exports the router by name, plus two types of its own.**
   `src/index.ts` lists what an application's code imports and never
   `export *`: the router also exports what only a hand-written table or the
   framework's own runtime uses. `index.test.ts` keeps `WITHHELD` beside it,
   so a new router export fails the test until it is put in one list or the
-  other. The one name that is not the router's is `Paths`, the type a
-  `paths.ts` is written against, and the same test holds that it is the
-  only one. `useParams` and
+  other. The names that are not the router's are `Paths` and
+  `RedirectTarget`, the types a `paths.ts` and a `redirect.ts` are written
+  against — route files of either mode, so neither type is on `./server`,
+  which static mode refuses — and the same test holds that they are the
+  only ones. `useParams` and
   `useRoute` are withheld because the framework never renders a `<Router>`.
   The router stays a peer and is never bundled, so a page and the framework
   share its one copy.
@@ -207,7 +209,7 @@ pnpm check         # check:write to auto-fix
   Node instead, with a copy of its own that no request reaches.
   `./serve` (`src/serve.ts`) is the Node server, and
   `./vercel` the Vercel plugin. The root and `./generated` are the router's
-  names and the `Paths` type, nothing else. `examples/server-basic`'s handler test runs
+  names and the `Paths` and `RedirectTarget` types, nothing else. `examples/server-basic`'s handler test runs
   `./serve` with Vite unresolvable, as a server of your own would, to hold
   the split. The types are split too:
   every server-mode `register.gen.ts` imports `./server`, so its `.d.mts`
@@ -563,7 +565,7 @@ pnpm check         # check:write to auto-fix
 ```
 src/
   index.ts          the root: the router's application-facing names, re-exported,
-                    and the Paths type
+                    and the Paths and RedirectTarget types
   generated.ts      ./generated: what .k8ordo/ imports (defineRoutes, Register, …)
   vite.ts           ./vite: framework() — the engine, plus static mode or server mode
   static.ts         staticMode: the refusals (dev in resolveId / transform, the
