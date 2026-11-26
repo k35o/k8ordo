@@ -104,7 +104,8 @@ framework's `<Link>`) or to fill a slot. There are two kinds, and they must not
 be blurred.
 
 **Replacing the element** (`renderAnchor` on `Button` / `IconButton` with
-`href`, `Anchor`, `Breadcrumb.Link`, `SideNav.Link`). The bag is _everything the
+`href`, `Anchor`, `Breadcrumb.Link`, `SideNav.Link`, `DropdownMenu.Item` /
+`ContextMenu.Item` with `href`). The bag is _everything the
 component would have put on its own `<a>`_. For `Button` / `IconButton` that is
 `href`, the resolved `className`, the composed `children` (icons included),
 `ref`, the click handler, `aria-disabled`, and the caller's remaining anchor
@@ -117,7 +118,10 @@ attributes, plus `kind` (`'internal' | 'external'`), which is not an attribute;
 `Breadcrumb.Link` takes no extra attributes, so its bag is `href` / `className` /
 `children`, and a `current` link renders a `<span>` without calling it;
 `SideNav.Link`'s bag is `href` / `className` / `children` / `aria-current` and
-the caller's remaining anchor attributes. Build that
+the caller's remaining anchor attributes; `DropdownMenu.Item` /
+`ContextMenu.Item`'s bag is `href` / `className` / `children` / `role` and the
+keyboard wiring (`id` / `ref` / `tabIndex` / `onFocus` / `onClick` /
+`onKeyDown`), all of which must be spread. Build that
 object once and hand the same one to both branches — the render prop and the
 component's own element — so the two can never drift. A render prop that quietly
 drops `onClick` or `aria-disabled` hands the caller a dead, undisabled element with

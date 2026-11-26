@@ -1240,12 +1240,20 @@ export const popover = {
 
 export const dropdownMenu = {
   description: message({
-    ja: 'ボタンから開くメニューです。項目は`label`と`onAction`で作り、`SubMenu`で入れ子にできます。',
-    en: 'A menu that opens from a button. Each item has a `label` and an `onAction`, and `SubMenu` nests one.',
+    ja: 'ボタンから開くメニューです。項目は`label`と`onAction`で作り、`href`を渡すとリンクになります。`SubMenu`で入れ子にできます。',
+    en: 'A menu that opens from a button. Each item has a `label` and an `onAction`, or an `href` to make it a link. `SubMenu` nests one.',
   }),
   iconTriggerTitle: message({
     ja: 'アイコンのトリガー',
     en: 'Icon trigger',
+  }),
+  linksTitle: message({
+    ja: 'リンクの項目',
+    en: 'Link items',
+  }),
+  linksDescription: message({
+    ja: '`href`を渡した項目は`<a role="menuitem">`になります。選ぶとメニューを閉じ、遷移はブラウザに任せます。中クリックや新しいタブで開くこともできます。ボタンの項目と同じく、Spaceでも選べます。',
+    en: 'An item with `href` renders an `<a role="menuitem">`. Choosing it closes the menu and leaves the navigation to the browser, so a middle click or opening in a new tab works too. Like a button item, it can be chosen with Space.',
   }),
   sizesTitle: message({
     ja: 'サイズ',

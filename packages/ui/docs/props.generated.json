@@ -1551,10 +1551,22 @@
           "required": true
         },
         {
+          "name": "href",
+          "types": ["T"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
           "name": "onAction",
           "types": ["() => void"],
           "defaultValue": null,
-          "required": true
+          "required": false
+        },
+        {
+          "name": "renderAnchor",
+          "types": ["(props: RenderItemAnchorProps<T>) => ReactNode"],
+          "defaultValue": "defaultRenderAnchor",
+          "required": false
         }
       ],
       "inherits": null,
@@ -2039,6 +2051,24 @@
           "types": ["string"],
           "defaultValue": null,
           "required": true
+        },
+        {
+          "name": "color",
+          "types": ["ComponentProps<typeof IconButton>['color']"],
+          "defaultValue": "'base'",
+          "required": false
+        },
+        {
+          "name": "size",
+          "types": ["ComponentProps<typeof IconButton>['size']"],
+          "defaultValue": "'md'",
+          "required": false
+        },
+        {
+          "name": "variant",
+          "types": ["ComponentProps<typeof IconButton>['variant']"],
+          "defaultValue": "'solid'",
+          "required": false
         }
       ],
       "inherits": null,
@@ -2055,10 +2085,22 @@
           "required": true
         },
         {
+          "name": "href",
+          "types": ["T"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
           "name": "onAction",
           "types": ["() => void"],
           "defaultValue": null,
-          "required": true
+          "required": false
+        },
+        {
+          "name": "renderAnchor",
+          "types": ["(props: RenderItemAnchorProps<T>) => ReactNode"],
+          "defaultValue": "defaultRenderAnchor",
+          "required": false
         }
       ],
       "inherits": null,
@@ -2131,6 +2173,12 @@
           "types": ["string"],
           "defaultValue": null,
           "required": true
+        },
+        {
+          "name": "color",
+          "types": ["ComponentProps<typeof Button>['color']"],
+          "defaultValue": "'base'",
+          "required": false
         },
         {
           "name": "size",

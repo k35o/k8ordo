@@ -27,7 +27,8 @@ Two different contracts are spelled `render*`, and mixing them up is the usual
 source of surprise.
 
 **Replacing the element** — `renderAnchor` on `Button` and `IconButton` (with
-`href`), `Anchor`, `Breadcrumb.Link`, and `SideNav.Link`. The component computes
+`href`), `Anchor`, `Breadcrumb.Link`, `SideNav.Link`, and `DropdownMenu.Item` /
+`ContextMenu.Item` (with `href`). The component computes
 everything and hands back the exact props it would have put on its own `<a>`,
 so substituting a framework `<Link>` loses nothing. Spread the bag onto whatever
 you render.
@@ -49,6 +50,11 @@ you render.
 - `SideNav.Link` hands back `href`, `className`, `children`, `aria-current`
   (`'page'` on the current link), and every other anchor attribute the caller
   passed. A current link is still a link.
+- `DropdownMenu.Item` and `ContextMenu.Item` hand back `href`, `className`,
+  `children` (the `label`), `role` (`'menuitem'`), and the keyboard wiring
+  (`id`, `ref`, `tabIndex`, `onFocus`, `onClick`, `onKeyDown`). Spread all of
+  it: the wiring is what moves the arrow keys onto the item, closes the menu
+  when it is chosen, and lets Space choose it.
 
 **Filling a slot** — `renderInput` on `FormControl`, `renderItem` on
 `Popover.Trigger`, `Tooltip.Trigger`, `FileField.Trigger`, and `Alert`'s
@@ -2398,6 +2404,27 @@ import { DropdownMenu } from '@k8ordo/ui';
 </DropdownMenu.Root>;
 ```
 
+An item is an action or a link. With `onAction` it renders a `<button
+role="menuitem">` and calls `onAction` when chosen. With `href` it renders an
+`<a role="menuitem">`: choosing it closes the menu and leaves the navigation to
+the browser, so the router's interception, a middle click, and opening in a new
+tab all work. Space chooses a link item as it does a button item, rather than
+scrolling the page. `renderAnchor` draws a link component of your own instead;
+its bag is `href`, `className`, `children`, `role`, and the keyboard wiring
+(`id`, `ref`, `tabIndex`, `onFocus`, `onClick`, `onKeyDown`), so spread all of
+it.
+
+```tsx
+<DropdownMenu.Content>
+  <DropdownMenu.Item href="/settings" label="Settings" />
+  <DropdownMenu.Item
+    href="/billing"
+    label="Billing"
+    renderAnchor={(props) => <Link {...props} />}
+  />
+</DropdownMenu.Content>
+```
+
 Props (Root):
 
 - `children`: `ReactNode`
@@ -2408,8 +2435,8 @@ Props (Root):
 
 Trigger variants:
 
-- `DropdownMenu.Trigger`: text-based (`label`, `size`, `variant`)
-- `DropdownMenu.IconTrigger`: icon-based (`icon`, `label`)
+- `DropdownMenu.Trigger`: text-based (`label`, and `Button`'s `size`, `variant`, `color`)
+- `DropdownMenu.IconTrigger`: icon-based (`icon`, `label`, and `IconButton`'s `size`, `variant`, `color`)
 
 Props (DropdownMenu.Content):
 
@@ -2419,11 +2446,16 @@ Props (DropdownMenu.IconTrigger):
 
 - `icon`: `ReactNode` (required)
 - `label`: `string` (required)
+- `color`: `ComponentProps<typeof IconButton>['color']` (default: `'base'`)
+- `size`: `ComponentProps<typeof IconButton>['size']` (default: `'md'`)
+- `variant`: `ComponentProps<typeof IconButton>['variant']` (default: `'solid'`)
 
 Props (DropdownMenu.Item):
 
 - `label`: `string` (required)
-- `onAction`: `() => void` (required)
+- `href`: `T`
+- `onAction`: `() => void`
+- `renderAnchor`: `(props: RenderItemAnchorProps<T>) => ReactNode` (default: `defaultRenderAnchor`)
 
 `DropdownMenu.SubMenu` is a nested menu. Hovering the `label` row, or opening it from the keyboard, opens the child menu to the right.
 
@@ -2435,6 +2467,7 @@ Props (DropdownMenu.SubMenu):
 Props (DropdownMenu.Trigger):
 
 - `label`: `string` (required)
+- `color`: `ComponentProps<typeof Button>['color']` (default: `'base'`)
 - `size`: `ComponentProps<typeof Button>['size']` (default: `'md'`)
 - `variant`: `ComponentProps<typeof Button>['variant']` (default: `'solid'`)
 
@@ -2442,8 +2475,8 @@ Props (DropdownMenu.Trigger):
 
 A menu opened by right-clicking (or by the keyboard's context-menu key or
 Shift+F10) on an area, shown at the pointer. The inside is `DropdownMenu`'s —
-`ContextMenu.Content`, `ContextMenu.Item` (`label` / `onAction`), and
-`ContextMenu.SubMenu` behave exactly like theirs — and only how it opens and
+`ContextMenu.Content`, `ContextMenu.Item` (`label` with `onAction` or `href`),
+and `ContextMenu.SubMenu` behave exactly like theirs — and only how it opens and
 where differ. When it closes from inside (an item, Escape), focus returns to
 the element that had it before it opened; closing by clicking elsewhere leaves
 focus where the click put it.
@@ -2487,7 +2520,9 @@ Props (ContextMenu.Content):
 Props (ContextMenu.Item):
 
 - `label`: `string` (required)
-- `onAction`: `() => void` (required)
+- `href`: `T`
+- `onAction`: `() => void`
+- `renderAnchor`: `(props: RenderItemAnchorProps<T>) => ReactNode` (default: `defaultRenderAnchor`)
 
 Props (ContextMenu.SubMenu):
 
