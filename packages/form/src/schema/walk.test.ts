@@ -215,9 +215,9 @@ describe('nested and repeated fields', () => {
           rows: z.array(z.object({ tags: z.array(z.string()) })),
         }),
       ),
-    ).toThrow(/繰り返しの中の繰り返し/u);
+    ).toThrow(/a repeat inside a repeat/u);
     expect(() => formFields(z.object({ 'a.b': z.string() }))).toThrow(
-      /キーに/u,
+      /^formFields: 'a\.b': a key containing/u,
     );
     expect(() =>
       formFields(z.object({ status: z.object({ a: z.string() }).nullable() })),

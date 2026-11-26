@@ -90,6 +90,9 @@ const countMessage = (
       (issue) => issue.code === code && issue.path.length === 0,
     )?.message;
 
+const boxesChecked = (count: number): string =>
+  `${String(count)} ${count === 1 ? 'box is' : 'boxes are'} checked`;
+
 /**
  * A checkbox group's `.min()` / `.max()` has no attribute — `required` on a
  * box would require that box — so it crosses as rules the browser runs, the
@@ -107,7 +110,7 @@ const countRulesOf = (
     const message = countMessage(bounds.array, options, checked, 'too_small');
     if (message === undefined) {
       dropped.push(
-        `${String(checked)}個チェックしたときに zod が .min(${String(bounds.minItems)}) の文言を返さないため、下限をブラウザでは検査しません`,
+        `zod gives no message for .min(${String(bounds.minItems)}) when ${boxesChecked(checked)}, so the browser does not check the lower bound`,
       );
     } else {
       rules.push({
@@ -123,7 +126,7 @@ const countRulesOf = (
     const message = countMessage(bounds.array, options, checked, 'too_big');
     if (message === undefined) {
       dropped.push(
-        `${String(checked)}個チェックしたときに zod が .max(${String(bounds.maxItems)}) の文言を返さないため、上限をブラウザでは検査しません`,
+        `zod gives no message for .max(${String(bounds.maxItems)}) when ${boxesChecked(checked)}, so the browser does not check the upper bound`,
       );
     } else {
       rules.push({
@@ -161,9 +164,9 @@ const warnDropped = (
   const lines = dropped.map(({ field, reason }) => `  - ${field}: ${reason}`);
   console.warn(
     [
-      '[@k8ordo/form] クライアントでは検査されないチェックがあります（サーバーでは検査されます）。',
+      'formFields: these checks run on the server only; the browser does not run them:',
       ...lines,
-      '  ブラウザ側でも検査するには、formFields の戻り値 dropped を確認してください。',
+      '  formFields returns the same list as dropped.',
     ].join('\n'),
   );
 };
@@ -181,7 +184,7 @@ export const formFields = <Source extends ObjectSchema | FormDefinition>(
   input: Source,
 ): FormFields<Source> => {
   const { schema, rules } = asDefinition<ObjectSchema>(input);
-  const map = schemaMap(schema);
+  const map = schemaMap(schema, 'formFields');
   const fields: Record<string, DerivedField<AnyFieldInput>> = {};
   const arrays: Record<string, AnyDerivedArray> = {};
   const dropped: DroppedCheck[] = [];
@@ -216,7 +219,7 @@ export const formFields = <Source extends ObjectSchema | FormDefinition>(
       format = undefined;
       formatDropped.push({
         field: leaf.name,
-        reason: `この日時書式は datetime-local が送信する形（${DATETIME_LOCAL_PROBE} のように秒もタイムゾーンも付かない）を受け付けないため、type="text" に落とします（z.iso.datetime({ local: true }) なら datetime-local が使えます）`,
+        reason: `this date-time format rejects what a datetime-local control submits (${DATETIME_LOCAL_PROBE}, with no seconds and no time zone), so the field falls back to a text input; z.iso.datetime({ local: true }) keeps datetime-local`,
       });
     }
 
@@ -258,7 +261,7 @@ export const formFields = <Source extends ObjectSchema | FormDefinition>(
         dropped.push({
           field: leaf.path,
           reason:
-            '繰り返し行の中のチェックボックス群は、行ごとの name を指すルールが無いため、個数の制限をブラウザでは検査しません',
+            'a checkbox group inside repeated rows has no fixed name for a rule to target, so the browser does not check how many boxes are checked',
         });
       }
     }
@@ -293,7 +296,10 @@ export const formFields = <Source extends ObjectSchema | FormDefinition>(
   if (objectChecks > 0) {
     dropped.push({
       field: '(schema)',
-      reason: `${String(objectChecks)}件のオブジェクト階層のチェック（refine など）は HTML の制約属性に落ちないため、クライアントでは検査されません`,
+      reason:
+        objectChecks === 1
+          ? 'an object-level check (.refine() and the like) has no HTML constraint attribute, so the browser does not run it'
+          : `${String(objectChecks)} object-level checks (.refine() and the like) have no HTML constraint attribute, so the browser does not run them`,
     });
   }
 

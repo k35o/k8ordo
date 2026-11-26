@@ -6,8 +6,8 @@ export const introduction = message({
 });
 
 export const missingTitle = message({
-  ja: '`スキーマにあるフィールドが送信されていません`',
-  en: '`スキーマにあるフィールドが送信されていません`',
+  ja: '`parseForm: the submission has no entry for these fields of the schema`',
+  en: '`parseForm: the submission has no entry for these fields of the schema`',
 });
 
 export const missingCause = message({

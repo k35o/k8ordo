@@ -195,12 +195,12 @@ describe('cross-field rules', () => {
       {
         field: 'tags',
         reason:
-          '1個チェックしたときに zod が .min(2) の文言を返さないため、下限をブラウザでは検査しません',
+          'zod gives no message for .min(2) when 1 box is checked, so the browser does not check the lower bound',
       },
       {
         field: 'tags',
         reason:
-          '3個チェックしたときに zod が .max(2) の文言を返さないため、上限をブラウザでは検査しません',
+          'zod gives no message for .max(2) when 3 boxes are checked, so the browser does not check the upper bound',
       },
     ]);
   });

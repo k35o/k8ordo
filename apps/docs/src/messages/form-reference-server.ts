@@ -30,8 +30,8 @@ export const formFieldsCaveats = [
     en: 'Messages are fixed when it runs. To follow the request’s locale, call it during the render.',
   }),
   message({
-    ja: "フォームで表せないスキーマ（`z.record`やタプル、`z.number()`など）を渡すと、`[@k8ordo/form] 'フィールド名': 理由`のエラーになります。",
-    en: "A schema a form cannot express (`z.record`, tuples, `z.number()` and so on) fails with `[@k8ordo/form] 'field': reason`.",
+    ja: "フォームで表せないスキーマ（`z.record`やタプル、`z.number()`など）を渡すと、`formFields: 'フィールド名': 理由`のエラーになります（`parseForm`では頭が`parseForm:`です）。",
+    en: "A schema a form cannot express (`z.record`, tuples, `z.number()` and so on) fails with `formFields: 'field': reason` (`parseForm:` when `parseForm` finds it).",
   }),
   message({
     ja: 'HTMLの属性で表せない検証は`dropped`に入り、サーバーだけで行われます。本番環境以外では`console.warn`でも知らせます。',
@@ -69,8 +69,8 @@ export const parseFormCaveats = [
     en: 'Before the schema runs, `parseForm` turns an unchecked checkbox into `false` and the values sent under one name into an array.',
   }),
   message({
-    ja: 'スキーマにあるフィールドが`FormData`に無いと、`[@k8ordo/form] スキーマにあるフィールドが送信されていません: フィールド名`のエラーになります。`input`を入力欄に渡し忘れたときに出ます。ラジオボタンと`<select>`、チェックボックスは、何も選ばなければ値を送らないので対象外です。',
-    en: 'A field in the schema that is missing from the `FormData` fails with `[@k8ordo/form] スキーマにあるフィールドが送信されていません: field`. It appears when `input` was never passed to the control. Radio buttons, `<select>` and checkboxes are exempt, since they send nothing when nothing is chosen.',
+    ja: 'スキーマにあるフィールドが`FormData`に無いと、`parseForm: the submission has no entry for these fields of the schema: フィールド名`のエラーになります。`input`を入力欄に渡し忘れたときに出ます。ラジオボタンと`<select>`、チェックボックスは、何も選ばなければ値を送らないので対象外です。',
+    en: 'A field in the schema that is missing from the `FormData` fails with `parseForm: the submission has no entry for these fields of the schema: field`. It appears when `input` was never passed to the control. Radio buttons, `<select>` and checkboxes are exempt, since they send nothing when nothing is chosen.',
   }),
   message({
     ja: 'パスワードとファイルの値は、`state.values`に入りません。',

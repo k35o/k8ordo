@@ -21,6 +21,8 @@ import type { ControlKind, LeafSchema } from '../derive/attributes';
 import { asProbe } from './object-schema';
 import type { ObjectSchema } from './object-schema';
 
+export type Api = 'formFields' | 'parseForm';
+
 /** Placeholder an array item's name carries until a row index is known. */
 export const INDEX = '{index}';
 
@@ -148,6 +150,11 @@ const rejectsEmptySubmission = (
  */
 const TEXT_PROBES = ['1', '2000-01-01', 'k8ordo-probe'];
 
+const COERCING: Partial<Record<string, string>> = {
+  date: 'z.coerce.date()',
+  bigint: 'z.coerce.bigint()',
+};
+
 const rejectsAsWrongType = ($schema: $ZodType, value: unknown): boolean => {
   const probed = asProbe($schema).safeParse(value);
   return (
@@ -177,7 +184,7 @@ const refusalOf = (
     // チェックを外したボックスは何も送らない。それを true と読むスキーマ
     // （`.default(true)`）では、外した操作が黙って捨てられる
     return asProbe($schema).safeParse(undefined).data === true
-      ? 'チェックを外したボックスは何も送らないため、未送信を true と読むこのスキーマ（.default(true) など）では false を送れません。チェックすると true になる向きの項目にしてください'
+      ? 'an unchecked box submits nothing, and this schema (.default(true) and the like) reads nothing as true, so the box can never submit false; word the field so that checking it means true'
       : undefined;
   }
   // 数値と文字列の判定は JSON のノードで分ける。bigint は数値の欄として扱うが、
@@ -193,18 +200,23 @@ const refusalOf = (
     // value as a number is accepted while its string form is not.
     return asProbe($schema).safeParse(1).success ||
       asText.error.issues.some((issue) => issue.code === 'invalid_type')
-      ? 'フォームの値は文字列で届くため、このスキーマはどんな入力でも失敗します。z.coerce.number() を使ってください'
+      ? 'form values arrive as strings, so this schema fails on every submission; use z.coerce.number()'
       : undefined;
   }
   if (kind === 'checkbox') {
     return [true, false].every((value) => rejectsAsWrongType($schema, value))
-      ? 'チェックボックスは真偽値（z.boolean()）か、送信する文字列（z.stringbool()）として読むため、どちらでもないこのスキーマはどんな入力でも失敗します'
+      ? 'a checkbox is read as a boolean (z.boolean()) or as the string it submits (z.stringbool()), and this schema takes neither, so it fails on every submission'
       : undefined;
   }
   if (control === 'text' && json.type !== 'string') {
-    return TEXT_PROBES.every((probe) => rejectsAsWrongType($schema, probe))
-      ? 'このスキーマは文字列を受け付けないため、フォームが送信できる値がありません（z.date() や z.bigint() などは表現できません）'
-      : undefined;
+    if (!TEXT_PROBES.every((probe) => rejectsAsWrongType($schema, probe))) {
+      return undefined;
+    }
+    const { type } = unwrap($schema)._zod.def;
+    const coercing = COERCING[type];
+    return coercing === undefined
+      ? 'this schema accepts no string, so nothing a form submits can satisfy it'
+      : `this schema accepts no string, so nothing a form submits can satisfy it; use ${coercing} instead of z.${type}()`;
   }
   return undefined;
 };
@@ -212,10 +224,12 @@ const refusalOf = (
 // The explicit annotation is what lets tsc treat a `fail(...)` call as
 // unreachable-after and narrow the checks above it; an inferred `never` does
 // not participate in control-flow analysis.
-const fail: (path: string, reason: string) => never = (path, reason) => {
-  throw new Error(
-    `[@k8ordo/form] '${path === '' ? '(schema)' : path}': ${reason}`,
-  );
+const fail: (api: Api, path: string, reason: string) => never = (
+  api,
+  path,
+  reason,
+) => {
+  throw new Error(`${api}: '${path === '' ? '(schema)' : path}': ${reason}`);
 };
 
 const walkNode = (
@@ -223,7 +237,7 @@ const walkNode = (
   zod: $ZodType,
   path: string,
   name: string,
-  context: { arrayPath: string | null; itemKey: string | null },
+  context: { api: Api; arrayPath: string | null; itemKey: string | null },
   out: SchemaMap,
 ): void => {
   if (json.type === 'object') {
@@ -233,22 +247,25 @@ const walkNode = (
       // anyway would silently discard whatever the person typed, which is the
       // one failure mode this package exists to rule out.
       fail(
+        context.api,
         path,
-        'オブジェクトのキー構成を列挙できないため、フォームに展開できません（z.record などは表現できません）',
+        'an object whose keys cannot be listed (z.record and the like) cannot be laid out as form fields',
       );
     }
     for (const [key, child] of Object.entries(json.properties)) {
       if (/[.[\]]/u.test(key)) {
         fail(
+          context.api,
           path === '' ? key : `${path}.${key}`,
-          "キーに '.' や '[' ']' を含むスキーマは、入力の name と経路の区切りが衝突するため使えません",
+          "a key containing '.', '[' or ']' collides with the separators of an input's name",
         );
       }
       const childZod = shape[key];
       if (childZod === undefined) {
         fail(
+          context.api,
           path === '' ? key : `${path}.${key}`,
-          'JSON Schema 側にだけ現れるキーです。zod 側と対応が取れないため、フォームに展開できません',
+          'this key appears only in the JSON Schema, with no zod schema to pair it with, so it cannot be laid out as a form field',
         );
       }
       walkNode(
@@ -257,6 +274,7 @@ const walkNode = (
         path === '' ? key : `${path}.${key}`,
         name === '' ? key : `${name}.${key}`,
         {
+          api: context.api,
           arrayPath: context.arrayPath,
           itemKey:
             context.arrayPath === null
@@ -274,8 +292,9 @@ const walkNode = (
   if (json.type === 'array') {
     if (json.items === undefined) {
       fail(
+        context.api,
         path,
-        'タプルなど要素型が一様でない配列は、繰り返し行として表現できません',
+        'an array whose items differ (a tuple and the like) cannot be repeated rows',
       );
     }
 
@@ -285,7 +304,7 @@ const walkNode = (
       // Rows would make no sense here, so the whole array is a single leaf.
       const element = elementOf(zod);
       if (element === undefined) {
-        fail(path, '配列要素のスキーマを取り出せませんでした');
+        fail(context.api, path, "the array's element schema could not be read");
       }
       out.leaves.push({
         path,
@@ -303,14 +322,15 @@ const walkNode = (
 
     if (context.arrayPath !== null) {
       fail(
+        context.api,
         path,
-        '繰り返しの中の繰り返しは name の添字が一意に決まらないため表現できません',
+        "a repeat inside a repeat has no unambiguous index in an input's name",
       );
     }
 
     const element = elementOf(zod);
     if (element === undefined) {
-      fail(path, '配列要素のスキーマを取り出せませんでした');
+      fail(context.api, path, "the array's element schema could not be read");
     }
     out.arrays.push({
       path,
@@ -325,7 +345,7 @@ const walkNode = (
       element,
       path,
       `${name}[${INDEX}]`,
-      { arrayPath: path, itemKey: '' },
+      { api: context.api, arrayPath: path, itemKey: '' },
       out,
     );
     return;
@@ -335,8 +355,9 @@ const walkNode = (
     for (const branch of json.anyOf) {
       if (branch.type === 'object' || branch.type === 'array') {
         fail(
+          context.api,
           path,
-          'nullable / union のオブジェクトや配列は、どちらの枝を描画すべきか決まらないため表現できません',
+          'a nullable or union object or array leaves no single branch to render',
         );
       }
     }
@@ -350,7 +371,7 @@ const walkNode = (
     checkedValue === undefined ? kindOf(json, zod) : 'string-checkbox';
   const refusal = refusalOf(json, zod, kind);
   if (refusal !== undefined) {
-    fail(path, refusal);
+    fail(context.api, path, refusal);
   }
 
   out.leaves.push({
@@ -373,7 +394,7 @@ const cache = new WeakMap<object, SchemaMap>();
  * that becomes a repeatable group. Both the derivation and the parse read this,
  * so the two can never disagree about what the form contains.
  */
-export const schemaMap = (schema: ObjectSchema): SchemaMap => {
+export const schemaMap = (schema: ObjectSchema, api: Api): SchemaMap => {
   const cached = cache.get(schema);
   if (cached !== undefined) {
     return cached;
@@ -388,7 +409,7 @@ export const schemaMap = (schema: ObjectSchema): SchemaMap => {
   }) as Node;
 
   const out: SchemaMap = { leaves: [], arrays: [] };
-  walkNode(json, schema, '', '', { arrayPath: null, itemKey: null }, out);
+  walkNode(json, schema, '', '', { api, arrayPath: null, itemKey: null }, out);
   cache.set(schema, out);
   return out;
 };

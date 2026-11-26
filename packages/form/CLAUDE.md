@@ -104,6 +104,9 @@ checks (`refine`) vanish from its output without a trace.
   the hook through `revalidate(control)`, never a dispatched event: a
   synthetic `focusout` re-enters the control's own `onBlur` and tells every
   blur listener of a blur that never happened.
+- A throw or a `console.warn` starts with the API it comes from
+  (`formFields: …`, `parseForm: …`, `useForm: …`); the walk is shared by
+  `formFields` and `parseForm`, so `schemaMap` takes the caller's name.
 - Comments explain why the straightforward version was not used — not what the
   code does.
 - Tests state a guarantee in their name ("marks a field required only when the

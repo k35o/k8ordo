@@ -197,7 +197,7 @@ describe('formFields', () => {
     expect(fields.at.input.type).toBe('datetime-local');
     expect(dropped).toHaveLength(1);
     expect(dropped[0]?.reason).toContain('pattern');
-    expect(dropped[0]?.reason).not.toContain('タイムゾーン');
+    expect(dropped[0]?.reason).not.toContain('time zone');
   });
 
   it('drops a pattern the browser would ignore rather than emitting it', () => {
@@ -220,9 +220,26 @@ describe('formFields', () => {
         .refine((v) => v.password === v.confirm, { path: ['confirm'] }),
     );
 
-    expect(dropped).toHaveLength(1);
-    expect(dropped[0]?.field).toBe('(schema)');
-    expect(dropped[0]?.reason).toContain('クライアントでは検査されません');
+    expect(dropped).toStrictEqual([
+      {
+        field: '(schema)',
+        reason:
+          'an object-level check (.refine() and the like) has no HTML constraint attribute, so the browser does not run it',
+      },
+    ]);
+  });
+
+  it('words the object-level checks it reports by how many there are', () => {
+    const { dropped } = formFields(
+      z
+        .object({ password: z.string(), confirm: z.string() })
+        .refine((v) => v.password === v.confirm)
+        .refine((v) => v.password !== ''),
+    );
+
+    expect(dropped.map((entry) => entry.reason)).toStrictEqual([
+      '2 object-level checks (.refine() and the like) have no HTML constraint attribute, so the browser does not run them',
+    ]);
   });
 
   it('leaves a checkbox the server would accept unchecked without required', () => {
@@ -390,7 +407,7 @@ describe('formFields', () => {
       'transformed',
       'opaque',
     ]);
-    expect(dropped[0]?.reason).toContain('検査されません');
+    expect(dropped[0]?.reason).toContain('the browser checks nothing');
   });
 
   it('gives a stringbool checkbox the value its schema writes for true', () => {
@@ -454,17 +471,17 @@ describe('formFields', () => {
     expect(fields.optional.input.required).toBeUndefined();
   });
 
-  it('refuses a leaf no text control can satisfy', () => {
+  it('refuses a leaf no text control can satisfy, naming the coercing schema only where zod has one', () => {
     expect(() => formFields(z.object({ when: z.date() }))).toThrow(
-      /文字列を受け付けない/u,
+      /accepts no string.*; use z\.coerce\.date\(\) instead of z\.date\(\)$/u,
     );
-    expect(() => formFields(z.object({ big: z.bigint() }))).toThrow(
-      /文字列を受け付けない/u,
+    expect(() => formFields(z.object({ big: z.bigint().optional() }))).toThrow(
+      /accepts no string.*; use z\.coerce\.bigint\(\) instead of z\.bigint\(\)$/u,
     );
     // A nullable number is as unsatisfiable as a bare one, and reaches the
     // refusal as an anyOf node rather than through the numeric branch.
     expect(() => formFields(z.object({ n: z.number().nullable() }))).toThrow(
-      /文字列を受け付けない/u,
+      /^formFields: 'n': this schema accepts no string, so nothing a form submits can satisfy it$/u,
     );
   });
 
@@ -506,7 +523,7 @@ describe('formFields', () => {
     expect(fields.attachment.input).not.toHaveProperty('maxLength');
     expect(
       dropped.find((entry) => entry.field === 'attachment')?.reason,
-    ).toContain('ファイルサイズ');
+    ).toContain('size of a file');
   });
 
   it('reports that accept only suggests the types the server enforces', () => {
@@ -542,13 +559,12 @@ describe('the dropped report outside production', () => {
 
     expect(warn).toHaveBeenCalledTimes(1);
     const message = String(warn.mock.calls[0]?.[0]);
-    expect(message).toContain('@k8ordo/form');
+    expect(message).toMatch(/^formFields: /u);
     for (const entry of first.dropped) {
       expect(message).toContain(entry.field);
       expect(message).toContain(entry.reason);
     }
-    // 「サーバーでは検査される」ことを読む人に伝える
-    expect(message).toContain('サーバー');
+    expect(message).toContain('server');
   });
 
   it('stays silent when nothing was dropped', () => {

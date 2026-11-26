@@ -297,6 +297,18 @@ const RowGroup: FC<{ state: FormState }> = ({ state }) => {
   );
 };
 
+const UnknownField: FC = () => {
+  const form = useForm(groupFields);
+  let message = '';
+  try {
+    // @ts-expect-error untyped code can still ask for a path the schema lacks
+    form.field('nope');
+  } catch (error) {
+    message = error instanceof Error ? error.message : '';
+  }
+  return <p data-testid="unknown-field">{message}</p>;
+};
+
 const asyncSchema = z.object({ slug: z.string() });
 const asyncFields = formFields(asyncSchema);
 
@@ -1140,6 +1152,16 @@ describe('useForm in a browser', () => {
     await expect
       .element(screen.getByTestId('row-group-input'))
       .toHaveTextContent('{"name":"people[0].tags","defaultValue":["b"]}');
+  });
+
+  it('names useForm and the path when asked for a field the schema lacks', async () => {
+    const screen = await render(<UnknownField />);
+
+    await expect
+      .element(screen.getByTestId('unknown-field'))
+      .toHaveTextContent(
+        "useForm: the schema has no field 'nope'; reach a field inside repeated rows through array()",
+      );
   });
 
   it('hears a HiddenValue change for isDirty like any other control', async () => {

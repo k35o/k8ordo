@@ -56,8 +56,8 @@ export const dates = message({
 });
 
 export const datesCoerce = message({
-  ja: '`Date`として受け取るには`z.coerce.date()`を使います。この場合はテキストの入力欄になります。`z.date()`は文字列を受け付けないので、`formFields`が`フォームが送信できる値がありません`というエラーにします。',
-  en: 'To receive a `Date`, use `z.coerce.date()`. It becomes a text field. `z.date()` accepts no string, so `formFields` throws (`フォームが送信できる値がありません`).',
+  ja: '`Date`として受け取るには`z.coerce.date()`を使います。この場合はテキストの入力欄になります。`z.date()`は文字列を受け付けないので、`formFields`が`this schema accepts no string`というエラーにします。',
+  en: 'To receive a `Date`, use `z.coerce.date()`. It becomes a text field. `z.date()` accepts no string, so `formFields` throws (`this schema accepts no string`).',
 });
 
 export const numbersTitle = message({
@@ -151,8 +151,8 @@ export const stringbool = message({
 });
 
 export const stringboolUnchecked = message({
-  ja: 'チェックが無いときは何も送らないので、`.default(false)`か`.optional()`を付けます。`.default(true)`は、`formFields`が`false を送れません`というエラーにします。',
-  en: 'An unchecked box submits nothing, so add `.default(false)` or `.optional()`. `formFields` throws on `.default(true)` (`false を送れません`).',
+  ja: 'チェックが無いときは何も送らないので、`.default(false)`か`.optional()`を付けます。`.default(true)`は、`formFields`が`the box can never submit false`というエラーにします。',
+  en: 'An unchecked box submits nothing, so add `.default(false)` or `.optional()`. `formFields` throws on `.default(true)` (`the box can never submit false`).',
 });
 
 export const groupTitle = message({

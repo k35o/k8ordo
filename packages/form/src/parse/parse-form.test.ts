@@ -121,7 +121,7 @@ describe('parseForm', () => {
     // Forgetting to spread the field props would otherwise submit nothing,
     // silently. It has to be loud.
     expect(() => parseForm(schema, formDataOf([['blogId', '3']]))).toThrow(
-      /送信されていません: title/u,
+      /^parseForm: .*: title\./u,
     );
   });
 
@@ -327,7 +327,7 @@ describe('parseForm', () => {
   it('refuses a number no submission could satisfy instead of always failing', () => {
     expect(() =>
       parseForm(z.object({ n: z.number() }), formDataOf([['n', '5']])),
-    ).toThrow(/z\.coerce\.number\(\)/u);
+    ).toThrow(/^parseForm: 'n': .*z\.coerce\.number\(\)/u);
   });
 
   it('reads an unfilled file input as nothing entered, not as an empty file', () => {

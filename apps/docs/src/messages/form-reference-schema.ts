@@ -226,8 +226,8 @@ export const refusedTitle = message({
 });
 
 export const refusedLead = message({
-  ja: "次のスキーマを渡すと、`formFields`と`parseForm`はエラーになります。エラー文には場所と理由が入ります（例：`[@k8ordo/form] 'rows.tags': 繰り返しの中の繰り返しは name の添字が一意に決まらないため表現できません`）。",
-  en: "`formFields` and `parseForm` throw on these schemas. The message names the path and the reason, for example `[@k8ordo/form] 'rows.tags': 繰り返しの中の繰り返しは name の添字が一意に決まらないため表現できません`.",
+  ja: "次のスキーマを渡すと、`formFields`と`parseForm`はエラーになります。エラー文には場所と理由が入ります（例：`formFields: 'rows.tags': a repeat inside a repeat has no unambiguous index in an input's name`）。",
+  en: "`formFields` and `parseForm` throw on these schemas. The message names the path and the reason, for example `formFields: 'rows.tags': a repeat inside a repeat has no unambiguous index in an input's name`.",
 });
 
 export const refusedNumber = message({

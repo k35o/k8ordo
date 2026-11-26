@@ -21,8 +21,8 @@ export const nestedOptional = message({
 });
 
 export const nestedAlwaysRender = message({
-  ja: 'オブジェクトを省ける場合でも、中の入力欄は必ず描画してください。`name`が`FormData`に無いと、`parseForm`は`スキーマにあるフィールドが送信されていません`というエラーになります。',
-  en: 'Render the fields even when the object may be left out. When a `name` is missing from the `FormData`, `parseForm` throws `スキーマにあるフィールドが送信されていません`.',
+  ja: 'オブジェクトを省ける場合でも、中の入力欄は必ず描画してください。`name`が`FormData`に無いと、`parseForm`は`parseForm: the submission has no entry for these fields of the schema`というエラーになります。',
+  en: 'Render the fields even when the object may be left out. When a `name` is missing from the `FormData`, `parseForm` throws `parseForm: the submission has no entry for these fields of the schema`.',
 });
 
 export const rowsTitle = message({
@@ -136,8 +136,8 @@ export const limitsTitle = message({
 });
 
 export const limitsNested = message({
-  ja: '行の中にさらに行を入れる形は、型チェックを通ります。実行時に`formFields`と`parseForm`が`繰り返しの中の繰り返しは name の添字が一意に決まらないため表現できません`というエラーになります。',
-  en: 'A repeat inside a repeat passes type checking. At runtime `formFields` and `parseForm` throw `繰り返しの中の繰り返しは name の添字が一意に決まらないため表現できません`.',
+  ja: '行の中にさらに行を入れる形は、型チェックを通ります。実行時に`formFields`と`parseForm`が`a repeat inside a repeat has no unambiguous index`というエラーになります。',
+  en: 'A repeat inside a repeat passes type checking. At runtime `formFields` and `parseForm` throw `a repeat inside a repeat has no unambiguous index`.',
 });
 
 export const limitsRules = message({

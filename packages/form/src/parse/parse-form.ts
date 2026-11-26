@@ -74,7 +74,7 @@ const isUntouched = (kind: ControlKind, value: unknown): boolean => {
 const describeMissing = (missing: string[]): string => {
   const shown = missing.slice(0, 5).join(', ');
   return missing.length > 5
-    ? `${shown} … ほか${String(missing.length - 5)}件`
+    ? `${shown} … and ${String(missing.length - 5)} more`
     : shown;
 };
 
@@ -92,7 +92,7 @@ export const parseForm = <Shape extends ObjectSchema>(
   formData: FormData,
 ): ParseResult<output<Shape>> => {
   const { schema, rules } = asDefinition(input);
-  const map = schemaMap(schema);
+  const map = schemaMap(schema, 'parseForm');
   const raw: Record<string, unknown> = {};
   const missing: string[] = [];
   const unechoed = new Set<string>();
@@ -158,8 +158,8 @@ export const parseForm = <Shape extends ObjectSchema>(
 
   if (missing.length > 0) {
     throw new Error(
-      `[@k8ordo/form] スキーマにあるフィールドが送信されていません: ${describeMissing(missing)}\n` +
-        'input に name が付いていないか、その入力欄が描画されていない可能性があります。',
+      `parseForm: the submission has no entry for these fields of the schema: ${describeMissing(missing)}. ` +
+        'Render each one, with the name from its input.',
     );
   }
 

@@ -623,7 +623,7 @@ export const useForm = <Inputs, Arrays>(
       const derived = lookup.fields[path];
       if (derived === undefined) {
         throw new Error(
-          `[@k8ordo/form] スキーマに '${path}' がありません。繰り返しの中の欄なら array('...') を使ってください。`,
+          `useForm: the schema has no field '${path}'; reach a field inside repeated rows through array()`,
         );
       }
       return viewOf(derived, derived.input.name);
@@ -635,9 +635,7 @@ export const useForm = <Inputs, Arrays>(
     (path: string): UntypedArrayView => {
       const derived = lookup.arrays[path];
       if (derived === undefined) {
-        throw new Error(
-          `[@k8ordo/form] スキーマに配列 '${path}' がありません。`,
-        );
+        throw new Error(`useForm: the schema has no array '${path}'`);
       }
       const keys = rowKeys[path] ?? [];
 
@@ -669,7 +667,7 @@ export const useForm = <Inputs, Arrays>(
             const item = derived.item[itemKey];
             if (item === undefined) {
               throw new Error(
-                `[@k8ordo/form] 配列 '${path}' に '${itemKey}' がありません。`,
+                `useForm: array '${path}' has no field '${itemKey}' in its rows`,
               );
             }
             return viewOf(item, item.input.name.replace(INDEX, String(index)));
