@@ -29,8 +29,10 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   server, cookie state the server renders (and how it relates to cookies the
   server writes), updating on the client,
   batching and update handles, subscription granularity, router
-  requirements, links on the URL the router built, reading local state
-  before hydration, and pairing with `@k8ordo/form` for GET forms.
+  requirements and turning a page, links on the URL the router built, the
+  one way to write each URL (a table shared with `@k8ordo/router` and
+  `@k8ordo/framework`), reading local state before hydration, and pairing
+  with `@k8ordo/form` for GET forms (whose URL is not the canonical one).
 
 ## Entry point
 
@@ -52,8 +54,13 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   keeping the URL's other params; with a hash slot it sets the fragment from
   `values.hash` (none at the default), without one it keeps the URL's own;
   it adds no base (the router's `href()` has) and keeps the URL literal in
-  the type, so the pattern is checked by the router and a typed route by
-  `<Link>`. There is no `search()` and no `Register` here.
+  the type, so the pattern is checked by the router — a rest param too,
+  `href('/files/:path+', { path })` — and a typed route by `<Link>`. There
+  is no `search()` and no `Register` here. Only `href` and `update()` write
+  the canonical URL; a GET form submits every named field (`q=`, `min=0`).
+  A same-pathname navigation keeps the scroll and the focus (a fragment
+  too), so a pager moves focus to the results heading (`tabIndex={-1}`)
+  after `update(…).finished`.
   `defineLocalState(key, schema, versioning?)`,
   `defineSessionState(key, schema)`,
   `defineCookieState(key, schema, versioning?)` and

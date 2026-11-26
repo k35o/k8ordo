@@ -78,7 +78,7 @@ export function FormDemo({ fields }: Props) {
         </div>
       </form>
       <dl className={styles.values}>
-        <dt className={styles.term}>URL</dt>
+        <dt className={styles.term}>{m.form.demoUrlTerm()}</dt>
         <dd className={styles.value}>
           <Code>{search === '' ? m.form.demoUrlEmpty() : search}</Code>
         </dd>

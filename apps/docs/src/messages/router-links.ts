@@ -95,6 +95,120 @@ export const navigateSplit = message({
   en: 'A page change is `navigation.navigate(href(…))`; a change of state within the page is `@k8ordo/state`’s `update()`. See ',
 });
 
+export const oneWayTitle = message({
+  ja: 'URLの書き方',
+  en: 'One way per URL',
+});
+
+export const oneWayLead = message({
+  ja: 'URLを扱う操作は、`@k8ordo/router`と`@k8ordo/state`と`@k8ordo/framework`のどれでも、書き方が操作ごとに1つです。',
+  en: 'Each thing an application does with a URL has one way to write it, the same under `@k8ordo/router`, `@k8ordo/state` and `@k8ordo/framework`.',
+});
+
+export const oneWayToColumn = message({
+  ja: 'すること',
+  en: 'To',
+});
+
+export const oneWayWriteColumn = message({
+  ja: '書き方',
+  en: 'Write',
+});
+
+export const oneWayRows = [
+  {
+    to: message({ ja: 'ページへのリンク', en: 'Link to a page' }),
+    write: message({
+      ja: '`href(pattern, params)`',
+      en: '`href(pattern, params)`',
+    }),
+  },
+  {
+    to: message({
+      ja: 'ページへの状態つきのリンク',
+      en: 'Link to a page with its state',
+    }),
+    write: message({
+      ja: '`def.href(href(pattern, params), values)`',
+      en: '`def.href(href(pattern, params), values)`',
+    }),
+  },
+  {
+    to: message({
+      ja: '今のページの状態だけを変えるリンク',
+      en: 'Link to the page itself with other state',
+    }),
+    write: message({
+      ja: "`def.href('', values)`",
+      en: "`def.href('', values)`",
+    }),
+  },
+  {
+    to: message({
+      ja: '表示中のページを調べる',
+      en: 'Ask which page is showing',
+    }),
+    write: message({
+      ja: 'Server Componentでは`matchPath(pattern, pathname)`、Client Componentでは`useMatch(pattern)`',
+      en: '`matchPath(pattern, pathname)` in a Server Component, `useMatch(pattern)` in a Client Component',
+    }),
+  },
+  {
+    to: message({
+      ja: 'コードからページを変える',
+      en: 'Change the page from code',
+    }),
+    write: message({
+      ja: '`navigation.navigate(href(pattern, params))`',
+      en: '`navigation.navigate(href(pattern, params))`',
+    }),
+  },
+  {
+    to: message({ ja: '状態を変える', en: 'Change the state' }),
+    write: message({ ja: '`update(values)`', en: '`update(values)`' }),
+  },
+  {
+    to: message({
+      ja: 'ページの場所を恒久的に移す',
+      en: 'Move a page for good',
+    }),
+    write: message({
+      ja: '`redirect.ts`（`to`は表のパターン）',
+      en: '`redirect.ts`, its `to` a table pattern',
+    }),
+  },
+  {
+    to: message({
+      ja: 'Server Action、`guard.ts`、`route.ts`からリダイレクトする',
+      en: 'Redirect from a Server Action, a `guard.ts` or a `route.ts`',
+    }),
+    write: message({
+      ja: '`redirect(href(pattern, params))`',
+      en: '`redirect(href(pattern, params))`',
+    }),
+  },
+  {
+    to: message({
+      ja: '表示中のページを別のロケールで開く',
+      en: 'Show the page on screen in another locale',
+    }),
+    write: message({
+      ja: '`withBase(locales.localize(pathname, locale))`',
+      en: '`withBase(locales.localize(pathname, locale))`',
+    }),
+  },
+];
+
+export const oneWayPathname = message({
+  ja: '最後の行だけは、パターンでなく`pathname`からURLを作ります。ほかの場面では、`pathname`と`href()`を比べたりつないだりしません。`pathname`はViteの`base`を含まず、`href()`は含むからです。',
+  en: 'The last row is the one URL built from a pathname rather than a pattern. Nowhere else compare or combine `pathname` and `href()`: `pathname` leaves Vite’s `base` out, and `href()` includes it.',
+});
+
+export const oneWayBound = message({
+  ja: '`[locale]`のアプリでは、ロケールを束ねた`href`を置いたモジュールからだけ`href`をimportします。ルーターの`href`も同じ名前で、型検査も通ってしまいます。束ね方は',
+  en: 'In a `[locale]` application, import `href` only from the module that binds the locale: the router’s own `href` has the same name and type-checks too. For binding it, see ',
+});
+
 export const finishedTitle = message({
   ja: '`finished`の待ち方',
   en: 'Awaiting `finished`',

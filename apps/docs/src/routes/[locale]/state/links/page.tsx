@@ -53,6 +53,13 @@ export default function StateLinksPage() {
         <p>
           <Rich>{t.hrefEdges()}</Rich>
         </p>
+        <p>
+          <Rich>{t.hrefOneWay()}</Rich>
+          <LocaleAnchor path="/:locale/router/links">
+            {m.router.navLinks()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
+        </p>
       </DocSection>
 
       <DocSection id="shared" title={t.sharedTitle}>

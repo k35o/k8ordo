@@ -14,9 +14,11 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
 ## Guide
 
 - [Design Guide](GUIDE.md): the table's grammar (leaves, branches, params,
-  rest params, wildcards, route groups, declaration order), mounting `<Router>` and
-  `<Outlet>`, links without a `<Link>` component, `useMatch` for active
-  sections, `Register` for checked patterns, what navigation guarantees
+  rest params, wildcards, route groups, declaration order, what fails at
+  definition time), mounting `<Router>` and
+  `<Outlet>`, links without a `<Link>` component, `useMatch` / `matchPath`
+  for active sections, the one way to write each URL (a table shared with
+  `@k8ordo/state` and `@k8ordo/framework`), `Register` for checked patterns, what navigation guarantees
   (`finished` after commit, scroll to top or fragment on a new page, and
   back to where an entry was left on back and forward), how
   a `<ViewTransition>` animates page changes by the router's transition
@@ -114,7 +116,7 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   the search), which then loads in place — no focus reset or transition
   types, and no scroll but going back or forward, which returns to where
   that entry was left once the page loaded again is on screen.
-  Exported types, by group — the table: `Routes` (`{ kind, record, match }`),
+  Exported types, by group — the table: `Routes` (`{ kind, record, match, matchAll }`),
   `RoutesRecord`, `RouteNode`, `RouteComponent`, `Match`, `ErrorComponent`,
   `ErrorProps`; patterns: `PatternOf`, `NavigablePatternOf`, `NavigablePath`,
   `MatchablePattern`; registration: `Register`, `RegisteredPattern`,
@@ -124,4 +126,4 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   `StandardSchemaLike`, `SchemaOutput`, `ParamsSchemaFor`, `ParsedParams`,
   `ParsedParamsMap`; options and handlers: `MatchOptions`
   (`{ inclusive? }`), `BoundParams` (what `bindParams`'s source returns),
-  `NavigationHandler` (`{ claim, load, apply }`).
+  `NavigationHandler` (`{ claim, load, apply, refresh? }`).

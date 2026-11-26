@@ -353,8 +353,8 @@ export const requestHeadersCaveats = [
 ] as const;
 
 export const redirectSummary = message({
-  ja: 'serverモードだけ。Server Actionを終え、別のURLへリダイレクトします。',
-  en: 'Server mode only. Ends a Server Action and redirects to another URL.',
+  ja: 'serverモードだけ。Server Action、`guard.ts`、`route.ts`を終え、別のURLへリダイレクトします。',
+  en: 'Server mode only. Ends a Server Action, a `guard.ts` or a `route.ts` and redirects to another URL.',
 });
 
 export const redirectTo = message({
@@ -370,11 +370,15 @@ export const redirectReturns = message({
 export const redirectCaveats = [
   message({
     ja: '内部で例外を使って処理を終えるので、`try`の中では呼びません。',
-    en: 'It ends the action by throwing, so do not call it inside a `try`.',
+    en: 'It ends by throwing, so do not call it inside a `try`.',
   }),
   message({
     ja: 'JavaScriptが読み込まれる前に送られたフォームには`303`を返します。クライアントのランタイムからの呼び出しには、ルーターに行き先を伝えるペイロードを返します。',
     en: 'A form posted before JavaScript loaded gets a `303`. A call from the client runtime gets a payload that tells the router where to go.',
+  }),
+  message({
+    ja: '`guard.ts`と`route.ts`では、`303`と`location`の応答を返します。',
+    en: 'In a `guard.ts` or a `route.ts`, it answers with a `303` and a `location`.',
   }),
 ] as const;
 

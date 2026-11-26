@@ -136,6 +136,30 @@ A Client Component asks `useMatch('/products')` and
 terms and `href` returns the URL with Vite's `base` in front, so under a base
 the two never agree.
 
+## One way per URL
+
+Each thing an application does with a URL has one spelling, the same under
+`@k8ordo/router`, `@k8ordo/state` and `@k8ordo/framework`:
+
+| to                                                          | write                                                                                 |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| link to a page                                              | `href(pattern, params)`                                                               |
+| link to a page with its state                               | `def.href(href(pattern, params), values)`                                             |
+| link to the page itself with other state                    | `def.href('', values)`                                                                |
+| ask which page is showing                                   | `matchPath(pattern, pathname)` in a Server Component, `useMatch(pattern)` in a client |
+| change the page from code                                   | `navigation.navigate(href(pattern, params))`, the link's own URL                      |
+| change the state                                            | `update(values)`                                                                      |
+| move a page for good                                        | `redirect.ts`, its `to` a table pattern (`@k8ordo/framework`)                         |
+| redirect from a Server Action, a `guard.ts` or a `route.ts` | `redirect(href(pattern, params))` (`@k8ordo/framework/server`)                        |
+| show the page on screen in another locale                   | `withBase(locales.localize(pathname, locale))`                                        |
+
+The last row is the one URL built from a pathname rather than a pattern: the
+page showing may be any page. Nothing else compares or combines `pathname` and
+`href()` — `pathname` is in the table's terms and `href()` carries Vite's
+`base`. In a `[locale]` application, import `href` only from the module that
+binds the locale (`export const href = bindParams(…)`): the router's own
+`href` has the same name and type-checks too.
+
 ## How a page is sent
 
 **Each page loads its own.** `page.tsx`, `not-found.tsx`, `route.ts` and

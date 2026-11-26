@@ -77,7 +77,10 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   pattern `/files/:path+`, an array of decoded segments for the page, layout,
   `route.ts` and `guard.ts`, never zero segments, always the last directory,
   tried after a literal and a `[name]` beside it and before the
-  `not-found.tsx`), where a `fallback.tsx` may sit, how a page is sent in
+  `not-found.tsx`), where a `fallback.tsx` may sit, a layout's current link
+  (`matchPath(pattern, pathname)` on the server, `useMatch` in a client) and
+  the one way to write each URL (a table shared with `@k8ordo/router` and
+  `@k8ordo/state`), how a page is sent in
   each mode (each page loads only its own client components and CSS, what
   every page loads comes in at most two files — the entry's and the frame's,
   which sets the client build's `codeSplitting` — and the browser renders

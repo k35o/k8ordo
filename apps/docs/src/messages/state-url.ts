@@ -110,6 +110,11 @@ export const canonicalOmit = message({
   en: '`href` leaves out every field that sits at its default. The same state always gives the same, shortest URL. Links, bookmarks and cache keys that point at the same state agree.',
 });
 
+export const canonicalForm = message({
+  ja: '正規の形になるのは、`href`と`update()`が書いたURLだけです。GETフォームは名前を持つ欄をすべて送るので、空の検索欄は`q=`、既定値のままの欄は`min=0`のようにURLに残ります。読む値は同じですが、URLは正規の形より長くなり、ページはそれを書き直しません。',
+  en: 'Only the URLs `href` and `update()` write are in the canonical form. A GET form submits every named field, so an empty search box stays in the URL as `q=` and a field at its default as `min=0`. The values read are the same, but the URL is longer than the canonical one, and the page does not rewrite it.',
+});
+
 export const canonicalOrder = message({
   ja: 'パラメータは、スキーマに書いた順に並びます。既定値を手で書いた`?page=1`のようなURLも、省いたURLと同じ値に読めます。`url`の値を変える次の`update()`がクエリを書き直すとき、この`page=1`は省かれます。',
   en: 'Parameters follow the order the schema declares them in. A URL with a hand-written default such as `?page=1` reads to the same values as one without it. The next `update()` that changes a `url` value rewrites the query without that `page=1`.',

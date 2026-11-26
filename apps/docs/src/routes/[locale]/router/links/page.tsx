@@ -127,6 +127,42 @@ export default function RouterLinksPage() {
         </p>
       </DocSection>
 
+      <DocSection id="one-way" title={t.oneWayTitle}>
+        <p>
+          <Rich>{t.oneWayLead()}</Rich>
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>{t.oneWayToColumn()}</th>
+              <th>{t.oneWayWriteColumn()}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {t.oneWayRows.map(({ to, write }) => (
+              <tr key={to()}>
+                <td>
+                  <Rich>{to()}</Rich>
+                </td>
+                <td>
+                  <Rich>{write()}</Rich>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          <Rich>{t.oneWayPathname()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.oneWayBound()}</Rich>
+          <LocaleAnchor path="/:locale/router/bind-params">
+            {m.router.navBindParams()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
+        </p>
+      </DocSection>
+
       <DocSection id="finished" title={t.finishedTitle}>
         <CodeBlock
           code={FINISHED}

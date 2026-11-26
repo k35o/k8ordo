@@ -142,6 +142,9 @@ export default function StateUrlPage() {
         <p>
           <Rich>{t.canonicalOrder()}</Rich>
         </p>
+        <p>
+          <Rich>{t.canonicalForm()}</Rich>
+        </p>
       </DocSection>
 
       <Playground

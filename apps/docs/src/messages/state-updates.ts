@@ -151,8 +151,8 @@ export const handleFinished = message({
 });
 
 export const handleWait = message({
-  ja: '書き込みを待つときは`finished`を待ちます。下の例では、ページ送りのあとに見出しへフォーカスを移しています。',
-  en: 'To wait for the write, await `finished`. Here, focus moves to the heading once the next page is in place.',
+  ja: '書き込みを待つときは`finished`を待ちます。',
+  en: 'To wait for the write, await `finished`.',
 });
 
 export const handleSettle = message({
@@ -173,6 +173,21 @@ export const handleFail = message({
 export const handleAction = message({
   ja: '非同期のアクションの中でも同じように待てます。`startTransition(async …)`や`useTransition`、`@k8ordo/ui`の`Button`の`action`がそうです。ただし`@k8ordo/router`の下では、別のページを読み込んでいる最中の`url`の更新はページの切り替えになります。その`finished`は、アクションの終わりを待たずに、そのページが表示された時点で解決します。',
   en: 'An async action can await it the same way: `startTransition(async …)`, `useTransition`, or `@k8ordo/ui`’s `Button` `action`. Under `@k8ordo/router`, though, a `url` update issued while another page is still loading is a page change. Its `finished` settles once that page is on screen, without waiting for the action to end.',
+});
+
+export const pageTurnTitle = message({
+  ja: 'ページ送り',
+  en: 'Turning a page',
+});
+
+export const pageTurnKeep = message({
+  ja: 'pathnameが変わらない遷移では、スクロール位置もフォーカスも動きません。URLにフラグメントがあってもスクロールしません。そのため長い一覧の下のページ送りは、新しいページの末尾を見せたままになります。`update()`を呼ぶボタンでも、`?page=2`へのリンクでも同じです。',
+  en: 'A navigation that keeps the pathname moves neither the scroll position nor the focus, and a fragment in the URL does not scroll either. So a pager below a long list leaves the reader at the bottom of the new page, whether it is a button calling `update()` or a link to `?page=2`.',
+});
+
+export const pageTurnFocus = message({
+  ja: '`finished`を待ってから、結果の見出しへフォーカスを移します。スクロールはフォーカスについていくので、キーボードやスクリーンリーダーの利用者にも新しいページの始まりが伝わります。`tabIndex={-1}`を付けた見出しは、タブ順に入らずにフォーカスを受け取れます。',
+  en: 'Once `finished` settles, move the focus to the results heading. The scroll follows the focus, and keyboard and screen-reader users hear where the new page starts. With `tabIndex={-1}`, the heading takes focus without entering the tab order.',
 });
 
 export const functionalTitle = message({

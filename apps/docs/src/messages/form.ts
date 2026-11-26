@@ -98,6 +98,11 @@ export const demoSubmit = message({
   en: 'Filter',
 });
 
+export const demoUrlTerm = message({
+  ja: '正規のURL',
+  en: 'Canonical URL',
+});
+
 export const demoUrlEmpty = message({
   ja: 'クエリなし（すべて既定値）',
   en: 'No query (all defaults)',

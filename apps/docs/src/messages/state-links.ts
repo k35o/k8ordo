@@ -30,6 +30,11 @@ export const hrefEdges = message({
   en: 'The return type keeps the URL you passed as a literal. When that URL already carries the definition’s params or a fragment, the type is an approximation: those params are rewritten, and the query goes in before the fragment. An `entry`-only definition returns the URL as given. A value no URL can represent throws an error containing `has no URL serialization`.',
 });
 
+export const hrefOneWay = message({
+  ja: 'ページへのリンクやコードからの遷移など、URLを扱う操作ごとの書き方の一覧は、',
+  en: 'For the one way to write every other URL, from a link to a page to a page change from code, see ',
+});
+
 export const sharedTitle = message({
   ja: 'ほかのパラメーター',
   en: 'Other params',

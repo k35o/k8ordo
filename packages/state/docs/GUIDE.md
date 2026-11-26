@@ -610,6 +610,33 @@ and `finished` waits for it to be on screen. On a router that does not intercept
 forms for url changes there, which is this package's preferred grain anyway.
 There is deliberately no history-API fallback.
 
+**Turning a page keeps the position.** A navigation that keeps the pathname
+moves neither the scroll position nor the focus — a fragment in the URL does
+not scroll either — so a pager below a long list, a button calling `update()`
+or a link to `?page=2` alike, leaves the reader at the bottom of the new
+page. Move the focus to the results once `finished` settles: the scroll
+follows the focus, and keyboard and screen-reader users hear where the new
+page starts. `tabIndex={-1}` lets the heading take focus without entering
+the tab order.
+
+```tsx
+const [{ page }, update] = useAppState(listState, ['page']);
+const results = useRef<HTMLHeadingElement>(null);
+
+const turn = async (next: number) => {
+  await update({ page: next }, { history: 'push' }).finished;
+  results.current?.focus();
+};
+
+<h2 ref={results} tabIndex={-1}>
+  Results
+</h2>;
+// … the list …
+<button type="button" onClick={() => void turn(page + 1)}>
+  Next page
+</button>;
+```
+
 A page state reads the URL of the page it renders in. Under
 `@k8ordo/router` the URL commits before the next page arrives, and the page
 being left stays on screen until it does: that page keeps the values its
@@ -668,6 +695,30 @@ listState.href('', { page: 2 });
   way the browser resolves it — for display, or for a link that keeps
   nothing else of the search.
 
+## One way per URL
+
+Each thing an application does with a URL has one spelling, the same under
+`@k8ordo/router`, `@k8ordo/state` and `@k8ordo/framework`:
+
+| to                                                          | write                                                                                 |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| link to a page                                              | `href(pattern, params)`                                                               |
+| link to a page with its state                               | `def.href(href(pattern, params), values)`                                             |
+| link to the page itself with other state                    | `def.href('', values)`                                                                |
+| ask which page is showing                                   | `matchPath(pattern, pathname)` in a Server Component, `useMatch(pattern)` in a client |
+| change the page from code                                   | `navigation.navigate(href(pattern, params))`, the link's own URL                      |
+| change the state                                            | `update(values)`                                                                      |
+| move a page for good                                        | `redirect.ts`, its `to` a table pattern (`@k8ordo/framework`)                         |
+| redirect from a Server Action, a `guard.ts` or a `route.ts` | `redirect(href(pattern, params))` (`@k8ordo/framework/server`)                        |
+| show the page on screen in another locale                   | `withBase(locales.localize(pathname, locale))`                                        |
+
+The last row is the one URL built from a pathname rather than a pattern: the
+page showing may be any page. Nothing else compares or combines `pathname` and
+`href()` — `pathname` is in the table's terms and `href()` carries Vite's
+`base`. In a `[locale]` application, import `href` only from the module that
+binds the locale (`export const href = bindParams(…)`): the router's own
+`href` has the same name and type-checks too.
+
 ## Reading before hydration
 
 Some state has to be applied before the first paint: a theme class on
@@ -709,7 +760,9 @@ on a scalar field takes the first value.
 
 **Canonical URLs.** Serialization omits every field sitting at its default, so
 the same state always produces the same, shortest URL — links, bookmarks and
-caches agree.
+caches agree. That holds for the URLs `href` and `update()` write, and only
+for those: a GET form submits every named field (below), and the page does
+not rewrite the URL it arrives at.
 
 **Back means back.** Both faces of a page state live on the history entry via
 the platform, not in a parallel store, so back/forward restore them together
@@ -767,6 +820,13 @@ Where the router hands the page its search, the RSC reads it back with
 and with JavaScript the submission loads it again in place. Anywhere else
 (static mode, a page that does not declare `search`) the server render
 shows the defaults, and the submitted values appear once the page hydrates.
+
+The URL a GET form writes is not the canonical one. The browser submits every
+named field, so an empty search box arrives as `q=` and a field left at its
+default as `min=0`: the values read back are the same, but the URL is longer
+than what `href` builds for that state, and nothing rewrites it — a
+rewrite would cost a navigation on every submission. Show or share the
+canonical form with `listState.href('', values)`.
 
 ## Testing
 
