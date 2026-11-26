@@ -156,7 +156,8 @@ const u = <T,>(value: T | null | undefined): T | undefined =>
 type Press = (() => void | Promise<void>) | undefined;
 
 export function renderButton(props: ButtonProps, onPress: Press): ReactNode {
-  const { label, href } = props;
+  const { label } = props;
+  const href = u(props.href);
   const isLink = href !== undefined && href !== '';
   return (
     <Button
@@ -232,9 +233,10 @@ export function renderCard(
   children: ReactNode,
   onPress: Press,
 ): ReactNode {
+  const href = u(props.href);
   return (
     <Card
-      href={props.href === '' ? undefined : props.href}
+      href={href === '' ? undefined : href}
       onAction={onPress}
       variant={u(props.variant)}
       width={u(props.width)}
