@@ -358,7 +358,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Accordion**（compound: \`Root\` / \`Item\`(\`defaultOpen?\`) / \`Button\` / \`Panel\`）
 - **Avatar** — \`src\` / \`name\`（イニシャル）/ \`fallback\`, \`size\`
 - **Badge** — \`label\`, \`tone: 'neutral'|'info'|'success'|'warning'|'error'\`, \`variant: 'solid'|'outline'\`, \`size\`, \`interactive\`
-- **Card** — \`width: 'full'|'fit'\`, \`variant: 'shadow'|'outline'\`, \`interactive\`
+- **Card** — \`width: 'full'|'fit'\`, \`variant: 'shadow'|'outline'\`, \`href\` / \`renderAnchor\` / \`openInNewTab\`（カード全体がリンク）, \`onAction\`（カード全体がボタン）, \`interactive\`（見た目だけ）
 - **Carousel**（compound: \`Root\`(\`label\`, \`slideSize: 'full'|'lg'|'md'|'sm'\`) / \`Slide\`(\`label?\`)）— スクロールスナップと前後ボタン。自動再生なし
 - **Code** — \`children: string\`（インラインコード。色文字列には色見本が付く）
 - **Heading** — \`level: 'h1'..'h6'\`（必須）, \`id?\`, \`lineClamp?\`

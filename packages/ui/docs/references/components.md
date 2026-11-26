@@ -1952,16 +1952,37 @@ import { Card } from '@k8ordo/ui';
   <div style={{ padding: 'calc(var(--spacing) * 6)' }}>Content</div>
 </Card>
 
-// Clickable card (scales to 1.02 on hover and to 0.98 while pressed)
-<Card variant="outline" interactive>
-  <div style={{ padding: 'calc(var(--spacing) * 6)' }}>Content</div>
+// The whole card is a link, or a button
+<Card href="/articles/1">
+  <h3>Article title</h3>
+  <a href="/tags/react">React</a>
+</Card>
+<Card onAction={choose}>
+  <h3>Go with this plan</h3>
 </Card>
 ```
+
+`href` makes the whole card one link and `onAction` one button (`href` wins
+when both are given). The card draws an `<a>` or a `<button>` over its
+content, named by the content's text, so a keyboard reaches it and a screen
+reader announces it. Links, buttons, and fields inside the card are raised
+above it and stay pressable on their own. While a promise `onAction` returned
+is pending, the card is busy and ignores presses. Pass `renderAnchor` to draw
+the link with your router's component; it receives `href`, `className`,
+`aria-labelledby`, and `target` / `rel` with `openInNewTab`.
+
+Either one gives the card the pressable look: it scales to 1.02 on hover and to
+0.98 while pressed. `interactive` gives that look alone, for a card whose
+content is a link of your own.
 
 Props:
 
 - `children`: `ReactNode`
+- `href`: `T`
 - `interactive`: `boolean` (default: `false`)
+- `onAction`: `() => void | Promise<void>`
+- `openInNewTab`: `boolean` (default: `false`)
+- `renderAnchor`: `(props: CardRenderAnchorProps<T>) => ReactNode` (default: `defaultRenderAnchor`)
 - `variant`: `'shadow'` | `'outline'` (default: `'shadow'`)
 - `width`: `'full'` | `'fit'` (default: `'full'`)
 - Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style`.

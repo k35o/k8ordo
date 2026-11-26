@@ -7,6 +7,7 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
+import { CardActionPreview } from '../../../../../demos/ui/components/card-previews';
 import * as m from '../../../../../messages';
 
 import page from '../../../../../styles/page.module.css';
@@ -76,6 +77,36 @@ export default function CardPage() {
             <Card width="fit">
               <div className={styles.body}>Fit content</div>
             </Card>
+          </ComponentPreview>
+        </div>
+
+        <div className={page.stack}>
+          <Heading level="h3">
+            <Rich>{m.components.card.wholeTitle()}</Rich>
+          </Heading>
+          <p className={page.mute}>
+            <Rich>{m.components.card.wholeDescription()}</Rich>
+          </p>
+          <ComponentPreview
+            code={`<Card href="/articles/1">
+  <div className={styles.body}>
+    <Heading level="h4">Article title</Heading>
+    <a href="/tags/react">React</a>
+  </div>
+</Card>
+<Card onAction={choose}>
+  <div className={styles.body}>Go with this plan</div>
+</Card>`}
+          >
+            <Card href="https://example.com/articles/1">
+              <div className={styles.body}>
+                <Heading level="h4">Article title</Heading>
+                <div className={styles.tags}>
+                  <a href="https://example.com/tags/react">React</a>
+                </div>
+              </div>
+            </Card>
+            <CardActionPreview />
           </ComponentPreview>
         </div>
 
