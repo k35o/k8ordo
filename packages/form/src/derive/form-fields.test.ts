@@ -310,7 +310,7 @@ describe('formFields', () => {
   });
 
   it('derives an array of enums as one shared-name checkbox group', () => {
-    const { fields, arrays, dropped } = formFields(
+    const { fields, arrays, rules, dropped } = formFields(
       z.object({ tags: z.array(z.enum(['a', 'b', 'c'])).min(2) }),
     );
 
@@ -321,9 +321,9 @@ describe('formFields', () => {
       minItems: 2,
       maxItems: undefined,
     });
-    // "At least two" has no HTML attribute; the report points at minChecked.
-    const report = dropped.find((entry) => entry.field === 'tags');
-    expect(report?.reason).toContain('minChecked');
+    // "At least two" has no HTML attribute; it crosses as a rule instead.
+    expect(dropped).toStrictEqual([]);
+    expect(rules.map((rule) => rule.kind)).toStrictEqual(['minChecked']);
   });
 
   it('refuses a number no control can submit rather than deriving a dead form', () => {

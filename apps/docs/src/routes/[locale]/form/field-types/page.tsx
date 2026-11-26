@@ -232,11 +232,7 @@ export default function FormFieldTypesPage() {
           <Rich>{t.group()}</Rich>
         </p>
         <p>
-          <Rich>{t.groupMinBefore()}</Rich>
-          <LocaleAnchor path="/:locale/form/rules">
-            {m.form.navRules()}
-          </LocaleAnchor>
-          <Rich>{t.groupMinAfter()}</Rich>
+          <Rich>{t.groupMin()}</Rich>
         </p>
       </DocSection>
 

@@ -89,8 +89,8 @@ export const defineFormSchema = message({
 });
 
 export const defineFormRules = message({
-  ja: '`sameAs`、`minChecked`、`requiredWhen`で作ったルール。入力欄のパスは型で確かめられます。',
-  en: 'Rules made with `sameAs`, `minChecked` and `requiredWhen`. Field paths are type-checked.',
+  ja: '`sameAs`と`requiredWhen`で作ったルール。入力欄のパスは型で確かめられます。',
+  en: 'Rules made with `sameAs` and `requiredWhen`. Field paths are type-checked.',
 });
 
 export const defineFormReturns = message({
@@ -110,11 +110,6 @@ export const sameAsSummary = message({
   en: 'Requires `field` to equal `other`. Use it to confirm a password.',
 });
 
-export const minCheckedSummary = message({
-  ja: '同じ名前のチェックボックスのうち、`min`個以上がチェックされていることを求めます。',
-  en: 'Requires at least `min` of the checkboxes sharing a name to be checked.',
-});
-
 export const requiredWhenSummary = message({
   ja: '`when`の値が`equals`であるあいだだけ、`field`を必須にします。',
   en: 'Makes `field` required only while the value of `when` is `equals`.',
@@ -128,11 +123,6 @@ export const ruleField = message({
 export const ruleOther = message({
   ja: '比べる相手の入力欄のパス。',
   en: 'The path of the field to compare with.',
-});
-
-export const ruleMin = message({
-  ja: 'チェックが必要な最小の数。',
-  en: 'The fewest boxes that must be checked.',
 });
 
 export const ruleWhen = message({

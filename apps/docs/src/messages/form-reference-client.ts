@@ -302,8 +302,8 @@ export const formFieldsTypeArrays = message({
 });
 
 export const formFieldsTypeRules = message({
-  ja: '`defineForm`で宣言した、複数の入力欄にまたがるルール。文言は`formFields`を呼んだ時点で決まっています。',
-  en: 'The cross-field rules declared with `defineForm`. Their messages are fixed when `formFields` runs.',
+  ja: '`defineForm`で宣言した、複数の入力欄にまたがるルールと、チェックボックスの集まりの`.min()`と`.max()`から作るルール。文言は`formFields`を呼んだ時点で決まっています。',
+  en: 'The cross-field rules declared with `defineForm`, and the rules derived from a checkbox group’s `.min()` and `.max()`. Their messages are fixed when `formFields` runs.',
 });
 
 export const formFieldsTypeDropped = message({

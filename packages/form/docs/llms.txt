@@ -85,7 +85,9 @@ row. Rules cannot target fields inside repeated rows.
   group always echoes as an array, which `field()` puts on the group's
   `input.defaultValue`.
   `defineForm(schema, rules)` attaches cross-field rules (`sameAs`,
-  `minChecked`, `requiredWhen`) typed against the schema's paths; a rule's
+  `requiredWhen`) typed against the schema's paths, and `formFields` derives a
+  checkbox group's `.min()` / `.max()` as rules of its own, in zod's wording;
+  a rule's
   message is a string or a function called when the rule is reported
   (`formFields` calls it while deriving, so a rule crosses to the client as a
   `DerivedRule` with the text in it; `parseForm` calls it when the rule

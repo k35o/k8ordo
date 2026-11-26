@@ -1,4 +1,4 @@
-import { defineForm, minChecked, requiredWhen } from '@k8ordo/form/server';
+import { defineForm, requiredWhen } from '@k8ordo/form/server';
 import * as z from 'zod/mini';
 
 import * as m from '../../../messages';
@@ -13,7 +13,9 @@ export const reviewDefinition = defineForm(
       error: m.formRules.demoDecisionMissing,
     }),
     reason: z.string(),
-    aspects: z.array(z.enum(ASPECTS)),
+    aspects: z
+      .array(z.enum(ASPECTS))
+      .check(z.minLength(2, { error: m.formRules.demoAspectsMin })),
   }),
   [
     requiredWhen(
@@ -22,6 +24,5 @@ export const reviewDefinition = defineForm(
       'reject',
       m.formRules.demoReasonRequired,
     ),
-    minChecked('aspects', 2, m.formRules.demoAspectsMin),
   ],
 );

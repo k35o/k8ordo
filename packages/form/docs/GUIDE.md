@@ -260,8 +260,8 @@ float, a regex whose flags or anchoring the `pattern` attribute would silently
 reinterpret, several regexes on one string (the attribute holds one), a regex on
 a control that ignores `pattern` such as `type="date"`, a `.mime()` that
 `accept` only suggests to the file picker, a `z.iso.datetime()` no
-`datetime-local` control can ever satisfy,
-a leaf whose constraints could not be read at all because a `.transform()` or a
+`datetime-local` control can ever satisfy, the count of a checkbox group inside
+repeated rows, a leaf whose constraints could not be read at all because a `.transform()` or a
 `z.custom()` left nothing to read — are returned in `dropped`. They still run
 on the server; you are told they do not run on the client. Outside production
 `formFields` also logs the list once per schema with `console.warn`, so it is
@@ -484,9 +484,17 @@ const tags = form.field('tags');
 
 `parseForm` reads every checked box under the shared name — none checked is
 `[]`, never a wiring error. The `.min(2)` cannot become an HTML attribute (on
-a group, `required` would mean "check every box"), so it is reported in
-`dropped`; declare `minChecked('tags', 2, '…')` to run the same bound in the
-browser.
+a group, `required` would mean "check every box"), so `formFields` derives
+the array's `.min()` and `.max()` as [rules](#checks-html-has-no-attribute-for)
+the browser runs on the group, worded by zod — read on every call, so the
+wording follows the locale like the rest of zod's. A bound zod gives no
+message for (a `.refine()` with `abort` ahead of it, say) is listed in
+`dropped` instead, and a `.max()` no selection can exceed derives no rule.
+`tags.required` is `true`
+while `.min()` asks for at least one box, for the label's required marker;
+`tags.input` carries no `required`. Inside repeated rows a group has no
+fixed name for a rule to target, so its count runs on the server only and is
+listed in `dropped`.
 
 After a submission `tags.input.defaultValue` holds what was checked as an
 array — `['a']` for one box, `[]` for none — typed `string[]`
@@ -555,8 +563,8 @@ const ItemRow = ({ row }: { row: RowView<typeof orderSchema, 'items'> }) => (
 
 ## Checks HTML has no attribute for
 
-Password confirmation, "tick at least two", "required only when rejected" —
-none of these map to a constraint attribute, and a `.refine()` cannot cross to
+Password confirmation, "required only when rejected" — neither maps to a
+constraint attribute, and a `.refine()` cannot cross to
 the client because it is a function. Declare them next to the schema instead:
 
 ```ts
@@ -580,10 +588,13 @@ indistinguishable from a built-in check — `:user-invalid` matches and the
 message arrives through the same path as every other one. When several rules
 break the same field, both sides show the one declared first.
 
-Available: `sameAs(field, other, message)`, `minChecked(field, min, message)`,
-and `requiredWhen(field, when, equals, message)` —
+Available: `sameAs(field, other, message)` and
+`requiredWhen(field, when, equals, message)` —
 `requiredWhen('reason', 'status', 'rejected', '…')` requires `reason` while
-`status` is `'rejected'`. Anything else stays a `.refine()` and runs on the
+`status` is `'rejected'`. How many boxes of a checkbox group may be checked
+is not a rule to declare: it is the array's `.min()` / `.max()`, which
+`formFields` turns into rules of its own, after the declared ones
+([Checkbox groups](#checkbox-groups)). Anything else stays a `.refine()` and runs on the
 server only. A `refine` on the schema as a whole is listed in `dropped`; one on
 a single field, a nested object, or a row is not yet.
 
@@ -599,11 +610,11 @@ reads it:
 
 ```ts
 // src/lib/signup-form.ts
-import { mismatch, pickAtLeast } from '../messages/signup'; // @k8ordo/i18n
+import { companyRequired, mismatch } from '../messages/signup'; // @k8ordo/i18n
 
 export const signup = defineForm(schema, [
   sameAs('confirm', 'password', mismatch),
-  minChecked('topics', 2, () => pickAtLeast(2)),
+  requiredWhen('company', 'plan', 'business', companyRequired),
 ]);
 ```
 
@@ -795,7 +806,7 @@ const tags = form.field('tags');
 />;
 ```
 
-`minChecked` reaches `Autocomplete` as well as the checkboxes: it submits
+A group's count reaches `Autocomplete` as well as the checkboxes: it submits
 through a hidden `<select multiple>` that is present even with nothing
 selected, so the rule has an element to mark, and focus sent to it after a
 failure goes on to the text input.

@@ -82,6 +82,7 @@ export function ReviewDemo({ fields }: Props) {
             ]}
           />
         )}
+        required={aspects.required}
       />
       <div className={styles.actions}>
         <Button type="submit" variant="solid">

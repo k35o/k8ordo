@@ -45,7 +45,7 @@ src/
     parse-form.ts     FormData → structure → safeParse → typed errors
     paths.ts          `items[1].name` ↔ nested value / zod issue path
   rules/
-    rules.ts          sameAs / minChecked / requiredWhen and the one evaluator
+    rules.ts          sameAs / requiredWhen, a group's derived count, and the one evaluator
     define-form.ts    defineForm(): a schema plus rules typed against its paths
   schema/
     walk.ts           pair the zod tree with its JSON Schema (derive and parse)
@@ -69,7 +69,9 @@ checks (`refine`) vanish from its output without a trace.
   is what the parse would hand the schema for an empty control: `''` for text,
   `false` for a checkbox, `undefined` for a number, a file, a choice, or a
   checkbox whose schema reads its string. Public API, and it guarantees the
-  client shows the text zod itself would produce.
+  client shows the text zod itself would produce. A checkbox group's count is
+  worded the same way, by running the array schema against the group's own
+  options, one box short of `.min()` or one past `.max()`.
 - **A `z.stringbool()` checkbox's `value`** is the schema's own `safeEncode`
   of `true` — public API, and the same call `@k8ordo/state` spells a url
   boolean with, so the box submits the string state writes. A schema that

@@ -4,6 +4,7 @@ import type { $ZodCheckStringFormatDef, $ZodType } from 'zod/v4/core';
 import { asDefinition } from '../rules/define-form';
 import type { FormDefinition } from '../rules/define-form';
 import { deriveRule } from '../rules/rules';
+import type { DerivedRule } from '../rules/rules';
 import { asProbe } from '../schema/object-schema';
 import type { ObjectSchema } from '../schema/object-schema';
 import { schemaMap, unwrap } from '../schema/walk';
@@ -68,6 +69,75 @@ const refusesDatetimeLocal = (schema: $ZodType): boolean =>
     ) ?? false;
 
 /**
+ * zod's own wording for a checkbox group with `count` boxes checked, as the
+ * issue with `code` on the array itself. The boxes are the group's own
+ * options, so the count is the only thing that can fail.
+ */
+const countMessage = (
+  array: $ZodType,
+  options: readonly unknown[],
+  count: number,
+  code: 'too_small' | 'too_big',
+): string | undefined =>
+  asProbe(array)
+    .safeParse(
+      Array.from(
+        { length: count },
+        (_, index) => options[index % options.length],
+      ),
+    )
+    .error?.issues.find(
+      (issue) => issue.code === code && issue.path.length === 0,
+    )?.message;
+
+/**
+ * A checkbox group's `.min()` / `.max()` has no attribute — `required` on a
+ * box would require that box — so it crosses as rules the browser runs, the
+ * same way a declared rule does.
+ */
+const countRulesOf = (
+  name: string,
+  bounds: { minItems?: number; maxItems?: number; array: $ZodType },
+  options: readonly unknown[],
+): { rules: DerivedRule[]; dropped: string[] } => {
+  const rules: DerivedRule[] = [];
+  const dropped: string[] = [];
+  if (bounds.minItems !== undefined && bounds.minItems > 0) {
+    const checked = bounds.minItems - 1;
+    const message = countMessage(bounds.array, options, checked, 'too_small');
+    if (message === undefined) {
+      dropped.push(
+        `${String(checked)}個チェックしたときに zod が .min(${String(bounds.minItems)}) の文言を返さないため、下限をブラウザでは検査しません`,
+      );
+    } else {
+      rules.push({
+        kind: 'minChecked',
+        field: name,
+        min: bounds.minItems,
+        message,
+      });
+    }
+  }
+  if (bounds.maxItems !== undefined && bounds.maxItems < options.length) {
+    const checked = bounds.maxItems + 1;
+    const message = countMessage(bounds.array, options, checked, 'too_big');
+    if (message === undefined) {
+      dropped.push(
+        `${String(checked)}個チェックしたときに zod が .max(${String(bounds.maxItems)}) の文言を返さないため、上限をブラウザでは検査しません`,
+      );
+    } else {
+      rules.push({
+        kind: 'maxChecked',
+        field: name,
+        max: bounds.maxItems,
+        message,
+      });
+    }
+  }
+  return { rules, dropped };
+};
+
+/**
  * Schemas whose `dropped` list has already been reported. `formFields` is not
  * memoized, so a schema derived in every request would otherwise warn on
  * every request; keyed by the schema object, an HMR re-evaluation still gets
@@ -115,6 +185,7 @@ export const formFields = <Source extends ObjectSchema | FormDefinition>(
   const fields: Record<string, DerivedField<AnyFieldInput>> = {};
   const arrays: Record<string, AnyDerivedArray> = {};
   const dropped: DroppedCheck[] = [];
+  const countRules: DerivedRule[] = [];
 
   for (const array of map.arrays) {
     arrays[array.path] = {
@@ -173,15 +244,23 @@ export const formFields = <Source extends ObjectSchema | FormDefinition>(
         ? attributes.input
         : { ...attributes.input, value: leaf.checkedValue };
 
-    if (
-      leaf.group !== undefined &&
-      (leaf.group.minItems !== undefined || leaf.group.maxItems !== undefined)
-    ) {
-      dropped.push({
-        field: leaf.path,
-        reason:
-          'チェックボックス群の個数制限に対応する HTML 属性はありません。クライアントでも検査するには minChecked を使ってください',
-      });
+    if (leaf.group !== undefined) {
+      if (leaf.arrayPath === null) {
+        const count = countRulesOf(leaf.name, leaf.group, leaf.json.enum ?? []);
+        countRules.push(...count.rules);
+        for (const reason of count.dropped) {
+          dropped.push({ field: leaf.path, reason });
+        }
+      } else if (
+        leaf.group.minItems !== undefined ||
+        leaf.group.maxItems !== undefined
+      ) {
+        dropped.push({
+          field: leaf.path,
+          reason:
+            '繰り返し行の中のチェックボックス群は、行ごとの name を指すルールが無いため、個数の制限をブラウザでは検査しません',
+        });
+      }
     }
 
     const derived: DerivedField<AnyFieldInput> = {
@@ -224,7 +303,7 @@ export const formFields = <Source extends ObjectSchema | FormDefinition>(
   return {
     fields,
     arrays,
-    rules: rules.map((rule) => deriveRule(rule)),
+    rules: [...rules.map((rule) => deriveRule(rule)), ...countRules],
     dropped,
   } as FormFields<Source>;
 };

@@ -206,8 +206,8 @@ export const droppedDatetime = message({
 });
 
 export const droppedGroupMin = message({
-  ja: 'チェックボックスの集まりの`.min()`。`minChecked`を宣言するとブラウザでも確かめます',
-  en: '`.min()` on a checkbox group; declare `minChecked` to run it in the browser too',
+  ja: '繰り返し行の中のチェックボックスの集まりの`.min()`と`.max()`。行ごとの名前を指すルールが無いので、サーバーだけで確かめます',
+  en: '`.min()` and `.max()` on a checkbox group inside repeated rows, which no rule can target; they run on the server only',
 });
 
 export const droppedTransform = message({

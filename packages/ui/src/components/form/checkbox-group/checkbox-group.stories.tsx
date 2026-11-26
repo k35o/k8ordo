@@ -1,9 +1,4 @@
-import {
-  defineForm,
-  formFields,
-  minChecked,
-  parseForm,
-} from '@k8ordo/form/server';
+import { formFields, parseForm } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
 import { expect, fn, waitFor } from 'storybook/test';
@@ -155,13 +150,12 @@ export const ForwardsRef: Story = {
   },
 };
 
-const favorites = defineForm(
-  z.object({
-    tags: z.array(z.enum(['react', 'vue', 'svelte'])).min(1),
-    memo,
-  }),
-  [minChecked('tags', 1, '1つ以上選んでください')],
-);
+const favorites = z.object({
+  tags: z
+    .array(z.enum(['react', 'vue', 'svelte']))
+    .min(1, '1つ以上選んでください'),
+  memo,
+});
 const favoritesFields = formFields(favorites);
 const received = fn();
 const TAGS = [
@@ -213,7 +207,7 @@ export const WithForm: Story = {
     const submit = () =>
       userEvent.click(canvas.getByRole('button', { name: '送信' }));
 
-    // 1 つもチェックせずに離れると minChecked の文言を出す
+    // 1 つもチェックせずに離れると スキーマの .min(1) の文言を出す
     await userEvent.click(canvas.getByText('React'));
     await userEvent.click(canvas.getByText('React'));
     await userEvent.tab();

@@ -9,7 +9,7 @@ import { formFields } from './derive/form-fields';
 import { HiddenValue } from './hidden-value';
 import { parseForm } from './parse/parse-form';
 import { defineForm } from './rules/define-form';
-import { minChecked, requiredWhen, sameAs } from './rules/rules';
+import { requiredWhen, sameAs } from './rules/rules';
 import type { FormState } from './types';
 import { useForm } from './use-form';
 
@@ -469,11 +469,11 @@ const Filter: FC = () => {
   );
 };
 
-const topics = defineForm(
-  z.object({ topics: z.array(z.enum(['a', 'b', 'c'])) }),
-  [minChecked('topics', 2, '2つ以上選んでください')],
+const topicsFields = formFields(
+  z.object({
+    topics: z.array(z.enum(['a', 'b', 'c'])).min(2, '2つ以上選んでください'),
+  }),
 );
-const topicsFields = formFields(topics);
 
 const Topics: FC<{ action: (formData: FormData) => void }> = ({ action }) => {
   const form = useForm(topicsFields);
@@ -485,12 +485,13 @@ const Topics: FC<{ action: (formData: FormData) => void }> = ({ action }) => {
         <input
           aria-label={option}
           key={option}
+          name={field.input.name}
           type="checkbox"
-          {...field.input}
           value={option}
         />
       ))}
       <p data-testid="topics-error">{field.error ?? ''}</p>
+      <p data-testid="topics-required">{String(field.required)}</p>
       <button type="submit">send</button>
     </form>
   );
@@ -1287,7 +1288,16 @@ describe('useForm in a browser', () => {
     });
   });
 
-  it('stops a submission on a checkbox group rule and focuses the group', async () => {
+  it('marks a group required when its schema needs a box, without requiring any one box', async () => {
+    const screen = await render(<Topics action={vi.fn()} />);
+
+    await expect
+      .element(screen.getByTestId('topics-required'))
+      .toHaveTextContent('true');
+    await expect.element(screen.getByLabelText('a')).not.toBeRequired();
+  });
+
+  it('stops a submission on the count a group schema allows and focuses the group', async () => {
     const action = vi.fn<(formData: FormData) => void>();
     const screen = await render(<Topics action={action} />);
 

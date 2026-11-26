@@ -609,7 +609,10 @@ export const useForm = <Inputs, Arrays>(
         input,
         error,
         invalid: error !== undefined,
-        required: field.input.required ?? false,
+        required:
+          field.group === undefined
+            ? (field.input.required ?? false)
+            : (field.group.minItems ?? 0) >= 1,
       };
     },
     [clientErrors, edited, state],

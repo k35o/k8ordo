@@ -165,14 +165,9 @@ export const group = message({
   en: '`z.array(z.enum())` becomes a group of checkboxes sharing one `name`. The checked values arrive as an array, and none checked is `[]`. After a failed submission, what was checked is on `input.defaultValue` as an array. Do not spread `input` onto a hand-written checkbox: pass its `name` and set `defaultChecked` from that array.',
 });
 
-export const groupMinBefore = message({
-  ja: '`.min(2)`のような下限はHTMLの属性にならないので、ブラウザでは確かめません。ブラウザでも確かめるには、',
-  en: 'A lower bound such as `.min(2)` has no HTML attribute, so the browser does not check it. To check it in the browser too, declare the `minChecked` rule on ',
-});
-
-export const groupMinAfter = message({
-  ja: 'の`minChecked`を宣言します。',
-  en: '.',
+export const groupMin = message({
+  ja: '`.min(2)`や`.max(3)`のような個数の制限は、HTMLの属性になりません。`formFields`がブラウザで確かめるルールとして導き、文言はzodのものを使います。`.min()`が1つ以上を求めるときは、入力欄の`required`が`true`になります。ラベルの必須の印に使います。',
+  en: 'A count bound such as `.min(2)` or `.max(3)` has no HTML attribute. `formFields` derives it as a rule the browser runs, in zod’s own wording. When `.min()` asks for at least one, the field’s `required` is `true`; use it for the label’s required marker.',
 });
 
 export const filesTitle = message({

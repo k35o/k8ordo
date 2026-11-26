@@ -25,15 +25,18 @@ const parsed = parseForm(signup, formData);`;
 
 const KINDS = `defineForm(schema, [
   sameAs('confirm', 'password', 'The passwords do not match'),
-  minChecked('topics', 2, 'Pick at least two'),
   requiredWhen('reason', 'status', 'rejected', 'Give a reason'),
 ]);`;
 
-const LOCALE = `import { mismatch, pickAtLeast } from '../messages/signup';
+const GROUP_COUNT = `z.object({
+  topics: z.array(z.enum(['css', 'react', 'a11y'])).min(2, 'Pick at least two'),
+});`;
+
+const LOCALE = `import { companyRequired, mismatch } from '../messages/signup';
 
 export const signup = defineForm(schema, [
   sameAs('confirm', 'password', mismatch),
-  minChecked('topics', 2, () => pickAtLeast(2)),
+  requiredWhen('company', 'plan', 'business', companyRequired),
 ]);`;
 
 const REFINE = `z.object({
@@ -74,12 +77,13 @@ export default function FormRulesPage() {
             <Rich>{t.kindSameAs()}</Rich>
           </li>
           <li>
-            <Rich>{t.kindMinChecked()}</Rich>
-          </li>
-          <li>
             <Rich>{t.kindRequiredWhen()}</Rich>
           </li>
         </ul>
+        <CodeBlock code={GROUP_COUNT} lang="ts" marks={{ 2: 'highlight' }} />
+        <p>
+          <Rich>{t.kindGroupCount()}</Rich>
+        </p>
       </DocSection>
 
       <Playground

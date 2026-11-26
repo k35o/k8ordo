@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { formFields } from '../derive/form-fields';
 import { parseForm } from '../parse/parse-form';
 import { defineForm } from './define-form';
-import { breachOf, minChecked, requiredWhen, sameAs } from './rules';
+import { breachOf, requiredWhen, sameAs } from './rules';
 
 const signup = defineForm(
   z.object({
@@ -104,23 +104,116 @@ describe('cross-field rules', () => {
     expect(result.state.errors).toStrictEqual({ a: 'first' });
   });
 
-  it('counts the boxes a checkbox group has checked', () => {
-    const rule = minChecked('tags', 2, '2つ以上選んでください');
+  it('runs the count a checkbox group schema allows, in its own wording', () => {
+    const schema = z.object({
+      tags: z
+        .array(z.enum(['a', 'b', 'c']))
+        .min(2, '2つ以上選んでください')
+        .max(2, '2つまでです'),
+    });
+    const { rules, dropped } = formFields(schema);
+    const one = formDataOf([['tags', 'a']]);
+    const two = formDataOf([
+      ['tags', 'a'],
+      ['tags', 'b'],
+    ]);
+    const three = formDataOf([
+      ['tags', 'a'],
+      ['tags', 'b'],
+      ['tags', 'c'],
+    ]);
 
-    expect(breachOf(rule, valuesOf(formDataOf([['tags', 'a']])))).toBe(
+    expect(rules).toStrictEqual([
+      {
+        kind: 'minChecked',
+        field: 'tags',
+        min: 2,
+        message: '2つ以上選んでください',
+      },
+      { kind: 'maxChecked', field: 'tags', max: 2, message: '2つまでです' },
+    ]);
+    expect(dropped).toStrictEqual([]);
+    expect(rules.map((rule) => breachOf(rule, valuesOf(one)))).toStrictEqual([
+      '2つ以上選んでください',
+      undefined,
+    ]);
+    expect(rules.map((rule) => breachOf(rule, valuesOf(two)))).toStrictEqual([
+      undefined,
+      undefined,
+    ]);
+    expect(rules.map((rule) => breachOf(rule, valuesOf(three)))).toStrictEqual([
+      undefined,
+      '2つまでです',
+    ]);
+    expect(parseForm(schema, one).state.errors?.tags).toBe(
       '2つ以上選んでください',
     );
-    expect(
-      breachOf(
-        rule,
-        valuesOf(
-          formDataOf([
-            ['tags', 'a'],
-            ['tags', 'b'],
-          ]),
-        ),
-      ),
-    ).toBeUndefined();
+  });
+
+  it('words the count of a checkbox group in the locale of each formFields call', () => {
+    const texts = { ja: '1つ以上選んでください', en: 'Pick at least one' };
+    let locale: keyof typeof texts = 'ja';
+    const schema = z.object({
+      tags: z.array(z.enum(['a', 'b'])).min(1, { error: () => texts[locale] }),
+    });
+
+    const ja = formFields(schema).rules[0]?.message;
+    locale = 'en';
+    const en = formFields(schema).rules[0]?.message;
+
+    expect([ja, en]).toStrictEqual([
+      '1つ以上選んでください',
+      'Pick at least one',
+    ]);
+  });
+
+  it('derives no upper count for a group that cannot hold more boxes than it allows', () => {
+    const { rules, dropped } = formFields(
+      z.object({
+        exact: z.array(z.enum(['a', 'b'])).max(2),
+        above: z.array(z.enum(['a', 'b'])).max(3),
+      }),
+    );
+
+    expect(rules).toStrictEqual([]);
+    expect(dropped).toStrictEqual([]);
+  });
+
+  it('reports a group count zod gives no message for, instead of losing it', () => {
+    const { rules, dropped } = formFields(
+      z.object({
+        tags: z
+          .array(z.enum(['a', 'b', 'c']))
+          .refine((tags) => tags.length === 2, { abort: true })
+          .min(2)
+          .max(2),
+      }),
+    );
+
+    expect(rules).toStrictEqual([]);
+    expect(dropped).toStrictEqual([
+      {
+        field: 'tags',
+        reason:
+          '1個チェックしたときに zod が .min(2) の文言を返さないため、下限をブラウザでは検査しません',
+      },
+      {
+        field: 'tags',
+        reason:
+          '3個チェックしたときに zod が .max(2) の文言を返さないため、上限をブラウザでは検査しません',
+      },
+    ]);
+  });
+
+  it('reports the count of a group inside repeated rows, which no rule can target', () => {
+    const { rules, dropped } = formFields(
+      z.object({
+        people: z.array(z.object({ tags: z.array(z.enum(['a', 'b'])).min(1) })),
+      }),
+    );
+
+    expect(rules).toStrictEqual([]);
+    expect(dropped.map((entry) => entry.field)).toStrictEqual(['people.tags']);
   });
 
   it('only requires a field while the other field holds the value', () => {
@@ -180,17 +273,18 @@ describe('cross-field rules', () => {
 
   it('hands the client a function message already called, as plain data', () => {
     const { rules } = formFields(
-      defineForm(z.object({ tags: z.array(z.enum(['a', 'b'])) }), [
-        minChecked('tags', 2, () => '2つ以上選んでください'),
+      defineForm(z.object({ status: z.string(), reason: z.string() }), [
+        requiredWhen('reason', 'status', 'rejected', () => '理由が必要です'),
       ]),
     );
 
     expect(rules).toStrictEqual([
       {
-        kind: 'minChecked',
-        field: 'tags',
-        min: 2,
-        message: '2つ以上選んでください',
+        kind: 'requiredWhen',
+        field: 'reason',
+        when: 'status',
+        equals: 'rejected',
+        message: '理由が必要です',
       },
     ]);
     expect(structuredClone(rules)).toStrictEqual(rules);

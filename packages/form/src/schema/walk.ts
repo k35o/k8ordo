@@ -42,9 +42,10 @@ export type LeafNode = {
   /**
    * Present when several same-named controls submit together — a checkbox
    * group, derived from an array of enums. Carries the bounds the group's
-   * array schema declared, which HTML has no attribute for.
+   * array schema declared, which HTML has no attribute for, and that schema,
+   * whose own wording reports them.
    */
-  group?: { minItems?: number; maxItems?: number };
+  group?: { minItems?: number; maxItems?: number; array: $ZodType };
 };
 
 export type ArrayNode = {
@@ -295,7 +296,7 @@ const walkNode = (
         required: false,
         arrayPath: context.arrayPath,
         itemKey: context.itemKey,
-        group: { minItems: json.minItems, maxItems: json.maxItems },
+        group: { minItems: json.minItems, maxItems: json.maxItems, array: zod },
       });
       return;
     }

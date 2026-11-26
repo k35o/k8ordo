@@ -1,9 +1,4 @@
-import {
-  defineForm,
-  formFields,
-  minChecked,
-  parseForm,
-} from '@k8ordo/form/server';
+import { formFields, parseForm } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { clsx } from 'clsx';
 import { useRef, useState } from 'react';
@@ -463,13 +458,12 @@ export const VerticalWritingMode: Story = {
   },
 };
 
-const favorites = defineForm(
-  z.object({
-    tags: z.array(z.enum(['react', 'vue', 'svelte'])).min(1),
-    memo,
-  }),
-  [minChecked('tags', 1, '1つ以上選んでください')],
-);
+const favorites = z.object({
+  tags: z
+    .array(z.enum(['react', 'vue', 'svelte']))
+    .min(1, '1つ以上選んでください'),
+  memo,
+});
 const favoritesFields = formFields(favorites);
 const received = fn();
 const TAGS = [
@@ -526,7 +520,7 @@ export const WithForm: Story = {
     await expect(combobox()).toHaveValue('');
     await expect(combobox()).toHaveAttribute('aria-expanded', 'false');
 
-    // 何も選ばずに送ると minChecked の文言を出し、入力欄へフォーカスを移す
+    // 何も選ばずに送ると スキーマの .min(1) の文言を出し、入力欄へフォーカスを移す
     await fill(userEvent, memoField(), 'よろしく');
     await submit();
     await expect(

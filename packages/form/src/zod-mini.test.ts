@@ -55,6 +55,25 @@ describe('a schema written with zod/mini', () => {
     expect(result.data?.tags).toStrictEqual(['a', 'b']);
   });
 
+  it("runs a checkbox group's count in its own wording here too", () => {
+    const { rules } = formFields(
+      zm.object({
+        tags: zm
+          .array(zm.enum(['a', 'b']))
+          .check(zm.minLength(1, '1つ以上選んでください')),
+      }),
+    );
+
+    expect(rules).toStrictEqual([
+      {
+        kind: 'minChecked',
+        field: 'tags',
+        min: 1,
+        message: '1つ以上選んでください',
+      },
+    ]);
+  });
+
   it('pairs a wrapped object and a wrapped array with their JSON nodes', () => {
     const { fields, arrays } = formFields(
       zm.object({

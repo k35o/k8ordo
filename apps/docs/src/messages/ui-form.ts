@@ -81,8 +81,8 @@ export const choiceTitle = message({
 });
 
 export const choiceGroup = message({
-  ja: 'チェックボックスの集まりでは、送信後にチェックされていた値が`input.defaultValue`へ配列で入ります。`CheckboxGroup.Root`、`CheckboxCard`、`Autocomplete`は`defaultValue`に配列を受け取るので、`input`を展開するだけで戻ります。`minChecked`は`Autocomplete`にも効きます。`Autocomplete`は、何も選んでいなくても残る隠れた`<select multiple>`で値を送り、エラーはこの要素に付きます。失敗したあとのフォーカスは、この要素から入力欄へ移ります。',
-  en: 'For a checkbox group, what was checked comes back on `input.defaultValue` as an array after a submission. `CheckboxGroup.Root`, `CheckboxCard` and `Autocomplete` take an array as `defaultValue`, so spreading `input` restores it. `minChecked` applies to `Autocomplete` too. It submits through a hidden `<select multiple>` that stays even with nothing selected, and the error is attached to that element. Focus sent there after a failure moves on to the text input.',
+  ja: 'チェックボックスの集まりでは、送信後にチェックされていた値が`input.defaultValue`へ配列で入ります。`CheckboxGroup.Root`、`CheckboxCard`、`Autocomplete`は`defaultValue`に配列を受け取るので、`input`を展開するだけで戻ります。スキーマの`.min()`と`.max()`から導く個数のルールは、`Autocomplete`にも効きます。`Autocomplete`は、何も選んでいなくても残る隠れた`<select multiple>`で値を送り、エラーはこの要素に付きます。失敗したあとのフォーカスは、この要素から入力欄へ移ります。',
+  en: 'For a checkbox group, what was checked comes back on `input.defaultValue` as an array after a submission. `CheckboxGroup.Root`, `CheckboxCard` and `Autocomplete` take an array as `defaultValue`, so spreading `input` restores it. The count rule derived from the schema’s `.min()` and `.max()` applies to `Autocomplete` too. It submits through a hidden `<select multiple>` that stays even with nothing selected, and the error is attached to that element. Focus sent there after a failure moves on to the text input.',
 });
 
 export const choiceRadio = message({
