@@ -602,9 +602,9 @@ each checked against `Paths` of its directory's pattern in a `PathsChecks`
 type (under `mode: 'server'` it too is empty); all seven are empty here
 because no route file declares any.
 
-`.k8ordo/register.gen.ts` registers that table with the framework — and with
-`@k8ordo/state` when the application depends on it — so typed paths work
-everywhere without a line of ceremony. It also says what the mode hands a
+`.k8ordo/register.gen.ts` registers that table with the framework, so typed
+links work everywhere without a line of ceremony — a page state's link too,
+since it is built on what `href` returns. It also says what the mode hands a
 route file: under `mode: 'server'` it registers the `request`, which is how
 `PageProps` and `LayoutProps` gain that field there and not under
 `mode: 'static'`:

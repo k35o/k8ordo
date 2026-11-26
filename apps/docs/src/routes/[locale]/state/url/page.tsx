@@ -59,11 +59,11 @@ const REFINE = `export const priceState = definePageState('price', {
 priceState.parseUrl(new URLSearchParams('min=500&max=100'));
 // { min: 0, max: 1000 }`;
 
-const CANONICAL = `catalogState.search({ page: 1, tags: ['sale'] });
-// 'tags=sale'
+const CANONICAL = `catalogState.href('', { page: 1, tags: ['sale'] });
+// '?tags=sale'
 
-catalogState.search({ tags: ['sale'], q: 'desk lamp' });
-// 'q=desk+lamp&tags=sale'`;
+catalogState.href('', { tags: ['sale'], q: 'desk lamp' });
+// '?q=desk+lamp&tags=sale'`;
 
 export default function StateUrlPage() {
   return (

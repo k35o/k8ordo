@@ -7,7 +7,7 @@ state) over the Navigation API; `defineLocalState` is localStorage,
 `defineCookieState` a cookie the browser writes and the server reads,
 `defineMemoryState` a typed shared box with no schema. One zod schema per
 boundary place (url, entry, local, session, cookie) derives the server read
-(`parseUrl`, `parseCookies`), canonical links (`href`/`search`), stale-data
+(`parseUrl`, `parseCookies`), canonical links (`href`, on the router's URL), stale-data
 salvage, and the client subscription (`useAppState`). The shared discipline
 (React 19 / RSC assumed, Baseline newly available only, no polyfills) and how
 a new package joins are in the repository root's [`CLAUDE.md`](../../CLAUDE.md).
@@ -109,7 +109,7 @@ pnpm check         # check:write to auto-fix
   answer both. `<Router>` and `@k8ordo/framework`'s runtime provide, per
   tree, the pathname it was applied for (`tree-pathname.ts`: a context
   reached through `Symbol.for('@k8ordo/router/tree-pathname')` on
-  `globalThis`, since the router is a peer this package never loads; the
+  `globalThis`, since this package never loads the router; the
   name is a promise between the three, changed in one release), and
   `useAppState` hands it to a page store. When the URL's pathname moves,
   the store freezes the snapshot (and the picks handed out) for the
@@ -183,12 +183,24 @@ pnpm check         # check:write to auto-fix
   values straight to the schema — no structured clone, no JSON — so those
   schemas must accept their own output, and a local, session or cookie value
   JSON cannot hold (a Date) survives the echo and is lost on the next load.
-- **A link carries Vite's base; a path does not.** `href(path)` takes a
-  path in the route table's terms and puts `import.meta.env.BASE_URL` in
-  front (`base.ts`, the router's `withBase` rule re-spelled, since the router
-  is a type-only peer here). The type stays the path given, which is what
-  typed-route checks read. Outside Vite `import.meta.env` is undefined
-  despite its type, and nothing is added.
+- **A link is built on the router's URL.** `href(url, values)` takes the
+  destination as the router built it — `@k8ordo/router`'s `href()`, a
+  Next.js `Route`, or `''` for the page itself — and rewrites only this
+  definition's url params, in canonical form after the URL's other params,
+  which stay in their spelling: the page store's _Shared ground stays
+  shared_, applied to a link. Only a hash slot touches the fragment (set from
+  `values.hash`, dropped at the default); without one the URL's own stays.
+  It adds no base and never reads `import.meta.env`: the router's `href()`
+  has put the base there, and adding it here carried it twice. The type is
+  the URL given, or it followed by `?…` / `#…` — an approximation when the
+  URL already carries this definition's params or a fragment — so the
+  pattern is checked by the router and a typed route by whoever takes the
+  link (Next.js's `<Link>`); this package has no `Register` and imports
+  nothing of the router, not even a type. The router stays an optional peer
+  all the same: the tree-pathname handshake ties the two at run time, and
+  the peer range is what makes a package manager warn about a mismatched
+  pair. Keep it the one way to put state on a URL: no `search()` beside it,
+  no path of its own.
 - **No history-API fallback.** Imperative url updates assume an intercepting
   router; links and GET forms are the path that works everywhere. Updates
   that change only entry, local, session, cookie or memory values never
@@ -212,7 +224,6 @@ src/
   hash/codec.ts        HashCodec: one schema ⇄ the URL's fragment
   entry/codec.ts       StoredCodec: read typed stored values (entry, local, session, cookie)
   page-state.ts        definePageState(); slot disjointness; urlReader (a url schema's reader, for the framework)
-  base.ts              withBase: Vite's base in front of a link
   storage-state.ts     defineLocalState() / defineSessionState(); storageKey, inlineRead
   cookie-state.ts      defineCookieState(); cookie name, value encoding, parseCookies
   row/codec.ts         RowCodec: [version, values] envelope, migrate, stale write-back flag
@@ -226,8 +237,6 @@ src/
   store/memory-store.ts
   use-app-state.ts     the client hook ('use client'); the store its definition bound
   testing.ts           mountPageUrl(): the ./testing entry, a router stand-in for tests
-  register.ts          Register interface for typed-route path constraint;
-                       AcceptedPath checks a path (routes → path → any)
   traversal.test.ts    serves fixtures/traversal with Vite and opens it top-level
 fixtures/
   traversal/           a page on useAppState, for going back
@@ -250,18 +259,7 @@ is why `@k8ordo/form`'s checkbox for the same field submits the same string.
 
 ## Conventions
 
-- `type`, not `interface` — except `Register`, which must merge. It takes
-  the router's own line, `{ routes: typeof routes }`, and checks each path
-  `href` is handed through `NavigablePath` from `@k8ordo/router` — a
-  type-only import, so the router is an optional peer that never loads at
-  runtime. `href` infers the path from the argument and checks that, never
-  a union of every path the table has. A refused path resolves to
-  what the form accepts instead — the table's linkable patterns, the `path`
-  union, `/${string}` — never `never`, so the type error lists the
-  alternatives the way the router's `href` does; each pattern's own spelling
-  is a path the table accepts, so this lets nothing through. The older
-  `{ path: P }` form stays accepted (other routers, and what the framework's
-  generator emitted before `routes`); `routes` wins when both are present.
+- `type`, not `interface`.
 - **A local or session definition owns its storage key.** `storageKey` on the
   definition is the one place `k8ordo-state:<key>` is spelled — the store
   reads it from there — and `inlineRead()` renders the pre-hydration read as

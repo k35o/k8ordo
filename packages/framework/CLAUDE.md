@@ -171,10 +171,11 @@ pnpm check         # check:write to auto-fix
   `register.gen.ts` augments `Register` there; the re-export carries the
   merge to the router's. `Register` is not on the root because nothing an
   application writes by hand augments it. `register.gen.ts` also augments
-  `@k8ordo/state`'s `Register` (the table) and `@k8ordo/i18n`'s (the
-  `locales` that `src/i18n.ts` exports) by those packages' own names, when
-  the application has them: they are the application's dependencies, not
-  this package's, and the application would otherwise write both by hand.
+  `@k8ordo/i18n`'s `Register` (the `locales` that `src/i18n.ts` exports) by
+  that package's own name, when the application has it: it is the
+  application's dependency, not this package's, and the application would
+  otherwise write it by hand. `@k8ordo/state` has no `Register`: a page
+  state's link is built on the URL the router's `href()` returns.
 - **`k8ordo generate` is the build's first step and nothing after it.** The
   package's one `bin` (`src/cli.ts`) resolves the Vite config in the working
   directory as `vite build` does (`resolveConfig`, `'build'`,

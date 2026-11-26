@@ -279,7 +279,6 @@ export const generate = async (
   });
   const registerSource = emitRegisterModule({
     routesModule: './routes.gen',
-    stateModule: withState ? '@k8ordo/state' : null,
     localesModule:
       localeSet?.exportsLocales === true
         ? importPath(options.outDir, localeSet.module.replace(/\.ts$/u, ''))

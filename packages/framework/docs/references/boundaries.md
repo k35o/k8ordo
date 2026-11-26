@@ -101,14 +101,16 @@ be wrapped in one of these to come under the same check.
 
 ## The search
 
-`@k8ordo/state` owns the search params, and the framework generates its
-`Register` for you, so a filter is typed against the same routes:
+`@k8ordo/state` owns the search params. A link that carries them is built on
+the URL `href` returns, so the pattern is checked against the same routes:
 
 ```tsx
 'use client';
+import { href } from '@k8ordo/framework';
 import { useAppState } from '@k8ordo/state';
 
 const [{ q }, update] = useAppState(listState, ['q']);
+<a href={listState.href(href('/products'), { q, page: 2 })}>next</a>;
 ```
 
 Changing the search does not change the page: the router leaves the route tree

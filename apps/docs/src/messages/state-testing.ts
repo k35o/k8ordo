@@ -11,8 +11,8 @@ export const pureTitle = message({
 });
 
 export const pureRuns = message({
-  ja: '`parseUrl`、`href`、`search`はブラウザのAPIを使いません。Cookieの`parseCookies`と`cookieValue`も同じです。Nodeで動くふつうのテストで確かめられます。',
-  en: '`parseUrl`, `href`, `search`, and a cookie state’s `parseCookies` and `cookieValue` use no browser API. An ordinary test under Node checks them.',
+  ja: '`parseUrl`と`href`はブラウザのAPIを使いません。Cookieの`parseCookies`と`cookieValue`も同じです。Nodeで動くふつうのテストで確かめられます。',
+  en: '`parseUrl`, `href`, and a cookie state’s `parseCookies` and `cookieValue` use no browser API. An ordinary test under Node checks them.',
 });
 
 export const pureInput = message({

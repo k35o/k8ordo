@@ -125,12 +125,12 @@ export const typesSchemaAfter = message({
   en: '.',
 });
 
-export const stateRegisterBefore = message({
-  ja: '`@k8ordo/state`の`Register`にも同じ`routes: typeof routes`を書くと、その`href`に渡すパスがこのルート表で検査されます。書き方は`@k8ordo/state`の',
-  en: 'Write the same `routes: typeof routes` on `Register` of `@k8ordo/state`, and the paths handed to its `href` are checked against this route table. See ',
+export const stateLinkBefore = message({
+  ja: '`@k8ordo/state`の`href`は、この`href`が返したURLに状態を載せます。パターンの検査はここで済むので、`@k8ordo/state`に登録するものはありません。書き方は`@k8ordo/state`の',
+  en: '`href` of `@k8ordo/state` puts its state on the URL this `href` returned. The pattern is checked here, so there is nothing to register with `@k8ordo/state`. See ',
 });
 
-export const stateRegisterAfter = message({
+export const stateLinkAfter = message({
   ja: 'を見てください。',
   en: ' of `@k8ordo/state`.',
 });

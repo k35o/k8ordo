@@ -1,4 +1,3 @@
-import { Pitfall } from '../../../../components/callout';
 import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
@@ -7,39 +6,34 @@ import * as m from '../../../../messages';
 
 const t = m.stateLinks;
 
-const HREF = `listState.href('/products');
+const HREF = `import { href } from '@k8ordo/router';
+
+listState.href(href('/products'));
 // '/products'
 
-listState.href('/products', { inStock: true, page: 2 });
+listState.href(href('/products'), { inStock: true, page: 2 });
 // '/products?inStock=true&page=2'
 
-listState.search({ page: 2 });
-// 'page=2'`;
+listState.href('', { page: 2 });
+// '?page=2'`;
 
-const BASE = `listState.href('/products', { page: 2 });
+const SHARED = `const url = campaignState.href(href('/products'), { ref: 'mail' });
+// '/products?ref=mail'
+
+listState.href(url, { page: 2 });
+// '/products?ref=mail&page=2'
+
+productState.href(href('/products/:id', { id: 42 }), {
+  hash: 'reviews',
+});
+// '/products/42#reviews'`;
+
+const BASE = `listState.href(href('/products'), { page: 2 });
 // '/docs/products?page=2'`;
 
-const REGISTER_ROUTES = `import type { routes } from './routes';
+const NEXT = `import Link from 'next/link';
 
-declare module '@k8ordo/router' {
-  interface Register {
-    routes: typeof routes;
-  }
-}
-
-declare module '@k8ordo/state' {
-  interface Register {
-    routes: typeof routes;
-  }
-}`;
-
-const REGISTER_PATH = `import type { Route } from 'next';
-
-declare module '@k8ordo/state' {
-  interface Register {
-    path: Route;
-  }
-}`;
+<Link href={listState.href('/products', { page: 2 })}>next</Link>;`;
 
 export default function StateLinksPage() {
   return (
@@ -54,55 +48,42 @@ export default function StateLinksPage() {
           <Rich>{t.see()}</Rich>
         </p>
         <p>
-          <Rich>{t.hrefSearch()}</Rich>
+          <Rich>{t.hrefUrl()}</Rich>
         </p>
         <p>
           <Rich>{t.hrefEdges()}</Rich>
         </p>
       </DocSection>
 
+      <DocSection id="shared" title={t.sharedTitle}>
+        <CodeBlock code={SHARED} lang="ts" />
+        <p>
+          <Rich>{t.sharedOwn()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.sharedHash()}</Rich>
+        </p>
+      </DocSection>
+
       <DocSection id="base" title={t.baseTitle}>
         <CodeBlock code={BASE} lang="ts" />
         <p>
-          <Rich>{t.baseRoot()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.baseRouterHref()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.baseOutside()}</Rich>
+          <Rich>{t.baseRouter()}</Rich>
         </p>
       </DocSection>
 
       <DocSection id="typed" title={t.typedTitle}>
-        <CodeBlock
-          code={REGISTER_ROUTES}
-          lang="ts"
-          marks={{ 9: 'highlight', 10: 'highlight', 11: 'highlight' }}
-          title="src/k8ordo.d.ts"
-        />
+        <CodeBlock code={NEXT} lang="tsx" />
         <p>
-          <Rich>{t.typedRegister()}</Rich>
+          <Rich>{t.typedRouter()}</Rich>
           <LocaleAnchor path="/:locale/router/typed-paths">
             {m.router.navTypedPaths()}
           </LocaleAnchor>
-          <Rich>{t.typedRegisterAfter()}</Rich>
+          <Rich>{t.see()}</Rich>
         </p>
         <p>
-          <Rich>{t.typedMatch()}</Rich>
+          <Rich>{t.typedNext()}</Rich>
         </p>
-        <p>
-          <Rich>{t.typedRuntime()}</Rich>
-        </p>
-        <CodeBlock code={REGISTER_PATH} lang="ts" title="types/k8ordo.d.ts" />
-        <p>
-          <Rich>{t.typedPath()}</Rich>
-        </p>
-        <Pitfall>
-          <p>
-            <Rich>{t.typedLibrary()}</Rich>
-          </p>
-        </Pitfall>
       </DocSection>
     </DocPage>
   );

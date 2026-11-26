@@ -65,9 +65,7 @@ export type NavigablePatternOf<R extends RoutesRecord> = Exclude<
  * `Path` when one of the table's navigable patterns matches it, segment by
  * segment — a literal spelled as the pattern spells it, a `:param` taking any
  * one non-empty segment, a rest param (`:name+`) one or more — and `never`
- * when none does. What `@k8ordo/state`
- * checks a path against with the `routes` its `Register` is given, and what
- * any other typed-path consumer takes.
+ * when none does. For a consumer handed a path rather than a pattern.
  */
 export type NavigablePath<D, Path extends string> =
   D extends Routes<infer R extends RoutesRecord>

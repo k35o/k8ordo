@@ -12,7 +12,7 @@ import styles from './query-demo.module.css';
 
 const t = m.stateUrl;
 
-// ページに載せる catalogState と同じ形。parseUrl と search は純粋なので、
+// ページに載せる catalogState と同じ形。parseUrl と href は純粋なので、
 // ストアは作らず、このページの URL にも触れない
 const catalogState = definePageState('state-url-demo', {
   url: z.object({
@@ -26,7 +26,7 @@ const catalogState = definePageState('state-url-demo', {
 export function QueryDemo() {
   const [query, setQuery] = useState('q=lamp&page=2');
   const values = catalogState.parseUrl(new URLSearchParams(query));
-  const canonical = catalogState.search(values);
+  const canonical = catalogState.href('', values);
 
   return (
     <div className={styles.root}>

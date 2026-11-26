@@ -404,9 +404,8 @@ only in an application — a library doing it would impose its table on every
 consumer.
 
 Under `@k8ordo/framework` this file is generated into
-`.k8ordo/register.gen.ts` from `routes/` — for `@k8ordo/state` too, when the
-application depends on it — so hand-writing it there is writing a second
-answer to a question already answered. Hand-write it in a client application
+`.k8ordo/register.gen.ts` from `routes/`, so hand-writing it there is
+writing a second answer to a question already answered. Hand-write it in a client application
 that mounts `<Router>` itself.
 
 The framework's generated `Register` also carries `params`: per pattern, the
@@ -429,22 +428,19 @@ link to `P` takes) and `RegisteredPageParams<P>` (what the page at `P`
 receives). Before the augmentation the first two are any `/`-prefixed
 string.
 
-## Typed paths for @k8ordo/state
+## Links that carry state
 
-`@k8ordo/state`'s `Register` takes the same line this one does:
+`@k8ordo/state` builds on the URL `href` returns: a page state's
+`href(url, values)` puts its own search params and fragment on it, and adds
+no base of its own.
 
 ```ts
-declare module '@k8ordo/state' {
-  interface Register {
-    routes: typeof routes;
-  }
-}
+listState.href(href('/products'), { q, page: 2 }); // '/products?q=…&page=2'
 ```
 
-With that, `listState.href('/products', { q })` is checked against the same
-table this router matches against, and the two packages agree on what a path
-is. `NavigablePath<typeof routes, Path>` is that check, for any other
-typed-path consumer: `Path` itself when one of the table's linkable patterns
+The pattern is checked once, here, against the table; state has no table of
+its own to register. `NavigablePath<typeof routes, Path>` is the same check
+for a consumer handed a path rather than a pattern: `Path` itself when one of the table's linkable patterns
 matches it segment by segment — a literal segment spelled as the pattern
 spells it, a `:param` taking any one non-empty segment, a `${string}` from a
 template literal included, a rest param (`:name+`) taking one or more — and

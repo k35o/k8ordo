@@ -145,7 +145,8 @@ export const deckState = definePageState('deck', {
 const [{ hash, mode }, update] = useAppState(deckState);
 // /slides/intro#3        → hash === 3
 update({ hash: 4 }); //    → /slides/intro#4
-deckState.href('/slides/intro', { hash: 4 }); // '/slides/intro#4'
+deckState.href(href('/slides/:slug', { slug: 'intro' }), { hash: 4 });
+// '/slides/intro#4'
 ```
 
 It follows the url slot's rules: the schema must tolerate absence, a boolean
@@ -316,25 +317,17 @@ a layout: the pathname axis is the router's, and the search is read in the
 browser by `useAppState`, so such a server render shows the url slot's
 defaults and the live URL takes over one render after hydration.
 Static mode refuses the export: a file is the same whatever the search
-holds. Building links is unaffected — `href` and `search` are pure and run
-anywhere, including in a Server Component.
+holds. Building links is unaffected — `href` is pure and runs anywhere,
+including in a Server Component.
 
 `urlReader(schema)` is that reading on its own — a url schema in,
 `(input) => values` out, the codec built once — for code handed the schema
 without its definition; the framework's generated table calls it.
 
-`href` and `search` are pure: unspecified fields mean their default, and
-default values are omitted from the query, so every link is canonical and as
-short as it can be. `search` returns the query string alone (no `?`) when the
-path should stay in the caller's hands.
-
-The path `href` takes is written from the application's root, the way the
-route table is, and the link it returns carries Vite's `base` in front of it:
-under `base: '/docs/'`, `listState.href('/products', { page: 2 })` is
-`/docs/products?page=2`. Hand it a path, then — not what `@k8ordo/router`'s
-`href` returned, which carries the base already. Outside Vite (Next.js, say)
-there is no `import.meta.env` to read, nothing is added, and a `basePath` is
-the framework's own `<Link>`'s to add.
+`href` is pure: unspecified fields mean their default, and default values are
+omitted from the query, so every link is canonical and as short as it can be.
+What it is handed is the URL the router built, not a path of its own — see
+[Links on the router's URL](#links-on-the-routers-url).
 
 ## Cookie state — preferences the server renders
 
@@ -594,7 +587,7 @@ Two operations depend on the router; everything else works under any router:
 
 | operation                                                               | needs                                                                                               |
 | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `href` / `search` links, GET forms                                      | nothing — the router or the browser handles the click or the submission                             |
+| `href` links, GET forms                                                 | nothing — the router or the browser handles the click or the submission                             |
 | updates that change only entry, local, session, cookie or memory values | nothing — no navigation is involved                                                                 |
 | url `update()` on the client                                            | a router that intercepts the Navigation API                                                         |
 | `parseUrl` on the server                                                | a router that hands the page its search (`@k8ordo/framework` in server mode: `export const search`) |
@@ -628,74 +621,48 @@ Keystrokes do not belong in the URL. Let the DOM or local React state hold
 the draft and call `update()` at commit points — submit, blur, pagination —
 the same division `@k8ordo/form` draws.
 
-## Typed routes
+## Links on the router's URL
 
-`href` keeps the path literal alive in the type
-(``'/products' | `/products?${string}` ``), which is what typed-route checks
-strip a query from and verify. To constrain paths app-wide, augment `Register`
-once, with the same line the `@k8ordo/router` augmentation takes:
-
-```ts
-// src/k8ordo.d.ts
-import type { routes } from './routes';
-
-declare module '@k8ordo/router' {
-  interface Register {
-    routes: typeof routes;
-  }
-}
-
-declare module '@k8ordo/state' {
-  interface Register {
-    routes: typeof routes;
-  }
-}
-```
-
-`href` then checks the path it is handed against the table's linkable
-patterns, segment by segment: a literal segment must be spelled as the pattern
-spells it, a `:param` takes any one non-empty segment — a `${string}` from a
-template literal such as `` `/${locale}/products` `` included — and a `*`
-wildcard is matched but never linked. A path no pattern matches is a type
-error, a `/:locale` table included: `'/ja/nowhere'` is refused even though
-`/:locale` takes any first segment. The error lists what would be accepted —
-the table's linkable patterns. With a table of `/`, `/members` and
-`/posts/:id`, `listState.href('/membrs')` reports:
-
-```
-Argument of type '"/membrs"' is not assignable to parameter of type '"/" | "/members" | "/posts/:id"'.
-```
-
-The check is exported as `RegisteredPath<Path>`: `Path` when accepted, and
-that union of patterns when refused. Each pattern's own spelling is a path
-the table accepts, so the union lets nothing through that the check refuses.
-It goes through `NavigablePath`
-from `@k8ordo/router` as a type only, so the router stays an optional peer and
-never loads at runtime. Under `@k8ordo/framework` this is generated for you into `.k8ordo/register.gen.ts` from
-`routes/` when the application's own `package.json` lists `@k8ordo/state` in
-`dependencies` or `devDependencies` — a transitive dependency does not count.
-Do not hand-write it in such an application: it would duplicate the generated
-declaration.
-
-A router that is not `@k8ordo/router` has no table to hand over; register its
-path union directly under `path` — `Route` from `next`, for instance:
+`href(url, values?)` puts this state on a URL the router built:
+`@k8ordo/router`'s `href()` (re-exported by `@k8ordo/framework`), a Next.js
+`Route`, or `''` for the page itself.
 
 ```ts
-// e.g. types/k8ordo-state.d.ts
-import type { Route } from 'next';
+import { href } from '@k8ordo/router';
 
-declare module '@k8ordo/state' {
-  interface Register {
-    path: Route;
-  }
-}
+listState.href(href('/products'), { q: 'lamp', page: 2 });
+// '/products?q=lamp&page=2'
+productState.href(href('/products/:id', { id }), { hash: 'reviews' });
+// '/products/42#reviews'
+listState.href('', { page: 2 });
+// '?page=2' — the page itself
 ```
 
-When both are present, `routes` wins. Every `href` in the app now rejects a
-path its router does not know, and the error lists the registered union.
-Without the augmentation the constraint is any `/`-prefixed string, and a path
-without the leading `/` is reported against `` `/${string}` ``. Augment only in an application — a shared library
-augmenting `Register` leaks the constraint to every consumer.
+- **Only its own params move.** The params of the URL handed in that this
+  definition does not declare stay, in their spelling, and this definition's
+  params follow them in their canonical form — the rule a url `update()`
+  follows (_Shared ground stays shared_).
+- **The fragment is the hash slot's.** With a `hash` slot the fragment is the
+  value's — none at the default — whatever the URL had; without one, the
+  URL's own fragment stays.
+- **Nothing is added to the path.** The pathname and a base are the router's:
+  `@k8ordo/router`'s `href()` has put Vite's `base` in front already, so the
+  result is the URL the browser needs. A router that adds no base leaves
+  spelling one to the application, as it does for every other link.
+- **The pattern is checked where the URL is built.** The router's `href()`
+  checks the pattern and its params against the route table — a rest param,
+  `href('/files/:path+', { path })`, included — before the URL reaches this
+  package, which has nothing to register. `href` is typed as the URL it was
+  given, or that URL followed by `?…` or `#…`, so a literal survives in the
+  type: under Next.js, `listState.href('/products', values)` is still
+  checked by typed routes where `<Link href>` takes it. When the URL handed
+  in already carries this definition's params or a fragment, that type is an
+  approximation: those params are rewritten, and the query goes in before
+  the fragment.
+- **The page itself is `''`.** `listState.href('', values)` is a link
+  relative to the page, `?page=2`, which replaces the page's whole search the
+  way the browser resolves it — for display, or for a link that keeps
+  nothing else of the search.
 
 ## Reading before hydration
 

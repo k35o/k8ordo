@@ -16,7 +16,7 @@ test('a page below 1 reads as the first page', () => {
 });
 
 test('a link leaves the defaults out', () => {
-  expect(listState.href('/products', { page: 1 })).toBe('/products');
+  expect(listState.href('', { inStock: true, page: 1 })).toBe('?inStock=true');
 });
 
 test('a compact cookie reads back as compact', () => {

@@ -50,19 +50,9 @@ export const typedTitle = message({
   en: 'Typed paths',
 });
 
-export const typedRegister = message({
-  ja: 'Next.jsにはルート表が無いので、`next`の`Route`を`path`に登録します。アプリの中のすべての`href`が、Next.jsの知らないパスを型エラーにします。',
-  en: 'Next.js has no route table to hand over, so register `Route` from `next` under `path`. Every `href` in the application then turns a path Next.js does not know into a type error.',
-});
-
 export const typedRoute = message({
-  ja: '`typedRoutes`を有効にすると、`Route`はアプリのパスのunionになります。`href`の返り値の型はパスをリテラルのまま残すので、Next.jsの`<Link>`の型検査も通ります。',
-  en: 'With `typedRoutes` enabled, `Route` is the union of the application’s paths. The return type of `href` keeps the path as a literal, so it passes the typed check of Next.js’s `<Link>` too.',
-});
-
-export const typedApplication = message({
-  ja: '`Register`の拡張はアプリの中でだけ行ってください。共有のライブラリで拡張すると、その制約が使う側のすべてに及びます。',
-  en: 'Augment `Register` only in an application. A shared library that augments it imposes the constraint on every consumer.',
+  ja: '`typedRoutes`を有効にすると、Next.jsの`<Link>`はアプリのパスだけを受け付けます。`href`の第1引数にそのパスを渡すと、返り値の型はパスをリテラルのまま残すので、`<Link>`の型検査がそのまま効きます。このパッケージに登録するものはありません。',
+  en: 'With `typedRoutes` enabled, Next.js’s `<Link>` takes only the application’s paths. Pass such a path as `href`’s first argument, and the return type keeps it as a literal, so `<Link>`’s typed check still applies. There is nothing to register with this package.',
 });
 
 export const updateTitle = message({

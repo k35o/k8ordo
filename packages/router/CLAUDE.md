@@ -288,9 +288,9 @@ pnpm check         # check:write to auto-fix
   `import.meta.env.BASE_URL` in front of what leaves for the browser, and
   `withoutBase` (in `usePathname`, `<Router>`'s match and claim) takes it off
   what comes back; nothing between ever sees it. `href` returns `string`
-  because its result is a URL: typed as a table path it could be handed to
-  something that adds the base itself (`@k8ordo/state`'s `href`) and carry
-  it twice. Code Node loads without Vite (static mode's build, `serve`)
+  because its result is a URL, not a path in the table — the URL a link, a
+  `navigation.navigate()` and `@k8ordo/state`'s `href(url, values)` all
+  take as it is. Code Node loads without Vite (static mode's build, `serve`)
   has no `import.meta.env` and passes the base explicitly.
 - **The type mirrors the runtime walk.** `Below` resets a branch that landed
   on the root, exactly as `walk` does; without it every route under a root

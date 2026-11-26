@@ -10,7 +10,7 @@ import type { Context } from 'react';
  * screen is being left. `@k8ordo/router`'s `<Router>` and
  * `@k8ordo/framework`'s runtime provide it.
  */
-// router は型しか読まない任意の peer なので import しない。router と framework
+// router は任意の peer で、このパッケージは import しない。router と framework
 // が同じ名前で globalThis に置く context を、ここも同じ名前で読む
 const KEY = Symbol.for('@k8ordo/router/tree-pathname');
 

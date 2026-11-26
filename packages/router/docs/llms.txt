@@ -57,14 +57,14 @@ When installed via npm, these docs live under `node_modules/@k8ordo/router/docs/
   `paramsSchema` produces — so `href` takes a param as the page receives it
   (`ParsedParams` / `ParsedParamsMap` / `ParamsSchemaFor` / `ParamsOf` /
   `ErrorComponent` are the types the generated code imports); `useRoute()`
-  is the untyped form.
-  `@k8ordo/state`'s `Register` takes the same `routes: typeof routes`;
-  `NavigablePath<typeof routes, Path>` is `Path` when a linkable pattern
+  is the untyped form. `@k8ordo/state` builds on the URL `href` returns
+  (`listState.href(href('/products'), { page: 2 })`), with no `Register` of
+  its own; `NavigablePath<typeof routes, Path>` is `Path` when a linkable pattern
   matches it segment by segment (a `:param` takes one non-empty segment, a
   `:name+` one or more)
   and `never` otherwise — a check of the path given, never a union of every
-  path, which a `/:locale` page would turn into `/${string}` — for any other
-  typed-path consumer. `usePathname()` reads the platform's
+  path, which a `/:locale` page would turn into `/${string}` — for a
+  consumer handed a path rather than a pattern. `usePathname()` reads the platform's
   pathname — never the search — so it works with or without a table, which
   makes it the location hook that also works under the framework;
   `useMatch(pattern, options?)` / `matchPath(pattern, pathname, options?)`

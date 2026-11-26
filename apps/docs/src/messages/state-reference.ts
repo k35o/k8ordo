@@ -66,13 +66,8 @@ export const pageParseUrl = message({
 });
 
 export const pageHref = message({
-  ja: 'リンクを作ります。省いたフィールドは既定値として扱い、既定値と同じフィールドはクエリに出しません。先頭にViteの`base`を付けます。',
-  en: 'Builds a link. A field left out means its default, fields at their default are left out of the query, and Vite’s `base` is prepended.',
-});
-
-export const pageSearch = message({
-  ja: 'クエリ文字列だけを、`?`を付けずに返します。',
-  en: 'Returns the query string alone, without the `?`.',
+  ja: "ルーターが作ったURL（`@k8ordo/router`の`href`の戻り値、Next.jsの`Route`、今のページなら`''`）に状態を載せます。書き換えるのはこの定義の`url`のパラメーターだけで、省いたフィールドは既定値として扱い、既定値と同じフィールドはクエリに出しません。`hash`を持つ定義はフラグメントを置き、持たない定義は渡したURLのフラグメントを残します。`base`は足しません。",
+  en: "Puts the state on a URL the router built: what `href` of `@k8ordo/router` returned, a Next.js `Route`, or `''` for the page itself. Only this definition’s `url` params are rewritten; a field left out means its default, and fields at their default are left out of the query. A definition with a `hash` slot sets the fragment, and one without keeps the URL’s own. No `base` is added.",
 });
 
 export const pageCaveats = [
@@ -375,36 +370,6 @@ export const versioningCaveats = [
   message({
     ja: '`migrate`の中で例外が起きると、何も保存されていないものとして読みます。保存した値には触りません。',
     en: 'A `migrate` that throws reads as nothing stored. The stored value is left as it is.',
-  }),
-] as const;
-
-export const registerSummary = message({
-  ja: '`href`に渡すパスを型で検査するために、アプリケーションが拡張するインターフェースです。',
-  en: 'The interface an application augments so that the paths `href` takes are checked by type.',
-});
-
-export const registerRoutes = message({
-  ja: '`@k8ordo/router`のルート表の型。パスは表のパターンと、セグメントごとに比べます。',
-  en: 'The type of `@k8ordo/router`’s route table. A path is matched against its patterns segment by segment.',
-});
-
-export const registerPath = message({
-  ja: '表を持たないルーターのパスのunion。`routes`があればそちらを優先します。',
-  en: 'The path union of a router with no table. `routes` wins when both are present.',
-});
-
-export const registerCaveats = [
-  message({
-    ja: '`@k8ordo/framework`では、`.k8ordo/register.gen.ts`に生成されます。',
-    en: 'Under `@k8ordo/framework`, it is generated into `.k8ordo/register.gen.ts`.',
-  }),
-  message({
-    ja: '拡張はアプリケーションの中でだけ行います。',
-    en: 'Augment it only in an application.',
-  }),
-  message({
-    ja: '検査は`RegisteredPath<Path>`としてもexportしています。受け付けるパスなら`Path`に、拒むなら`never`になります。',
-    en: 'The check is also exported as `RegisteredPath<Path>`: `Path` when accepted, `never` when refused.',
   }),
 ] as const;
 

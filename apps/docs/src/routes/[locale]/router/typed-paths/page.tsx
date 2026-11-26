@@ -80,11 +80,11 @@ export default function RouterTypedPathsPage() {
           <Rich>{t.registerOnce()}</Rich>
         </p>
         <p>
-          <Rich>{t.stateRegisterBefore()}</Rich>
+          <Rich>{t.stateLinkBefore()}</Rich>
           <LocaleAnchor path="/:locale/state/links">
             {m.state.navLinks()}
           </LocaleAnchor>
-          <Rich>{t.stateRegisterAfter()}</Rich>
+          <Rich>{t.stateLinkAfter()}</Rich>
         </p>
         <Note>
           <p>

@@ -68,14 +68,6 @@ export function Filters({ initialUrl }: FiltersProps) {
   );
 }`;
 
-const REGISTER_PATH = `import type { Route } from 'next';
-
-declare module '@k8ordo/state' {
-  interface Register {
-    path: Route;
-  }
-}`;
-
 export default function StateNextjsPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/state/nextjs">
@@ -117,20 +109,8 @@ export default function StateNextjsPage() {
       </DocSection>
 
       <DocSection id="typed" title={t.typedTitle}>
-        <CodeBlock
-          code={REGISTER_PATH}
-          lang="ts"
-          marks={{ 5: 'highlight' }}
-          title="types/k8ordo-state.d.ts"
-        />
-        <p>
-          <Rich>{t.typedRegister()}</Rich>
-        </p>
         <p>
           <Rich>{t.typedRoute()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.typedApplication()}</Rich>
         </p>
       </DocSection>
 

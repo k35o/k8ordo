@@ -17,7 +17,7 @@ types, into the root's declarations.
 The framework's job is to make the application's structure a checkable form:
 `routes/` is the pathname space and holds nothing else, execution boundaries
 are declared with React's own `'use client'` and enforced, and the type wiring
-between the app and `@k8ordo/router` / `@k8ordo/state` / `@k8ordo/i18n` is
+between the app and `@k8ordo/router` / `@k8ordo/i18n` is
 generated rather than hand-written. The shared discipline (React 19 / RSC assumed, Baseline
 newly available only) is in the repository root's [`CLAUDE.md`](../../CLAUDE.md).
 

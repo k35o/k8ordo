@@ -6,6 +6,8 @@ import * as m from '../../../../messages';
 const t = m.stateReference;
 const FROM = '@k8ordo/state';
 
+const PAGE_HREF = `<U extends string>(url: U, values?) => U | \`\${U}?\${string}\``;
+
 const PAGE_EXAMPLE = `export const listState = definePageState('product-list', {
   url: z.object({
     page: z.coerce.number().int().min(1).default(1),
@@ -36,13 +38,8 @@ export default function StateReferencePage() {
           },
           {
             name: 'href',
-            type: '(path, values?) => string',
+            type: PAGE_HREF,
             description: t.pageHref,
-          },
-          {
-            name: 'search',
-            type: '(values?) => string',
-            description: t.pageSearch,
           },
         ]}
         from={FROM}
@@ -321,27 +318,6 @@ useAppState(def, keys, options?): [Pick<state, Key>, update]`}
   ) => { readonly [Key in keyof input<Schema>]?: unknown };
 };`}
         summary={t.versioningSummary}
-      />
-
-      <ApiEntry
-        caveats={t.registerCaveats}
-        fields={[
-          {
-            name: 'routes',
-            type: 'typeof routes',
-            description: t.registerRoutes,
-          },
-          { name: 'path', type: 'string', description: t.registerPath },
-        ]}
-        from={FROM}
-        id="register"
-        name="Register"
-        signature={`declare module '@k8ordo/state' {
-  interface Register {
-    routes: typeof routes;
-  }
-}`}
-        summary={t.registerSummary}
       />
 
       <ApiEntry

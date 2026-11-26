@@ -521,8 +521,8 @@ export const generatedFiles = [
     en: '`routes.gen.ts`: the route table itself. It checks each route file against its directory’s pattern with `satisfies`. `page.tsx`, `not-found.tsx`, `route.ts` and `fallback.tsx` are read with `import()` when a request reaches them, and a page or a `not-found.tsx` stands in the table as `lazy()`.',
   }),
   message({
-    ja: '`register.gen.ts`：ルート表をフレームワークに登録します。これで`href()`や`useMatch()`のパターンに型が付きます。serverモードでは、`PageProps`と`LayoutProps`に`request`も足します。アプリが`@k8ordo/state`に依存していれば、そちらにも登録します。アプリが`@k8ordo/i18n`に依存し、`src/i18n.ts`が`locales`をexportしていれば、`@k8ordo/i18n`の`Register`も書きます。',
-    en: '`register.gen.ts`: registers the table with the framework, which types the patterns `href()` and `useMatch()` take. Under server mode it also adds `request` to `PageProps` and `LayoutProps`. When the application depends on `@k8ordo/state`, it registers the table there too. When the application depends on `@k8ordo/i18n` and `src/i18n.ts` exports `locales`, it writes `@k8ordo/i18n`’s `Register` too.',
+    ja: '`register.gen.ts`：ルート表をフレームワークに登録します。これで`href()`や`useMatch()`のパターンに型が付きます。serverモードでは、`PageProps`と`LayoutProps`に`request`も足します。アプリが`@k8ordo/i18n`に依存し、`src/i18n.ts`が`locales`をexportしていれば、`@k8ordo/i18n`の`Register`も書きます。',
+    en: '`register.gen.ts`: registers the table with the framework, which types the patterns `href()` and `useMatch()` take. Under server mode it also adds `request` to `PageProps` and `LayoutProps`. When the application depends on `@k8ordo/i18n` and `src/i18n.ts` exports `locales`, it writes `@k8ordo/i18n`’s `Register` too.',
   }),
   message({
     ja: '`.gitignore`：`*`で中身をすべて無視します。`.k8ordo/`はこれでgitの管理から外れるので、アプリの`.gitignore`に足すものはありません。',

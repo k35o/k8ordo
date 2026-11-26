@@ -106,8 +106,8 @@ export const canonicalTitle = message({
 });
 
 export const canonicalOmit = message({
-  ja: '`search`と`href`は、既定値と同じフィールドをクエリから省きます。同じ状態からはいつも同じ、いちばん短いURLができます。同じ状態を指すリンクやブックマーク、キャッシュのキーが一致します。',
-  en: '`search` and `href` leave out every field that sits at its default. The same state always gives the same, shortest URL. Links, bookmarks and cache keys that point at the same state agree.',
+  ja: '`href`は、既定値と同じフィールドをクエリから省きます。同じ状態からはいつも同じ、いちばん短いURLができます。同じ状態を指すリンクやブックマーク、キャッシュのキーが一致します。',
+  en: '`href` leaves out every field that sits at its default. The same state always gives the same, shortest URL. Links, bookmarks and cache keys that point at the same state agree.',
 });
 
 export const canonicalOrder = message({
@@ -121,8 +121,8 @@ export const demoTitle = message({
 });
 
 export const demoDescription = message({
-  ja: '入力したクエリを上の`catalogState`と同じ定義の`parseUrl`で読み、`search`で作り直したクエリと並べて表示します（このページのURLは変わりません）。',
-  en: 'The query you type is read by `parseUrl` on the same definition as `catalogState` above, next to the query `search` writes back from it (this page’s own URL is left alone).',
+  ja: '入力したクエリを上の`catalogState`と同じ定義の`parseUrl`で読み、`href`で作り直したクエリと並べて表示します（このページのURLは変わりません）。',
+  en: 'The query you type is read by `parseUrl` on the same definition as `catalogState` above, next to the query `href` writes back from it (this page’s own URL is left alone).',
 });
 
 export const demoSteps = [
