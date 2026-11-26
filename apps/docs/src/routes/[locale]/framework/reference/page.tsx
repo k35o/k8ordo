@@ -160,6 +160,11 @@ export default function FrameworkReferencePage() {
             description: t.frameworkReactCompiler,
           },
           {
+            name: 'options.headers',
+            type: 'Readonly<Record<string, string>>',
+            description: t.frameworkHeaders,
+          },
+          {
             name: 'options.site',
             type: 'string',
             description: t.frameworkSite,

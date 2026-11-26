@@ -165,6 +165,12 @@ export default defineConfig({
   },
 });`;
 
+const TESTING = `import handler from '../dist/rsc/index.js';
+
+const response = await handler(new Request('https://example.test/account'));
+expect(response.status).toBe(303);
+expect(response.headers.get('location')).toBe('/login');`;
+
 const SERVE = `import { serve } from '@k8ordo/framework/serve';
 
 const server = await serve({ port: 3000, host: '0.0.0.0' });
@@ -558,6 +564,19 @@ export default function FrameworkDeployPage() {
         </p>
         <p>
           <Rich>{t.headersNot()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection id="testing" title={t.testingTitle}>
+        <p>
+          <Rich>{t.testingPlain()}</Rich>
+        </p>
+        <CodeBlock code={TESTING} lang="ts" title="src/handler.test.ts" />
+        <p>
+          <Rich>{t.testingHandler()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.testingServe()}</Rich>
         </p>
       </DocSection>
 

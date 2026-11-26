@@ -133,7 +133,8 @@ export async function createTalk(_previous: FormState, formData: FormData) {
 ```
 
 The built handler, `dist/rsc/index.js`, is a plain
-`(request: Request) => Promise<Response>` that needs nothing from its runtime
+`(request: Request, context?: HandlerContext) => Promise<Response>`
+(`context.waitUntil` is the host's own) that needs nothing from its runtime
 but `AsyncLocalStorage`, so Node.js, Bun, Deno and Cloudflare Workers
 (`nodejs_compat`) all run it, and `vercel()` from `@k8ordo/framework/vercel`
 writes a build for Vercel.

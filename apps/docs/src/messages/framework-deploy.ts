@@ -635,6 +635,26 @@ export const headersNot = message({
   en: 'Leave `Cache-Control` out: it would reach the files under `assets/` and every page. A header for some paths only goes where the host reads it, a route of `vercel()`’s or a rule in `public/_headers`. For a value that differs between `vite dev` and the build, branch on `defineConfig(({ command }) => …)`.',
 });
 
+export const testingTitle = message({
+  ja: 'テスト',
+  en: 'Testing',
+});
+
+export const testingPlain = message({
+  ja: '`paramsSchema`や`src/lib/`のモジュール、クライアントコンポーネントのように、リクエストの要らないものは普通のモジュールとしてテストします。リクエストに答えるものは、ビルドが書いたハンドラを呼んでテストします。ホストが呼ぶのと同じ関数です。',
+  en: 'What needs no request, such as a `paramsSchema`, a module under `src/lib/` or a client component, is an ordinary module and is tested as one. What answers a request is tested by calling the handler the build wrote, the same function a host calls.',
+});
+
+export const testingHandler = message({
+  ja: '`guard.ts`と`route.ts`、Server Actionは、直接呼ばずにハンドラを通してテストします。`cookies()`、`responseHeaders()`、`requestHeaders()`、`nonce()`、`waitUntil()`は処理中のリクエストに属するので、リクエストの外で呼ぶと`… needs a request`のエラーになります。',
+  en: 'Test a `guard.ts`, a `route.ts` and a Server Action through the handler rather than calling them directly. `cookies()`, `responseHeaders()`, `requestHeaders()`, `nonce()` and `waitUntil()` belong to a request in progress, and outside one they fail with `… needs a request`.',
+});
+
+export const testingServe = message({
+  ja: 'ブラウザが受け取る`Set-Cookie`や圧縮のように、HTTPのやり取りまで確かめたいときは、`@k8ordo/framework/serve`の`serve()`に`port: 0`を渡し、空いているポートでビルドを動かします。`close()`で止めます。staticモードのビルドは、`dist/client/`に書かれたファイルを読むか、同じように`serve()`で配ってテストします。',
+  en: 'For a real HTTP round trip, such as the `Set-Cookie` a browser would store or a compressed answer, pass `port: 0` to `serve()` from `@k8ordo/framework/serve` to run the build on a free port, and stop it with `close()`. A static build is tested by reading the files it wrote under `dist/client/`, or by serving them the same way.',
+});
+
 export const tabsTitle = message({
   ja: 'デプロイ前に開いたタブ',
   en: 'Tabs opened before a deploy',

@@ -61,6 +61,11 @@ export const frameworkReactCompiler = message({
   en: 'Either mode. With `true`, client components are compiled with React Compiler (the Rust one, through `@vitejs/plugin-react`’s `compiler`). The application needs `oxc-transform-react` installed. Server Components, and the HTML a client component renders on the server, are left as written. `false` by default.',
 });
 
+export const frameworkHeaders = message({
+  ja: '両モードで使えます。どの応答にも付けるヘッダーです。ページでもビルドのファイルでも、`404`でもリダイレクトでも付きます。`vite dev`、`vite preview`、`serve`が送り、serverモードではハンドラが自分の応答に足し、staticモードのビルドは`_headers`（`vercel()`ならそのルート）に書きます。`guard.ts`や`route.ts`が同じ名前で付けたヘッダーは、そちらが残ります。',
+  en: 'Either mode. Headers every response carries, whether a page, a file of the build, a `404` or a redirect. `vite dev`, `vite preview` and `serve` send them, the handler adds them to its own answers under server mode, and a static build writes them into `_headers` (or `vercel()`’s routes). A header a `guard.ts` or a `route.ts` set under the same name stays.',
+});
+
 export const frameworkSite = message({
   ja: 'staticモードでは必須。サイトの配信元のoriginで、パスは含めません（`https://example.com`）。ビルドがページと`route.ts`に頼むリクエストのoriginになり、`route.ts`が受け取る`request.url`のoriginもこの値です。ビルドは書いたページをこのoriginで並べた`sitemap.xml`も書きます。`sitemap.xml`を書く`route.ts`があれば、ビルドはそちらを使います。',
   en: 'Required under static mode. The origin the site is served from, with no path, such as `https://example.com`. Every request the build makes to a page or a `route.ts` is under it, so it is the origin of the `request.url` a `route.ts` receives. The build also writes `sitemap.xml`, listing the pages it wrote at this origin; a `route.ts` that writes `sitemap.xml` is used instead.',

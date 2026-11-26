@@ -293,8 +293,9 @@ dev dependencies.
 
 ## The options
 
-`framework()` takes `mode`, which is required, and `reactCompiler`, in
-either mode. The route files always live in `src/routes/`. Any other key
+`framework()` takes `mode`, which is required, and `reactCompiler` and
+`headers`, in either mode. The route files always live in `src/routes/`.
+Any other key
 stops the config as it loads, naming the keys the mode takes — a
 `vite.config.js` is never type-checked, and a key spelt wrong would
 otherwise do nothing:
@@ -314,6 +315,14 @@ read the config, with React's plugin's own error
 what runs in the browser is compiled; Server Components, and the HTML a
 client component renders on the server, are left as written.
 
+`headers` is one set of response headers every answer carries, whatever
+answered it — a page, a file of the build, a `404`, a redirect: sent by
+`vite dev`, `vite preview` and `serve`, added by the handler to its own
+answers under `mode: 'server'`, and written into `_headers` (and `vercel()`'s
+routes) for a static host. A header a `guard.ts` or a `route.ts` set under
+the same name wins
+([Headers on every response](references/deploy.md#headers-on-every-response)).
+
 Two more describe files, so only `mode: 'static'` takes them — passing
 them with `mode: 'server'` is a type error:
 
@@ -328,6 +337,32 @@ them with `mode: 'server'` is a type error:
   an origin stops the config as it loads.
 - `csp` — the Content-Security-Policy each page carries
   ([Content Security Policy](references/csp.md#static-mode-hashes-in-a-meta)).
+
+## Testing
+
+What needs no request — a `paramsSchema`, a module under `src/lib/`, a
+client component — is an ordinary module, tested as one. What answers a
+request is tested through the handler the build wrote, the same function a
+host calls:
+
+```ts
+// after `vite build` under mode: 'server'
+import handler from '../dist/rsc/index.js';
+
+const response = await handler(new Request('https://example.test/account'));
+expect(response.status).toBe(303); // the guard sent the visitor to sign in
+expect(response.headers.get('location')).toBe('/login');
+```
+
+A guard, a `route.ts` and a Server Action are tested this way rather than
+called by hand: `cookies()`, `responseHeaders()`, `requestHeaders()`,
+`nonce()` and `waitUntil()` belong to a request in progress, and outside
+one they throw `… needs a request`. For a real HTTP round trip — the
+`Set-Cookie` a browser would store, a compressed answer — `serve()` from
+`@k8ordo/framework/serve` runs the build on `port: 0`, a free port, and
+`close()` stops it ([Running the build](references/deploy.md#running-the-build)).
+A static build is tested by the files it wrote under `dist/client/`, or
+served the same way, as a static host serves them.
 
 ## References
 

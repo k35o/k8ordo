@@ -5,9 +5,13 @@
 > `framework({ mode: 'static', site })` renders every route at build time into
 > files a static host serves, with no server, and
 > `framework({ mode: 'server' })` renders per request on a server. Switching
-> is changing `mode` (and dropping `site` and `csp`, which server mode
-> refuses); nothing else in the application
-> changes. Pick `server` when the application needs the request — Server
+> takes more than `mode`: towards server, drop `site` and `csp` (refused
+> there; the policy becomes a header a `guard.ts` writes) and run
+> `dist/server.js` or hand the handler to a host; towards static, add
+> `site`, give every parameter's directory a `paths.ts` (or its page a
+> `fallback.tsx`), and remove what static mode refuses and every read of the
+> `request` prop — a layout's `nonce()` from `/server` included. The
+> route grammar, the boundaries and the handler stay the same. Pick `server` when the application needs the request — Server
 > Actions, `guard.ts`, the `request` prop, cookies, a page that exports
 > `search`, parameter values with no list rendered on the server (static
 > mode has only a `fallback.tsx`'s shell for those, drawn in the browser), a
@@ -59,10 +63,12 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   setup (install, `vite.config.ts`, `tsconfig.json`, the root layout as the
   document), `vite dev` and `vite preview` against a static build, the
   browsers a build is aimed at (Baseline newly available, unless the config
-  sets its own targets), the entries, and the plugin's options —
-  `reactCompiler` among them, React
-  Compiler on the client components, which needs `oxc-transform-react`
-  installed.
+  sets its own targets), the entries, the plugin's options —
+  `reactCompiler` (React Compiler on the client components, which needs
+  `oxc-transform-react` installed), `headers` on every answer, and
+  static mode's `site` and `csp` — and testing: what answers a request
+  through the built handler or `serve({ port: 0 })`, since the request API
+  throws outside a request.
 
 ## References
 
@@ -227,7 +233,8 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   `dist/` runs with nothing installed and the framework is a dev
   dependency.
 - `dist/rsc/index.js` — under server mode, the built request handler, a
-  plain `(request: Request) => Promise<Response>` default export with every
+  `(request: Request, context?: HandlerContext) => Promise<Response>`
+  default export (`context.waitUntil` is the host's own) with every
   dependency bundled in, that needs nothing from its runtime but
   `AsyncLocalStorage` (`node:async_hooks`), so Node.js, Bun, Deno and
   Cloudflare Workers with `nodejs_compat` run it directly; the host serves
