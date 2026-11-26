@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
+import { expect } from 'storybook/test';
 
 import { Anchor } from '../../navigation/anchor';
 import { Alert } from './alert';
@@ -49,6 +50,25 @@ export const ArrayMessage: Story = {
       'パスワードは8文字以上で入力してください',
       '利用規約に同意してください',
     ],
+  },
+};
+
+export const DuplicateArrayMessage: Story = {
+  args: {
+    tone: 'error',
+    message: [
+      'メールアドレスの形式が正しくありません',
+      'メールアドレスの形式が正しくありません',
+    ],
+  },
+  play: async ({ canvas }) => {
+    const items = canvas.getAllByRole('listitem');
+    await expect(items).toHaveLength(2);
+    for (const item of items) {
+      await expect(item).toHaveTextContent(
+        'メールアドレスの形式が正しくありません',
+      );
+    }
   },
 };
 

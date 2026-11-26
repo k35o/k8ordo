@@ -52,8 +52,9 @@ export const Alert: FC<Props> = ({
   if (Array.isArray(message) && message.length > 1) {
     const list = (
       <ul>
-        {message.map((msg) => (
-          <li className={styles.listItem} key={msg}>
+        {message.map((msg, index) => (
+          // eslint-disable-next-line react/no-array-index-key -- 同じ文が並びうる、並べ替えのない静的な列
+          <li className={styles.listItem} key={`${msg}-${index}`}>
             {msg}
           </li>
         ))}
