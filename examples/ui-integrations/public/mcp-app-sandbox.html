@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <title>MCP App のサンドボックス</title>
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+
+      iframe {
+        display: block;
+        width: 100%;
+        height: 100%;
+        border: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      // MCPAppRenderer の外側の iframe に読ませるページ。ホストとは別のオリジンで
+      // 配り、App の HTML は sandbox の内側の iframe に入れ、メッセージを中継する
+      const host =
+        document.referrer === '' ? null : new URL(document.referrer).origin;
+
+      // リソースが csp を宣言しなかったときに敷く、MCP Apps の仕様の既定
+      const DEFAULT_CSP =
+        "default-src 'none'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self' data:; connect-src 'none'";
+
+      const withCsp = (html, csp) => {
+        const meta = `<meta http-equiv="Content-Security-Policy" content="${csp.replaceAll('"', '&quot;')}">`;
+        const head = /<head[^>]*>/i.exec(html);
+        if (head === null) {
+          return meta + html;
+        }
+        const end = head.index + head[0].length;
+        return html.slice(0, end) + meta + html.slice(end);
+      };
+
+      let app = null;
+
+      window.addEventListener('message', (event) => {
+        const message = event.data;
+        if (message?.jsonrpc !== '2.0') {
+          return;
+        }
+        if (event.source === window.parent && event.origin === host) {
+          if (message.method === 'ui/notifications/sandbox-resource-ready') {
+            const { html, csp, sandbox, allow } = message.params;
+            app?.remove();
+            app = document.createElement('iframe');
+            app.sandbox = sandbox ?? 'allow-scripts allow-forms';
+            if (allow !== undefined) {
+              app.allow = allow;
+            }
+            app.srcdoc = withCsp(html, csp ?? DEFAULT_CSP);
+            document.body.append(app);
+          } else {
+            // 内側は allow-same-origin が無く、オリジンを持たないので * で送る
+            app?.contentWindow?.postMessage(message, '*');
+          }
+        } else if (app !== null && event.source === app.contentWindow) {
+          window.parent.postMessage(message, host);
+        }
+      });
+
+      if (host !== null) {
+        window.parent.postMessage(
+          { jsonrpc: '2.0', method: 'ui/notifications/sandbox-proxy-ready' },
+          host,
+        );
+      }
+    </script>
+  </body>
+</html>

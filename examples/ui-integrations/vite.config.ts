@@ -1,4 +1,6 @@
-import type { IncomingMessage, ServerResponse } from 'node:http';
+import { createServer } from 'node:http';
+import type { IncomingMessage, Server, ServerResponse } from 'node:http';
+import type { AddressInfo } from 'node:net';
 import { fileURLToPath } from 'node:url';
 
 import tailwindcss from '@tailwindcss/vite';
@@ -15,12 +17,13 @@ type Handler = (
 
 type GenerateModule = { handleGenerate: Handler };
 type McpModule = { handleMcp: Handler };
+type ChatModule = { handleChat: Handler; handleResource: Handler };
 
 const route = (
   server: ViteDevServer,
   path: string,
   method: string | null,
-  load: () => Promise<Handler>,
+  load: () => Handler | Promise<Handler>,
 ): void => {
   server.middlewares.use(path, (request, response, next) => {
     if (method !== null && request.method !== method) {
@@ -39,8 +42,25 @@ const route = (
   });
 };
 
+// MCP Apps の仕様は、App を入れるサンドボックスをホストと別のオリジンに置くよう
+// 求める。同じ dev サーバーを別のポートでも聞かせ、そちらから配る
 const mcpApps = (): Plugin => {
+  let sandbox: Server | null = null;
   let watcher: { close: () => Promise<void> } | null = null;
+
+  const sandboxPort = (server: ViteDevServer): Promise<number> =>
+    new Promise((resolve) => {
+      sandbox ??= createServer(server.middlewares).listen(0, 'localhost');
+      const listening = sandbox;
+      const resolvePort = () => {
+        resolve((listening.address() as AddressInfo).port);
+      };
+      if (listening.listening) {
+        resolvePort();
+      } else {
+        listening.once('listening', resolvePort);
+      }
+    });
 
   return {
     name: 'ui-integrations:mcp-apps',
@@ -53,6 +73,32 @@ const mcpApps = (): Plugin => {
         const { handleMcp } = await load<McpModule>('/src/mcp/http.ts');
         return handleMcp;
       });
+      route(server, '/api/chat', 'POST', async () => {
+        const { handleChat } = await load<ChatModule>(
+          '/src/mcp-chat/server.ts',
+        );
+        return handleChat;
+      });
+      route(server, '/api/mcp-app/resource', 'POST', async () => {
+        const { handleResource } = await load<ChatModule>(
+          '/src/mcp-chat/server.ts',
+        );
+        return handleResource;
+      });
+      route(
+        server,
+        '/api/mcp-app/sandbox',
+        'GET',
+        () => async (_request, response) => {
+          const port = await sandboxPort(server);
+          response.setHeader('content-type', 'application/json; charset=utf-8');
+          response.end(
+            JSON.stringify({
+              url: `http://localhost:${String(port)}/mcp-app-sandbox.html`,
+            }),
+          );
+        },
+      );
 
       // MCP サーバーが返す App は 1 枚の HTML にビルドしたもの。dev の間は
       // 書き換えるたびに作り直す
@@ -71,6 +117,7 @@ const mcpApps = (): Plugin => {
       }
     },
     async closeBundle() {
+      sandbox?.close();
       await watcher?.close();
     },
   };

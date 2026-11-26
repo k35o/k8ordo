@@ -33,6 +33,7 @@ describe('mapMessageParts', () => {
         output: 'result',
         errorText: undefined,
         approval: undefined,
+        part: message.parts[3],
       },
     ]);
   });
@@ -59,6 +60,7 @@ describe('mapMessageParts', () => {
         output: undefined,
         errorText: 'boom',
         approval: undefined,
+        part: message.parts[0],
       },
     ]);
   });
@@ -84,6 +86,7 @@ describe('mapMessageParts', () => {
         output: undefined,
         errorText: undefined,
         approval: { id: 'a1', requestReason: 'ファイルを消します' },
+        part: message.parts[0],
       },
     ]);
   });
@@ -109,6 +112,7 @@ describe('mapMessageParts', () => {
         output: undefined,
         errorText: undefined,
         approval: { id: 'a2', approved: false, reason: '外部検索は無効' },
+        part: message.parts[0],
       },
     ]);
   });
