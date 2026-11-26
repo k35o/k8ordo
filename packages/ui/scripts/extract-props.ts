@@ -398,7 +398,21 @@ const componentFrom = (name: string, symbol: TsSymbol): Component | null => {
   if (!declaration) return null;
 
   const type = checker.getTypeOfSymbolAtLocation(symbol, declaration);
-  const [signature] = checker.getSignaturesOfType(type, SignatureKind.Call);
+  const signatures = checker.getSignaturesOfType(type, SignatureKind.Call);
+  // A component typed as overloads (`Button`: a link shape and a button
+  // shape) is read off its implementation, whose parameter is the union of
+  // every shape; the first overload alone would document one of them.
+  const implementation =
+    signatures.length > 1 &&
+    isVariableDeclaration(declaration) &&
+    declaration.initializer &&
+    isArrowFunction(declaration.initializer)
+      ? checker.getSignaturesOfType(
+          checker.getTypeAtLocation(declaration.initializer),
+          SignatureKind.Call,
+        )
+      : signatures;
+  const [signature] = implementation;
   if (!signature) return null;
   const category = categoryOf(name, declaration);
 

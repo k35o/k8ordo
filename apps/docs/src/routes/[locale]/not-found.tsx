@@ -18,24 +18,12 @@ export default function NotFound() {
         <p className={page.mute}>{m.notFound.description()}</p>
       </div>
       <div className={styles.actions}>
-        <Button
-          renderItem={({ className, children }) => (
-            <a className={className} href={href('/:locale')}>
-              {children}
-            </a>
-          )}
-          size="md"
-          variant="solid"
-        >
+        <Button href={href('/:locale')} size="md" variant="solid">
           {m.nav.home()}
         </Button>
         <Button
           color="base"
-          renderItem={({ className, children }) => (
-            <a className={className} href={href('/:locale/ui/get-started')}>
-              {children}
-            </a>
-          )}
+          href={href('/:locale/ui/get-started')}
           size="md"
           variant="outline"
         >

@@ -2,61 +2,87 @@
 
 import { clsx } from 'clsx';
 import type {
-  ButtonHTMLAttributes,
   ComponentPropsWithRef,
-  FC,
   MouseEvent,
   MouseEventHandler,
   ReactNode,
-  RefCallback,
 } from 'react';
-import { useMemo, useTransition } from 'react';
+import { useTransition } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import { Spinner } from '../../feedback/spinner/spinner';
-import { mergeRefs } from './../../../helpers/merge-refs';
 
 import focusRing from '../../_internal/focus-ring.module.css';
 import styles from './button.module.css';
 
-/**
- * `renderItem` が受け取る props。既定の `<button>` に渡すものと同じ
- * オブジェクトで、`<button>` にはそのまま展開できる。`<a>` など別の要素を
- * 描画するときは `<button>` 専用の `disabled` / `type` を分割代入で外してから
- * 残りを展開する。無効状態は同梱の `aria-disabled` で表現でき、
- * `onClick` は無効なら何もしないので `<a>` でも遷移しない。
- *
- * `disabled` が表すのは利用者が渡した `disabled` だけ。`onAction` の保留中と、
- * `type="submit"` で属するフォームの送信が保留中のあいだは、`aria-disabled` と
- * `aria-busy` が立っても `disabled` は `false` のままで、押された要素はフォーカスを
- * 保つ。その間に押されても `onClick` が何もしない。
- *
- * ハンドラの要素型を `HTMLButtonElement` ではなく `HTMLElement` にしているのは、
- * `ClipboardEventHandler<HTMLButtonElement>` のような兄弟型が `<a>` の同名 props
- * に代入できず、束ごと展開できなくなるため。
- */
-export type ButtonRenderItemProps = Omit<
-  ButtonHTMLAttributes<HTMLElement>,
-  | 'aria-busy'
-  | 'aria-disabled'
-  | 'children'
-  | 'className'
-  | 'disabled'
-  | 'onClick'
-  | 'style'
-  | 'type'
-> & {
-  // ref を要素固有の Ref<HTMLButtonElement> ではなくコールバックで渡すのは、
-  // RefObject が不変で <a> などの ref に代入できないため。
-  ref: RefCallback<HTMLElement> | undefined;
+type AnchorAttributes = Omit<
+  ComponentPropsWithRef<'a'>,
+  'aria-disabled' | 'children' | 'className' | 'href' | 'style' | 'type'
+>;
+
+type RenderAnchorProps<T extends string> = {
+  href: NoInfer<T>;
   className: string;
   children: ReactNode;
-  type: 'button' | 'submit';
-  disabled: boolean;
-  'aria-busy': true | undefined;
+  onClick: MouseEventHandler<HTMLAnchorElement> | undefined;
   'aria-disabled': true | undefined;
-  onClick: MouseEventHandler<HTMLElement> | undefined;
+} & Omit<AnchorAttributes, 'onClick'>;
+
+type Look = {
+  size?: 'sm' | 'md' | 'lg';
+  color?: 'primary' | 'secondary' | 'base';
+  variant?: 'solid' | 'outline' | 'skeleton';
+  fullWidth?: boolean;
+  isActive?: boolean;
+  startIcon?: ReactNode;
+  endIcon?: ReactNode;
+  children?: ReactNode;
+  disabled?: boolean;
 };
+
+type ButtonProps = Look & {
+  href?: undefined;
+  type?: 'button' | 'submit' | 'reset';
+  /**
+   * 押したときに transition の中で走らせる処理。返した Promise が解決するまで
+   * スピナーを出し、`aria-busy` と `aria-disabled` を立て、押されても何もしない。
+   * ボタンはフォーカスを持ったままでいる。続けて押す同期の更新や、イベントが
+   * 要る処理は `onClick` に書く。両方あれば `onClick` → `onAction` の順に呼び、
+   * `onClick` が `preventDefault` したら `onAction` は呼ばない。
+   */
+  onAction?: () => void | Promise<void>;
+  renderAnchor?: never;
+} & Omit<
+    ComponentPropsWithRef<'button'>,
+    'children' | 'className' | 'disabled' | 'style' | 'type'
+  >;
+
+type LinkProps<T extends string> = Look & {
+  /** あれば `<button>` の代わりに `<a>` を描く。 */
+  href: T;
+  type?: never;
+  onAction?: never;
+  /** `<a>` の代わりに描く要素。Next.js の `Link` などに受け取った props を展開する。 */
+  renderAnchor?: (props: RenderAnchorProps<T>) => ReactNode;
+} & AnchorAttributes;
+
+// 1 つのジェネリックな union にしないのは、TypeScript がそこから onClick などの
+// 引数の型を推論できないため。ボタンの形を最後に置くのは、ComponentProps が
+// 最後のシグネチャを読むため。
+type ButtonComponent = {
+  <T extends string>(props: LinkProps<T>): ReactNode;
+  (props: ButtonProps): ReactNode;
+};
+
+type ButtonRest = Omit<ButtonProps, keyof Look | 'type' | 'onAction'>;
+type LinkRest<T extends string> = Omit<
+  LinkProps<T>,
+  keyof Look | 'type' | 'onAction'
+>;
+
+const isLink = <T extends string>(
+  rest: ButtonRest | LinkRest<T>,
+): rest is LinkRest<T> => rest.href !== undefined;
 
 const VARIANT = {
   solid: {
@@ -73,74 +99,31 @@ const VARIANT = {
 
 const SIZE = { sm: styles.sm, md: styles.md, lg: styles.lg } as const;
 
-type Props = {
-  type?: 'button' | 'submit';
-  size?: 'sm' | 'md' | 'lg';
-  color?: 'primary' | 'secondary' | 'base';
-  variant?: 'solid' | 'outline' | 'skeleton';
-  fullWidth?: boolean;
-  isActive?: boolean;
-  startIcon?: ReactNode;
-  endIcon?: ReactNode;
-  /**
-   * クリック時の処理。`onAction` は非同期処理を `useTransition` で包み、保留中は
-   * 自動でスピナーを表示する糖衣。保留中は押しても何もしないが、ボタンは
-   * フォーカスを持ったままでいる。素のクリックイベント（`event` が必要、
-   * `preventDefault` したい等）は `onClick` を使う。両者は併用可能で、
-   * `onClick` → `onAction` の順に実行される（`onClick` が `preventDefault`
-   * した場合は `onAction` をスキップ）。
-   */
-  onAction?: () => void | Promise<void>;
-  renderItem?: (props: ButtonRenderItemProps) => ReactNode;
-} & Omit<ComponentPropsWithRef<'button'>, 'type' | 'className' | 'style'>;
+// Stable module-level reference so it is not re-created on every render
+// (default prop function expressions break referential equality).
+const defaultRenderAnchor = ({
+  children: anchorChildren,
+  ...rest
+}: RenderAnchorProps<string>): ReactNode => <a {...rest}>{anchorChildren}</a>;
 
-export const Button: FC<Props> = ({
-  ref,
-  children,
-  type = 'button',
+export const Button: ButtonComponent = <T extends string>({
   size = 'md',
   color = 'primary',
   variant = 'solid',
-  disabled = false,
   fullWidth = false,
   isActive = false,
-  onAction,
-  onClick,
+  disabled = false,
   startIcon,
   endIcon,
-  renderItem,
+  children,
+  type = 'button',
+  onAction,
   ...rest
-}) => {
-  // ref を毎レンダー作り直すと React が付け外しを繰り返すので、合成結果を保持する。
-  // react(refs) を止めているのは、renderItem に ref を渡す設計そのものを
-  // このルールが許さないため。ref という名前で受けた値は、関数に渡してもクロージャに
-  // 閉じ込めても違反になり、renderItem(itemProps) 側へ位置が移るだけになる。
-  // mergeRefs が返すのはコールバック ref で、.current をレンダー中に読む経路はない。
-  // oxlint-disable-next-line react/refs
-  const mergedRef = useMemo(() => (ref ? mergeRefs(ref) : undefined), [ref]);
+}: ButtonProps | LinkProps<T>): ReactNode => {
   const [transitionPending, startTransition] = useTransition();
   const { pending: formPending } = useFormStatus();
   const isPending = transitionPending || (type === 'submit' && formPending);
   const isDisabled = disabled || isPending;
-
-  // 無効なときもハンドラを付けるのは、保留中の <button> や renderItem が描いた
-  // <a> などにはネイティブの disabled が付かず、押せば click が届くため。
-  const handleClick =
-    onClick || onAction || isDisabled
-      ? (event: MouseEvent<HTMLButtonElement>) => {
-          if (isDisabled) {
-            event.preventDefault();
-            return;
-          }
-          onClick?.(event);
-          if (event.defaultPrevented) return;
-          if (onAction) {
-            startTransition(async () => {
-              await onAction();
-            });
-          }
-        }
-      : undefined;
 
   const spinnerSize = size === 'lg' ? 'md' : 'sm';
   const resolvedStartIcon = isPending ? (
@@ -164,34 +147,74 @@ export const Button: FC<Props> = ({
     isActive && styles.active,
     isDisabled && styles.disabled,
   );
+  const content = (
+    <>
+      {resolvedStartIcon}
+      {children}
+      {endIcon}
+    </>
+  );
 
-  const itemProps: ButtonRenderItemProps = {
-    ...rest,
-    'aria-busy': isPending || undefined,
-    'aria-disabled': isDisabled || undefined,
-    className,
-    // 保留中にネイティブの disabled を付けないのは、押されてフォーカスを持つ要素が
-    // disabled になると、Chromium が描画の更新でフォーカスを body へ落とすため。
-    // 二重の実行は handleClick が止める。入力欄の Enter による暗黙の送信も、既定の
-    // ボタンへの click を経るので同じく止まる。
-    disabled,
-    onClick: handleClick,
-    ref: mergedRef,
-    type,
-    children: (
-      <>
-        {resolvedStartIcon}
-        {children}
-        {endIcon}
-      </>
-    ),
-  };
+  if (isLink(rest)) {
+    const {
+      href,
+      onClick,
+      renderAnchor = defaultRenderAnchor,
+      ...anchorRest
+    } = rest;
+    return renderAnchor({
+      ...anchorRest,
+      href,
+      className,
+      children: content,
+      'aria-disabled': disabled || undefined,
+      // <a> には disabled が無いので、無効なあいだはクリックで遷移させない。
+      onClick: disabled
+        ? (event: MouseEvent<HTMLAnchorElement>) => {
+            event.preventDefault();
+          }
+        : onClick,
+    });
+  }
 
-  // type を展開のあとにリテラルで書き直しているのは、lint の button-has-type が
-  // スプレッド越しの type も変数の type も読めないため（値は itemProps.type と同じ）。
-  return renderItem ? (
-    renderItem(itemProps)
-  ) : (
-    <button {...itemProps} type={type === 'submit' ? 'submit' : 'button'} />
+  const { href: _href, onClick, ...buttonRest } = rest;
+  // 無効なときもハンドラを付けるのは、保留中の <button> にはネイティブの
+  // disabled が付かず、押せば click が届くため。
+  const handleClick =
+    onClick || onAction || isDisabled
+      ? (event: MouseEvent<HTMLButtonElement>) => {
+          if (isDisabled) {
+            event.preventDefault();
+            return;
+          }
+          onClick?.(event);
+          if (event.defaultPrevented) return;
+          if (onAction) {
+            startTransition(async () => {
+              await onAction();
+            });
+          }
+        }
+      : undefined;
+
+  return (
+    <button
+      {...buttonRest}
+      aria-busy={isPending || undefined}
+      aria-disabled={isDisabled || undefined}
+      className={className}
+      // 保留中にネイティブの disabled を付けないのは、押されてフォーカスを持つ要素が
+      // disabled になると、Chromium が描画の更新でフォーカスを body へ落とすため。
+      // 二重の実行は handleClick が止める。入力欄の Enter による暗黙の送信も、既定の
+      // ボタンへの click を経るので同じく止まる。
+      disabled={disabled}
+      onClick={handleClick}
+      // lint の button-has-type は変数の type を読めないので、値ごとにリテラルで書く。
+      type={
+        type === 'submit' ? 'submit' : type === 'reset' ? 'reset' : 'button'
+      }
+    >
+      {content}
+    </button>
   );
 };

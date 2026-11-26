@@ -91,8 +91,8 @@ export const componentImport = message({
 });
 
 export const componentProps = message({
-  ja: 'どのコンポーネントも`className`と`style`を受け取りません。見た目は`variant`や`size`などのpropsで選びます。それでも足りないときは、`Button`の`renderItem`のようなrender propで要素を差し替えます。',
-  en: 'No component takes `className` or `style`. Choose the look with props such as `variant` and `size`. When that is not enough, replace the element through a render prop such as `Button`’s `renderItem`.',
+  ja: 'どのコンポーネントも`className`と`style`を受け取りません。見た目は`variant`や`size`などのpropsで選びます。それでも足りないときは、`Anchor`の`renderAnchor`のようなrender propで要素を差し替えます。',
+  en: 'No component takes `className` or `style`. Choose the look with props such as `variant` and `size`. When that is not enough, replace the element through a render prop such as `Anchor`’s `renderAnchor`.',
 });
 
 export const packageManagerLabel = message({

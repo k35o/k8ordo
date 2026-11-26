@@ -148,78 +148,65 @@ export const NativeAttributes: Story = {
  * `onClick` は先に呼ぶので、押下の検証には影響しない。
  */
 const withoutNavigation =
-  (onClick: MouseEventHandler<HTMLElement> | undefined) =>
-  (event: MouseEvent<HTMLElement>) => {
+  (onClick: MouseEventHandler<HTMLAnchorElement> | undefined) =>
+  (event: MouseEvent<HTMLAnchorElement>) => {
     onClick?.(event);
     event.preventDefault();
   };
 
+const linkClick = fn();
+const linkMouseEnter = fn();
+
 /**
- * `renderItem` は既定の `<button>` に渡るのと同じ props を受け取り、tooltip の
- * 配線だけが `triggerProps` に入る。`<a>` を描画するときは `<button>` 専用の
- * `disabled` / `type` を外し、残りと `triggerProps` の両方を展開する。
+ * `href` があれば `<a>` を描く。`label` は `<a>` の名前になり、tooltip も付く。
  */
-export const RenderItemLink: Story = {
-  args: {
-    onClick: fn(),
-    onMouseEnter: fn(),
-    renderItem: ({
-      children,
-      disabled: _disabled,
-      triggerProps,
-      type: _type,
-      ...props
-    }) => (
-      <a
-        href="#render-item"
-        {...props}
-        {...triggerProps}
-        onClick={withoutNavigation(props.onClick)}
-      >
-        {children}
-      </a>
-    ),
-  },
-  play: async ({ args, canvas, userEvent }) => {
+export const Link: Story = {
+  render: () => (
+    <IconButton
+      href="#icon-link"
+      label="コピー"
+      onClick={withoutNavigation(linkClick)}
+      onMouseEnter={linkMouseEnter}
+    >
+      <CopyIcon />
+    </IconButton>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    linkClick.mockClear();
+    linkMouseEnter.mockClear();
     const link = canvas.getByRole('link', { name: 'コピー' });
+
+    await expect(link).toHaveAttribute('href', '#icon-link');
 
     await userEvent.hover(link);
 
-    // triggerProps を展開したので tooltip が開き、利用者のハンドラも連結される。
     await expect(await screen.findByRole('tooltip')).toHaveTextContent(
       'コピー',
     );
-    await expect(args.onMouseEnter).toHaveBeenCalled();
+    await expect(linkMouseEnter).toHaveBeenCalled();
 
     await userEvent.click(link);
 
-    await expect(args.onClick).toHaveBeenCalled();
+    await expect(linkClick).toHaveBeenCalled();
   },
 };
 
-export const RenderItemDisabled: Story = {
-  args: {
-    disabled: true,
-    tooltipDisabled: true,
-    onClick: fn(),
-    renderItem: ({
-      children,
-      disabled: _disabled,
-      triggerProps,
-      type: _type,
-      ...props
-    }) => (
-      <a
-        href="#render-item"
-        {...props}
-        {...triggerProps}
-        onClick={withoutNavigation(props.onClick)}
-      >
-        {children}
-      </a>
-    ),
-  },
-  play: async ({ args, canvas, userEvent }) => {
+const disabledLinkClick = fn();
+
+export const LinkDisabled: Story = {
+  render: () => (
+    <IconButton
+      disabled
+      href="#disabled-icon-link"
+      label="コピー"
+      onClick={disabledLinkClick}
+      tooltipDisabled
+    >
+      <CopyIcon />
+    </IconButton>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    disabledLinkClick.mockClear();
     const link = canvas.getByRole('link', { name: 'コピー' });
 
     await expect(link).toHaveAttribute('aria-disabled', 'true');
@@ -227,6 +214,43 @@ export const RenderItemDisabled: Story = {
 
     await userEvent.click(link);
 
-    await expect(args.onClick).not.toHaveBeenCalled();
+    await expect(disabledLinkClick).not.toHaveBeenCalled();
+    await expect(window.location.hash).not.toBe('#disabled-icon-link');
+  },
+};
+
+/**
+ * `renderAnchor` は tooltip の配線ごと `<a>` に渡る props を受け取る。
+ * 展開すれば、リンク部品にも tooltip が付く。
+ */
+export const RenderAnchor: Story = {
+  render: () => (
+    <IconButton
+      href="#render-anchor"
+      label="コピー"
+      renderAnchor={({ children, href, onClick, ...props }) => (
+        <a
+          {...props}
+          data-rendered=""
+          href={href}
+          onClick={withoutNavigation(onClick)}
+        >
+          {children}
+        </a>
+      )}
+    >
+      <CopyIcon />
+    </IconButton>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    const link = canvas.getByRole('link', { name: 'コピー' });
+
+    await expect(link).toHaveAttribute('data-rendered');
+
+    await userEvent.hover(link);
+
+    await expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'コピー',
+    );
   },
 };

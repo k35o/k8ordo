@@ -1,10 +1,6 @@
-export { Button, type ButtonRenderItemProps } from './buttons/button';
+export { Button } from './buttons/button';
 export { CopyButton } from './buttons/copy-button';
-export {
-  IconButton,
-  type IconButtonRenderItemProps,
-  type IconButtonTriggerProps,
-} from './buttons/icon-button';
+export { IconButton } from './buttons/icon-button';
 export { Toolbar, type ToolbarItemProps } from './buttons/toolbar';
 export { Accordion } from './data-display/accordion';
 export { Avatar } from './data-display/avatar';

@@ -87,8 +87,6 @@ code around it:
 | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | `StackProps` / `GridProps`                                            | Every prop of `Stack` / `Grid`, for a component that wraps one                                          |
 | `GapSize` / `PaddingSize`                                             | The `none`–`xl` scale of `gap` (Stack, Grid) and `padding` (Stack)                                      |
-| `ButtonRenderItemProps` / `IconButtonRenderItemProps`                 | What `renderItem` receives on `Button` / `IconButton`                                                   |
-| `IconButtonTriggerProps`                                              | `Partial<TooltipTriggerProps>`: the tooltip wiring in `IconButtonRenderItemProps`' `triggerProps`       |
 | `PopoverTriggerProps` / `PopoverContentProps` / `TooltipTriggerProps` | What `renderItem` receives on `Popover.Trigger` / `Popover.Content` / `Tooltip.Trigger`                 |
 | `ToolbarItemProps`                                                    | What `renderItem` receives on `Toolbar.Item`: `ref`, `tabIndex`, `onFocus`                              |
 | `CommandPaletteItem`                                                  | A command in `CommandPalette`: `id`, `label`, `onSelect`, plus `group`, `keywords`, `shortcut`          |

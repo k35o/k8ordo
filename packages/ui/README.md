@@ -534,7 +534,7 @@ Components are written in CSS Modules and placed in the `components` cascade
 layer. Customize them through:
 
 - CSS custom properties (semantic design tokens), overridden after `styles.css`
-- `renderItem` / `renderAnchor`, which hand you the component's `className`
+- `renderAnchor`, which hands a link component of your own the component's `className`
 - Light / Dark mode via semantic color tokens (`light-dark()`, switched by the `dark` class)
 - Tailwind utility classes on your own markup, through `tailwind.css`
 

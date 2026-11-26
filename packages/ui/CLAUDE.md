@@ -90,22 +90,27 @@ For example: `Modal` and `Drawer` take `isOpen?` + `defaultOpen?` + `onClose?`;
 | `placement` | Placement relative to an anchor (`Placement`) | `bottom-start`, …                                                                        |
 | `onAction`  | Activating an item or button (no event arg)   | `() => void` (`Button` / `IconButton` also accept a `Promise`)                           |
 
-`type` is reserved for HTML attributes only (`button` / `submit`, input types).
+`type` is reserved for HTML attributes only (`button` / `submit` / `reset`, input types).
 Render props take a verb+noun form: `renderItem` / `renderAnchor` / `renderInput`.
 In generative-UI schemas the trigger wording is `triggerLabel` and the body text
 is `content` (`Toast` and `Alert` keep their component's `message`).
 
 ### Render props
 
-Because every component omits `className` and `style`, a render prop is the only
-escape hatch a caller has. There are two kinds, and they must not be blurred.
+Every component omits `className` and `style`, and a render prop is not a way
+around that: it exists to hand an element to someone else's component (a
+framework's `<Link>`) or to fill a slot. There are two kinds, and they must not
+be blurred.
 
-**Replacing the element** (`Button` / `IconButton` `renderItem`, `Anchor` /
-`Breadcrumb.Link` / `SideNav.Link` `renderAnchor`). The bag is _everything the component would
-have put on its own element_. For `Button` / `IconButton` that is the resolved
-`className`, the composed `children` (icons and the pending spinner included),
-`ref`, the click handler, the disabled and pending state, and the caller's
-remaining attributes. The link components own less: `Anchor`'s bag is `href` /
+**Replacing the element** (`renderAnchor` on `Button` / `IconButton` with
+`href`, `Anchor`, `Breadcrumb.Link`, `SideNav.Link`). The bag is _everything the
+component would have put on its own `<a>`_. For `Button` / `IconButton` that is
+`href`, the resolved `className`, the composed `children` (icons included),
+`ref`, the click handler, `aria-disabled`, and the caller's remaining anchor
+attributes (`IconButton` adds `aria-label` and the tooltip's handlers, chained
+with the caller's). A button is never replaced: `type`, `onAction` and the
+pending state belong to the `<button>` side, and `href` switches to the `<a>`
+side. The link components own less: `Anchor`'s bag is `href` /
 `className` / `children` / `target` / `rel` and the caller's remaining
 attributes, plus `kind` (`'internal' | 'external'`), which is not an attribute;
 `Breadcrumb.Link` takes no extra attributes, so its bag is `href` / `className` /
@@ -114,19 +119,16 @@ attributes, plus `kind` (`'internal' | 'external'`), which is not an attribute;
 the caller's remaining anchor attributes. Build that
 object once and hand the same one to both branches — the render prop and the
 component's own element — so the two can never drift. A render prop that quietly
-drops `onClick` or `disabled` hands the caller a dead, undisabled element with
+drops `onClick` or `aria-disabled` hands the caller a dead, undisabled element with
 no warning.
 
-Two rules make such a bag usable on a tag other than the component's own:
-
-- Type the handlers and the `ref` for `HTMLElement`, not for the concrete
-  element. `ClipboardEventHandler<HTMLButtonElement>` will not go onto an `<a>`,
-  and a `RefObject` is invariant — pass the ref through `mergeRefs` so it is a
-  callback. Base the pass-through on `ButtonHTMLAttributes<HTMLElement>` rather
-  than on `ComponentPropsWithRef<'button'>`.
-- Ship `aria-disabled` next to `disabled`, and make the supplied click handler
-  return early with `preventDefault()` while disabled. `disabled` does nothing
-  on an `<a>`, so without both a "disabled" link still navigates.
+A component that renders either a `<button>` or an `<a>` takes the two shapes
+as overloads, the link one generic in its `href` (`<T extends string>`, handed
+back as `NoInfer<T>` so a typed route stays typed), the button one last: a
+single generic union leaves a handler's argument untyped, and `ComponentProps`
+reads the last signature. A disabled link ships `aria-disabled` and a click
+handler that calls `preventDefault()`, since `disabled` does nothing on an
+`<a>`.
 
 **Filling a slot** (`FormControl` `renderInput`, `Popover.Trigger` /
 `Tooltip.Trigger` / `FileField.Trigger` / `Alert` `action.renderItem`). The
@@ -214,7 +216,7 @@ wrapped into `@layer components` by its plugin, in Vite and in `vp pack` alike.
   with a compound class. `button.module.css` is the worked example.
 - **Variants are modifier classes** on the element itself
   (`styles.solidPrimary`, `styles.sm`), never data attributes: a caller who
-  copies only `className` from a `renderItem` bag must get the whole look.
+  copies only `className` from a `renderAnchor` bag must get the whole look.
   States the component already exposes as ARIA or native attributes are styled
   from those (`&[aria-pressed='true']`, `&:disabled`, `&:checked`).
 - **Map a prop to a class with an object** (`const SIZE = { … } as const`).

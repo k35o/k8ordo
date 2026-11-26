@@ -54,12 +54,7 @@ export function ActionForm<Source extends ObjectSchema | FormDefinition>({
       {children(form, state)}
       <Stack direction="row" gap="sm">
         <Button type="submit">送信</Button>
-        <Button
-          onClick={(event) => {
-            event.currentTarget.form?.reset();
-          }}
-          variant="outline"
-        >
+        <Button type="reset" variant="outline">
           リセット
         </Button>
       </Stack>

@@ -64,16 +64,7 @@ export function EditDemo({ fields }: Props) {
         <Button type="submit" variant="solid">
           {m.formEdit.demoSave()}
         </Button>
-        {/* Button の type は button と submit だけなので、reset は要素ごと差し替える */}
-        <Button
-          color="base"
-          renderItem={({ children, className }) => (
-            <button className={className} type="reset">
-              {children}
-            </button>
-          )}
-          variant="outline"
-        >
+        <Button color="base" type="reset" variant="outline">
           {m.formEdit.demoReset()}
         </Button>
         <p aria-live="polite" className={styles.saved}>

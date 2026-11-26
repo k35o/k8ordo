@@ -110,9 +110,13 @@ export const button = {
     ja: '無効',
     en: 'Disabled',
   }),
-  renderItemTitle: message({
-    ja: 'リンクへの差し替え',
-    en: 'Rendering as a link',
+  linkTitle: message({
+    ja: 'リンク',
+    en: 'As a link',
+  }),
+  linkDescription: message({
+    ja: '`href`を渡すと`<a>`を描きます。見た目はボタンと同じで、`target`などの属性は`<a>`に渡ります。Next.jsの`Link`のようなリンク部品は、`renderAnchor`で受け取ったpropsを展開して描きます。',
+    en: 'With `href`, it renders an `<a>` that looks the same, and attributes such as `target` go to the `<a>`. A link component such as Next.js’s `Link` is drawn through `renderAnchor`, spreading the props it receives.',
   }),
 };
 
@@ -133,9 +137,9 @@ export const iconButton = {
     ja: '無効',
     en: 'Disabled',
   }),
-  renderItemTitle: message({
-    ja: 'リンクへの差し替え',
-    en: 'Rendering as a link',
+  linkTitle: message({
+    ja: 'リンク',
+    en: 'As a link',
   }),
 };
 

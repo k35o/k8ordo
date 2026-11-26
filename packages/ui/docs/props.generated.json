@@ -615,6 +615,12 @@
           "required": false
         },
         {
+          "name": "disabled",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
           "name": "endIcon",
           "types": ["ReactNode"],
           "defaultValue": null,
@@ -624,6 +630,12 @@
           "name": "fullWidth",
           "types": ["boolean"],
           "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "href",
+          "types": ["T"],
+          "defaultValue": null,
           "required": false
         },
         {
@@ -639,8 +651,8 @@
           "required": false
         },
         {
-          "name": "renderItem",
-          "types": ["(props: ButtonRenderItemProps) => ReactNode"],
+          "name": "renderAnchor",
+          "types": ["(props: RenderAnchorProps<T>) => ReactNode"],
           "defaultValue": null,
           "required": false
         },
@@ -658,7 +670,7 @@
         },
         {
           "name": "type",
-          "types": ["'button'", "'submit'"],
+          "types": ["'button'", "'submit'", "'reset'"],
           "defaultValue": "'button'",
           "required": false
         },
@@ -669,8 +681,8 @@
           "required": false
         }
       ],
-      "inherits": "ComponentPropsWithRef<'button'>",
-      "omitted": ["className", "style"]
+      "inherits": "ComponentPropsWithRef<'button'> | ComponentPropsWithRef<'a'>",
+      "omitted": ["className", "style", "aria-disabled"]
     },
     {
       "name": "Calendar",
@@ -2713,14 +2725,26 @@
           "required": false
         },
         {
+          "name": "disabled",
+          "types": ["boolean"],
+          "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "href",
+          "types": ["T"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
           "name": "onAction",
           "types": ["() => void | Promise<void>"],
           "defaultValue": null,
           "required": false
         },
         {
-          "name": "renderItem",
-          "types": ["(props: IconButtonRenderItemProps) => ReactNode"],
+          "name": "renderAnchor",
+          "types": ["(props: RenderAnchorProps<T>) => ReactNode"],
           "defaultValue": null,
           "required": false
         },
@@ -2743,8 +2767,8 @@
           "required": false
         }
       ],
-      "inherits": "ComponentPropsWithRef<'button'>",
-      "omitted": ["type", "className", "style"]
+      "inherits": "ComponentPropsWithRef<'button'> | ComponentPropsWithRef<'a'>",
+      "omitted": ["className", "style", "type", "aria-disabled"]
     },
     {
       "name": "ImageIcon",

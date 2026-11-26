@@ -158,24 +158,18 @@ type Press = (() => void | Promise<void>) | undefined;
 export function renderButton(props: ButtonProps, onPress: Press): ReactNode {
   const { label } = props;
   const href = u(props.href);
-  const isLink = href !== undefined && href !== '';
-  return (
-    <Button
-      color={u(props.color)}
-      fullWidth={u(props.fullWidth)}
-      onAction={isLink ? undefined : onPress}
-      renderItem={
-        isLink
-          ? ({ className, children }) => (
-              <a className={className} href={href}>
-                {children}
-              </a>
-            )
-          : undefined
-      }
-      size={u(props.size)}
-      variant={u(props.variant)}
-    >
+  const look = {
+    color: u(props.color),
+    fullWidth: u(props.fullWidth),
+    size: u(props.size),
+    variant: u(props.variant),
+  };
+  return href !== undefined && href !== '' ? (
+    <Button {...look} href={href}>
+      {label}
+    </Button>
+  ) : (
+    <Button {...look} onAction={onPress}>
       {label}
     </Button>
   );

@@ -54,14 +54,7 @@ export const Interactive: Story = {
             カード内にインタラクティブ要素を配置できます。
           </p>
           <nav className={styles.actions}>
-            <Button
-              renderItem={({ className, children }) => (
-                <a className={className} href="https://example.com">
-                  {children}
-                </a>
-              )}
-              size="sm"
-            >
+            <Button href="https://example.com" size="sm">
               詳細を見る
             </Button>
             <Button color="base" size="sm" variant="outline">

@@ -26,33 +26,17 @@ the interactive parts carry `'use client'`.
 Two different contracts are spelled `render*`, and mixing them up is the usual
 source of surprise.
 
-**Replacing the element** — `renderItem` on `Button` and `IconButton`,
-`renderAnchor` on `Anchor`, `Breadcrumb.Link`, and `SideNav.Link`. The component computes
-everything and hands back the exact props it would have put on its own element,
-so substituting an `<a>`, a framework `<Link>`, or your own button loses
-nothing. For `Button` and `IconButton` that is the resolved `className`, the
-composed `children` (icons and the pending spinner included), the click handler,
-the disabled and pending state, the `ref`, and every `aria-*` / `data-*` /
-native attribute the caller passed in. Spread the bag onto whatever you render.
+**Replacing the element** — `renderAnchor` on `Button` and `IconButton` (with
+`href`), `Anchor`, `Breadcrumb.Link`, and `SideNav.Link`. The component computes
+everything and hands back the exact props it would have put on its own `<a>`,
+so substituting a framework `<Link>` loses nothing. Spread the bag onto whatever
+you render.
 
-- Handlers and the `ref` are typed for `HTMLElement` rather than for the
-  element the component would have rendered, so the bag spreads onto any tag.
-- `disabled` and `type` are the only members that exist on `<button>` alone.
-  Destructure them away when you render something else — `aria-disabled` in the
-  same bag carries the state, and the supplied `onClick` already does nothing
-  and calls `preventDefault()` while disabled, so a disabled link will not
-  navigate. The examples below name them `_disabled` / `_type` so the discarded
-  bindings pass a `no-unused-vars` rule.
-- `disabled` is only the `disabled` you passed. While an action is pending (see
-  [Button](#button)), the bag carries `aria-disabled` and `aria-busy` but
-  `disabled` stays `false`, so the pressed element keeps focus; the supplied
-  `onClick` is what ignores presses meanwhile.
-- Spreading onto a real `<button>` is exact, but write `type` on the element
-  anyway: the `button-has-type` lint rule cannot see a `type` that arrives
-  through a spread.
-
-The link components own less, so their bags are smaller:
-
+- `Button` and `IconButton` hand back `href`, `className`, the composed
+  `children` (icons included), `ref`, `onClick`, `aria-disabled`, and every
+  anchor attribute the caller passed. `IconButton` adds `aria-label` and the
+  tooltip's handlers, chained with any the caller passed. While `disabled`, the
+  supplied `onClick` calls `preventDefault()`, so the link does not navigate.
 - `Anchor` hands back `href`, `className`, `children` (with the new-tab icon on
   an external link), `target` / `rel` on an external link, and every other
   anchor attribute the caller passed, plus `kind` (`'internal'` |
@@ -84,6 +68,7 @@ import { Button } from '@k8ordo/ui';
   size="sm" | "md" | "lg"
   color="primary" | "secondary" | "base"
   variant="solid" | "outline" | "skeleton"
+  type="button" | "submit" | "reset"
   fullWidth={false}
   startIcon={<Icon />}
   endIcon={<Icon />}
@@ -98,16 +83,18 @@ Props:
 
 - `children`: `ReactNode`
 - `color`: `'primary'` | `'secondary'` | `'base'` (default: `'primary'`)
+- `disabled`: `boolean` (default: `false`)
 - `endIcon`: `ReactNode`
 - `fullWidth`: `boolean` (default: `false`)
+- `href`: `T`
 - `isActive`: `boolean` (default: `false`)
 - `onAction`: `() => void | Promise<void>`
-- `renderItem`: `(props: ButtonRenderItemProps) => ReactNode`
+- `renderAnchor`: `(props: RenderAnchorProps<T>) => ReactNode`
 - `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
 - `startIcon`: `ReactNode`
-- `type`: `'button'` | `'submit'` (default: `'button'`)
+- `type`: `'button'` | `'submit'` | `'reset'` (default: `'button'`)
 - `variant`: `'solid'` | `'outline'` | `'skeleton'` (default: `'solid'`)
-- Other props are forwarded to `ComponentPropsWithRef<'button'>`, except `className` / `style`.
+- Other props are forwarded to `ComponentPropsWithRef<'button'> | ComponentPropsWithRef<'a'>`, except `className` / `style` / `aria-disabled`.
 
 `onAction` runs inside a transition. While the promise it returns is pending —
 and, with `type="submit"`, while the form's action is pending — the button shows
@@ -116,25 +103,23 @@ including the implicit submission of pressing Enter in a field. It does not
 become natively `disabled`: Chromium moves focus to `body` when the focused
 element is disabled, so a keyboard user who pressed the button would lose their
 place. The `disabled` you pass is native, and takes the button out of the tab
-order.
+order. Only `type="submit"` follows the form's pending state; `type="reset"`
+resets the form it belongs to.
 
-`renderItem` replaces the `<button>`; see [Render props](#render-props) for the
-contract. It receives `className`, the composed `children`, `ref`, `type`,
-`disabled`, `aria-disabled`, `aria-busy`, `onClick`, and every other attribute
-passed to `Button`. Use it to render a link — the same shape works for things
-like Next.js's `<Link>`.
+With `href`, `Button` renders an `<a>` with the same look. That form takes
+anchor attributes (`target`, `rel`, `download`, `data-*`) and no `type` or
+`onAction`. `disabled` sets `aria-disabled` and stops the click from navigating.
+`renderAnchor` draws a link component of your own, such as Next.js's `<Link>`;
+see [Render props](#render-props) for what it receives. The type of `href` is
+kept in the bag, so a typed route stays typed.
 
 ```tsx
-<Button
-  color="base"
-  variant="outline"
-  renderItem={({ children, disabled: _disabled, type: _type, ...props }) => (
-    <a href="/page" {...props}>
-      {children}
-    </a>
-  )}
->
-  Link
+<Button color="base" href="/settings" variant="outline">
+  Settings
+</Button>
+
+<Button href="/settings" renderAnchor={(props) => <Link {...props} />}>
+  Settings
 </Button>
 ```
 
@@ -155,39 +140,25 @@ Props:
 - `label`: `string` (required)
 - `children`: `ReactNode`
 - `color`: `'transparent'` | `'base'` | `'primary'` | `'secondary'` (default: `'transparent'`)
+- `disabled`: `boolean` (default: `false`)
+- `href`: `T`
 - `onAction`: `() => void | Promise<void>`
-- `renderItem`: `(props: IconButtonRenderItemProps) => ReactNode`
+- `renderAnchor`: `(props: RenderAnchorProps<T>) => ReactNode`
 - `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
 - `tooltipDisabled`: `boolean` (default: `false`)
 - `tooltipPlacement`: `Placement` (default: `'top'`)
-- Other props are forwarded to `ComponentPropsWithRef<'button'>`, except `type` / `className` / `style`.
+- Other props are forwarded to `ComponentPropsWithRef<'button'> | ComponentPropsWithRef<'a'>`, except `className` / `style` / `type` / `aria-disabled`.
 
 `onAction` keeps the button busy the way `Button`'s does — `aria-busy`,
 `aria-disabled`, presses ignored, focus kept — without the spinner.
 
-`renderItem` replaces the `<button>` under the same contract as `Button`'s,
-with one addition: the tooltip wiring is kept in a nested `triggerProps` so it
-stays free of any element type. Spread it too, and `label` shows as a tooltip on
-hover and focus. `triggerProps` also carries the merged `ref` and any
-`onMouseEnter` / `onMouseLeave` / `onFocus` / `onBlur` the caller passed, so the
-flat part of the bag holds neither.
+With `href`, `IconButton` renders an `<a>`, named by `label` and with the same
+tooltip. `renderAnchor` replaces that `<a>` under the same contract as
+`Button`'s; the bag also carries `aria-label` and the tooltip's handlers and
+`ref`, so spreading it keeps the tooltip.
 
 ```tsx
-<IconButton
-  color="base"
-  label="Mail"
-  renderItem={({
-    children,
-    disabled: _disabled,
-    triggerProps,
-    type: _type,
-    ...props
-  }) => (
-    <a href="/contact" {...props} {...triggerProps}>
-      {children}
-    </a>
-  )}
->
+<IconButton color="base" href="/contact" label="Mail">
   <MailIcon />
 </IconButton>
 ```

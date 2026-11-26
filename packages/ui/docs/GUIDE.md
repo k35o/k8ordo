@@ -103,9 +103,9 @@ A k8ordo application sets neither: `@k8ordo/framework` aims its build at the
 browsers Baseline has newly available unless the config sets its own
 targets.
 
-Components take no `className`. To change how one looks, change the tokens, or
-render your own element through its `renderItem` / `renderAnchor`, which hands
-you the component's `className` to keep or to add to.
+Components take no `className`. To change how one looks, change the tokens. A
+link component of your own (a framework's `<Link>`) goes in through
+`renderAnchor`, which hands you the component's `className` to keep.
 
 ### Tokens
 
@@ -384,18 +384,16 @@ import { Button } from '@k8ordo/ui';
 // Text only
 <Button variant="skeleton">View details</Button>
 
-// Render as a link (renderItem prop). The bag holds everything the <button>
-// would have received, so drop the two <button>-only members and spread the
-// rest: className, children, ref, onClick, aria-disabled, aria-busy, and any
-// attribute passed to Button all ride along.
-<Button
-  color="base"
-  renderItem={({ children, disabled: _disabled, type: _type, ...props }) => (
-    <a href="/settings" {...props}>{children}</a>
-  )}
->
+// A link with the same look: href renders an <a>
+<Button color="base" href="/settings" variant="outline">Settings</Button>
+
+// A framework's link component, through renderAnchor
+<Button href="/settings" renderAnchor={(props) => <Link {...props} />}>
   Settings
 </Button>
+
+// Reset the form it belongs to
+<Button color="base" type="reset" variant="outline">Reset</Button>
 ```
 
 ### IconButton
@@ -409,17 +407,8 @@ import { CopyIcon, HomeIcon, SendIcon } from '@k8ordo/ui/icons';
 <IconButton color="transparent" label="Copy"><CopyIcon /></IconButton>
 <IconButton color="primary" label="Send"><SendIcon /></IconButton>
 
-// Render as a link (renderItem prop). triggerProps holds the tooltip wiring
-// and the merged ref; spread it alongside the rest.
-<IconButton
-  color="base"
-  label="Home"
-  renderItem={({ children, disabled: _disabled, triggerProps, type: _type, ...props }) => (
-    <a href="/home" {...props} {...triggerProps}>
-      {children}
-    </a>
-  )}
->
+// A link: href renders an <a>, named by label and with the same tooltip
+<IconButton color="base" href="/home" label="Home">
   <HomeIcon />
 </IconButton>
 ```
