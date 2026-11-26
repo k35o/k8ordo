@@ -2,7 +2,7 @@
 '@k8ordo/ui': major
 ---
 
-生成UIのカタログに、利用者の操作をアプリに伝える`events`を足しました。`Button`、`IconButton`、`Card`、`DropdownMenuItem`が`press`を持ちます。形式のつなぎは、各形式の操作の書き方（A2UIの`action`、json-renderの`on`、OpenUIのaction）を`press`に結び、結んだものを描画側に`on`として渡します。描画側は`on.press`をボタンの`onAction`やカードの`onAction`にします。結ばれていない`Card`は押せる形にならず、押せそうに見えて何も起きないカードは描かれません。型は`CatalogEventOf<N>`です。
+生成UIのカタログに、利用者の操作をアプリに伝える`events`を足しました。`Button`、`IconButton`、`Card`、`DropdownMenuItem`が`press`を持ちます。形式のつなぎは、各形式の操作の書き方（A2UIの`action`、json-renderの`on`、OpenUIのaction）を`press`に結び、結んだものを描画側に`on`として渡します。描画側は`on.press`をボタンやカードの`action`にします。結ばれていない`Card`は押せる形にならず、押せそうに見えて何も起きないカードは描かれません。型は`CatalogEventOf<N>`です。
 
 カタログのいくつかの部品の書き方が変わります。
 

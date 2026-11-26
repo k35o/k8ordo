@@ -796,8 +796,8 @@ export const card = {
     en: 'Link and button',
   }),
   wholeDescription: message({
-    ja: '`href`を渡すとカード全体が1つのリンクに、`onAction`を渡すと1つのボタンになります。キーボードでも押せて、読み上げではカードの中の文字が名前になります。中のリンクやボタンは、その上で別に押せます。',
-    en: 'With `href` the whole card is one link, and with `onAction` one button. A keyboard reaches it, and a screen reader names it by the text in the card. Links and buttons inside the card stay pressable on their own.',
+    ja: '`href`を渡すとカード全体が1つのリンクに、`action`を渡すと1つのボタンになります。キーボードでも押せて、読み上げではカードの中の文字が名前になります。中のリンクやボタンは、その上で別に押せます。',
+    en: 'With `href` the whole card is one link, and with `action` one button. A keyboard reaches it, and a screen reader names it by the text in the card. Links and buttons inside the card stay pressable on their own.',
   }),
   interactiveDescription: message({
     ja: '`interactive`は見た目だけを付けます。ホバーで少し大きく、押すと少し小さくなります。中身を自分のリンクで包むときに使います。',

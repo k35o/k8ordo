@@ -509,7 +509,7 @@ const onNext = async () => {
 ```
 
 An async action — `startTransition(async …)`, `useTransition`'s included, or
-`@k8ordo/ui`'s `Button` `onAction` — can await it the same way. Under
+`@k8ordo/ui`'s `Button` `action` — can await it the same way. Under
 `@k8ordo/router` a url update issued while another page is still loading is a
 page change, and a page change never joins the action, so `finished` settles
 once that page is on screen rather than waiting for the action to end.

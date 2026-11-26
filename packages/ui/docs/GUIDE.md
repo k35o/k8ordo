@@ -384,6 +384,9 @@ import { Button } from '@k8ordo/ui';
 // Text only
 <Button variant="skeleton">View details</Button>
 
+// Work that runs on a press: a transition, with a spinner until it settles
+<Button action={save}>Save</Button>
+
 // A link with the same look: href renders an <a>
 <Button color="base" href="/settings" variant="outline">Settings</Button>
 
@@ -395,6 +398,9 @@ import { Button } from '@k8ordo/ui';
 // Reset the form it belongs to
 <Button color="base" type="reset" variant="outline">Reset</Button>
 ```
+
+Put a synchronous update a user may press again at once (a counter, a slide
+change) in `onClick`: `action` ignores presses while its transition is pending.
 
 ### IconButton
 
@@ -446,7 +452,7 @@ import { Card } from '@k8ordo/ui';
   <div className={styles.body}>Card content</div>
 </Card>
 
-// The whole card is a link (href) or a button (onAction); links and
+// The whole card is a link (href) or a button (action); links and
 // buttons inside it stay pressable on their own
 <Card href="/articles/1">
   <div className={styles.body}>Content</div>

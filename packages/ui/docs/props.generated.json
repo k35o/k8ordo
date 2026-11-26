@@ -603,6 +603,12 @@
       "category": "buttons",
       "props": [
         {
+          "name": "action",
+          "types": ["() => void | Promise<void>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
           "name": "children",
           "types": ["ReactNode"],
           "defaultValue": null,
@@ -642,12 +648,6 @@
           "name": "isActive",
           "types": ["boolean"],
           "defaultValue": "false",
-          "required": false
-        },
-        {
-          "name": "onAction",
-          "types": ["() => void | Promise<void>"],
-          "defaultValue": null,
           "required": false
         },
         {
@@ -767,6 +767,12 @@
       "category": "data-display",
       "props": [
         {
+          "name": "action",
+          "types": ["() => void | Promise<void>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
           "name": "children",
           "types": ["ReactNode"],
           "defaultValue": null,
@@ -782,12 +788,6 @@
           "name": "interactive",
           "types": ["boolean"],
           "defaultValue": "false",
-          "required": false
-        },
-        {
-          "name": "onAction",
-          "types": ["() => void | Promise<void>"],
-          "defaultValue": null,
           "required": false
         },
         {
@@ -2713,6 +2713,12 @@
           "required": true
         },
         {
+          "name": "action",
+          "types": ["() => void | Promise<void>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
           "name": "children",
           "types": ["ReactNode"],
           "defaultValue": null,
@@ -2733,12 +2739,6 @@
         {
           "name": "href",
           "types": ["T"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "onAction",
-          "types": ["() => void | Promise<void>"],
           "defaultValue": null,
           "required": false
         },
@@ -3137,14 +3137,14 @@
           "required": true
         },
         {
-          "name": "disabled",
-          "types": ["boolean"],
+          "name": "action",
+          "types": ["() => void | Promise<void>"],
           "defaultValue": null,
           "required": false
         },
         {
-          "name": "onAction",
-          "types": ["() => void | Promise<void>"],
+          "name": "disabled",
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         }
@@ -3243,7 +3243,7 @@
       "category": "ai",
       "props": [
         {
-          "name": "onAction",
+          "name": "action",
           "types": ["() => void | Promise<void>"],
           "defaultValue": null,
           "required": true

@@ -99,13 +99,13 @@ export const WholeCardLink: Story = {
 };
 
 /**
- * `onAction` で、カード全体が 1 つのボタンになる。キーボードでも押せ、中の
+ * `action` で、カード全体が 1 つのボタンになる。キーボードでも押せ、中の
  * ボタンはその上で別に押せる。
  */
 export const WholeCardAction: Story = {
-  args: { onAction: fn() },
-  render: ({ onAction }) => (
-    <Card onAction={onAction}>
+  args: { action: fn() },
+  render: ({ action }) => (
+    <Card action={action}>
       <div className={styles.actionsBody}>
         <h3 className={styles.compactTitle}>この案で進める</h3>
         <p className={styles.note}>カード全体を押すと選びます。</p>
@@ -129,7 +129,7 @@ export const WholeCardAction: Story = {
     await userEvent.tab();
     await expect(card).toHaveFocus();
     await userEvent.keyboard('{Enter}');
-    await expect(args.onAction).toHaveBeenCalledOnce();
+    await expect(args.action).toHaveBeenCalledOnce();
   },
 };
 
@@ -140,13 +140,13 @@ const actionUntilFinished = (): Promise<void> =>
   });
 
 /**
- * `onAction` が返した promise が終わるまで、カードは保留中として押されても
+ * `action` が返した promise が終わるまで、カードは保留中として押されても
  * 何もしない。
  */
 export const WholeCardActionPending: Story = {
-  args: { onAction: fn(actionUntilFinished) },
-  render: ({ onAction }) => (
-    <Card onAction={onAction}>
+  args: { action: fn(actionUntilFinished) },
+  render: ({ action }) => (
+    <Card action={action}>
       <div className={styles.body}>
         <h3 className={styles.title}>この案で進める</h3>
       </div>
@@ -162,7 +162,7 @@ export const WholeCardActionPending: Story = {
       });
       await afterRenderingUpdate();
       await userEvent.click(card);
-      await expect(args.onAction).toHaveBeenCalledOnce();
+      await expect(args.action).toHaveBeenCalledOnce();
     } finally {
       // 終わらない非同期の transition は、同じ React の後続の transition を
       // すべて待たせる。途中で落ちても後のストーリーを巻き込まないよう片付ける

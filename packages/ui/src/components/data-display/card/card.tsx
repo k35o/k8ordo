@@ -34,7 +34,7 @@ type CardProps<T extends string> = {
    * Makes the whole card a button, when there is no `href`. While a returned
    * promise is pending the card is busy and ignores presses.
    */
-  onAction?: () => void | Promise<void>;
+  action?: () => void | Promise<void>;
 } & Omit<HTMLAttributes<HTMLDivElement>, 'className' | 'style'>;
 
 const VARIANT = {
@@ -59,18 +59,18 @@ export const Card = <T extends string>({
   href,
   openInNewTab = false,
   renderAnchor = defaultRenderAnchor,
-  onAction,
+  action,
   ...rest
 }: CardProps<T>) => {
   const contentId = useId();
   const targetClassName = clsx(styles.target, focusRing.ringNoBorder);
   const target =
     href === undefined ? (
-      onAction === undefined ? null : (
+      action === undefined ? null : (
         <CardAction
+          action={action}
           className={targetClassName}
           labelledBy={contentId}
-          onAction={onAction}
         />
       )
     ) : (

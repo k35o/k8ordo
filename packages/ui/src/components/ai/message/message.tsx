@@ -102,18 +102,18 @@ export const Actions: FC<ActionsProps> = ({ label, children }) => {
 
 type ActionProps = {
   label: string;
-  onAction?: () => void | Promise<void>;
+  action?: () => void | Promise<void>;
   disabled?: boolean;
   children: ReactNode;
 };
 
 export const Action: FC<ActionProps> = ({
   label,
-  onAction,
+  action,
   disabled,
   children,
 }) => (
-  <IconButton disabled={disabled} label={label} onAction={onAction} size="sm">
+  <IconButton action={action} disabled={disabled} label={label} size="sm">
     {children}
   </IconButton>
 );
@@ -128,13 +128,13 @@ export const Copy: FC<CopyProps> = ({ value, label }) => (
 );
 
 type RegenerateProps = {
-  onAction: () => void | Promise<void>;
+  action: () => void | Promise<void>;
   label?: string;
   disabled?: boolean;
 };
 
 export const Regenerate: FC<RegenerateProps> = ({
-  onAction,
+  action,
   label,
   disabled,
 }) => {
@@ -142,9 +142,9 @@ export const Regenerate: FC<RegenerateProps> = ({
 
   return (
     <Action
+      action={action}
       disabled={disabled}
       label={label ?? messages.regenerate}
-      onAction={onAction}
     >
       <RefreshIcon size="sm" />
     </Action>

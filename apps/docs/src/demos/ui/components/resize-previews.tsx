@@ -11,7 +11,7 @@ export function ResizeBasicPreview() {
   return (
     <div className={styles.root}>
       <Button
-        onAction={() => {
+        onClick={() => {
           setIsWide((current) => !current);
         }}
         size="sm"

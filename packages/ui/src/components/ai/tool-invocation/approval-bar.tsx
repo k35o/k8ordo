@@ -27,7 +27,7 @@ export const ApprovalBar: FC<Props> = ({
   const messages = getMessages();
   // 答えている間、押していない方だけをネイティブの disabled にする。押した方を
   // disabled にすると Chromium は描画の更新のあとでフォーカスを body へ外し、
-  // バーが消えるときに見出しへ移せなくなる。押した方は Button の onAction の保留で
+  // バーが消えるときに見出しへ移せなくなる。押した方は Button の action の保留で
   // aria-disabled になり、二度目の答えは Button が止める
   const [answering, setAnswering] = useOptimistic<boolean | undefined>(
     undefined,
@@ -65,17 +65,17 @@ export const ApprovalBar: FC<Props> = ({
       {onApprovalResponse !== undefined && (
         <div className={styles.buttons}>
           <Button
+            action={respond(false)}
             color="base"
             disabled={answering === true}
-            onAction={respond(false)}
             size="sm"
             variant="outline"
           >
             {messages.toolDeny}
           </Button>
           <Button
+            action={respond(true)}
             disabled={answering === false}
-            onAction={respond(true)}
             size="sm"
           >
             {messages.toolApprove}

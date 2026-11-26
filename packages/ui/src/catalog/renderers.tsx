@@ -169,7 +169,7 @@ export function renderButton(props: ButtonProps, onPress: Press): ReactNode {
       {label}
     </Button>
   ) : (
-    <Button {...look} onAction={onPress}>
+    <Button {...look} action={onPress}>
       {label}
     </Button>
   );
@@ -230,8 +230,8 @@ export function renderCard(
   const href = u(props.href);
   return (
     <Card
+      action={onPress}
       href={href === '' ? undefined : href}
-      onAction={onPress}
       variant={u(props.variant)}
       width={u(props.width)}
     >
@@ -718,9 +718,9 @@ export function renderIconButton(
   const IconComponent = iconMap[props.icon];
   return (
     <IconButton
+      action={onPress}
       color={u(props.color)}
       label={props.label}
-      onAction={onPress}
       size={u(props.size)}
     >
       <IconComponent size={u(props.size) ?? 'md'} />

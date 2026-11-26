@@ -165,7 +165,7 @@ export const CopyAgain: Story = {
       expect(status).toHaveTextContent('コピーしました');
     });
     const first = status.firstElementChild;
-    // 結果は onAction の保留が明けるより先に出る。保留中の押下は Button が
+    // 結果は action の保留が明けるより先に出る。保留中の押下は Button が
     // 捨てるので、明けてから押し直す
     await waitFor(() => {
       expect(button).not.toHaveAttribute('aria-busy');

@@ -54,7 +54,7 @@ export function RatingDemo({ fields }: Props) {
               aria-pressed={rating === star}
               color={star <= rating ? 'primary' : 'base'}
               key={star}
-              onAction={() => {
+              onClick={() => {
                 setRating(star);
               }}
               size="sm"

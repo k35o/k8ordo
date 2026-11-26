@@ -63,10 +63,10 @@ type ButtonProps = Look & {
    * 押したときに transition の中で走らせる処理。返した Promise が解決するまで
    * `aria-busy` と `aria-disabled` を立て、押されても何もしない。ボタンは
    * フォーカスを持ったままでいる。続けて押す同期の更新や、イベントが要る処理は
-   * `onClick` に書く。両方あれば `onClick` → `onAction` の順に呼び、`onClick` が
-   * `preventDefault` したら `onAction` は呼ばない。
+   * `onClick` に書く。両方あれば `onClick` → `action` の順に呼び、`onClick` が
+   * `preventDefault` したら `action` は呼ばない。
    */
-  onAction?: () => void | Promise<void>;
+  action?: () => void | Promise<void>;
   renderAnchor?: never;
 } & Omit<
     ComponentPropsWithRef<'button'>,
@@ -76,7 +76,7 @@ type ButtonProps = Look & {
 type LinkProps<T extends string> = Look & {
   /** あれば `<button>` の代わりに `<a>` を描く。 */
   href: T;
-  onAction?: never;
+  action?: never;
   /** `<a>` の代わりに描く要素。Next.js の `Link` などに受け取った props を展開する。 */
   renderAnchor?: (props: RenderAnchorProps<T>) => ReactNode;
 } & AnchorAttributes;
@@ -89,13 +89,10 @@ type IconButtonComponent = {
   (props: ButtonProps): ReactNode;
 };
 
-type ButtonRest = Omit<
-  ButtonProps,
-  keyof Look | 'onAction' | 'aria-describedby'
->;
+type ButtonRest = Omit<ButtonProps, keyof Look | 'action' | 'aria-describedby'>;
 type LinkRest<T extends string> = Omit<
   LinkProps<T>,
-  keyof Look | 'onAction' | 'aria-describedby'
+  keyof Look | 'action' | 'aria-describedby'
 >;
 
 const isLink = <T extends string>(
@@ -145,7 +142,7 @@ export const IconButton: IconButtonComponent = <T extends string>({
   tooltipDisabled = false,
   disabled = false,
   children,
-  onAction,
+  action,
   'aria-describedby': describedBy,
   ...rest
 }: ButtonProps | LinkProps<T>): ReactNode => {
@@ -226,7 +223,7 @@ export const IconButton: IconButtonComponent = <T extends string>({
     // 無効なときもハンドラを付けるのは、保留中の <button> にはネイティブの
     // disabled が付かず、押せば click が届くため。
     const handleClick =
-      onClick || onAction || isDisabled
+      onClick || action || isDisabled
         ? (event: MouseEvent<HTMLButtonElement>) => {
             if (isDisabled) {
               event.preventDefault();
@@ -234,9 +231,9 @@ export const IconButton: IconButtonComponent = <T extends string>({
             }
             onClick?.(event);
             if (event.defaultPrevented) return;
-            if (onAction) {
+            if (action) {
               startTransition(async () => {
-                await onAction();
+                await action();
               });
             }
           }

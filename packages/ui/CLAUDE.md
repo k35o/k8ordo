@@ -78,17 +78,18 @@ For example: `Modal` and `Drawer` take `isOpen?` + `defaultOpen?` + `onClose?`;
 
 ### Prop vocabulary
 
-| prop        | Meaning                                       | Example values                                                                           |
-| ----------- | --------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `variant`   | Visual variant                                | `solid` / `outline` / `skeleton` / `shadow`                                              |
-| `color`     | Which color-token family to use               | Accents: `primary` / `secondary` / `base`; monochrome weight: `base` / `mute` / `subtle` |
-| `tone`      | Status semantics (this prop only)             | `neutral` / `info` / `success` / `warning` / `error`                                     |
-| `size`      | Size                                          | `sm` / `md` / `lg`                                                                       |
-| `label`     | Visible text or accessible name               | —                                                                                        |
-| `role`      | Which ARIA role to use                        | `dialog` / `menu` / `listbox`                                                            |
-| `side`      | Placement against a viewport edge             | `center` / `bottom` / `right` / `left`                                                   |
-| `placement` | Placement relative to an anchor (`Placement`) | `bottom-start`, …                                                                        |
-| `onAction`  | Activating an item or button (no event arg)   | `() => void` (`Button` / `IconButton` also accept a `Promise`)                           |
+| prop        | Meaning                                             | Example values                                                                           |
+| ----------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `variant`   | Visual variant                                      | `solid` / `outline` / `skeleton` / `shadow`                                              |
+| `color`     | Which color-token family to use                     | Accents: `primary` / `secondary` / `base`; monochrome weight: `base` / `mute` / `subtle` |
+| `tone`      | Status semantics (this prop only)                   | `neutral` / `info` / `success` / `warning` / `error`                                     |
+| `size`      | Size                                                | `sm` / `md` / `lg`                                                                       |
+| `label`     | Visible text or accessible name                     | —                                                                                        |
+| `role`      | Which ARIA role to use                              | `dialog` / `menu` / `listbox`                                                            |
+| `side`      | Placement against a viewport edge                   | `center` / `bottom` / `right` / `left`                                                   |
+| `placement` | Placement relative to an anchor (`Placement`)       | `bottom-start`, …                                                                        |
+| `action`    | Work a press runs in a transition, shown as pending | `() => void \| Promise<void>` (`Button` / `IconButton` / `Card` / `Message.Action`)      |
+| `onAction`  | Activating an item (no event arg), called as is     | `() => void` (`DropdownMenu.Item` / `ContextMenu.Item`)                                  |
 
 `type` is reserved for HTML attributes only (`button` / `submit` / `reset`, input types).
 Render props take a verb+noun form: `renderItem` / `renderAnchor` / `renderInput`.
@@ -108,7 +109,7 @@ component would have put on its own `<a>`_. For `Button` / `IconButton` that is
 `href`, the resolved `className`, the composed `children` (icons included),
 `ref`, the click handler, `aria-disabled`, and the caller's remaining anchor
 attributes (`IconButton` adds `aria-label` and the tooltip's handlers, chained
-with the caller's). A button is never replaced: `type`, `onAction` and the
+with the caller's). A button is never replaced: `type`, `action` and the
 pending state belong to the `<button>` side, and `href` switches to the `<a>`
 side. The link components own less: `Anchor`'s bag is `href` /
 `className` / `children` / `target` / `rel` and the caller's remaining
@@ -342,7 +343,7 @@ from `usage.ts`, and the docs site's i18n page reads it through the exported
 
 ### Pending state
 
-`Button` / `IconButton` waiting on their own action — an `onAction` promise, or
+`Button` / `IconButton` waiting on their own action — an `action` promise, or
 the form's action for a submit button — take `aria-busy` and `aria-disabled` and
 ignore presses in the click handler, but never native `disabled`. Chromium
 moves focus to `body` once the focused element is disabled, so a keyboard user

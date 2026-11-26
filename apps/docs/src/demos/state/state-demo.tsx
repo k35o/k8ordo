@@ -25,7 +25,7 @@ export function StateDemo() {
             <Button
               color={value === current.tab ? 'primary' : 'base'}
               key={value}
-              onAction={() => {
+              onClick={() => {
                 update({ tab: value });
               }}
               size="sm"
@@ -42,7 +42,7 @@ export function StateDemo() {
           <IconButton
             color="base"
             label={m.state.demoPrevious()}
-            onAction={() => {
+            onClick={() => {
               update({ page: current.page - 1 }, { history: 'push' });
             }}
             size="sm"
@@ -53,7 +53,7 @@ export function StateDemo() {
           <IconButton
             color="base"
             label={m.state.demoNext()}
-            onAction={() => {
+            onClick={() => {
               update({ page: current.page + 1 }, { history: 'push' });
             }}
             size="sm"

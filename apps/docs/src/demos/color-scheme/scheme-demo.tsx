@@ -28,7 +28,7 @@ export function SchemeDemo() {
             aria-pressed={preference === choice.value}
             color={preference === choice.value ? 'primary' : 'base'}
             key={choice.value}
-            onAction={() => {
+            onClick={() => {
               setPreference(choice.value);
             }}
             variant={preference === choice.value ? 'solid' : 'outline'}

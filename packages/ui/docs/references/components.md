@@ -74,6 +74,7 @@ import { Button } from '@k8ordo/ui';
   endIcon={<Icon />}
   disabled={false}
   isActive={false}
+  action={async () => {}}
 >
   Button
 </Button>
@@ -81,6 +82,7 @@ import { Button } from '@k8ordo/ui';
 
 Props:
 
+- `action`: `() => void | Promise<void>`
 - `children`: `ReactNode`
 - `color`: `'primary'` | `'secondary'` | `'base'` (default: `'primary'`)
 - `disabled`: `boolean` (default: `false`)
@@ -88,7 +90,6 @@ Props:
 - `fullWidth`: `boolean` (default: `false`)
 - `href`: `T`
 - `isActive`: `boolean` (default: `false`)
-- `onAction`: `() => void | Promise<void>`
 - `renderAnchor`: `(props: RenderAnchorProps<T>) => ReactNode`
 - `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
 - `startIcon`: `ReactNode`
@@ -96,19 +97,21 @@ Props:
 - `variant`: `'solid'` | `'outline'` | `'skeleton'` (default: `'solid'`)
 - Other props are forwarded to `ComponentPropsWithRef<'button'> | ComponentPropsWithRef<'a'>`, except `className` / `style` / `aria-disabled`.
 
-`onAction` runs inside a transition. While the promise it returns is pending —
+`action` runs inside a transition. While the promise it returns is pending —
 and, with `type="submit"`, while the form's action is pending — the button shows
 a spinner, carries `aria-busy` and `aria-disabled`, and ignores presses,
 including the implicit submission of pressing Enter in a field. It does not
 become natively `disabled`: Chromium moves focus to `body` when the focused
 element is disabled, so a keyboard user who pressed the button would lose their
 place. The `disabled` you pass is native, and takes the button out of the tab
-order. Only `type="submit"` follows the form's pending state; `type="reset"`
-resets the form it belongs to.
+order. A synchronous update a user may press again at once belongs in
+`onClick`, since `action` ignores presses while its transition is pending. Only
+`type="submit"` follows the form's pending state; `type="reset"` resets the
+form it belongs to.
 
 With `href`, `Button` renders an `<a>` with the same look. That form takes
 anchor attributes (`target`, `rel`, `download`, `data-*`) and no `type` or
-`onAction`. `disabled` sets `aria-disabled` and stops the click from navigating.
+`action`. `disabled` sets `aria-disabled` and stops the click from navigating.
 `renderAnchor` draws a link component of your own, such as Next.js's `<Link>`;
 see [Render props](#render-props) for what it receives. The type of `href` is
 kept in the bag, so a typed route stays typed.
@@ -138,18 +141,18 @@ import { IconButton } from '@k8ordo/ui';
 Props:
 
 - `label`: `string` (required)
+- `action`: `() => void | Promise<void>`
 - `children`: `ReactNode`
 - `color`: `'transparent'` | `'base'` | `'primary'` | `'secondary'` (default: `'transparent'`)
 - `disabled`: `boolean` (default: `false`)
 - `href`: `T`
-- `onAction`: `() => void | Promise<void>`
 - `renderAnchor`: `(props: RenderAnchorProps<T>) => ReactNode`
 - `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
 - `tooltipDisabled`: `boolean` (default: `false`)
 - `tooltipPlacement`: `Placement` (default: `'top'`)
 - Other props are forwarded to `ComponentPropsWithRef<'button'> | ComponentPropsWithRef<'a'>`, except `className` / `style` / `type` / `aria-disabled`.
 
-`onAction` keeps the button busy the way `Button`'s does — `aria-busy`,
+`action` keeps the button busy the way `Button`'s does — `aria-busy`,
 `aria-disabled`, presses ignored, focus kept — without the spinner.
 
 With `href`, `IconButton` renders an `<a>`, named by `label` and with the same
@@ -1929,19 +1932,20 @@ import { Card } from '@k8ordo/ui';
   <h3>Article title</h3>
   <a href="/tags/react">React</a>
 </Card>
-<Card onAction={choose}>
+<Card action={choose}>
   <h3>Go with this plan</h3>
 </Card>
 ```
 
-`href` makes the whole card one link and `onAction` one button (`href` wins
+`href` makes the whole card one link and `action` one button (`href` wins
 when both are given). The card draws an `<a>` or a `<button>` over its
 content, named by the content's text, so a keyboard reaches it and a screen
 reader announces it. Links, buttons, and fields inside the card are raised
-above it and stay pressable on their own. While a promise `onAction` returned
-is pending, the card is busy and ignores presses. Pass `renderAnchor` to draw
-the link with your router's component; it receives `href`, `className`,
-`aria-labelledby`, and `target` / `rel` with `openInNewTab`.
+above it and stay pressable on their own. `action` runs in a transition, as
+`Button`'s does: while a promise it returned is pending, the card is busy and
+ignores presses. Pass `renderAnchor` to draw the link with your router's
+component; it receives `href`, `className`, `aria-labelledby`, and `target` /
+`rel` with `openInNewTab`.
 
 Either one gives the card the pressable look: it scales to 1.02 on hover and to
 0.98 while pressed. `interactive` gives that look alone, for a card whose
@@ -1949,10 +1953,10 @@ content is a link of your own.
 
 Props:
 
+- `action`: `() => void | Promise<void>`
 - `children`: `ReactNode`
 - `href`: `T`
 - `interactive`: `boolean` (default: `false`)
-- `onAction`: `() => void | Promise<void>`
 - `openInNewTab`: `boolean` (default: `false`)
 - `renderAnchor`: `(props: CardRenderAnchorProps<T>) => ReactNode` (default: `defaultRenderAnchor`)
 - `variant`: `'shadow'` | `'outline'` (default: `'shadow'`)

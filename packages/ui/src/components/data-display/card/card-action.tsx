@@ -4,10 +4,10 @@ import { useTransition } from 'react';
 import type { FC } from 'react';
 
 export const CardAction: FC<{
+  action: () => void | Promise<void>;
   className: string;
   labelledBy: string;
-  onAction: () => void | Promise<void>;
-}> = ({ className, labelledBy, onAction }) => {
+}> = ({ action, className, labelledBy }) => {
   const [isPending, startTransition] = useTransition();
   return (
     <button
@@ -20,7 +20,7 @@ export const CardAction: FC<{
           return;
         }
         startTransition(async () => {
-          await onAction();
+          await action();
         });
       }}
       type="button"

@@ -56,12 +56,12 @@ const actionUntilFinished = (): Promise<void> =>
   });
 
 /**
- * `onAction` の保留中も、押したボタンはフォーカスを持ち続ける。押せないことは
- * `aria-disabled` で伝え、もう一度押しても `onAction` は走らない。
+ * `action` の保留中も、押したボタンはフォーカスを持ち続ける。押せないことは
+ * `aria-disabled` で伝え、もう一度押しても `action` は走らない。
  */
 export const PendingKeepsFocus: Story = {
   args: {
-    onAction: fn(actionUntilFinished),
+    action: fn(actionUntilFinished),
   },
   play: async ({ args, canvas, userEvent }) => {
     const button = canvas.getByRole('button', { name: 'コピー' });
@@ -79,7 +79,7 @@ export const PendingKeepsFocus: Story = {
 
       await userEvent.keyboard('{Enter}');
       await userEvent.click(button);
-      await expect(args.onAction).toHaveBeenCalledOnce();
+      await expect(args.action).toHaveBeenCalledOnce();
     } finally {
       // 終わらない非同期の transition は、同じ React の後続の transition を
       // すべて待たせる。途中で落ちても後のストーリーを巻き込まないよう片付ける

@@ -41,7 +41,7 @@ export function OverlayDemo() {
         <IconButton
           color="base"
           label={m.ui.demoShare()}
-          onAction={() => {
+          onClick={() => {
             setLast(m.ui.demoShare());
           }}
         >
