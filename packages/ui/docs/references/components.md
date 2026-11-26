@@ -45,9 +45,10 @@ you render.
   `'external'`). `kind` is not an attribute: destructure it away before
   spreading, or use it to choose between a framework `<Link>` and a plain `<a>`.
   There is no `ref` and no disabled state.
-- `Breadcrumb.Link` hands back `href`, `className`, and `children` only — it
-  takes no other attributes. A `current` link renders
-  `<span aria-current="page">` and does not call `renderAnchor`.
+- `Breadcrumb.Link` hands back `href`, `className`, `children`, and every other
+  anchor attribute the caller passed. A `current` link renders
+  `<span aria-current="page">`, without those attributes, and does not call
+  `renderAnchor`.
 - `SideNav.Link` hands back `href`, `className`, `children`, `aria-current`
   (`'page'` on the current link), and every other anchor attribute the caller
   passed. A current link is still a link.
@@ -323,9 +324,11 @@ Props (Breadcrumb.Link):
 - `children`: `ReactNode`
 - `current`: `boolean` (default: `false`)
 - `renderAnchor`: `(props: RenderBreadcrumbAnchorProps<T>) => ReactNode` (default: `defaultRenderBreadcrumbAnchor`)
+- Other props are forwarded to `AnchorHTMLAttributes<HTMLAnchorElement>`, except `className` / `style`.
 
-`Breadcrumb.Link`'s `renderAnchor` receives `href`, `className`, and `children`;
-see [Render props](#render-props).
+`Breadcrumb.Link` passes any other anchor attribute (`hrefLang`, `data-*`) to
+the `<a>`, and its `renderAnchor` receives them with `href`, `className`, and
+`children`; see [Render props](#render-props).
 
 Props (Breadcrumb.Item):
 

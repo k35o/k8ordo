@@ -409,7 +409,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 ### Navigation
 
 - **Anchor** — テキストリンク。http(s) の絶対 URL と \`//\` で始まる URL は外部リンクとして新しいタブで開き、アイコンと読み上げ専用の「新しいタブで開きます」を添える。\`href\`, \`openInNewTab?\`, \`renderAnchor?\`
-- **Breadcrumb**（compound: \`List\` / \`Item\` / \`Link\`(\`current?\`) / \`Separator\`）
+- **Breadcrumb**（compound: \`List\` / \`Item\` / \`Link\`(\`current?\`、ほかの \`<a>\` の属性も渡る) / \`Separator\`）
 - **Pagination** — ページネーション
 - **SideNav**（compound: \`Root\`(\`label\`) / \`Group\`(\`title\`) / \`Link\`(\`href\`, \`current?\`, \`renderAnchor?\`)）— 今のページを傍線で示す
 - **TableOfContents** — \`items\`（\`{ id, label, children? }\` の木）, \`label?\`。見出しの scroll-margin を読み取り位置にして今の見出しを示す

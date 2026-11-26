@@ -115,8 +115,9 @@ pending state belong to the `<button>` side, and `href` switches to the `<a>`
 side. The link components own less: `Anchor`'s bag is `href` /
 `className` / `children` / `target` / `rel` and the caller's remaining
 attributes, plus `kind` (`'internal' | 'external'`), which is not an attribute;
-`Breadcrumb.Link` takes no extra attributes, so its bag is `href` / `className` /
-`children`, and a `current` link renders a `<span>` without calling it;
+`Breadcrumb.Link`'s bag is `href` / `className` / `children` and the caller's
+remaining anchor attributes, and a `current` link renders a `<span>` without
+calling it;
 `SideNav.Link`'s bag is `href` / `className` / `children` / `aria-current` and
 the caller's remaining anchor attributes; `DropdownMenu.Item` /
 `ContextMenu.Item`'s bag is `href` / `className` / `children` / `role` and the

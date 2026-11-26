@@ -568,8 +568,8 @@
           "required": false
         }
       ],
-      "inherits": null,
-      "omitted": []
+      "inherits": "AnchorHTMLAttributes<HTMLAnchorElement>",
+      "omitted": ["className", "style"]
     },
     {
       "name": "Breadcrumb.List",
