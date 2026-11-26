@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vp dev",
-    "build": "vp build",
+    "build": "vp build && vp build -c vite.mcp-app.config.ts",
+    "build:mcp-app": "vp build -c vite.mcp-app.config.ts",
     "test": "vp test",
     "typecheck": "tsc -b",
     "check": "vp check",
