@@ -1220,14 +1220,12 @@ export function renderListBox(
   onChange: (next: string) => void,
 ): ReactNode {
   return (
-    <ListBox.Root
+    <ListBox
+      label={u(props.label)}
       onChange={onChange}
       options={props.options}
       value={value === '' ? undefined : value}
-    >
-      <ListBox.Trigger label={u(props.label)} />
-      <ListBox.Content />
-    </ListBox.Root>
+    />
   );
 }
 

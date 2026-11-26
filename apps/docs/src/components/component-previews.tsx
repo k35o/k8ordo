@@ -545,13 +545,11 @@ export const componentPreviews = {
   ),
   ListBox: (
     <div className={styles.listBox}>
-      <ListBox.Root
+      <ListBox
         onChange={() => undefined}
         options={listBoxOptions}
         value="apple"
-      >
-        <ListBox.Trigger />
-      </ListBox.Root>
+      />
     </div>
   ),
   ColorPicker: (

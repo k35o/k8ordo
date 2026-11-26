@@ -2535,54 +2535,37 @@ Props (ContextMenu.Trigger):
 
 ### ListBox
 
-List selection, as a compound component. The choices use the same `Option` (`{ value, label }`) as `Select`.
+Picks one option from a list that opens from a button. The choices use the same `Option` (`{ value, label }`) as `Select`. It is one component: the button shows the current value, or an icon when `icon` is given, and the list holds `options`.
 
 ```tsx
 import { ListBox } from '@k8ordo/ui';
 
-<ListBox.Root
+<ListBox
+  label="Items per page"
   onChange={onChange}
   options={[
     { value: '1', label: 'Option 1' },
     { value: '2', label: 'Option 2' },
   ]}
   value={value}
->
-  <ListBox.Trigger label="Items per page" size="md" />
-  <ListBox.Content />
-</ListBox.Root>;
+/>;
+
+<ListBox icon={<ListIcon />} label="Sort" options={sortOptions} />;
 ```
 
-Props (Root):
+Props:
 
 - `options`: `readonly Option[]` (required)
-- `children`: `ReactNode`
 - `defaultValue`: `Option['value']`
+- `helpContent`: `ReactElement`
+- `icon`: `ReactElement`
+- `label`: `string`
 - `onChange`: `(value: Option['value']) => void`
 - `placement`: `Placement` (default: `'bottom'`)
+- `size`: `'sm'` | `'md'` | `'lg'` (default: `'md'`)
 - `value`: `Option['value']`
 
-Trigger variants:
-
-- `ListBox.Trigger`: text-based (`size`, `label`)
-- `ListBox.IconTrigger`: icon-based (`size`, `icon`, `label`)
-
-Passing `label` makes the trigger's accessible name "label + current value". Omit it and only the current value is used, so pass it when there is no heading nearby.
-
-Props (Content):
-
-- `helpContent`: `ReactElement`
-
-Props (ListBox.IconTrigger):
-
-- `icon`: `ReactElement` (required)
-- `label`: `string`
-- `size`: `ComponentProps<typeof Button>['size']` (default: `'md'`)
-
-Props (ListBox.Trigger):
-
-- `label`: `string`
-- `size`: `ComponentProps<typeof Button>['size']` (default: `'md'`)
+Passing `label` makes the button's accessible name "label + current value". Omit it and only the current value is used, so pass it when there is no heading nearby. `helpContent` sits above the list, outside `role="listbox"`, and describes the list.
 
 ## Layout
 

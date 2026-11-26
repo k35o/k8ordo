@@ -423,7 +423,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Popover**（compound: \`Root\` / \`Trigger\` / \`Content\`、\`placement\`。いつも dialog で、\`Content\` は \`label\` を名前にして面（地・角丸・影）を描く。余白は中身で作る）
 - **Tooltip**（compound: \`Root\` / \`Trigger\` / \`Content\`、\`placement\`）
 - **DropdownMenu**（compound: \`Root\`(\`placement\`) / \`Trigger\`(\`label\`, \`size\`, \`variant\`, \`color\`) / \`IconTrigger\`(\`icon\`, \`label\`, \`size\`, \`variant\`, \`color\`) / \`Content\` / \`Item\`(\`label\` と \`onAction\`、またはリンクなら \`href\`)）
-- **ListBox**（compound: \`Root\` / \`Trigger\` / \`IconTrigger\` / \`Content\`、\`options\` / \`value\` / \`onChange\`）
+- **ListBox** — \`options\`, \`value\` / \`defaultValue\`, \`onChange\`, \`label\`, \`size\`, \`icon\`（あればアイコンのボタン）, \`helpContent\`, \`placement\`
 
 ### Icons
 

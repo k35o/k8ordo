@@ -2945,47 +2945,7 @@
       "omitted": []
     },
     {
-      "name": "ListBox.Content",
-      "category": "overlays",
-      "props": [
-        {
-          "name": "helpContent",
-          "types": ["ReactElement"],
-          "defaultValue": null,
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
-      "name": "ListBox.IconTrigger",
-      "category": "overlays",
-      "props": [
-        {
-          "name": "icon",
-          "types": ["ReactElement"],
-          "defaultValue": null,
-          "required": true
-        },
-        {
-          "name": "label",
-          "types": ["string"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "size",
-          "types": ["ComponentProps<typeof Button>['size']"],
-          "defaultValue": "'md'",
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
-      "name": "ListBox.Root",
+      "name": "ListBox",
       "category": "overlays",
       "props": [
         {
@@ -2995,14 +2955,26 @@
           "required": true
         },
         {
-          "name": "children",
-          "types": ["ReactNode"],
+          "name": "defaultValue",
+          "types": ["Option['value']"],
           "defaultValue": null,
           "required": false
         },
         {
-          "name": "defaultValue",
-          "types": ["Option['value']"],
+          "name": "helpContent",
+          "types": ["ReactElement"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "icon",
+          "types": ["ReactElement"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "label",
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },
@@ -3019,29 +2991,15 @@
           "required": false
         },
         {
-          "name": "value",
-          "types": ["Option['value']"],
-          "defaultValue": null,
-          "required": false
-        }
-      ],
-      "inherits": null,
-      "omitted": []
-    },
-    {
-      "name": "ListBox.Trigger",
-      "category": "overlays",
-      "props": [
-        {
-          "name": "label",
-          "types": ["string"],
-          "defaultValue": null,
+          "name": "size",
+          "types": ["'sm'", "'md'", "'lg'"],
+          "defaultValue": "'md'",
           "required": false
         },
         {
-          "name": "size",
-          "types": ["ComponentProps<typeof Button>['size']"],
-          "defaultValue": "'md'",
+          "name": "value",
+          "types": ["Option['value']"],
+          "defaultValue": null,
           "required": false
         }
       ],

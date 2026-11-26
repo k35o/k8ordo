@@ -1,12 +1,7 @@
 'use client';
 
 import { useId, useState } from 'react';
-import type {
-  ComponentProps,
-  FC,
-  PropsWithChildren,
-  ReactElement,
-} from 'react';
+import type { FC, PropsWithChildren, ReactElement } from 'react';
 
 import { useControllableState } from '../../../hooks/controllable-state';
 import type { Option, Placement } from '../../../types/variables';
@@ -26,21 +21,31 @@ import {
 import srOnly from '../../_internal/sr-only.module.css';
 import styles from './list-box.module.css';
 
-export const Root: FC<
-  PropsWithChildren<{
-    placement?: Placement;
-    options: readonly Option[];
-    value?: Option['value'];
-    defaultValue?: Option['value'];
-    onChange?: (value: Option['value']) => void;
-  }>
-> = ({
-  children,
-  placement = 'bottom',
+type Size = 'sm' | 'md' | 'lg';
+
+export const ListBox: FC<{
+  options: readonly Option[];
+  value?: Option['value'];
+  defaultValue?: Option['value'];
+  onChange?: (value: Option['value']) => void;
+  /** 読み上げ用の名前。トリガーの名前は「label と今の値」になる。 */
+  label?: string;
+  size?: Size;
+  /** あれば、今の値を文字で出すボタンの代わりにアイコンのボタンを描く。 */
+  icon?: ReactElement;
+  /** リストの上に出す補足。リストの説明として結ぶ。 */
+  helpContent?: ReactElement;
+  placement?: Placement;
+}> = ({
   options,
   value,
   defaultValue,
   onChange,
+  label,
+  size = 'md',
+  icon,
+  helpContent,
+  placement = 'bottom',
 }) => {
   const [selectedValue, setSelectedValue] = useControllableState<
     Option['value'] | undefined
@@ -63,7 +68,12 @@ export const Root: FC<
         options={options}
         value={selectedValue}
       >
-        {children}
+        {icon === undefined ? (
+          <Trigger label={label} size={size} />
+        ) : (
+          <IconTrigger icon={icon} label={label} size={size} />
+        )}
+        <Content helpContent={helpContent} />
       </MenuProvider>
     </PopoverBase.Root>
   );
@@ -104,8 +114,8 @@ const MenuProvider: FC<
   );
 };
 
-export const Content: FC<{
-  helpContent?: ReactElement;
+const Content: FC<{
+  helpContent: ReactElement | undefined;
 }> = ({ helpContent }) => {
   const { options, contentProps } = useMenuContent();
   const helpId = useId();
@@ -172,10 +182,10 @@ const useTriggerLabels = (label: string | undefined) => {
   };
 };
 
-export const Trigger: FC<{
-  size?: ComponentProps<typeof Button>['size'];
-  label?: string;
-}> = ({ size = 'md', label }) => {
+const Trigger: FC<{
+  size: Size;
+  label: string | undefined;
+}> = ({ size, label }) => {
   const { valueLabel, labelId, valueId, labelledBy } = useTriggerLabels(label);
 
   return (
@@ -205,11 +215,11 @@ export const Trigger: FC<{
   );
 };
 
-export const IconTrigger: FC<{
-  size?: ComponentProps<typeof Button>['size'];
+const IconTrigger: FC<{
+  size: Size;
   icon: ReactElement;
-  label?: string;
-}> = ({ size = 'md', icon, label }) => {
+  label: string | undefined;
+}> = ({ size, icon, label }) => {
   const { valueLabel, labelId, valueId, labelledBy } = useTriggerLabels(label);
 
   return (

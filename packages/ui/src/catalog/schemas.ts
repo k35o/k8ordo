@@ -908,7 +908,7 @@ type ListBoxIntegrationProps = {
   name: string;
   options: readonly SelectOption[];
   defaultValue?: string;
-  label?: ComponentProps<typeof ListBox.Trigger>['label'];
+  label?: ComponentProps<typeof ListBox>['label'];
 };
 export const listBoxProps = z.object({
   name: z.string(),

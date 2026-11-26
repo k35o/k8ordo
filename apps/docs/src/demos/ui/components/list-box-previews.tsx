@@ -19,16 +19,14 @@ export function ListBoxBasicPreview() {
   const [selected, setSelected] = useState<string>();
   return (
     <div className={styles.frame}>
-      <ListBox.Root
+      <ListBox
+        label="Fruit"
         onChange={(value: string) => {
           setSelected(value);
         }}
         options={OPTIONS}
         value={selected}
-      >
-        <ListBox.Trigger label="Fruit" />
-        <ListBox.Content />
-      </ListBox.Root>
+      />
     </div>
   );
 }
@@ -40,40 +38,37 @@ export function ListBoxSizesPreview() {
   return (
     <div className={styles.sizes}>
       <div className={styles.sm}>
-        <ListBox.Root
+        <ListBox
+          label="Fruit (sm)"
+          size="sm"
           onChange={(value: string) => {
             setSm(value);
           }}
           options={OPTIONS}
           value={sm}
-        >
-          <ListBox.Trigger label="Fruit (sm)" size="sm" />
-          <ListBox.Content />
-        </ListBox.Root>
+        />
       </div>
       <div className={styles.md}>
-        <ListBox.Root
+        <ListBox
+          label="Fruit (md)"
+          size="md"
           onChange={(value: string) => {
             setMd(value);
           }}
           options={OPTIONS}
           value={md}
-        >
-          <ListBox.Trigger label="Fruit (md)" size="md" />
-          <ListBox.Content />
-        </ListBox.Root>
+        />
       </div>
       <div className={styles.lg}>
-        <ListBox.Root
+        <ListBox
+          label="Fruit (lg)"
+          size="lg"
           onChange={(value: string) => {
             setLg(value);
           }}
           options={OPTIONS}
           value={lg}
-        >
-          <ListBox.Trigger label="Fruit (lg)" size="lg" />
-          <ListBox.Content />
-        </ListBox.Root>
+        />
       </div>
     </div>
   );
@@ -82,15 +77,14 @@ export function ListBoxSizesPreview() {
 export function ListBoxIconTriggerPreview() {
   const [selected, setSelected] = useState<string>();
   return (
-    <ListBox.Root
+    <ListBox
+      icon={<ListIcon />}
+      label="Fruit"
       onChange={(value: string) => {
         setSelected(value);
       }}
       options={OPTIONS}
       value={selected}
-    >
-      <ListBox.IconTrigger icon={<ListIcon />} label="Fruit" />
-      <ListBox.Content />
-    </ListBox.Root>
+    />
   );
 }
