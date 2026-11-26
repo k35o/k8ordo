@@ -736,8 +736,7 @@ Props:
 - `type`: `string`
 - Other props are forwarded to `TextareaHTMLAttributes<HTMLTextAreaElement>`, except `className` / `style`.
 
-`type` is accepted and dropped: a `<textarea>` has none, and the attributes
-`@k8ordo/form` derives for a string carry `type="text"`. A `pattern` is not
+`type` is accepted and dropped: a `<textarea>` has none. A `pattern` is not
 checked by the browser on a `<textarea>` either.
 
 ### NumberField
@@ -785,7 +784,9 @@ field clamps the value into range. A message set by someone else on the same
 input — a form library's cross-field rule — is left alone.
 
 `min`, `max`, and an uncontrolled `defaultValue` also take strings, and `step`
-takes `'any'`, which is what `@k8ordo/form` derives. `precision` defaults to the
+takes `'any'`. `@k8ordo/form` derives numeric `min` / `max`, a `step` of
+`'any'` unless the schema sets one, and echoes the submitted text as a string
+`defaultValue`. `precision` defaults to the
 number of decimals in `step`; with `step="any"` the value is not rounded.
 
 A value the field writes itself — an arrow key, a stepper press, formatting on

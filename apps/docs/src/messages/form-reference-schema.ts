@@ -16,8 +16,8 @@ export const typesLead = message({
 });
 
 export const typeString = message({
-  ja: '`z.string()`：`type="text"`',
-  en: '`z.string()`: `type="text"`',
+  ja: '`z.string()`：`type`なし（テキストの入力欄）',
+  en: '`z.string()`: no `type` (a text input)',
 });
 
 export const typeEmailUrl = message({
@@ -71,8 +71,8 @@ export const typeEnumArray = message({
 });
 
 export const typeOther = message({
-  ja: 'それ以外（`z.uuid()`や`z.coerce.date()`など）：`type="text"`',
-  en: 'Anything else (`z.uuid()`, `z.coerce.date()`, …): `type="text"`',
+  ja: 'それ以外（`z.uuid()`や`z.coerce.date()`など）：`type`なし（テキストの入力欄）',
+  en: 'Anything else (`z.uuid()`, `z.coerce.date()`, …): no `type` (a text input)',
 });
 
 export const typesFormat = message({

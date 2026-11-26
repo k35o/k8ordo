@@ -200,7 +200,6 @@ export const attributesFor = (
   if (schema.anyOf !== undefined) {
     // A scalar union renders as a plain text input; whatever constraints live
     // inside the branches cannot be lifted out without picking a branch.
-    input.type = 'text';
     dropped.push({
       field: name,
       reason:
@@ -267,7 +266,6 @@ export const attributesFor = (
     // z.custom() and z.unknown() all become — carries nothing to build a
     // control from. A text input is the only thing left, but nothing about it
     // is derived, so it is reported rather than presented as a derivation.
-    input.type = 'text';
     dropped.push({
       field: name,
       reason:
@@ -276,10 +274,13 @@ export const attributesFor = (
     return { input, dropped };
   }
 
-  input.type =
+  const type =
     schema.format === undefined
-      ? 'text'
-      : (FORMAT_TO_INPUT_TYPE[schema.format] ?? 'text');
+      ? undefined
+      : FORMAT_TO_INPUT_TYPE[schema.format];
+  if (type !== undefined && type !== 'text') {
+    input.type = type;
+  }
 
   if (isFiniteNumber(schema.minLength) && schema.minLength > 0) {
     input.minLength = schema.minLength;
@@ -295,7 +296,7 @@ export const attributesFor = (
         )
       : [schema.pattern];
 
-  if (TYPES_WITHOUT_PATTERN.has(input.type)) {
+  if (input.type !== undefined && TYPES_WITHOUT_PATTERN.has(input.type)) {
     // type="date" already constrains the value far more tightly than the
     // format's own regex would, so losing that one costs nothing. A regex
     // stacked on top is a different check, and it is lost all the same.

@@ -33,9 +33,8 @@ describe('formFields', () => {
       }),
     );
 
-    expect(fields.title.input).toMatchObject({
+    expect(fields.title.input).toStrictEqual({
       name: 'title',
-      type: 'text',
       required: true,
       minLength: 1,
       maxLength: 120,
@@ -43,6 +42,21 @@ describe('formFields', () => {
     expect(fields.eventUrl.input.type).toBe('url');
     expect(fields.eventDate.input.type).toBe('date');
     expect(fields.blogId.input).toMatchObject({ type: 'number', step: 1 });
+  });
+
+  it('writes no type where the control is a plain text input, its default', () => {
+    const { fields } = formFields(
+      z.object({
+        plain: z.string(),
+        id: z.uuid(),
+        address: z.ipv4(),
+        either: z.union([z.string(), z.literal(1)]),
+      }),
+    );
+
+    for (const field of Object.values(fields)) {
+      expect(field.input).not.toHaveProperty('type');
+    }
   });
 
   it('marks a field required only when the schema rejects an empty string', () => {
@@ -239,7 +253,7 @@ describe('formFields', () => {
       }),
     );
 
-    expect(fields.strict.input.type).toBe('text');
+    expect(fields.strict.input).not.toHaveProperty('type');
     expect(dropped.some((entry) => entry.field === 'strict')).toBe(true);
     expect(fields.local.input.type).toBe('datetime-local');
   });
@@ -290,7 +304,7 @@ describe('formFields', () => {
       z.object({ note: z.string().min(3).nullable() }),
     );
 
-    expect(fields.note.input.type).toBe('text');
+    expect(fields.note.input).not.toHaveProperty('type');
     expect(fields.note.input.minLength).toBeUndefined();
     expect(dropped.some((entry) => entry.field === 'note')).toBe(true);
   });
@@ -366,7 +380,7 @@ describe('formFields', () => {
 
     // A text input still submits something the schema accepts, so the form
     // works — but nothing about it was derived, and saying so is the point.
-    expect(fields.transformed.input.type).toBe('text');
+    expect(fields.transformed.input).not.toHaveProperty('type');
     expect(fields.transformed.input.minLength).toBeUndefined();
     expect(dropped.map((entry) => entry.field)).toStrictEqual([
       'transformed',
@@ -461,9 +475,9 @@ describe('formFields', () => {
       }),
     );
 
-    expect(fields.nullableNumber.input.type).toBe('text');
-    expect(fields.when.input.type).toBe('text');
-    expect(fields.big.input.type).toBe('text');
+    expect(fields.nullableNumber.input).not.toHaveProperty('type');
+    expect(fields.when.input).not.toHaveProperty('type');
+    expect(fields.big.input).not.toHaveProperty('type');
   });
 
   it('derives a file control, its accepted types, and what HTML cannot carry', () => {

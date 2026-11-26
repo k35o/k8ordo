@@ -302,9 +302,10 @@ export const MyComponent = { Root, Part } as const;
 A field must work when `@k8ordo/form`'s `formFields` output is spread onto it
 unchanged (each field's `WithForm` story holds it to that). Four rules follow:
 
-- **Accept the derived attribute types.** `input` carries `type` as a string,
-  `min` / `max` as `number | string`, `step` as `number | 'any'`, and the
-  echoed `defaultValue` as a string (none on a file field). Widen a prop to
+- **Accept the derived attribute types.** `input` carries `type` as a string
+  (none on a plain text field), `min` / `max` as numbers, `step` as
+  `number | 'any'`, and the echoed `defaultValue` as a string (none on a file
+  field). Widen a prop to
   take them, or take one and drop it (`Textarea`'s `type`); never make the
   caller destructure it away.
 - **Keep an uncontrolled value in the DOM.** Pass `defaultValue` /

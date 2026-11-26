@@ -30,8 +30,8 @@ export type FieldInput = {
   pattern?: string;
   /** Comma-separated mime types for a file control, from `.mime()`. */
   accept?: string;
-  min?: number | string;
-  max?: number | string;
+  min?: number;
+  max?: number;
   step?: number | 'any';
   defaultValue?: string;
   defaultChecked?: boolean;

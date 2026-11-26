@@ -13,10 +13,10 @@ client   useForm(fields, state)   → props for <form>, input for each field
 server   parseForm(schema, data)  → typed data, or errors per field`;
 
 const EMPTY = `z.object({ bio: z.string() });
-// bio: { name: 'bio', type: 'text' }
+// bio: { name: 'bio' }
 
 z.object({ title: z.string().min(1) });
-// title: { name: 'title', required: true, type: 'text', minLength: 1 }
+// title: { name: 'title', required: true, minLength: 1 }
 
 z.object({ age: z.coerce.number().optional() });
 // age: { name: 'age', type: 'number', step: 'any' }`;

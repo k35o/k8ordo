@@ -11,7 +11,7 @@ import * as m from '../../../../messages';
 
 const t = m.formFieldTypes;
 
-const OVERVIEW = `z.string()                        → type="text"
+const OVERVIEW = `z.string()                        → no type (a text input)
 z.email() / z.url()               → type="email" / type="url"
 z.iso.date() / z.iso.time()       → type="date" / type="time"
 z.iso.datetime({ local: true })   → type="datetime-local"
@@ -21,14 +21,14 @@ z.stringbool()                    → type="checkbox" value="true"
 z.file()                          → type="file"
 z.enum([…])                       → <select>
 z.array(z.enum([…]))              → type="checkbox"
-z.uuid()                          → type="text"`;
+z.uuid()                          → no type (a text input)`;
 
 const TEXT = `z.object({
   handle: z.string().min(3).max(20).regex(/^[a-z0-9_]+$/),
 });
 
 // handle.input
-// { name: 'handle', type: 'text', required: true,
+// { name: 'handle', required: true,
 //   minLength: 3, maxLength: 20, pattern: '^[a-z0-9_]+$' }`;
 
 const TEXT_BLANK = `bio: z.string().min(1).optional(),

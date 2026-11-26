@@ -74,7 +74,7 @@ Each leaf derives the control that submits what it validates:
 
 | Schema                                           | `input`                                                                                                |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| `z.string()`                                     | `type="text"`                                                                                          |
+| `z.string()`                                     | no `type`: a plain text input, the browser's default                                                   |
 | `z.email()` / `z.url()`                          | `type="email"` / `type="url"`                                                                          |
 | `z.iso.date()` / `z.iso.time()`                  | `type="date"` / `type="time"`                                                                          |
 | `z.iso.datetime({ local: true })`                | `type="datetime-local"`                                                                                |
@@ -85,7 +85,7 @@ Each leaf derives the control that submits what it validates:
 | a password ([below](#what-it-guarantees))        | `type="password"`                                                                                      |
 | `z.enum([…])`                                    | no `type`: spread it onto a `<select>`, not a radio ([Radio groups](#radio-groups))                    |
 | `z.array(z.enum([…]))`                           | no `type`: one checkbox per option ([Checkbox groups](#checkbox-groups))                               |
-| anything else (`z.uuid()`, `z.coerce.date()`, …) | `type="text"`                                                                                          |
+| anything else (`z.uuid()`, `z.coerce.date()`, …) | no `type`                                                                                              |
 
 `form.field()` types each `input` by the control its schema derives, so a
 spread reaches a component that takes only what that control has:
@@ -711,11 +711,13 @@ const title = form.field('title');
 />;
 ```
 
-Nothing in `input` has to be taken out first: `TextField` renders the date and
-time types as well as the text ones, `PasswordInput` keeps its show/hide toggle
-under a spread `type`, `Textarea` drops the `type` a `<textarea>` does not
-have, and `NumberField` and `Slider` take string bounds, `step="any"`, and the
-echoed `defaultValue`, which is a string whichever field it belongs to.
+Nothing in `input` has to be taken out first. `formFields` writes only
+attributes the native element takes — no `type` for a plain text input, `min`
+and `max` as numbers — so `TextField` renders the date and time types as well
+as the text ones, `PasswordInput` keeps its show/hide toggle under a spread
+`type`, a plain string spreads onto `Textarea` as it is, and `NumberField` and
+`Slider` take `step="any"` and the echoed `defaultValue`, which is a string
+whichever field it belongs to.
 Uncontrolled fields keep their value in the DOM, so a reset — React's after
 each action included — restores the echo, `isDirty` reads them, and a value a
 component changes in code — a stepper, a chosen option, a removed file —
