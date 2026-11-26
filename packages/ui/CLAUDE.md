@@ -73,7 +73,7 @@ library. Reuse `useControllableState`.
 - **Change notification**: `onChange?: (next) => void` (a close-only action is `onClose?`).
 
 For example: `Dialog` and `Drawer` take `isOpen?` + `defaultOpen?` + `onClose?`;
-`Tabs.Root` takes `selectedId?` + `defaultSelectedId?` + `onChange?`;
+`Tabs.Root` takes `selectedId` + `onChange?`, or `defaultSelectedId` when uncontrolled;
 `Accordion.Item` takes `isOpen?` + `defaultOpen?` + `onChange?`.
 
 ### Prop vocabulary
@@ -369,12 +369,16 @@ animation frames before `toHaveFocus()`.
 
 ### Content that gets replaced
 
-A change that swaps what is on screen (`Tabs`) is applied inside
-`startTransition`, and the swapped element is wrapped in
-`<ViewTransition default="none" enter="auto" exit="auto">`: React animates
-the swap with the platform's own cross-fade, and a panel that suspends keeps
-the current one on screen until it is ready. `default="none"` is what keeps
-an unrelated transition inside the panel — a `Button`'s action — from
+An element that gets swapped (`Tabs`' panels) is drawn from a deferred copy
+of the selection (`useDeferredValue`), while the selection's own marks — the
+selected tab, its indicator — follow the value at once. The swapped element
+is wrapped in `<ViewTransition default="none" enter="auto" exit="auto">`:
+React animates the deferred swap with the platform's own cross-fade, and a
+panel that suspends keeps the current one on screen until it is ready. Both
+hold when the controlled value arrives in a synchronous update (a store read
+through `useSyncExternalStore`, `@k8ordo/state` included), which a setter
+wrapped in `startTransition` could not promise. `default="none"` is what
+keeps an unrelated transition inside the panel — a `Button`'s action — from
 animating it. `base.css` turns every view transition off under
 `prefers-reduced-motion`, so a component never checks it itself.
 

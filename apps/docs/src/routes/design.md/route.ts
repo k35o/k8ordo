@@ -413,7 +413,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Pagination** — ページネーション
 - **SideNav**（compound: \`Root\`(\`label\`) / \`Group\`(\`title\`) / \`Link\`(\`href\`, \`current?\`, \`renderAnchor?\`)）— 今のページを傍線で示す
 - **TableOfContents** — \`items\`（\`{ id, label, children? }\` の木）, \`label?\`。見出しの scroll-margin を読み取り位置にして今の見出しを示す
-- **Tabs**（compound: \`Root\`(\`ids\` / \`defaultSelectedId?\`) / \`List\` / \`Tab\` / \`Panel\`）
+- **Tabs**（compound: \`Root\`(\`defaultSelectedId\`、制御するなら \`selectedId\` と \`onChange\`) / \`List\` / \`Tab\` / \`Panel\`）。パネルは選択の遅延値で入れ替わる
 
 ### Overlays
 

@@ -518,12 +518,16 @@ Props:
 
 ### Tabs
 
-Tab switching, as a compound component.
+Tab switching, as a compound component. The tab that starts selected is
+`defaultSelectedId`, required when the selection is not controlled; a
+controlled one takes `selectedId` and `onChange`. Each `Tabs.Tab` and its
+`Tabs.Panel` share an `id`, so map both from one list when the tabs come from
+data.
 
 ```tsx
 import { Tabs } from '@k8ordo/ui';
 
-<Tabs.Root ids={['tab1', 'tab2']}>
+<Tabs.Root defaultSelectedId="tab1">
   <Tabs.List label="Tabs">
     <Tabs.Tab id="tab1">Tab 1</Tabs.Tab>
     <Tabs.Tab id="tab2">Tab 2</Tabs.Tab>
@@ -533,21 +537,23 @@ import { Tabs } from '@k8ordo/ui';
 </Tabs.Root>;
 ```
 
-Selecting a tab is a transition: the panels cross-fade through React's
+The tab is marked selected at once, and the panels follow a deferred copy of
+the selection (`useDeferredValue`): they cross-fade through React's
 `<ViewTransition>` (off under `prefers-reduced-motion`), and a panel that
-suspends keeps the current one on screen until it is ready.
+suspends keeps the current one on screen until it is ready. Both hold however
+the selection is set, by `useState` or by a store such as `@k8ordo/state`
+whose updates are synchronous.
 
 The keys follow the WAI-ARIA tabs pattern, and focusing a tab selects it.
-`ArrowLeft` / `ArrowRight` move to the previous / next tab, wrapping at the
-ends, and swap under `dir="rtl"`; in vertical writing mode the list is
-vertical and `ArrowUp` / `ArrowDown` do the same. `Home` / `End` go to the
-first / last tab.
+`ArrowLeft` / `ArrowRight` move to the previous / next tab in the order the
+tabs appear, wrapping at the ends, and swap under `dir="rtl"`; in vertical
+writing mode the list is vertical and `ArrowUp` / `ArrowDown` do the same.
+`Home` / `End` go to the first / last tab.
 
 Props (Tabs.Root):
 
-- `ids`: `[string, ...string[]]` (required)
 - `children`: `ReactNode`
-- `defaultSelectedId`: `string` | `null` (default: `null`)
+- `defaultSelectedId`: `string`
 - `onChange`: `(id: string) => void`
 - `selectedId`: `string`
 

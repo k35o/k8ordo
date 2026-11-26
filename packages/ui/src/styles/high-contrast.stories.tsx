@@ -86,7 +86,7 @@ export const ForcedColors: Story = {
       </Card>
       <Alert message="お知らせ" tone="info" />
       <Button>フォーカスを受けるボタン</Button>
-      <Tabs.Root defaultSelectedId="settings" ids={['overview', 'settings']}>
+      <Tabs.Root defaultSelectedId="settings">
         <Tabs.List label="設定メニュー">
           <Tabs.Tab id="overview">概要</Tabs.Tab>
           <Tabs.Tab id="settings">設定</Tabs.Tab>

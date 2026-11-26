@@ -10,7 +10,7 @@ export const InstallTabs: FC<{
   yarn: ReactNode;
   pnpm: ReactNode;
 }> = ({ npm, yarn, pnpm }) => (
-  <Tabs.Root ids={['npm', 'yarn', 'pnpm']}>
+  <Tabs.Root defaultSelectedId="npm">
     <Tabs.List label={m.getStarted.packageManagerLabel()}>
       <Tabs.Tab id="npm">npm</Tabs.Tab>
       <Tabs.Tab id="yarn">yarn</Tabs.Tab>

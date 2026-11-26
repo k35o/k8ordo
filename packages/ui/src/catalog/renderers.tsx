@@ -245,12 +245,9 @@ export function renderCard(
 export const TabsView: FC<{ props: TabsProps }> = ({ props }) => {
   const messages = getMessages();
   const baseId = useId();
-  const ids = props.tabs.map((_, index) => `${baseId}-tab-${index}`) as [
-    string,
-    ...string[],
-  ];
+  const ids = props.tabs.map((_, index) => `${baseId}-tab-${index}`);
   return (
-    <Tabs.Root ids={ids}>
+    <Tabs.Root defaultSelectedId={ids[0] ?? ''}>
       <Tabs.List label={u(props.label) ?? messages.tabList}>
         {props.tabs.map((tab, index) => (
           <Tabs.Tab id={ids[index] ?? ''} key={ids[index]}>

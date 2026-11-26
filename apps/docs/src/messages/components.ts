@@ -1379,9 +1379,13 @@ export const tabs = {
     ja: 'タブで内容を切り替えます。パネルはクロスフェードで切り替わり、キーボード操作はWAI-ARIAのtabsに従います。',
     en: 'Switches content with tabs. Panels cross-fade, and the keyboard follows the WAI-ARIA tabs pattern.',
   }),
-  defaultSelectedTitle: message({
-    ja: '既定の選択',
-    en: 'Default selection',
+  controlledTitle: message({
+    ja: '選択を制御する',
+    en: 'Controlling the selection',
+  }),
+  controlledDescription: message({
+    ja: '`selectedId`と`onChange`で選択を持ちます。制御しないときは`defaultSelectedId`が要ります。タブの印はすぐに切り替わり、パネルは選択の遅延値で入れ替わります。そのため、`useState`で持っても`@k8ordo/state`のような同期で更新するストアで持っても、クロスフェードし、suspendするパネルは用意できるまで前のパネルを残します。',
+    en: '`selectedId` and `onChange` hold the selection; without them, `defaultSelectedId` is required. The selected tab is marked at once, and the panels follow a deferred copy of the selection, so they cross-fade and a suspending panel keeps the previous one on screen whether the selection lives in `useState` or in a store that updates synchronously, such as `@k8ordo/state`.',
   }),
 };
 

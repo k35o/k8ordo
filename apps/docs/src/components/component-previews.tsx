@@ -170,7 +170,7 @@ export const componentPreviews = {
   ),
   Tabs: (
     <div className={styles.tabs}>
-      <Tabs.Root ids={['overview', 'settings']}>
+      <Tabs.Root defaultSelectedId="overview">
         <Tabs.List label="Navigation">
           <Tabs.Tab id="overview">Overview</Tabs.Tab>
           <Tabs.Tab id="settings">Settings</Tabs.Tab>

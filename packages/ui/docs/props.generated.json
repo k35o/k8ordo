@@ -5294,12 +5294,6 @@
       "category": "navigation",
       "props": [
         {
-          "name": "ids",
-          "types": ["[string, ...string[]]"],
-          "defaultValue": null,
-          "required": true
-        },
-        {
           "name": "children",
           "types": ["ReactNode"],
           "defaultValue": null,
@@ -5307,8 +5301,8 @@
         },
         {
           "name": "defaultSelectedId",
-          "types": ["string", "null"],
-          "defaultValue": "null",
+          "types": ["string"],
+          "defaultValue": null,
           "required": false
         },
         {
