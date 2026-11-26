@@ -14,10 +14,14 @@
   "dependencies": {
     "@a2ui/react": "0.16.1",
     "@a2ui/web_core": "0.16.1",
+    "@ai-sdk/mcp": "2.0.101",
     "@ai-sdk/react": "4.0.180",
     "@json-render/core": "catalog:",
     "@json-render/react": "catalog:",
     "@k8ordo/ui": "workspace:^",
+    "@modelcontextprotocol/client": "2.4.0",
+    "@modelcontextprotocol/core": "2.4.0",
+    "@modelcontextprotocol/ext-apps": "2.1.0",
     "@openuidev/lang-core": "catalog:",
     "@openuidev/react-lang": "catalog:",
     "@tailwindcss/vite": "catalog:",
@@ -26,7 +30,10 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@ai-sdk/anthropic": "4.0.106",
     "@anthropic-ai/sdk": "1.10.0",
+    "@modelcontextprotocol/node": "2.1.2",
+    "@modelcontextprotocol/server": "2.4.0",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
@@ -35,6 +42,7 @@
     "react": "catalog:",
     "react-dom": "catalog:",
     "vite": "catalog:",
+    "vite-plugin-singlefile": "2.3.4",
     "vite-plus": "catalog:",
     "vitest": "catalog:",
     "vitest-browser-react": "catalog:"
