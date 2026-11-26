@@ -16,8 +16,6 @@ import {
   Suggestion,
   ToolInvocation,
 } from '@k8ordo/ui/ai';
-// AI SDK integration (optional peer: ai)
-import { mapMessageParts } from '@k8ordo/ui/ai-sdk';
 // Streaming-aware Markdown rendering (optional peer: streamdown)
 import { Response } from '@k8ordo/ui/ai/response';
 ```
@@ -32,13 +30,10 @@ The types are exported from `@k8ordo/ui/ai` too:
 
 ### Setting up the optional peers
 
-Install only what the subpaths you use require. `@k8ordo/ui/ai` itself needs neither.
+`@k8ordo/ui/ai` itself needs nothing more. `@k8ordo/ui/ai/response` needs streamdown:
 
 ```bash
-# If you use @k8ordo/ui/ai/response (Response)
 pnpm add streamdown
-# If you use @k8ordo/ui/ai-sdk (mapMessageParts)
-pnpm add ai
 ```
 
 `Response` styles what streamdown renders itself, through the
@@ -56,7 +51,7 @@ The "default" shown for `label`, `sendLabel`, and similar props below is the bui
 
 ## The whole picture
 
-`Conversation` (the log), `Message` (a bubble), and `PromptInput` (the input box) form the skeleton. `Response`, `Reasoning`, `ToolInvocation`, `Attachment`, `Source`, and the message actions can be added later — [AI SDK integration](#ai-sdk-integration-mapmessageparts) shows all of them together.
+`Conversation` (the log), `Message` (a bubble), and `PromptInput` (the input box) form the skeleton. `Response`, `Reasoning`, `ToolInvocation`, `Attachment`, `Source`, and the message actions can be added later — [With the AI SDK](#with-the-ai-sdk) shows all of them together.
 
 ```tsx
 'use client';
@@ -458,9 +453,9 @@ Props:
 - `onApprovalResponse`: `(response: ToolApprovalResponse) => void | PromiseLike<void>` (called with the approval `id` and the user's answer)
 - `isOpen` / `defaultOpen` / `onChange`: open state, controlled or uncontrolled
 
-## AI SDK integration (mapMessageParts)
+## With the AI SDK
 
-`mapMessageParts` from `@k8ordo/ui/ai-sdk` converts the AI SDK's `UIMessage.parts` into a `MappedPart[]` that is easy to render. It has no React dependency and requires the optional peer `ai` (v7).
+The types `@k8ordo/ui/ai` exports (`ChatStatus`, `ToolState`, `ToolApproval`, `ToolApprovalResponse`) take the AI SDK's own shapes, so the SDK's values pass to the components as they are, and `@k8ordo/ui` does not depend on the SDK. What is left is turning a `UIMessage`'s parts into rows of components. `examples/ui-integrations` in the repository does it with `mapMessageParts` (`src/ai-sdk/map-parts.ts`, about a hundred lines with no React): copy it into your application. It turns `UIMessage.parts` into a `MappedPart[]` that is easy to render:
 
 ```ts
 type MappedPart =
@@ -503,13 +498,15 @@ import {
   Source,
   ToolInvocation,
 } from '@k8ordo/ui/ai';
-import { mapMessageParts } from '@k8ordo/ui/ai-sdk';
 import { Response } from '@k8ordo/ui/ai/response';
 import { BotMessageIcon } from '@k8ordo/ui/icons';
-import { validateGeneratedSpec } from '@k8ordo/ui/json-render';
-import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
 import { lastAssistantMessageIsCompleteWithApprovalResponses } from 'ai';
 import type { UIMessage } from 'ai';
+
+// copied from examples/ui-integrations: the AI SDK glue and the json-render glue
+import { mapMessageParts } from './ai-sdk/map-parts';
+import { validateGeneratedSpec } from './json-render/catalog';
+import { JsonRenderUI } from './json-render/registry';
 
 type Chat = ReturnType<typeof useChat>;
 
@@ -620,16 +617,15 @@ export function Chat() {
 
 `examples/ui-integrations` in the repository runs this against the real `useChat`, with a scripted transport in place of a model.
 
-`@k8ordo/ui/ai-sdk` exports the `MappedPart` type, and re-exports the `ChatStatus`, `ToolState`, `ToolApproval`, and `ToolApprovalResponse` types as well.
-
 ## Combining with generative UI
 
-A UI spec returned by an LLM as a tool result can be rendered inside a chat bubble. See the [generative UI reference](generative-ui.md) for details.
+A UI spec returned by an LLM as a tool result can be rendered inside a chat bubble, with the glue of the format you use (here json-render's, copied from `examples/ui-integrations`). See the [generative UI reference](generative-ui.md) for details.
 
 ```tsx
 'use client';
 import { Message } from '@k8ordo/ui/ai';
-import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
+
+import { JsonRenderUI } from './json-render/registry';
 
 <Message.Root from="assistant">
   <Message.Content>

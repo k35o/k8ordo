@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'LLMに`@k8ordo/ui`のコンポーネントだけでUIを組み立てさせます。json-renderとOpenUIのどちらでも、プロンプトの生成から描画までをこのライブラリのアダプタで行えます。',
-  en: 'Have an LLM build UI out of `@k8ordo/ui` components only. With json-render or OpenUI, the adapters in this library cover everything from the prompt to the rendering.',
+  ja: 'LLMに`@k8ordo/ui`のコンポーネントだけでUIを組み立てさせるためのカタログです。json-renderやOpenUIといった形式には依存しません。形式とのつなぎはアプリが持ちます。',
+  en: 'A catalog for having an LLM build UI out of `@k8ordo/ui` components only. It depends on no format such as json-render or OpenUI; the glue to a format lives in your app.',
 });
 
 export const installTitle = message({
@@ -11,45 +11,28 @@ export const installTitle = message({
 });
 
 export const installDescription = message({
-  ja: 'json-renderとOpenUIのうち、使うほうのパッケージをzodと一緒に入れます。',
-  en: 'Install zod and the packages for whichever you use, json-render or OpenUI.',
+  ja: 'カタログに要るのはzodだけです。json-renderやOpenUIは、つなぎを置くアプリが入れます。',
+  en: 'The catalog needs zod alone. json-render or OpenUI is installed by the app that keeps the glue.',
 });
 
-export const installSeries = message({
-  ja: (jsonRender: string, openUi: string) =>
-    `対応するバージョンはjson-renderが${jsonRender}、OpenUIが${openUi}です。json-renderは0.x系なので、マイナーバージョンが上がると互換性が変わります。`,
-  en: (jsonRender, openUi) =>
-    `The supported versions are json-render ${jsonRender} and OpenUI ${openUi}. json-render is still 0.x, where a minor release can break compatibility.`,
+export const catalogTitle = message({
+  ja: 'カタログ',
+  en: 'The catalog',
 });
 
-export const installOneCopy = message({
-  ja: 'アダプタはjson-renderやOpenUIが持つReactのコンテキストを読みます。アプリと`@k8ordo/ui`がそれぞれ別のバージョンを解決しても、型とビルドは通ります。それでも描画のときに、フォームのコンポーネントがエラーになります。OpenUIなら`useOpenUI must be used within a <Renderer /> component.`、json-renderなら`useStateStore must be used within a StateProvider`です。バージョンはアプリの中で1つにそろえます。',
-  en: 'The adapters read the React context that json-render or OpenUI itself provides. If your app and `@k8ordo/ui` resolve different versions of it, the types and the build still pass. At render time, though, the form components fail: OpenUI with `useOpenUI must be used within a <Renderer /> component.`, json-render with `useStateStore must be used within a StateProvider`. Keep one version in the app.',
+export const catalogDescription = message({
+  ja: '`catalog`は、コンポーネントの名前ごとに説明とpropsのスキーマを持ちます。子を並べるコンポーネントには`children`が、入力欄には`value`が付きます。',
+  en: '`catalog` holds a description and a props schema for each component name. A component that lays out children has `children`, and a field has `value`.',
 });
 
-export const promptTitle = message({
-  ja: 'プロンプトの生成',
-  en: 'Prompt generation',
+export const catalogValue = message({
+  ja: '`value.prop`は値を持つpropの名前です。`value.initial(props)`は、何も結び付けないときの値です。',
+  en: '`value.prop` names the prop that holds the value. `value.initial(props)` is the value when nothing is bound to it.',
 });
 
-export const promptServer = message({
-  ja: '`@k8ordo/ui/json-render`はサーバーで読み込めます。Server Componentやサーバーの処理から`catalog.prompt()`を呼べます。',
-  en: '`@k8ordo/ui/json-render` loads on the server. A Server Component or any server code can call `catalog.prompt()`.',
-});
-
-export const promptRules = message({
-  ja: '`uiRules`は、表の各行にセルを列の数だけ置くといった、LLMが破りやすい約束事の一覧です。`customRules`に渡すと、プロンプトに書き足されます。',
-  en: '`uiRules` lists the rules a model most often breaks, such as giving a table row as many cells as there are columns. Pass them as `customRules` and they are added to the prompt.',
-});
-
-export const promptLanguage = message({
-  ja: 'アダプタがLLMに渡す説明は、アプリのロケールに関係なくすべて英語です。UIに書かれる文の言語を決めたいときは、約束事を自分で足します。',
-  en: 'Everything the adapters hand the model is English, whatever the application’s locale. To set the language of the text written into the UI, add a rule of your own.',
-});
-
-export const promptLanguageCallout = message({
-  ja: 'UIの文の言語を決める約束事',
-  en: 'A rule that sets the language of the UI text',
+export const catalogServer = message({
+  ja: '`@k8ordo/ui/catalog`はReactを読まないので、サーバーで読み込めます。Server Componentやサーバーの処理からプロンプトを作れます。',
+  en: '`@k8ordo/ui/catalog` imports no React, so it loads on the server. A Server Component or any server code can build the prompt from it.',
 });
 
 export const renderTitle = message({
@@ -58,13 +41,43 @@ export const renderTitle = message({
 });
 
 export const renderDescription = message({
-  ja: '`JsonRenderUI`はjson-renderのプロバイダ、レンダラー、コンポーネントの登録を1つにまとめたコンポーネントです。`spec`を渡すだけで描けます。',
-  en: '`JsonRenderUI` bundles json-render’s provider, its renderer and the component registry. Passing the `spec` is all it takes.',
+  ja: '`renderers`は`catalog`と同じ名前で、コンポーネントの描き方を持ちます。形式が解決したpropsと、形式が描いた子を渡します。',
+  en: '`renderers` has the same names as `catalog` and draws each component. Pass the props the format resolved and the children it drew.',
 });
 
-export const renderStateChange = message({
-  ja: 'フォームの値を集めるときは`onStateChange`を渡します。変わった`path`と`value`の配列を受け取ります。',
-  en: 'To collect form values, pass `onStateChange`. It receives an array of the changed `path` and `value` pairs.',
+export const renderValue = message({
+  ja: '入力欄には、値とそれを書き換える関数も渡します。値をどこに置くかは、つなぎが決めます。',
+  en: 'A field also takes its value and a function that sets it. Where the value lives is up to the glue.',
+});
+
+export const glueTitle = message({
+  ja: '形式とのつなぎ',
+  en: 'Connecting a format',
+});
+
+export const glueDescription = message({
+  ja: 'つなぎは`catalog`を回して、コンポーネントを名前ごとに形式へ登録します。コンポーネントの名前を1つも書かないので、ライブラリに部品が増えてもつなぎは変わりません。',
+  en: 'The glue maps over `catalog` and registers each component with the format by name. It names no component, so a component added to the library needs no change to the glue.',
+});
+
+export const glueBinding = message({
+  ja: '入力欄の値は、形式の状態に結び付けます。json-renderなら`$bindState`で、OpenUIなら`name`で結び付けます。',
+  en: 'Each field’s value is bound to the format’s state: with `$bindState` in json-render, and by `name` in OpenUI.',
+});
+
+export const glueExample = message({
+  ja: 'json-render、OpenUI、AI SDKのつなぎは、リポジトリの`examples/ui-integrations`にあります。どれも変更のたびにブラウザで確かめています。',
+  en: 'Working glue for json-render, OpenUI and the AI SDK lives in `examples/ui-integrations` in the repository. Each runs in a real browser on every change.',
+});
+
+export const glueCopy = message({
+  ja: '使う形式のつなぎを、アプリに写して持ちます。',
+  en: 'Copy the glue for the format you use into your app.',
+});
+
+export const glueLink = message({
+  ja: 'GitHubでつなぎを見る',
+  en: 'See the glue on GitHub',
 });
 
 export const validateTitle = message({
@@ -73,36 +86,36 @@ export const validateTitle = message({
 });
 
 export const validateDescription = message({
-  ja: '`validateGeneratedSpec`は、機械的に直せる誤りを直してから、specの構造とコンポーネントごとのpropsを確かめます。通れば`spec`を返します。',
-  en: '`validateGeneratedSpec` fixes what can be fixed mechanically, then checks the spec’s structure and each component’s props. When the spec passes, it returns the `spec`.',
+  ja: '`catalogPropIssues`は、モデルが書いたコンポーネントを1つ確かめて、誤りを英語の文の配列で返します。空の配列なら、そのまま描けます。',
+  en: '`catalogPropIssues` checks one component the model wrote and returns what is wrong with it as English sentences. An empty array means it renders as written.',
+});
+
+export const validateUnknown = message({
+  ja: 'zodは知らないキーを、エラーにせず取り除きます。そのため、スキーマにないpropも誤りとして返します。',
+  en: 'zod drops a key it does not know instead of failing, so a prop missing from the schema is reported as an issue too.',
 });
 
 export const validateRepair = message({
-  ja: '通らなければ、見つけた誤りの一覧`issues`と、それをもとに作った`repairPrompt`を返します。`repairPrompt`はLLMにそのまま送り返せる文章です。',
-  en: 'When it does not, it returns the `issues` it found and a `repairPrompt` built from them. The `repairPrompt` can be sent straight back to the model.',
+  ja: '形式の構造の検証のあとに要素ごとに呼び、集めた誤りをモデルに送り返します。',
+  en: 'Call it for every element after the format’s own structural check, and send the issues back to the model.',
 });
 
-export const typedTitle = message({
-  ja: 'specの型',
-  en: 'Typed specs',
+export const promptTitle = message({
+  ja: 'プロンプトの言語',
+  en: 'The language of the prompt',
 });
 
-export const typedDescription = message({
-  ja: '自分でspecを書くときは、`satisfies UISpec`を付けます。コンポーネントの名前やpropsを打ち間違えると、型エラーになります。',
-  en: 'When you write a spec by hand, add `satisfies UISpec`. A misspelt component name or prop becomes a type error.',
+export const promptLanguage = message({
+  ja: 'カタログがLLMに渡す文は、アプリのロケールに関係なくすべて英語です。UIに書かれる文の言語を決めたいときは、約束事を自分で足します。',
+  en: 'Everything the catalog hands the model is English, whatever the application’s locale. To set the language of the text written into the UI, add a rule of your own.',
 });
 
-export const openuiTitle = message({
-  ja: 'OpenUI',
-  en: 'OpenUI',
+export const promptRules = message({
+  ja: '`catalogRules`は、表の各行にセルを列の数だけ置くといった、LLMが破りやすい約束事の一覧です。形式のプロンプトに渡します。',
+  en: '`catalogRules` lists the rules a model most often breaks, such as giving a table row as many cells as there are columns. Pass it to the format’s prompt.',
 });
 
-export const openuiDescription = message({
-  ja: 'OpenUIは、LLMが書いた文字列を`library`で描きます。描画はClient Componentで行います。',
-  en: 'OpenUI renders the model’s output string with `library`. Rendering happens in a Client Component.',
-});
-
-export const openuiPrompt = message({
-  ja: 'プロンプトは`@k8ordo/ui/openui/prompt`の`prompt()`で作ります。この入口はReactに依存しないので、サーバーで呼べます。UIの文の言語を決める約束事は`additionalRules`に渡します。',
-  en: 'The prompt comes from `prompt()` in `@k8ordo/ui/openui/prompt`. That entry does not depend on React, so it runs on the server. A rule that sets the language of the UI text goes in `additionalRules`.',
+export const promptLanguageCallout = message({
+  ja: 'UIの文の言語を決める約束事',
+  en: 'A rule that sets the language of the UI text',
 });

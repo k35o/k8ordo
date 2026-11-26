@@ -1,16 +1,14 @@
 {
   "name": "@k8ordo/ui",
   "version": "3.0.0",
-  "description": "k8o's React UI library with built-in generative UI adapters (json-render & OpenUI) for LLM-driven, on-brand interfaces",
+  "description": "k8o's React UI library, with a format-neutral catalog of its components for LLM-driven, on-brand generative UI",
   "keywords": [
     "ai",
     "components",
     "design-system",
     "generative-ui",
-    "json-render",
     "k8o",
     "llm",
-    "openui",
     "react",
     "typescript",
     "ui"
@@ -43,21 +41,13 @@
       "default": "./dist/styles/tokens.mjs"
     },
     "./props.json": "./docs/props.generated.json",
-    "./json-render": {
-      "types": "./dist/integrations/json-render/catalog.d.mts",
-      "default": "./dist/integrations/json-render/catalog.mjs"
+    "./catalog": {
+      "types": "./dist/catalog/index.d.mts",
+      "default": "./dist/catalog/index.mjs"
     },
-    "./json-render/registry": {
-      "types": "./dist/integrations/json-render/registry.d.mts",
-      "default": "./dist/integrations/json-render/registry.mjs"
-    },
-    "./openui": {
-      "types": "./dist/integrations/openui/library.d.mts",
-      "default": "./dist/integrations/openui/library.mjs"
-    },
-    "./openui/prompt": {
-      "types": "./dist/integrations/openui/prompt.d.mts",
-      "default": "./dist/integrations/openui/prompt.mjs"
+    "./catalog/render": {
+      "types": "./dist/catalog/render.d.mts",
+      "default": "./dist/catalog/render.mjs"
     },
     "./ai": {
       "types": "./dist/components/ai/index.d.mts",
@@ -74,10 +64,6 @@
     "./code-block": {
       "types": "./dist/components/data-display/code-block/index.d.mts",
       "default": "./dist/components/data-display/code-block/index.mjs"
-    },
-    "./ai-sdk": {
-      "types": "./dist/integrations/ai-sdk/index.d.mts",
-      "default": "./dist/integrations/ai-sdk/index.mjs"
     },
     "./i18n": {
       "types": "./dist/i18n/index.d.mts",
@@ -118,12 +104,8 @@
     "@better-css-modules/core": "catalog:",
     "@better-css-modules/vite": "catalog:",
     "@chromatic-com/storybook": "5.6.0",
-    "@json-render/core": "catalog:",
-    "@json-render/react": "catalog:",
     "@k8ordo/form": "workspace:^",
     "@k8ordo/i18n": "workspace:^",
-    "@openuidev/lang-core": "catalog:",
-    "@openuidev/react-lang": "catalog:",
     "@storybook/addon-a11y": "10.6.7",
     "@storybook/addon-docs": "10.6.7",
     "@storybook/addon-mcp": "10.6.7",
@@ -135,7 +117,6 @@
     "@vitest/browser-playwright": "catalog:",
     "@vitest/coverage-v8": "catalog:",
     "@vitest/ui": "catalog:",
-    "ai": "catalog:",
     "postcss": "catalog:",
     "publint": "catalog:",
     "react": "catalog:",
@@ -153,14 +134,9 @@
     "zod": "catalog:"
   },
   "peerDependencies": {
-    "@json-render/core": ">=0.22.0 <0.23.0",
-    "@json-render/react": ">=0.22.0 <0.23.0",
     "@k8ordo/i18n": "workspace:^",
-    "@openuidev/lang-core": "^1.0.0",
-    "@openuidev/react-lang": "^1.0.0",
     "@types/react": ">=19.3.0",
     "@types/react-dom": ">=19.3.0",
-    "ai": ">=7.0.51",
     "react": ">=19.3.0",
     "react-dom": ">=19.3.0",
     "streamdown": ">=2.5.0",
@@ -168,25 +144,10 @@
     "zod": "^4.6.6"
   },
   "peerDependenciesMeta": {
-    "@json-render/core": {
-      "optional": true
-    },
-    "@json-render/react": {
-      "optional": true
-    },
-    "@openuidev/lang-core": {
-      "optional": true
-    },
-    "@openuidev/react-lang": {
-      "optional": true
-    },
     "@types/react": {
       "optional": true
     },
     "@types/react-dom": {
-      "optional": true
-    },
-    "ai": {
       "optional": true
     },
     "streamdown": {

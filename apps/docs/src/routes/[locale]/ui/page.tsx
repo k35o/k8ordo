@@ -19,12 +19,13 @@ const HERO_FORM = `<FormControl
   Subscribe
 </Button>`;
 
-const CLAIM_GENERATIVE = `const systemPrompt = catalog.prompt({
-  customRules: [...uiRules],
-});
+const CLAIM_GENERATIVE = `import { catalog, catalogPropIssues } from '@k8ordo/ui/catalog';
 
-const result = validateGeneratedSpec(JSON.parse(llmOutput));
-if (result.ok) return <JsonRenderUI spec={result.spec} />;`;
+catalog.Button.description;
+// 'Action button. With href it renders as a link (<a>).'
+
+catalogPropIssues('Button', { label: 'OK', colour: 'primary' });
+// ['Button: Unknown prop "colour". Allowed props: label, …']`;
 
 export default function UiPage() {
   return (
@@ -67,7 +68,7 @@ export default function UiPage() {
         </Playground>
       </LandingClaim>
       <LandingClaim body={m.ui.claimAgentsBody} title={m.ui.claimAgentsTitle}>
-        <CodeBlock code={CLAIM_GENERATIVE} lang="tsx" title="gen-ui.tsx" />
+        <CodeBlock code={CLAIM_GENERATIVE} lang="ts" title="catalog.ts" />
       </LandingClaim>
     </div>
   );

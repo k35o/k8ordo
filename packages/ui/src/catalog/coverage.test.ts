@@ -8,8 +8,8 @@ import * as ai from '../components/ai';
 import * as response from '../components/ai/response';
 import * as codeBlock from '../components/data-display/code-block';
 import * as icons from '../components/icons';
-import { iconMap } from './_shared/icon-map';
-import { catalog } from './json-render/catalog';
+import { iconMap } from './icon-map';
+import { catalog } from './index';
 
 // CodeBlock は server-only を import する。ここでは export の名前を読むだけなので外す
 vi.mock('server-only', () => ({}));
@@ -87,7 +87,7 @@ const catalogIconExports = new Set(
     .filter(([, component]) => catalogIcons.has(component))
     .map(([name]) => name),
 );
-const catalogNames: readonly string[] = catalog.componentNames;
+const catalogNames: readonly string[] = Object.keys(catalog);
 
 // アイコンは 1 つずつではなく、name で絵柄を選ぶ Icon 1 項目として載る
 const entryOf = (name: string): string | undefined => {
@@ -135,8 +135,7 @@ const section = (markdown: string, heading: string): string => {
 const namesIn = (text: string): string[] =>
   [...text.matchAll(/`(?<name>\w+)`/gu)].map((m) => m.groups?.name ?? '');
 
-const SUPPORTED_LIST =
-  /^Supported components \(both frameworks\):\n\n(?<list>(?:- .+\n)+)/mu;
+const SUPPORTED_LIST = /^Components in the catalog:\n\n(?<list>(?:- .+\n)+)/mu;
 
 const readmeSupportedNames = (): string[] =>
   namesIn(

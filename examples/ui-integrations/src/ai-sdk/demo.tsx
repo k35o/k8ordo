@@ -9,13 +9,13 @@ import {
   Source,
   ToolInvocation,
 } from '@k8ordo/ui/ai';
-import { mapMessageParts } from '@k8ordo/ui/ai-sdk';
 import { BotMessageIcon } from '@k8ordo/ui/icons';
-import { validateGeneratedSpec } from '@k8ordo/ui/json-render';
-import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
 import { lastAssistantMessageIsCompleteWithApprovalResponses } from 'ai';
 import type { UIMessage } from 'ai';
 
+import { validateGeneratedSpec } from '../json-render/catalog';
+import { JsonRenderUI } from '../json-render/registry';
+import { mapMessageParts } from './map-parts';
 import { scriptedTransport } from './scripted-transport';
 
 type Chat = ReturnType<typeof useChat>;

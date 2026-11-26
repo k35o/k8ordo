@@ -578,4 +578,4 @@ check is the thing it cannot model.
 - Component catalog: [references/components.md](references/components.md)
 - Types: [references/types.md](references/types.md)
 - AI chat (Conversation / Message / PromptInput, …): [references/ai-chat.md](references/ai-chat.md)
-- Generative UI (having an LLM generate UI via json-render / OpenUI): [references/generative-ui.md](references/generative-ui.md)
+- Generative UI (the catalog an LLM composes UIs from, for json-render, OpenUI, A2UI, or any format): [references/generative-ui.md](references/generative-ui.md)

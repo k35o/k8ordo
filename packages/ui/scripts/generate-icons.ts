@@ -4,8 +4,8 @@
  * Single source of truth:
  *   src/components/icons/<name>.tsx ──(this)──►
  *     src/components/icons/index.ts            the `@k8ordo/ui/icons` entry
- *     src/integrations/_shared/icon-names.ts   the names a generative-UI spec may use
- *     src/integrations/_shared/icon-map.ts     the component each name draws
+ *     src/catalog/icon-names.ts                the names a generative-UI spec may use
+ *     src/catalog/icon-map.ts                  the component each name draws
  *
  * One file is one icon: `eye-closed.tsx` exports `EyeClosedIcon`, and a spec
  * calls it `eye-closed`. Adding an icon is adding its file and running this.
@@ -19,9 +19,7 @@ import { fileURLToPath } from 'node:url';
 const ICONS_DIR = fileURLToPath(
   new URL('../src/components/icons/', import.meta.url),
 );
-const SHARED_DIR = fileURLToPath(
-  new URL('../src/integrations/_shared/', import.meta.url),
-);
+const CATALOG_DIR = fileURLToPath(new URL('../src/catalog/', import.meta.url));
 
 // What the icons are built on, not icons themselves.
 const NOT_ICONS = new Set(['base', 'line-icon']);
@@ -71,7 +69,7 @@ const outputs: ReadonlyArray<readonly [path: string, content: string]> = [
     ].join('\n'),
   ],
   [
-    `${SHARED_DIR}icon-names.ts`,
+    `${CATALOG_DIR}icon-names.ts`,
     [
       HEADER,
       'export const ICON_NAMES = [',
@@ -81,12 +79,12 @@ const outputs: ReadonlyArray<readonly [path: string, content: string]> = [
     ].join('\n'),
   ],
   [
-    `${SHARED_DIR}icon-map.ts`,
+    `${CATALOG_DIR}icon-map.ts`,
     [
       HEADER,
       ...shapes.map(
         (file) =>
-          `import { ${exportNameOf(file)} } from '../../components/icons/${file}';`,
+          `import { ${exportNameOf(file)} } from '../components/icons/${file}';`,
       ),
       '',
       'export const iconMap = {',

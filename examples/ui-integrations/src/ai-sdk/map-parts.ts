@@ -1,3 +1,4 @@
+import type { ToolApproval, ToolState } from '@k8ordo/ui/ai';
 import {
   getToolName,
   isDataUIPart,
@@ -7,8 +8,6 @@ import {
   isToolUIPart,
 } from 'ai';
 import type { UIMessage } from 'ai';
-
-import type { ToolApproval, ToolState } from '../../components/ai/types';
 
 export type MappedPart =
   | { kind: 'text'; text: string }

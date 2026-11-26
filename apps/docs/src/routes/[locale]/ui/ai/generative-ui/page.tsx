@@ -1,11 +1,7 @@
-import { Heading, Separator } from '@k8ordo/ui';
+import { Anchor, Heading, Separator } from '@k8ordo/ui';
 
-import { Pitfall } from '../../../../../components/callout';
 import { CodeBlock } from '../../../../../components/code-block';
-import {
-  InstallCommand,
-  peerSeriesOf,
-} from '../../../../../components/install';
+import { InstallCommand } from '../../../../../components/install';
 import { PageTitle } from '../../../../../components/page-title';
 import { Rich } from '../../../../../components/rich';
 import * as m from '../../../../../messages';
@@ -14,62 +10,58 @@ import page from '../../../../../styles/page.module.css';
 
 const t = m.generativeUi;
 
-const PROMPT = `import { catalog, uiRules } from '@k8ordo/ui/json-render';
+const EXAMPLE_URL =
+  'https://github.com/k35o/k8ordo/tree/main/examples/ui-integrations';
 
-const systemPrompt = catalog.prompt({ customRules: [...uiRules] });`;
+const CATALOG = `import { catalog } from '@k8ordo/ui/catalog';
 
-const PROMPT_LANGUAGE = `const systemPrompt = catalog.prompt({
-  customRules: [...uiRules, 'Write all UI text in Japanese.'],
-});`;
+catalog.TextField.description; // 'Single-line text input.'
+catalog.TextField.props; // z.object({ name, placeholder, defaultValue, … })
+catalog.TextField.value; // { prop: 'defaultValue', initial: (props) => … }
+catalog.Stack.children; // true`;
 
 const RENDER = `'use client';
-import type { UISpec } from '@k8ordo/ui/json-render';
-import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
+import { renderers } from '@k8ordo/ui/catalog/render';
 
-export function GenUi({ spec }: { spec: UISpec }) {
-  return (
-    <JsonRenderUI
-      spec={spec}
-      onStateChange={(changes) => console.log(changes)}
-    />
-  );
+export function Title(field: {
+  value: string;
+  setValue: (next: string) => void;
+}) {
+  return renderers.TextField({
+    props: { name: 'title' },
+    children: [],
+    ...field,
+  });
 }`;
 
-const VALIDATE = `import { validateGeneratedSpec } from '@k8ordo/ui/json-render';
+const GLUE = `import { defineCatalog } from '@json-render/core';
+import { schema } from '@json-render/react/schema';
+import { catalog as k8ordo } from '@k8ordo/ui/catalog';
 
-async function toSpec(
-  output: string,
-  ask: (prompt: string) => Promise<string>,
-) {
-  const result = validateGeneratedSpec(JSON.parse(output));
-  if (result.ok) return result.spec;
-  const retried = validateGeneratedSpec(
-    JSON.parse(await ask(result.repairPrompt)),
-  );
-  return retried.ok ? retried.spec : null;
-}`;
+export const catalog = defineCatalog(schema, {
+  components: Object.fromEntries(
+    Object.entries(k8ordo).map(([name, entry]) => [
+      name,
+      {
+        props: entry.props,
+        description: entry.description,
+        ...(entry.children === true ? { slots: ['default'] } : {}),
+      },
+    ]),
+  ),
+  actions: {},
+});`;
 
-const TYPED = `import type { UISpec } from '@k8ordo/ui/json-render';
+const VALIDATE = `import { catalogPropIssues } from '@k8ordo/ui/catalog';
 
-const spec = {
-  root: 'root',
-  elements: {
-    root: { type: 'Stack', props: { direction: 'column' }, children: ['ok'] },
-    ok: { type: 'Button', props: { label: 'OK' } },
-  },
-} satisfies UISpec;`;
+catalogPropIssues('Button', { label: 'OK', colour: 'primary' });
+// ['Button: Unknown prop "colour". Allowed props: label, variant, …']`;
 
-const OPENUI_RENDER = `'use client';
-import { library } from '@k8ordo/ui/openui';
-import { Renderer } from '@openuidev/react-lang';
+const PROMPT_LANGUAGE = `import { catalogRules } from '@k8ordo/ui/catalog';
 
-export function GenUi({ response }: { response: string }) {
-  return <Renderer library={library} response={response} />;
-}`;
-
-const OPENUI_PROMPT = `import { prompt } from '@k8ordo/ui/openui/prompt';
-
-const systemPrompt = prompt();`;
+const systemPrompt = catalog.prompt({
+  customRules: [...catalogRules, 'Write all UI text in Japanese.'],
+});`;
 
 export default function GenerativeUi() {
   return (
@@ -89,55 +81,32 @@ export default function GenerativeUi() {
         <Heading level="h2">
           <Rich>{t.installTitle()}</Rich>
         </Heading>
+        <InstallCommand packages="zod" />
         <p className={page.mute}>
           <Rich>{t.installDescription()}</Rich>
         </p>
-        <Heading level="h3">json-render</Heading>
-        <InstallCommand packages="@json-render/core @json-render/react zod" />
-        <Heading level="h3">OpenUI</Heading>
-        <InstallCommand packages="@openuidev/react-lang @openuidev/lang-core zod" />
-        <p className={page.mute}>
-          <Rich>
-            {t.installSeries(
-              peerSeriesOf('@k8ordo/ui', '@json-render/core'),
-              peerSeriesOf('@k8ordo/ui', '@openuidev/lang-core'),
-            )}
-          </Rich>
-        </p>
-        <Pitfall>
-          <p>
-            <Rich>{t.installOneCopy()}</Rich>
-          </p>
-        </Pitfall>
       </section>
 
       <Separator color="mute" />
 
       <section className={page.stack}>
         <Heading level="h2">
-          <Rich>{t.promptTitle()}</Rich>
+          <Rich>{t.catalogTitle()}</Rich>
         </Heading>
         <CodeBlock
-          code={PROMPT}
+          code={CATALOG}
           lang="ts"
-          marks={{ 3: 'highlight' }}
-          title="system-prompt.ts"
+          marks={{ 5: 'highlight' }}
+          title="catalog.ts"
         />
         <p className={page.mute}>
-          <Rich>{t.promptServer()}</Rich>
+          <Rich>{t.catalogDescription()}</Rich>
         </p>
         <p className={page.mute}>
-          <Rich>{t.promptRules()}</Rich>
+          <Rich>{t.catalogValue()}</Rich>
         </p>
-        <CodeBlock
-          callouts={{ 2: t.promptLanguageCallout() }}
-          code={PROMPT_LANGUAGE}
-          lang="ts"
-          marks={{ 2: 'highlight' }}
-          title="system-prompt.ts"
-        />
         <p className={page.mute}>
-          <Rich>{t.promptLanguage()}</Rich>
+          <Rich>{t.catalogServer()}</Rich>
         </p>
       </section>
 
@@ -150,14 +119,45 @@ export default function GenerativeUi() {
         <CodeBlock
           code={RENDER}
           lang="tsx"
-          marks={{ 8: 'highlight', 9: 'highlight' }}
-          title="gen-ui.tsx"
+          marks={{ 8: 'highlight' }}
+          title="title.tsx"
         />
         <p className={page.mute}>
           <Rich>{t.renderDescription()}</Rich>
         </p>
         <p className={page.mute}>
-          <Rich>{t.renderStateChange()}</Rich>
+          <Rich>{t.renderValue()}</Rich>
+        </p>
+      </section>
+
+      <Separator color="mute" />
+
+      <section className={page.stack}>
+        <Heading level="h2">
+          <Rich>{t.glueTitle()}</Rich>
+        </Heading>
+        <CodeBlock
+          code={GLUE}
+          lang="ts"
+          marks={{ 7: 'highlight' }}
+          title="json-render/catalog.ts"
+        />
+        <p className={page.mute}>
+          <Rich>{t.glueDescription()}</Rich>
+        </p>
+        <p className={page.mute}>
+          <Rich>{t.glueBinding()}</Rich>
+        </p>
+        <p className={page.mute}>
+          <Rich>{t.glueExample()}</Rich>
+        </p>
+        <p className={page.mute}>
+          <Rich>{t.glueCopy()}</Rich>
+        </p>
+        <p>
+          <Anchor href={EXAMPLE_URL} openInNewTab>
+            {t.glueLink()}
+          </Anchor>
         </p>
       </section>
 
@@ -167,13 +167,12 @@ export default function GenerativeUi() {
         <Heading level="h2">
           <Rich>{t.validateTitle()}</Rich>
         </Heading>
-        <CodeBlock
-          code={VALIDATE}
-          lang="ts"
-          marks={{ 7: 'highlight', 10: 'highlight' }}
-        />
+        <CodeBlock code={VALIDATE} lang="ts" marks={{ 3: 'highlight' }} />
         <p className={page.mute}>
           <Rich>{t.validateDescription()}</Rich>
+        </p>
+        <p className={page.mute}>
+          <Rich>{t.validateUnknown()}</Rich>
         </p>
         <p className={page.mute}>
           <Rich>{t.validateRepair()}</Rich>
@@ -184,37 +183,20 @@ export default function GenerativeUi() {
 
       <section className={page.stack}>
         <Heading level="h2">
-          <Rich>{t.typedTitle()}</Rich>
-        </Heading>
-        <CodeBlock code={TYPED} lang="tsx" marks={{ 9: 'highlight' }} />
-        <p className={page.mute}>
-          <Rich>{t.typedDescription()}</Rich>
-        </p>
-      </section>
-
-      <Separator color="mute" />
-
-      <section className={page.stack}>
-        <Heading level="h2">
-          <Rich>{t.openuiTitle()}</Rich>
+          <Rich>{t.promptTitle()}</Rich>
         </Heading>
         <CodeBlock
-          code={OPENUI_RENDER}
-          lang="tsx"
-          marks={{ 6: 'highlight' }}
-          title="gen-ui.tsx"
-        />
-        <p className={page.mute}>
-          <Rich>{t.openuiDescription()}</Rich>
-        </p>
-        <CodeBlock
-          code={OPENUI_PROMPT}
+          callouts={{ 4: t.promptLanguageCallout() }}
+          code={PROMPT_LANGUAGE}
           lang="ts"
-          marks={{ 3: 'highlight' }}
+          marks={{ 4: 'highlight' }}
           title="system-prompt.ts"
         />
         <p className={page.mute}>
-          <Rich>{t.openuiPrompt()}</Rich>
+          <Rich>{t.promptLanguage()}</Rich>
+        </p>
+        <p className={page.mute}>
+          <Rich>{t.promptRules()}</Rich>
         </p>
       </section>
     </div>

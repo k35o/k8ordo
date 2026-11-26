@@ -20,8 +20,6 @@ catalog:
   '@better-css-modules/cli': 0.5.0
   '@better-css-modules/core': 0.5.0
   '@better-css-modules/vite': 0.5.0
-  # generative-UI アダプタの peer。@k8ordo/ui が開発対象にする版と examples が
-  # 使う版を同じ 1 コピーに保つ (scripts/check-peer-copies.mjs が検査する)。
   '@json-render/core': 0.23.1
   '@json-render/react': 0.23.1
   '@openuidev/lang-core': 1.1.1
@@ -44,8 +42,8 @@ catalog:
   '@vitest/spy': 5.1.0
   '@vitest/ui': 5.1.0
   '@vitest/utils': 5.1.0
-  # @k8ordo/ui/ai-sdk の peer。example が使う @ai-sdk/react は ai を exact で
-  # 持つので、上げるときは同じ ai を持つ @ai-sdk/react と揃えて 1 コピーに保つ。
+  # @ai-sdk/react は ai を exact で持つので、上げるときは同じ ai を持つ
+  # @ai-sdk/react と揃えて 1 コピーに保つ。
   ai: 7.0.176
   # @k8ordo/framework の reactCompiler が使う、@vitejs/plugin-react の任意の peer。
   # 版は plugin-react の peer の範囲から選ぶので、plugin-react と揃えて手で上げる (renovate.json)

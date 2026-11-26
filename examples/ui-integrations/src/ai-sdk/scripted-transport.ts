@@ -1,4 +1,3 @@
-import type { UISpec } from '@k8ordo/ui/json-render';
 import {
   isFileUIPart,
   isTextUIPart,
@@ -6,6 +5,8 @@ import {
   simulateReadableStream,
 } from 'ai';
 import type { ChatTransport, UIMessage, UIMessageChunk } from 'ai';
+
+import type { UISpec } from '../json-render/catalog';
 
 export const SEARCH_TOOL = 'searchDocs';
 

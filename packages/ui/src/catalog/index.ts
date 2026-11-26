@@ -1,0 +1,466 @@
+import type { z } from 'zod';
+
+import * as s from './schemas';
+
+/**
+ * A field's value as a generative-UI format holds it: which prop carries the
+ * value the field starts from, and what it starts from when nothing is bound.
+ */
+export type CatalogValue<P, V> = {
+  /** The prop a format binds to its state (`defaultValue`, `defaultChecked`, `defaultPage`). */
+  prop: keyof P & string;
+  /** The value the field starts from when the format binds nothing to `prop`. */
+  initial: (props: P) => V;
+};
+
+/** One component of the catalog, described without any generative-UI format. */
+export type CatalogEntry<P extends z.ZodObject = z.ZodObject, V = never> = {
+  /** What the component is, for the model. English, whatever the app's locale. */
+  description: string;
+  /** The props a model may write. The key order is part of the contract (see `schemas.ts`). */
+  props: P;
+  /** Present when the component lays out children of its own (Stack, Card, Modal…). */
+  children?: true;
+  /** Present when the component is a field whose value a format can bind to its state. */
+  value?: CatalogValue<z.infer<P>, V>;
+};
+
+const entry = <P extends z.ZodObject, V = never>(
+  definition: CatalogEntry<P, V>,
+): CatalogEntry<P, V> => definition;
+
+const firstOption = (props: {
+  defaultValue?: string | undefined;
+  options: ReadonlyArray<{ value: string }>;
+}): string => props.defaultValue ?? props.options[0]?.value ?? '';
+
+/**
+ * `@k8ordo/ui/catalog` (server-safe)
+ *
+ * Every component a model may place, described for no format in particular:
+ * what it is, the props it takes, whether it holds children, and which prop
+ * is its value. A json-render catalog, an OpenUI library, or an A2UI catalog
+ * is built from this by mapping over the entries; the drawing side is
+ * `@k8ordo/ui/catalog/render`.
+ *
+ * @example
+ * import { catalog } from '@k8ordo/ui/catalog';
+ *
+ * for (const [name, { description, props }] of Object.entries(catalog)) {
+ *   // register `name` with the format you use
+ * }
+ */
+export const catalog = {
+  Stack: entry({
+    description:
+      'Layout container that places its children in a row or a column with even spacing. gap sets the space between children and padding (none to xl) the space inside; give a section padding when it needs room around its content.',
+    props: s.stackProps,
+    children: true,
+  }),
+  Grid: entry({
+    description:
+      'Places its children in a grid. Set cols (1 to 6, auto-fill, or auto-fit) and gap; with auto-fill or auto-fit, minItemSize sets the smallest size of each cell.',
+    props: s.gridProps,
+    children: true,
+  }),
+  Card: entry({
+    description:
+      'Card that groups content (a container). size (sm/md/lg, default md) sets its inner padding, so a Stack inside it needs no padding of its own. interactive makes it scale up on hover.',
+    props: s.cardProps,
+    children: true,
+  }),
+  Form: entry({
+    description: 'Wrapper for form elements (a vertical layout).',
+    props: s.formProps,
+    children: true,
+  }),
+  Carousel: entry({
+    description:
+      'Horizontally scrolling carousel with previous and next buttons. Each child is one slide. slideSize sets how much of the track one slide takes (full, lg, md for two, sm for three).',
+    props: s.carouselProps,
+    children: true,
+  }),
+  Button: entry({
+    description: 'Action button. With href it renders as a link (<a>).',
+    props: s.buttonProps,
+  }),
+  IconButton: entry({
+    description:
+      'Icon-only button (label is required and shown as its tooltip).',
+    props: s.iconButtonProps,
+  }),
+  CopyButton: entry({
+    description:
+      'Button that copies value to the clipboard and confirms it. With iconOnly, label becomes its tooltip.',
+    props: s.copyButtonProps,
+  }),
+  Toolbar: entry({
+    description:
+      'Row (or column) of buttons that arrow keys move between, e.g. formatting actions. Give each item an icon to show only the icon.',
+    props: s.toolbarProps,
+  }),
+  Anchor: entry({ description: 'Text link.', props: s.anchorProps }),
+  Breadcrumb: entry({
+    description: 'Breadcrumb trail.',
+    props: s.breadcrumbProps,
+  }),
+  Pagination: entry({
+    description: 'Pagination.',
+    props: s.paginationProps,
+    value: { prop: 'defaultPage', initial: (props) => props.defaultPage ?? 1 },
+  }),
+  Stepper: entry({
+    description:
+      'Steps of a process in order, marking the ones done and the current one (display only).',
+    props: s.stepperProps,
+  }),
+  SideNav: entry({
+    description:
+      'Side navigation: groups of links, each group under a small title. Mark the page being shown with current: true.',
+    props: s.sideNavProps,
+  }),
+  Badge: entry({
+    description: 'Badge for a status or a label.',
+    props: s.badgeProps,
+  }),
+  Heading: entry({ description: 'Heading (h1 to h6).', props: s.headingProps }),
+  Avatar: entry({
+    description: 'Avatar (an image or initials).',
+    props: s.avatarProps,
+  }),
+  Code: entry({ description: 'Inline code or value.', props: s.codeProps }),
+  Kbd: entry({
+    description:
+      'Keyboard shortcut. keys lists the keys pressed together, and each is drawn as its own key cap.',
+    props: s.kbdProps,
+  }),
+  EmptyState: entry({
+    description:
+      'Placeholder for a list, table, or search with nothing to show: a title, an optional description, and an optional icon.',
+    props: s.emptyStateProps,
+  }),
+  Icon: entry({ description: 'Icon, chosen by name.', props: s.iconProps }),
+  ChevronIcon: entry({
+    description: 'Arrow icon. direction sets which way it points.',
+    props: s.chevronIconProps,
+  }),
+  StatusIcon: entry({
+    description:
+      'Icon for a status (success/info/warning/error). It is decorative; to show a message, use Alert.',
+    props: s.statusIconProps,
+  }),
+  Alert: entry({
+    description:
+      'Alert that reports a status. message is a string or an array of strings.',
+    props: s.alertProps,
+  }),
+  Callout: entry({
+    description:
+      'Note inside the content (a tip, a caveat). Unlike Alert, it is not announced as a status. content is plain text; label is an optional bold line above it.',
+    props: s.calloutProps,
+  }),
+  Spinner: entry({ description: 'Loading spinner.', props: s.spinnerProps }),
+  Progress: entry({
+    description:
+      'Progress bar. Leave value out when progress is unknown; it then shows an animated bar.',
+    props: s.progressProps,
+  }),
+  Skeleton: entry({
+    description: 'Loading placeholder.',
+    props: s.skeletonProps,
+  }),
+  Separator: entry({ description: 'Divider line.', props: s.separatorProps }),
+  Tabs: entry({
+    description:
+      'Tabs. Each tab has a label and text content; content must be a plain string.',
+    props: s.tabsProps,
+  }),
+  Accordion: entry({
+    description:
+      'Accordion of items that open and close. Each item has a title and text content; content must be a plain string.',
+    props: s.accordionProps,
+  }),
+  Table: entry({
+    description:
+      'Table with columns (the headers) and rows (the cell strings of each row). Every row must have exactly as many cells as there are columns.',
+    props: s.tableProps,
+  }),
+  DataTable: entry({
+    description:
+      'Table the reader can sort (by the columns marked sortable) and, with selectable, pick rows from. Use it for records someone works through; use Table for data only read. Every row must have exactly as many cells as there are columns.',
+    props: s.dataTableProps,
+  }),
+  Tree: entry({
+    description:
+      'Tree of nodes that open and close, such as files and folders, navigable with the arrow keys. List every node flat; a child names its parent by parentId.',
+    props: s.treeProps,
+  }),
+  Modal: entry({
+    description: 'Modal dialog that opens from a button labeled triggerLabel.',
+    props: s.modalProps,
+    children: true,
+  }),
+  Dialog: entry({
+    description:
+      'Centered dialog that opens from a button labeled triggerLabel.',
+    props: s.dialogProps,
+    children: true,
+  }),
+  Drawer: entry({
+    description: 'Side drawer that opens from a button labeled triggerLabel.',
+    props: s.drawerProps,
+    children: true,
+  }),
+  Popover: entry({
+    description: 'Popover that a button labeled triggerLabel opens and closes.',
+    props: s.popoverProps,
+    children: true,
+  }),
+  Tooltip: entry({
+    description: 'Tooltip shown on hover or focus.',
+    props: s.tooltipProps,
+  }),
+  DropdownMenu: entry({
+    description: 'Dropdown menu.',
+    props: s.dropdownMenuProps,
+  }),
+  Toast: entry({
+    description: 'Toast notification that a button labeled triggerLabel shows.',
+    props: s.toastProps,
+  }),
+  TextField: entry({
+    description: 'Single-line text input.',
+    props: s.textFieldProps,
+    value: {
+      prop: 'defaultValue',
+      initial: (props) => props.defaultValue ?? '',
+    },
+  }),
+  Textarea: entry({
+    description: 'Multi-line text input.',
+    props: s.textareaProps,
+    value: {
+      prop: 'defaultValue',
+      initial: (props) => props.defaultValue ?? '',
+    },
+  }),
+  PasswordInput: entry({
+    description: 'Password input.',
+    props: s.passwordInputProps,
+    value: {
+      prop: 'defaultValue',
+      initial: (props) => props.defaultValue ?? '',
+    },
+  }),
+  NumberField: entry({
+    description: 'Number input.',
+    props: s.numberFieldProps,
+    value: {
+      prop: 'defaultValue',
+      initial: (props): number | null => props.defaultValue ?? null,
+    },
+  }),
+  Slider: entry({
+    description: 'Slider.',
+    props: s.sliderProps,
+    value: {
+      prop: 'defaultValue',
+      initial: (props) => props.defaultValue ?? props.min ?? 0,
+    },
+  }),
+  RangeSlider: entry({
+    description:
+      'Slider with two thumbs for picking a range. Its value is [lower, upper].',
+    props: s.rangeSliderProps,
+    value: {
+      prop: 'defaultValue',
+      initial: (props): readonly [number, number] =>
+        props.defaultValue ?? [props.min ?? 0, props.max ?? 100],
+    },
+  }),
+  DateField: entry({
+    description:
+      'Date input with a visible label. Dates are YYYY-MM-DD strings.',
+    props: s.dateFieldProps,
+    value: {
+      prop: 'defaultValue',
+      initial: (props) => props.defaultValue ?? '',
+    },
+  }),
+  DatePicker: entry({
+    description:
+      'Date input with a visible label and a button that opens a calendar. Dates are YYYY-MM-DD strings.',
+    props: s.datePickerProps,
+    value: {
+      prop: 'defaultValue',
+      initial: (props) => props.defaultValue ?? '',
+    },
+  }),
+  Calendar: entry({
+    description:
+      'Month calendar shown inline for picking one day (YYYY-MM-DD). It submits nothing; in a form, use DatePicker.',
+    props: s.calendarProps,
+    value: {
+      prop: 'defaultValue',
+      initial: (props) => props.defaultValue ?? '',
+    },
+  }),
+  ColorPicker: entry({
+    description:
+      'Color input with a visible label: a #rrggbb text field, hue / saturation / lightness sliders, and optional preset swatches.',
+    props: s.colorPickerProps,
+    value: {
+      prop: 'defaultValue',
+      initial: (props) => props.defaultValue ?? '',
+    },
+  }),
+  Combobox: entry({
+    description:
+      'Text field with a visible label that filters a list of options as you type, for picking one. Prefer it to ListBox when there are many options.',
+    props: s.comboboxProps,
+    value: {
+      prop: 'defaultValue',
+      initial: (props) => props.defaultValue ?? '',
+    },
+  }),
+  Checkbox: entry({
+    description: 'Checkbox.',
+    props: s.checkboxProps,
+    value: {
+      prop: 'defaultChecked',
+      initial: (props) => props.defaultChecked ?? false,
+    },
+  }),
+  Switch: entry({
+    description: 'On/off switch.',
+    props: s.switchProps,
+    value: {
+      prop: 'defaultChecked',
+      initial: (props) => props.defaultChecked ?? false,
+    },
+  }),
+  Select: entry({
+    description: 'Dropdown select.',
+    props: s.selectProps,
+    value: { prop: 'defaultValue', initial: firstOption },
+  }),
+  Radio: entry({
+    description: 'Radio buttons for a single choice.',
+    props: s.radioProps,
+    value: { prop: 'defaultValue', initial: firstOption },
+  }),
+  RadioCard: entry({
+    description: 'Single choice presented as cards.',
+    props: s.radioCardProps,
+    value: { prop: 'defaultValue', initial: firstOption },
+  }),
+  CheckboxCard: entry({
+    description: 'Multiple choice presented as cards.',
+    props: s.checkboxCardProps,
+    value: {
+      prop: 'defaultValue',
+      initial: (props): string[] => props.defaultValue ?? [],
+    },
+  }),
+  ListBox: entry({
+    description: 'Single-choice list in a popup.',
+    props: s.listBoxProps,
+    value: { prop: 'defaultValue', initial: firstOption },
+  }),
+  CheckboxGroup: entry({
+    description: 'Group of checkboxes.',
+    props: s.checkboxGroupProps,
+    value: {
+      prop: 'defaultValue',
+      initial: (props): string[] => props.defaultValue ?? [],
+    },
+  }),
+  Autocomplete: entry({
+    description: 'Tag-style autocomplete for multiple choices.',
+    props: s.autocompleteProps,
+    value: {
+      prop: 'defaultValue',
+      initial: (props): string[] => props.defaultValue ?? [],
+    },
+  }),
+  FileField: entry({
+    description:
+      'File picker field. With dropzone, files can also be dropped onto it.',
+    props: s.fileFieldProps,
+  }),
+  FormControl: entry({
+    description:
+      'Field with a label and help or error text (text/textarea/password).',
+    props: s.formControlProps,
+  }),
+};
+
+/** The name of a component in the catalog. */
+export type CatalogName = keyof typeof catalog;
+
+/** The props a model writes for the component `N`. */
+export type CatalogProps<N extends CatalogName> = z.infer<
+  (typeof catalog)[N]['props']
+>;
+
+/** The value of the field `N` (`never` for a component that is not a field). */
+export type CatalogValueOf<N extends CatalogName> =
+  (typeof catalog)[N] extends {
+    value?: { initial: (props: never) => infer V };
+  }
+    ? V
+    : never;
+
+/**
+ * Cross-cutting constraints a model most often breaks, for the format's
+ * system prompt (json-render's `customRules`, OpenUI's `additionalRules`).
+ */
+export const catalogRules: readonly string[] = [
+  'Every row in rows of a Table must have exactly as many cells as there are columns.',
+  'An href must be an absolute URL starting with https:// or http://, or a path starting with /.',
+  'The content of Tabs and Accordion must be plain text; components cannot be nested inside it.',
+];
+
+const isCatalogName = (type: string): type is CatalogName =>
+  Object.hasOwn(catalog, type);
+
+/**
+ * Checks what a model wrote for one component and returns what is wrong with
+ * it, in English, ready to send back to the model. An empty array means the
+ * component exists and its props are valid.
+ *
+ * Unknown props are reported as well: zod drops a key the schema does not
+ * know instead of failing, so a prop the model invented would otherwise pass
+ * and render as if it were not there.
+ *
+ * @example
+ * catalogPropIssues('Button', { label: 'OK', colour: 'primary' });
+ * // ['Button: Unknown prop "colour". Allowed props: label, variant, …']
+ */
+export const catalogPropIssues = (type: string, props: unknown): string[] => {
+  if (!isCatalogName(type)) {
+    return [
+      `Unknown component type "${type}". Use one of: ${Object.keys(catalog).join(', ')}.`,
+    ];
+  }
+  const schema: z.ZodObject = catalog[type].props;
+  const parsed = schema.safeParse(props);
+  const issues = parsed.success
+    ? []
+    : parsed.error.issues.map((issue) => {
+        const path = issue.path.join('.');
+        return `${type}${path === '' ? '' : `.${path}`}: ${issue.message}`;
+      });
+
+  const allowed = Object.keys(schema.shape);
+  const given =
+    typeof props === 'object' && props !== null ? Object.keys(props) : [];
+  for (const key of given) {
+    if (!allowed.includes(key)) {
+      issues.push(
+        `${type}: Unknown prop "${key}". Allowed props: ${allowed.join(', ')}.`,
+      );
+    }
+  }
+  return issues;
+};

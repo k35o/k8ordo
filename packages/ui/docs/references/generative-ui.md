@@ -1,43 +1,183 @@
-# Generative UI (json-render / OpenUI)
+# Generative UI (the catalog)
 
-`@k8ordo/ui` ships official adapters that let an LLM generate UI out of
-`@k8ordo/ui` components only. The generated UI is pinned to the design tokens,
-so it cannot drift off-brand. Two frameworks are supported:
-[json-render](https://json-render.dev) and [OpenUI](https://www.openui.com).
+`@k8ordo/ui` describes its own components for an LLM, for no generative-UI
+format in particular: what each component is, the props a model may write,
+whether it holds children, and which prop holds a field's value. The props are
+pinned to the design tokens, so a UI a model composes from them cannot drift
+off-brand.
 
-Both are optional peer dependencies — install only the one you use.
+The library ties itself to no format. json-render, OpenUI, A2UI, or your own
+format each needs a small piece of glue that maps over the catalog — see
+[Connecting a format](#connecting-a-format). `zod` is the only peer the catalog
+needs:
 
 ```bash
-# json-render
-pnpm add @json-render/core @json-render/react zod
-# OpenUI — both entries import lang-core directly, so install both packages
-pnpm add @openuidev/react-lang @openuidev/lang-core zod
+pnpm add zod
 ```
 
-`@openuidev/lang-core` is not optional for OpenUI: `@k8ordo/ui/openui` builds its
-component library with it and `@k8ordo/ui/openui/prompt` is the React-free entry
-on top of it. `@openuidev/react-lang` depends on it as well, but pnpm will not
-let your app resolve a dependency of a dependency — declare it yourself.
+## The two entries
 
-json-render is 0.x, where a minor bump is a breaking release, so `@k8ordo/ui`
-declares a range that stops at the next minor; OpenUI is 1.x, and the range
-stops at the next major. The peer table in the package's README
-(`node_modules/@k8ordo/ui/README.md` when installed via npm) lists the current
-range for each package. Pick a version inside it.
+- `@k8ordo/ui/catalog` is **server-safe**: it imports no React, so a Server
+  Component or an API route can build the system prompt from it.
+- `@k8ordo/ui/catalog/render` is `'use client'`: how each component is drawn.
 
-Within that range, resolve exactly **one copy** of each framework. The adapters
-read the framework's own React context — `useStateField` for OpenUI,
-`useBoundProp` for json-render — so if your app and `@k8ordo/ui` end up on two
-different copies, the context objects are different objects: every schema check,
-the types, and the build all pass, and the form views throw
-`useOpenUI must be used within a <Renderer /> component.` at render time. With
-pnpm this happens as soon as your version differs from the one `@k8ordo/ui`
-resolves, even when both satisfy the range.
+```ts
+import { catalog, catalogRules, catalogPropIssues } from '@k8ordo/ui/catalog';
+```
+
+```tsx
+'use client';
+import { renderers } from '@k8ordo/ui/catalog/render';
+```
+
+## What an entry says
+
+`catalog` maps each component's name to an entry:
+
+- `description`: what the component is, for the model.
+- `props`: a zod object of the props the model writes.
+- `children: true`: the component lays out children of its own (`Stack`,
+  `Card`, `Modal`, …). Absent for every other component.
+- `value`: present on a field. `value.prop` is the prop that carries the value
+  the field starts from (`defaultValue`, `defaultChecked`, or `defaultPage`), and
+  `value.initial(props)` is what it starts from when nothing is bound to it.
+
+```ts
+catalog.TextField;
+// {
+//   description: 'Single-line text input.',
+//   props: z.object({ name, placeholder, defaultValue, … }),
+//   value: { prop: 'defaultValue', initial: (props) => props.defaultValue ?? '' },
+// }
+```
+
+The types follow the table: `CatalogName` is the union of the names,
+`CatalogProps<'Button'>` the props of one component, and `CatalogValueOf<'Slider'>`
+the value of one field (`never` for a component that is not a field).
+
+The key order of every `props` schema is part of the contract. A format with
+positional arguments (OpenUI Lang) maps the arguments back to props by that
+order, so keys are only ever appended.
+
+## Drawing
+
+`renderers` has the same names as `catalog`. Call one with the props the format
+resolved and the children it drew — one node per child, keyed; `Children.toArray`
+keys them. A field also takes its value and a setter, so the format decides
+where the value lives: in its own state, or in the component's.
+
+```tsx
+'use client';
+import { renderers } from '@k8ordo/ui/catalog/render';
+
+renderers.Button({ props: { label: 'Save' }, children: [] });
+renderers.TextField({
+  props: { name: 'title' },
+  children: [],
+  value,
+  setValue,
+});
+```
+
+## Connecting a format
+
+The glue for a format does three things, each by mapping over `catalog`:
+
+1. **Register** every component with the format, by name, with its
+   `description` and its `props` schema. A component with `children: true`
+   gets the format's way of holding children — json-render's `slots`, a
+   `children` prop in OpenUI.
+2. **Bind** each field: read the format's state at `value.prop` (json-render's
+   `$bindState`, OpenUI's form state by `name`), starting from
+   `value.initial(props)` when nothing is bound.
+3. **Draw** each component through `renderers`.
+
+Since no step names a component, a component added to `@k8ordo/ui` reaches
+every format without a change to the glue, and a new format is one new piece of
+glue.
+
+The repository keeps working glue for json-render, OpenUI, and the AI SDK in
+[`examples/ui-integrations`](https://github.com/k35o/k8ordo/tree/main/examples/ui-integrations),
+run in a real browser on every change. Copy the one you use into your
+application and own it: the glue depends on the format's own release cycle, not
+on `@k8ordo/ui`'s.
+
+json-render, for example, is registered like this (the full glue adds the
+system prompt, validation, and a ready-wired `<JsonRenderUI spec={spec} />`):
+
+```ts
+import { defineCatalog } from '@json-render/core';
+import { schema } from '@json-render/react/schema';
+import { catalog as k8ordo } from '@k8ordo/ui/catalog';
+
+export const catalog = defineCatalog(schema, {
+  components: Object.fromEntries(
+    Object.entries(k8ordo).map(([name, entry]) => [
+      name,
+      {
+        props: entry.props,
+        description:
+          entry.value === undefined
+            ? entry.description
+            : `${entry.description} ${entry.value.prop} can be bound to state with $bindState.`,
+        ...(entry.children === true ? { slots: ['default'] } : {}),
+      },
+    ]),
+  ),
+  actions: {},
+});
+```
+
+## Checking what a model wrote
+
+`catalogPropIssues(type, props)` checks one component the model wrote and
+returns what is wrong with it, in English, ready to send back to the model. An
+empty array means the component exists and its props are valid.
+
+```ts
+catalogPropIssues('Anchor', {
+  label: 'Docs',
+  href: 'ftp://example.com',
+  rel: 'x',
+});
+// [
+//   'Anchor.href: …',
+//   'Anchor: Unknown prop "rel". Allowed props: label, href, …',
+// ]
+```
+
+Unknown props are reported too. zod drops a key the schema does not know rather
+than failing, so a prop the model invented would otherwise pass and render as if
+it were not there. Run it on every element of a spec, after the format's own
+structural check, and send the issues back as a repair prompt.
+
+## Prompt language
+
+Everything the catalog hands the model — the descriptions, the schemas'
+descriptions, `catalogRules`, and the issues `catalogPropIssues` returns — is
+English, whatever your application's locale. The model reads it; your users
+never see it.
+
+`catalogRules` holds the cross-cutting constraints a model most often breaks
+(a `Table` row with as many cells as there are columns, the `href` format, plain
+text inside `Tabs` and `Accordion`). Pass it to the format's system prompt, and
+add a rule of your own to pin the language of the text the model writes into the
+UI:
+
+```ts
+// json-render
+catalog.prompt({
+  customRules: [...catalogRules, 'Write all UI text in Japanese.'],
+});
+// OpenUI
+prompt({
+  additionalRules: [...catalogRules, 'Write all UI text in Japanese.'],
+});
+```
 
 ## What the catalog covers
 
-Both adapters register the same components, and the prompts they generate list
-them. Most are the exported component of the same name. A few are shaped for a
+Most entries are the exported component of the same name. A few are shaped for a
 model instead:
 
 - **Icons** are one `Icon` entry whose `name` picks the glyph. Every icon in
@@ -99,147 +239,13 @@ These exports are left out on purpose, so a model cannot place them:
   follows the scroll. The headings a spec places carry no id, so there would be
   nothing to point at.
 
-## Prompt language
-
-Everything the adapters hand the model — component descriptions, `uiRules`,
-schema descriptions, and the repair prompt — is English, whatever your
-application's locale. The model reads it; your users never see it. To pin the
-language of the text the model writes into the UI, add a rule of your own:
-
-```tsx
-// json-render
-catalog.prompt({ customRules: [...uiRules, 'Write all UI text in Japanese.'] });
-// OpenUI
-prompt({ additionalRules: ['Write all UI text in Japanese.'] });
-```
-
-## json-render
-
-The catalog (schemas and prompt) is separate from the registry (rendering), and
-the catalog is **server-safe**.
-
-### 1. Generate the prompt on the server
-
-```tsx
-import { catalog, uiRules } from '@k8ordo/ui/json-render';
-
-// customRules injects the cross-cutting constraints an LLM most often breaks
-// (cell count matching columns in Table, href format, text-only content in
-// Tabs and Accordion).
-const systemPrompt = catalog.prompt({ customRules: [...uiRules] });
-```
-
-### 2. Render on the client
-
-`JsonRenderUI` already wires up `JSONUIProvider` + `Renderer` + registry
-internally, so passing the spec is enough. Pass `onStateChange` when you need to
-collect form values.
-
-```tsx
-'use client';
-import type { UISpec } from '@k8ordo/ui/json-render';
-import { JsonRenderUI } from '@k8ordo/ui/json-render/registry';
-
-export function GenUi({ spec }: { spec: UISpec }) {
-  return <JsonRenderUI spec={spec} />;
-}
-```
-
-Props:
-
-- `spec`: `Spec | null` (required; a `UISpec` is assignable to json-render's `Spec` without a cast, and `null` renders nothing)
-- `loading`: boolean (passed to `Renderer`: set it while the spec is still streaming in, so children that have not arrived yet are skipped without a warning)
-- `onStateChange`: `(changes: Array<{ path: string; value: unknown }>) => void` (called once per state update with every changed path and its new value)
-
-For an advanced setup (your own `navigate`, `handlers`, or
-`validationFunctions`), pass the low-level `registry` straight to
-`@json-render/react`'s `JSONUIProvider` / `Renderer`.
-
-### 3. Validate LLM output, then render or repair it
-
-`validateGeneratedSpec` applies mechanical fixes, validates the structure, then
-validates props per component. On failure it returns the `issues` it found (each
-a `message`, plus the `elementKey` of the offending element when there is one)
-and a repair prompt built from them that you can send straight back to the LLM.
-Use it instead of `catalog.validate()`, which rejects valid specs in the current
-upstream version. The result and issue types are exported as
-`ValidateGeneratedSpecResult` and `GeneratedSpecIssue`.
-
-```tsx
-import { validateGeneratedSpec } from '@k8ordo/ui/json-render';
-
-const result = validateGeneratedSpec(JSON.parse(llmOutput));
-if (result.ok) {
-  // result.fixes lists what was auto-corrected
-  return <JsonRenderUI spec={result.spec} />;
-}
-// If it is broken, regenerate with the repair prompt
-const retried = await llm(result.repairPrompt);
-```
-
-### 4. Typed specs (optional)
-
-Writing `satisfies UISpec` turns a typo in a component name or prop into a
-compile error, and removes the need for `as unknown as Spec`.
-
-```tsx
-import type { UISpec } from '@k8ordo/ui/json-render';
-
-const spec = {
-  root: 'root',
-  elements: {
-    root: { type: 'Stack', props: { direction: 'column' }, children: ['ok'] },
-    ok: { type: 'Button', props: { label: 'OK' } },
-  },
-} satisfies UISpec;
-```
-
-`UISpecElement` (one element of a `UISpec`), `ComponentName`, and
-`ComponentProps<K>` are exported as well, so you can pull out the props type of a
-specific component.
-
-## OpenUI
-
-A model where children are expressed as typed subcomponents
-(`z.array(Child.ref)`). Rendering is `'use client'`.
-
-```tsx
-'use client';
-import { library } from '@k8ordo/ui/openui';
-import { Renderer } from '@openuidev/react-lang';
-
-export function GenUi({ response }: { response: string }) {
-  return <Renderer library={library} response={response} />;
-}
-```
-
-The system prompt comes from a dedicated server-safe entry, mirroring
-json-render's `catalog.prompt()`.
-
-```tsx
-import { prompt } from '@k8ordo/ui/openui/prompt';
-
-const systemPrompt = prompt(); // No React dependency — callable from RSC or an API route
-```
-
-`prompt` takes an optional `PromptOptions` from `@openuidev/lang-core`
-(`preamble`, `additionalRules`, `examples`, …) and passes it straight through to
-the library's prompt generation.
-
-Containers nest freely in OpenUI, as they do in json-render: `Stack`, `Grid`,
-`Card`, `Form`, `Modal`, `Dialog`, `Drawer`, and `Popover` each list every
-container among their children, so a `Card` can sit inside a `Stack` and a
-`Stack` inside another `Stack`.
-
 ## Exports at a glance
 
-| Export                            | Kind           | Contents                                                           |
-| --------------------------------- | -------------- | ------------------------------------------------------------------ |
-| `@k8ordo/ui/json-render`          | server-safe    | `catalog`, `validateGeneratedSpec`, `uiRules`, types (`UISpec`, …) |
-| `@k8ordo/ui/json-render/registry` | `'use client'` | `JsonRenderUI` (pre-wired), `registry` (low level)                 |
-| `@k8ordo/ui/openui`               | `'use client'` | `library` (rendering)                                              |
-| `@k8ordo/ui/openui/prompt`        | server-safe    | `prompt(options?)` (prompt generation)                             |
+| Export                      | Kind           | Contents                                                                                                 |
+| --------------------------- | -------------- | -------------------------------------------------------------------------------------------------------- |
+| `@k8ordo/ui/catalog`        | server-safe    | `catalog`, `catalogRules`, `catalogPropIssues`, types (`CatalogName`, `CatalogProps`, `CatalogEntry`, …) |
+| `@k8ordo/ui/catalog/render` | `'use client'` | `renderers`, types (`RenderArgs`, `Renderer`)                                                            |
 
-> All of them assume you have loaded `@k8ordo/ui/styles.css` (or
+> The drawn components assume you have loaded `@k8ordo/ui/styles.css` (or
 > `@k8ordo/ui/tailwind.css` after Tailwind, in a Tailwind CSS 4 project) and
 > wrapped the tree in `UIProvider`.
