@@ -3,14 +3,37 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
-import type { Plugin } from 'vite';
+import type { Plugin, ViteDevServer } from 'vite';
 import { defineConfig } from 'vite-plus';
 
-type GenerateModule = {
-  handleGenerate: (
-    request: IncomingMessage,
-    response: ServerResponse,
-  ) => Promise<void>;
+type Handler = (
+  request: IncomingMessage,
+  response: ServerResponse,
+) => Promise<void>;
+
+type GenerateModule = { handleGenerate: Handler };
+
+const route = (
+  server: ViteDevServer,
+  path: string,
+  method: string | null,
+  load: () => Promise<Handler>,
+): void => {
+  server.middlewares.use(path, (request, response, next) => {
+    if (method !== null && request.method !== method) {
+      next();
+      return;
+    }
+    void (async () => {
+      try {
+        await (
+          await load()
+        )(request, response);
+      } catch (error) {
+        next(error);
+      }
+    })();
+  });
 };
 
 // 鍵で Claude を呼ぶ口なので、配る build ではなく手元の dev サーバーにだけ置く。
@@ -19,21 +42,11 @@ const generateEndpoint = (): Plugin => ({
   name: 'ui-integrations:generate',
   apply: 'serve',
   configureServer(server) {
-    server.middlewares.use('/api/generate', (request, response, next) => {
-      if (request.method !== 'POST') {
-        next();
-        return;
-      }
-      void (async () => {
-        try {
-          const endpoint = (await server.ssrLoadModule(
-            '/src/playground/server.ts',
-          )) as GenerateModule;
-          await endpoint.handleGenerate(request, response);
-        } catch (error) {
-          next(error);
-        }
-      })();
+    route(server, '/api/generate', 'POST', async () => {
+      const { handleGenerate } = (await server.ssrLoadModule(
+        '/src/playground/server.ts',
+      )) as GenerateModule;
+      return handleGenerate;
     });
   },
 });
