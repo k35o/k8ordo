@@ -4,6 +4,7 @@ import path from 'node:path';
 
 import {
   clientDepsHeader,
+  NONCE_HEADER,
   serverStylesheetsHeader,
 } from '@k8ordo/framework-engine';
 import type { ClientDeps } from '@k8ordo/framework-engine';
@@ -368,8 +369,8 @@ export const pathValues = async (file) => ({
     ),
   )[file],
 });
-// 本物のハンドラは、文書を描いたペイロードを答えに持たせる。ここでは
-// <pathname>/index.rsc と書かれた答えの本文がそれ
+// 本物のハンドラは、文書を描いたペイロードを答えに持たせ、署名した nonce を
+// ヘッダーで言う。ここでは <pathname>/index.rsc と書かれた答えの本文がペイロード
 const payloads = new WeakMap();
 export const payloadOf = (response) => payloads.get(response);
 export default async function handler(request) {
@@ -379,7 +380,7 @@ export default async function handler(request) {
   if (answer === undefined) return new Response('not found', { status: 404 });
   const response = new Response(answer.body ?? null, {
     status: answer.status ?? 200,
-    headers: answer.headers ?? {},
+    headers: { ${JSON.stringify(NONCE_HEADER)}: 'bm9uY2U=', ...answer.headers },
   });
   const payload = answers[pathname.replace(/\\/$/u, '') + '/index.rsc'];
   if (payload !== undefined) {

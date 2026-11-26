@@ -278,10 +278,14 @@ pnpm check         # check:write to auto-fix
   shells stand at `/ja/posts/:id` and `/en/posts/:id`, and with no
   parameter above, at the bare pattern. A directory with both a paths.ts
   and a fallback.tsx writes its values as pages and keeps the shell for the
-  rest. `planPaths` takes those locations as it took the option's: a
-  location goes to the first pattern in table order it fits, and may leave
-  open only the params no layout above the fallback.tsx receives — one a
-  layout receives means that parameter's directory needs a paths.ts.
+  rest. Each location comes with the pattern of the directory the walk
+  reached it at (`ShellLocation`), so `planPaths` matches nothing to place
+  it: it takes the pathnames to write apart from the shells, gives a shell
+  to its own pattern, and lets it leave open only the params no layout above
+  the fallback.tsx receives — one a layout receives means that parameter's
+  directory needs a paths.ts. A shell a literal directory declared first
+  would hide (`ja/posts/[id]/` beside `[locale]/posts/[id]/` with a
+  fallback.tsx) is still made, and `shadowedShells` names the literal.
   Shell pathnames replace the left-open segments with `!fallback`, which a
   returned value may not be, escaped or not. `shadowedShells` refuses a
   shell whose host rule would answer URLs a pattern declared first is given
@@ -408,8 +412,9 @@ pnpm check         # check:write to auto-fix
   application's — its own `lastmod`, its own order — and the build writes
   none over it. It is the one file of the build's a `route.ts` may take;
   the others are refused (`routeFileRefusals`).
-- **The pattern walk is the engine's.** `patternsOf` is
-  `declaredPatterns(tree)` from the engine, in the matcher's order, so the
+- **The pattern walk is the engine's.** `answeringPatterns` is
+  `declaredPatterns(tree)` from the engine without the catch-alls, told apart
+  by `kind` and never by spelling, in the matcher's order, so the
   build, the shadow check and the prerenderer never disagree; the trailing
   slash is the router's `normalizePathname`, and decoding a pathname for the
   filesystem is the engine's `decodePathname`, which `serve` uses too.
@@ -572,7 +577,7 @@ src/
                     build's in buildApp), prerendering into files, vite dev
                     answering as the build's host will (devPlan,
                     answerUnbuilt) and vite preview's static host
-  paths.ts          patternsOf / patternsNeedingPaths / suppliedFrom (what
+  paths.ts          answeringPatterns / patternsNeedingPaths / suppliedFrom (what
                     the paths.ts files say the site holds) / planPaths /
                     catchAllPatterns / catchAllPath / dirFor / isConcrete /
                     fileAt / answersOf / shellPathname / shadowedShells /

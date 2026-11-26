@@ -65,7 +65,7 @@ import {
   fileAt,
   isConcrete,
   patternsNeedingPaths,
-  patternsOf,
+  answeringPatterns,
   planPaths,
   planRefusals,
   routeFileRefusals,
@@ -319,12 +319,10 @@ export const staticMode = (
             ),
         declared: failed
           ? []
-          : patternsOf(tree)
-              .filter((pattern) => !pattern.endsWith('/*'))
-              .map((pattern) => ({
-                pattern,
-                matcher: new URLPattern({ pathname: pattern }),
-              })),
+          : answeringPatterns(tree).map(({ pattern }) => ({
+              pattern,
+              matcher: new URLPattern({ pathname: pattern }),
+            })),
       };
     })());
 
@@ -372,7 +370,7 @@ export const staticMode = (
         }
         return NO_PLAN;
       }
-      const plan = planPaths(tree, supplied.locations);
+      const plan = planPaths(tree, supplied);
       for (const refusal of [
         ...supplied.problems,
         ...planRefusals(
@@ -737,7 +735,7 @@ export const staticMode = (
           payloadOf: (response: Response) => ArrayBuffer | undefined;
         };
         const supplied = await suppliedFrom(tree, built.pathValues);
-        const plan = planPaths(tree, supplied.locations);
+        const plan = planPaths(tree, supplied);
         const answers = answersOf(tree, plan.paths);
         // RSC の仕組みは action とリクエストの API をどちらのモードでもコンパイル
         // するので、static で受けないと言えるのはビルドが断るときだけ
@@ -1086,7 +1084,6 @@ const renderPage = async (
   // リダイレクトにペイロードは無い。クライアントの遷移は index.rsc に何も
   // 見つけず、URL をブラウザに渡し、上の HTML がリダイレクトする
   if (status === 307 || status === 308) return { kind: 'redirect', pathname };
-  if (status !== 200) return { kind: 'document', files, payload: null };
   // 200 の文書は、描いたペイロードを必ず持つ。持たないなら約束が破れているので、
   // index.rsc の無いページを黙って書かない
   if (payload === null) return failed('render', pathname);
@@ -1295,8 +1292,9 @@ const writeHtml = async (
   }
   const nonce = response.headers.get(NONCE_HEADER);
   if (nonce === null) {
-    await writeFile(file, Buffer.from(await response.arrayBuffer()));
-    return written;
+    throw new Error(
+      `${url} answered HTML without saying the nonce it signed its scripts with`,
+    );
   }
   await writeFile(file, asFile(await response.text(), nonce, csp));
   const named = response.headers.get(CLIENT_DEPS_HEADER);

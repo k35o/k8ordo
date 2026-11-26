@@ -950,8 +950,9 @@ pnpm check         # check:write to auto-fix
 - **One pattern walk.** `declaredPatterns(tree)` is the order the matcher
   tries patterns — pages and redirects, literals before params, params
   before a rest param, the catch-all last in its branch — and everything that asks "which URLs does
-  this site have" reads it: the shadow check here, `patternsOf` in
-  `@k8ordo/framework`'s static mode. `decodePathname` is likewise the one
+  this site have" reads it: the shadow check here, `answeringPatterns` in
+  `@k8ordo/framework`'s static mode, which tells the catch-alls apart by
+  `kind`. `decodePathname` is likewise the one
   decoding both modes use before a pathname may name a file.
 - **A route file's props are checked in the generated table.** `routes.gen.ts`
   emits `lazy(products_id_page) satisfies Page<'/products/:id'>` /
