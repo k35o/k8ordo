@@ -12,11 +12,13 @@ import type {
   CatalogName,
   CatalogProps,
 } from '@k8ordo/ui/catalog';
+import { z } from 'zod';
 
 type JsonRenderComponent<N extends CatalogName> = {
   props: (typeof k8ordo)[N]['props'];
   description: string;
   slots?: string[];
+  events?: string[];
 };
 
 // json-render は値を `$bindState` で状態に結ぶ。どの prop が結べるかは
@@ -35,12 +37,34 @@ const components = Object.fromEntries(
       props: entry.props,
       description: describe(entry),
       ...(entry.children === true ? { slots: ['default'] } : {}),
+      ...(entry.events === undefined
+        ? {}
+        : { events: Object.keys(entry.events) }),
     },
   ]),
 ) as { [N in CatalogName]: JsonRenderComponent<N> };
 
+/** The action that reports what the user did to the assistant. */
+export const TO_ASSISTANT = 'toAssistant';
+
 /** The json-render catalog of `@k8ordo/ui`: schemas and the system prompt. Server-safe. */
-export const catalog = defineCatalog(schema, { components, actions: {} });
+export const catalog = defineCatalog(schema, {
+  components,
+  actions: {
+    [TO_ASSISTANT]: {
+      params: z.record(z.string(), z.unknown()),
+      description:
+        'Reports what the user did to the assistant, which answers with changes to this UI. Name what happened in params.event, and put in params what the assistant needs, reading what the user entered with {"$state": "/path"}.',
+    },
+  },
+});
+
+// registry は catalog の操作の実装を求めるが、toAssistant で何をするかはアプリが
+// JsonRenderProvider の onToAssistant で決める。描く側には部品だけを渡す
+export const componentsCatalog = defineCatalog(schema, {
+  components,
+  actions: {},
+});
 
 /** One element of a spec built only from `@k8ordo/ui` components. */
 export type UISpecElement = {

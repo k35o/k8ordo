@@ -67,7 +67,8 @@ examples/ui-integrations/
 │   │   ├── renderer.tsx           # Glue: the React catalog and <A2uiSurfaces /> ('use client')
 │   │   ├── demo.tsx               # Scripted messages, a field bound to the data model
 │   │   ├── demo.test.ts           # The messages pass validation; an unbound field does not
-│   │   └── demo.browser.test.tsx  # The surface renders and writes input back to the data model
+│   │   ├── demo.browser.test.tsx  # The surface renders and writes input back to the data model
+│   │   └── renderer.browser.test.tsx  # A bound press reaches the action handler; an unbound Card is no button
 │   ├── playground/
 │   │   ├── server.ts              # /api/generate: streams Claude's answer as NDJSON (dev server only)
 │   │   ├── request.ts             # Checks a request before the key is used
@@ -87,7 +88,7 @@ examples/ui-integrations/
 │   │   ├── catalog.ts             # Glue: the json-render catalog, UISpec, validateGeneratedSpec (server-safe)
 │   │   ├── catalog.test.ts        # What validateGeneratedSpec accepts and reports
 │   │   ├── registry.tsx           # Glue: the registry, <JsonRenderProvider />, and <JsonRenderUI /> ('use client')
-│   │   ├── registry.browser.test.tsx  # The spec's state starts the bound fields and survives a streamed update
+│   │   ├── registry.browser.test.tsx  # The spec's state starts the bound fields; toAssistant reaches the app, setState does not
 │   │   ├── demo.tsx               # Typed UISpec rendered with <JsonRenderUI />
 │   │   ├── demo.test.ts           # The spec passes validateGeneratedSpec with no fixes
 │   │   └── demo.browser.test.tsx  # The spec renders and keeps form state in a real browser
@@ -96,6 +97,7 @@ examples/ui-integrations/
 │   │   ├── library.tsx            # Glue: the library with renderers ('use client')
 │   │   ├── prompt.ts              # Glue: the system prompt, without React
 │   │   ├── library.test.ts        # Every container takes every container as a child
+│   │   ├── library.browser.test.tsx  # A press reaches onAction with the form state; a label-less Card stays unpressable
 │   │   ├── demo.tsx               # OpenUI-Lang DSL rendered with library + Renderer
 │   │   ├── demo.test.ts           # The DSL parses and every statement reaches the tree
 │   │   └── demo.browser.test.tsx  # The DSL renders and keeps form state in a real browser
@@ -116,8 +118,23 @@ Each piece of glue maps over `catalog` from `@k8ordo/ui/catalog` and does three
 things: it registers every component with the format, by name, with its
 `description` and `props`; it binds each field's `value.prop` to the format's
 state (json-render's `$bindState`, OpenUI's form state by `name`), starting from
-`value.initial(props)`; and it draws every component through `renderers` from
-`@k8ordo/ui/catalog/render`.
+`value.initial(props)`, and each of a component's `events` to the format's own
+action; and it draws every component through `renderers` from
+`@k8ordo/ui/catalog/render`, handing it the bound events as `on`.
+
+An event is `press` today (`Button`, `IconButton`, `Card`, `DropdownMenuItem`),
+and each format writes it its own way:
+
+- A2UI: a `press` property of type `Action`. An `event` reaches the
+  `MessageProcessor`'s action handler with its `context` read from the data
+  model.
+- json-render: `on.press` on the element. The glue declares one action,
+  `toAssistant`, which `<JsonRenderProvider onToAssistant>` receives;
+  json-render's own actions (`setState`, …) change the state without it.
+- OpenUI: a `press` action argument, after the children. `Renderer`'s
+  `onAction` receives it with the form state. A component with a `label` and no
+  action sends its label, as OpenUI's prompt tells the model; a `Card` with no
+  action is not pressable.
 
 ### json-render (`src/json-render/`)
 

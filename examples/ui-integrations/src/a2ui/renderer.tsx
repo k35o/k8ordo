@@ -17,16 +17,19 @@ import type { ComponentProps, FC, ReactNode } from 'react';
 import { catalogDocument } from './catalog';
 
 // 部品ごとの型は catalog が持つので、ここでは名前で引いた 1 つの形として扱う
+type Handler = () => void | Promise<void>;
 type AnyRenderer = (args: {
   props: Record<string, unknown>;
   children: readonly ReactNode[];
   value?: unknown;
   setValue?: (next: unknown) => void;
+  on?: Record<string, Handler>;
 }) => ReactNode;
 type Entry = {
   props: { shape: Record<string, unknown> };
   children?: true;
   value?: { prop: string; initial: (props: unknown) => unknown };
+  events?: Readonly<Record<string, string>>;
 };
 type ChildRef = string | { id: string; basePath: string };
 type View = FC<ReactA2uiComponentProps<Record<string, unknown>>>;
@@ -48,10 +51,17 @@ const viewOf = (name: CatalogName): View => {
   const render = renderers[name] as AnyRenderer;
   const entry = k8ordo[name] as Entry;
   const keys = Object.keys(entry.props.shape);
+  const events = Object.keys(entry.events ?? {});
 
   const View: View = ({ props, buildChild }) => {
     const own = Object.fromEntries(
       keys.filter((key) => key in props).map((key) => [key, props[key]]),
+    );
+    const on = Object.fromEntries(
+      events.flatMap((event) => {
+        const action = props[event];
+        return typeof action === 'function' ? [[event, action as Handler]] : [];
+      }),
     );
     const children =
       entry.children === true
@@ -66,12 +76,13 @@ const viewOf = (name: CatalogName): View => {
           )
         : [];
     if (entry.value === undefined) {
-      return render({ props: own, children });
+      return render({ props: own, children, on });
     }
     const { prop, initial } = entry.value;
     return render({
       props: own,
       children,
+      on,
       value: own[prop] ?? initial(own),
       setValue: props[setterOf(prop)] as (next: unknown) => void,
     });

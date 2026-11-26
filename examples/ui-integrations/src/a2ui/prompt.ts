@@ -21,6 +21,7 @@ export const prompt = (): string =>
     'An id is an identifier: letters, digits, and underscores, starting with a letter (nameField, not name-field).',
     'A component that lays out children lists their ids in "children".',
     'To read a value from the data model, write {"@path": "/json/pointer"} in place of the literal.',
+    'To let the user act, set the event property of a component (press) to {"event": {"name": "...", "context": {...}}}. name says what the user did, such as "submitSignup"; put in context what you need to know, reading what the user entered with {"@path": "/..."}.',
     '',
     'Use only the components and properties of this catalog (JSON Schema):',
     JSON.stringify(catalogDocument),
