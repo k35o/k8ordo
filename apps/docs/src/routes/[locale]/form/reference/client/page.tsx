@@ -67,7 +67,7 @@ export default function FormReferenceClientPage() {
           },
           {
             name: 'array',
-            type: '(path) => ArrayView',
+            type: '(path) => ArrayView<Source, path>',
             description: t.formHookArray,
           },
           {
@@ -144,7 +144,11 @@ export default function FormReferenceClientPage() {
 
       <ApiEntry
         fields={[
-          { name: 'rows', type: 'RowView[]', description: t.arrayViewRows },
+          {
+            name: 'rows',
+            type: 'RowView<Source, Path>[]',
+            description: t.arrayViewRows,
+          },
           { name: 'add', type: '() => void', description: t.arrayViewAdd },
           { name: 'canAdd', type: 'boolean', description: t.arrayViewCanAdd },
           {
@@ -166,8 +170,11 @@ export default function FormReferenceClientPage() {
         from={FROM}
         id="array-view"
         name="ArrayView"
-        signature={`type ArrayView = {
-  rows: RowView[];
+        signature={`type ArrayView<
+  Source extends ObjectSchema | FormDefinition,
+  Path extends array paths of Source,
+> = {
+  rows: RowView<Source, Path>[];
   add: () => void;
   canAdd: boolean;
   canRemove: boolean;
@@ -186,7 +193,7 @@ export default function FormReferenceClientPage() {
           { name: 'index', type: 'number', description: t.rowViewIndex },
           {
             name: 'field',
-            type: '(itemKey?: string) => FieldView',
+            type: '(itemKey) => FieldView<input of itemKey>',
             description: t.rowViewField,
           },
           { name: 'remove', type: '() => void', description: t.rowViewRemove },
@@ -194,10 +201,15 @@ export default function FormReferenceClientPage() {
         from={FROM}
         id="row-view"
         name="RowView"
-        signature={`type RowView = {
+        signature={`type RowView<
+  Source extends ObjectSchema | FormDefinition,
+  Path extends array paths of Source,
+> = {
   key: string;
   index: number;
-  field: (itemKey?: string) => FieldView;
+  field: <Key extends keys of one row of Path>(
+    itemKey: Key,
+  ) => FieldView<input of Key>;
   remove: () => void;
 };`}
         summary={t.rowViewSummary}
@@ -290,7 +302,7 @@ export default function FormReferenceClientPage() {
           },
           {
             name: 'arrays',
-            type: '{ [path]: DerivedArray }',
+            type: '{ [path]: DerivedArray<Source, path> }',
             description: t.formFieldsTypeArrays,
           },
           {
@@ -309,7 +321,7 @@ export default function FormReferenceClientPage() {
         name="FormFields"
         signature={`type FormFields<Source extends ObjectSchema | FormDefinition> = {
   fields: { [Path in field paths of Source]: DerivedField<input of Path> };
-  arrays: { [Path in array paths of Source]: DerivedArray };
+  arrays: { [Path in array paths of Source]: DerivedArray<Source, Path> };
   rules: DerivedRule[];
   dropped: DroppedCheck[];
 };`}

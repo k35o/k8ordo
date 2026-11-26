@@ -12,18 +12,20 @@ import {
 } from 'react';
 import type { FocusEvent, Ref, SubmitEvent, SyntheticEvent } from 'react';
 
-import type { ArrayPathsOf, FieldInputsOf } from './paths';
+import type { ArrayInputsOf, FieldInputsOf } from './paths';
 import type { FormDefinition } from './rules/define-form';
 import { breachOf } from './rules/rules';
 import type { DerivedRule } from './rules/rules';
 import type { ObjectSchema } from './schema/object-schema';
 import type {
+  AnyDerivedArray,
   AnyFieldInput,
-  DerivedArray,
+  ArrayPathOf,
   DerivedField,
   FieldInput,
   FieldsBy,
   FormState,
+  ItemInputsOf,
   SchemaOf,
   ValidityFlag,
 } from './types';
@@ -46,7 +48,7 @@ type Control = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
 
 type Fields = {
   fields: Record<string, DerivedField<AnyFieldInput>>;
-  arrays: Record<string, DerivedArray>;
+  arrays: Record<string, AnyDerivedArray>;
   rules: DerivedRule[];
 };
 
@@ -85,7 +87,7 @@ const controlNamed = (
  */
 const messageFor = (
   control: Control,
-  field: DerivedField,
+  field: DerivedField<AnyFieldInput>,
 ): string | undefined => {
   const { validity } = control;
   if (validity.valid) {
@@ -109,21 +111,61 @@ export type FieldView<Input = FieldInput> = {
   required: boolean;
 };
 
-export type RowView = {
+/**
+ * One repeated row, named by the schema (or `defineForm` definition) and the
+ * array's path, for a component that takes a whole row:
+ * `{ row: RowView<typeof orderSchema, 'items'> }`.
+ */
+export type RowView<
+  Source extends ObjectSchema | FormDefinition,
+  Path extends ArrayPathOf<Source>,
+> = RowViewBy<ItemInputsOf<Source, Path>>;
+
+type RowViewBy<ItemInputs> = {
   key: string;
   index: number;
-  field: (itemKey?: string) => FieldView;
+  /**
+   * One field of the row, by its path within the item. A row of an array of
+   * scalars is a single field, under `''`, so its key can be left out.
+   */
+  field: [keyof ItemInputs] extends ['']
+    ? (itemKey?: '') => FieldView<ItemInputs[keyof ItemInputs]>
+    : <Key extends keyof ItemInputs & string>(
+        itemKey: Key,
+      ) => FieldView<ItemInputs[Key]>;
   remove: () => void;
 };
 
-export type ArrayView = {
-  rows: RowView[];
+/**
+ * What `form.array()` returns, named by the schema (or `defineForm`
+ * definition) and the array's path: `ArrayView<typeof orderSchema, 'items'>`.
+ */
+export type ArrayView<
+  Source extends ObjectSchema | FormDefinition,
+  Path extends ArrayPathOf<Source>,
+> = ArrayViewBy<ItemInputsOf<Source, Path>>;
+
+type ArrayViewBy<ItemInputs> = {
+  rows: Array<RowViewBy<ItemInputs>>;
   add: () => void;
   canAdd: boolean;
   canRemove: boolean;
   error: string | undefined;
   /** Spread onto the element that shows `error`, so focus can land on it. */
   errorProps: { id: string; tabIndex: -1 };
+};
+
+// ArrayViewBy<Record<string, AnyFieldInput>> では row.field の条件型と比べられず、
+// 返すときの型の付け替え（as）が通らない。キーを文字列で受ける形を別に置く
+type UntypedArrayView = Omit<
+  ArrayViewBy<Record<string, AnyFieldInput>>,
+  'rows'
+> & {
+  rows: Array<
+    Omit<RowViewBy<Record<string, AnyFieldInput>>, 'field'> & {
+      field: (itemKey?: string) => FieldView<AnyFieldInput>;
+    }
+  >;
 };
 
 export type FormErrorView = {
@@ -140,10 +182,10 @@ export type FormErrorView = {
 export type UseFormReturn<Source extends ObjectSchema | FormDefinition> =
   UseFormReturnBy<
     FieldInputsOf<SchemaOf<Source>>,
-    ArrayPathsOf<SchemaOf<Source>>
+    ArrayInputsOf<SchemaOf<Source>>
   >;
 
-type UseFormReturnBy<Inputs, ArrayPath extends string> = {
+type UseFormReturnBy<Inputs, Arrays> = {
   props: {
     onBlur: (event: FocusEvent<HTMLFormElement>) => void;
     onInput: (event: SyntheticEvent<HTMLFormElement>) => void;
@@ -154,7 +196,9 @@ type UseFormReturnBy<Inputs, ArrayPath extends string> = {
   field: <Path extends keyof Inputs & string>(
     path: Path,
   ) => FieldView<Inputs[Path]>;
-  array: (path: ArrayPath) => ArrayView;
+  array: <Path extends keyof Arrays & string>(
+    path: Path,
+  ) => ArrayViewBy<Arrays[Path]>;
   formError: FormErrorView;
   /** True once any field differs from the value it was rendered with. */
   isDirty: boolean;
@@ -307,10 +351,10 @@ const shiftSet = (
  * identity of each repeated row, one dirty flag, and the row counts adding or
  * removing a row is measured against.
  */
-export const useForm = <Inputs, ArrayPath extends string>(
-  fields: FieldsBy<Inputs, ArrayPath>,
+export const useForm = <Inputs, Arrays>(
+  fields: FieldsBy<Inputs, Arrays>,
   state: FormState = {},
-): UseFormReturnBy<Inputs, ArrayPath> => {
+): UseFormReturnBy<Inputs, Arrays> => {
   const lookup = fields as Fields;
   const formRef = useRef<HTMLFormElement>(null);
   const nextKey = useRef(0);
@@ -547,7 +591,11 @@ export const useForm = <Inputs, ArrayPath extends string>(
       const value = state.values?.[name];
       const input: AnyFieldInput = { ...field.input, name };
 
-      if (field.input.type === 'checkbox') {
+      if (field.group !== undefined) {
+        if (value !== undefined) {
+          input.defaultValue = [value].flat();
+        }
+      } else if (field.input.type === 'checkbox') {
         // An unchecked box is simply absent from the echo, so presence is the
         // whole answer — defaultValue would only set the value attribute.
         if (state.values !== undefined) {
@@ -556,8 +604,6 @@ export const useForm = <Inputs, ArrayPath extends string>(
       } else if (typeof value === 'string') {
         input.defaultValue = value;
       }
-      // An array echo (a checkbox group) has no single defaultValue; the
-      // caller restores it per option from state.values.
 
       return {
         input,
@@ -583,7 +629,7 @@ export const useForm = <Inputs, ArrayPath extends string>(
   );
 
   const array = useCallback(
-    (path: ArrayPath): ArrayView => {
+    (path: string): UntypedArrayView => {
       const derived = lookup.arrays[path];
       if (derived === undefined) {
         throw new Error(
@@ -681,8 +727,8 @@ export const useForm = <Inputs, ArrayPath extends string>(
     props,
     // 欄ごとの input の型はスキーマの型から決まり、実行時の表からは導けない。
     // formFields が同じスキーマから両方を作っているので、ここで型を付け替える
-    field: field as UseFormReturnBy<Inputs, ArrayPath>['field'],
-    array,
+    field: field as UseFormReturnBy<Inputs, Arrays>['field'],
+    array: array as UseFormReturnBy<Inputs, Arrays>['array'],
     formError,
     isDirty: domDirty || structuralDirty,
     revalidate,
@@ -764,7 +810,10 @@ const messagesIn = (
 };
 
 /** Look up the derived field for a submitted name, row index included. */
-const fieldFor = (fields: Fields, name: string): DerivedField | undefined => {
+const fieldFor = (
+  fields: Fields,
+  name: string,
+): DerivedField<AnyFieldInput> | undefined => {
   const direct = fields.fields[name];
   if (direct !== undefined) {
     return direct;

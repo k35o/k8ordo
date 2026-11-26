@@ -161,8 +161,8 @@ export const groupTitle = message({
 });
 
 export const group = message({
-  ja: '`z.array(z.enum())`は、同じ`name`を持つチェックボックスの集まりになります。チェックされた値を配列で受け取り、1つも無ければ`[]`です。',
-  en: '`z.array(z.enum())` becomes a group of checkboxes sharing one `name`. The checked values arrive as an array, and none checked is `[]`.',
+  ja: '`z.array(z.enum())`は、同じ`name`を持つチェックボックスの集まりになります。チェックされた値を配列で受け取り、1つも無ければ`[]`です。送信に失敗したあとは、チェックされていた値が`input.defaultValue`に配列で入ります。手で書くチェックボックスには`input`を展開せず、`name`を渡して`defaultChecked`をこの配列から決めます。',
+  en: '`z.array(z.enum())` becomes a group of checkboxes sharing one `name`. The checked values arrive as an array, and none checked is `[]`. After a failed submission, what was checked is on `input.defaultValue` as an array. Do not spread `input` onto a hand-written checkbox: pass its `name` and set `defaultChecked` from that array.',
 });
 
 export const groupMinBefore = message({

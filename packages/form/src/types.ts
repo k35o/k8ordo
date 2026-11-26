@@ -1,4 +1,4 @@
-import type { ArrayPathsOf, FieldInputsOf } from './paths';
+import type { ArrayInputsOf, FieldInputsOf } from './paths';
 import type { FormDefinition } from './rules/define-form';
 import type { DerivedRule } from './rules/rules';
 import type { ObjectSchema } from './schema/object-schema';
@@ -79,7 +79,19 @@ export type FileInput = {
   accept?: string;
 };
 
-export type AnyFieldInput = FieldInput & { value?: string };
+/**
+ * The input of a checkbox group (`z.array(z.enum([…]))`): the name every box
+ * shares, and after a submission the options that were checked.
+ */
+export type CheckboxGroupInput = {
+  name: string;
+  defaultValue?: string[];
+};
+
+export type AnyFieldInput = Omit<FieldInput, 'defaultValue'> & {
+  value?: string;
+  defaultValue?: string | string[];
+};
 
 /**
  * One field as derived from the schema. Serializable on purpose: it crosses the
@@ -91,18 +103,40 @@ export type DerivedField<Input = FieldInput> = {
   messages: Partial<Record<ValidityFlag, string>>;
   /** True when the input must not be echoed back after a failed submit. */
   secret: boolean;
+  /**
+   * Present on a checkbox group — one name shared by every box — with the
+   * bounds its array schema declared.
+   */
+  group?: { minItems?: number; maxItems?: number };
 };
 
 /**
- * A repeatable group. The item is described once; the row index is filled into
- * the name when a row renders, because rows do not exist until then.
+ * A repeatable group as `formFields` derives it, named by the schema (or
+ * `defineForm` definition) and the array's path:
+ * `DerivedArray<typeof orderSchema, 'items'>`. The item is described once;
+ * the row index is filled into the name when a row renders, because rows do
+ * not exist until then.
  */
-export type DerivedArray = {
+export type DerivedArray<
+  Source extends ObjectSchema | FormDefinition,
+  Path extends ArrayPathOf<Source>,
+> = DerivedArrayBy<ItemInputsOf<Source, Path>>;
+
+export type DerivedArrayBy<ItemInputs> = {
   path: string;
   minItems?: number;
   maxItems?: number;
   /** Keyed by the path within one item; '' when the array holds scalars. */
-  item: Record<string, DerivedField>;
+  item: { [Key in keyof ItemInputs]: DerivedField<ItemInputs[Key]> };
+};
+
+// DerivedArrayBy<Record<string, AnyFieldInput>> の item は写像型で、添字で引くと
+// oxlint の no-unsafe-enum-assignment が誤って報告する。素の Record にしておく
+export type AnyDerivedArray = Omit<
+  DerivedArrayBy<Record<string, AnyFieldInput>>,
+  'item'
+> & {
+  item: Record<string, DerivedField<AnyFieldInput>>;
 };
 
 /** What a constraint-carrying check lost on its way to HTML. */
@@ -114,6 +148,14 @@ export type DroppedCheck = {
 export type SchemaOf<Source extends ObjectSchema | FormDefinition> =
   Source extends FormDefinition<infer Schema> ? Schema : Source;
 
+export type ArrayPathOf<Source extends ObjectSchema | FormDefinition> =
+  keyof ArrayInputsOf<SchemaOf<Source>> & string;
+
+export type ItemInputsOf<
+  Source extends ObjectSchema | FormDefinition,
+  Path extends ArrayPathOf<Source>,
+> = ArrayInputsOf<SchemaOf<Source>>[Path];
+
 /**
  * What `formFields` derives from a schema or a `defineForm` definition, typed
  * from that schema: `FormFields<typeof talkSchema>` is what `formFields`
@@ -121,16 +163,16 @@ export type SchemaOf<Source extends ObjectSchema | FormDefinition> =
  */
 export type FormFields<Source extends ObjectSchema | FormDefinition> = FieldsBy<
   FieldInputsOf<SchemaOf<Source>>,
-  ArrayPathsOf<SchemaOf<Source>>
+  ArrayInputsOf<SchemaOf<Source>>
 >;
 
 /**
  * `FormFields` spelled out by what it holds rather than by the schema, so
  * `useForm` can infer it from the structure of any value of that shape.
  */
-export type FieldsBy<Inputs, ArrayPath extends string> = {
+export type FieldsBy<Inputs, Arrays> = {
   fields: { [Path in keyof Inputs]: DerivedField<Inputs[Path]> };
-  arrays: Record<ArrayPath, DerivedArray>;
+  arrays: { [Path in keyof Arrays]: DerivedArrayBy<Arrays[Path]> };
   /**
    * Checks HTML has no attribute for, each run by the same evaluator on both
    * sides. A function message has already been called.

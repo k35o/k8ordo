@@ -8,8 +8,8 @@ import { asProbe } from '../schema/object-schema';
 import type { ObjectSchema } from '../schema/object-schema';
 import { schemaMap, unwrap } from '../schema/walk';
 import type {
+  AnyDerivedArray,
   AnyFieldInput,
-  DerivedArray,
   DerivedField,
   DroppedCheck,
   FormFields,
@@ -113,7 +113,7 @@ export const formFields = <Source extends ObjectSchema | FormDefinition>(
   const { schema, rules } = asDefinition<ObjectSchema>(input);
   const map = schemaMap(schema);
   const fields: Record<string, DerivedField<AnyFieldInput>> = {};
-  const arrays: Record<string, DerivedArray> = {};
+  const arrays: Record<string, AnyDerivedArray> = {};
   const dropped: DroppedCheck[] = [];
 
   for (const array of map.arrays) {
@@ -193,6 +193,9 @@ export const formFields = <Source extends ObjectSchema | FormDefinition>(
         emptySubmissionOf(leaf.kind),
       ),
       secret,
+      ...(leaf.group !== undefined && {
+        group: { minItems: leaf.group.minItems, maxItems: leaf.group.maxItems },
+      }),
     };
 
     const array = leaf.arrayPath === null ? undefined : arrays[leaf.arrayPath];

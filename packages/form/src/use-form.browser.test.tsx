@@ -217,6 +217,7 @@ const SubmittedPick: FC<{ lockedTags?: string[] }> = ({ lockedTags }) => {
   );
   const form = useForm(pickFields, state);
   const tags = state.values?.tags;
+  const tagsInput = form.field('tags').input;
 
   return (
     <form {...form.props} action={formAction}>
@@ -234,8 +235,8 @@ const SubmittedPick: FC<{ lockedTags?: string[] }> = ({ lockedTags }) => {
         <select
           aria-label="tags"
           multiple
-          {...form.field('tags').input}
-          defaultValue={lockedTags ?? (Array.isArray(tags) ? tags : [])}
+          {...tagsInput}
+          defaultValue={lockedTags ?? tagsInput.defaultValue}
         >
           <option value="a">a</option>
           <option value="b">b</option>
@@ -265,17 +266,33 @@ const Group: FC<{ state: FormState }> = ({ state }) => {
       {(['a', 'b'] as const).map((option) => (
         <input
           aria-label={option}
-          defaultChecked={
-            Array.isArray(state.values?.tags) &&
-            state.values.tags.includes(option)
-          }
+          defaultChecked={tags.input.defaultValue?.includes(option)}
           key={option}
+          name={tags.input.name}
           type="checkbox"
-          {...tags.input}
           value={option}
         />
       ))}
       <p data-testid="group-input">{JSON.stringify(tags.input)}</p>
+    </form>
+  );
+};
+
+const rowGroupSchema = z.object({
+  people: z.array(z.object({ tags: z.array(z.enum(['a', 'b'])) })),
+});
+const rowGroupFields = formFields(rowGroupSchema);
+
+const RowGroup: FC<{ state: FormState }> = ({ state }) => {
+  const form = useForm(rowGroupFields, state);
+
+  return (
+    <form {...form.props}>
+      {form.array('people').rows.map((row) => (
+        <p data-testid="row-group-input" key={row.key}>
+          {JSON.stringify(row.field('tags').input)}
+        </p>
+      ))}
     </form>
   );
 };
@@ -1098,7 +1115,7 @@ describe('useForm in a browser', () => {
     await expect.element(screen.getByLabelText('agree')).not.toBeChecked();
   });
 
-  it('restores a one-box group per option, never as a value on every box', async () => {
+  it('echoes a one-box group as an array on input.defaultValue', async () => {
     const formData = new FormData();
     formData.append('tags', 'a');
     const { state } = parseForm(groupSchema, formData);
@@ -1109,7 +1126,19 @@ describe('useForm in a browser', () => {
     await expect.element(screen.getByLabelText('b')).not.toBeChecked();
     await expect
       .element(screen.getByTestId('group-input'))
-      .toHaveTextContent('{"name":"tags"}');
+      .toHaveTextContent('{"name":"tags","defaultValue":["a"]}');
+  });
+
+  it('echoes a checkbox group inside a row on its input as well', async () => {
+    const formData = new FormData();
+    formData.append('people[0].tags', 'b');
+    const { state } = parseForm(rowGroupSchema, formData);
+
+    const screen = await render(<RowGroup state={state} />);
+
+    await expect
+      .element(screen.getByTestId('row-group-input'))
+      .toHaveTextContent('{"name":"people[0].tags","defaultValue":["b"]}');
   });
 
   it('hears a HiddenValue change for isDirty like any other control', async () => {

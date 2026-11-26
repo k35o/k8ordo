@@ -7,14 +7,16 @@ import type { FormDefinition } from './rules/define-form';
 import { sameAs } from './rules/rules';
 import type { ObjectSchema } from './schema/object-schema';
 import type {
+  CheckboxGroupInput,
   CheckboxInput,
+  DerivedArray,
   FileInput,
   FormFields,
   NumberInput,
   StringCheckboxInput,
 } from './types';
 import { useForm } from './use-form';
-import type { FieldView, UseFormReturn } from './use-form';
+import type { ArrayView, FieldView, RowView, UseFormReturn } from './use-form';
 
 const schema = z.object({
   title: z.string(),
@@ -124,6 +126,7 @@ describe('paths are derived from the schema', () => {
         inStock: z.stringbool().optional(),
         avatar: z.file(),
         nullableNumber: z.coerce.number().nullable(),
+        topics: z.array(z.enum(['a', 'b'])),
       }),
     );
 
@@ -147,12 +150,114 @@ describe('paths are derived from the schema', () => {
         >,
         Equal<FieldView<FileInput>, ReturnType<typeof form.field<'avatar'>>>,
         Equal<FieldView, ReturnType<typeof form.field<'nullableNumber'>>>,
-      ] = [true, true, true, true, true, true, true];
+        Equal<
+          FieldView<CheckboxGroupInput>,
+          ReturnType<typeof form.field<'topics'>>
+        >,
+      ] = [true, true, true, true, true, true, true, true];
 
       // @ts-expect-error a file control cannot take a value back
       const avatar: unknown = form.field('avatar').input.defaultValue;
 
       expect([types, avatar]).toBeDefined();
+    };
+
+    expect(useCompileTimeOnly).toBeTypeOf('function');
+  });
+
+  it('types each field of a row by its key, as field() types a path', () => {
+    const rows = formFields(
+      z.object({
+        talks: z.array(
+          z.object({
+            title: z.string(),
+            minutes: z.coerce.number(),
+            topics: z.array(z.enum(['a', 'b'])),
+            slides: z.object({ public: z.stringbool().optional() }),
+          }),
+        ),
+        scores: z.array(z.coerce.number()),
+        picks: z.array(z.array(z.enum(['a', 'b']))),
+      }),
+    );
+
+    const useCompileTimeOnly = (): void => {
+      const form = useForm(rows);
+
+      for (const row of form.array('talks').rows) {
+        const types: [
+          Equal<FieldView, ReturnType<typeof row.field<'title'>>>,
+          Equal<
+            FieldView<NumberInput>,
+            ReturnType<typeof row.field<'minutes'>>
+          >,
+          Equal<
+            FieldView<CheckboxGroupInput>,
+            ReturnType<typeof row.field<'topics'>>
+          >,
+          Equal<
+            FieldView<StringCheckboxInput>,
+            ReturnType<typeof row.field<'slides.public'>>
+          >,
+        ] = [true, true, true, true];
+        // @ts-expect-error 'titel' is not a field of the row
+        row.field('titel');
+        // @ts-expect-error a row of an object names the field it wants
+        row.field();
+        expect(types).toBeDefined();
+      }
+
+      for (const row of form.array('scores').rows) {
+        const score: FieldView<NumberInput> = row.field();
+        const same: FieldView<NumberInput> = row.field('');
+        expect([score, same]).toBeDefined();
+      }
+
+      for (const row of form.array('picks').rows) {
+        const picked: FieldView<CheckboxGroupInput> = row.field();
+        const checked: string[] | undefined = picked.input.defaultValue;
+        expect(checked).toBeDefined();
+      }
+    };
+
+    expect(useCompileTimeOnly).toBeTypeOf('function');
+  });
+
+  it('passes each field of a row to a child that takes its FieldView', () => {
+    const rows = formFields(
+      z.object({
+        talks: z.array(
+          z.object({
+            title: z.string(),
+            minutes: z.coerce.number(),
+            topics: z.array(z.enum(['a', 'b'])),
+          }),
+        ),
+      }),
+    );
+    const TextInput = ({ field }: { field: FieldView }): string =>
+      field.input.name;
+    const NumberInputField = ({
+      field,
+    }: {
+      field: FieldView<NumberInput>;
+    }): string => field.input.name;
+    const Group = ({
+      field,
+    }: {
+      field: FieldView<CheckboxGroupInput>;
+    }): string => field.input.name;
+
+    const useCompileTimeOnly = (): string[] => {
+      const form = useForm(rows);
+      return form
+        .array('talks')
+        .rows.flatMap((row) => [
+          TextInput({ field: row.field('title') }),
+          TextInput({ field: row.field('minutes') }),
+          NumberInputField({ field: row.field('minutes') }),
+          Group({ field: row.field('topics') }),
+        ]);
     };
 
     expect(useCompileTimeOnly).toBeTypeOf('function');
@@ -212,6 +317,54 @@ describe('FormFields and UseFormReturn are named by the schema', () => {
     };
 
     expect(useCompileTimeOnly).toBeTypeOf('function');
+  });
+
+  it('passes a whole row to a child that takes its RowView', () => {
+    const ItemRow = ({
+      row,
+    }: {
+      row: RowView<typeof schema, 'items'>;
+    }): string => row.field('name').input.name;
+
+    const useCompileTimeOnly = (): string[] => {
+      const form = useForm(derived);
+      return form.array('items').rows.map((row) => ItemRow({ row }));
+    };
+
+    expect(useCompileTimeOnly).toBeTypeOf('function');
+  });
+
+  it('names the array types by the schema and the array path alike', () => {
+    const useCompileTimeOnly = (): void => {
+      const form = useForm(derived);
+      const types: [
+        Equal<
+          ArrayView<typeof schema, 'items'>,
+          ReturnType<typeof form.array<'items'>>
+        >,
+        Equal<
+          RowView<typeof definition, 'items'>,
+          RowView<typeof schema, 'items'>
+        >,
+        Equal<
+          DerivedArray<typeof schema, 'items'>,
+          FormFields<typeof schema>['arrays']['items']
+        >,
+      ] = [true, true, true];
+      expect(types).toBeDefined();
+    };
+
+    expect(useCompileTimeOnly).toBeTypeOf('function');
+  });
+
+  it('refuses a row type that does not name its schema and array path', () => {
+    // @ts-expect-error a RowView is named by the schema and the array path
+    type BareRow = (props: { row: RowView }) => string;
+    // @ts-expect-error 'title' is a field, not an array of rows
+    type FieldRow = (props: { row: RowView<typeof schema, 'title'> }) => string;
+    const children: Array<BareRow | FieldRow> = [];
+
+    expect(children).toHaveLength(0);
   });
 
   it('carries the schema through a component generic over it', () => {

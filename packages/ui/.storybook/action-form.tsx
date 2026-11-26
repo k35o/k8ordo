@@ -87,13 +87,6 @@ export const MemoField: FC<{ field: FieldView }> = ({ field }) => (
 );
 
 /**
- * 送信に失敗した echo を配列で受ける部品に渡す。チェックボックスの組は、
- * 何個チェックしても配列で返ってくる。
- */
-export const listOf = (value: string | string[] | undefined): string[] =>
-  Array.isArray(value) ? value : [];
-
-/**
  * 欄の値を打ち直す。storybook/test の userEvent は打った値を要素の側にも覚えて
  * おき、次に打つ文字をその後ろに足す。form の reset（送信後の React の自動
  * リセットを含む）は DOM の値だけを戻すので、そのまま打つと reset 前の値が

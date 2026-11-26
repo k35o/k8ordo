@@ -13,7 +13,6 @@ import { CheckboxGroup } from '.';
 import {
   ActionForm,
   fill,
-  listOf,
   memo,
   MemoField,
 } from '../../../../.storybook/action-form';
@@ -177,7 +176,7 @@ const FavoritesForm = () => (
     onReceive={received}
     serve={(data) => parseForm(favorites, data)}
   >
-    {(form, state) => {
+    {(form) => {
       const tags = form.field('tags');
       return (
         <>
@@ -187,11 +186,7 @@ const FavoritesForm = () => (
             label="好きなもの"
             labelAs="legend"
             renderInput={(props) => (
-              <CheckboxGroup.Root
-                {...props}
-                {...tags.input}
-                defaultValue={listOf(state.values?.tags)}
-              >
+              <CheckboxGroup.Root {...props} {...tags.input}>
                 {TAGS.map((tag) => (
                   <CheckboxGroup.Item
                     itemValue={tag.value}

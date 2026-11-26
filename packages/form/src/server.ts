@@ -7,6 +7,7 @@ export { minChecked, requiredWhen, sameAs } from './rules/rules';
 export type { DerivedRule, Rule, RuleMessage } from './rules/rules';
 export type { ObjectSchema } from './schema/object-schema';
 export type {
+  CheckboxGroupInput,
   CheckboxInput,
   DerivedArray,
   DerivedField,

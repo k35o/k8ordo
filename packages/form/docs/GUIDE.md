@@ -96,6 +96,7 @@ spread reaches a component that takes only what that control has:
 | `z.boolean()`                                                               | `CheckboxInput`       |
 | `z.stringbool()`                                                            | `StringCheckboxInput` |
 | `z.file()`                                                                  | `FileInput`           |
+| `z.array(z.enum([…]))`                                                      | `CheckboxGroupInput`  |
 | a string, `z.enum([…])`, and anything behind `.nullable()`, a union, a pipe | `FieldInput`          |
 
 `NumberInput` has numeric `min` and `max` and always a `step`; `FileInput` has
@@ -455,9 +456,8 @@ Only these fields carry `value` in their type. `field()` reads which ones they
 are from the schema's type, and types `input` by the control each field
 derives ([the table above](#writing-a-form)): `StringCheckboxInput` is the one
 input type with a `value`, so every other field spreads onto a component that
-takes `value` only when it is controlled.
-A box inside repeated rows still submits its `value`, but `row.field()` never
-types it there.
+takes `value` only when it is controlled. A box inside repeated rows is typed
+the same way by `row.field(key)`.
 
 ## Checkbox groups
 
@@ -472,9 +472,7 @@ const tags = form.field('tags');
 {
   ['a', 'b', 'c'].map((option) => (
     <input
-      defaultChecked={
-        Array.isArray(state.values?.tags) && state.values.tags.includes(option)
-      }
+      defaultChecked={tags.input.defaultValue?.includes(option)}
       key={option}
       name={tags.input.name}
       type="checkbox"
@@ -488,9 +486,17 @@ const tags = form.field('tags');
 `[]`, never a wiring error. The `.min(2)` cannot become an HTML attribute (on
 a group, `required` would mean "check every box"), so it is reported in
 `dropped`; declare `minChecked('tags', 2, '…')` to run the same bound in the
-browser. After a submission `state.values.tags` holds what was checked as an
-array — `['a']` for one box, `[]` for none — and `tags.input` carries only the
-`name`, so each box restores itself from that array.
+browser.
+
+After a submission `tags.input.defaultValue` holds what was checked as an
+array — `['a']` for one box, `[]` for none — typed `string[]`
+(`CheckboxGroupInput`). A component that takes the checked options as its
+`defaultValue` — a `<select multiple>`, or `@k8ordo/ui`'s `CheckboxGroup.Root`,
+`CheckboxCard` and `Autocomplete` — takes the spread as it is. A hand-written
+box takes the `name` and reads `defaultChecked` from the array, as above: a
+spread would put the whole array on every box. The same holds for a group
+inside repeated rows, which `row.field(key)` types as `CheckboxGroupInput`
+too.
 
 ## Files
 
@@ -517,11 +523,35 @@ form.field('titel'); // error: not a field in the schema
 form.field('items'); // error: an array of objects, reached through array()
 form.array('user'); // error: an object, not an array
 form.array('tags'); // error: a checkbox group is a field
+row.field('nmae'); // error: not a field of the row
 defineForm(schema, [sameAs('confrim', 'password', '…')]); // error: typo
 ```
 
-A row's `row.field(key)` is the exception: the key is a plain string, and a
-typo in it throws when the row renders.
+A row's `row.field(key)` takes the path within one item and types its `input`
+by that key, the way `form.field()` does by path: in a row of a string and a
+number, `row.field('name').input` is a `FieldInput` and
+`row.field('quantity').input` a `NumberInput`. The row of an array of scalars
+is a single field under `''`, so its key is left out: `row.field()`.
+
+A component that draws a whole row takes its `RowView`, named by the schema
+(or the `defineForm` definition) and the array's path, the way `FormFields`
+is named by the schema. The keys `row.field()` accepts follow from those two,
+so `RowView` without them is a type error. `ArrayView` and `DerivedArray`
+are named the same way.
+
+```tsx
+import type { RowView } from '@k8ordo/form';
+
+import type { orderSchema } from '../lib/schema';
+
+const ItemRow = ({ row }: { row: RowView<typeof orderSchema, 'items'> }) => (
+  <input {...row.field('quantity').input} />
+);
+
+{
+  form.array('items').rows.map((row) => <ItemRow key={row.key} row={row} />);
+}
+```
 
 ## Checks HTML has no attribute for
 
@@ -723,15 +753,15 @@ each action included — restores the echo, `isDirty` reads them, and a value a
 component changes in code — a stepper, a chosen option, a removed file —
 arrives as an `input` event, the way typing does.
 
-| Schema                                            | Component                                            | What to pass besides `{...props} {...input}`              |
-| ------------------------------------------------- | ---------------------------------------------------- | --------------------------------------------------------- |
-| `z.string()`, `z.email()`, `z.url()`, `z.iso.*()` | `TextField`, `Textarea`                              | —                                                         |
-| a password                                        | `PasswordInput`                                      | —                                                         |
-| `z.coerce.number()`                               | `NumberField`, `Slider`                              | —                                                         |
-| `z.enum([…])`                                     | `Select`, `Radio`, `RadioCard`                       | `options`; `labelAs="legend"` on `FormControl` for radios |
-| `z.boolean()`, `z.literal(true)`                  | `Checkbox`, `Switch`                                 | `label`, and no `{...props}`: they need no `FormControl`  |
-| `z.array(z.enum([…]))`                            | `CheckboxGroup.Root`, `CheckboxCard`, `Autocomplete` | `defaultValue` from `state.values`                        |
-| `z.file()`                                        | `FileField.Root`                                     | a `FileField.Trigger` and `FileField.ItemList`            |
+| Schema                                            | Component                                            | What to pass besides `{...props} {...input}`               |
+| ------------------------------------------------- | ---------------------------------------------------- | ---------------------------------------------------------- |
+| `z.string()`, `z.email()`, `z.url()`, `z.iso.*()` | `TextField`, `Textarea`                              | —                                                          |
+| a password                                        | `PasswordInput`                                      | —                                                          |
+| `z.coerce.number()`                               | `NumberField`, `Slider`                              | —                                                          |
+| `z.enum([…])`                                     | `Select`, `Radio`, `RadioCard`                       | `options`; `labelAs="legend"` on `FormControl` for radios  |
+| `z.boolean()`, `z.literal(true)`                  | `Checkbox`, `Switch`                                 | `label`, and no `{...props}`: they need no `FormControl`   |
+| `z.array(z.enum([…]))`                            | `CheckboxGroup.Root`, `CheckboxCard`, `Autocomplete` | the options; `labelAs="legend"` on `FormControl` for boxes |
+| `z.file()`                                        | `FileField.Root`                                     | a `FileField.Trigger` and `FileField.ItemList`             |
 
 **Radios take the spread.** The advice under [Radio groups](#radio-groups) is
 about a hand-written `<input type="radio">`. `Radio` and `RadioCard` read an
@@ -748,12 +778,11 @@ custom `truthy`, and the URL state writes, do not share. Render a plain
 `{ value: '', label: '…' }` first in `options`; a `<select>` without an empty
 option always has a choice selected.
 
-**A checkbox group echoes as an array.** `input` carries only the `name`, so
-pass what was checked back as `defaultValue`:
+**A checkbox group echoes as an array.** `input.defaultValue` is what was
+checked, so the group components take the spread with nothing added:
 
 ```tsx
 const tags = form.field('tags');
-const checked = state.values?.tags;
 
 <FormControl
   errorText={tags.error}
@@ -761,12 +790,7 @@ const checked = state.values?.tags;
   label="タグ"
   labelAs="legend"
   renderInput={(props) => (
-    <CheckboxCard
-      {...props}
-      {...tags.input}
-      defaultValue={Array.isArray(checked) ? checked : []}
-      options={options}
-    />
+    <CheckboxCard {...props} {...tags.input} options={options} />
   )}
 />;
 ```

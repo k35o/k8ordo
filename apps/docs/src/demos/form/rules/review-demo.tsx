@@ -75,7 +75,6 @@ export function ReviewDemo({ fields }: Props) {
           <CheckboxCard
             {...props}
             {...aspects.input}
-            defaultValue={[]}
             options={[
               { value: 'content', label: m.formRules.demoAspectContent() },
               { value: 'structure', label: m.formRules.demoAspectStructure() },

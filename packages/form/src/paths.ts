@@ -11,6 +11,7 @@
  */
 
 import type {
+  CheckboxGroupInput,
   CheckboxInput,
   FieldInput,
   FileInput,
@@ -61,9 +62,7 @@ type FieldEntriesOf<Schema, Prefix extends string = ''> =
   Unwrap<Schema> extends infer Bare
     ? IsArray<Bare> extends true
       ? IsEnum<ArrayElement<Bare>> extends true
-        ? Prefix extends ''
-          ? never
-          : [Prefix, FieldInput]
+        ? [Prefix, CheckboxGroupInput]
         : never
       : Bare extends { shape: infer Shape }
         ? {
@@ -72,9 +71,7 @@ type FieldEntriesOf<Schema, Prefix extends string = ''> =
               Join<Prefix, Key>
             >;
           }[keyof Shape & string]
-        : Prefix extends ''
-          ? never
-          : [Prefix, LeafInputOf<Schema>]
+        : [Prefix, LeafInputOf<Schema>]
     : never;
 
 export type FieldPathsOf<Schema> = FieldEntriesOf<Schema>[0];
@@ -87,23 +84,27 @@ export type FieldInputsOf<Schema> = {
  * No recursion into an array's element: a repeat inside a repeat has no
  * unambiguous name, and the runtime walk refuses it too.
  */
-export type ArrayPathsOf<Schema, Prefix extends string = ''> =
+type ArrayEntriesOf<Schema, Prefix extends string = ''> =
   Unwrap<Schema> extends infer Bare
     ? IsArray<Bare> extends true
       ? IsEnum<ArrayElement<Bare>> extends true
         ? never
         : Prefix extends ''
           ? never
-          : Prefix
+          : [Prefix, FieldInputsOf<ArrayElement<Bare>>]
       : Bare extends { shape: infer Shape }
         ? {
-            [Key in keyof Shape & string]: ArrayPathsOf<
+            [Key in keyof Shape & string]: ArrayEntriesOf<
               Shape[Key],
               Join<Prefix, Key>
             >;
           }[keyof Shape & string]
         : never
     : never;
+
+export type ArrayInputsOf<Schema> = {
+  [Entry in ArrayEntriesOf<Schema> as Entry[0]]: Entry[1];
+};
 
 /**
  * The one control whose `input` carries a `value` is a checkbox whose schema

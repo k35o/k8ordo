@@ -317,6 +317,10 @@ describe('formFields', () => {
     // One leaf, no rows: every box submits under the same name.
     expect(arrays).toStrictEqual({});
     expect(fields.tags.input).toStrictEqual({ name: 'tags' });
+    expect(fields.tags.group).toStrictEqual({
+      minItems: 2,
+      maxItems: undefined,
+    });
     // "At least two" has no HTML attribute; the report points at minChecked.
     const report = dropped.find((entry) => entry.field === 'tags');
     expect(report?.reason).toContain('minChecked');

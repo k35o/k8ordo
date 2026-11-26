@@ -44,14 +44,15 @@ describe('nested and repeated fields', () => {
 
     expect(arrays.items.minItems).toBe(1);
     expect(arrays.items.maxItems).toBe(3);
-    expect(arrays.items.item.name?.input.name).toBe('items[{index}].name');
-    expect(arrays.items.item.qty?.input.type).toBe('number');
+    expect(arrays.items.item.name.input.name).toBe('items[{index}].name');
+    expect(arrays.items.item.qty.input.type).toBe('number');
   });
 
   it("keys a scalar array's item under the empty string", () => {
     const { arrays } = formFields(schema);
+    const { '': tag } = arrays.tags.item;
 
-    expect(arrays.tags.item['']?.input.name).toBe('tags[{index}]');
+    expect(tag.input.name).toBe('tags[{index}]');
   });
 
   it('never emits the safe-integer bounds that .int() carries', () => {
@@ -181,7 +182,7 @@ describe('nested and repeated fields', () => {
     });
 
     expect(
-      formFields(rowsWithFlag).arrays.members.item.admin?.input,
+      formFields(rowsWithFlag).arrays.members.item.admin.input,
     ).toStrictEqual({
       name: 'members[{index}].admin',
       type: 'checkbox',

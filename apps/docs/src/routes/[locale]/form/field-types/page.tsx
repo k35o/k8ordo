@@ -83,12 +83,11 @@ const STRINGBOOL = `z.object({
 // inStock.input → { name: 'inStock', type: 'checkbox', value: 'true' }`;
 
 const GROUP = `const tags = form.field('tags');
-const checked = state.values?.tags;
 
 {['react', 'css', 'a11y'].map((option) => (
   <label key={option}>
     <input
-      defaultChecked={Array.isArray(checked) && checked.includes(option)}
+      defaultChecked={tags.input.defaultValue?.includes(option)}
       name={tags.input.name}
       type="checkbox"
       value={option}
@@ -228,7 +227,7 @@ export default function FormFieldTypesPage() {
       </DocSection>
 
       <DocSection id="checkbox-group" title={t.groupTitle}>
-        <CodeBlock code={GROUP} lang="tsx" marks={{ 7: 'highlight' }} />
+        <CodeBlock code={GROUP} lang="tsx" marks={{ 6: 'highlight' }} />
         <p>
           <Rich>{t.group()}</Rich>
         </p>
