@@ -21,6 +21,15 @@ included: `Tabs.Root`, `Accordion.Item`, `Popover.Trigger`, and the rest are
 composed outside the client modules, so the parts resolve on the server. Only
 the interactive parts carry `'use client'`.
 
+What a Server Component cannot do is pass a client part a function other
+than a Server Action. A part whose required prop is a function — the
+`renderItem` of `Popover.Trigger`, `Tooltip.Trigger`, `ContextMenu.Trigger`,
+`Toolbar.Item`, and `FileField.Trigger`, `DataTable`'s `getRowId` and a
+column's `cell` — is rendered from a Client Component, as is any part given
+`onChange` or another handler. `FormControl` and `Form` are not client
+modules: a Server Component renders them with `renderInput` and with a Server
+Action as `action`, and only the fields inside are client parts.
+
 ## Render props
 
 Two different contracts are spelled `render*`, and mixing them up is the usual

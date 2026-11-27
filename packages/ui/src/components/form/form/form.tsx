@@ -1,5 +1,3 @@
-'use client';
-
 import type { FC, FormHTMLAttributes, ReactNode, Ref } from 'react';
 
 import styles from './form.module.css';

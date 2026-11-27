@@ -1,5 +1,3 @@
-'use client';
-
 import { FormControl, Radio, TextField } from '@k8ordo/ui';
 
 export function FormControlBasicPreview() {

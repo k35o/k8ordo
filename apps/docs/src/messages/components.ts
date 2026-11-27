@@ -712,8 +712,8 @@ export const fileField = {
 
 export const formControl = {
   description: message({
-    ja: '入力欄にラベルとヘルプ、エラーの表示を付けるラッパーです。入力欄は`renderInput`で描きます。`Radio`のようなグループには`labelAs="group"`を付け、ラベルをグループの名前にします。',
-    en: 'A wrapper that gives a field its label, help text and error text. The field itself is drawn in `renderInput`. For a group such as `Radio`, `labelAs="group"` makes the label the group’s name.',
+    ja: '入力欄にラベルとヘルプ、エラーの表示を付けるラッパーです。入力欄は`renderInput`で描きます。`Radio`のようなグループには`labelAs="group"`を付け、ラベルをグループの名前にします。Client Componentではないので、Server Componentからも`renderInput`を渡せます。',
+    en: 'A wrapper that gives a field its label, help text and error text. The field itself is drawn in `renderInput`. For a group such as `Radio`, `labelAs="group"` makes the label the group’s name. It is not a Client Component, so a Server Component can pass it `renderInput` too.',
   }),
   helpTextTitle: message({
     ja: 'ヘルプテキスト',

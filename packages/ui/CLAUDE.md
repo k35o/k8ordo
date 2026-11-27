@@ -313,7 +313,14 @@ export const MyComponent = { Root, Part } as const;
   `export const X = {` inside a `'use client'` file.
 - Use `createContext` + `use()` (or `createSafeContext`) for sharing state between parts
 - Use `useId()` for accessible `aria-labelledby`/`aria-describedby` connections
-- `'use client'` directive at top when using hooks
+- `'use client'` directive at top when using state, effects, context, or event
+  handlers. The hooks React's server build exports too (`useId`, `useMemo`,
+  `useCallback`) do not need it: `FormControl`'s only hook is `useId`, so it
+  stays a Server Component and a Server Component can hand it `renderInput`.
+  A server-safe module calls nothing a `'use client'` module exports — on the
+  server those exports are references, not functions — which is why
+  `_internal/field-message.tsx`, whose `hasErrorText` `FormControl` calls, is
+  in `compound-rsc.test.ts`'s list as well
 
 ### Form fields
 
@@ -367,7 +374,8 @@ when the application has defined no locale set. It is a plain function, not a
 hook, so wording never makes a component a client module:
 `src/components/compound-rsc.test.ts` keeps the ones that only read wording
 (`Spinner`, `Anchor`, `Card`, `Breadcrumb`, `Code`, `Alert`, `Callout`, `Reasoning`, `ToolInvocation`) free
-of `'use client'`. A new key goes into `messages.ts`, `ja.ts`, `en.ts`, and
+of `'use client'`, along with `FormControl` (wording and `useId`) and `Form`
+(no hook at all). A new key goes into `messages.ts`, `ja.ts`, `en.ts`, and
 `usage.ts` (the components that draw it); there is no provider and no context.
 `pnpm generate:props` writes the key list in `docs/references/components.md`
 from `usage.ts`, and the same mapping into `docs/props.generated.json`

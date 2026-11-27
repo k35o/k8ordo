@@ -1,5 +1,3 @@
-'use client';
-
 import { clsx } from 'clsx';
 import { useId } from 'react';
 import type { FC, HTMLAttributes, ReactElement, Ref } from 'react';
