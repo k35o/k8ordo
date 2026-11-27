@@ -955,7 +955,7 @@ type DensityValues = { density: 'comfortable' | 'compact'; fontSize: number };
 
 // ほかのタブのストアも、サーバーの cookies().set も、値を 1 回エンコードして書く
 const densityCookie = (values: Partial<DensityValues>): string =>
-  encodeURIComponent(densityState.cookieValue(values));
+  encodeURIComponent(densityState.cookie(values, new Map())[1]);
 
 const Density: FC = () => {
   const [{ density, fontSize }, update] = useAppState(densityState);

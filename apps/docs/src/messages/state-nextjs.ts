@@ -45,6 +45,21 @@ export const serverInitial = message({
   en: 'Pass the values read to the Client Component as `initialUrl`. The server render and the hydration render then show the URL’s values, not the defaults.',
 });
 
+export const cookieTitle = message({
+  ja: 'Cookieの状態',
+  en: 'Cookie state',
+});
+
+export const cookieRead = message({
+  ja: 'Next.jsの`cookies()`の`get`は、`{ name, value }`のオブジェクトを返します。`parseCookies`には、値だけを返す`get`で包んで渡します。',
+  en: 'The `get` of Next.js’s `cookies()` returns a `{ name, value }` object. Wrap it in a `get` that returns the value alone, and pass that to `parseCookies`.',
+});
+
+export const cookieWrite = message({
+  ja: 'Server Actionで同じCookieを書くときは、`cookie()`の2つ目の引数にも同じ`get`を渡します。返る名前と値と属性を`set`に展開します。Next.jsの`set`も値をパーセントエンコードするので、ブラウザの`useAppState`がそのまま読めます。',
+  en: 'To write the same cookie from a Server Action, pass the same `get` as `cookie()`’s second argument, and spread the name, value and attributes it returns into `set`. Next.js’s `set` percent-encodes the value too, so `useAppState` in the browser reads it as it is.',
+});
+
 export const typedTitle = message({
   ja: 'パスの型検査',
   en: 'Typed paths',

@@ -83,16 +83,39 @@ describe('parseCookies', () => {
   });
 });
 
-describe('cookieValue', () => {
-  it('writes the JSON of every field, defaults filled in', () => {
-    expect(density.cookieValue({ density: 'compact' })).toBe(
+describe('cookie', () => {
+  it('gives the name, the JSON of every field and the attributes the browser store writes', () => {
+    expect(density.cookie({ density: 'compact' }, new Map())).toStrictEqual([
+      'k8ordo-state.density',
       '{"density":"compact","fontSize":16}',
+      { path: '/', sameSite: 'lax', maxAge: 34_560_000, httpOnly: false },
+    ]);
+  });
+
+  it('lays the patch over the cookie the request carries, as update() does', () => {
+    const current = new Map([
+      ['k8ordo-state.density', '{"density":"comfortable","fontSize":18}'],
+    ]);
+
+    expect(density.cookie({ density: 'compact' }, current)[1]).toBe(
+      '{"density":"compact","fontSize":18}',
     );
   });
 
-  it('runs the values through the schema first', () => {
-    expect(density.cookieValue({ fontSize: 3 })).toBe(
+  it('runs the merged values through the schema', () => {
+    const current = new Map([
+      ['k8ordo-state.density', '{"density":"cosy","fontSize":18}'],
+    ]);
+
+    expect(density.cookie({ fontSize: 3 }, current)[1]).toBe(
       '{"density":"comfortable","fontSize":16}',
     );
+  });
+
+  it('refuses a field the definition does not declare, as update() does', () => {
+    expect(() =>
+      // @ts-expect-error -- 型の外から来たフィールドを実行時にも断ることを確かめる
+      density.cookie({ zoom: 2 }, new Map()),
+    ).toThrow(/"density" has no field "zoom"/u);
   });
 });

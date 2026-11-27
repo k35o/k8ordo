@@ -20,9 +20,11 @@ test('a link leaves the defaults out', () => {
 });
 
 test('a compact cookie reads back as compact', () => {
-  const cookies = new Map([
-    [density.cookieName, density.cookieValue({ density: 'compact' })],
-  ]);
+  const [name, value] = density.cookie(
+    { density: 'compact' },
+    new Map(),
+  );
+  const cookies = new Map([[name, value]]);
   expect(density.parseCookies(cookies).density).toBe('compact');
 });`;
 
@@ -54,10 +56,11 @@ window.dispatchEvent(
   }),
 );`;
 
-const COOKIE_CHANGE = `await cookieStore.set(
-  density.cookieName,
-  encodeURIComponent(density.cookieValue({ density: 'compact' })),
-);`;
+const COOKIE_CHANGE = `const [name, value] = density.cookie(
+  { density: 'compact' },
+  new Map(),
+);
+await cookieStore.set(name, encodeURIComponent(value));`;
 
 export default function StateTestingPage() {
   return (

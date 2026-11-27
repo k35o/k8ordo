@@ -148,18 +148,23 @@ export const stateOnce = message({
 });
 
 export const stateWriteCallout = message({
-  ja: 'ブラウザが書くときと同じ属性',
-  en: 'The attributes the browser writes',
+  ja: '今の値に重ね、ブラウザと同じ属性で書く',
+  en: 'Over the current values, with the browser’s attributes',
 });
 
 export const stateWrite = message({
-  ja: '同じCookieを`cookies()`で書くときは、名前に`cookieName`を、値に`cookieValue()`の返り値を渡します。`cookieValue()`は値をスキーマに通し、渡さなかったフィールドを既定値で埋めます。`maxAge`は、ブラウザが書くときと同じ400日（`34_560_000`秒）にします。',
-  en: 'To write the same cookie with `cookies()`, pass `cookieName` as the name and the return value of `cookieValue()` as the value. `cookieValue()` runs the values through the schema and fills the fields you left out with their defaults. Set `maxAge` to 400 days (`34_560_000` seconds), the same the browser writes.',
+  ja: '同じCookieを`cookies()`で書くときは、定義の`cookie()`が返す名前と値と属性を`set`に展開します。`cookie()`は1つ目の引数を、2つ目の引数から読んだ今の値に重ねてからスキーマに通します。渡さなかったフィールドは、訪問者が保存した値のままです。',
+  en: 'To write the same cookie with `cookies()`, spread the name, value and attributes the definition’s `cookie()` returns into `set`. `cookie()` lays its first argument over the values it reads from the second, then runs them through the schema. A field you leave out keeps what the visitor saved.',
 });
 
-export const stateHttpOnly = message({
-  ja: '`httpOnly: false`は外さないでください。`HttpOnly`のCookieはスクリプトから読めないので、ブラウザの`useAppState`がその値を読めなくなります。',
-  en: 'Keep `httpOnly: false`. A script cannot read an `HttpOnly` cookie, so `useAppState` in the browser would no longer see the value.',
+export const stateAttributes = message({
+  ja: '属性は、ブラウザが書くときと同じ`Path=/`と`SameSite=Lax`、400日の`Max-Age`です。`HttpOnly`は付けません。`HttpOnly`のCookieはスクリプトから読めず、ブラウザの`useAppState`がその値を読めなくなるためです。',
+  en: 'The attributes are the ones the browser writes: `Path=/`, `SameSite=Lax` and a `Max-Age` of 400 days. It is not `HttpOnly`, because a script cannot read an `HttpOnly` cookie, and `useAppState` in the browser would no longer see the value.',
+});
+
+export const stateReset = message({
+  ja: 'すべてのフィールドを既定値に戻すときは、`cookies().delete(density.cookieName)`でCookieを消します。',
+  en: 'To put every field back to its default, delete the cookie with `cookies().delete(density.cookieName)`.',
 });
 
 export const headersTitle = message({

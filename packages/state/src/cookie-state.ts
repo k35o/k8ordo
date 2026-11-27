@@ -1,13 +1,15 @@
 import type { output } from 'zod/v4/core';
 
 import { createRowCodec } from './row/codec';
-import type { Versioning } from './row/codec';
+import type { RowRead, Versioning } from './row/codec';
 import type { StateSchema } from './schema/object';
 import {
+  COOKIE_ATTRIBUTES,
   cookieInitialSnapshot,
   cookieStoreOf,
   parseCookieText,
 } from './store/cookie-store';
+import { resolvePatch } from './store/core';
 import { setKind } from './store/kind';
 
 type CookieReader = {
@@ -39,13 +41,28 @@ export type CookieState<Schema extends StateSchema = StateSchema> = {
    */
   parseCookies: (cookies: CookieReader) => output<Schema>;
   /**
-   * The value to hand a server's cookie API when it writes the same cookie
-   * (`cookies().set` from `@k8ordo/framework/server`, Next.js's): the JSON of these
-   * values, left for that API to percent-encode, as the browser store
-   * encodes it before writing. Unspecified fields mean their default, and
-   * the values pass the schema first, as `update()` does.
+   * The same cookie written from a server, as the arguments of its cookie
+   * API: `cookies().set(...density.cookie({ density: 'compact' }, cookies()))`
+   * under `@k8ordo/framework`'s server mode. `patch` goes over the values
+   * `current` holds — read as `parseCookies` reads them — as `update()` lays
+   * it over the cookie in the browser, so the fields it leaves out keep what
+   * the visitor saved; the result passes the schema. The value is the JSON
+   * left for that API to percent-encode, and the options are the browser
+   * store's own attributes with `httpOnly: false`, which keeps the cookie
+   * readable to the browser store. A cookie whose `migrate` throws is never
+   * written over: this throws instead, the error as its `cause`.
    */
-  cookieValue: (values?: Readonly<Partial<output<Schema>>>) => string;
+  cookie: (
+    patch: Readonly<Partial<output<Schema>>>,
+    current: CookieReader,
+  ) => readonly [name: string, value: string, options: CookieAttributes];
+};
+
+type CookieAttributes = {
+  readonly path: '/';
+  readonly sameSite: 'lax';
+  readonly maxAge: number;
+  readonly httpOnly: false;
 };
 
 // localStorage の行と同じ名前空間だが、区切りは `.`。Cookie の名前は HTTP の
@@ -66,6 +83,8 @@ export const defineCookieState = <Schema extends StateSchema>(
     );
   }
   const codec = createRowCodec(schema, 'cookie', key, versioning);
+  const readRow = (cookies: CookieReader): RowRead =>
+    codec.read(parseCookieText(cookies.get(cookieName)));
   const def: CookieState<Schema> = {
     kind: 'cookie',
     key,
@@ -74,7 +93,7 @@ export const defineCookieState = <Schema extends StateSchema>(
     // サーバーは応答に Cookie を書けないので、古い版の Cookie は移行して読む
     // だけにする。書き戻すのは hydration の後のブラウザのストア
     parseCookies: (cookies) => {
-      const row = codec.read(parseCookieText(cookies.get(cookieName)));
+      const row = readRow(cookies);
       if (row.failed) {
         console.error(
           `parseCookies: the migrate of "${key}" threw on the cookie ${cookieName}, which reads as nothing stored and is left as it is`,
@@ -83,8 +102,22 @@ export const defineCookieState = <Schema extends StateSchema>(
       }
       return row.values as output<Schema>;
     },
-    cookieValue: (values) =>
-      JSON.stringify(codec.row(codec.salvage(values ?? {}))),
+    cookie: (patch, current) => {
+      const row = readRow(current);
+      if (row.failed) {
+        throw new Error(
+          `cookie: the migrate of "${key}" threw on the cookie ${cookieName}, which is left as it is rather than written over`,
+          { cause: row.error },
+        );
+      }
+      const resolved = resolvePatch(patch, row.values, codec.keys, key);
+      const values = codec.salvage({ ...row.values, ...resolved });
+      return [
+        cookieName,
+        JSON.stringify(codec.row(values)),
+        { ...COOKIE_ATTRIBUTES, httpOnly: false },
+      ];
+    },
   };
   setKind(def, {
     store: () => cookieStoreOf(def, codec),

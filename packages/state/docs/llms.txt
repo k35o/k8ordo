@@ -86,10 +86,17 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   `get(name)` returns a request's cookie percent-decoded (`request.cookies`
   in a page and `cookies()` in a guard, a route.ts or a Server Action under
   `@k8ordo/framework`'s server mode, `{ get: (name) => store.get(name)?.value }`
-  over Next.js's `cookies()`), salvaged like any read — and `cookieValue(values?)`, the unencoded JSON a server
-  hands its cookie API (`cookies().set`, which percent-encodes it) when it
-  sets the same cookie (`Path=/`, `SameSite=Lax`, `Max-Age=34560000`, never
-  `HttpOnly`). `useAppState(definition, keys?, { initialUrl? } |
+  over Next.js's `cookies()`), salvaged like any read — and
+  `cookie(patch, current)`, which writes the same cookie from a server as
+  `readonly [name, value, options]` to spread into its cookie API
+  (`cookies().set(...density.cookie({ density: 'compact' }, cookies()))`):
+  `patch` goes over the values `current` holds, read as `parseCookies` reads
+  them, as `update()` lays it over the cookie in the browser, the result
+  passes the schema, the value is the unencoded JSON (`cookies().set`
+  percent-encodes it), the options are `{ path: '/', sameSite: 'lax',
+  maxAge: 34560000, httpOnly: false }`, and a cookie whose `migrate` throws
+  makes it throw rather than be written over.
+  `useAppState(definition, keys?, { initialUrl? } |
   { initialCookie? })` (client) works on any kind and returns
   `[state, update]` — state is the flat merge of a page definition's slots;
   `initialUrl` / `initialCookie` seed the server and hydration renders with

@@ -171,9 +171,9 @@ export default function StateReferencePage() {
             description: t.cookieParse,
           },
           {
-            name: 'cookieValue',
-            type: '(values?) => string',
-            description: t.cookieValue,
+            name: 'cookie',
+            type: '(patch, current: { get(name) }) => [name, value, options]',
+            description: t.cookieWrite,
           },
         ]}
         from={FROM}

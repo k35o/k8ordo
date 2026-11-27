@@ -1,4 +1,4 @@
-import { Note, Pitfall } from '../../../../components/callout';
+import { Note } from '../../../../components/callout';
 import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
@@ -98,9 +98,7 @@ import { density } from '../state';
 
 export async function compact() {
   cookies().set(
-    density.cookieName,
-    density.cookieValue({ density: 'compact' }),
-    { httpOnly: false, maxAge: 34_560_000 },
+    ...density.cookie({ density: 'compact' }, cookies()),
   );
 }`;
 
@@ -206,20 +204,21 @@ export default function FrameworkRequestPage() {
           <Rich>{t.see()}</Rich>
         </p>
         <CodeBlock
-          callouts={{ 11: t.stateWriteCallout() }}
+          callouts={{ 9: t.stateWriteCallout() }}
           code={STATE_ACTION}
           lang="ts"
-          marks={{ 9: 'highlight', 10: 'highlight', 11: 'highlight' }}
+          marks={{ 9: 'highlight' }}
           title="src/lib/compact.ts"
         />
         <p>
           <Rich>{t.stateWrite()}</Rich>
         </p>
-        <Pitfall>
-          <p>
-            <Rich>{t.stateHttpOnly()}</Rich>
-          </p>
-        </Pitfall>
+        <p>
+          <Rich>{t.stateAttributes()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.stateReset()}</Rich>
+        </p>
       </DocSection>
 
       <DocSection id="headers" title={t.headersTitle}>

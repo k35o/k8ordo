@@ -224,6 +224,16 @@ pnpm check         # check:write to auto-fix
   `document.cookie` — `useSyncExternalStore` needs a synchronous snapshot and
   `cookieStore.get()` is a promise; writes and cross-tab sync go through the
   Cookie Store API.
+- **A server's write of a cookie state is the browser's write.**
+  `cookie(patch, current)` reads `current` as `parseCookies` does, lays the
+  patch over it as the store's flush lays the batch over the cookie it
+  re-reads (`resolvePatch`, so an undeclared field throws there as in
+  `update()`), salvages, and returns `COOKIE_ATTRIBUTES` — the constant the
+  store spreads into `cookieStore.set` — with `httpOnly: false`. A row
+  `migrate` could not read makes it throw (the error as `cause`) rather
+  than return defaults plus the patch, the flush's refusal. Never let it
+  fill the fields the patch leaves out with defaults: a Server Action that
+  changes one field would silently reset every other one the visitor saved.
 
 ## Layout
 
@@ -235,7 +245,7 @@ src/
   entry/codec.ts       StoredCodec: read typed stored values (entry, local, session, cookie)
   page-state.ts        definePageState(); slot disjointness; urlReader (a url schema's reader, for the framework)
   storage-state.ts     defineLocalState() / defineSessionState(); storageKey, inlineRead
-  cookie-state.ts      defineCookieState(); cookie name, value encoding, parseCookies
+  cookie-state.ts      defineCookieState(); cookie name, parseCookies, cookie() for a server's write
   row/codec.ts         RowCodec: [version, values] envelope, migrate, stale write-back flag
   memory-state.ts      defineMemoryState() — no schema by design
   store/core.ts        snapshot core: key-diff notify, picks, update handles
@@ -243,7 +253,7 @@ src/
   store/registry.ts    kind+key-keyed store registry + resetStateRegistry()
   store/page-store.ts  Navigation API wiring, batching, atomic two-face flush
   store/storage-store.ts Web Storage wiring (local, session), storage-event sync
-  store/cookie-store.ts Cookie Store API wiring, change-event sync, in-flight guard
+  store/cookie-store.ts Cookie Store API wiring, change-event sync, in-flight guard; COOKIE_ATTRIBUTES
   store/memory-store.ts
   use-app-state.ts     the client hook ('use client'); the store its definition bound
   testing.ts           the ./testing entry: mountPageUrl() (a router stand-in) + resetStateRegistry()
@@ -280,12 +290,14 @@ is why `@k8ordo/form`'s checkbox for the same field submits the same string.
   since `migrate` cannot run there either.
   A cookie definition likewise owns `cookieName` (`k8ordo-state.<key>` — `.`,
   not `:`, because a cookie name is an HTTP token, and a key that would break
-  the token is refused at define time) and `cookieValue()`, the JSON a
-  server hands its cookie API when it sets the same cookie. It is left
-  unencoded because that API (`cookies().set`, Next.js's) percent-encodes on
-  the way out and `parseCookies` receives the value decoded once; only the
-  browser store encodes it itself, since the Cookie Store API writes a value
-  verbatim. `examples/server-basic`'s handler test is the round trip.
+  the token is refused at define time) and `cookie()`, the name, value and
+  attributes a server hands its cookie API when it sets the same cookie, so
+  an app never copies the attributes or the JSON envelope either. The value
+  is left unencoded because that API (`cookies().set`, Next.js's)
+  percent-encodes on the way out and `parseCookies` receives the value
+  decoded once; only the browser store encodes it itself, since the Cookie
+  Store API writes a value verbatim. `examples/server-basic`'s handler test
+  is the round trip.
 - Duplicate definition keys within a kind are NOT detected at runtime: an
   HMR re-evaluation legitimately re-registers the same key, so a warning
   would cry wolf on every edit. The GUIDE tells users to treat keys as

@@ -223,7 +223,8 @@ export const prefs = defineLocalState(
   monitoring see it, and logged with the key by `parseCookies` on the
   server. The row stays as it was for a fixed `migrate` to try again: an
   `update()` writes nothing over it and rejects its handle with the same
-  error, while the value it set stays in memory until the next load.
+  error, while the value it set stays in memory until the next load, and a
+  server's `cookie()` throws instead of returning a value to write.
 - **Adopting a version changes the row's shape.** A tab still running code
   from before reads `[version, values]` as nothing stored until it reloads.
 - **`inlineRead()` hands out only the current version.** Neither the schema
@@ -424,11 +425,8 @@ never writes the response; in server mode the framework's
 `route.ts` and Server Actions. That is where a session cookie belongs, as
 `HttpOnly`, and this package never sees it. The same `cookies()` can also
 write a cookie state, for a form that sets a preference without JavaScript,
-say: write `cookieName` with the value `cookieValue(values)` returns — the
-values pass the schema, unspecified fields mean their default — and the
-attributes above (`Path=/`, `SameSite=Lax`, `Max-Age=34560000`), never
-`HttpOnly`, or the browser store can no longer see it. Open tabs take the new
-values in through the `change` event.
+say: `cookie(patch, current)` returns the name, the value and the options,
+to spread into `set`.
 
 ```ts
 // src/lib/actions.ts
@@ -438,18 +436,41 @@ import { cookies } from '@k8ordo/framework/server';
 import { density } from '../state';
 
 export async function compact() {
-  cookies().set(
-    density.cookieName,
-    density.cookieValue({ density: 'compact' }),
-    { httpOnly: false, maxAge: 34_560_000 },
-  );
+  cookies().set(...density.cookie({ density: 'compact' }, cookies()));
 }
 ```
 
-`cookieValue` returns the JSON unencoded: `cookies().set` percent-encodes the
-value on its way out (so does Next.js's), which is the one encoding
-`parseCookies` expects undone. Writing a `Set-Cookie` header by hand, pass
-the value through `encodeURIComponent` yourself — once.
+- **It writes what `update()` would.** `patch` goes over the values the
+  request's cookie holds — `current` is read the way `parseCookies` reads
+  it — so a field the patch leaves out keeps what the visitor saved, and the
+  result passes the schema. A field the definition does not declare throws,
+  as it does in `update()`. To go back to every default, delete the cookie:
+  `cookies().delete(density.cookieName)`.
+- **The options are the browser store's attributes.** `Path=/`,
+  `SameSite=Lax`, a `Max-Age` of 400 days, and `httpOnly: false`: an
+  `HttpOnly` cookie is one the browser store can no longer see. Open tabs
+  take the new values in through the `change` event.
+- **The value is the JSON, unencoded.** `cookies().set` percent-encodes it on
+  its way out (so does Next.js's), which is the one encoding `parseCookies`
+  expects undone. Writing a `Set-Cookie` header by hand, pass the value
+  through `encodeURIComponent` yourself — once.
+- **A cookie `migrate` cannot read is never written over.** `cookie()` throws,
+  naming the key, with `migrate`'s error as its `cause` — the refusal a
+  browser `update()` makes ([When a stored shape changes](#when-a-stored-shape-changes)).
+
+Under Next.js, hand `current` over as `parseCookies` takes it:
+
+```ts
+const store = await cookies();
+store.set(
+  ...density.cookie(
+    { density: 'compact' },
+    {
+      get: (name) => store.get(name)?.value,
+    },
+  ),
+);
+```
 
 ## Client — subscribe and update
 
