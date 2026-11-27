@@ -70,6 +70,11 @@ export const sectionMatchPath = message({
   en: '`matchPath` makes the same check as `useMatch` against a path you pass in. `/*` can only follow a pattern in the route table. With `Register` augmented, a pattern the table lacks is a type error.',
 });
 
+export const sectionServer = message({
+  ja: '今のページへのリンクに印を付けるとき、Server Componentでは`matchPath(パターン, pathname)`を、Client Componentでは`useMatch(パターン)`を使います。`matchPath`はディレクティブの無いモジュールにあるので、フレームワークのレイアウトが受け取る`pathname`でそのまま呼べます。`pathname === href(…)`のように比べてはいけません。`pathname`はルート表の書き方で、`href`はViteの`base`を付けたURLなので、`base`の下では一致しません。',
+  en: 'To mark the link to the current page, a Server Component asks `matchPath(pattern, pathname)` and a Client Component asks `useMatch(pattern)`. `matchPath` lives in a module with no directive, so a framework layout calls it with the `pathname` it receives. Never compare `pathname === href(…)`: `pathname` is in the route table’s terms and `href` returns a URL with Vite’s `base` in front, so under a `base` they never agree.',
+});
+
 export const demoTitle = message({
   ja: '照合のデモ',
   en: 'Matching demo',

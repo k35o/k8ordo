@@ -23,7 +23,9 @@ update({ hash: 5 }, { history: 'push' });
 
 update({ hash: 1 }); // /slides/intro`;
 
-const LINK = `deckState.href('/slides/intro', { hash: 4 });
+const LINK = `import { href } from '@k8ordo/router';
+
+deckState.href(href('/slides/:slug', { slug: 'intro' }), { hash: 4 });
 // '/slides/intro#4'`;
 
 export default function StateHashPage() {

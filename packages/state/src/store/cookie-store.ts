@@ -1,5 +1,5 @@
 import type { CookieState } from '../cookie-state';
-import type { RowCodec } from '../row/codec';
+import type { RowCodec, RowRead } from '../row/codec';
 import type { StateValues } from '../schema/object';
 import { createHandle, createStoreCore, resolvePatch } from './core';
 import type { Handle, Patch, Store, UpdateHandle } from './core';
@@ -43,10 +43,18 @@ const decoded = (raw: string | undefined): string | undefined => {
 const createCookieStore = (def: CookieState, codec: RowCodec): Store => {
   const { cookieName } = def;
 
-  const readRow = (): { values: StateValues; stale: boolean } =>
-    codec.read(parseCookieText(decoded(rawCookie(cookieName))));
+  const readRow = (): RowRead & { text: string | undefined } => {
+    const text = rawCookie(cookieName);
+    return { ...codec.read(parseCookieText(decoded(text))), text };
+  };
 
-  const read = (): StateValues => readRow().values;
+  // change は同じ Cookie を何度でも読み直すので、知らせるのは値ごとに 1 度
+  let reported: string | undefined | null = null;
+  const reportFailed = (text: string | undefined, error: unknown): void => {
+    if (text === reported) return;
+    reported = text;
+    reportError(error);
+  };
 
   let pending: StateValues | null = null;
   let handle: Handle | null = null;
@@ -62,7 +70,13 @@ const createCookieStore = (def: CookieState, codec: RowCodec): Store => {
       return;
     }
     missed = false;
-    const { values: fresh, stale } = readRow();
+    const row = readRow();
+    // migrate が読めなかった Cookie も、既定値と読めば画面の値を巻き戻す
+    if (row.failed) {
+      reportFailed(row.text, row.error);
+      return;
+    }
+    const { values: fresh, stale } = row;
     if (stale) writeBack();
     // A foreign tab's write must not roll back a batch that has not flushed
     // yet: the pending patch stays on top.
@@ -85,7 +99,16 @@ const createCookieStore = (def: CookieState, codec: RowCodec): Store => {
     try {
       // Base the write on what the cookie holds now, not on the snapshot — a
       // foreign tab may have written between the echo and this flush.
-      const target = codec.salvage({ ...read(), ...patch });
+      const row = readRow();
+      // migrate が読めなかった Cookie を既定値とパッチで書くと、直した
+      // migrate がやり直す値が消える。書かずに echo だけを残す
+      if (row.failed) {
+        writing -= 1;
+        if (missed) sync();
+        current.fail(row.error);
+        return;
+      }
+      const target = codec.salvage({ ...row.values, ...patch });
       // lib.dom の CookieInit にはまだ maxAge が無い（Safari 27 で 4 ブラウザ
       // がそろったばかり）ので、型を足してから渡す
       const init: CookieInit & { maxAge: number } = {
@@ -141,6 +164,7 @@ const createCookieStore = (def: CookieState, codec: RowCodec): Store => {
   const first = readRow();
   const core = createStoreCore(codec.keys, first.values);
   if (first.stale) writeBack();
+  if (first.failed) reportFailed(first.text, first.error);
 
   const update = (patch: Patch): UpdateHandle => {
     const resolved = resolvePatch(patch, core.snapshot(), codec.keys, def.key);

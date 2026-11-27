@@ -284,8 +284,8 @@ every visitor who never chose.
 ## Testing
 
 Under a browser, `localStorage.clear()`, remove the class from
-`document.documentElement`, and `resetStateRegistry()` from `@k8ordo/state`
-between tests; render the hook under `<ColorSchemeProvider>` (a `wrapper`),
+`document.documentElement`, and `resetStateRegistry()` from
+`@k8ordo/state/testing` between tests; render the hook under `<ColorSchemeProvider>` (a `wrapper`),
 and leave `ColorSchemeScript` out: React never executes an inline
 `<script>` it creates in the browser (in development it logs an error
 saying so), so the class a test sees is the one the provider's effect

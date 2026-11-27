@@ -26,7 +26,7 @@ pnpm check         # check:write to auto-fix
   (the framework, for a page that exports `search`) says so through the
   handler's `refresh(url)`, and the hook loads in place for it — the router
   itself still reads nothing of the search.
-- **Pages never import the table.** `href` / `navigateTo` / `useParams` work
+- **Pages never import the table.** `href` / `useParams` work
   from the pattern string; `Register` supplies the check. Only `<Router>`
   holds the table's value, which is why the routes-module → pages →
   routes-module cycle cannot form. Keep it that way.
@@ -233,6 +233,13 @@ pnpm check         # check:write to auto-fix
   `usePathname`, which is why it works under the framework where `useRoute`
   cannot; `/*` on a table pattern is the one extension of the grammar it
   accepts, meaning "and everything below".
+- **`matchPath` is server-safe.** `match.ts` carries no directive, so a
+  Server Component — a framework layout, holding `pathname` — calls
+  `matchPath` itself; `useMatch` beside it still needs a client, since the
+  `usePathname` it calls lives in `location.tsx`, which is `'use client'`.
+  `match.test.ts` reads `dist/match.mjs` to hold it. Never add the
+  directive back to `match.ts`: in an RSC environment every export of a
+  client module is a reference, and calling one from the server throws.
 - **Unmatched pathnames are not intercepted.** A real 404 is the server's.
 - **Reload, POST, download and hash are not ours.** `isOurs` says no before
   the table is consulted — and to anything the platform reports it cannot
@@ -266,7 +273,15 @@ pnpm check         # check:write to auto-fix
 - **A bound param is a param, not a concept.** `bindParams` knows a name and
   a source function; that the name is `locale` and the source is
   `@k8ordo/i18n` is the application's `links.ts`. Nothing locale-shaped
-  belongs here.
+  belongs here. It returns the bound `href` itself.
+- **A page change from code is the platform's call.** There is no
+  `navigateTo`: `navigation.navigate(href(…))` goes to the same URL a link
+  does, and `href` already holds the typing and the base. A wrapper would be
+  a second way to write the same thing — the reason there is no `<Link>` —
+  and its params and options, both plain objects, had to be told apart at
+  run time from the pattern string. The docs' rule is: a page change is
+  `navigation.navigate(href(…))`, a state change is `@k8ordo/state`'s
+  `update()`.
 - **`PageProps` reads `Register`, never the mode.** `request` appears only
   because the generator wrote it into `Register` in server mode; the type
   has no idea which mode did.
@@ -276,17 +291,27 @@ pnpm check         # check:write to auto-fix
   fails until a new export here is either re-exported there or listed in its
   `WITHHELD`, with the reason.
 - **The table is written from the root; Vite's `base` lives at the edges.**
-  `withBase` (in `href` / `navigateTo` / `bindParams`) puts
+  `withBase` (in `href` and a bound `href`) puts
   `import.meta.env.BASE_URL` in front of what leaves for the browser, and
   `withoutBase` (in `usePathname`, `<Router>`'s match and claim) takes it off
   what comes back; nothing between ever sees it. `href` returns `string`
-  because its result is a URL: typed as a table path it could be handed to
-  something that adds the base itself (`@k8ordo/state`'s `href`) and carry
-  it twice. Code Node loads without Vite (static mode's build, `serve`)
+  because its result is a URL, not a path in the table — the URL a link, a
+  `navigation.navigate()` and `@k8ordo/state`'s `href(url, values)` all
+  take as it is. Code Node loads without Vite (static mode's build, `serve`)
   has no `import.meta.env` and passes the base explicitly.
 - **The type mirrors the runtime walk.** `Below` resets a branch that landed
   on the root, exactly as `walk` does; without it every route under a root
   layout types as `//products`. Any change to one has to change the other.
+- **The grammar is enforced, not described.** `defineRoutes` refuses, by
+  pattern and rule, every leaf pattern outside it: a segment is a literal
+  with none of `: * ? + { } ( ) \`, a `:name` (a JavaScript identifier, as
+  URLPattern reads one), or — last — a `:name+` or a `*`; plus `/(name)`
+  groups, and no empty segment. The position is read on the joined leaf
+  pattern, never key by key, since a branch's key is followed by its
+  children's. The types (`SegParam`, `SegListPath`) and the runtime
+  (`readParams`, `buildHref`) both assume this grammar and read anything
+  else differently — `/:id?` types as `{ 'id?': string }` and matches as
+  `{ id }` — so a new form is added to both and to the check, or to none.
 - **A rest param is `:name+`, and its value is its segments.** URLPattern's
   one-or-more modifier is the only one the grammar reads: `/files/:path+`
   takes one segment or more, never zero (`/files` is another pattern's), and
@@ -297,18 +322,14 @@ pnpm check         # check:write to auto-fix
   escaped, joined with `/` — and throws for anything but an array, for an
   empty one, and for an empty segment, since each would spell a pathname the
   pattern does not match. The types say the same: `ParamsOf` gives
-  `readonly string[]`, a link takes `readonly ParamValue[]`, `PathFor` a
-  `${string}` (which spans slashes), and `PathMatching` reads `:name+` only
-  where it ends the pattern, which is where `@k8ordo/framework`'s grammar
-  puts it. Where it sits among other patterns is declaration order, as for
+  `readonly string[]`, a link takes `readonly ParamValue[]`, and `PathFor`
+  a `${string}` (which spans slashes). Where
+  it sits among other patterns is declaration order, as for
   everything else; the framework's generator is what orders it after a
   `:param`.
-- **A typed path is checked, never enumerated.** `NavigablePath` matches the
-  path it is handed against the table's patterns segment by segment
-  (`PathMatching` in `paths.ts`, a `:param` reading as URLPattern reads it:
-  one non-empty segment, a `:name+` one or more). Never go back to a union of `PathFor` each
-  pattern: a `/:locale` page puts `/${string}` in it, and that one member
-  takes every path there is.
+- **A path is never checked on its own.** A URL is built with `href` from a
+  pattern of the table, and that is where the check is; a hand-written path
+  has no type that vouches for it, by design (one way per URL).
 
 ## Layout
 
@@ -316,8 +337,8 @@ pnpm check         # check:write to auto-fix
 src/
   paths.ts          type derivation (ParamsOf / PathFor / Join) + string operations (readParams / buildHref)
   base.ts           withBase / withoutBase (Vite's base at the edges)
-  define-routes.ts  defineRoutes / match / matchAll / NavigablePath
-  links.ts          href / navigateTo / bindParams (the side that needs no table)
+  define-routes.ts  defineRoutes / match / matchAll
+  links.ts          href / bindParams (the side that needs no table)
   register.ts       Register (module augmentation) + PageProps / LayoutProps / RouteContext
   navigation.ts     useInterceptedNavigation (intercept and the commit contract), usePendingPathname
   left-at.ts        the position each entry was left at (kept to 100, mirrored into sessionStorage)

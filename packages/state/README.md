@@ -28,21 +28,21 @@ pnpm add @k8ordo/state zod
 
 <!-- peers -->
 
-| Package          | Version | Required | Needed for                                              |
-| ---------------- | ------- | -------- | ------------------------------------------------------- |
-| `react`          | ≥19.3.0 | yes      | `useAppState`                                           |
-| `zod`            | ^4.6.6  | yes      | the schemas (`zod/mini` works, and is the lighter pick) |
-| `@k8ordo/router` | ^4.0.0  | optional | typed `href` paths from the app's route table           |
-| `typescript`     | ≥7.0.0  | optional | the shipped type declarations                           |
-| `@types/react`   | ≥19.3.0 | optional | the shipped type declarations                           |
+| Package          | Version | Required | Needed for                                                             |
+| ---------------- | ------- | -------- | ---------------------------------------------------------------------- |
+| `react`          | ≥19.3.0 | yes      | `useAppState`                                                          |
+| `zod`            | ^4.6.6  | yes      | the schemas (`zod/mini` works, and is the lighter pick)                |
+| `@k8ordo/router` | ^4.0.0  | optional | page state that stays with the page on screen while the next one loads |
+| `typescript`     | ≥7.0.0  | optional | the shipped type declarations                                          |
+| `@types/react`   | ≥19.3.0 | optional | the shipped type declarations                                          |
 
 <!-- /peers -->
 
 The schema ships to the browser here — the client parses and serializes with
 it — so reach for `zod/mini` unless the app already pays for classic `zod`.
-`@k8ordo/router` is a type-only peer: it is never loaded at runtime. Under
-it, `@k8ordo/framework` included, a page state keeps the values of the page
-on screen while the next one loads.
+Under `@k8ordo/router` — `@k8ordo/framework` included — a page state keeps
+the values of the page on screen while the next one loads; the two agree on
+that through a global symbol, so neither imports the other.
 
 ## Quick Start
 
@@ -123,8 +123,11 @@ in `defineCookieState` instead of `defineLocalState`: in server mode,
 render, so the default never flashes.
 
 `update()` applies synchronously, batches per handler into one write (memory
-applies per call), and returns `{ committed, finished }` handles. `href` omits
-every field at its default, so every link is canonical. A value the schema
+applies per call), and returns `{ committed, finished }` handles.
+`href(url, values)` puts the state on the URL the router built —
+`href('/products')` from `@k8ordo/router`, a Next.js `Route`, or `''` for
+the page itself — rewriting only its own params and omitting every field at
+its default, so every link is canonical. A value the schema
 rejects — a URL a user edited, a row an older schema wrote — falls back to its
 own default, field by field.
 
@@ -132,7 +135,7 @@ The [design guide](docs/GUIDE.md) covers the rest: the places and when each
 fits, history-entry state, cookie state the server renders (and why it is
 never a secret), migrating stored rows with `version` and `migrate`,
 batching and update handles, subscription granularity,
-router requirements, typed routes via `Register`, reading local state before
+router requirements, building a link on the router's URL, reading local state before
 hydration with `inlineRead()`, and GET forms with `@k8ordo/form`.
 
 ## AI Agent Documentation

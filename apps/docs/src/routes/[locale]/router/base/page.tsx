@@ -1,4 +1,3 @@
-import { Pitfall } from '../../../../components/callout';
 import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
@@ -57,15 +56,13 @@ export default function RouterBasePage() {
           </LocaleAnchor>
           <Rich>{t.frameworkAfter()}</Rich>
         </p>
-        <Pitfall>
-          <p>
-            <Rich>{t.statePitfall()}</Rich>
-            <LocaleAnchor path="/:locale/state/links">
-              {m.state.navLinks()}
-            </LocaleAnchor>
-            <Rich>{t.statePitfallAfter()}</Rich>
-          </p>
-        </Pitfall>
+        <p>
+          <Rich>{t.stateLink()}</Rich>
+          <LocaleAnchor path="/:locale/state/links">
+            {m.state.navLinks()}
+          </LocaleAnchor>
+          <Rich>{t.stateLinkAfter()}</Rich>
+        </p>
       </DocSection>
 
       <DocSection id="read" title={t.readTitle}>

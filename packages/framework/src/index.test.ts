@@ -32,7 +32,7 @@ const WITHHELD: Readonly<Record<string, string>> = {
   ErrorComponent:
     'what the generated table checks error.tsx against; the component itself takes ErrorProps',
   ParamsOf:
-    'what the generated table types layouts and guards by; a route file reads PageProps or LayoutProps, and a layout with no page at its pattern spells its params inline',
+    'what the generated table types layouts and guards by; a route file reads PageProps or LayoutProps, which take its pattern whether or not a page is there',
   ParamsSchemaFor:
     'what the generated table checks a paramsSchema export against',
   ParsedParams: 'what the generated table types pages by',
@@ -48,8 +48,6 @@ const WITHHELD: Readonly<Record<string, string>> = {
     "the patterns of a hand-written table; RegisteredPattern is the generated table's",
   NavigablePatternOf:
     "the linkable patterns of a hand-written table; RegisteredNavigablePattern is the generated table's",
-  NavigablePath:
-    'checks a path against a table type a framework application never holds',
   PathFor:
     'the path type a pattern spells; a link is written through href, against RegisteredNavigablePattern',
   ParamValue:

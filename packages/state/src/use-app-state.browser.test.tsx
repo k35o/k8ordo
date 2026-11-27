@@ -1558,14 +1558,16 @@ it('a versioned local state writes its version with every update', async () => {
   );
 });
 
-it('a local row a failing migrate cannot turn stays as it was', async () => {
+it('a local row a failing migrate cannot turn stays as it was, and the error is reported', async () => {
+  const thrown = new Error('unexpected shape');
   const failing = defineLocalState('failing', versionedSchema, {
     version: 2,
     migrate: () => {
-      throw new Error('unexpected shape');
+      throw thrown;
     },
   });
   localStorage.setItem('k8ordo-state:failing', '[1,{"layout":"list"}]');
+  const reported = vi.spyOn(window, 'reportError').mockImplementation(() => {});
   const Failing: FC = () => {
     const [{ view }] = useAppState(failing);
     return <p data-testid="failing-view">{view}</p>;
@@ -1580,8 +1582,104 @@ it('a local row a failing migrate cannot turn stays as it was', async () => {
     expect(localStorage.getItem('k8ordo-state:failing')).toBe(
       '[1,{"layout":"list"}]',
     );
+    expect(reported).toHaveBeenCalledExactlyOnceWith(thrown);
   } finally {
+    reported.mockRestore();
     localStorage.removeItem('k8ordo-state:failing');
+  }
+});
+
+it('a local row a failing migrate cannot turn survives an update, whose value stays in memory through a storage event', async () => {
+  const thrown = new Error('unexpected shape');
+  const failing = defineLocalState('failing-update', versionedSchema, {
+    version: 2,
+    migrate: () => {
+      throw thrown;
+    },
+  });
+  localStorage.setItem('k8ordo-state:failing-update', '[1,{"layout":"list"}]');
+  const reported = vi.spyOn(window, 'reportError').mockImplementation(() => {});
+  let handle: UpdateHandle | undefined;
+  const Failing: FC = () => {
+    const [{ view }, update] = useAppState(failing);
+    return (
+      <button
+        onClick={() => {
+          handle = update({ view: 'table' });
+        }}
+        type="button"
+      >
+        {view}
+      </button>
+    );
+  };
+  try {
+    const screen = await render(<Failing />);
+
+    await screen.getByRole('button').click();
+
+    await expect.element(screen.getByRole('button')).toHaveTextContent('table');
+    await expect((handle as UpdateHandle).committed).rejects.toBe(thrown);
+    expect(localStorage.getItem('k8ordo-state:failing-update')).toBe(
+      '[1,{"layout":"list"}]',
+    );
+
+    window.dispatchEvent(
+      new StorageEvent('storage', {
+        key: 'k8ordo-state:failing-update',
+        storageArea: localStorage,
+      }),
+    );
+
+    await frame();
+    expect(screen.getByRole('button').element().textContent).toBe('table');
+    expect(reported).toHaveBeenCalledExactlyOnceWith(thrown);
+  } finally {
+    reported.mockRestore();
+    localStorage.removeItem('k8ordo-state:failing-update');
+  }
+});
+
+it('a different row a failing migrate cannot turn is reported again after the first was reported', async () => {
+  const failing = defineLocalState('failing-another', versionedSchema, {
+    version: 2,
+    migrate: (old) => {
+      throw new Error(`unexpected layout ${String(old.layout)}`);
+    },
+  });
+  localStorage.setItem('k8ordo-state:failing-another', '[1,{"layout":"list"}]');
+  const reported = vi.spyOn(window, 'reportError').mockImplementation(() => {});
+  const Failing: FC = () => {
+    const [{ view }] = useAppState(failing);
+    return <p data-testid="failing-view">{view}</p>;
+  };
+  try {
+    const screen = await render(<Failing />);
+    await expect
+      .element(screen.getByTestId('failing-view'))
+      .toHaveTextContent('grid');
+    expect(reported).toHaveBeenCalledExactlyOnceWith(
+      new Error('unexpected layout list'),
+    );
+
+    localStorage.setItem(
+      'k8ordo-state:failing-another',
+      '[1,{"layout":"cards"}]',
+    );
+    window.dispatchEvent(
+      new StorageEvent('storage', {
+        key: 'k8ordo-state:failing-another',
+        storageArea: localStorage,
+      }),
+    );
+
+    expect(reported).toHaveBeenCalledTimes(2);
+    expect(reported).toHaveBeenLastCalledWith(
+      new Error('unexpected layout cards'),
+    );
+  } finally {
+    reported.mockRestore();
+    localStorage.removeItem('k8ordo-state:failing-another');
   }
 });
 
@@ -1856,11 +1954,12 @@ it('a migrated row that cannot be read again is left for the next load', async (
   );
 });
 
-it('a cookie a failing migrate cannot turn stays as it was', async () => {
+it('a cookie a failing migrate cannot turn stays as it was, and the error is reported', async () => {
+  const thrown = new Error('unexpected shape');
   const failing = defineCookieState('failing', versionedSchema, {
     version: 2,
     migrate: () => {
-      throw new Error('unexpected shape');
+      throw thrown;
     },
   });
   const Failing: FC = () => {
@@ -1871,6 +1970,7 @@ it('a cookie a failing migrate cannot turn stays as it was', async () => {
     failing.cookieName,
     encodeURIComponent('[1,{"layout":"list"}]'),
   );
+  const reported = vi.spyOn(window, 'reportError').mockImplementation(() => {});
   try {
     const screen = await render(<Failing />);
 
@@ -1884,7 +1984,65 @@ it('a cookie a failing migrate cannot turn stays as it was', async () => {
     expect(decodeURIComponent(cookie.value as string)).toBe(
       '[1,{"layout":"list"}]',
     );
+    expect(reported).toHaveBeenCalledExactlyOnceWith(thrown);
   } finally {
+    reported.mockRestore();
+    await cookieStore.delete(failing.cookieName);
+  }
+});
+
+it('a cookie a failing migrate cannot turn survives an update, whose value stays in memory through a change event', async () => {
+  const thrown = new Error('unexpected shape');
+  const failing = defineCookieState('failing-update', versionedSchema, {
+    version: 2,
+    migrate: () => {
+      throw thrown;
+    },
+  });
+  let handle: UpdateHandle | undefined;
+  const Failing: FC = () => {
+    const [{ view }, update] = useAppState(failing);
+    return (
+      <button
+        onClick={() => {
+          handle = update({ view: 'table' });
+        }}
+        type="button"
+      >
+        {view}
+      </button>
+    );
+  };
+  await cookieStore.set(
+    failing.cookieName,
+    encodeURIComponent('[1,{"layout":"list"}]'),
+  );
+  const reported = vi.spyOn(window, 'reportError').mockImplementation(() => {});
+  try {
+    const screen = await render(<Failing />);
+
+    await screen.getByRole('button').click();
+
+    await expect.element(screen.getByRole('button')).toHaveTextContent('table');
+    await expect((handle as UpdateHandle).committed).rejects.toBe(thrown);
+    const cookie = (await cookieStore.get(
+      failing.cookieName,
+    )) as CookieListItem;
+    expect(decodeURIComponent(cookie.value as string)).toBe(
+      '[1,{"layout":"list"}]',
+    );
+
+    cookieStore.dispatchEvent(
+      new CookieChangeEvent('change', {
+        changed: [{ name: failing.cookieName, value: cookie.value }],
+      }),
+    );
+
+    await frame();
+    expect(screen.getByRole('button').element().textContent).toBe('table');
+    expect(reported).toHaveBeenCalledExactlyOnceWith(thrown);
+  } finally {
+    reported.mockRestore();
     await cookieStore.delete(failing.cookieName);
   }
 });

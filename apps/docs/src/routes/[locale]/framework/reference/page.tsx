@@ -31,7 +31,6 @@ const ROOT = `import {
   href,
   isNotFound,
   matchPath,
-  navigateTo,
   normalizePathname,
   notFound,
   useMatch,
@@ -40,13 +39,11 @@ const ROOT = `import {
   withBase,
 } from '@k8ordo/framework';
 import type {
-  BoundLinks,
   BoundParams,
   ErrorProps,
   LayoutProps,
   MatchablePattern,
   MatchOptions,
-  NavigateToOptions,
   PageProps,
   Paths,
   RedirectTarget,

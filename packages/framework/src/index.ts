@@ -11,7 +11,6 @@ export {
   href,
   isNotFound,
   matchPath,
-  navigateTo,
   normalizePathname,
   notFound,
   useMatch,
@@ -20,13 +19,11 @@ export {
   withBase,
 } from '@k8ordo/router';
 export type {
-  BoundLinks,
   BoundParams,
   ErrorProps,
   LayoutProps,
   MatchablePattern,
   MatchOptions,
-  NavigateToOptions,
   PageProps,
   RegisteredNavigablePattern,
   RegisteredPageParams,

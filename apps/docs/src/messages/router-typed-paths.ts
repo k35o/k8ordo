@@ -21,8 +21,8 @@ export const paramsMisspelled = message({
 });
 
 export const paramsInferred = message({
-  ja: '`href`と`navigateTo`、`useParams`は、渡したパターンの文字列からparamの型を作ります。何も設定しなくても、paramの渡し忘れや名前の書き間違いは型エラーになります。',
-  en: '`href`, `navigateTo` and `useParams` derive the type of the params from the pattern string they are given. With no setup at all, a missing or misspelled param is a type error.',
+  ja: '`href`と`useParams`は、渡したパターンの文字列からparamの型を作ります。何も設定しなくても、paramの渡し忘れや名前の書き間違いは型エラーになります。',
+  en: '`href` and `useParams` derive the type of the params from the pattern string they are given. With no setup at all, a missing or misspelled param is a type error.',
 });
 
 export const registerTitle = message({
@@ -46,8 +46,8 @@ export const registerEffect = message({
 });
 
 export const registerEffectLink = message({
-  ja: '`href`、`navigateTo`：リンク先にできるパターン',
-  en: '`href`, `navigateTo`: the patterns a link can point at',
+  ja: '`href`：リンク先にできるパターン',
+  en: '`href`: the patterns a link can point at',
 });
 
 export const registerEffectParams = message({
@@ -125,27 +125,12 @@ export const typesSchemaAfter = message({
   en: '.',
 });
 
-export const stateRegisterBefore = message({
-  ja: '`@k8ordo/state`の`Register`にも同じ`routes: typeof routes`を書くと、その`href`に渡すパスがこのルート表で検査されます。書き方は`@k8ordo/state`の',
-  en: 'Write the same `routes: typeof routes` on `Register` of `@k8ordo/state`, and the paths handed to its `href` are checked against this route table. See ',
+export const stateLinkBefore = message({
+  ja: '`@k8ordo/state`の`href`は、この`href`が返したURLに状態を載せます。パターンの検査はここで済むので、`@k8ordo/state`に登録するものはありません。書き方は`@k8ordo/state`の',
+  en: '`href` of `@k8ordo/state` puts its state on the URL this `href` returned. The pattern is checked here, so there is nothing to register with `@k8ordo/state`. See ',
 });
 
-export const stateRegisterAfter = message({
+export const stateLinkAfter = message({
   ja: 'を見てください。',
   en: ' of `@k8ordo/state`.',
-});
-
-export const navigablePathTitle = message({
-  ja: '`NavigablePath`',
-  en: '`NavigablePath`',
-});
-
-export const navigablePathRule = message({
-  ja: '`NavigablePath<typeof routes, Path>`は、パスがリンク先にできるパターンのどれかに合えばそのパスを返し、どれにも合わなければ`never`を返します。`:id`のようなparamの位置には、空でない1区間ならどれでも入ります。',
-  en: '`NavigablePath<typeof routes, Path>` gives back the path when one of the patterns a link can point at matches it, and `never` when none does. Where a pattern has a param such as `:id`, any one non-empty segment fits.',
-});
-
-export const navigablePathSlash = message({
-  ja: '末尾にスラッシュのあるパスは受け付けません。照合では`/products/`も`/products`と同じページになりますが、リンクに書くパスは1通りの書き方にそろえます。',
-  en: 'A path with a trailing slash is refused. Matching treats `/products/` as `/products`, but a link spells each path one way only.',
 });

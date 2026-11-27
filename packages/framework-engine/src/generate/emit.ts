@@ -937,8 +937,6 @@ export const emitRoutesModule = (
 export type RegisterOptions = {
   /** Import specifier of the generated routes module, e.g. `./routes.gen`. */
   readonly routesModule: string;
-  /** Present only when the application depends on `@k8ordo/state`. */
-  readonly stateModule?: string | null;
   /**
    * Import specifier of the module exporting the application's locale set
    * (`locales`), e.g. `../src/i18n`. Present only when the application
@@ -950,16 +948,13 @@ export type RegisterOptions = {
 };
 
 /**
- * Both packages read the app's route table through declaration merging, so
- * the app gets typed paths everywhere without writing the ceremony itself.
- * The router's `Register` is augmented through the framework's re-export of
- * it, which TypeScript merges into the router's own declaration. The locale
- * set reaches `@k8ordo/i18n`'s `Register` the same way, so every message is
- * held to it.
+ * The router reads the app's route table through declaration merging, so the
+ * app gets typed links everywhere without writing the ceremony itself. Its
+ * `Register` is augmented through the framework's re-export of it, which
+ * TypeScript merges into the router's own declaration. The locale set reaches
+ * `@k8ordo/i18n`'s `Register` the same way, so every message is held to it.
  */
 export const emitRegisterModule = (options: RegisterOptions): string => {
-  const wantsState =
-    options.stateModule !== null && options.stateModule !== undefined;
   const localesModule = options.localesModule ?? null;
   // Under a running server a route file also receives the request, and
   // `PageProps` / `LayoutProps` from the router learn it from here — so a
@@ -978,9 +973,6 @@ export const emitRegisterModule = (options: RegisterOptions): string => {
     ...(localesModule === null
       ? []
       : [`import type { LocaleOf } from '${I18N}';`]),
-    // An augmentation does not bring its module into the program, and an
-    // application may depend on state before any of its files imports it.
-    ...(wantsState ? [`import type {} from '${options.stateModule}';`] : []),
     ...(localesModule === null
       ? []
       : [`import type { locales } from '${localesModule}';`]),
@@ -1004,16 +996,6 @@ export const emitRegisterModule = (options: RegisterOptions): string => {
     '  }',
     '}',
   ];
-  if (wantsState) {
-    lines.push(
-      '',
-      `declare module '${options.stateModule}' {`,
-      '  interface Register {',
-      '    routes: typeof routes;',
-      '  }',
-      '}',
-    );
-  }
   if (localesModule !== null) {
     lines.push(
       '',

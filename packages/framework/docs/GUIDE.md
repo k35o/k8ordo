@@ -258,7 +258,7 @@ target, since a server reads it.
 The package is split by where the code runs.
 
 - `@k8ordo/framework` — what the application's own code imports: `href`,
-  `navigateTo`, `bindParams`, `notFound`, `usePathname`,
+  `bindParams`, `notFound`, `usePathname`,
   `usePendingPathname`, `useMatch`, `matchPath`, `withBase`, and the types
   `PageProps`, `LayoutProps`, `RouteContext` and `ErrorProps`, re-exported
   from `@k8ordo/router`, with the two types of its own a route file of

@@ -3,9 +3,9 @@ import type { FC } from 'react';
 import { describe, expect, expectTypeOf, it } from 'vite-plus/test';
 
 import { defineRoutes } from './define-routes';
-import type { NavigablePath, PatternOf } from './define-routes';
+import type { PatternOf } from './define-routes';
 import { href } from './links';
-import type { ParamsOf, PathFor, PathMatching } from './paths';
+import type { ParamsOf, PathFor } from './paths';
 
 const Home: FC = () => null;
 const LocaleLayout: FC = () => null;
@@ -190,57 +190,6 @@ describe('href', () => {
   });
 });
 
-describe('NavigablePath', () => {
-  it('takes a path a navigable pattern matches, segment by segment', () => {
-    expectTypeOf<NavigablePath<typeof routes, '/'>>().toEqualTypeOf<'/'>();
-    expectTypeOf<NavigablePath<typeof routes, '/ja'>>().toEqualTypeOf<'/ja'>();
-    expectTypeOf<
-      NavigablePath<typeof routes, '/ja/products/42'>
-    >().toEqualTypeOf<'/ja/products/42'>();
-  });
-
-  it('takes a param built into a template literal as one segment', () => {
-    expectTypeOf<
-      NavigablePath<typeof routes, `/${string}/products`>
-    >().toEqualTypeOf<`/${string}/products`>();
-  });
-
-  it('refuses a path no pattern matches, though a param stands first', () => {
-    // 和集合だった頃は '/:locale' が `/${string}` になり、これを通していた
-    expectTypeOf<NavigablePath<typeof routes, '/ja/nowhere'>>().toBeNever();
-    expectTypeOf<
-      NavigablePath<typeof routes, '/ja/products/42/reviews'>
-    >().toBeNever();
-  });
-
-  it('refuses a path only the wildcard matches — matched, never linked', () => {
-    expectTypeOf<
-      NavigablePath<typeof routes, '/ja/no/such/page'>
-    >().toBeNever();
-  });
-
-  it('refuses a trailing slash — a link is spelled the one way the table matches', () => {
-    // 実行時の match は末尾スラッシュを同じ pathname として受けるが、
-    // リンクとして組み立てるパスは正規形（末尾スラッシュなし）に揃えさせる
-    expectTypeOf<NavigablePath<typeof routes, '/ja/products/'>>().toBeNever();
-  });
-
-  it('refuses an empty segment where a param stands', () => {
-    expectTypeOf<NavigablePath<typeof routes, '//products'>>().toBeNever();
-  });
-
-  it('refuses a path that is not spelled from the root', () => {
-    expectTypeOf<NavigablePath<typeof routes, 'ja/products'>>().toBeNever();
-    expectTypeOf<NavigablePath<typeof routes, string>>().toBeNever();
-  });
-
-  it('keeps only the members of a union that match', () => {
-    expectTypeOf<
-      NavigablePath<typeof routes, '/ja' | '/ja/nowhere'>
-    >().toEqualTypeOf<'/ja'>();
-  });
-});
-
 // 型検査だけが目的で、実行はしない(実行すれば正しく throw する)。
 // パターンが表に実在するかの検査は Register 宣言後に効く(このパッケージ
 // 内で augment するとコンパイル全体に漏れるため、ここでは検査しない)
@@ -261,8 +210,79 @@ describe('defineRoutes', () => {
     ).toThrow(/declared twice/u);
   });
 
-  it('rejects a pattern URLPattern cannot parse, at definition time', () => {
-    expect(() => defineRoutes({ '/a{b': Home })).toThrow(TypeError);
+  it.each([
+    ['/:id?', ':id?'],
+    ['/files/:path*', ':path*'],
+    ['/foo-:bar', 'foo-:bar'],
+    ['/files/*.pdf', '*.pdf'],
+    ['/a{b}?', 'a{b}?'],
+    ['/a+b', 'a+b'],
+    ['/a\\b', 'a\\b'],
+    ['/:', ':'],
+    ['/:a-b', ':a-b'],
+  ])(
+    'rejects %s, a segment outside the grammar, naming the pattern and the segment',
+    (pattern, segment) => {
+      expect(() => defineRoutes({ [pattern]: Home })).toThrow(
+        new TypeError(
+          `route pattern "${pattern}" has the segment "${segment}", which is not part of the grammar — a segment is a literal holding none of : * ? + { } ( ) \\, a ":name", or — last — a ":name+" or a "*"`,
+        ),
+      );
+    },
+  );
+
+  it('rejects an empty segment', () => {
+    expect(() => defineRoutes({ '/a//b': Home })).toThrow(
+      /route pattern "\/a\/\/b" has an empty segment/u,
+    );
+    expect(() => defineRoutes({ '/a/': Home })).toThrow(
+      /route pattern "\/a\/" has an empty segment/u,
+    );
+  });
+
+  it('rejects a rest param anywhere but at the end of the full pattern', () => {
+    expect(() => defineRoutes({ '/files/:path+/edit': Home })).toThrow(
+      new TypeError(
+        'route pattern "/files/:path+/edit" puts ":path+" before the end — a rest param must be the last segment',
+      ),
+    );
+  });
+
+  it('rejects a rest param that ends a branch key with children after it', () => {
+    expect(() =>
+      defineRoutes({ '/files/:path+': { children: { '/edit': Home } } }),
+    ).toThrow(/"\/files\/:path\+\/edit" puts ":path\+" before the end/u);
+  });
+
+  it('rejects a wildcard anywhere but at the end of the full pattern', () => {
+    expect(() => defineRoutes({ '/*/edit': Home })).toThrow(
+      new TypeError(
+        'route pattern "/*/edit" puts "*" before the end — a wildcard must be the last segment',
+      ),
+    );
+    expect(() =>
+      defineRoutes({ '/docs/*': { children: { '/edit': Home } } }),
+    ).toThrow(/"\/docs\/\*\/edit" puts "\*" before the end/u);
+  });
+
+  it('takes a rest param or a wildcard that a branch puts last', () => {
+    const table = defineRoutes({
+      '/files/:path+': { layout: Home, children: { '/': First } },
+      '/docs': { children: { '/(guide)': { children: { '/*': Second } } } },
+    });
+    expect(table.match('/files/a/b')?.params).toStrictEqual({
+      path: ['a', 'b'],
+    });
+    expect(table.match('/docs/any/thing')?.stack).toStrictEqual([Second]);
+  });
+
+  it('takes a param named as a JavaScript identifier, as URLPattern reads it', () => {
+    const table = defineRoutes({ '/:$id/:_part/:café': Home });
+    expect(table.match('/1/2/3')?.params).toStrictEqual({
+      $id: '1',
+      _part: '2',
+      café: '3',
+    });
   });
 
   it('rejects parentheses that are not exactly a group', () => {
@@ -402,29 +422,6 @@ describe('a rest param', () => {
     expectTypeOf<
       PathFor<'/files/:path+'>
     >().toEqualTypeOf<`/files/${string}`>();
-  });
-
-  it('takes a path of one segment or more, and none of zero', () => {
-    type Fits<Path extends string> = PathMatching<Path, '/files/:path+'>;
-    expectTypeOf<Fits<'/files/a'>>().toEqualTypeOf<'/files/a'>();
-    expectTypeOf<Fits<'/files/a/b/c'>>().toEqualTypeOf<'/files/a/b/c'>();
-    expectTypeOf<
-      Fits<`/files/${string}`>
-    >().toEqualTypeOf<`/files/${string}`>();
-    expectTypeOf<Fits<'/files'>>().toBeNever();
-    expectTypeOf<Fits<'/files/'>>().toBeNever();
-    expectTypeOf<Fits<'/files/a//b'>>().toBeNever();
-    expectTypeOf<Fits<'/files/a/'>>().toBeNever();
-    expectTypeOf<Fits<'/other/a'>>().toBeNever();
-  });
-
-  it('is a path a link can point at', () => {
-    expectTypeOf<
-      NavigablePath<typeof files, '/files/a/b'>
-    >().toEqualTypeOf<'/files/a/b'>();
-    expectTypeOf<
-      NavigablePath<typeof files, '/ja/docs/guide/intro'>
-    >().toEqualTypeOf<'/ja/docs/guide/intro'>();
   });
 });
 

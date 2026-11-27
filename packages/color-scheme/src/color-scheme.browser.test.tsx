@@ -1,4 +1,4 @@
-import { resetStateRegistry } from '@k8ordo/state';
+import { resetStateRegistry } from '@k8ordo/state/testing';
 import { useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { hydrateRoot } from 'react-dom/client';

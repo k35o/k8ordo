@@ -66,9 +66,16 @@ export const defineCookieState = <Schema extends StateSchema>(
     cookieName,
     // サーバーは応答に Cookie を書けないので、古い版の Cookie は移行して読む
     // だけにする。書き戻すのは hydration の後のブラウザのストア
-    parseCookies: (cookies) =>
-      codec.read(parseCookieText(cookies.get(cookieName)))
-        .values as output<Schema>,
+    parseCookies: (cookies) => {
+      const row = codec.read(parseCookieText(cookies.get(cookieName)));
+      if (row.failed) {
+        console.error(
+          `parseCookies: the migrate of "${key}" threw on the cookie ${cookieName}, which reads as nothing stored and is left as it is`,
+          row.error,
+        );
+      }
+      return row.values as output<Schema>;
+    },
     cookieValue: (values) =>
       JSON.stringify(codec.row(codec.salvage(values ?? {}))),
   };

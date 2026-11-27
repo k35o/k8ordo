@@ -11,13 +11,13 @@ export const bindTitle = message({
 });
 
 export const bindTakes = message({
-  ja: '`bindParams`には、束ねるparamを返す関数を渡します。返ってくる`href`と`navigateTo`は、渡されなかったparamをこの関数の値で埋めます。',
-  en: '`bindParams` takes a function that returns the params to bind. The `href` and `navigateTo` it returns fill any param the call leaves out with that function’s value.',
+  ja: '`bindParams`には、束ねるparamを返す関数を渡します。返ってくるのは`href`そのもので、渡されなかったparamをこの関数の値で埋めます。',
+  en: '`bindParams` takes a function that returns the params to bind, and returns an `href` that fills any param the call leaves out with that function’s value.',
 });
 
 export const bindImport = message({
-  ja: 'アプリのコードでは、`href`と`navigateTo`をこのモジュールからimportします。',
-  en: 'The app imports `href` and `navigateTo` from this module.',
+  ja: 'アプリのコードでは、`href`をいつもこのモジュールからimportします。`@k8ordo/router`の`href`も同じ名前で型も通るので、取り違えないようにします。コードからページを移るときも、このモジュールの`href`で作ったURLを`navigation.navigate()`に渡します。',
+  en: 'The app always imports `href` from this module. `@k8ordo/router`’s own `href` has the same name and type-checks too, so do not reach for it by mistake. A page change from code hands a URL from this module’s `href` to `navigation.navigate()`.',
 });
 
 export const usageTitle = message({
@@ -71,8 +71,8 @@ export const sourceTitle = message({
 });
 
 export const sourceEachCall = message({
-  ja: '束ねる関数は、`href`や`navigateTo`を呼ぶたびに呼ばれます。リクエストやURLで変わる値でも、リンクを作る時点の値が入ります。',
-  en: 'The binding function runs every time `href` or `navigateTo` is called. A value that differs per request or per URL is taken at the moment the link is built.',
+  ja: '束ねる関数は、`href`を呼ぶたびに呼ばれます。リクエストやURLで変わる値でも、リンクを作る時点の値が入ります。',
+  en: 'The binding function runs every time `href` is called. A value that differs per request or per URL is taken at the moment the link is built.',
 });
 
 export const sourceOnce = message({
@@ -83,34 +83,4 @@ export const sourceOnce = message({
 export const sourceAgnostic = message({
   ja: 'どのパッケージが値を返すかはアプリが決めます。ルーターが知っているのはparamの名前だけです。',
   en: 'Which package supplies the value is up to the app. The router knows only the param’s name.',
-});
-
-export const optionsTitle = message({
-  ja: 'オプションの位置',
-  en: 'Options position',
-});
-
-export const optionsUndefined = message({
-  ja: 'paramの代わりに`undefined`を渡す',
-  en: 'Pass `undefined` in place of the params',
-});
-
-export const optionsSecond = message({
-  ja: 'オプションを2つ目に書くと型エラーになる',
-  en: 'Options in second place are a type error',
-});
-
-export const optionsThird = message({
-  ja: 'すべてのparamを束ねたパターンでも、`navigateTo`のオプションは3つ目の引数です。',
-  en: 'Even for a pattern whose params are all bound, `navigateTo`’s options are the third argument.',
-});
-
-export const optionsWhy = message({
-  ja: 'パターンにparamがあれば、2つ目の引数はいつも`params`として読まれます。',
-  en: 'When the pattern names a param, the second argument is always read as params.',
-});
-
-export const optionsPitfall = message({
-  ja: '型エラーを`as`などで消してオプションを2つ目に渡すと、`params`として読まれます。`history`は無視され、新しい履歴エントリが追加されます。',
-  en: 'If a type assertion lets options through as the second argument, they are read as params. `history` is ignored, and a new history entry is added.',
 });

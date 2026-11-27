@@ -31,7 +31,7 @@ routes.ts        defineRoutes({ … })      the pathname schema, one place
    ↓ mounted once
 <Router routes>  match → stack → render   layouts wrap through <Outlet />
    ↑ never imported by pages
-pages            href / navigateTo / useParams
+pages            href / useParams
                  take the pattern string; Register supplies the check
 ```
 
@@ -127,27 +127,41 @@ href('/files/:path+', { path: [] }); // ✗ throws: at least one segment
 href('/files/:path+', { path: ['a', ''] }); // ✗ throws: an empty segment
 ```
 
-`navigateTo` and `bindParams` take it the same way, and `useParams`,
+A bound `href` (`bindParams`) takes it the same way, and `useParams`,
 `useMatch` and `matchPath` hand back the array. In the types, `ParamsOf`
 gives `{ path: readonly string[] }`, a link takes an array of anything with
 one spelling, and `PathFor<'/files/:path+'>` is `` `/files/${string}` ``.
 
 It also takes the one segment a `/:name` beside it takes, so order decides
 between them as between everything else: declare `/files/:id` first, or it
-never matches. There is no optional form (`:name*`, `:name?`): a pattern for
-the prefix itself — `/files` above — is what answers zero segments.
+never matches. There is no optional form — `:name*` and `:name?` are refused
+when the table is defined: a pattern for the prefix itself — `/files` above —
+is what answers zero segments.
 
 ### What fails at definition time
 
-A table is checked when the module loads, not when someone first navigates:
+A table is checked when the module loads, not when someone first navigates.
+The grammar is the forms above and nothing more: a literal segment, a
+`:name` (a JavaScript identifier, as URLPattern reads one), and — as the
+last segment of the full pattern — a `:name+` or a `*`, plus `/(name)`
+groups. URLPattern reads much more (`:id?`, `:path*`, `{…}`, a param inside
+a segment), and the types would read those differently from the matching,
+so every other spelling is refused:
 
-| written                                                   | error                                                                                                             |
-| --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| the same full pattern twice, wherever the copies nest     | `route pattern "/x" is declared twice`                                                                            |
-| a group with no children (it would redeclare the index)   | `route group "/(oops)" must have children`                                                                        |
-| a key not starting with `/`                               | `route pattern "x" must start with "/"`                                                                           |
-| parentheses that are not exactly a group (`/(admin)/new`) | `route group "/(admin)/new" must be "/(name)" and nothing else — a regular expression is not part of the grammar` |
-| a pattern URLPattern cannot parse                         | URLPattern's own `TypeError`                                                                                      |
+| written                                                                               | error                                                                                                                   |
+| ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| a segment outside the grammar (`/:id?`, `/files/:path*`, `/foo-:bar`, `/files/*.pdf`) | `route pattern "/:id?" has the segment ":id?", which is not part of the grammar — …`, followed by what a segment may be |
+| a rest param or a wildcard before the end of the full pattern                         | `route pattern "/files/:path+/edit" puts ":path+" before the end — a rest param must be the last segment`               |
+| an empty segment (`/a//b`, `/a/`)                                                     | `route pattern "/a/" has an empty segment — …`                                                                          |
+| the same full pattern twice, wherever the copies nest                                 | `route pattern "/x" is declared twice`                                                                                  |
+| a group with no children (it would redeclare the index)                               | `route group "/(oops)" must have children`                                                                              |
+| a key not starting with `/`                                                           | `route pattern "x" must start with "/"`                                                                                 |
+| parentheses that are not exactly a group (`/(admin)/new`)                             | `route group "/(admin)/new" must be "/(name)" and nothing else — a regular expression is not part of the grammar`       |
+
+The position is read on the full pattern, not on the key:
+`'/files/:path+': { children: { '/edit': FileEditor } }` is refused as
+`/files/:path+/edit`, while a branch whose children are only its `'/'` index
+keeps the rest param last.
 
 ## Mounting it
 
@@ -206,19 +220,13 @@ layout, or around the lazy component itself.
 ## Links and navigation
 
 ```tsx
-import {
-  href,
-  navigateTo,
-  useParams,
-  usePathname,
-  useRoute,
-} from '@k8ordo/router';
+import { href, useParams, usePathname, useRoute } from '@k8ordo/router';
 
 <a href={href('/products/:id', { id })}>…</a>;
 <a href={href('/products')}>…</a>; // no params, no second argument
 
-navigateTo('/products/:id', { id }); // pushes: the back button undoes it
-navigateTo('/products', { history: 'replace' });
+navigation.navigate(href('/products/:id', { id })); // the same URL, from code
+navigation.navigate(href('/products'), { history: 'replace' });
 
 const { id } = useParams('/products/:id');
 const { pattern } = useRoute(); // untyped: the winning pattern and its params
@@ -238,6 +246,14 @@ useMatch('/products/*'); // {} anywhere under /products, else null
 matchPath('/products/:id', pathname); // the same, pure, for a pathname in hand
 useMatch('/files/:path+'); // { path: ['a', 'b'] } on /files/a/b
 ```
+
+**The current link is asked by pattern, never by URL.** In a Server
+Component — a framework layout, which receives `pathname` — ask
+`matchPath(pattern, pathname)`: it is a pure function in a module with no
+directive, so the server calls it itself. In a Client Component, ask
+`useMatch(pattern)`. Never compare `pathname === href(…)`: a pathname is in
+the table's terms and `href` returns the URL with Vite's `base` in front, so
+under a base the two never agree.
 
 `useMatch` takes a pattern from the table, or a table pattern followed by
 `/*` to mean "everything below it" — what a sidebar asks when it wants to
@@ -263,8 +279,8 @@ is going — `null` when none is — set as the navigation starts and cleared on
 the new page is on screen or the navigation is given up; a state change sets
 nothing, unless the host loads the page again for it (a framework page that
 reads the search), which is a load in progress like any other. The caller that
-started it can instead await `navigateTo`'s `finished` — it resolves when the
-tree is on screen (below).
+started it can instead await the `finished` its `navigation.navigate()`
+returned — it resolves when the tree is on screen (below).
 
 `usePathname` reads the platform rather than the table, which is why it is the
 one that also works under the framework, where the browser holds no table at
@@ -289,39 +305,40 @@ import { bindParams } from '@k8ordo/router';
 
 import { locales } from './i18n';
 
-export const { href, navigateTo } = bindParams(() => ({
+export const href = bindParams(() => ({
   locale: locales.getLocale(),
 }));
 ```
 
 ```tsx
 href('/:locale/products/:id', { id }); // locale from the source, id as before
-navigateTo('/:locale', { locale: 'en' }, { history: 'replace' }); // or overridden
-navigateTo('/:locale', undefined, { history: 'replace' }); // options stay third
+href('/:locale', { locale: 'en' }); // or overridden
 ```
 
-Patterns keep their full spelling, so the table's types apply unchanged; the
-source is read at each call, so a value that differs per request or per URL
-is read where it is current. Options still come after the params whenever
-the pattern names one, even when the source supplies them all — params and
-options are both plain objects, and the pattern alone decides which is which —
-so the params slot is passed as `undefined`, as in the last line above. Which
-package supplies the value is the application's business — the router knows a
-param name, nothing more.
+`bindParams` returns the bound `href` itself. Patterns keep their full
+spelling, so the table's types apply unchanged; the source is read at each
+call, so a value that differs per request or per URL is read where it is
+current. Which package supplies the value is the application's business — the
+router knows a param name, nothing more. Import `href` from that one module
+everywhere, so no link reaches for the unbound one by accident.
 `normalizePathname` is the router's own reading of a pathname — a trailing
 slash dropped, root excepted — for code that compares pathnames the way the
 table does.
 
-`navigateTo` returns the platform's own `{ committed, finished }`. `finished`
-resolves once the new page is on screen, so an async action can await it and
-let `isPending` cover the wait:
+**A page change from code is the platform's own call.**
+`navigation.navigate(href(…))` goes to the same URL the link would, and the
+router intercepts it the same way. There is no wrapper: `href` already does
+the typing and the base, and a second function would be a second way to
+write the same thing, as `<Link>` would. The call returns the platform's
+`{ committed, finished }`, and `finished` resolves once the new page is on
+screen, so an async action can await it and let `isPending` cover the wait:
 
 ```tsx
 const [isPending, startTransition] = useTransition();
 
 startTransition(async () => {
   try {
-    await navigateTo('/products/:id', { id }).finished;
+    await navigation.navigate(href('/products/:id', { id })).finished;
   } catch (error) {
     // overtaken by another navigation
     if (!(error instanceof DOMException && error.name === 'AbortError')) {
@@ -338,10 +355,37 @@ wait. An event handler can await it the same way. A page change started while
 some unrelated action is still pending reaches the screen without waiting for
 that action either.
 
-Its default is `push`, the opposite of `@k8ordo/state`'s `update()`, and for
-the same reason: going to a page is what the back button should undo, while
-refining what is on the page is not. **Changing pages goes through
-`navigateTo`; changing state goes through `update`.**
+Its default, `'auto'`, pushes an entry for another URL and replaces the
+current one for the same URL, as following a link does — the opposite of
+`@k8ordo/state`'s `update()`, which replaces by default, and for the same
+reason: going to a page is what the back button should undo, while refining
+what is on the page is not. **Changing pages is
+`navigation.navigate(href(…))`, the same URL as `<a href>`; changing state
+is `update()`.**
+
+## One way per URL
+
+Each thing an application does with a URL has one spelling, the same under
+`@k8ordo/router`, `@k8ordo/state` and `@k8ordo/framework`:
+
+| to                                                          | write                                                                                 |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| link to a page                                              | `href(pattern, params)`                                                               |
+| link to a page with its state                               | `def.href(href(pattern, params), values)`                                             |
+| link to the page itself with other state                    | `def.href('', values)`                                                                |
+| ask which page is showing                                   | `matchPath(pattern, pathname)` in a Server Component, `useMatch(pattern)` in a client |
+| change the page from code                                   | `navigation.navigate(href(pattern, params))`, the link's own URL                      |
+| change the state                                            | `update(values)`                                                                      |
+| move a page for good                                        | `redirect.ts`, its `to` a table pattern (`@k8ordo/framework`)                         |
+| redirect from a Server Action, a `guard.ts` or a `route.ts` | `redirect(href(pattern, params))` (`@k8ordo/framework/server`)                        |
+| show the page on screen in another locale                   | `withBase(locales.localize(pathname, locale))`                                        |
+
+The last row is the one URL built from a pathname rather than a pattern: the
+page showing may be any page. Nothing else compares or combines `pathname` and
+`href()` — `pathname` is in the table's terms and `href()` carries Vite's
+`base`. In a `[locale]` application, import `href` only from the module that
+binds the locale (`export const href = bindParams(…)`): the router's own
+`href` has the same name and type-checks too.
 
 ## Served under a base
 
@@ -350,7 +394,7 @@ the application is served below one — Vite's
 [`base`](https://vite.dev/config/shared-options#base), `base: '/docs/'`. The
 router reads it from `import.meta.env.BASE_URL` and does the rest:
 
-- `href` and `navigateTo` put it in front of every link: `href('/products')`
+- `href` puts it in front of every link: `href('/products')`
   is `/docs/products`, and `href('/')` is `/docs/`.
 - `usePathname` takes it off, so what it returns compares with the patterns:
   `/products` at `/docs/products`. `useMatch` follows, and `<Router>` matches
@@ -392,15 +436,14 @@ only in an application — a library doing it would impose its table on every
 consumer.
 
 Under `@k8ordo/framework` this file is generated into
-`.k8ordo/register.gen.ts` from `routes/` — for `@k8ordo/state` too, when the
-application depends on it — so hand-writing it there is writing a second
-answer to a question already answered. Hand-write it in a client application
+`.k8ordo/register.gen.ts` from `routes/`, so hand-writing it there is
+writing a second answer to a question already answered. Hand-write it in a client application
 that mounts `<Router>` itself.
 
 The framework's generated `Register` also carries `params`: per pattern, the
-type the route file's `paramsSchema` produces. With it, `href` and
-`navigateTo` take a param as the page receives it — `{ id: 42 }` for a
-schema that said number — and spell it the one way the schema reads back. A
+type the route file's `paramsSchema` produces. With it, `href`
+takes a param as the page receives it — `{ id: 42 }` for a
+schema that said number — and spells it the one way the schema reads back. A
 value with no URL spelling (an object) is refused. Before `Register` is
 augmented — or for a pattern no schema along its stack covers — a link takes
 any value with one spelling (a string, a number, a bigint, a boolean), so a
@@ -417,32 +460,19 @@ link to `P` takes) and `RegisteredPageParams<P>` (what the page at `P`
 receives). Before the augmentation the first two are any `/`-prefixed
 string.
 
-## Typed paths for @k8ordo/state
+## Links that carry state
 
-`@k8ordo/state`'s `Register` takes the same line this one does:
+`@k8ordo/state` builds on the URL `href` returns: a page state's
+`href(url, values)` puts its own search params and fragment on it, and adds
+no base of its own.
 
 ```ts
-declare module '@k8ordo/state' {
-  interface Register {
-    routes: typeof routes;
-  }
-}
+listState.href(href('/products'), { q, page: 2 }); // '/products?q=…&page=2'
 ```
 
-With that, `listState.href('/products', { q })` is checked against the same
-table this router matches against, and the two packages agree on what a path
-is. `NavigablePath<typeof routes, Path>` is that check, for any other
-typed-path consumer: `Path` itself when one of the table's linkable patterns
-matches it segment by segment — a literal segment spelled as the pattern
-spells it, a `:param` taking any one non-empty segment, a `${string}` from a
-template literal included, a rest param (`:name+`) taking one or more — and
-`never` when none does. A trailing slash is
-refused: matching treats `/products/` as `/products`, but a path built for a
-link is spelled the one canonical way.
-
-The path is checked against the patterns rather than collected into a union
-of every path the table has: a `/:locale` page would put `/${string}` in such
-a union, and `/${string}` takes every path there is.
+The pattern is checked once, here, against the table; state has no table of
+its own to register. A path is never checked on its own: a URL is built with
+`href` from a pattern, so there is no type for a hand-written path to pass.
 
 ## What navigation guarantees
 
@@ -671,8 +701,8 @@ a class, since a page and the framework may hold two copies of this package.
 Under a client `<Router>` there is no status to answer with, and `notFound()`
 is an error like any other.
 
-What carries across unchanged is everything that needs no table: `href`,
-`navigateTo` and `bindParams`, `usePathname`, `useMatch` and `matchPath`, and
+What carries across unchanged is everything that needs no table: `href` and
+`bindParams`, `usePathname`, `useMatch` and `matchPath`, and
 `normalizePathname` — an application on the framework imports them from
 `@k8ordo/framework`, which re-exports them by name, and never names this
 package. `usePathname` needs one thing on the server,
@@ -699,6 +729,6 @@ strings whatever the schemas say, since `not-found.tsx` renders under a layout
 whether or not its schemas accepted. In server mode the generated `Register` also carries
 the `request`, so both types gain `request` there and a page that reads it
 fails to type-check under a build into files. A route file may equally declare
-its props inline — the generated table checks them at the import either way —
-and a layout whose pattern has no page of its own has to: `LayoutProps` takes
-only a pattern the table has a page at.
+its props inline — the generated table checks them at the import either way.
+`PageProps` takes a pattern the table has a page at, and `LayoutProps` any
+pattern, a layout's with no page of its own included.

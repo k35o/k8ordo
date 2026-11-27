@@ -77,30 +77,88 @@ export default async function ProductPage({
 }
 ```
 
-`PageProps<P>` and `LayoutProps<P>` take a pattern the table has a page at.
-A layout whose directory holds no `page.tsx` of its own — `blog/[slug]/`
-with only `comments/page.tsx` below it — has no such pattern, so it declares
-its props inline. Its params are strings, and under `mode: 'server'` it may
-add `request: RouteRequest` (from `@k8ordo/framework/server`) to read the
-request:
+`PageProps<P>` takes a pattern the table has a page at. `LayoutProps<P>`
+takes any pattern, so a layout whose directory holds no `page.tsx` of its
+own — `blog/[slug]/` with only `comments/page.tsx` below it — names its own
+pattern all the same. Its params are strings, and under `mode: 'server'` it
+receives `request` too:
 
 ```tsx
 // src/routes/blog/[slug]/layout.tsx
-import type { ReactNode } from 'react';
+import type { LayoutProps } from '@k8ordo/framework';
 
 export default function PostLayout({
   params,
   children,
-}: {
-  params: { slug: string };
-  children: ReactNode;
-}) {
+}: LayoutProps<'/blog/:slug'>) {
   return <article data-slug={params.slug}>{children}</article>;
 }
 ```
 
-The generated table checks those props against the pattern at the import,
-as it checks every route file's.
+The generated table checks those props against the layout's own pattern at
+the import, as it checks every route file's, so a pattern that names other
+params fails there.
+
+**A layout marks the current link with `matchPath`.** It receives `pathname`
+in the table's terms, and `matchPath` is a pure function a Server Component
+calls, so the navigation renders on the server with its `aria-current`
+already right. `aria-current="page"` goes only on the link whose own URL is
+the page on screen, an exact match; a link to a section the page is inside
+gets `aria-current="true"`, an inclusive match:
+
+```tsx
+// src/routes/layout.tsx
+import { href, matchPath } from '@k8ordo/framework';
+import type { LayoutProps } from '@k8ordo/framework';
+
+export default function RootLayout({ children, pathname }: LayoutProps<'/'>) {
+  const onProducts = matchPath('/products', pathname) !== null;
+  const inProducts =
+    matchPath('/products/*', pathname, { inclusive: true }) !== null;
+  return (
+    <>
+      <nav>
+        <a
+          aria-current={onProducts ? 'page' : inProducts ? 'true' : undefined}
+          href={href('/products')}
+        >
+          Products
+        </a>
+      </nav>
+      {children}
+    </>
+  );
+}
+```
+
+A Client Component asks `useMatch('/products')` and
+`useMatch('/products/*', { inclusive: true })` instead. Never compare `pathname === href(…)`: `pathname` is in the table's
+terms and `href` returns the URL with Vite's `base` in front, so under a base
+the two never agree.
+
+## One way per URL
+
+Each thing an application does with a URL has one spelling, the same under
+`@k8ordo/router`, `@k8ordo/state` and `@k8ordo/framework`:
+
+| to                                                          | write                                                                                 |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| link to a page                                              | `href(pattern, params)`                                                               |
+| link to a page with its state                               | `def.href(href(pattern, params), values)`                                             |
+| link to the page itself with other state                    | `def.href('', values)`                                                                |
+| ask which page is showing                                   | `matchPath(pattern, pathname)` in a Server Component, `useMatch(pattern)` in a client |
+| change the page from code                                   | `navigation.navigate(href(pattern, params))`, the link's own URL                      |
+| change the state                                            | `update(values)`                                                                      |
+| move a page for good                                        | `redirect.ts`, its `to` a table pattern (`@k8ordo/framework`)                         |
+| redirect from a Server Action, a `guard.ts` or a `route.ts` | `redirect(href(pattern, params))` (`@k8ordo/framework/server`)                        |
+| show the page on screen in another locale                   | `withBase(locales.localize(pathname, locale))`                                        |
+
+The last row is the one URL built from a pathname rather than a pattern: the
+page showing may be any page. Nothing else compares or combines `pathname` and
+`href()` — `pathname` is in the table's terms and `href()` carries Vite's
+`base`. In a `[locale]` application, import `href` only from the module that
+binds the locale (`export const href = bindParams(…)`): the router's own
+`href` has the same name and type-checks too.
 
 ## How a page is sent
 
@@ -602,9 +660,9 @@ each checked against `Paths` of its directory's pattern in a `PathsChecks`
 type (under `mode: 'server'` it too is empty); all seven are empty here
 because no route file declares any.
 
-`.k8ordo/register.gen.ts` registers that table with the framework — and with
-`@k8ordo/state` when the application depends on it — so typed paths work
-everywhere without a line of ceremony. It also says what the mode hands a
+`.k8ordo/register.gen.ts` registers that table with the framework, so typed
+links work everywhere without a line of ceremony — a page state's link too,
+since it is built on what `href` returns. It also says what the mode hands a
 route file: under `mode: 'server'` it registers the `request`, which is how
 `PageProps` and `LayoutProps` gain that field there and not under
 `mode: 'static'`:

@@ -1,11 +1,9 @@
 import type { $ZodType, output } from 'zod/v4/core';
 
-import { withBase } from './base';
 import { createStoredCodec } from './entry/codec';
 import type { StoredCodec } from './entry/codec';
 import { createHashCodec } from './hash/codec';
 import type { HashCodec } from './hash/codec';
-import type { RegisteredPath } from './register';
 import type { StateSchema } from './schema/object';
 import { setKind } from './store/kind';
 import { pageInitialSnapshot, pageStoreOf } from './store/page-store';
@@ -40,21 +38,26 @@ export type PageState<
   /** Reads the url slot on the server. Absent params get their defaults. */
   parseUrl: (input: UrlInput) => OutputOf<Url>;
   /**
-   * Builds a link. Unspecified fields mean their default and defaults are
-   * omitted from the query and the fragment, so canonical URLs stay short.
-   * The path is in the table's terms and the URL carries Vite's `base` in
-   * front of it; the path literal survives in the type, which is what lets
-   * typed-route checks pass.
+   * Puts this state on a URL: the destination as the router built it —
+   * `@k8ordo/router`'s `href()`, a Next.js `Route` — or `''` for the page
+   * itself. Only this definition's url params are rewritten, in their
+   * canonical form: unspecified fields mean their default, and defaults are
+   * omitted. The URL's other params stay. With a hash slot the fragment is
+   * the value's (none at the default); without one the URL's own fragment
+   * stays. Nothing is added to the path — a `base` is the router's, and its
+   * `href()` has put it there — and the URL literal survives in the type,
+   * which is what typed-route checks read. When the URL handed in already
+   * carries this definition's params or a fragment, the type is an
+   * approximation: those params are rewritten, and the query goes in before
+   * the fragment.
    */
-  href: <Path extends string>(
-    path: RegisteredPath<Path>,
+  href: <U extends string>(
+    url: U,
     values?: Readonly<Partial<OutputOf<Url> & HashOf<Hash>>>,
   ) =>
-    | Path
-    | `${Path}?${string}`
-    | (Hash extends $ZodType ? `${Path}#${string}` : never);
-  /** The query string alone (no `?`), for handrolled URL composition. */
-  search: (values?: Readonly<Partial<OutputOf<Url>>>) => string;
+    | U
+    | `${U}?${string}`
+    | (Hash extends $ZodType ? `${U}#${string}` : never);
 };
 
 type SharedKeys<Url, Entry> = Extract<
@@ -97,6 +100,9 @@ export type PageInternals = {
   /** url keys first, then entry keys, then `hash` — the flat snapshot's full key set. */
   keys: readonly string[];
 };
+
+const keyOf = (pair: string): string =>
+  new URLSearchParams(pair).keys().next().value ?? '';
 
 export function definePageState<
   Url extends StateSchema | undefined = undefined,
@@ -142,9 +148,7 @@ export function definePageState(
     );
   }
 
-  const search = (
-    values?: Readonly<Partial<Record<string, unknown>>>,
-  ): string => (url === null ? '' : url.search(values ?? {}));
+  const ownKeys = new Set(url?.keys);
 
   const def: PageState = {
     kind: 'page',
@@ -153,16 +157,29 @@ export function definePageState(
     entry: config.entry,
     hash: config.hash,
     parseUrl: (input) => (url === null ? {} : url.parse(input)),
-    search,
-    href: <Path extends string>(
-      path: RegisteredPath<Path>,
-      values?: Readonly<Partial<Record<string, unknown>>>,
+    href: <U extends string>(
+      destination: U,
+      values: Readonly<Partial<Record<string, unknown>>> = {},
     ) => {
-      const query = search(values);
-      // 型は渡されたパスのまま。URL にだけ Vite の base が付く
-      const link = withBase(path) as Path;
-      const located = query === '' ? link : (`${link}?${query}` as const);
-      const fragment = hash === null ? '' : hash.fragment(values?.hash);
+      const hashAt = destination.indexOf('#');
+      const beforeHash =
+        hashAt === -1 ? destination : destination.slice(0, hashAt);
+      const queryAt = beforeHash.indexOf('?');
+      const path = queryAt === -1 ? beforeHash : beforeHash.slice(0, queryAt);
+      const kept = (queryAt === -1 ? '' : beforeHash.slice(queryAt + 1))
+        .split('&')
+        .filter((pair) => pair !== '' && !ownKeys.has(keyOf(pair)));
+      const own = url === null ? '' : url.search(values);
+      const query = [...kept, ...(own === '' ? [] : [own])].join('&');
+      // 型付きルートの検査が読む U のリテラルを残すための近似。U が自分の
+      // パラメーターやフラグメントを持てば、値はそこが書き換わる
+      const located = (query === '' ? path : `${path}?${query}`) as U;
+      if (hash === null) {
+        return hashAt === -1
+          ? located
+          : (`${located}${destination.slice(hashAt)}` as U);
+      }
+      const fragment = hash.fragment(values.hash);
       return fragment === '' ? located : `${located}#${fragment}`;
     },
   };

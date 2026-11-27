@@ -4,8 +4,9 @@ import { afterEach, expect, it } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
 import { z } from 'zod';
 
+import * as main from './index';
 import { definePageState } from './page-state';
-import { mountPageUrl } from './testing';
+import { mountPageUrl, resetStateRegistry } from './testing';
 import { useAppState } from './use-app-state';
 
 const deckState = definePageState('testing-deck', {
@@ -38,6 +39,11 @@ let restore: (() => void) | undefined;
 afterEach(() => {
   restore?.();
   restore = undefined;
+});
+
+it('offers resetStateRegistry from the testing entry and never from the main one', () => {
+  expect(resetStateRegistry).toBeTypeOf('function');
+  expect(Object.keys(main)).not.toContain('resetStateRegistry');
 });
 
 it('puts the search and the fragment in the URL a component mounts into', async () => {

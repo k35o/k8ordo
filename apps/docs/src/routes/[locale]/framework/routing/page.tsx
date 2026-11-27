@@ -57,9 +57,13 @@ const ROUTER_API = `'use client';
 import { href, useMatch } from '@k8ordo/framework';
 
 export function ProductsLink() {
-  const showing = useMatch('/products/*', { inclusive: true }) !== null;
+  const onProducts = useMatch('/products') !== null;
+  const inProducts = useMatch('/products/*', { inclusive: true }) !== null;
   return (
-    <a aria-current={showing ? 'page' : undefined} href={href('/products')}>
+    <a
+      aria-current={onProducts ? 'page' : inProducts ? 'true' : undefined}
+      href={href('/products')}
+    >
       Products
     </a>
   );
@@ -109,16 +113,17 @@ const HOME_PAGE = `export default function HomePage() {
 
 const HOME_STATIC = `'use client';
 
-import { navigateTo } from '@k8ordo/framework';
+import { href } from '@k8ordo/framework';
 import { useEffect } from 'react';
 
 import { locales } from '../i18n';
 
 export default function HomePage() {
   useEffect(() => {
-    navigateTo(
-      '/:locale',
-      { locale: locales.negotiate(navigator.languages) },
+    navigation.navigate(
+      href('/:locale', {
+        locale: locales.negotiate(navigator.languages),
+      }),
       { history: 'replace' },
     );
   }, []);
@@ -128,14 +133,13 @@ export default function HomePage() {
 
 const HOME_COOKIE = `useEffect(() => {
   void cookieStore.get('locale').then((saved) => {
-    navigateTo(
-      '/:locale',
-      {
+    navigation.navigate(
+      href('/:locale', {
         locale: locales.negotiate([
           ...(saved?.value === undefined ? [] : [saved.value]),
           ...navigator.languages,
         ]),
-      },
+      }),
       { history: 'replace' },
     );
   });
@@ -392,7 +396,12 @@ export default function FrameworkRoutingPage() {
         <CodeBlock
           code={ROUTER_API}
           lang="tsx"
-          marks={{ 3: 'highlight', 6: 'highlight', 8: 'highlight' }}
+          marks={{
+            3: 'highlight',
+            6: 'highlight',
+            7: 'highlight',
+            11: 'highlight',
+          }}
           title="src/components/products-link.tsx"
         />
         <p>
@@ -469,7 +478,7 @@ export default function FrameworkRoutingPage() {
         <CodeBlock
           code={HOME_STATIC}
           lang="tsx"
-          marks={{ 12: 'highlight', 13: 'highlight' }}
+          marks={{ 12: 'highlight', 14: 'highlight' }}
           title="src/routes/page.tsx"
         />
         <p>
@@ -487,7 +496,7 @@ export default function FrameworkRoutingPage() {
           <CodeBlock
             code={HOME_COOKIE}
             lang="tsx"
-            marks={{ 2: 'highlight', 6: 'highlight', 7: 'highlight' }}
+            marks={{ 2: 'highlight', 5: 'highlight', 6: 'highlight' }}
             title="src/routes/page.tsx"
           />
           <p>

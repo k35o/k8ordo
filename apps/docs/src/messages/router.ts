@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const description = message({
-  ja: 'Navigation APIでページを切り替えるReactのルーターです。`href`と`navigateTo`はルート表の型で検査され、リンクは`<a>`のまま書けます。',
-  en: 'A React router that switches pages through the Navigation API. `href` and `navigateTo` are typed by the route table, and links stay plain `<a>` elements.',
+  ja: 'Navigation APIでページを切り替えるReactのルーターです。`href`はルート表の型で検査され、リンクは`<a>`のまま、コードからの遷移は`navigation.navigate()`のまま書けます。',
+  en: 'A React router that switches pages through the Navigation API. `href` is typed by the route table, links stay plain `<a>` elements, and a page change from code stays `navigation.navigate()`.',
 });
 
 export const tagline = message({
@@ -33,8 +33,8 @@ export const claimTypesTitle = message({
 
 export const claimTypesBody = [
   message({
-    ja: '`href`と`navigateTo`は、ルート表のパターンを文字列で受け取ります。足りないparamは設定なしでも型エラーになり、`Register`にルート表を登録すると表に無いパターンも型エラーになります。',
-    en: '`href` and `navigateTo` take a pattern from the route table as a string. A missing param is a type error with no setup, and once the table is registered in `Register`, so is a pattern the table lacks.',
+    ja: '`href`は、ルート表のパターンを文字列で受け取ります。足りないparamは設定なしでも型エラーになり、`Register`にルート表を登録すると表に無いパターンも型エラーになります。',
+    en: '`href` takes a pattern from the route table as a string. A missing param is a type error with no setup, and once the table is registered in `Register`, so is a pattern the table lacks.',
   }),
   message({
     ja: 'ページはルート表をimportせず、リンク先をパターンの文字列だけで書きます。ルート表とページが互いにimportし合う循環は起きません。',
@@ -59,8 +59,8 @@ export const claimNavigationTitle = message({
 
 export const claimNavigationBody = [
   message({
-    ja: '`navigateTo`が返す`finished`は、新しいページが画面に表示されたときに解決します。`useTransition`の中で待てば、`isPending`は切り替えの間だけ`true`になります。',
-    en: 'The `finished` promise from `navigateTo` resolves once the new page is on screen. Await it inside `useTransition`, and `isPending` is `true` only while the page changes.',
+    ja: '`navigation.navigate(href(…))`が返す`finished`は、新しいページが画面に表示されたときに解決します。`useTransition`の中で待てば、`isPending`は切り替えの間だけ`true`になります。',
+    en: 'The `finished` promise from `navigation.navigate(href(…))` resolves once the new page is on screen. Await it inside `useTransition`, and `isPending` is `true` only while the page changes.',
   }),
   message({
     ja: "ページの切り替えには、Reactのトランジションの種類として`navigation`が付きます。`<ViewTransition>`の`update`で`navigation`だけを`'auto'`にすると、ページを切り替えるときだけアニメーションします。",

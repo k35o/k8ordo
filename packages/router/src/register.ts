@@ -18,7 +18,7 @@ import type { ParamsOf, ParamValue } from './paths';
  * }
  * ```
  *
- * and `href` / `navigateTo` / `useParams` verify their pattern against the
+ * and `href` / `useParams` verify their pattern against the
  * table everywhere — without any component importing the table's value.
  * Only `<Router>` touches the value; everything else needs just the string
  * pattern, so the routes-module → pages → routes-module import cycle never
@@ -137,13 +137,13 @@ export type PageProps<P extends RegisteredPattern> = {
 
 /**
  * The props a `layout.tsx` receives, by the prefix every route below it
- * shares — only where the table also has a page at that prefix, since the
- * constraint is a page pattern; a layout with no page of its own declares
- * its props inline. Its params are strings whatever it declared: a
- * `not-found.tsx` renders under it whether or not its schemas accepted, and
- * a typed value there would be a lie.
+ * shares — any pattern, a layout whose directory has no page of its own
+ * included: the generated table checks the props against the layout's own
+ * pattern at the import, so a wrong one fails there. Its params are strings
+ * whatever it declared: a `not-found.tsx` renders under it whether or not
+ * its schemas accepted, and a typed value there would be a lie.
  */
-export type LayoutProps<P extends RegisteredPattern> = {
+export type LayoutProps<P extends string> = {
   readonly params: ParamsOf<P>;
   readonly pathname: string;
   readonly children: ReactNode;

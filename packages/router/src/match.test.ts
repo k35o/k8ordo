@@ -1,3 +1,5 @@
+import { readFile } from 'node:fs/promises';
+
 import { describe, expect, it } from 'vite-plus/test';
 
 import { matchPath } from './match';
@@ -67,5 +69,16 @@ describe('matchPath with inclusive', () => {
     expect(
       matchPath('/products/:id', '/products/1', { inclusive: true }),
     ).toStrictEqual({ id: '1' });
+  });
+});
+
+describe('the module matchPath ships in', () => {
+  it('carries no directive, so a Server Component calls matchPath itself', async () => {
+    const shipped = await readFile(
+      new URL('../dist/match.mjs', import.meta.url),
+      'utf8',
+    );
+    expect(shipped).toContain('const matchPath');
+    expect(shipped).not.toMatch(/^\s*["']use client["']/u);
   });
 });

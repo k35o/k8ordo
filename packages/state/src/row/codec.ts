@@ -22,8 +22,10 @@ export type Versioning<Schema extends StateSchema = StateSchema> = {
    * written before the definition declared a version. The result passes the
    * schema field by field like any read, so its keys are the schema's but its
    * values may be anything: map what you can, hand old values over as they
-   * are, and leave the rest out. A throw reads as nothing stored and leaves
-   * the row as it was.
+   * are, and leave the rest out. A throw reads as nothing stored and is
+   * reported — `reportError` in the browser, `console.error` from
+   * `parseCookies` — and the row stays as it was, through an `update()` too,
+   * for a fixed `migrate` to read.
    */
   migrate: (
     old: Readonly<Record<string, unknown>>,
@@ -37,13 +39,13 @@ export type Versioning<Schema extends StateSchema = StateSchema> = {
  * never what an unversioned row holds (the values are always an object), so
  * the two never read as each other.
  */
+export type RowRead =
+  | { values: StateValues; stale: boolean; failed: false }
+  | { values: StateValues; stale: false; failed: true; error: unknown };
+
 // parse は版を知らない読み方なので、行を読むのは read だけにする
 export type RowCodec = Omit<StoredCodec, 'parse'> & {
-  /**
-   * The values in a parsed row. `stale` when the row was written by an older
-   * version and migrated here, so the caller writes it back.
-   */
-  read: (row: unknown) => { values: StateValues; stale: boolean };
+  read: (row: unknown) => RowRead;
   /** The JSON-ready row for these values. */
   row: (values: Readonly<StateValues>) => unknown;
   /** The version rows are written with, `undefined` when unversioned. */
@@ -75,7 +77,11 @@ export const createRowCodec = (
   if (versioning === undefined) {
     return {
       ...stored,
-      read: (row) => ({ values: stored.parse(row), stale: false }),
+      read: (row) => ({
+        values: stored.parse(row),
+        stale: false,
+        failed: false,
+      }),
       row: (values) => values,
       version: undefined,
     };
@@ -88,24 +94,33 @@ export const createRowCodec = (
     );
   }
 
-  const read = (row: unknown): { values: StateValues; stale: boolean } => {
+  const read = (row: unknown): RowRead => {
     const envelope = envelopeOf(row);
     if (envelope === null) {
-      return { values: stored.parse(undefined), stale: false };
+      return { values: stored.parse(undefined), stale: false, failed: false };
     }
     // 新しい版が書いた行は移行できないので、読めるフィールドだけを拾う。
     // 書き戻すと、その版を動かしているタブの値を古い形で潰してしまう
     if (envelope.fromVersion >= version) {
-      return { values: stored.parse(envelope.values), stale: false };
+      return {
+        values: stored.parse(envelope.values),
+        stale: false,
+        failed: false,
+      };
     }
     let migrated: unknown;
     try {
       migrated = migrate(envelope.values, envelope.fromVersion);
-    } catch {
+    } catch (error) {
       // 直した migrate が次の読み込みでやり直せるよう、行には触らない
-      return { values: stored.parse(undefined), stale: false };
+      return {
+        values: stored.parse(undefined),
+        stale: false,
+        failed: true,
+        error,
+      };
     }
-    return { values: stored.parse(migrated), stale: true };
+    return { values: stored.parse(migrated), stale: true, failed: false };
   };
 
   return {

@@ -24,7 +24,7 @@ export function FormDemo({ fields }: Props) {
   const inStock = form.field('inStock');
   // フォームが GET で書いた URL を、同じスキーマの state が読み返す
   const [current] = useAppState(demoState);
-  const search = demoState.search(current);
+  const search = demoState.href('', current);
 
   return (
     <div className={styles.root}>
@@ -78,9 +78,9 @@ export function FormDemo({ fields }: Props) {
         </div>
       </form>
       <dl className={styles.values}>
-        <dt className={styles.term}>URL</dt>
+        <dt className={styles.term}>{m.form.demoUrlTerm()}</dt>
         <dd className={styles.value}>
-          <Code>{search === '' ? m.form.demoUrlEmpty() : `?${search}`}</Code>
+          <Code>{search === '' ? m.form.demoUrlEmpty() : search}</Code>
         </dd>
         <dt className={styles.term}>state</dt>
         <dd className={styles.value}>

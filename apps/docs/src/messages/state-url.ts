@@ -106,8 +106,13 @@ export const canonicalTitle = message({
 });
 
 export const canonicalOmit = message({
-  ja: '`search`と`href`は、既定値と同じフィールドをクエリから省きます。同じ状態からはいつも同じ、いちばん短いURLができます。同じ状態を指すリンクやブックマーク、キャッシュのキーが一致します。',
-  en: '`search` and `href` leave out every field that sits at its default. The same state always gives the same, shortest URL. Links, bookmarks and cache keys that point at the same state agree.',
+  ja: '`href`は、既定値と同じフィールドをクエリから省きます。同じ状態からはいつも同じ、いちばん短いURLができます。同じ状態を指すリンクやブックマーク、キャッシュのキーが一致します。',
+  en: '`href` leaves out every field that sits at its default. The same state always gives the same, shortest URL. Links, bookmarks and cache keys that point at the same state agree.',
+});
+
+export const canonicalForm = message({
+  ja: '正規の形になるのは、`href`と`update()`が書いたURLだけです。GETフォームは名前を持つ欄をすべて送るので、空の検索欄は`q=`、既定値のままの欄は`min=0`のようにURLに残ります。読む値は同じですが、URLは正規の形より長くなり、ページはそれを書き直しません。',
+  en: 'Only the URLs `href` and `update()` write are in the canonical form. A GET form submits every named field, so an empty search box stays in the URL as `q=` and a field at its default as `min=0`. The values read are the same, but the URL is longer than the canonical one, and the page does not rewrite it.',
 });
 
 export const canonicalOrder = message({
@@ -121,8 +126,8 @@ export const demoTitle = message({
 });
 
 export const demoDescription = message({
-  ja: '入力したクエリを上の`catalogState`と同じ定義の`parseUrl`で読み、`search`で作り直したクエリと並べて表示します（このページのURLは変わりません）。',
-  en: 'The query you type is read by `parseUrl` on the same definition as `catalogState` above, next to the query `search` writes back from it (this page’s own URL is left alone).',
+  ja: '入力したクエリを上の`catalogState`と同じ定義の`parseUrl`で読み、`href`で作り直したクエリと並べて表示します（このページのURLは変わりません）。',
+  en: 'The query you type is read by `parseUrl` on the same definition as `catalogState` above, next to the query `href` writes back from it (this page’s own URL is left alone).',
 });
 
 export const demoSteps = [

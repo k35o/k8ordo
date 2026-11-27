@@ -1,9 +1,8 @@
 /**
  * The type half of the route table: everything here is derived from the
  * pattern strings by inference alone — no code generation. A pattern like
- * `'/:locale/products/:id'` yields its params (`{ locale, id }`), its
- * concrete-path type (`` `/${string}/products/${string}` ``), and whether a
- * path handed in fits it.
+ * `'/:locale/products/:id'` yields its params (`{ locale, id }`) and its
+ * concrete-path type (`` `/${string}/products/${string}` ``).
  */
 
 type SegParam<Segment extends string> = Segment extends `:${infer Name}+`
@@ -52,15 +51,16 @@ export type ParamsSchemaFor<Pattern extends string> = StandardSchemaLike<
 >;
 
 type MergedOutput<Schemas extends readonly unknown[]> =
-  Schemas extends readonly [infer Head, ...infer Tail]
-    ? Omit<MergedOutput<Tail>, keyof SchemaOutput<Head>> & SchemaOutput<Head>
+  Schemas extends readonly [...infer Init, infer Last]
+    ? Omit<MergedOutput<Init>, keyof SchemaOutput<Last>> & SchemaOutput<Last>
     : object;
 
 /**
  * A pattern's params after the schemas along its stack have run — outer
- * layouts first, the page last — each replacing the strings it names with
- * what it produced. Params no schema names stay strings. A union of stacks
- * gives the union of what each one produces.
+ * layouts first, the page last — each replacing what it names with what it
+ * produced, so of two schemas that name one param, the later one's output is
+ * what the page receives. Params no schema names stay strings. A union of
+ * stacks gives the union of what each one produces.
  */
 export type ParsedParams<
   Pattern extends string,
@@ -92,77 +92,6 @@ type SegListPath<Rest extends string> =
  */
 export type PathFor<Pattern extends string> = Pattern extends `/${infer Rest}`
   ? `/${SegListPath<Rest>}`
-  : never;
-
-/**
- * One segment of a path against one segment of a pattern, the way URLPattern
- * reads a `:param`: any single segment that is not empty. A `${string}` in
- * the path — a param built into a template literal — counts as one segment.
- * A rest param (`:name+`) is `SegmentsFit`'s to read: it takes more than one.
- */
-type SegmentFits<
-  Segment extends string,
-  PatternSegment extends string,
-> = PatternSegment extends `:${string}`
-  ? Segment extends ''
-    ? false
-    : true
-  : Segment extends PatternSegment
-    ? true
-    : false;
-
-/** One segment or more, none of them empty: what a rest param takes. */
-type EverySegmentFilled<Rest extends string> =
-  Rest extends `${infer Segment}/${infer Tail}`
-    ? Segment extends ''
-      ? false
-      : EverySegmentFilled<Tail>
-    : Rest extends ''
-      ? false
-      : true;
-
-// A rest param (`:name+`) is read only where it ends the pattern, which is
-// the one place the framework's grammar puts it.
-type SegmentsFit<
-  Rest extends string,
-  PatternRest extends string,
-> = PatternRest extends `${infer PatternSegment}/${infer PatternTail}`
-  ? Rest extends `${infer Segment}/${infer Tail}`
-    ? SegmentFits<Segment, PatternSegment> extends true
-      ? SegmentsFit<Tail, PatternTail>
-      : false
-    : false
-  : PatternRest extends `:${string}+`
-    ? EverySegmentFilled<Rest>
-    : Rest extends `${string}/${string}`
-      ? false
-      : SegmentFits<Rest, PatternRest>;
-
-// Pattern を裸の型引数のまま条件に置き、パターンの和集合に 1 つずつ分配する
-type FitsAny<
-  Path extends string,
-  Pattern extends string,
-> = Pattern extends `/${infer PatternRest}`
-  ? Path extends `/${infer Rest}`
-    ? SegmentsFit<Rest, PatternRest>
-    : false
-  : never;
-
-/**
- * `Path` when one of `Patterns` matches it segment by segment, `never` when
- * none does. A union of paths keeps only the members that match.
- *
- * The path is checked against the patterns, never collected into a union of
- * `PathFor` each pattern: `/:locale` would put `/${string}` in that union,
- * and `/${string}` takes every path there is.
- */
-export type PathMatching<
-  Path extends string,
-  Patterns extends string,
-> = Path extends string
-  ? true extends FitsAny<Path, Patterns>
-    ? Path
-    : never
   : never;
 
 /**

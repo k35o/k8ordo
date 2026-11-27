@@ -94,50 +94,28 @@ export const hrefCaveats = [
     en: 'Values are encoded with `encodeURIComponent`.',
   }),
   message({
+    ja: 'コードからページを移るときは、返したURLを`navigation.navigate()`に渡します。リンクと同じURLなので、ルーターも同じように扱います。',
+    en: 'To change pages from code, hand the URL it returns to `navigation.navigate()`. It is the same URL a link points at, and the router handles it the same way.',
+  }),
+  message({
     ja: '実行時には、`/*`を含むパターンは`is a wildcard`を含む`TypeError`になります。値の無いparamは`needs a value for`、URLで表せない値は`has no URL spelling`を含む`TypeError`になります。',
     en: 'At run time, a pattern with `/*` throws a `TypeError` containing `is a wildcard`. A param without a value throws one containing `needs a value for`, and a value that cannot be spelled in a URL one containing `has no URL spelling`.',
   }),
 ] as const;
 
-export const navigateToSummary = message({
-  ja: 'パターンとparamからURLを作り、そのページへ移動します。',
-  en: 'Builds a URL from a pattern and its params, and navigates there.',
-});
-
-export const navigateToOptions = message({
-  ja: 'ナビゲーションのオプション。paramの無いパターンでは2つ目の引数です。',
-  en: 'Options for the navigation. For a pattern without params, it is the second argument.',
-});
-
-export const navigateToReturns = message({
-  ja: '`navigation.navigate()`が返す`{ committed, finished }`。`finished`は、新しいページが画面に表示されたときに解決します。',
-  en: 'The `{ committed, finished }` that `navigation.navigate()` returns. `finished` resolves once the new page is on screen.',
-});
-
-export const navigateToCaveats = [
-  message({
-    ja: '既定では新しい履歴エントリを追加します。',
-    en: 'By default, it adds a new history entry.',
-  }),
-  message({
-    ja: '別のナビゲーションに追い越されると、`finished`は`AbortError`でrejectします。',
-    en: 'Overtaken by another navigation, `finished` rejects with an `AbortError`.',
-  }),
-] as const;
-
 export const bindParamsSummary = message({
-  ja: '一部のparamを関数から補う`href`と`navigateTo`を作ります。ロケールのように、すべてのリンクに共通のparamに使います。',
-  en: 'Creates an `href` and a `navigateTo` that fill in some params from a function. Use it for a param every link shares, such as a locale.',
+  ja: '一部のparamを関数から補う`href`を作ります。ロケールのように、すべてのリンクに共通のparamに使います。',
+  en: 'Creates an `href` that fills in some params from a function. Use it for a param every link shares, such as a locale.',
 });
 
 export const bindParamsSource = message({
-  ja: '補うparamを返す関数。`href`や`navigateTo`を呼ぶたびに呼ばれます。',
-  en: 'A function returning the params to fill in. It is called on every call to `href` or `navigateTo`.',
+  ja: '補うparamを返す関数。返した`href`を呼ぶたびに呼ばれます。',
+  en: 'A function returning the params to fill in. It is called on every call to the `href` returned.',
 });
 
 export const bindParamsReturns = message({
-  ja: '`source`の値を補う`href`と`navigateTo`。',
-  en: 'An `href` and a `navigateTo` that fill in what `source` returns.',
+  ja: '`source`の値を補う`href`。`export const href = bindParams(…)`のように、そのまま`href`の名前で書き出します。',
+  en: 'An `href` that fills in what `source` returns. Export it under the name `href` as it is: `export const href = bindParams(…)`.',
 });
 
 export const bindParamsCaveats = [
@@ -568,16 +546,6 @@ export const errorComponentSummary = message({
   en: 'The type of the component named by the route table’s `error`.',
 });
 
-export const navigateToOptionsSummary = message({
-  ja: '`navigateTo`のオプションの型です。',
-  en: 'The type of `navigateTo`’s options.',
-});
-
-export const navigateToOptionsHistory = message({
-  ja: "`'push'`なら新しい履歴エントリを追加し、`'replace'`なら今のエントリを置き換えます。既定は`'push'`です。",
-  en: "`'push'` adds a new history entry, and `'replace'` replaces the current one. The default is `'push'`.",
-});
-
 export const matchOptionsSummary = message({
   ja: '`useMatch`と`matchPath`のオプションの型です。',
   en: 'The type of the options `useMatch` and `matchPath` take.',
@@ -596,21 +564,6 @@ export const matchablePatternSummary = message({
 export const boundParamsSummary = message({
   ja: '`bindParams`に渡す関数が返す値の型です。URLでの表し方が1通りに決まる値を、paramの名前ごとに持ちます。',
   en: 'The type of what the function given to `bindParams` returns: values with exactly one URL spelling, by param name.',
-});
-
-export const boundLinksSummary = message({
-  ja: '`bindParams`が返すオブジェクトの型です。',
-  en: 'The type of the object `bindParams` returns.',
-});
-
-export const boundLinksHref = message({
-  ja: '`source`のparamを補う`href`。',
-  en: 'An `href` that fills in the params from `source`.',
-});
-
-export const boundLinksNavigateTo = message({
-  ja: '`source`のparamを補う`navigateTo`。',
-  en: 'A `navigateTo` that fills in the params from `source`.',
 });
 
 export const navigationHandlerSummary = message({
@@ -700,8 +653,8 @@ export const pagePropsSearch = message({
 });
 
 export const layoutPropsSummary = message({
-  ja: '`@k8ordo/framework`のレイアウトが受け取るpropsの型です。型引数には、ページのあるパターンだけを渡せます。',
-  en: 'The props a layout under `@k8ordo/framework` receives. The type argument must be a pattern the table has a page at.',
+  ja: '`@k8ordo/framework`のレイアウトが受け取るpropsの型です。型引数には、レイアウトのディレクトリのパターンを渡します。そこにページが無くても構いません。',
+  en: 'The props a layout under `@k8ordo/framework` receives. The type argument is the pattern of the layout’s directory, whether or not a page is there.',
 });
 
 export const layoutPropsParams = message({
@@ -738,22 +691,6 @@ export const navigablePatternOfSummary = message({
   ja: '表`R`のうち、リンク先にできるパターンです。`/*`を含むものを除きます。',
   en: 'The patterns in table `R` a link can point at, which excludes those with `/*`.',
 });
-
-export const navigablePathSummary = message({
-  ja: 'パス`Path`を、表のリンク先にできるパターンと区間ごとに比べます。どれかに合えば`Path`、合わなければ`never`です。',
-  en: 'Compares `Path` segment by segment with the table’s linkable patterns. It is `Path` when one fits, and `never` when none does.',
-});
-
-export const navigablePathCaveats = [
-  message({
-    ja: '`:param`の位置には、空でない区間が1つ入ります。',
-    en: 'Where a pattern has a `:param`, any one non-empty segment fits.',
-  }),
-  message({
-    ja: '末尾にスラッシュのあるパスは`never`です。',
-    en: 'A path with a trailing slash is `never`.',
-  }),
-] as const;
 
 export const paramsOfSummary = message({
   ja: 'パターンの文字列から作るparamの型です。値はすべて`string`です。',

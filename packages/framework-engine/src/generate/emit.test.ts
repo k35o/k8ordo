@@ -163,26 +163,6 @@ describe('the emitted register', () => {
     expect(source).not.toContain('@k8ordo/router');
   });
 
-  it('wires the same table into state only when the app depends on it', () => {
-    const withState = emitRegisterModule({
-      routesModule: './routes.gen',
-      stateModule: '@k8ordo/state',
-    });
-    expect(withState).toContain("declare module '@k8ordo/state' {");
-    expect(withState.match(/routes: typeof routes;/gu)).toHaveLength(2);
-
-    const without = emitRegisterModule({ routesModule: './routes.gen' });
-    expect(without).not.toContain('@k8ordo/state');
-  });
-
-  it('loads state itself, so the augmentation holds before any file imports it', () => {
-    const source = emitRegisterModule({
-      routesModule: './routes.gen',
-      stateModule: '@k8ordo/state',
-    });
-    expect(source).toContain("import type {} from '@k8ordo/state';");
-  });
-
   it('hands route files the request under a running server only', () => {
     const server = emitRegisterModule({
       routesModule: './routes.gen',

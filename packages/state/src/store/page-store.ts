@@ -49,7 +49,7 @@ const readLive = (def: PageState, page: PageInternals): Live => {
 /**
  * The URL's pathname as the router compares a tree's: a trailing slash is
  * not another page. `@k8ordo/router`'s `normalizePathname`, spelled again —
- * the router is a peer this package only reads types from.
+ * this package never imports the router.
  */
 const livePathname = (): string => {
   const { pathname } = location;

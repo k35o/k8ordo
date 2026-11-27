@@ -174,8 +174,8 @@ export const propsReceive = message({
 });
 
 export const propsTypes = message({
-  ja: '`@k8ordo/framework`の`PageProps`と`LayoutProps`は、このpropsをパターンから引いた型です。生成されたルート表を読むので、型引数にはパターンの文字列だけを渡します。`LayoutProps`に渡せるのはページのあるパターンだけです。`products/page.tsx`が無いなら、`/products`のレイアウトはpropsの型を自分で書きます。',
-  en: '`PageProps` and `LayoutProps` from `@k8ordo/framework` are these props looked up by pattern. They read the generated route table, so the pattern string is the only type argument. `LayoutProps` takes only a pattern that has a page: without `products/page.tsx`, the layout for `/products` writes its props type itself.',
+  ja: '`@k8ordo/framework`の`PageProps`と`LayoutProps`は、このpropsをパターンから引いた型です。生成されたルート表を読むので、型引数にはパターンの文字列だけを渡します。`PageProps`に渡せるのはページのあるパターンだけで、`LayoutProps`には`products/page.tsx`が無くても`/products`のレイアウトのパターンを渡せます。',
+  en: '`PageProps` and `LayoutProps` from `@k8ordo/framework` are these props looked up by pattern. They read the generated route table, so the pattern string is the only type argument. `PageProps` takes only a pattern that has a page, while `LayoutProps` takes the pattern of the layout for `/products` even without `products/page.tsx`.',
 });
 
 export const propsRequest = message({
@@ -259,8 +259,8 @@ export const rootStaticTitle = message({
 });
 
 export const rootStaticPage = message({
-  ja: 'staticモードでは`guard.ts`を置けないので、`/`のページがブラウザで移動します。`navigator.languages`からロケールを選び、`navigateTo`でそのロケールのURLへ移ります。ページ自体は何も描画しません。',
-  en: 'Static mode refuses a `guard.ts`, so the `/` page moves the visitor in the browser: it picks a locale from `navigator.languages` and goes to that locale’s URL with `navigateTo`. The page itself renders nothing.',
+  ja: 'staticモードでは`guard.ts`を置けないので、`/`のページがブラウザで移動します。`navigator.languages`からロケールを選び、`navigation.navigate(href(…))`でそのロケールのURLへ移ります。ページ自体は何も描画しません。',
+  en: 'Static mode refuses a `guard.ts`, so the `/` page moves the visitor in the browser: it picks a locale from `navigator.languages` and goes to that locale’s URL with `navigation.navigate(href(…))`. The page itself renders nothing.',
 });
 
 export const rootStaticEffect = message({
@@ -521,8 +521,8 @@ export const generatedFiles = [
     en: '`routes.gen.ts`: the route table itself. It checks each route file against its directory’s pattern with `satisfies`. `page.tsx`, `not-found.tsx`, `route.ts` and `fallback.tsx` are read with `import()` when a request reaches them, and a page or a `not-found.tsx` stands in the table as `lazy()`.',
   }),
   message({
-    ja: '`register.gen.ts`：ルート表をフレームワークに登録します。これで`href()`や`useMatch()`のパターンに型が付きます。serverモードでは、`PageProps`と`LayoutProps`に`request`も足します。アプリが`@k8ordo/state`に依存していれば、そちらにも登録します。アプリが`@k8ordo/i18n`に依存し、`src/i18n.ts`が`locales`をexportしていれば、`@k8ordo/i18n`の`Register`も書きます。',
-    en: '`register.gen.ts`: registers the table with the framework, which types the patterns `href()` and `useMatch()` take. Under server mode it also adds `request` to `PageProps` and `LayoutProps`. When the application depends on `@k8ordo/state`, it registers the table there too. When the application depends on `@k8ordo/i18n` and `src/i18n.ts` exports `locales`, it writes `@k8ordo/i18n`’s `Register` too.',
+    ja: '`register.gen.ts`：ルート表をフレームワークに登録します。これで`href()`や`useMatch()`のパターンに型が付きます。serverモードでは、`PageProps`と`LayoutProps`に`request`も足します。アプリが`@k8ordo/i18n`に依存し、`src/i18n.ts`が`locales`をexportしていれば、`@k8ordo/i18n`の`Register`も書きます。',
+    en: '`register.gen.ts`: registers the table with the framework, which types the patterns `href()` and `useMatch()` take. Under server mode it also adds `request` to `PageProps` and `LayoutProps`. When the application depends on `@k8ordo/i18n` and `src/i18n.ts` exports `locales`, it writes `@k8ordo/i18n`’s `Register` too.',
   }),
   message({
     ja: '`.gitignore`：`*`で中身をすべて無視します。`.k8ordo/`はこれでgitの管理から外れるので、アプリの`.gitignore`に足すものはありません。',

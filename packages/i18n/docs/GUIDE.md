@@ -416,16 +416,15 @@ visitor without JavaScript is redirected all the same, and so is a client
 navigation to `/`, whose payload request the guard answers too.
 
 Static mode refuses a `guard.ts` — a file has no request to guard — so
-there the page renders nothing and redirects from an effect: through the
-bound `navigateTo` where the router is `@k8ordo/router`'s (below), or
+there the page renders nothing and redirects from an effect: to the bound
+`href` where the router is `@k8ordo/router`'s (below), or to
 `locales.localize` otherwise:
 
 ```tsx
 'use client';
 useEffect(() => {
-  navigateTo(
-    '/:locale',
-    { locale: locales.negotiate(navigator.languages) },
+  navigation.navigate(
+    href('/:locale', { locale: locales.negotiate(navigator.languages) }),
     { history: 'replace' },
   );
 }, []);
@@ -516,15 +515,15 @@ script runs, and a visitor without JavaScript keeps the default.
   // src/lib/links.ts
   import { bindParams } from '@k8ordo/framework'; // '@k8ordo/router' without the framework
 
-  export const { href, navigateTo } = bindParams(() => ({
+  export const href = bindParams(() => ({
     locale: locales.getLocale(),
   }));
   ```
 
   `href('/:locale/products/:id', { id })` then reads the current locale;
-  `navigateTo('/:locale', { locale: 'en' }, { history: 'replace' })`
-  overrides it. Neither package imports the other: the line above is the
-  application's. `localize` / `delocalize` remain for a pathname in hand —
+  `href('/:locale', { locale: 'en' })` overrides it, and
+  `navigation.navigate(href(…))` goes there from code. Neither package
+  imports the other: the line above is the application's. `localize` / `delocalize` remain for a pathname in hand —
   the language switcher, which takes the page it is on to another locale.
 
 - **`@k8ordo/ui`**: its built-in strings read `currentLocale()` from this

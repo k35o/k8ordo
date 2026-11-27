@@ -22,7 +22,7 @@ const prefixOf = (base: string): string => {
 /**
  * A pathname in the table's terms, as the URL spells it: the base in front.
  * Under `base: '/docs/'`, `/products` → `/docs/products` and `/` → `/docs/`.
- * `href` and `navigateTo` build every link through it, so a table written
+ * `href` builds every link through it, so a table written
  * from the root works wherever the application is served.
  */
 export const withBase = (

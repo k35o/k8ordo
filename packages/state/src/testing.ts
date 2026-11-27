@@ -1,5 +1,7 @@
 import { resetStateRegistry } from './store/registry';
 
+export { resetStateRegistry } from './store/registry';
+
 export type PageUrl = {
   /** Params to add to the search the page already has, as written. */
   search?: string;

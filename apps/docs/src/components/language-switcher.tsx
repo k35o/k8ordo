@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname } from '@k8ordo/framework';
+import { usePathname, withBase } from '@k8ordo/framework';
 import { DropdownMenu } from '@k8ordo/ui';
 
 import { getLocale, locales } from '../i18n';
@@ -27,7 +27,10 @@ export function LanguageSwitcher() {
       <DropdownMenu.Content>
         {locales.all.map((l) => (
           <DropdownMenu.Item
-            href={locales.localize(path, l)}
+            // href() は表のパターンしか受け取らず、ここの行き先は今の
+            // pathname から作るので、型を偽らずには書けない。フレームワーク
+            // 下のブラウザには、どのパターンが勝ったかが届かない。
+            href={withBase(locales.localize(path, l))}
             key={l}
             label={LOCALE_LABELS[l]}
           />

@@ -101,14 +101,16 @@ be wrapped in one of these to come under the same check.
 
 ## The search
 
-`@k8ordo/state` owns the search params, and the framework generates its
-`Register` for you, so a filter is typed against the same routes:
+`@k8ordo/state` owns the search params. A link that carries them is built on
+the URL `href` returns, so the pattern is checked against the same routes:
 
 ```tsx
 'use client';
+import { href } from '@k8ordo/framework';
 import { useAppState } from '@k8ordo/state';
 
 const [{ q }, update] = useAppState(listState, ['q']);
+<a href={listState.href(href('/products'), { q, page: 2 })}>next</a>;
 ```
 
 Changing the search does not change the page: the router leaves the route tree
@@ -155,6 +157,25 @@ returns to the position that entry was left at once the page loaded again
 is on screen. The generated table reads it through
 `@k8ordo/state`, so the application depends on that. A layout never
 receives it.
+
+So a pager below the list leaves the reader at the bottom of the new page,
+a link to `?page=2` and an `update()` alike — a fragment does not scroll a
+same-pathname navigation either. `update().finished` settles once the page
+loaded again is on screen, so the pager moves the focus to the results there:
+
+```tsx
+'use client';
+const results = useRef<HTMLHeadingElement>(null);
+
+const turn = async (next: number) => {
+  await update({ page: next }, { history: 'push' }).finished;
+  results.current?.focus(); // the scroll follows the focus
+};
+
+<h2 ref={results} tabIndex={-1}>
+  Results
+</h2>;
+```
 
 Under `mode: 'static'` the export is refused by name: a file is the same
 whatever the search holds.

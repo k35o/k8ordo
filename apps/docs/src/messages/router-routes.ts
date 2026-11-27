@@ -76,8 +76,8 @@ export const restType = message({
 });
 
 export const restLink = message({
-  ja: '`href`と`navigateTo`には同じ配列を渡します。区間ごとにエスケープして`/`でつなぎます。空の配列と空文字の区間は`TypeError`になります。',
-  en: '`href` and `navigateTo` take the same array, escape each segment and join them with `/`. An empty array or an empty segment throws a `TypeError`.',
+  ja: '`href`には同じ配列を渡します。区間ごとにエスケープして`/`でつなぎます。空の配列と空文字の区間は`TypeError`になります。',
+  en: '`href` takes the same array, escapes each segment and joins them with `/`. An empty array or an empty segment throws a `TypeError`.',
 });
 
 export const wildcardTitle = message({
@@ -190,12 +190,22 @@ export const refusedTwice = message({
   en: 'The same pattern declared twice, wherever the copies nest',
 });
 
-export const refusedUnparsable = message({
-  ja: '`URLPattern`が解釈できないパターン：`URLPattern`自身の`TypeError`になります',
-  en: 'A pattern `URLPattern` cannot parse: `URLPattern`’s own `TypeError`',
+export const refusedGrammar = message({
+  ja: 'ここまでの書き方に無い区間（`/:id?`、`/files/:path*`、`/foo-:bar`、`/files/*.pdf`など）',
+  en: 'A segment none of the forms above spells, such as `/:id?`, `/files/:path*`, `/foo-:bar` or `/files/*.pdf`',
+});
+
+export const refusedPosition = message({
+  ja: 'パターンの最後以外に置いた`:name+`と`*`（枝のキーの最後でも、子のキーが後ろに続けば最後ではありません）',
+  en: 'A `:name+` or a `*` anywhere but at the end of the full pattern, including at the end of a branch’s key that its children continue',
+});
+
+export const refusedEmpty = message({
+  ja: '空の区間（`/a//b`、`/a/`）',
+  en: 'An empty segment, as in `/a//b` or `/a/`',
 });
 
 export const refusedWhy = message({
-  ja: '括弧を拒むのは、`URLPattern`が`(…)`を正規表現として読むからです。`children`の無いグループは、親の`/`のページの2度目の宣言になります。',
-  en: 'Parentheses are refused because `URLPattern` reads `(…)` as a regular expression. A group without `children` would declare its parent’s `/` page a second time.',
+  ja: '`URLPattern`はこのページの書き方より多くの書き方を読みます。けれども、paramの型とリンクはこのページの書き方だけを前提にしているので、それ以外の書き方では型と照合の結果が食い違います。`/:id?`の型は`{ "id?": string }`ですが、照合の結果は`{ id }`です。括弧を拒むのは、`URLPattern`が`(…)`を正規表現として読むからです。`children`の無いグループは、親の`/`のページの2度目の宣言になります。',
+  en: '`URLPattern` reads more than the forms on this page, but the param types and links assume these forms alone, so any other spelling makes the types and the matching disagree: `/:id?` types as `{ "id?": string }` and matches as `{ id }`. Parentheses are refused because `URLPattern` reads `(…)` as a regular expression. A group without `children` would declare its parent’s `/` page a second time.',
 });

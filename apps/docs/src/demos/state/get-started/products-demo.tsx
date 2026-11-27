@@ -30,7 +30,7 @@ export function ProductsDemo() {
   // 手で書き換えた ?page=9 のような値でも空の一覧にしないよう、表示だけ丸める
   const page = Math.min(current.page, pages);
   const visible = matching.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
-  const search = listState.search(current);
+  const search = listState.href('', current);
 
   return (
     <div className={styles.root}>
@@ -81,7 +81,7 @@ export function ProductsDemo() {
       <dl className={styles.values}>
         <dt className={styles.term}>{t.tryQuery()}</dt>
         <dd className={styles.value}>
-          <Code>{search === '' ? t.tryQueryEmpty() : `?${search}`}</Code>
+          <Code>{search === '' ? t.tryQueryEmpty() : search}</Code>
         </dd>
       </dl>
     </div>
