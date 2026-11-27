@@ -30,8 +30,8 @@ When installed via npm, these docs live under `node_modules/@k8ordo/i18n/docs/`.
   drawn for the current locale, dates in its time zone), the Server
   Component boundary (a message is called before it is passed to a
   `'use client'` component), what reaches the browser, where the locale comes
-  from on each side, `/` (a `307` from a `guard.ts` in server mode,
-  an effect in static mode) and `<html lang>` / `dir`, the static build's
+  from on each side, `/` (`redirect(href('/:locale', …))` from a
+  `guard.ts` in server mode, an effect in static mode) and `<html lang>` / `dir`, the static build's
   `[locale]/paths.ts`, and pairing with `@k8ordo/router` / `@k8ordo/ui` /
   `@k8ordo/form`.
 

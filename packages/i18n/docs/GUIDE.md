@@ -379,21 +379,22 @@ draw.
 
 In server mode a `guard.ts` answers it before anything renders. It
 chooses from the request — the cookie holding the locale the visitor chose
-before, then `Accept-Language` — and ends the request with a `307`:
+before, then `Accept-Language` — and ends the request with `redirect()`:
 
 ```ts
 // src/routes/(home)/guard.ts
-import { withBase } from '@k8ordo/framework';
+import { href } from '@k8ordo/framework';
+import { redirect } from '@k8ordo/framework/server';
 import type { Guard } from '@k8ordo/framework/server';
 
 import { locales } from '../../i18n';
 
 const guard: Guard<'/'> = ({ request }) => {
-  const locale = locales.negotiateRequest(request, { cookie: 'locale' });
-  return new Response(null, {
-    status: 307,
-    headers: { location: withBase(locales.localize('/', locale)) },
-  });
+  redirect(
+    href('/:locale', {
+      locale: locales.negotiateRequest(request, { cookie: 'locale' }),
+    }),
+  );
 };
 
 export default guard;
@@ -412,10 +413,9 @@ The route group is what keeps the guard to `/`: a `guard.ts` runs before
 every URL below its directory, so one directly in `src/routes/` would send
 `/en/…` away as well. The page still has to exist — a guard runs before a
 URL a page declares, and without one `/` is a 404 — and it can return
-`null`. The status is `307`, not `308`, because the answer depends on who
-asks; `withBase` puts back the Vite `base` that `localize` leaves out. A
-visitor without JavaScript is redirected all the same, and so is a client
-navigation to `/`, whose payload request the guard answers too.
+`null`. The URL is built by `href`, as a link's is, so it carries the Vite
+`base`. A visitor without JavaScript is redirected all the same, and so is a
+client navigation to `/`, whose payload request the guard answers too.
 
 Static mode refuses a `guard.ts` — a file has no request to guard — so
 there the page renders nothing and redirects from an effect: to the bound
