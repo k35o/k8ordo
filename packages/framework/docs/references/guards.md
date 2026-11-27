@@ -185,12 +185,20 @@ both read-only.
 // src/routes/layout.tsx
 import type { LayoutProps } from '@k8ordo/framework';
 
+import { Analytics } from '../components/analytics';
+import { Shell } from '../components/shell';
+import { density } from '../state';
+
 export default function RootLayout({ children, request }: LayoutProps<'/'>) {
-  const theme = request.cookies.get('theme') ?? 'light';
-  const language = request.headers.get('accept-language') ?? 'en';
+  const optedOut = request.headers.get('sec-gpc') === '1';
   return (
-    <html data-theme={theme} lang={language.split(',')[0]}>
-      <body>{children}</body>
+    <html lang="en">
+      <body>
+        <Shell initialCookie={density.parseCookies(request.cookies)}>
+          {children}
+        </Shell>
+        {optedOut ? null : <Analytics />}
+      </body>
     </html>
   );
 }
@@ -202,10 +210,12 @@ export default function RootLayout({ children, request }: LayoutProps<'/'>) {
 takes it as a prop.
 
 A preference kept in a `@k8ordo/state` cookie state renders without a flash
-of the default this way: the layout reads it with
-`parseCookies(request.cookies)` and hands the result to the client component
-as `initialCookie`. A guard, a `route.ts` or a Server Action reads it with
-`parseCookies(cookies())`.
+of the default this way: the layout above reads it with
+`density.parseCookies(request.cookies)` and hands the result to the client
+component as `initialCookie`. A guard, a `route.ts` or a Server Action reads
+it with `density.parseCookies(cookies())`. The header the layout reads is
+Global Privacy Control's `Sec-GPC`, which decides whether the page carries
+an analytics script at all.
 
 Nothing lets a page write to the response — no status, no `Set-Cookie` —
 because a page is a render, and a render that answered the request would be

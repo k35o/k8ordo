@@ -66,7 +66,10 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   sets its own targets), the entries, the plugin's options —
   `reactCompiler` (React Compiler on the client components, which needs
   `oxc-transform-react` installed), `headers` on every answer, and
-  static mode's `site` and `csp` — and testing: what answers a request
+  static mode's `site` and `csp` — where a visitor's preference is kept
+  (look-only: `defineLocalState` and `inlineRead()`; one the server answers
+  by: `defineCookieState` under server mode; the language: a plain cookie
+  passed to `negotiateRequest` as `chosen`) — and testing: what answers a request
   through the built handler or `serve({ port: 0 })`, since the request API
   throws outside a request.
 

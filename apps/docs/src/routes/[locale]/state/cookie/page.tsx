@@ -32,6 +32,13 @@ export default function StateCookiePage() {
           <Rich>{t.defineSameAfter()}</Rich>
         </p>
         <p>
+          <Rich>{t.defineWhich()}</Rich>
+          <LocaleAnchor path="/:locale/framework/request">
+            {m.framework.navRequest()}
+          </LocaleAnchor>
+          <Rich>{t.defineWhichAfter()}</Rich>
+        </p>
+        <p>
           <Rich>{t.defineName()}</Rich>
         </p>
         <p>

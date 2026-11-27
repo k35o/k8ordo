@@ -338,6 +338,57 @@ them with `mode: 'server'` is a type error:
 - `csp` — the Content-Security-Policy each page carries
   ([Content Security Policy](references/csp.md#static-mode-hashes-in-a-meta)).
 
+## Preferences
+
+Where a visitor's preference is kept follows from who acts on it. There are
+three cases, and each has one place:
+
+- **It only changes how the page looks** — a colour scheme, a writing mode.
+  The browser applies it, and the server never needs it: keep it with
+  `@k8ordo/state`'s `defineLocalState`, and put it on `<html>` before the
+  first paint with an inline script that reads it through `inlineRead()`
+  ([A script of the application's that runs before the first paint](references/csp.md#a-script-of-the-applications-that-runs-before-the-first-paint)).
+  The same code runs under both modes. `@k8ordo/color-scheme` is this case.
+- **The server answers by it** — a guard that sends the visitor elsewhere, a
+  form that sets it without JavaScript, HTML that differs with it. The
+  density in `@k8ordo/state`'s cookie examples is here for the second
+  reason: it only changes the look, but a form without JavaScript sets it,
+  and the Server Action receiving that form can write a cookie, not
+  localStorage. Keep it in a cookie with `defineCookieState`, under
+  `mode: 'server'`. A render
+  reads it with `def.parseCookies(request.cookies)` and hands that to
+  `useAppState` as `initialCookie`, so the default never flashes; a guard,
+  a `route.ts` or a Server Action reads `def.parseCookies(cookies())` and
+  writes `cookies().set(...def.cookie(patch, cookies()))`; the browser
+  writes through `useAppState`'s `update()`
+  ([Guards, cookies and the request](references/guards.md)). Under
+  `mode: 'static'` there is no request, and the cookie renders its default
+  until the page hydrates.
+- **The language.** A page's language is its URL's; what is kept is the
+  choice for `/`, the one URL without a locale. It is a plain cookie of the
+  application's own, which the language switcher writes with
+  `cookieStore.set` and `/` hands to `@k8ordo/i18n` as `chosen` — a
+  `guard.ts` under server mode, an effect in front of
+  `navigator.languages` under static mode (`@k8ordo/i18n`'s guide, "The `/`
+  page"):
+
+  ```ts
+  // src/routes/(home)/guard.ts — server mode
+  const guard: Guard<'/'> = ({ request }) => {
+    redirect(
+      href('/:locale', {
+        locale: locales.negotiateRequest(request, {
+          chosen: cookies().get('locale'),
+        }),
+      }),
+    );
+  };
+  ```
+
+  It is not a cookie state: nothing renders it, and the tag needs no schema
+  — negotiation checks it against the set and falls through when it is not
+  one.
+
 ## Testing
 
 What needs no request — a `paramsSchema`, a module under `src/lib/`, a

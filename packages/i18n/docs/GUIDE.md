@@ -186,7 +186,10 @@ cookie under `SameSite=Strict`: the choice is gone once the browser closes,
 and the first request arriving from a link on another site goes without it,
 so that page is chosen by the header instead. `sameSite: 'lax'` and a far
 `expires` — 400 days is the longest a browser keeps a cookie — are what make
-the choice stick.
+the choice stick. Why the choice is a plain cookie rather than a
+`@k8ordo/state` cookie state, beside the application's other preferences, is
+in `@k8ordo/framework`'s guide
+(`node_modules/@k8ordo/framework/docs/GUIDE.md`, "Preferences").
 
 `parseAcceptLanguage(header)` is the header half on its own: it turns an
 `Accept-Language` header into a preference list for `negotiate`: `q` weights decide the order (a `q` that is not a number is ignored),

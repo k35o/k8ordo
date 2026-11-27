@@ -342,7 +342,10 @@ goes with every request: where the page receives the request's cookies —
 `request.cookies` in `@k8ordo/framework`'s server mode — `parseCookies` reads
 the values
 and `initialCookie` seeds the server render and the hydration render with
-them, so the default never flashes.
+them, so the default never flashes. Which preference belongs in a cookie,
+which in local state and which in neither (the language) is set out once,
+in `@k8ordo/framework`'s guide
+(`node_modules/@k8ordo/framework/docs/GUIDE.md`, "Preferences").
 
 ```tsx
 // src/routes/layout.tsx — server mode

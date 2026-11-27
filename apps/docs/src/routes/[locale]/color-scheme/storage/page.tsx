@@ -122,6 +122,13 @@ export default function ColorSchemeStoragePage() {
           </LocaleAnchor>
           <Rich>{t.besideOwnAfter()}</Rich>
         </p>
+        <p>
+          <Rich>{t.besideServer()}</Rich>
+          <LocaleAnchor path="/:locale/framework/request">
+            {m.framework.navRequest()}
+          </LocaleAnchor>
+          <Rich>{t.besideServerAfter()}</Rich>
+        </p>
         <Pitfall>
           <p>
             <Rich>{t.besideCollision()}</Rich>

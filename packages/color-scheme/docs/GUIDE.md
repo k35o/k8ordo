@@ -246,7 +246,10 @@ every visitor who never chose.
 - **Other preferences beside it.** A display preference of the
   application's own is a `defineLocalState` under another key, in a module
   without `'use client'`. Never define another `'color-scheme'`: stores are
-  shared by key, and the two definitions would fight over one row.
+  shared by key, and the two definitions would fight over one row. One the
+  server has to act on belongs in a cookie instead; `@k8ordo/framework`'s
+  guide (`node_modules/@k8ordo/framework/docs/GUIDE.md`, "Preferences") sets
+  out which preference goes where.
 
 ## What it guarantees
 

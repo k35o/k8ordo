@@ -20,6 +20,16 @@ export const defineSameAfter = message({
   en: '.',
 });
 
+export const defineWhich = message({
+  ja: 'Cookieに置くのは、サーバーが値で応答を変える設定です。上の密度は見た目を変えるだけですが、JavaScriptの無いフォームで変えるので、そのフォームを受けたServer ActionがCookieに書きます。ブラウザだけで当てる見た目の設定はlocalStorageに、言語の選択は素のCookieに置きます。どの設定をどこに置くかは',
+  en: 'A cookie is for a preference the server answers by. The density above only changes the look, but a form without JavaScript sets it, so the Server Action receiving that form writes it as a cookie. One the browser alone applies to the look goes in localStorage, and the language choice in a plain cookie. Which preference goes where is set out in ',
+});
+
+export const defineWhichAfter = message({
+  ja: 'の「設定の置き場所」を見てください。',
+  en: ', under “Where a preference is kept”.',
+});
+
 export const defineName = message({
   ja: '値は`k8ordo-state.density`という1つのCookieに、スキーマに書いたフィールドのJSONとして保存されます。この名前は、定義の`cookieName`で読めます。',
   en: 'The values are kept in one cookie named `k8ordo-state.density`, as the JSON of the declared fields. The definition exposes the name as `cookieName`.',
