@@ -10,6 +10,10 @@ import {
 } from './store/cookie-store';
 import { setKind } from './store/kind';
 
+type CookieReader = {
+  readonly get: (name: string) => string | undefined;
+};
+
 /**
  * App-scope state that lives in a cookie: device-persistent and shared across
  * tabs like local state, and — unlike it — sent with every request, so a
@@ -26,11 +30,14 @@ export type CookieState<Schema extends StateSchema = StateSchema> = {
   /** The cookie the values are written under: `k8ordo-state.<key>`. */
   cookieName: string;
   /**
-   * Reads the values out of a request's cookies on the server —
-   * `request.cookies` under `@k8ordo/framework`'s server mode, whose values arrive
-   * percent-decoded. Absent, corrupt, or rejected fields get their defaults.
+   * Reads the values out of a request's cookies on the server — anything
+   * whose `get(name)` gives a cookie's percent-decoded value:
+   * `request.cookies` in a page and `cookies()` in a guard, a route.ts or a
+   * Server Action under `@k8ordo/framework`'s server mode,
+   * `{ get: (name) => store.get(name)?.value }` over Next.js's
+   * `cookies()`. Absent, corrupt, or rejected fields get their defaults.
    */
-  parseCookies: (cookies: ReadonlyMap<string, string>) => output<Schema>;
+  parseCookies: (cookies: CookieReader) => output<Schema>;
   /**
    * The value to hand a server's cookie API when it writes the same cookie
    * (`cookies().set` from `@k8ordo/framework/server`, Next.js's): the JSON of these

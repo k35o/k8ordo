@@ -82,9 +82,11 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   (also `null` for a row of another version, when versioned) —
   unvalidated, so read only what you need with a fallback. A
   cookie definition exposes `cookieName` (`k8ordo-state.<key>`),
-  `parseCookies(cookies)` — reads the values out of a request's
-  percent-decoded cookies (`request.cookies` in `@k8ordo/framework`'s server mode), salvaged
-  like any read — and `cookieValue(values?)`, the unencoded JSON a server
+  `parseCookies(cookies)` — reads the values out of anything whose
+  `get(name)` returns a request's cookie percent-decoded (`request.cookies`
+  in a page and `cookies()` in a guard, a route.ts or a Server Action under
+  `@k8ordo/framework`'s server mode, `{ get: (name) => store.get(name)?.value }`
+  over Next.js's `cookies()`), salvaged like any read — and `cookieValue(values?)`, the unencoded JSON a server
   hands its cookie API (`cookies().set`, which percent-encodes it) when it
   sets the same cookie (`Path=/`, `SameSite=Lax`, `Max-Age=34560000`, never
   `HttpOnly`). `useAppState(definition, keys?, { initialUrl? } |

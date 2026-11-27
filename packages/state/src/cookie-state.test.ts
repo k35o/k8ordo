@@ -44,6 +44,17 @@ describe('parseCookies', () => {
     });
   });
 
+  it("reads through any get(name), as a server's cookie API offers it", () => {
+    const jar: Record<string, string> = {
+      'k8ordo-state.density': '{"density":"compact","fontSize":18}',
+    };
+
+    expect(density.parseCookies({ get: (name) => jar[name] })).toStrictEqual({
+      density: 'compact',
+      fontSize: 18,
+    });
+  });
+
   it('gives the defaults when the cookie is absent', () => {
     expect(density.parseCookies(new Map())).toStrictEqual({
       density: 'comfortable',

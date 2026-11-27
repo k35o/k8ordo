@@ -200,8 +200,8 @@ export const cookieName = message({
 });
 
 export const cookieParse = message({
-  ja: 'リクエストのCookieから値を読みます。パーセントデコード済みの値の`Map`を渡します。`@k8ordo/framework`のserverモードなら`request.cookies`をそのまま渡せます。古いバージョンの値は移行して読みますが、書き戻しません。',
-  en: 'Reads the values out of a request’s cookies, given as a `Map` of percent-decoded values. In `@k8ordo/framework`’s server mode, pass `request.cookies` as it is. An older version is migrated as it is read, but never written back.',
+  ja: 'リクエストのCookieから値を読みます。Cookieの名前からパーセントデコードした値を返す`get`を持つものを渡します。`@k8ordo/framework`のserverモードなら、ページでは`request.cookies`をそのまま渡せます。`guard.ts`と`route.ts`とServer Actionでは`cookies()`を渡します。古いバージョンの値は移行して読みますが、書き戻しません。',
+  en: 'Reads the values out of a request’s cookies: pass anything whose `get` returns a cookie’s percent-decoded value by name. In `@k8ordo/framework`’s server mode, pass `request.cookies` in a page, and `cookies()` in a `guard.ts`, a `route.ts` or a Server Action. An older version is migrated as it is read, but never written back.',
 });
 
 export const cookieValue = message({

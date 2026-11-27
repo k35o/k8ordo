@@ -381,10 +381,14 @@ export function Shell({ initialCookie, children }: ShellProps) {
 
 - **One cookie per definition.** The values are one cookie named
   `k8ordo-state.<key>` (`cookieName`), holding the percent-encoded JSON of the
-  declared fields. `parseCookies(cookies)` takes the request's cookies as a
-  `ReadonlyMap<string, string>` of percent-decoded values — what
-  `request.cookies` is — and salvages field by field like every other read:
-  absent, corrupt or rejected values land on their defaults.
+  declared fields. `parseCookies(cookies)` takes anything whose `get(name)`
+  returns a cookie's percent-decoded value — `request.cookies` in a page,
+  and in server mode `cookies()` in a guard, a route.ts or a Server Action
+  too — and salvages field by field like every other read: absent, corrupt
+  or rejected values land on their defaults. Next.js's `cookies()` gets a
+  `{ name, value }` object, so hand it over as
+  `density.parseCookies({ get: (name) => store.get(name)?.value })`, where
+  `store` is `await cookies()`.
 - **Seed every renderer.** Like `initialUrl`, `initialCookie` seeds only the
   `useAppState` call it is passed to: a component that renders on the server
   without it shows the defaults there. Read the cookie once, high up — a

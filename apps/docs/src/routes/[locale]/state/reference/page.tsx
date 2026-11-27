@@ -167,7 +167,7 @@ export default function StateReferencePage() {
           },
           {
             name: 'parseCookies',
-            type: '(cookies: ReadonlyMap<string, string>) => output<Schema>',
+            type: '(cookies: { get(name) }) => output<Schema>',
             description: t.cookieParse,
           },
           {

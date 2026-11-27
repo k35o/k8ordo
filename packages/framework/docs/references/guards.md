@@ -204,7 +204,8 @@ takes it as a prop.
 A preference kept in a `@k8ordo/state` cookie state renders without a flash
 of the default this way: the layout reads it with
 `parseCookies(request.cookies)` and hands the result to the client component
-as `initialCookie`.
+as `initialCookie`. A guard, a `route.ts` or a Server Action reads it with
+`parseCookies(cookies())`.
 
 Nothing lets a page write to the response — no status, no `Set-Cookie` —
 because a page is a render, and a render that answered the request would be
