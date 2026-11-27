@@ -1,4 +1,4 @@
-import { catalog } from '@k8ordo/ui/catalog';
+import { catalog, catalogNames } from '@k8ordo/ui/catalog';
 import type { AnyCatalogEntry, CatalogName } from '@k8ordo/ui/catalog';
 import { action, createLibrary, defineComponent } from '@openuidev/lang-core';
 import type { DefinedComponent, Library } from '@openuidev/lang-core';
@@ -12,8 +12,6 @@ const describe = (name: CatalogName): string => {
     ? description
     : `${description} Bound to form state by name.`;
 };
-
-const NAMES = Object.keys(catalog) as CatalogName[];
 
 /**
  * Builds the OpenUI library of `@k8ordo/ui` from the catalog, with the
@@ -36,7 +34,7 @@ export const buildLibrary = <C>(
       z.union(defined.map((component) => component.ref) as [Ref, ...Ref[]]),
     );
 
-  for (const name of NAMES) {
+  for (const name of catalogNames) {
     const {
       props,
       children: hasChildren,

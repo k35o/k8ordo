@@ -461,8 +461,13 @@ export const catalogRules: readonly string[] = [
   'The content of Tabs and Accordion must be plain text; components cannot be nested inside it.',
 ];
 
-const isCatalogName = (type: string): type is CatalogName =>
-  Object.hasOwn(catalog, type);
+/** Tells whether `name` names an entry of `catalog`, and types it as one. */
+export const isCatalogName = (name: string): name is CatalogName =>
+  Object.hasOwn(catalog, name);
+
+/** The name of every entry of `catalog`, in its order. */
+export const catalogNames: readonly CatalogName[] =
+  Object.keys(catalog).filter(isCatalogName);
 
 const unknownProps = (
   at: string,

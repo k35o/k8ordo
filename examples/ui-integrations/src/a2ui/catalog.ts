@@ -1,4 +1,8 @@
-import { catalog as k8ordo, catalogRules } from '@k8ordo/ui/catalog';
+import {
+  catalog as k8ordo,
+  catalogNames,
+  catalogRules,
+} from '@k8ordo/ui/catalog';
 import type { AnyCatalogEntry, CatalogName } from '@k8ordo/ui/catalog';
 import { z } from 'zod';
 
@@ -75,8 +79,6 @@ const componentOf = (name: CatalogName) => {
   };
 };
 
-const NAMES = Object.keys(k8ordo) as CatalogName[];
-
 /**
  * The A2UI 1.0 catalog document of `@k8ordo/ui`, built from
  * `@k8ordo/ui/catalog`. Send it to the agent (in the system prompt, or as an
@@ -97,12 +99,12 @@ export const catalogDocument = {
     ...catalogRules,
   ].join('\n'),
   components: Object.fromEntries(
-    NAMES.map((name) => [name, componentOf(name)]),
+    catalogNames.map((name) => [name, componentOf(name)]),
   ),
   functions: {},
   $defs: {
     anyComponent: {
-      oneOf: NAMES.map((name) => ({ $ref: `#/components/${name}` })),
+      oneOf: catalogNames.map((name) => ({ $ref: `#/components/${name}` })),
     },
   },
 };

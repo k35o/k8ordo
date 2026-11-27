@@ -8,7 +8,7 @@ import {
   useBoundProp,
 } from '@json-render/react';
 import type { BaseComponentProps } from '@json-render/react';
-import { catalog as k8ordo } from '@k8ordo/ui/catalog';
+import { catalog as k8ordo, catalogNames } from '@k8ordo/ui/catalog';
 import type { AnyCatalogEntry, CatalogName } from '@k8ordo/ui/catalog';
 import { rendererOf } from '@k8ordo/ui/catalog/render';
 import { Children, useEffect, useMemo, useRef, useState } from 'react';
@@ -93,7 +93,7 @@ const componentOf = (name: CatalogName): ComponentFn => {
 /** The json-render registry that draws every component of the catalog with `@k8ordo/ui`. */
 export const { registry } = defineRegistry(componentsCatalog, {
   components: Object.fromEntries(
-    Object.keys(k8ordo).map((name) => [name, componentOf(name as CatalogName)]),
+    catalogNames.map((name) => [name, componentOf(name)]),
   ) as Record<CatalogName, ComponentFn>,
 });
 

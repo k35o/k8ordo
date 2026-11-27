@@ -1,6 +1,6 @@
 'use client';
 
-import { catalog } from '@k8ordo/ui/catalog';
+import { catalog, catalogNames } from '@k8ordo/ui/catalog';
 import type { AnyCatalogEntry, CatalogName } from '@k8ordo/ui/catalog';
 import { rendererOf } from '@k8ordo/ui/catalog/render';
 import {
@@ -100,10 +100,5 @@ const componentOf = (name: CatalogName): ComponentRenderer<OpenUIProps> => {
  * For the system prompt alone, without React, use `./prompt`.
  */
 export const library = buildLibrary<ComponentRenderer<OpenUIProps>>(
-  Object.fromEntries(
-    Object.keys(catalog).map((name) => [
-      name,
-      componentOf(name as CatalogName),
-    ]),
-  ),
+  Object.fromEntries(catalogNames.map((name) => [name, componentOf(name)])),
 );

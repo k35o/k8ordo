@@ -154,7 +154,10 @@ each export a view with those types erased, so the glue needs no cast: every
 entry of `catalog` is assignable to `AnyCatalogEntry`, whose `value.initial`
 takes any props, and `rendererOf(name)` returns the renderer as an
 `AnyRenderer`, which takes `AnyRenderArgs` — the parsed props as
-`Record<string, unknown>`, and a field's value and setter as `unknown`.
+`Record<string, unknown>`, and a field's value and setter as `unknown`. A name
+the format hands over as a string becomes a `CatalogName` through
+`isCatalogName(name)`, and `catalogNames` lists every entry's name, so building
+a format's registry needs no cast either.
 
 ```tsx
 'use client';
@@ -421,10 +424,10 @@ These exports are left out on purpose, so a model cannot place them:
 
 ## Exports at a glance
 
-| Export                      | Kind           | Contents                                                                                                                    |
-| --------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `@k8ordo/ui/catalog`        | server-safe    | `catalog`, `catalogRules`, `catalogPropIssues`, types (`CatalogName`, `CatalogProps`, `CatalogEntry`, `AnyCatalogEntry`, …) |
-| `@k8ordo/ui/catalog/render` | `'use client'` | `renderers`, `rendererOf`, types (`RenderArgs`, `Renderer`, `AnyRenderArgs`, `AnyRenderer`)                                 |
+| Export                      | Kind           | Contents                                                                                                                                                     |
+| --------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `@k8ordo/ui/catalog`        | server-safe    | `catalog`, `catalogNames`, `isCatalogName`, `catalogRules`, `catalogPropIssues`, types (`CatalogName`, `CatalogProps`, `CatalogEntry`, `AnyCatalogEntry`, …) |
+| `@k8ordo/ui/catalog/render` | `'use client'` | `renderers`, `rendererOf`, types (`RenderArgs`, `Renderer`, `AnyRenderArgs`, `AnyRenderer`)                                                                  |
 
 > The drawn components assume you have loaded `@k8ordo/ui/styles.css` (or
 > `@k8ordo/ui/tailwind.css` after Tailwind, in a Tailwind CSS 4 project).

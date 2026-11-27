@@ -8,7 +8,7 @@ import type {
   MessageProcessor,
   SurfaceModel,
 } from '@a2ui/web_core';
-import { catalog as k8ordo } from '@k8ordo/ui/catalog';
+import { catalog as k8ordo, isCatalogName } from '@k8ordo/ui/catalog';
 import type { AnyCatalogEntry, CatalogName } from '@k8ordo/ui/catalog';
 import { rendererOf } from '@k8ordo/ui/catalog/render';
 import { Fragment, useCallback, useSyncExternalStore } from 'react';
@@ -93,8 +93,10 @@ const schemas = Catalog.fromJson(catalogDocument);
  */
 export const a2uiCatalog = schemas.withEntries(
   toWebCore(
-    [...schemas.components.values()].map((api) =>
-      createComponentImplementation(api, viewOf(api.name as CatalogName)),
+    [...schemas.components.values()].flatMap((api) =>
+      isCatalogName(api.name)
+        ? [createComponentImplementation(api, viewOf(api.name))]
+        : [],
     ),
   ),
   [],

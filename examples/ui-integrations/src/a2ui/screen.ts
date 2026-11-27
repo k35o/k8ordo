@@ -1,6 +1,5 @@
 import { Catalog, MessageProcessor } from '@a2ui/web_core';
-import { catalog, catalogPropIssues } from '@k8ordo/ui/catalog';
-import type { CatalogName } from '@k8ordo/ui/catalog';
+import { catalog, catalogPropIssues, isCatalogName } from '@k8ordo/ui/catalog';
 import { z } from 'zod';
 
 import { CATALOG_ID, catalogDocument } from './catalog.ts';
@@ -103,9 +102,6 @@ export const screenMessages = (
 };
 
 const schemas = Catalog.fromJson(catalogDocument);
-
-const isCatalogName = (name: string): name is CatalogName =>
-  Object.hasOwn(catalog, name);
 
 /**
  * What A2UI refuses in `step`, carried out after the steps `before`, checked
