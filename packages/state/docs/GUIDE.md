@@ -772,6 +772,14 @@ the hydrated store be the source of truth from then on. The script changes
 `<html>` before React hydrates it, so render that element with
 `suppressHydrationWarning`.
 
+Under `@k8ordo/framework`, render the script from a small `'use client'`
+component that takes the page's nonce, rather than straight in the root
+layout, whose `<script>` text would ride every page's payload; its
+reference on Content Security Policy
+(`node_modules/@k8ordo/framework/docs/references/csp.md`, "A script of the
+application's that runs before the first paint") shows it under both
+modes.
+
 ## What it guarantees
 
 **Boundary data is input, not trusted state.** A URL param a user edited, a

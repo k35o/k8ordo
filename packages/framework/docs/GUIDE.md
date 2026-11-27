@@ -388,7 +388,8 @@ Each topic has a reference of its own. Read the one the task needs:
   only. `guard.ts`, `responseHeaders()`, `cookies()`, `waitUntil()` for
   work after the answer, and the `request` a page reads.
 - [Content Security Policy](references/csp.md): `nonce()` under server
-  mode, the `csp` option and hashes under static mode.
+  mode, the `csp` option and hashes under static mode, and an application's
+  own script that runs before the first paint, under both.
 - [Running and deploying](references/deploy.md): what a static build
   writes, the rewrites that reach its shells on each host, `serve` and
   `vite preview`, the request handler on other runtimes, `vercel()`, a tab

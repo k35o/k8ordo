@@ -89,6 +89,13 @@ export default function StateBeforeHydrationPage() {
         <p>
           <Rich>{t.embedSuppress()}</Rich>
         </p>
+        <p>
+          <Rich>{t.embedFramework()}</Rich>
+          <LocaleAnchor path="/:locale/framework/csp">
+            {m.framework.navCsp()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
+        </p>
       </DocSection>
 
       <DocSection id="null" title={t.nullTitle}>

@@ -142,7 +142,9 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 - [Content Security Policy](references/csp.md): `nonce()` in a header a
   guard writes under server mode, in `style-src` too for the framework's
   one `<style>`; the `csp` option and `colorSchemeScriptHash()` under static
-  mode, and `connect-src` for the data a `fallback.tsx`'s shell fetches.
+  mode, and `connect-src` for the data a `fallback.tsx`'s shell fetches; an
+  application's own pre-paint script (`inlineRead()`) as a `'use client'`
+  component taking the nonce, its text hashed for static mode.
 - [Running and deploying](references/deploy.md): a static build's
   `dist/client/` (HTML, `index.rsc` payloads, shells, `404.html`,
   `client-files.json`, `sitemap.xml`, `_redirects`), the rewrites that reach a shell on Netlify,

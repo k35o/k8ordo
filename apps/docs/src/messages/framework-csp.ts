@@ -184,3 +184,33 @@ export const cacheShared = message({
   ja: 'nonceを含む応答は、CDNなどの共有キャッシュに置かないでください。同じnonceを何度も配信すると、それを知った攻撃者がnonce付きのスクリプトを差し込めます。',
   en: 'Keep a response that carries a nonce out of shared caches such as a CDN. If the same nonce is served again and again, an attacker who learned it can inject a script that carries it.',
 });
+
+export const prepaintTitle = message({
+  ja: '最初の描画の前に動くスクリプト',
+  en: 'A script that runs before the first paint',
+});
+
+export const prepaintWhere = message({
+  ja: 'ブラウザだけが当てる設定は、最初の描画の前に`<html>`へ反映します。ルートレイアウトの`<head>`に、`@k8ordo/state`の`inlineRead()`で保存した値を読むインラインスクリプトを置きます。',
+  en: 'A preference only the browser applies has to reach `<html>` before the first paint. An inline script in the root layout’s `<head>` reads the stored value with `@k8ordo/state`’s `inlineRead()`.',
+});
+
+export const prepaintClient = message({
+  ja: "このスクリプトは`'use client'`のコンポーネントにします。Server Componentが描いた`<script>`は、本文がすべてのページのペイロードに入るからです。遷移で届いたスクリプトは実行されないので、本文はHTMLにあれば足ります。Client Componentなら、ペイロードに入るのはpropsだけです。",
+  en: "Make that script a `'use client'` component. The text of a `<script>` a Server Component renders goes into every page’s payload, though a script that arrives with a navigation never runs. A Client Component’s payload carries only its props.",
+});
+
+export const prepaintNonce = message({
+  ja: 'nonceはpropsで受け取ります。serverモードでは、ルートレイアウトが`nonce()`を渡します。',
+  en: 'Take the nonce as a prop. Under server mode, the root layout passes `nonce()`.',
+});
+
+export const prepaintHash = message({
+  ja: 'staticモードでは、同じ本文のハッシュを`csp`に書きます。本文はディレクティブの無いモジュールからexportし、コンポーネントと`vite.config.ts`の両方で読みます。',
+  en: 'Under static mode, the `csp` option names the hash of the same text. Export the text from a module without a directive, and read it from both the component and `vite.config.ts`.',
+});
+
+export const prepaintSuppress = message({
+  ja: 'スクリプトはReactより先に`<html>`を変えるので、`<html>`に`suppressHydrationWarning`を付けます。',
+  en: 'The script changes `<html>` before React hydrates it, so `<html>` carries `suppressHydrationWarning`.',
+});

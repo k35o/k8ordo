@@ -50,6 +50,11 @@ export const embedSuppress = message({
   en: 'The script changes the class of `<html>` before React hydrates it, so line 18 puts `suppressHydrationWarning` on `<html>`. After hydration, the store is the source of truth.',
 });
 
+export const embedFramework = message({
+  ja: "`@k8ordo/framework`では、スクリプトをルートレイアウトに直接書かず、nonceを受け取る小さな`'use client'`のコンポーネントにします。Server Componentが描いた`<script>`は、本文がすべてのページのペイロードに入るからです。書き方は",
+  en: "Under `@k8ordo/framework`, render the script from a small `'use client'` component that takes the nonce, not straight in the root layout. The text of a `<script>` a Server Component renders goes into every page’s payload. See ",
+});
+
 export const nullTitle = message({
   ja: '`null`になるとき',
   en: 'When it is `null`',
