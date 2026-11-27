@@ -14,6 +14,9 @@ import {
   renderToReadableStream,
 } from '@vitejs/plugin-rsc/rsc/server';
 import type { ReactNode } from 'react';
+// locale の集合は評価されたときに自分を登録する。下の表が読み込むレイアウト
+// より先に評価させないと、集合を import しないルートの文言が集合を知らない
+import 'virtual:k8ordo/locales';
 import {
   catchAllSchemas,
   fallbacks,

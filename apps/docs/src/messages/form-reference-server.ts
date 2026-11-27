@@ -22,12 +22,12 @@ export const formFieldsReturns = message({
 
 export const formFieldsCaveats = [
   message({
-    ja: 'Server Componentの中か、モジュールのトップレベルで呼びます。戻り値はJSONなので、propsでClient Componentに渡せます。',
-    en: 'Call it in a Server Component or at module scope. The result is JSON, so it can be passed to a Client Component as props.',
+    ja: 'Server Componentの描画の中で呼びます。戻り値はJSONなので、propsでClient Componentに渡せます。',
+    en: 'Call it in a Server Component’s render. The result is JSON, so it can be passed to a Client Component as props.',
   }),
   message({
-    ja: '文言は呼んだ時点で決まります。リクエストの言語に合わせるなら、描画の中で呼びます。',
-    en: 'Messages are fixed when it runs. To follow the request’s locale, call it during the render.',
+    ja: '文言は呼んだ時点で決まります。モジュールのトップレベルで呼ぶと、どのリクエストにも読み込んだときのロケールの文言が出ます。',
+    en: 'Messages are fixed when it runs. Called at module scope, every request gets them in the locale current when the module loaded.',
   }),
   message({
     ja: "フォームで表せないスキーマ（`z.record`やタプル、`z.number()`など）を渡すと、`formFields: 'フィールド名': 理由`のエラーになります（`parseForm`では頭が`parseForm:`です）。",

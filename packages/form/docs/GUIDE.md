@@ -33,12 +33,16 @@ client    useForm(fields, state)  →  attributes to spread, message to show
 server    parseForm(schema, formData)  →  typed data, or per-field errors
 ```
 
-`formFields` runs on the server — in a Server Component or at module scope. Its
-result is JSON, so it crosses the RSC boundary as props and zod never enters the
-client bundle. The messages are read when it runs — zod's, and a rule's
-[function message](#a-message-that-follows-the-request) — and module scope runs
-once, before any request: when a message follows the request (its locale, say,
-with `@k8ordo/i18n`), call `formFields` during the render instead.
+`formFields` runs on the server, in the render of the Server Component that
+hands its result to the form. Its result is JSON, so it crosses the RSC
+boundary as props and zod never enters the client bundle. The messages are
+read when it runs — zod's, and a rule's
+[function message](#a-message-that-follows-the-request) — so a call in the
+render words them for the request being answered (its locale, say, with
+`@k8ordo/i18n`). Do not hoist it to module scope: that runs once, before any
+request, and every visitor would get the messages of whichever locale was
+current then. Deriving is a walk over the schema, cheap enough to repeat on
+every render.
 
 ## Writing a form
 
@@ -108,10 +112,8 @@ covers every control.
 
 ```tsx
 // src/routes/talks/new/page.tsx — Server Component
-const talkFields = formFields(talkSchema); // module scope: derived once
-
 export default function Page() {
-  return <TalkForm action={createTalk} fields={talkFields} />;
+  return <TalkForm action={createTalk} fields={formFields(talkSchema)} />;
 }
 ```
 
@@ -679,8 +681,12 @@ export const signup = defineForm(schema, [
 ]);
 ```
 
-Call `formFields` during the render for this, the same as for zod's function
-messages.
+The definition stays at module scope; `formFields(signup)` is called in the
+render, as everywhere, so the rules come out worded for that request. zod's
+own wording, for a check written without a message, follows the request once
+its configuration reads the locale; `@k8ordo/i18n`'s guide
+(`node_modules/@k8ordo/i18n/docs/GUIDE.md`, the `@k8ordo/form` item of
+"Alongside the rest of k8ordo") shows the module that does it.
 
 ## Asking the server about one field
 

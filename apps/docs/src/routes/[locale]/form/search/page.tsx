@@ -19,10 +19,8 @@ const SHARE = `export const listState = definePageState('product-list', {
   }),
 });`;
 
-const SHARE_PAGE = `const filterFields = formFields(listState.url);
-
-export default function ProductsPage() {
-  return <Filters fields={filterFields} />;
+const SHARE_PAGE = `export default function ProductsPage() {
+  return <Filters fields={formFields(listState.url)} />;
 }`;
 
 const FORM = `const form = useForm(fields);
@@ -35,10 +33,6 @@ const inStock = form.field('inStock');
   <input {...inStock.input} defaultChecked={current.inStock} />
   <button type="submit">Filter</button>
 </form>`;
-
-// Server Component（このファイルにディレクティブは無い）。制約属性はここで
-// 導いて JSON として渡すので、zod はブラウザに届かない
-const demoFields = formFields(demoState.url);
 
 export default function FormSearchPage() {
   return (
@@ -53,7 +47,7 @@ export default function FormSearchPage() {
         <CodeBlock
           code={SHARE_PAGE}
           lang="tsx"
-          marks={{ 1: 'highlight' }}
+          marks={{ 2: 'highlight' }}
           title="src/routes/products/page.tsx"
         />
         <p>
@@ -108,7 +102,7 @@ export default function FormSearchPage() {
         steps={t.demoSteps}
         title={t.demoTitle}
       >
-        <FormDemo fields={demoFields} />
+        <FormDemo fields={formFields(demoState.url)} />
       </Playground>
 
       <DocSection id="boolean" title={t.booleanTitle}>

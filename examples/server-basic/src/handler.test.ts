@@ -346,6 +346,22 @@ describe('a Server Action under serve', () => {
   });
 });
 
+describe('<html lang dir>', () => {
+  it.each([
+    ['/ja/greeting', 'ja'],
+    ['/en/greeting', 'en'],
+    ['/products', 'en'],
+  ])(
+    'is written for %s in the locale its messages render in',
+    async (pathname, locale) => {
+      const html = await (
+        await handler(new Request(`${ORIGIN}${pathname}`))
+      ).text();
+      expect(html).toMatch(new RegExp(`<html dir="ltr" lang="${locale}"`, 'u'));
+    },
+  );
+});
+
 describe('a Server Action posted to a [locale] page', () => {
   it.each([
     ['/ja/greeting', 'こんにちは、k8o さん。'],

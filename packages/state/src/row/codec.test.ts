@@ -112,8 +112,39 @@ describe('version and migrate', () => {
   });
 
   it('writes the version together with the values', () => {
-    expect(viewCookie.cookieValue({ view: 'table' })).toBe(
+    expect(viewCookie.cookie({ view: 'table' }, new Map())[1]).toBe(
       '[2,{"view":"table","pageSize":20}]',
+    );
+  });
+
+  it('writes a cookie an older version wrote back in the current one, the patch over it', () => {
+    const [, value] = viewCookie.cookie(
+      { view: 'grid' },
+      cookiesWith([1, { layout: 'list', pageSize: 50 }]),
+    );
+
+    expect(value).toBe('[2,{"view":"grid","pageSize":50}]');
+  });
+
+  it('refuses to write over a cookie a failing migrate cannot turn', () => {
+    const thrown = new Error('unexpected shape');
+    const failing = defineCookieState('failing', viewSchema, {
+      version: 2,
+      migrate: () => {
+        throw thrown;
+      },
+    });
+
+    expect(() =>
+      failing.cookie(
+        { view: 'table' },
+        new Map([[failing.cookieName, '[1,{"layout":"list"}]']]),
+      ),
+    ).toThrow(
+      expect.objectContaining({
+        message: expect.stringContaining('"failing"'),
+        cause: thrown,
+      }),
     );
   });
 

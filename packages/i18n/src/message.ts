@@ -1,4 +1,4 @@
-import { namedLocale, registeredDefault } from './current';
+import { currentLocale } from './current';
 import type { RegisteredLocale } from './register';
 
 /**
@@ -26,7 +26,10 @@ export type Variants<V> = Readonly<Record<RegisteredLocale, V>>;
  * ```
  *
  * When nothing names a locale, the text is the default locale's — the one
- * `defineLocales` registered, else the first variant written.
+ * `defineLocales` registered. Called where no set is defined, it throws:
+ * the module that calls `defineLocales` has to run first, on every side
+ * (`@k8ordo/framework` runs `src/i18n.ts` before anything else; a test or a
+ * Storybook preview imports it).
  */
 export function message(variants: Variants<string>): Message;
 export function message<A extends readonly unknown[]>(
@@ -39,13 +42,13 @@ export function message<A extends readonly unknown[]>(
   // し得る呼び出しはバンドラに副作用と見なされ、使われない文言が消えなく
   // なる。欠けは描画で言う。
   return (...args: A): string => {
-    // 何も指名していないときだけ、書かれた先頭の文言に落ちる。指名された
-    // ロケールの文言が無いのは翻訳漏れなので、隠さず言う。
-    const locale = namedLocale() ?? registeredDefault();
-    const variant =
-      locale === null
-        ? variants[Object.keys(variants)[0] ?? '']
-        : variants[locale];
+    const locale = currentLocale();
+    if (locale === null) {
+      throw new TypeError(
+        'message: no locale set is defined here — the module that calls defineLocales has to run before any message, in the browser too (under @k8ordo/framework, export it as locales from src/i18n.ts; a test imports that file from its setupFiles, and Storybook from .storybook/preview.tsx)',
+      );
+    }
+    const variant = variants[locale];
     if (variant === undefined) {
       throw new TypeError(
         `message: no text for ${JSON.stringify(locale)} in ${JSON.stringify(Object.keys(variants))}`,

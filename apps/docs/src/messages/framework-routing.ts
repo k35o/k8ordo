@@ -239,8 +239,8 @@ export const rootServerStatusCallout = message({
 });
 
 export const rootServerGuard = message({
-  ja: "serverモードだけで使えます。`/`へのリクエストには、ページを描画する前に`(home)/guard.ts`が応答します。`negotiateRequest`でロケールを選び、`redirect(href('/:locale', { locale }))`でそのロケールのURLへ送ります。リダイレクトは`Response`を組まずに`redirect()`で書き、URLはリンクと同じく`href()`で作ります。",
-  en: "Server mode only. Requests for `/` are answered by `(home)/guard.ts` before any page renders. It picks a locale with `negotiateRequest` and sends the visitor to that locale’s URL with `redirect(href('/:locale', { locale }))`. A redirect is `redirect()`, not a `Response` built by hand, and its URL comes from `href()`, as a link’s does.",
+  ja: "serverモードだけで使えます。`/`へのリクエストには、ページを描画する前に`(home)/guard.ts`が応答します。`cookies().get('locale')`で読んだ前回の選択を`chosen`に渡し、`negotiateRequest`でロケールを選びます。`redirect(href('/:locale', { locale }))`で、そのロケールのURLへ送ります。リダイレクトは`Response`を組まずに`redirect()`で書き、URLはリンクと同じく`href()`で作ります。",
+  en: "Server mode only. Requests for `/` are answered by `(home)/guard.ts` before any page renders. It hands the earlier choice, read with `cookies().get('locale')`, to `negotiateRequest` as `chosen` to pick a locale, and sends the visitor to that locale’s URL with `redirect(href('/:locale', { locale }))`. A redirect is `redirect()`, not a `Response` built by hand, and its URL comes from `href()`, as a link’s does.",
 });
 
 export const rootServerGroup = message({
@@ -279,8 +279,8 @@ export const rootCookieTitle = message({
 });
 
 export const rootCookie = message({
-  ja: '言語の切り替えで選んだロケールをCookieに保存しているなら、その値を`navigator.languages`の前に並べて`negotiate`に渡します。serverモードの`negotiateRequest`が読むのと同じ順番です。',
-  en: 'When the locale chosen in a language switcher is saved in a cookie, put its value in front of `navigator.languages` and pass both to `negotiate`. That is the order `negotiateRequest` reads them in under server mode.',
+  ja: '言語の切り替えで選んだロケールをCookieに保存しているなら、その値を`navigator.languages`の前に並べて`negotiate`に渡します。serverモードの`negotiateRequest`が読むのと同じ順番です。Cookieが無いときの`undefined`は、`negotiate`が飛ばします。',
+  en: 'When the locale chosen in a language switcher is saved in a cookie, put its value in front of `navigator.languages` and pass both to `negotiate`. That is the order `negotiateRequest` reads them in under server mode. Without the cookie the value is `undefined`, which `negotiate` skips.',
 });
 
 export const htmlTitle = message({
@@ -288,14 +288,14 @@ export const htmlTitle = message({
   en: '`<html lang>` and `dir`',
 });
 
-export const htmlPathname = message({
-  ja: 'ルートレイアウトは`[locale]`より上にありますが、描画しているURLを`pathname`で受け取ります。`delocalize`でその先頭の区間を読み、`<html>`の`lang`と`dir`に書きます。先頭の区間がロケールでないときは`null`が返るので、既定のロケールを補います。',
-  en: 'The root layout sits above `[locale]`, but it receives the URL being rendered as `pathname`. Read its first segment with `delocalize`, and write it into `lang` and `dir` on `<html>`. When that segment is not a locale, `delocalize` returns `null`, and the default locale fills in.',
+export const htmlGetLocale = message({
+  ja: 'ルートレイアウトは`[locale]`より上にありますが、`locales.getLocale()`で今のロケールを読めます。描画は、スキーマがパラメータを検証したあとに始まるからです。読んだロケールを、`<html>`の`lang`と`dir`に書きます。',
+  en: 'The root layout sits above `[locale]`, but `locales.getLocale()` reads the current locale there, because rendering starts after the schemas have validated the params. Write it into `lang` and `dir` on `<html>`.',
 });
 
-export const htmlGetLocale = message({
-  ja: '描画は、スキーマがパラメータを検証したあとに始まります。`[locale]`のレイアウトが`paramsSchema`をexportしていれば、ルートレイアウトで`locales.getLocale()`を呼んでも同じロケールが返ります。`not-found.tsx`を`[locale]`の下に置いていれば、404でも同じです。',
-  en: 'Rendering starts after the schemas have validated the params. With `paramsSchema` exported from the `[locale]` layout, `locales.getLocale()` called in the root layout returns the same locale. So does a 404, as long as `not-found.tsx` sits under `[locale]`.',
+export const htmlDefault = message({
+  ja: '`[locale]`の外のページでは、既定のロケールが返ります。404では、`not-found.tsx`より上のレイアウトのスキーマが受け付けたロケールが返ります。どちらも、そのページの文言が使うロケールと同じです。',
+  en: 'Outside `[locale]`, it returns the default locale. On a 404, it returns the locale the schemas of the layouts above `not-found.tsx` accepted. Either way, it is the locale the page’s messages use.',
 });
 
 export const orderTitle = message({

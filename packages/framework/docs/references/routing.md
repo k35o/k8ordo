@@ -702,6 +702,12 @@ unchecked; an application that keeps its set elsewhere writes the
 goes, or gains or loses the export. A hand-written augmentation left in the
 application still compiles beside it, since both declare the same type.
 
+Running it is the framework's part too: `src/i18n.ts` runs before any route
+file, in the browser and in both server renders (the Server Components' and
+the HTML's), whether `@k8ordo/i18n` is a dependency or not. The set is
+registered wherever a message is called, even in a module that never imports
+it.
+
 Neither file names `@k8ordo/router`: they import from
 `@k8ordo/framework/generated`, so the application's code, generated or not,
 reads only the framework.

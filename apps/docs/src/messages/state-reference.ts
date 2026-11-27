@@ -200,13 +200,13 @@ export const cookieName = message({
 });
 
 export const cookieParse = message({
-  ja: 'リクエストのCookieから値を読みます。パーセントデコード済みの値の`Map`を渡します。`@k8ordo/framework`のserverモードなら`request.cookies`をそのまま渡せます。古いバージョンの値は移行して読みますが、書き戻しません。',
-  en: 'Reads the values out of a request’s cookies, given as a `Map` of percent-decoded values. In `@k8ordo/framework`’s server mode, pass `request.cookies` as it is. An older version is migrated as it is read, but never written back.',
+  ja: 'リクエストのCookieから値を読みます。Cookieの名前からパーセントデコードした値を返す`get`を持つものを渡します。`@k8ordo/framework`のserverモードなら、ページでは`request.cookies`をそのまま渡せます。`guard.ts`と`route.ts`とServer Actionでは`cookies()`を渡します。古いバージョンの値は移行して読みますが、書き戻しません。',
+  en: 'Reads the values out of a request’s cookies: pass anything whose `get` returns a cookie’s percent-decoded value by name. In `@k8ordo/framework`’s server mode, pass `request.cookies` in a page, and `cookies()` in a `guard.ts`, a `route.ts` or a Server Action. An older version is migrated as it is read, but never written back.',
 });
 
-export const cookieValue = message({
-  ja: 'サーバーが同じCookieを書くときの値。スキーマに通した値を、エンコードしていないJSONで返します。省いたフィールドは既定値になります。',
-  en: 'The value for a server writing the same cookie: the values after the schema, as unencoded JSON. A field left out means its default.',
+export const cookieWrite = message({
+  ja: 'サーバーが同じCookieを書くときの名前と値と属性。`cookies().set(...def.cookie(patch, cookies()))`のように展開して渡します。`patch`は`current`から読んだ今の値に重ねてからスキーマに通すので、省いたフィールドは保存した値のままです。値はエンコードしていないJSONで、属性はブラウザが書くときと同じものに`httpOnly: false`を足したものです。',
+  en: 'The name, value and attributes for a server writing the same cookie, spread as `cookies().set(...def.cookie(patch, cookies()))`. `patch` goes over the values read from `current` and then through the schema, so a field left out keeps its saved value. The value is unencoded JSON, and the attributes are the ones the browser writes, with `httpOnly: false`.',
 });
 
 export const cookieCaveats = [
@@ -276,8 +276,8 @@ export const appStateKeys = message({
 });
 
 export const appStateOptions = message({
-  ja: 'サーバーで読んだ値。`initialUrl`は`url`を持つページの状態にだけ、`initialCookie`はCookieの状態にだけ渡せます。',
-  en: 'What the server read. `initialUrl` is accepted only by a page state with `url`, `initialCookie` only by a cookie state.',
+  ja: 'サーバーで読んだ値。`initialUrl`は`url`を持つページの状態にだけ、`initialCookie`はCookieの状態にだけ渡せます。`undefined`を渡すと、渡さなかったときと同じです。',
+  en: 'What the server read. `initialUrl` is accepted only by a page state with `url`, `initialCookie` only by a cookie state. Passing `undefined` is the same as leaving it out.',
 });
 
 export const appStateReturns = message({
@@ -368,8 +368,8 @@ export const versioningCaveats = [
     en: 'What it returns passes the schema field by field. A field the schema rejects falls back to its default.',
   }),
   message({
-    ja: '`migrate`の中で例外が起きると、何も保存されていないものとして読み、例外を知らせます（ブラウザでは`reportError`、`parseCookies`ではキーを添えた`console.error`）。保存した値には触らず、`update()`も上書きせずにハンドルをその例外でrejectします。',
-    en: 'A `migrate` that throws reads as nothing stored, and the error is reported (`reportError` in the browser, `console.error` with the key from `parseCookies`). The stored value is left as it is: an `update()` does not overwrite it and rejects its handle with that error.',
+    ja: '`migrate`の中で例外が起きると、何も保存されていないものとして読み、例外を知らせます（ブラウザでは`reportError`、`parseCookies`ではキーを添えた`console.error`）。保存した値には触らず、`update()`も上書きせずにハンドルをその例外でrejectします。サーバーの`cookie()`も上書きせずにエラーになります。',
+    en: 'A `migrate` that throws reads as nothing stored, and the error is reported (`reportError` in the browser, `console.error` with the key from `parseCookies`). The stored value is left as it is: an `update()` does not overwrite it and rejects its handle with that error, and a server’s `cookie()` throws instead of writing over it.',
   }),
 ] as const;
 

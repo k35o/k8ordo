@@ -12,7 +12,7 @@ const t = m.i18nSwitch;
 const DESTINATION = `locales.delocalize('/ja/products/42');
 // { locale: 'ja', pathname: '/products/42' }
 
-locales.localize('/products/42', 'en');
+locales.localize('/ja/products/42', 'en');
 // '/en/products/42'`;
 
 const SWITCHER = `import type { Variants } from '@k8ordo/i18n';
@@ -24,7 +24,6 @@ const NAMES: Variants<string> = { ja: '日本語', en: 'English' };
 type Props = { pathname: string };
 
 export function LanguageSwitcher({ pathname }: Props) {
-  const rest = locales.delocalize(pathname).pathname;
   const current = locales.getLocale();
 
   return (
@@ -33,7 +32,7 @@ export function LanguageSwitcher({ pathname }: Props) {
         <li key={locale}>
           <a
             aria-current={locale === current ? 'true' : undefined}
-            href={locales.localize(rest, locale)}
+            href={locales.localize(pathname, locale)}
             hrefLang={locale}
             lang={locale}
           >
@@ -59,7 +58,7 @@ export const rememberLocale = (locale: Locale) =>
 
 const REMEMBER_CALL = `<a
   aria-current={locale === current ? 'true' : undefined}
-  href={locales.localize(rest, locale)}
+  href={locales.localize(pathname, locale)}
   hrefLang={locale}
   lang={locale}
   onClick={() => {
@@ -99,13 +98,10 @@ export default function I18nSwitchPage() {
 
       <DocSection id="switcher" title={t.switcherTitle}>
         <CodeBlock
-          callouts={{
-            10: t.switcherDelocalizeCallout(),
-            19: t.switcherLocalizeCallout(),
-          }}
+          callouts={{ 18: t.switcherLocalizeCallout() }}
           code={SWITCHER}
           lang="tsx"
-          marks={{ 10: 'highlight', 19: 'highlight' }}
+          marks={{ 18: 'highlight' }}
           title="src/components/language-switcher.tsx"
         />
         <p>

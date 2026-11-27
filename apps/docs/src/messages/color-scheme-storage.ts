@@ -145,6 +145,16 @@ export const besideOwnAfter = message({
   en: ' in `@k8ordo/state`.',
 });
 
+export const besideServer = message({
+  ja: 'サーバーが値で応答を変える設定は、localStorageではなくCookieに置きます。どの設定をどこに置くかは',
+  en: 'A preference the server answers by goes in a cookie, not in localStorage. Which preference goes where is set out in ',
+});
+
+export const besideServerAfter = message({
+  ja: 'の「設定の置き場所」を見てください。',
+  en: ', under “Where a preference is kept”.',
+});
+
 export const besideCollision = message({
   ja: "アプリの中で`defineLocalState('color-scheme', …)`をもう1つ定義しないでください。ストアは名前で共有されるので、2つの定義が同じlocalStorageのキーを読み書きします。",
   en: "Do not define another `defineLocalState('color-scheme', …)` in the application. Stores are shared by name, so both definitions read and write the same localStorage key.",

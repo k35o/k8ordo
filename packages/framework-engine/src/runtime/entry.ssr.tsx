@@ -7,6 +7,9 @@ import type { ReactNode } from 'react';
 import { preinit, preloadModule } from 'react-dom';
 import { renderToReadableStream } from 'react-dom/server.edge';
 import { injectRSCPayload } from 'rsc-html-stream/server';
+// RSC とは別のモジュールのグラフなので、client コンポーネントが HTML の
+// ために走る前に、ここでも locale の集合を評価させる
+import 'virtual:k8ordo/locales';
 import assetsManifest from 'virtual:vite-rsc/assets-manifest';
 
 import { AppRouter } from './app-router';

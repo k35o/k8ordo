@@ -54,10 +54,9 @@ export const talkSchema = z.object({
 // src/routes/talks/new/page.tsx — Server Component
 import { formFields } from '@k8ordo/form/server';
 
-const talkFields = formFields(talkSchema); // derived once, plain data
-
 export default function Page() {
-  return <TalkForm action={createTalk} fields={talkFields} />;
+  // derived in the render, so its messages follow the request; plain data
+  return <TalkForm action={createTalk} fields={formFields(talkSchema)} />;
 }
 ```
 

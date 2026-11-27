@@ -9,10 +9,6 @@ import { guestbookSchema } from '../lib/guestbook-schema';
 import { leave } from '../lib/leave';
 import { prefsState } from '../lib/prefs-state';
 
-// スキーマから属性と文言を導くのは Server Component 側。モジュールスコープで
-// 一度だけ導き、素の JSON として props でクライアントに渡す
-const guestbookFields = formFields(guestbookSchema);
-
 // request は server モードでだけ生成器が Register に書くので、この型は
 // static モードでは request を持たず、読むページは型で落ちる
 export default async function HomePage({ request }: PageProps<'/'>) {
@@ -27,7 +23,7 @@ export default async function HomePage({ request }: PageProps<'/'>) {
         {`visitor:${request.cookies.get('visitor') ?? '-'} language:${request.headers.get('accept-language') ?? '-'}`}
       </p>
       <Counter />
-      <GuestbookForm fields={guestbookFields} />
+      <GuestbookForm fields={formFields(guestbookSchema)} />
       <form action={leave} data-testid="leave-form">
         <button type="submit">leave</button>
       </form>

@@ -8,8 +8,8 @@ export const ratingSchema = z.object({
   rating: z.coerce
     .number({ error: m.formCustomInputs.demoRatingMissing })
     .check(
-      z.int(),
+      z.int({ error: m.formCustomInputs.demoRatingMissing }),
       z.gte(1, { error: m.formCustomInputs.demoRatingMissing }),
-      z.lte(5),
+      z.lte(5, { error: m.formCustomInputs.demoRatingMissing }),
     ),
 });

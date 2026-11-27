@@ -223,7 +223,8 @@ export const prefs = defineLocalState(
   monitoring see it, and logged with the key by `parseCookies` on the
   server. The row stays as it was for a fixed `migrate` to try again: an
   `update()` writes nothing over it and rejects its handle with the same
-  error, while the value it set stays in memory until the next load.
+  error, while the value it set stays in memory until the next load, and a
+  server's `cookie()` throws instead of returning a value to write.
 - **Adopting a version changes the row's shape.** A tab still running code
   from before reads `[version, values]` as nothing stored until it reloads.
 - **`inlineRead()` hands out only the current version.** Neither the schema
@@ -341,7 +342,10 @@ goes with every request: where the page receives the request's cookies —
 `request.cookies` in `@k8ordo/framework`'s server mode — `parseCookies` reads
 the values
 and `initialCookie` seeds the server render and the hydration render with
-them, so the default never flashes.
+them, so the default never flashes. Which preference belongs in a cookie,
+which in local state and which in neither (the language) is set out once,
+in `@k8ordo/framework`'s guide
+(`node_modules/@k8ordo/framework/docs/GUIDE.md`, "Preferences").
 
 ```tsx
 // src/routes/layout.tsx — server mode
@@ -381,10 +385,14 @@ export function Shell({ initialCookie, children }: ShellProps) {
 
 - **One cookie per definition.** The values are one cookie named
   `k8ordo-state.<key>` (`cookieName`), holding the percent-encoded JSON of the
-  declared fields. `parseCookies(cookies)` takes the request's cookies as a
-  `ReadonlyMap<string, string>` of percent-decoded values — what
-  `request.cookies` is — and salvages field by field like every other read:
-  absent, corrupt or rejected values land on their defaults.
+  declared fields. `parseCookies(cookies)` takes anything whose `get(name)`
+  returns a cookie's percent-decoded value — `request.cookies` in a page,
+  and in server mode `cookies()` in a guard, a route.ts or a Server Action
+  too — and salvages field by field like every other read: absent, corrupt
+  or rejected values land on their defaults. Next.js's `cookies()` gets a
+  `{ name, value }` object, so hand it over as
+  `density.parseCookies({ get: (name) => store.get(name)?.value })`, where
+  `store` is `await cookies()`.
 - **Seed every renderer.** Like `initialUrl`, `initialCookie` seeds only the
   `useAppState` call it is passed to: a component that renders on the server
   without it shows the defaults there. Read the cookie once, high up — a
@@ -420,11 +428,8 @@ never writes the response; in server mode the framework's
 `route.ts` and Server Actions. That is where a session cookie belongs, as
 `HttpOnly`, and this package never sees it. The same `cookies()` can also
 write a cookie state, for a form that sets a preference without JavaScript,
-say: write `cookieName` with the value `cookieValue(values)` returns — the
-values pass the schema, unspecified fields mean their default — and the
-attributes above (`Path=/`, `SameSite=Lax`, `Max-Age=34560000`), never
-`HttpOnly`, or the browser store can no longer see it. Open tabs take the new
-values in through the `change` event.
+say: `cookie(patch, current)` returns the name, the value and the options,
+to spread into `set`.
 
 ```ts
 // src/lib/actions.ts
@@ -434,18 +439,41 @@ import { cookies } from '@k8ordo/framework/server';
 import { density } from '../state';
 
 export async function compact() {
-  cookies().set(
-    density.cookieName,
-    density.cookieValue({ density: 'compact' }),
-    { httpOnly: false, maxAge: 34_560_000 },
-  );
+  cookies().set(...density.cookie({ density: 'compact' }, cookies()));
 }
 ```
 
-`cookieValue` returns the JSON unencoded: `cookies().set` percent-encodes the
-value on its way out (so does Next.js's), which is the one encoding
-`parseCookies` expects undone. Writing a `Set-Cookie` header by hand, pass
-the value through `encodeURIComponent` yourself — once.
+- **It writes what `update()` would.** `patch` goes over the values the
+  request's cookie holds — `current` is read the way `parseCookies` reads
+  it — so a field the patch leaves out keeps what the visitor saved, and the
+  result passes the schema. A field the definition does not declare throws,
+  as it does in `update()`. To go back to every default, delete the cookie:
+  `cookies().delete(density.cookieName)`.
+- **The options are the browser store's attributes.** `Path=/`,
+  `SameSite=Lax`, a `Max-Age` of 400 days, and `httpOnly: false`: an
+  `HttpOnly` cookie is one the browser store can no longer see. Open tabs
+  take the new values in through the `change` event.
+- **The value is the JSON, unencoded.** `cookies().set` percent-encodes it on
+  its way out (so does Next.js's), which is the one encoding `parseCookies`
+  expects undone. Writing a `Set-Cookie` header by hand, pass the value
+  through `encodeURIComponent` yourself — once.
+- **A cookie `migrate` cannot read is never written over.** `cookie()` throws,
+  naming the key, with `migrate`'s error as its `cause` — the refusal a
+  browser `update()` makes ([When a stored shape changes](#when-a-stored-shape-changes)).
+
+Under Next.js, hand `current` over as `parseCookies` takes it:
+
+```ts
+const store = await cookies();
+store.set(
+  ...density.cookie(
+    { density: 'compact' },
+    {
+      get: (name) => store.get(name)?.value,
+    },
+  ),
+);
+```
 
 ## Client — subscribe and update
 
@@ -747,6 +775,14 @@ the hydrated store be the source of truth from then on. The script changes
 `<html>` before React hydrates it, so render that element with
 `suppressHydrationWarning`.
 
+Under `@k8ordo/framework`, render the script from a small `'use client'`
+component that takes the page's nonce, rather than straight in the root
+layout, whose `<script>` text would ride every page's payload; its
+reference on Content Security Policy
+(`node_modules/@k8ordo/framework/docs/references/csp.md`, "A script of the
+application's that runs before the first paint") shows it under both
+modes.
+
 ## What it guarantees
 
 **Boundary data is input, not trusted state.** A URL param a user edited, a
@@ -794,7 +830,9 @@ takes over on hydration.
 `parseCookies(request.cookies)` returned as `initialCookie` — in
 `@k8ordo/framework`'s server mode, say — and neither render shows the
 defaults. Without a request (static mode), the cookie takes over on
-hydration.
+hydration. Either option may be `undefined`, which is the same as leaving
+it out, so a component shared by a page that has the value and one that
+does not passes its prop straight through.
 
 Everything else — entry, local, session, memory — renders its defaults on the
 server by construction: those places do not exist there.
@@ -807,7 +845,10 @@ are the same schema:
 ```tsx
 import { formFields } from '@k8ordo/form/server';
 
-const filterFields = formFields(listState.url); // one schema, both jobs
+export default function ListPage() {
+  // one schema, both jobs
+  return <FilterForm fields={formFields(listState.url)} />;
+}
 ```
 
 A `z.stringbool()` field derives a checkbox whose `value` is the same spelling

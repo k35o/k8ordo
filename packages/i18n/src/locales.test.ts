@@ -109,6 +109,12 @@ describe('negotiate', () => {
   it('accepts any iterable, so navigator.languages passes as is', () => {
     expect(locales.negotiate(new Set(['en']))).toBe('en');
   });
+
+  it('skips null and undefined, so a choice not made yet goes in front as it is', () => {
+    expect(locales.negotiate([undefined, 'en'])).toBe('en');
+    expect(locales.negotiate([null, 'en'])).toBe('en');
+    expect(locales.negotiate([undefined])).toBe('ja');
+  });
 });
 
 describe('negotiateRequest', () => {
@@ -121,43 +127,32 @@ describe('negotiateRequest', () => {
     expect(locales.negotiateRequest(request({}))).toBe('ja');
   });
 
-  it("puts the visitor's choice in the named cookie before the header", () => {
+  it("puts the visitor's choice before the header", () => {
+    const asks = request({ 'accept-language': 'en' });
+    expect(locales.negotiateRequest(asks, { chosen: 'ja' })).toBe('ja');
+    expect(locales.negotiateRequest(asks, { chosen: 'ja-JP' })).toBe('ja');
+  });
+
+  it('falls through to the header when there is no choice, or it is not a locale of the set', () => {
+    const asks = request({ 'accept-language': 'en' });
+    expect(locales.negotiateRequest(asks)).toBe('en');
+    expect(locales.negotiateRequest(asks, { chosen: undefined })).toBe('en');
+    expect(locales.negotiateRequest(asks, { chosen: null })).toBe('en');
+    expect(locales.negotiateRequest(asks, { chosen: 'fr' })).toBe('en');
+    expect(locales.negotiateRequest(asks, { chosen: 'en_US' })).toBe('en');
+  });
+
+  it('reads no cookie of its own: the choice is what the caller hands it', () => {
     expect(
       locales.negotiateRequest(
-        request({
-          'accept-language': 'en',
-          cookie: 'theme=dark; locale=ja; other=1',
-        }),
-        { cookie: 'locale' },
-      ),
-    ).toBe('ja');
-    expect(
-      locales.negotiateRequest(
-        request({ 'accept-language': 'ja', cookie: 'locale="en"' }),
-        { cookie: 'locale' },
+        request({ 'accept-language': 'en', cookie: 'locale=ja' }),
       ),
     ).toBe('en');
   });
 
-  it('falls through to the header when the cookie is missing, unnamed, or not a locale of the set', () => {
-    const headers = { 'accept-language': 'en' };
-    expect(
-      locales.negotiateRequest(request(headers), { cookie: 'locale' }),
-    ).toBe('en');
-    expect(
-      locales.negotiateRequest(request({ ...headers, cookie: 'locale=ja' })),
-    ).toBe('en');
-    expect(
-      locales.negotiateRequest(request({ ...headers, cookie: 'locale=fr' }), {
-        cookie: 'locale',
-      }),
-    ).toBe('en');
-    expect(
-      locales.negotiateRequest(
-        request({ ...headers, cookie: 'xlocale=ja; locale_=ja' }),
-        { cookie: 'locale' },
-      ),
-    ).toBe('en');
+  it("takes anything with the request's headers, as a page's request prop has them", () => {
+    const headers = new Headers({ 'accept-language': 'en' });
+    expect(locales.negotiateRequest({ headers })).toBe('en');
   });
 });
 
@@ -193,6 +188,15 @@ describe('localize / delocalize', () => {
       locale: null,
       pathname: '/english',
     });
+  });
+
+  it('replaces a leading locale segment rather than stacking another, and keeps a segment outside the set', () => {
+    expect(locales.localize('/en/ui', 'ja')).toBe('/ja/ui');
+    expect(locales.localize('/ja/ui', 'ja')).toBe('/ja/ui');
+    expect(locales.localize('/en', 'ja')).toBe('/ja');
+    expect(locales.localize('/en/', 'ja')).toBe('/ja');
+    expect(locales.localize('/fr/ui', 'en')).toBe('/en/fr/ui');
+    expect(locales.localize('/english', 'en')).toBe('/en/english');
   });
 
   it('refuses to localize something that is not a pathname', () => {
@@ -269,6 +273,23 @@ describe('message', () => {
     expect(() => locales.run('en', () => partial())).toThrow(
       /no text for "en"/u,
     );
+  });
+
+  it('throws where no set is defined rather than picking a variant, even while a locale is named', () => {
+    const key = Symbol.for('@k8ordo/i18n/locales');
+    const registry = globalThis as { [key]?: unknown };
+    const saved = registry[key];
+    try {
+      registry[key] = undefined;
+      expect(() => nav.home()).toThrow(
+        /no locale set is defined here — the module that calls defineLocales has to run before any message/u,
+      );
+      expect(() => locales.run('en', () => nav.home())).toThrow(
+        /no locale set is defined here/u,
+      );
+    } finally {
+      registry[key] = saved;
+    }
   });
 });
 

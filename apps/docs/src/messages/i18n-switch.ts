@@ -11,8 +11,8 @@ export const urlTitle = message({
 });
 
 export const urlSegments = message({
-  ja: '`delocalize`は、pathnameの先頭にあるロケールの区間を外します。`localize`は、pathnameの先頭にロケールの区間を付けます。',
-  en: '`delocalize` takes the locale segment off the front of a pathname. `localize` puts one on.',
+  ja: '`delocalize`は、pathnameの先頭にあるロケールの区間を外します。`localize`は、先頭のロケールの区間を指定したロケールに置き換えます。先頭がロケールでなければ、区間を付けます。',
+  en: '`delocalize` takes the locale segment off the front of a pathname. `localize` replaces that segment with the locale it is given, or puts one on when there is none.',
 });
 
 export const urlNull = message({
@@ -26,8 +26,8 @@ export const urlRoot = message({
 });
 
 export const urlPitfall = message({
-  ja: '`localize`は、区間がすでに付いているかを確かめません。`localize(\'/en/ui\', \'ja\')`は`/ja/en/ui`になるので、`delocalize`したpathnameを渡します。`/`で始まらない値は`TypeError`になります（`localize: "products" is not a pathname — it does not start with "/"`）。',
-  en: '`localize` does not check for a segment that is already there: `localize(\'/en/ui\', \'ja\')` is `/ja/en/ui`, so pass it a pathname that went through `delocalize`. A value that does not start with `/` is a `TypeError` (`localize: "products" is not a pathname — it does not start with "/"`).',
+  ja: '`localize`は、集合に無い先頭の区間をそのまま残します。`localize(\'/fr/ui\', \'en\')`は`/en/fr/ui`です。`/`で始まらない値は`TypeError`になります（`localize: "products" is not a pathname — it does not start with "/"`）。',
+  en: '`localize` keeps a first segment that is not one of the set’s locales: `localize(\'/fr/ui\', \'en\')` is `/en/fr/ui`. A value that does not start with `/` is a `TypeError` (`localize: "products" is not a pathname — it does not start with "/"`).',
 });
 
 export const demoTitle = message({
@@ -64,14 +64,9 @@ export const switcherTitle = message({
   en: 'Switcher links',
 });
 
-export const switcherDelocalizeCallout = message({
-  ja: '今のpathnameからロケールの区間を外す',
-  en: 'Takes the locale segment off the current pathname',
-});
-
 export const switcherLocalizeCallout = message({
-  ja: '各ロケールの区間を付けた切り替え先',
-  en: 'The destination with each locale’s segment put on',
+  ja: '今のpathnameの区間を各ロケールに置き換えた切り替え先',
+  en: 'The current pathname with its segment swapped for each locale',
 });
 
 export const switcherPathname = message({
@@ -110,8 +105,8 @@ export const rememberTitle = message({
 });
 
 export const rememberWhy = message({
-  ja: 'サーバーの`negotiateRequest`は、このCookieを`Accept-Language`より先に読みます。',
-  en: 'On the server, `negotiateRequest` reads this cookie before `Accept-Language`.',
+  ja: 'サーバーでこのCookieの値を`negotiateRequest`の`chosen`に渡すと、`Accept-Language`より先に使われます。',
+  en: 'On the server, pass this cookie’s value to `negotiateRequest` as `chosen`, and it comes before `Accept-Language`.',
 });
 
 export const rememberCallCallout = message({
@@ -125,8 +120,8 @@ export const rememberDefaults = message({
 });
 
 export const rememberName = message({
-  ja: "Cookieの名前はアプリが決めます。読む側の`negotiateRequest`にも、同じ名前を`{ cookie: 'locale' }`のように渡します。読む側の書き方は",
-  en: "The app chooses the cookie’s name. Pass the same name to the `negotiateRequest` that reads it, as `{ cookie: 'locale' }`. The reading side is covered in ",
+  ja: "Cookieの名前と値の形はアプリが決めます。`@k8ordo/i18n`はCookieを読みません。読む側は同じ名前で値を読み、`{ chosen: cookies().get('locale') }`のように渡します。読む側の書き方は",
+  en: "The app chooses the cookie’s name and the shape of its value; `@k8ordo/i18n` reads no cookie. The reading side reads the value by the same name and passes it on, as `{ chosen: cookies().get('locale') }`. The reading side is covered in ",
 });
 
 export const rememberStatic = message({

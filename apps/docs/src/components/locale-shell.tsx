@@ -182,11 +182,12 @@ export function LocaleShell({
     ? param
     : (locales.delocalize(pathname).locale ?? locales.default);
 
-  // 実ページの lang はルートレイアウトがサーバーで書く。ここで直すのは
+  // 実ページの lang と dir はルートレイアウトがサーバーで書く。ここで直すのは
   // 404.html の 1 枚だけで、あれは番兵の URL で描かれているので、読んでいる
   // 人の URL が分かるのはブラウザで描いた後になる。
   useEffect(() => {
     document.documentElement.lang = locale;
+    document.documentElement.dir = locales.definitions[locale].dir;
   }, [locale]);
 
   // 遷移後にトップ（または #fragment）へ戻すのはルーターの仕事になったので、

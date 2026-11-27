@@ -90,12 +90,17 @@ pnpm check         # check:write to auto-fix
   alone then, since only the type-only `register.gen.ts` can change. A
   hand-written augmentation left in an application still compiles:
   TypeScript accepts a property declared twice with one type.
-- **The browser loads `src/i18n.ts` before anything renders.** A locale set
-  registers itself as it is evaluated, and `@k8ordo/i18n` reads no locale
-  where none has (`packages/i18n/CLAUDE.md`), so `entry.browser.tsx`
-  imports `virtual:k8ordo/locales`: the file when the root has one, an
-  empty module when not. The server needs nothing of the kind: the route
-  files that take a locale import the set.
+- **Every environment loads `src/i18n.ts` before the application.** A
+  locale set registers itself as it is evaluated, and a message of
+  `@k8ordo/i18n` needs one registered where it is called
+  (`packages/i18n/CLAUDE.md`), so all three entries — `entry.browser.tsx`,
+  `entry.rsc.tsx` and `entry.ssr.tsx` — import `virtual:k8ordo/locales`:
+  the file when the root has one, an empty module when not. In the RSC
+  entry it sits above `virtual:k8ordo/routes`, whose layouts are static
+  imports and would otherwise run first. The RSC and SSR environments are
+  separate module graphs, so each evaluates the file; both register on the
+  same `globalThis`. A route file that never imports the set still finds it,
+  on either side.
 - **Declaration order is load-bearing.** `not-found.tsx` is emitted last in
   its branch because the router matches in declaration order; every route the
   app actually declared has to out-rank the catch-all. Literal directories are
@@ -1112,6 +1117,11 @@ fixtures/
   head-scripts/src/routes/   a layout writing an inline script in <head> and
                              importing CSS, which runtime/head-scripts.test.ts
                              opens in each engine with the CSS held back
+  locales-first/src/         an i18n.ts that counts its evaluations, and a
+                             layout, a page and a client component that never
+                             import it and record the count as they load,
+                             which runtime/locales-first.test.ts builds and
+                             calls
 ```
 
 ## Conventions

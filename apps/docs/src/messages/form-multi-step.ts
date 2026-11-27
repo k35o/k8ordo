@@ -190,6 +190,11 @@ export const demoMinutesMissing = message({
   en: 'Enter the length in minutes',
 });
 
+export const demoMinutesWhole = message({
+  ja: '分は整数で入力してください',
+  en: 'Use whole minutes',
+});
+
 export const demoMinutesRange = message({
   ja: '5分から60分の間で入力してください',
   en: 'Keep it between 5 and 60 minutes',

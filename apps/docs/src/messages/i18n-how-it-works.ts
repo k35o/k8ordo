@@ -45,11 +45,6 @@ export const browserUrl = message({
   en: 'In the browser, a message reads the first segment of `location.pathname` below Vite’s `base` every time it is called.',
 });
 
-export const browserBeforeSet = message({
-  ja: '集合を定義するモジュールがブラウザでまだ評価されていない間は、URLの区間がロケールかどうか分かりません。その間は、呼ばれた文言が文を持たない区間をロケールではないとみなし、最初に書いた文を返します。これで`/fr/…`の404ページはエラーになりません。',
-  en: 'Until the module defining the set has run in the browser, there is no telling whether a segment is a locale. Meanwhile a segment the message has no text for counts as no locale, and the first text written is returned. That is what keeps a 404 page on `/fr/…` from throwing.',
-});
-
 export const lastTitle = message({
   ja: '集合の登録',
   en: 'Set registration',
@@ -58,6 +53,11 @@ export const lastTitle = message({
 export const lastRegister = message({
   ja: '`defineLocales`は集合を返すほかに、既定のロケールと`is`を`globalThis`に登録します。`message`は集合を受け取らないので、ここから既定のロケールと、区間がロケールかどうかを判定する`is`を読みます。',
   en: 'Besides returning the set, `defineLocales` registers the default locale and `is` on `globalThis`. `message` takes no set, so this is where it reads the default locale and `is`, the membership check, from.',
+});
+
+export const lastNoSet = message({
+  ja: '集合が登録される前に文言を呼ぶと、`message: no locale set is defined here`のエラーになります。区間がロケールかどうかも、既定のロケールも、集合が無いと決まらないからです。`@k8ordo/framework`は、ブラウザでもサーバーでも、どのルートのファイルよりも先に`src/i18n.ts`を読みます。',
+  en: 'A message called before any set is registered throws `message: no locale set is defined here`. Without the set, neither whether a segment is a locale nor the default is known. `@k8ordo/framework` loads `src/i18n.ts` before any route file, in the browser and on the server.',
 });
 
 export const lastWins = message({
@@ -117,8 +117,12 @@ export const guaranteesTitle = message({
 
 export const guarantees = [
   message({
-    ja: '一覧に無いロケールは、`paramsSchema`が受け付けません。ブラウザでは集合が定義されたあと、URLの先頭の区間が一覧に無ければ、文言と`getLocale()`は既定のロケールを使います。',
-    en: '`paramsSchema` refuses a locale outside the list. In the browser, once the set is defined, messages and `getLocale()` use the default locale when the first segment of the URL is outside the list.',
+    ja: '一覧に無いロケールは、`paramsSchema`が受け付けません。ブラウザでは、URLの先頭の区間が一覧に無ければ、文言と`getLocale()`は既定のロケールを使います。',
+    en: '`paramsSchema` refuses a locale outside the list. In the browser, messages and `getLocale()` use the default locale when the first segment of the URL is outside the list.',
+  }),
+  message({
+    ja: '集合が無いところで呼んだ文言はエラーになります。どれかのロケールの文を推して返すことはありません。',
+    en: 'A message called where no set is defined throws. It never guesses a locale’s text.',
   }),
   message({
     ja: '`run`が設定したロケールは、`fn`とそこから始まる処理の中でだけ読まれます。同時に処理しているほかのリクエストには使われません。',

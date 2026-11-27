@@ -53,15 +53,15 @@ export default function I18nHowItWorksPage() {
           <p>
             <Rich>{t.browserUrl()}</Rich>
           </p>
-          <p>
-            <Rich>{t.browserBeforeSet()}</Rich>
-          </p>
         </DocSubsection>
       </DocSection>
 
       <DocSection id="last-set" title={t.lastTitle}>
         <p>
           <Rich>{t.lastRegister()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.lastNoSet()}</Rich>
         </p>
         <p>
           <Rich>{t.lastWins()}</Rich>

@@ -41,13 +41,13 @@ export const deriveTitle = message({
 });
 
 export const deriveCallout = message({
-  ja: 'モジュールスコープで1回だけ作る',
-  en: 'Built once, at module scope',
+  ja: 'リクエストごとに描画の中で作る',
+  en: 'Built in the render, per request',
 });
 
 export const deriveFields = message({
-  ja: 'Server Componentで`formFields`にスキーマを渡します。入力欄に付ける`required`や`maxlength`などの属性と、エラーの文言が作られます。',
-  en: 'Hand the schema to `formFields` in a Server Component. It builds the attributes for each input, such as `required` and `maxlength`, along with the error messages.',
+  ja: 'Server Componentの描画の中で、`formFields`にスキーマを渡します。入力欄に付ける`required`や`maxlength`などの属性と、エラーの文言が作られます。',
+  en: 'Hand the schema to `formFields` in a Server Component’s render. It builds the attributes for each input, such as `required` and `maxlength`, along with the error messages.',
 });
 
 export const deriveJson = message({

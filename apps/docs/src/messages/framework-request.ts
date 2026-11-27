@@ -127,6 +127,41 @@ export const optionsDelete = message({
   en: 'Pass `delete` the `path` and `domain` the cookie was written with. A browser tells cookies apart by those two.',
 });
 
+export const prefsTitle = message({
+  ja: '設定の置き場所',
+  en: 'Where a preference is kept',
+});
+
+export const prefsLead = message({
+  ja: '訪問者の設定をどこに置くかは、その値で誰が動くかで決まります。',
+  en: 'Where a visitor’s preference is kept follows from who acts on it.',
+});
+
+export const prefsList = [
+  message({
+    ja: '見た目だけを変える設定（配色や、縦書きか横書きか）は、`@k8ordo/state`の`defineLocalState`に置きます。最初の描画の前に、`inlineRead()`で読むインラインスクリプトが`<html>`に反映します。staticモードでもserverモードでも、同じコードで動きます。',
+    en: 'A preference that only changes how the page looks, such as a colour scheme or a writing mode, goes in `@k8ordo/state`’s `defineLocalState`. An inline script that reads it with `inlineRead()` puts it on `<html>` before the first paint. The same code runs under both modes.',
+  }),
+  message({
+    ja: 'サーバーの応答を変える設定は、serverモードで`defineCookieState`に置きます。guardやJavaScriptの無いフォーム、HTMLそのものが値で変わるときです。次の節で読み書きする密度は、見た目を変えるだけですが、JavaScriptの無いフォームで変えます。そのフォームを受けるServer ActionはlocalStorageに書けず、Cookieに書くので、ここに入ります。',
+    en: 'A preference the server answers by goes in `defineCookieState`, under server mode: a guard, a form without JavaScript, or HTML that differs with it. The density the next section reads and writes only changes the look, but a form without JavaScript sets it, and the Server Action receiving that form can write a cookie, not localStorage, so it belongs here.',
+  }),
+  message({
+    ja: '言語の選択は、アプリが名前を決めた素のCookieに置きます。言語の切り替えが`cookieStore.set`で書き、`/`のguardが`negotiateRequest`の`chosen`に渡します。タグは集合と照らして確かめるので、スキーマは要りません。',
+    en: 'The language choice goes in a plain cookie the app names. The language switcher writes it with `cookieStore.set`, and the guard of `/` passes it to `negotiateRequest` as `chosen`. The tag is checked against the set, so it needs no schema.',
+  }),
+] as const;
+
+export const prefsScript = message({
+  ja: '描く前に動くスクリプトの書き方は',
+  en: 'Writing the script that runs before the first paint is covered in ',
+});
+
+export const prefsLanguage = message({
+  ja: '言語の選び方は',
+  en: 'Choosing the language is covered in ',
+});
+
 export const stateTitle = message({
   ja: 'stateのCookie',
   en: 'Cookie state from `@k8ordo/state`',
@@ -148,18 +183,23 @@ export const stateOnce = message({
 });
 
 export const stateWriteCallout = message({
-  ja: 'ブラウザが書くときと同じ属性',
-  en: 'The attributes the browser writes',
+  ja: '今の値に重ね、ブラウザと同じ属性で書く',
+  en: 'Over the current values, with the browser’s attributes',
 });
 
 export const stateWrite = message({
-  ja: '同じCookieを`cookies()`で書くときは、名前に`cookieName`を、値に`cookieValue()`の返り値を渡します。`cookieValue()`は値をスキーマに通し、渡さなかったフィールドを既定値で埋めます。`maxAge`は、ブラウザが書くときと同じ400日（`34_560_000`秒）にします。',
-  en: 'To write the same cookie with `cookies()`, pass `cookieName` as the name and the return value of `cookieValue()` as the value. `cookieValue()` runs the values through the schema and fills the fields you left out with their defaults. Set `maxAge` to 400 days (`34_560_000` seconds), the same the browser writes.',
+  ja: '同じCookieを`cookies()`で書くときは、定義の`cookie()`が返す名前と値と属性を`set`に展開します。`cookie()`は1つ目の引数を、2つ目の引数から読んだ今の値に重ねてからスキーマに通します。渡さなかったフィールドは、訪問者が保存した値のままです。',
+  en: 'To write the same cookie with `cookies()`, spread the name, value and attributes the definition’s `cookie()` returns into `set`. `cookie()` lays its first argument over the values it reads from the second, then runs them through the schema. A field you leave out keeps what the visitor saved.',
 });
 
-export const stateHttpOnly = message({
-  ja: '`httpOnly: false`は外さないでください。`HttpOnly`のCookieはスクリプトから読めないので、ブラウザの`useAppState`がその値を読めなくなります。',
-  en: 'Keep `httpOnly: false`. A script cannot read an `HttpOnly` cookie, so `useAppState` in the browser would no longer see the value.',
+export const stateAttributes = message({
+  ja: '属性は、ブラウザが書くときと同じ`Path=/`と`SameSite=Lax`、400日の`Max-Age`です。`HttpOnly`は付けません。`HttpOnly`のCookieはスクリプトから読めず、ブラウザの`useAppState`がその値を読めなくなるためです。',
+  en: 'The attributes are the ones the browser writes: `Path=/`, `SameSite=Lax` and a `Max-Age` of 400 days. It is not `HttpOnly`, because a script cannot read an `HttpOnly` cookie, and `useAppState` in the browser would no longer see the value.',
+});
+
+export const stateReset = message({
+  ja: 'すべてのフィールドを既定値に戻すときは、`cookies().delete(density.cookieName)`でCookieを消します。',
+  en: 'To put every field back to its default, delete the cookie with `cookies().delete(density.cookieName)`.',
 });
 
 export const headersTitle = message({

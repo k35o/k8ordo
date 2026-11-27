@@ -66,7 +66,10 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   sets its own targets), the entries, the plugin's options —
   `reactCompiler` (React Compiler on the client components, which needs
   `oxc-transform-react` installed), `headers` on every answer, and
-  static mode's `site` and `csp` — and testing: what answers a request
+  static mode's `site` and `csp` — where a visitor's preference is kept
+  (look-only: `defineLocalState` and `inlineRead()`; one the server answers
+  by: `defineCookieState` under server mode; the language: a plain cookie
+  passed to `negotiateRequest` as `chosen`) — and testing: what answers a request
   through the built handler or `serve({ port: 0 })`, since the request API
   throws outside a request.
 
@@ -142,7 +145,9 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 - [Content Security Policy](references/csp.md): `nonce()` in a header a
   guard writes under server mode, in `style-src` too for the framework's
   one `<style>`; the `csp` option and `colorSchemeScriptHash()` under static
-  mode, and `connect-src` for the data a `fallback.tsx`'s shell fetches.
+  mode, and `connect-src` for the data a `fallback.tsx`'s shell fetches; an
+  application's own pre-paint script (`inlineRead()`) as a `'use client'`
+  component taking the nonce, its text hashed for static mode.
 - [Running and deploying](references/deploy.md): a static build's
   `dist/client/` (HTML, `index.rsc` payloads, shells, `404.html`,
   `client-files.json`, `sitemap.xml`, `_redirects`), the rewrites that reach a shell on Netlify,

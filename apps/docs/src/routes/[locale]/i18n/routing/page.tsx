@@ -37,6 +37,21 @@ export function Document({ children }: { children: ReactNode }) {
   );
 }`;
 
+const DOCUMENT_LOCALE = `'use client';
+
+import { useEffect } from 'react';
+
+import { locales } from '../i18n';
+
+export function DocumentLocale() {
+  const locale = locales.getLocale();
+  useEffect(() => {
+    document.documentElement.lang = locale;
+    document.documentElement.dir = locales.definitions[locale].dir;
+  }, [locale]);
+  return null;
+}`;
+
 const BASE = `import { locales } from '../i18n';
 
 // base: '/docs/', URL: '/docs/en/ui'
@@ -126,8 +141,17 @@ export default function I18nRoutingPage() {
           <Rich>{t.htmlServer()}</Rich>
         </p>
         <p>
-          <Rich>{t.htmlNull()}</Rich>
+          <Rich>{t.htmlDefault()}</Rich>
         </p>
+        <p>
+          <Rich>{t.htmlStatic404()}</Rich>
+        </p>
+        <CodeBlock
+          code={DOCUMENT_LOCALE}
+          lang="tsx"
+          marks={{ 8: 'highlight', 10: 'highlight', 11: 'highlight' }}
+          title="src/components/document-locale.tsx"
+        />
       </DocSection>
 
       <DocSection id="base" title={t.baseTitle}>

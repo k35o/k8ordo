@@ -27,10 +27,8 @@ import { TalkForm } from '../../../components/talk-form';
 import { createTalk } from '../../../lib/actions';
 import { talkSchema } from '../../../lib/schema';
 
-const talkFields = formFields(talkSchema);
-
 export default function NewTalkPage() {
-  return <TalkForm action={createTalk} fields={talkFields} />;
+  return <TalkForm action={createTalk} fields={formFields(talkSchema)} />;
 }`;
 
 const ACTION = `'use server';
@@ -128,10 +126,10 @@ export default function FormGetStartedPage() {
 
       <DocSection id="derive" title={t.deriveTitle}>
         <CodeBlock
-          callouts={{ 7: t.deriveCallout() }}
+          callouts={{ 8: t.deriveCallout() }}
           code={PAGE}
           lang="tsx"
-          marks={{ 7: 'highlight' }}
+          marks={{ 8: 'highlight' }}
           title="src/routes/talks/new/page.tsx"
         />
         <p>

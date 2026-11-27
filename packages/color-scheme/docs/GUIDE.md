@@ -34,9 +34,13 @@ legacy fallbacks.
 - **Contrast.** `prefers-contrast: more` and `forced-colors: active` are
   settings the visitor makes in the OS, not something an application stores
   or toggles, so neither is a preference here. `@k8ordo/ui`'s stylesheet
-  follows both on its own, in either scheme — its high-contrast values are
-  declared for `:root` and for `.dark` — so a visitor who chose dark and asks
-  the OS for more contrast gets the dark high-contrast values.
+  follows both on its own, in either scheme: its high-contrast values are
+  declared once, on `:root` inside `@media (prefers-contrast: more)`, each as
+  a `light-dark()` pair, and the pair resolves by the `color-scheme` the
+  stylesheet sets from the class. A visitor who chose dark and asks the OS
+  for more contrast gets the dark high-contrast values. A stylesheet of your
+  own does the same: `light-dark()` pairs under the media query, with
+  `color-scheme` declared by the class.
 - **Where the preference lives.** That is `@k8ordo/state`'s
   `defineLocalState`; this package declares one and reads and writes
   through it, so the localStorage key and the row's JSON are never spelled
@@ -242,7 +246,10 @@ every visitor who never chose.
 - **Other preferences beside it.** A display preference of the
   application's own is a `defineLocalState` under another key, in a module
   without `'use client'`. Never define another `'color-scheme'`: stores are
-  shared by key, and the two definitions would fight over one row.
+  shared by key, and the two definitions would fight over one row. One the
+  server has to act on belongs in a cookie instead; `@k8ordo/framework`'s
+  guide (`node_modules/@k8ordo/framework/docs/GUIDE.md`, "Preferences") sets
+  out which preference goes where.
 
 ## What it guarantees
 

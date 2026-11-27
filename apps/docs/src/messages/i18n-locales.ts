@@ -105,6 +105,40 @@ export const dirHtml = message({
   en: 'Write the current locale’s `dir` onto `<html>`. See ',
 });
 
+export const addTitle = message({
+  ja: 'ロケールを足す',
+  en: 'Adding a locale',
+});
+
+export const addIntro = message({
+  ja: 'ロケールを足すときに書き足す場所は、書き忘れると型エラーかエラー文で分かります。',
+  en: 'Each place a new locale has to be added to says so when it is left out, with a type error or an error message.',
+});
+
+export const addSteps = [
+  message({
+    ja: '`src/i18n.ts`の集合に、タイムゾーンと文字の向きを付けて足します。`RegisteredLocale`にも加わります。',
+    en: 'Add it to the set in `src/i18n.ts`, with its time zone and direction. `RegisteredLocale` gains it too.',
+  }),
+  message({
+    ja: 'そのロケールの文を持たない`message()`が、すべて型エラーになります。',
+    en: 'Every `message()` without text for it becomes a type error.',
+  }),
+  message({
+    ja: '`@k8ordo/ui`が同梱する文は`ja`と`en`だけです。ほかのロケールでは、集合の隣で`registerMessages`に辞書を渡します。辞書を`Messages`型にすると、足りないキーが型エラーになります。`en`を展開すると、まだ訳していないキーは英語のまま残ります。',
+    en: '`@k8ordo/ui` ships text for `ja` and `en` only. For another locale, hand a dictionary to `registerMessages` next to the set. Typed as `Messages`, a missing key is a type error. Spreading `en` keeps English for the keys not translated yet.',
+  }),
+  message({
+    ja: 'zodの既定の文言をロケールごとに出しているなら、その表も型エラーになります。',
+    en: 'If the app words zod’s default messages per locale, that table becomes a type error too.',
+  }),
+] as const;
+
+export const addRest = message({
+  ja: '`[locale]`のスキーマ、言語の選択、`localize`、静的ビルドの`paths.ts`、`<html lang dir>`は集合から読むので、書き足すものはありません。',
+  en: 'The `[locale]` schema, negotiation, `localize`, the static build’s `paths.ts` and `<html lang dir>` read the set, so nothing is added there.',
+});
+
 export const errorsTitle = message({
   ja: '拒まれる定義',
   en: 'Rejected definitions',

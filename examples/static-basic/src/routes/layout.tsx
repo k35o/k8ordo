@@ -7,8 +7,7 @@ import { locales } from '../i18n';
 
 // ディレクティブなし = Server Component（既定）
 export default function RootLayout({ children, pathname }: LayoutProps<'/'>) {
-  // [locale] の下なら URL のロケール、それ以外（404.html も）は既定の en
-  const locale = locales.delocalize(pathname).locale ?? locales.default;
+  const locale = locales.getLocale();
   const onProducts = matchPath('/products', pathname) !== null;
   const inProducts =
     matchPath('/products/*', pathname, { inclusive: true }) !== null;

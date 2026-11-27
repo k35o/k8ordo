@@ -167,13 +167,13 @@ export default function StateReferencePage() {
           },
           {
             name: 'parseCookies',
-            type: '(cookies: ReadonlyMap<string, string>) => output<Schema>',
+            type: '(cookies: { get(name) }) => output<Schema>',
             description: t.cookieParse,
           },
           {
-            name: 'cookieValue',
-            type: '(values?) => string',
-            description: t.cookieValue,
+            name: 'cookie',
+            type: '(patch, current: { get(name) }) => [name, value, options]',
+            description: t.cookieWrite,
           },
         ]}
         from={FROM}

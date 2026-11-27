@@ -1,0 +1,5 @@
+{
+  "private": true,
+  "description": "An application whose src/i18n.ts counts how often it is evaluated, and whose layout, page and client component — none of which imports it — note the count as they load, which runtime/locales-first.test.ts builds and calls.",
+  "type": "module"
+}

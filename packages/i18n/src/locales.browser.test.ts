@@ -47,17 +47,19 @@ describe('getLocale (browser)', () => {
     }
   });
 
-  it('reads no locale before a set is defined, whatever the URL starts with', () => {
+  it('throws before a set is defined, naming the module that has to run, whatever the URL starts with', () => {
     const key = Symbol.for('@k8ordo/i18n/locales');
     const registry = globalThis as { [key]?: unknown };
     const saved = registry[key];
     const original = location.pathname;
     try {
       registry[key] = undefined;
-      history.replaceState(null, '', '/fr/ui');
-      expect(home()).toBe('ホーム');
       history.replaceState(null, '', '/en/ui');
-      expect(home()).toBe('ホーム');
+      expect(() => home()).toThrow(
+        /no locale set is defined here — the module that calls defineLocales has to run before any message, in the browser too/u,
+      );
+      history.replaceState(null, '', '/');
+      expect(() => home()).toThrow(/no locale set is defined here/u);
     } finally {
       registry[key] = saved;
       history.replaceState(null, '', original);

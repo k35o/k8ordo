@@ -15,7 +15,7 @@ export const entrySchema = z.object({
   minutes: z.coerce
     .number({ error: m.formMultiStep.demoMinutesMissing })
     .check(
-      z.int(),
+      z.int({ error: m.formMultiStep.demoMinutesWhole }),
       z.gte(5, { error: m.formMultiStep.demoMinutesRange }),
       z.lte(60, { error: m.formMultiStep.demoMinutesRange }),
     ),

@@ -25,6 +25,13 @@ const SYMPTOMS: readonly Symptom[] = [
     fix: t.missingFix,
   },
   {
+    id: 'no-set',
+    title: t.noSetTitle,
+    cause: t.noSetCause,
+    fix: t.noSetFix,
+    link: { path: '/:locale/i18n/testing', label: m.i18n.navTesting },
+  },
+  {
     id: 'untyped',
     title: t.untypedTitle,
     cause: t.untypedCause,
@@ -71,12 +78,6 @@ const SYMPTOMS: readonly Symptom[] = [
     cause: t.uiMissingCause,
     fix: t.uiMissingFix,
     link: { path: '/:locale/ui/i18n', label: m.nav.i18n },
-  },
-  {
-    id: 'double',
-    title: t.doubleTitle,
-    cause: t.doubleCause,
-    fix: t.doubleFix,
   },
   {
     id: 'not-found',

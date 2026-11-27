@@ -15,8 +15,6 @@ export function LanguageSwitcher() {
   const locale = getLocale();
   const pathname = usePathname();
 
-  const { pathname: path } = locales.delocalize(pathname);
-
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger
@@ -30,7 +28,7 @@ export function LanguageSwitcher() {
             // href() は表のパターンしか受け取らず、ここの行き先は今の
             // pathname から作るので、型を偽らずには書けない。フレームワーク
             // 下のブラウザには、どのパターンが勝ったかが届かない。
-            href={withBase(locales.localize(path, l))}
+            href={withBase(locales.localize(pathname, l))}
             key={l}
             label={LOCALE_LABELS[l]}
           />

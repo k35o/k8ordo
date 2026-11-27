@@ -36,8 +36,8 @@ type StateOf<Def> =
 type UrlStateOf<Def> = Def extends PageState<infer Url> ? OutputOf<Url> : never;
 
 type Options = {
-  initialUrl?: Readonly<StateValues>;
-  initialCookie?: Readonly<StateValues>;
+  initialUrl?: Readonly<StateValues> | undefined;
+  initialCookie?: Readonly<StateValues> | undefined;
 };
 
 type UpdateFn<Def> = (
@@ -59,8 +59,9 @@ type OptionsFor<Def> = Def extends { kind: 'page'; url: StateSchema }
        * the hydration render; without it those two renders see the defaults,
        * which flashes once the live URL takes over. The entry slot has no
        * server-side source, so it always starts from defaults there.
+       * `undefined` is the same as leaving it out.
        */
-      initialUrl?: Readonly<UrlStateOf<Def>>;
+      initialUrl?: Readonly<UrlStateOf<Def>> | undefined;
     }
   : Def extends CookieState<infer Schema>
     ? {
@@ -68,9 +69,9 @@ type OptionsFor<Def> = Def extends { kind: 'page'; url: StateSchema }
          * What `parseCookies(request.cookies)` returned on the server, passed
          * down as a prop. It seeds SSR and the hydration render; without it
          * those two renders see the defaults, which flashes once the cookie
-         * is read in the browser.
+         * is read in the browser. `undefined` is the same as leaving it out.
          */
-        initialCookie?: Readonly<output<Schema>>;
+        initialCookie?: Readonly<output<Schema>> | undefined;
       }
     : never;
 

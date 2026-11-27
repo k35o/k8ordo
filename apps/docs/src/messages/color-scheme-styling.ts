@@ -126,8 +126,8 @@ export const contrastOwn = message({
 });
 
 export const contrastUi = message({
-  ja: '`@k8ordo/ui`のスタイルシートは、`:root`と`.dark`の両方にハイコントラストの値を持っているので、どちらを選んでいても効きます。詳しくは',
-  en: '`@k8ordo/ui`’s stylesheet holds high-contrast values for both `:root` and `.dark`, so they apply in either scheme. See ',
+  ja: '`@k8ordo/ui`のスタイルシートは、`@media (prefers-contrast: more)`の中の`:root`に、ハイコントラストの値を`light-dark()`の組で1回だけ書いています。組のどちらを使うかは、クラスから決まる`color-scheme`が選びます。そのため、ライトとダークのどちらを選んでいても効きます。詳しくは',
+  en: '`@k8ordo/ui`’s stylesheet declares its high-contrast values once, on `:root` inside `@media (prefers-contrast: more)`, each as a `light-dark()` pair. The `color-scheme` set from the class picks one of the pair, so they apply in either scheme. See ',
 });
 
 export const contrastAfter = message({

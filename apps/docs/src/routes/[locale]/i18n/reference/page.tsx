@@ -1,7 +1,11 @@
 import { ApiEntry } from '../../../../components/api-entry';
 import { CodeBlock } from '../../../../components/code-block';
 import { DocPage } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
+import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
+
+import styles from '../../../../styles/pages/i18n/reference.module.css';
 
 const t = m.i18nReference;
 const FROM = '@k8ordo/i18n';
@@ -122,9 +126,11 @@ export default function I18nReferencePage() {
     definitions: Readonly<Record<L, LocaleDefinition>>;
     default: D;
     is: (value: unknown) => value is L;
-    negotiate: (requested: Iterable<string>) => L;
+    negotiate: (
+      requested: Iterable<string | null | undefined>,
+    ) => L;
     negotiateRequest: (
-      request: Request,
+      request: { headers: Headers },
       options?: NegotiateRequestOptions,
     ) => L;
     localize: (pathname: string, locale: L) => string;
@@ -210,6 +216,13 @@ function message<A extends readonly unknown[]>(
           lang="ts"
           title="src/messages/nav.ts"
         />
+        <p className={styles.example}>
+          <Rich>{t.messageTestingBefore()}</Rich>
+          <LocaleAnchor path="/:locale/i18n/testing">
+            {m.i18n.navTesting()}
+          </LocaleAnchor>
+          <Rich>{t.messageTestingAfter()}</Rich>
+        </p>
       </ApiEntry>
 
       <ApiEntry
@@ -335,15 +348,17 @@ function message<A extends readonly unknown[]>(
       <ApiEntry
         fields={[
           {
-            name: 'cookie',
-            type: 'string',
-            description: t.negotiateOptionsCookie,
+            name: 'chosen',
+            type: 'string | null | undefined',
+            description: t.negotiateOptionsChosen,
           },
         ]}
         from={FROM}
         id="negotiate-request-options"
         name="NegotiateRequestOptions"
-        signature="type NegotiateRequestOptions = { cookie?: string };"
+        signature={`type NegotiateRequestOptions = {
+  chosen?: string | null | undefined;
+};`}
         summary={t.negotiateOptionsSummary}
       />
 

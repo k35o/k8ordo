@@ -5,9 +5,15 @@ import { createHandle, createStoreCore, resolvePatch } from './core';
 import type { Handle, Patch, Store, UpdateHandle } from './core';
 import { getOrCreateStore } from './registry';
 
-// RFC 6265bis がブラウザに許す寿命の上限。書き込むたびに延びるので、使われて
-// いる好みが期限で消えることはない
-const MAX_AGE = 400 * 24 * 60 * 60;
+export const COOKIE_ATTRIBUTES = {
+  path: '/',
+  // 既定の strict では、ほかのサイトのリンクから来た最初のリクエストに
+  // Cookie が付かず、サーバーが既定値で描いてしまう
+  sameSite: 'lax',
+  // RFC 6265bis がブラウザに許す寿命の上限。書き込むたびに延びるので、使われて
+  // いる好みが期限で消えることはない
+  maxAge: 400 * 24 * 60 * 60,
+} as const;
 
 // useSyncExternalStore のスナップショットは同期で要るが、cookieStore.get() は
 // Promise を返す。読むのだけは document.cookie で行う
@@ -117,11 +123,7 @@ const createCookieStore = (def: CookieState, codec: RowCodec): Store => {
         // エンコードする。サーバーの Cookie パーサーが戻すのもこの符号化。
         // JSON にできない値（bigint など）はここで throw する
         value: encodeURIComponent(JSON.stringify(codec.row(target))),
-        path: '/',
-        // 既定の strict では、ほかのサイトのリンクから来た最初のリクエストに
-        // Cookie が付かず、サーバーが既定値で描いてしまう
-        sameSite: 'lax',
-        maxAge: MAX_AGE,
+        ...COOKIE_ATTRIBUTES,
       };
       await cookieStore.set(init);
     } catch (error) {
