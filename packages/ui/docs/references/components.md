@@ -793,11 +793,10 @@ Props:
 - `fullHeight`: `boolean` (default: `false`)
 - `invalid`: `boolean` (default: `false`)
 - `ref`: `Ref<HTMLTextAreaElement>`
-- `type`: `string`
 - Other props are forwarded to `TextareaHTMLAttributes<HTMLTextAreaElement>`, except `className` / `style`.
 
-`type` is accepted and dropped: a `<textarea>` has none. A `pattern` is not
-checked by the browser on a `<textarea>` either.
+A `<textarea>` has no `type`, and the browser does not check a `pattern` on
+one.
 
 ### NumberField
 
@@ -1091,9 +1090,8 @@ Props:
 - `onChange`: `(value: string) => void`
 - `ref`: `Ref<HTMLInputElement>`
 - `swatches`: `readonly ColorPickerSwatch[]`
-- `type`: `string`
 - `value`: `string`
-- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `className` / `style` / `children`.
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `children`.
 
 ### Combobox
 
@@ -1146,9 +1144,8 @@ Props:
 - `options`: `readonly Option[]`
 - `ref`: `Ref<HTMLInputElement>`
 - `search`: `ComboboxSearch`
-- `type`: `string`
 - `value`: `string`
-- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `role` / `className` / `style` / `children` / `autoComplete` / `aria-autocomplete` / `aria-controls` / `aria-expanded` / `aria-activedescendant`.
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `children` / `autoComplete` / `aria-autocomplete` / `aria-controls` / `aria-expanded` / `aria-activedescendant`.
 
 ### Checkbox
 
@@ -1476,8 +1473,7 @@ Props:
 
 ### FileField
 
-File upload, as a composite pattern. A string `defaultValue` is accepted and
-ignored.
+File upload, as a composite pattern.
 
 ```tsx
 import { FileField } from '@k8ordo/ui';
@@ -1514,8 +1510,8 @@ submitted:
   alone would keep only the files just picked. A rewrite is announced with an
   `input` event.
 - Removing a file from `ItemList` removes it from the input.
-- A `File[]` `defaultValue` is submitted as well as listed, and a form reset
-  puts both back to it (to an empty list without one).
+- The files in `defaultValue` are submitted as well as listed, and a form
+  reset puts both back to them (to an empty list without one).
 - `onChange` receives that whole list — not only the files just picked or
   dropped — after every pick, drop, and removal. Only a pick passes the
   `event`.
@@ -1530,7 +1526,7 @@ submitted:
 Props (Root):
 
 - `children`: `ReactNode`
-- `defaultValue`: `File[]` | `string`
+- `defaultValue`: `File[]`
 - `invalid`: `boolean` (default: `false`)
 - `maxFiles`: `number`
 - `onChange`: `(files: FileList | null, event?: ChangeEvent<HTMLInputElement>) => void`

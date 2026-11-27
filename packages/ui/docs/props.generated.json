@@ -1353,12 +1353,6 @@
           "required": false
         },
         {
-          "name": "type",
-          "types": ["string"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
           "name": "value",
           "types": ["string"],
           "defaultValue": null,
@@ -1366,7 +1360,7 @@
         }
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
-      "omitted": ["className", "style", "children"]
+      "omitted": ["type", "className", "style", "children"]
     },
     {
       "name": "ColorScaleIcon",
@@ -1423,12 +1417,6 @@
           "required": false
         },
         {
-          "name": "type",
-          "types": ["string"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
           "name": "value",
           "types": ["string"],
           "defaultValue": null,
@@ -1437,6 +1425,7 @@
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
       "omitted": [
+        "type",
         "role",
         "className",
         "style",
@@ -2304,7 +2293,7 @@
         },
         {
           "name": "defaultValue",
-          "types": ["File[]", "string"],
+          "types": ["File[]"],
           "defaultValue": null,
           "required": false
         },
@@ -5266,12 +5255,6 @@
         {
           "name": "ref",
           "types": ["Ref<HTMLTextAreaElement>"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "type",
-          "types": ["string"],
           "defaultValue": null,
           "required": false
         }

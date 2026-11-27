@@ -826,7 +826,8 @@ arrives as an `input` event, the way typing does.
 
 | Schema                                             | Component                                       | What to pass besides `{...props} {...input}`                  |
 | -------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------- |
-| `z.string()`, `z.email()`, `z.url()`, `z.iso.*()`  | `TextField`, `Textarea`                         | —                                                             |
+| `z.string()`                                       | `TextField`, `Textarea`                         | —                                                             |
+| `z.email()`, `z.url()`, `z.iso.*()`                | `TextField`                                     | —                                                             |
 | a password                                         | `PasswordInput`                                 | —                                                             |
 | `z.coerce.number()`                                | `NumberField`, `Slider`                         | —                                                             |
 | `z.enum([…])`                                      | `Select`, `Radio`, `RadioCard`                  | `options`; `labelAs="group"` on `FormControl` for radios      |

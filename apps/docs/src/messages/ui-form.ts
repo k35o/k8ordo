@@ -41,8 +41,8 @@ export const mapLead = message({
 });
 
 export const mapText = message({
-  ja: '`z.string()`と`z.email()`、`z.url()`、`z.iso.*()`：`TextField`か`Textarea`。ほかに渡すものはありません。',
-  en: '`z.string()`, `z.email()`, `z.url()`, `z.iso.*()`: `TextField` or `Textarea`, with nothing else to pass.',
+  ja: '`z.string()`と`z.email()`、`z.url()`、`z.iso.*()`：`TextField`。ほかに渡すものはありません。`Textarea`に展開できるのは、`type`の付かない`z.string()`だけです。',
+  en: '`z.string()`, `z.email()`, `z.url()`, `z.iso.*()`: `TextField`, with nothing else to pass. Only `z.string()`, which derives no `type`, spreads onto `Textarea` too.',
 });
 
 export const mapPassword = message({

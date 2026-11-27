@@ -43,8 +43,6 @@ type BaseProps = {
   options?: readonly Option[];
   /** 打った文字で候補を探す。打ち直すと前の問い合わせは `signal` で打ち切る。 */
   search?: ComboboxSearch;
-  // @k8ordo/form の formFields は type を導くので受けて捨てる
-  type?: string;
   // フォームライブラリの register が入力値を読めるよう、ref は combobox の input に向ける
   ref?: Ref<HTMLInputElement>;
 } & Omit<
@@ -88,7 +86,6 @@ export const Combobox: FC<Props> = ({
   invalid = false,
   options: optionsProp,
   search,
-  type: _type,
   value,
   defaultValue,
   onChange,

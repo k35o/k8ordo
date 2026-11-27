@@ -327,12 +327,24 @@ export const MyComponent = { Root, Part } as const;
 A field must work when `@k8ordo/form`'s `formFields` output is spread onto it
 unchanged (each field's `WithForm` story holds it to that). Five rules follow:
 
-- **Accept the derived attribute types.** `input` carries `type` as a string
-  (none on a plain text field), `min` / `max` as numbers, `step` as
-  `number | 'any'`, and the echoed `defaultValue` as a string — an array of the
-  checked options on a checkbox group, and none on a file field. Widen a prop to
-  take them, or take one and drop it (`Textarea`'s `type`); never make the
-  caller destructure it away.
+- **Take the native attributes; the form emits values that fit them.** A
+  field's props are the attributes of the element it renders, never wider
+  than React types them and narrower where the field reads the value itself
+  (`NumberField` and `Slider` take `min` / `max` as numbers only, and
+  `Slider`'s `step` as `number | 'any'`). `@k8ordo/form` emits only values that
+  fit: no `type` on a plain text field, `min` / `max` as numbers, `step` as
+  `number | 'any'`, and
+  the echoed `defaultValue` as a string — an array of the checked options on a
+  checkbox group, none on a file field. Never widen a prop, or take one and
+  drop it, for the form's sake: when the two disagree, change what
+  `@k8ordo/form` emits. An attribute the element lacks or the field fixes
+  itself is not a prop (`Textarea` has no `type`; `Combobox` and
+  `ColorPicker` fix `type="text"`). The one exception is `required`, which
+  `FormControl`'s props carry to every field: `CheckboxGroup`,
+  `CheckboxCard`, `Slider`, and `RangeSlider` accept it and write it to no
+  element, since no element they render takes it — a `<fieldset>` has no
+  `required`, and HTML bars it on a range, which always has a value. A
+  group's name says it instead, through `labelAs="group"`'s mark.
 - **Keep an uncontrolled value in the DOM.** Pass `defaultValue` /
   `defaultChecked` to the element, not a `value` / `checked` mirrored from
   state: a form reset — React's after every action included — restores the
