@@ -58,8 +58,11 @@ import { ICON_NAMES } from './icon-names';
  * は、引数をキーの並び順で props に戻す。そのため **各 schema のキーの並び順は
  * 契約**で、モデルが書いた文字列も保存された文字列もそれに頼っている。
  *
- * - 新しいキーは **必ず末尾に足す**。途中に挿入すると以降の位置が 1 つずつずれ、
- *   既存の文字列が無言で誤描画される（型エラーにもならない）。
+ * - 新しい任意のキーは **必ず末尾に足す**。途中に挿入すると以降の位置が 1 つずつ
+ *   ずれ、既存の文字列が無言で誤描画される（型エラーにもならない）。
+ * - 新しい必須のキーは、その項目の保存済みの文字列をどれも通らなくするので、
+ *   並びを決め直してよい。入力欄の label は name の直後に置く。末尾に置くと、
+ *   モデルは前にある任意の引数をすべて null で埋めて書くことになる。
  * - 既存キーの削除・並べ替えも、後ろの引数を全部ずらす。
  * - 既存キーのリネームは位置を変えないが、名前で props を書く形式（json-render、
  *   A2UI）の保存済みの spec を壊す。
@@ -606,11 +609,17 @@ export const tabsProps = z.object({
     .describe('Label and text panel of each tab'),
 }) satisfies z.ZodType<TabsIntegrationProps>;
 
+type LabelIntegrationProps = { label: string; helpText?: string };
+const fieldLabel = () => z.string().describe('Visible label of the field');
+const fieldHelpText = () =>
+  z.string().optional().describe('Help text shown under the field');
+
 // TextField と Textarea はキーが揃っているが、`textareaProps = textFieldProps`
 // のようにインスタンスを共有してはいけない（冒頭「スキーマの実体が同一性」参照）。
 // 形だけを spread して別インスタンスにする。
 const textInputShape = {
   name: z.string(),
+  label: fieldLabel(),
   placeholder: z.string().optional(),
   defaultValue: z.string().optional(),
   invalid: z.boolean().optional(),
@@ -685,9 +694,10 @@ const defaultValueFitsType = (
   }
 };
 
-type TextFieldIntegrationProps = TextInputIntegrationProps & {
-  type?: TextInputType;
-};
+type TextFieldIntegrationProps = TextInputIntegrationProps &
+  LabelIntegrationProps & {
+    type?: TextInputType;
+  };
 export const textFieldProps = z
   .object({
     ...textInputShape,
@@ -708,15 +718,17 @@ export const textFieldProps = z
       .describe(
         'Kind of value the field takes (text when omitted); a date or time kind holds the input format, such as YYYY-MM-DD for date',
       ),
+    helpText: fieldHelpText(),
   })
   .superRefine(defaultValueFitsType, {
     when: whenParsed('type', 'defaultValue'),
   }) satisfies z.ZodType<TextFieldIntegrationProps>;
 
-type TextareaIntegrationProps = TextInputIntegrationProps & {
-  rows?: ComponentProps<typeof Textarea>['rows'];
-  autoResize?: ComponentProps<typeof Textarea>['autoResize'];
-};
+type TextareaIntegrationProps = TextInputIntegrationProps &
+  LabelIntegrationProps & {
+    rows?: ComponentProps<typeof Textarea>['rows'];
+    autoResize?: ComponentProps<typeof Textarea>['autoResize'];
+  };
 export const textareaProps = z.object({
   ...textInputShape,
   rows: z
@@ -729,9 +741,10 @@ export const textareaProps = z.object({
     .boolean()
     .optional()
     .describe('Grow the height to fit the text'),
+  helpText: fieldHelpText(),
 }) satisfies z.ZodType<TextareaIntegrationProps>;
 
-type PasswordInputIntegrationProps = {
+type PasswordInputIntegrationProps = LabelIntegrationProps & {
   name: string;
   placeholder?: string;
   defaultValue?: string;
@@ -740,15 +753,18 @@ type PasswordInputIntegrationProps = {
 };
 export const passwordInputProps = z.object({
   name: z.string(),
+  label: fieldLabel(),
   placeholder: z.string().optional(),
   defaultValue: z.string().optional(),
   invalid: z.boolean().optional(),
   disabled: z.boolean().optional(),
+  helpText: fieldHelpText(),
 }) satisfies z.ZodType<PasswordInputIntegrationProps>;
 
 // NumberField と Slider も同様に、インスタンスではなく形だけを共有する。
 const numericInputShape = {
   name: z.string(),
+  label: fieldLabel(),
   defaultValue: z.number().optional(),
   min: z.number().optional(),
   max: z.number().optional(),
@@ -757,7 +773,7 @@ const numericInputShape = {
   disabled: z.boolean().optional(),
 };
 
-type NumberFieldIntegrationProps = {
+type NumberFieldIntegrationProps = LabelIntegrationProps & {
   name: string;
   defaultValue?: number;
   min?: number;
@@ -768,6 +784,7 @@ type NumberFieldIntegrationProps = {
 };
 export const numberFieldProps = z.object({
   ...numericInputShape,
+  helpText: fieldHelpText(),
 }) satisfies z.ZodType<NumberFieldIntegrationProps>;
 
 type SliderIntegrationProps = NumberFieldIntegrationProps;
@@ -775,15 +792,15 @@ export const sliderProps = z.object({
   ...numericInputShape,
   min: z.number().optional().describe('Lower bound (0 when omitted)'),
   max: z.number().optional().describe('Upper bound (100 when omitted)'),
+  helpText: fieldHelpText(),
 }) satisfies z.ZodType<SliderIntegrationProps>;
 
 // 値は `<input type="date">` の value と同じ YYYY-MM-DD で、LLM が別の書式で
 // 書くと検証で弾く
 const isoDate = () => z.iso.date();
 
-type DatePickerIntegrationProps = {
+type DatePickerIntegrationProps = LabelIntegrationProps & {
   name: string;
-  label: string;
   defaultValue?: string;
   min?: string;
   max?: string;
@@ -793,13 +810,14 @@ type DatePickerIntegrationProps = {
 };
 export const datePickerProps = z.object({
   name: z.string(),
-  label: z.string().describe('Visible label of the field'),
+  label: fieldLabel(),
   defaultValue: isoDate().optional().describe('YYYY-MM-DD'),
   min: isoDate().optional().describe('Earliest date that can be entered'),
   max: isoDate().optional().describe('Latest date that can be entered'),
   invalid: z.boolean().optional(),
   disabled: z.boolean().optional(),
   required: z.boolean().optional(),
+  helpText: fieldHelpText(),
 }) satisfies z.ZodType<DatePickerIntegrationProps>;
 
 type CalendarIntegrationProps = {
@@ -815,9 +833,8 @@ export const calendarProps = z.object({
   max: isoDate().optional().describe('Latest date that can be picked'),
 }) satisfies z.ZodType<CalendarIntegrationProps>;
 
-type RangeSliderIntegrationProps = {
+type RangeSliderIntegrationProps = LabelIntegrationProps & {
   name: string;
-  label: string;
   defaultValue?: readonly [number, number];
   min?: number;
   max?: number;
@@ -829,7 +846,7 @@ export const rangeSliderProps = z.object({
   name: z
     .string()
     .describe('Both thumbs submit under this name, lower value first'),
-  label: z.string().describe('Accessible name of the slider'),
+  label: fieldLabel(),
   defaultValue: z
     .tuple([z.number(), z.number()])
     .optional()
@@ -839,14 +856,14 @@ export const rangeSliderProps = z.object({
   step: z.number().optional(),
   invalid: z.boolean().optional(),
   disabled: z.boolean().optional(),
+  helpText: fieldHelpText(),
 }) satisfies z.ZodType<RangeSliderIntegrationProps>;
 
 // 値は `<ColorPicker>` の欄と同じ #rrggbb。大文字は部品が小文字にそろえる
 const hexColor = () => z.string().regex(/^#[0-9a-fA-F]{6}$/u);
 
-type ColorPickerIntegrationProps = {
+type ColorPickerIntegrationProps = LabelIntegrationProps & {
   name: string;
-  label: string;
   defaultValue?: string;
   swatches?: ComponentProps<typeof ColorPicker>['swatches'];
   invalid?: boolean;
@@ -855,7 +872,7 @@ type ColorPickerIntegrationProps = {
 };
 export const colorPickerProps = z.object({
   name: z.string(),
-  label: z.string().describe('Visible label of the field'),
+  label: fieldLabel(),
   defaultValue: hexColor().optional().describe('#rrggbb'),
   swatches: z
     .array(
@@ -871,6 +888,7 @@ export const colorPickerProps = z.object({
   invalid: z.boolean().optional(),
   disabled: z.boolean().optional(),
   required: z.boolean().optional(),
+  helpText: fieldHelpText(),
 }) satisfies z.ZodType<ColorPickerIntegrationProps>;
 
 type CheckboxIntegrationProps = {
@@ -904,7 +922,7 @@ export const switchProps = z.object({
 }) satisfies z.ZodType<SwitchIntegrationProps>;
 
 type SelectOption = { value: string; label: string };
-type SelectIntegrationProps = {
+type SelectIntegrationProps = LabelIntegrationProps & {
   name: string;
   options: readonly SelectOption[];
   defaultValue?: string;
@@ -918,34 +936,35 @@ const radioCardOption = selectOption.extend({
 });
 export const selectProps = z.object({
   name: z.string(),
+  label: fieldLabel(),
   options: z.array(selectOption).min(1).describe('Choices (value / label)'),
   defaultValue: z.string().optional(),
   invalid: z.boolean().optional(),
   disabled: z.boolean().optional(),
+  helpText: fieldHelpText(),
 }) satisfies z.ZodType<SelectIntegrationProps>;
 
-type RadioIntegrationProps = {
+type RadioIntegrationProps = LabelIntegrationProps & {
   name: string;
-  label: string;
   options: readonly SelectOption[];
   defaultValue?: string;
   disabled?: boolean;
 };
 export const radioProps = z.object({
   name: z.string(),
-  label: z.string(),
+  label: fieldLabel(),
   options: z.array(selectOption).min(1),
   defaultValue: z.string().optional(),
   disabled: z.boolean().optional(),
+  helpText: fieldHelpText(),
 }) satisfies z.ZodType<RadioIntegrationProps>;
 
 type RadioCardOption = SelectOption & {
   description?: string;
   disabled?: boolean;
 };
-type RadioCardIntegrationProps = {
+type RadioCardIntegrationProps = LabelIntegrationProps & {
   name: string;
-  label: string;
   options: readonly RadioCardOption[];
   defaultValue?: string;
   invalid?: boolean;
@@ -953,20 +972,20 @@ type RadioCardIntegrationProps = {
 };
 export const radioCardProps = z.object({
   name: z.string(),
-  label: z.string(),
+  label: fieldLabel(),
   options: z.array(radioCardOption).min(1),
   defaultValue: z.string().optional(),
   invalid: z.boolean().optional(),
   disabled: z.boolean().optional(),
+  helpText: fieldHelpText(),
 }) satisfies z.ZodType<RadioCardIntegrationProps>;
 
-type CheckboxCardIntegrationProps = {
+type CheckboxCardIntegrationProps = LabelIntegrationProps & {
   name: string;
   options: readonly RadioCardOption[];
   defaultValue?: readonly string[];
   invalid?: boolean;
   disabled?: boolean;
-  label: string;
 };
 export const checkboxCardProps = z.object({
   name: z.string(),
@@ -976,7 +995,8 @@ export const checkboxCardProps = z.object({
   disabled: z.boolean().optional(),
   // RadioCard は label を 2 番目に持つが、こちらは後から足したので末尾に置く
   // （冒頭「キーの並び順は契約」参照）
-  label: z.string(),
+  label: fieldLabel(),
+  helpText: fieldHelpText(),
 }) satisfies z.ZodType<CheckboxCardIntegrationProps>;
 
 type ListBoxIntegrationProps = {
@@ -992,22 +1012,21 @@ export const listBoxProps = z.object({
   label: z.string().optional().describe('Accessible name of the trigger'),
 }) satisfies z.ZodType<ListBoxIntegrationProps>;
 
-type CheckboxGroupIntegrationProps = {
+type CheckboxGroupIntegrationProps = LabelIntegrationProps & {
   name: string;
   options: readonly SelectOption[];
   defaultValue?: readonly string[];
-  label: string;
 };
 export const checkboxGroupProps = z.object({
   name: z.string(),
   options: z.array(selectOption).min(1),
   defaultValue: z.array(z.string()).optional(),
-  // グループのアクセシブル名。後から足したので末尾に置く
-  // （冒頭「キーの並び順は契約」参照）
-  label: z.string(),
+  // 後から足したので末尾に置く（冒頭「キーの並び順は契約」参照）
+  label: fieldLabel(),
+  helpText: fieldHelpText(),
 }) satisfies z.ZodType<CheckboxGroupIntegrationProps>;
 
-type AutocompleteIntegrationProps = {
+type AutocompleteIntegrationProps = LabelIntegrationProps & {
   name: string;
   options: readonly SelectOption[];
   defaultValue?: readonly string[];
@@ -1016,16 +1035,17 @@ type AutocompleteIntegrationProps = {
 };
 export const autocompleteProps = z.object({
   name: z.string(),
+  label: fieldLabel(),
   options: z.array(selectOption).min(1),
   defaultValue: z.array(z.string()).optional(),
   invalid: z.boolean().optional(),
   disabled: z.boolean().optional(),
+  helpText: fieldHelpText(),
 }) satisfies z.ZodType<AutocompleteIntegrationProps>;
 
 // search は関数なので生成 UI からは渡せない。決まった候補の絞り込みだけを載せる
-type ComboboxIntegrationProps = {
+type ComboboxIntegrationProps = LabelIntegrationProps & {
   name: string;
-  label: string;
   options: readonly SelectOption[];
   defaultValue?: string;
   placeholder?: string;
@@ -1035,7 +1055,7 @@ type ComboboxIntegrationProps = {
 };
 export const comboboxProps = z.object({
   name: z.string(),
-  label: z.string().describe('Visible label of the field'),
+  label: fieldLabel(),
   options: z
     .array(selectOption)
     .min(1)
@@ -1045,9 +1065,10 @@ export const comboboxProps = z.object({
   invalid: z.boolean().optional(),
   disabled: z.boolean().optional(),
   required: z.boolean().optional(),
+  helpText: fieldHelpText(),
 }) satisfies z.ZodType<ComboboxIntegrationProps>;
 
-type FileFieldIntegrationProps = {
+type FileFieldIntegrationProps = LabelIntegrationProps & {
   triggerLabel?: string;
   multiple?: boolean;
   maxFiles?: number;
@@ -1055,6 +1076,7 @@ type FileFieldIntegrationProps = {
   dropzone?: boolean;
 };
 export const fileFieldProps = z.object({
+  label: fieldLabel(),
   triggerLabel: z
     .string()
     .optional()
@@ -1069,6 +1091,7 @@ export const fileFieldProps = z.object({
     .boolean()
     .optional()
     .describe('Show an area files can be dropped onto, with the button in it'),
+  helpText: fieldHelpText(),
 }) satisfies z.ZodType<FileFieldIntegrationProps>;
 
 type FormControlIntegrationProps = {

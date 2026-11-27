@@ -25,7 +25,7 @@ it('press に書いた @ToAssistant は、フォームの状態を付けて届�
     ].join('\n'),
   );
 
-  await screen.getByPlaceholder('ニックネーム').fill('ordo');
+  await screen.getByLabelText('ニックネーム').fill('ordo');
   await screen.getByRole('button', { name: '保存' }).click();
 
   await expect.poll(() => onAction.mock.calls.length).toBe(1);

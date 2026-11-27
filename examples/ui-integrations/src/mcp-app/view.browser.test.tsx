@@ -17,7 +17,7 @@ const form: ScreenInput = {
       id: 'nickname',
       component: 'TextField',
       name: 'nickname',
-      placeholder: 'ニックネーム',
+      label: 'ニックネーム',
       defaultValue: { '@path': '/nickname' },
     },
     {
@@ -84,7 +84,7 @@ it('ツールの入力の画面を、@k8ordo/ui の部品で描く', async () =>
   await bridge.sendToolInput({ arguments: form });
 
   await expect
-    .element(screen.getByPlaceholder('ニックネーム'))
+    .element(screen.getByLabelText('ニックネーム'))
     .toBeInTheDocument();
   await expect
     .element(screen.getByRole('button', { name: '保存' }))
@@ -95,7 +95,7 @@ it('押した操作を、画面の状態と一緒に会話へ送る', async () =
   const { bridge, screen, messages } = await open();
   await bridge.sendToolInput({ arguments: form });
 
-  await screen.getByPlaceholder('ニックネーム').fill('ordo');
+  await screen.getByLabelText('ニックネーム').fill('ordo');
   await screen.getByRole('button', { name: '保存' }).click();
 
   await expect.poll(() => messages.mock.calls.length).toBe(1);
@@ -112,7 +112,7 @@ it('入力が変わるたびに、今の状態をモデルの文脈に置く', a
   const { bridge, screen, modelContexts } = await open();
   await bridge.sendToolInput({ arguments: form });
 
-  await screen.getByPlaceholder('ニックネーム').fill('ordo');
+  await screen.getByLabelText('ニックネーム').fill('ordo');
 
   await expect
     .poll(() => JSON.stringify(modelContexts.mock.lastCall))
@@ -132,7 +132,7 @@ it('ホストが全画面を持つときだけ、全画面への切り替えを�
   const inline = await open({ availableDisplayModes: ['inline'] });
   await inline.bridge.sendToolInput({ arguments: form });
   await expect
-    .element(inline.screen.getByPlaceholder('ニックネーム'))
+    .element(inline.screen.getByLabelText('ニックネーム'))
     .toBeInTheDocument();
   expect(
     inline.screen.getByRole('button', { name: '全画面で開く' }).elements(),

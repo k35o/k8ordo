@@ -10,7 +10,7 @@ const form: ScreenInput = {
       id: 'nickname',
       component: 'TextField',
       name: 'nickname',
-      placeholder: 'ニックネーム',
+      label: 'ニックネーム',
       defaultValue: { '@path': '/nickname' },
     },
     {

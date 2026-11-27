@@ -1,7 +1,13 @@
 'use client';
 
 import { Fragment, useId, useMemo, useState } from 'react';
-import type { FC, ReactNode, SubmitEvent } from 'react';
+import type {
+  ComponentProps,
+  FC,
+  ReactElement,
+  ReactNode,
+  SubmitEvent,
+} from 'react';
 
 import { Button } from '../components/buttons/button';
 import { CopyButton } from '../components/buttons/copy-button';
@@ -278,14 +284,40 @@ export function renderGrid(props: GridProps, children: ReactNode): ReactNode {
   );
 }
 
+type FieldWiring = Parameters<
+  ComponentProps<typeof FormControl>['renderInput']
+>[0];
+
+// catalog は errorText を持たないので、束の invalid は常に false。欄の
+// invalid は束を広げたあとに、スキーマの値で上書きする
+const drawField = (
+  props: {
+    label: string;
+    helpText?: string | undefined;
+    disabled?: boolean | undefined;
+    required?: boolean | undefined;
+  },
+  renderInput: (wiring: FieldWiring) => ReactElement,
+  labelAs: 'label' | 'group' = 'label',
+): ReactNode => (
+  <FormControl
+    disabled={props.disabled}
+    helpText={props.helpText}
+    label={props.label}
+    labelAs={labelAs}
+    renderInput={renderInput}
+    required={props.required}
+  />
+);
+
 export function renderTextField(
   props: TextFieldProps,
   value: string,
   onChange: (next: string) => void,
 ): ReactNode {
-  return (
+  return drawField(props, (wiring) => (
     <TextField
-      disabled={props.disabled}
+      {...wiring}
       invalid={props.invalid}
       name={props.name}
       onChange={(event) => {
@@ -296,7 +328,7 @@ export function renderTextField(
       type={props.type}
       value={value}
     />
-  );
+  ));
 }
 
 export function renderCheckbox(
@@ -338,9 +370,9 @@ export function renderSelect(
   value: string,
   onChange: (next: string) => void,
 ): ReactNode {
-  return (
+  return drawField(props, (wiring) => (
     <Select
-      disabled={props.disabled}
+      {...wiring}
       invalid={props.invalid}
       name={props.name}
       onChange={(event) => {
@@ -349,7 +381,7 @@ export function renderSelect(
       options={props.options}
       value={value}
     />
-  );
+  ));
 }
 
 export function renderTextarea(
@@ -357,10 +389,10 @@ export function renderTextarea(
   value: string,
   onChange: (next: string) => void,
 ): ReactNode {
-  return (
+  return drawField(props, (wiring) => (
     <Textarea
+      {...wiring}
       autoResize={props.autoResize}
-      disabled={props.disabled}
       invalid={props.invalid}
       name={props.name}
       onChange={(event) => {
@@ -371,7 +403,7 @@ export function renderTextarea(
       rows={props.rows}
       value={value}
     />
-  );
+  ));
 }
 
 export function renderPasswordInput(
@@ -379,9 +411,9 @@ export function renderPasswordInput(
   value: string,
   onChange: (next: string) => void,
 ): ReactNode {
-  return (
+  return drawField(props, (wiring) => (
     <PasswordInput
-      disabled={props.disabled}
+      {...wiring}
       invalid={props.invalid}
       name={props.name}
       onChange={(event) => {
@@ -390,7 +422,7 @@ export function renderPasswordInput(
       placeholder={props.placeholder}
       value={value}
     />
-  );
+  ));
 }
 
 export function renderNumberField(
@@ -398,9 +430,9 @@ export function renderNumberField(
   value: number | null,
   onChange: (next: number | null) => void,
 ): ReactNode {
-  return (
+  return drawField(props, (wiring) => (
     <NumberField
-      disabled={props.disabled}
+      {...wiring}
       invalid={props.invalid}
       max={props.max}
       min={props.min}
@@ -409,7 +441,7 @@ export function renderNumberField(
       step={props.step}
       value={value}
     />
-  );
+  ));
 }
 
 export function renderSlider(
@@ -417,9 +449,9 @@ export function renderSlider(
   value: number,
   onChange: (next: number) => void,
 ): ReactNode {
-  return (
+  return drawField(props, (wiring) => (
     <Slider
-      disabled={props.disabled}
+      {...wiring}
       invalid={props.invalid}
       max={props.max}
       min={props.min}
@@ -428,7 +460,7 @@ export function renderSlider(
       step={props.step}
       value={value}
     />
-  );
+  ));
 }
 
 // 両方のつまみが同じ name で送るので、FormData では [下側, 上側] の配列になる
@@ -437,96 +469,57 @@ export function renderRangeSlider(
   value: readonly [number, number],
   onChange: (next: readonly [number, number]) => void,
 ): ReactNode {
-  return (
-    <RangeSlider
-      aria-label={props.label}
-      disabled={props.disabled}
-      invalid={props.invalid}
-      max={props.max}
-      min={props.min}
-      name={[props.name, props.name]}
-      onChange={onChange}
-      step={props.step}
-      value={value}
-    />
-  );
-}
-
-// Radio / RadioCard は `aria-labelledby` の宛先 ID を持つ必要があるが、
-// `${name}-label` は同じ name の別 Renderer が同居すると衝突する。
-// `useId()` でユニーク化したラベルを子に渡す共有ラッパー。
-const LabeledField: FC<{
-  label: string;
-  children: (labelId: string) => ReactNode;
-}> = ({ label, children }) => {
-  const labelId = useId();
-  return (
-    <div className={styles.field}>
-      <span className={styles.fieldLabel} id={labelId}>
-        {label}
-      </span>
-      {children(labelId)}
-    </div>
-  );
-};
-
-const ColorPickerView: FC<{
-  props: ColorPickerProps;
-  value: string;
-  onChange: (next: string) => void;
-}> = ({ props, value, onChange }) => (
-  <LabeledField label={props.label}>
-    {(labelId) => (
-      <ColorPicker
-        aria-labelledby={labelId}
-        disabled={props.disabled}
+  return drawField(
+    props,
+    (wiring) => (
+      <RangeSlider
+        {...wiring}
         invalid={props.invalid}
-        name={props.name}
+        max={props.max}
+        min={props.min}
+        name={[props.name, props.name]}
         onChange={onChange}
-        required={props.required}
-        swatches={props.swatches}
+        step={props.step}
         value={value}
       />
-    )}
-  </LabeledField>
-);
+    ),
+    'group',
+  );
+}
 
 export function renderColorPicker(
   props: ColorPickerProps,
   value: string,
   onChange: (next: string) => void,
 ): ReactNode {
-  return <ColorPickerView onChange={onChange} props={props} value={value} />;
+  return drawField(props, (wiring) => (
+    <ColorPicker
+      {...wiring}
+      invalid={props.invalid}
+      name={props.name}
+      onChange={onChange}
+      swatches={props.swatches}
+      value={value}
+    />
+  ));
 }
-
-const DatePickerView: FC<{
-  props: DatePickerProps;
-  value: string;
-  onChange: (next: string) => void;
-}> = ({ props, value, onChange }) => (
-  <LabeledField label={props.label}>
-    {(labelId) => (
-      <DatePicker
-        aria-labelledby={labelId}
-        disabled={props.disabled}
-        invalid={props.invalid}
-        max={props.max}
-        min={props.min}
-        name={props.name}
-        onChange={onChange}
-        required={props.required}
-        value={value}
-      />
-    )}
-  </LabeledField>
-);
 
 export function renderDatePicker(
   props: DatePickerProps,
   value: string,
   onChange: (next: string) => void,
 ): ReactNode {
-  return <DatePickerView onChange={onChange} props={props} value={value} />;
+  return drawField(props, (wiring) => (
+    <DatePicker
+      {...wiring}
+      invalid={props.invalid}
+      max={props.max}
+      min={props.min}
+      name={props.name}
+      onChange={onChange}
+      value={value}
+    />
+  ));
 }
 
 export function renderCalendar(
@@ -544,51 +537,24 @@ export function renderCalendar(
   );
 }
 
-const RadioView: FC<{
-  props: RadioProps;
-  value: string;
-  onChange: (next: string) => void;
-}> = ({ props, value, onChange }) => (
-  <LabeledField label={props.label}>
-    {(labelId) => (
-      <Radio
-        aria-labelledby={labelId}
-        disabled={props.disabled}
-        name={props.name}
-        onChange={onChange}
-        options={props.options}
-        value={value}
-      />
-    )}
-  </LabeledField>
-);
-
-const RadioCardView: FC<{
-  props: RadioCardProps;
-  value: string;
-  onChange: (next: string) => void;
-}> = ({ props, value, onChange }) => (
-  <LabeledField label={props.label}>
-    {(labelId) => (
-      <RadioCard
-        aria-labelledby={labelId}
-        disabled={props.disabled}
-        invalid={props.invalid}
-        name={props.name}
-        onChange={onChange}
-        options={props.options}
-        value={value}
-      />
-    )}
-  </LabeledField>
-);
-
 export function renderRadio(
   props: RadioProps,
   value: string,
   onChange: (next: string) => void,
 ): ReactNode {
-  return <RadioView onChange={onChange} props={props} value={value} />;
+  return drawField(
+    props,
+    (wiring) => (
+      <Radio
+        {...wiring}
+        name={props.name}
+        onChange={onChange}
+        options={props.options}
+        value={value}
+      />
+    ),
+    'group',
+  );
 }
 
 export function renderRadioCard(
@@ -596,35 +562,41 @@ export function renderRadioCard(
   value: string,
   onChange: (next: string) => void,
 ): ReactNode {
-  return <RadioCardView onChange={onChange} props={props} value={value} />;
-}
-
-const CheckboxCardView: FC<{
-  props: CheckboxCardProps;
-  value: string[];
-  onChange: (next: string[]) => void;
-}> = ({ props, value, onChange }) => (
-  <LabeledField label={props.label}>
-    {(labelId) => (
-      <CheckboxCard
-        aria-labelledby={labelId}
-        disabled={props.disabled}
+  return drawField(
+    props,
+    (wiring) => (
+      <RadioCard
+        {...wiring}
         invalid={props.invalid}
         name={props.name}
         onChange={onChange}
         options={props.options}
         value={value}
       />
-    )}
-  </LabeledField>
-);
+    ),
+    'group',
+  );
+}
 
 export function renderCheckboxCard(
   props: CheckboxCardProps,
   value: string[],
   onChange: (next: string[]) => void,
 ): ReactNode {
-  return <CheckboxCardView onChange={onChange} props={props} value={value} />;
+  return drawField(
+    props,
+    (wiring) => (
+      <CheckboxCard
+        {...wiring}
+        invalid={props.invalid}
+        name={props.name}
+        onChange={onChange}
+        options={props.options}
+        value={value}
+      />
+    ),
+    'group',
+  );
 }
 
 export function renderPagination(
@@ -1130,78 +1102,54 @@ export function renderCheckboxGroup(
   value: string[],
   onChange: (next: string[]) => void,
 ): ReactNode {
-  return (
-    <LabeledField label={props.label}>
-      {(labelId) => (
-        <CheckboxGroup
-          aria-labelledby={labelId}
-          name={props.name}
-          onChange={onChange}
-          options={props.options}
-          value={value}
-        />
-      )}
-    </LabeledField>
+  return drawField(
+    props,
+    (wiring) => (
+      <CheckboxGroup
+        {...wiring}
+        name={props.name}
+        onChange={onChange}
+        options={props.options}
+        value={value}
+      />
+    ),
+    'group',
   );
 }
-
-// Autocomplete は本体側で `id` が必須。`name` ベースだと同 name の Autocomplete が
-// 複数の Renderer に同居したときに id が衝突するので `useId()` でユニーク化する。
-const AutocompleteView: FC<{
-  props: AutocompleteProps;
-  value: string[];
-  onChange: (next: string[]) => void;
-}> = ({ props, value, onChange }) => {
-  const id = useId();
-  return (
-    <Autocomplete
-      disabled={props.disabled}
-      id={id}
-      invalid={props.invalid}
-      name={props.name}
-      onChange={onChange}
-      options={props.options}
-      value={value}
-    />
-  );
-};
 
 export function renderAutocomplete(
   props: AutocompleteProps,
   value: string[],
   onChange: (next: string[]) => void,
 ): ReactNode {
-  return <AutocompleteView onChange={onChange} props={props} value={value} />;
+  return drawField(props, (wiring) => (
+    <Autocomplete
+      {...wiring}
+      invalid={props.invalid}
+      name={props.name}
+      onChange={onChange}
+      options={props.options}
+      value={value}
+    />
+  ));
 }
-
-const ComboboxView: FC<{
-  props: ComboboxProps;
-  value: string;
-  onChange: (next: string) => void;
-}> = ({ props, value, onChange }) => (
-  <LabeledField label={props.label}>
-    {(labelId) => (
-      <Combobox
-        aria-labelledby={labelId}
-        disabled={props.disabled}
-        invalid={props.invalid}
-        name={props.name}
-        onChange={onChange}
-        options={props.options}
-        placeholder={props.placeholder}
-        required={props.required}
-        value={value}
-      />
-    )}
-  </LabeledField>
-);
 
 export function renderCombobox(
   props: ComboboxProps,
   value: string,
   onChange: (next: string) => void,
 ): ReactNode {
-  return <ComboboxView onChange={onChange} props={props} value={value} />;
+  return drawField(props, (wiring) => (
+    <Combobox
+      {...wiring}
+      invalid={props.invalid}
+      name={props.name}
+      onChange={onChange}
+      options={props.options}
+      placeholder={props.placeholder}
+      value={value}
+    />
+  ));
 }
 
 export const FileFieldWidget: FC<{ props: FileFieldProps }> = ({ props }) => {
@@ -1215,18 +1163,26 @@ export const FileFieldWidget: FC<{ props: FileFieldProps }> = ({ props }) => {
       )}
     />
   );
-  return (
-    <FileField.Root maxFiles={props.maxFiles} multiple={props.multiple}>
-      {props.dropzone === true ? (
-        <FileField.Dropzone>
-          <p className={styles.dropHint}>{messages.fileFieldDrop}</p>
-          {trigger}
-        </FileField.Dropzone>
-      ) : (
-        trigger
-      )}
-      <FileField.ItemList clearable={props.clearable} />
-    </FileField.Root>
+  return drawField(
+    props,
+    (wiring) => (
+      <FileField.Root
+        {...wiring}
+        maxFiles={props.maxFiles}
+        multiple={props.multiple}
+      >
+        {props.dropzone === true ? (
+          <FileField.Dropzone>
+            <p className={styles.dropHint}>{messages.fileFieldDrop}</p>
+            {trigger}
+          </FileField.Dropzone>
+        ) : (
+          trigger
+        )}
+        <FileField.ItemList clearable={props.clearable} />
+      </FileField.Root>
+    ),
+    'group',
   );
 };
 

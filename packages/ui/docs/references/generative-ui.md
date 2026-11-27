@@ -49,7 +49,7 @@ import { renderers } from '@k8ordo/ui/catalog/render';
 catalog.TextField;
 // {
 //   description: 'Single-line text input. type picks the kind of value: …',
-//   props: z.object({ name, placeholder, defaultValue, … }),
+//   props: z.object({ name, label, placeholder, … }),
 //   value: { prop: 'defaultValue', initial: (props) => props.defaultValue ?? '' },
 // }
 ```
@@ -61,7 +61,9 @@ the value of one field (`never` for a component that is not a field), and
 
 The key order of every `props` schema is part of the contract. A format with
 positional arguments (OpenUI Lang) maps the arguments back to props by that
-order, so keys are only ever appended.
+order, so an optional key is only ever appended. A new required key breaks every
+saved string of its entry anyway, so it goes where it reads best: a field's
+`label` comes right after its `name`.
 
 ## Drawing
 
@@ -84,7 +86,7 @@ renderers.Button({
   on: { press: () => sendToAgent('save') },
 });
 renderers.TextField({
-  props: { name: 'title' },
+  props: { name: 'title', label: 'Title' },
   children: [],
   value,
   setValue,
@@ -205,7 +207,11 @@ is not reported missing.
 ```ts
 catalogPropIssues(
   'TextField',
-  { name: 'nickname', defaultValue: { $bindState: '/form/nickname' } },
+  {
+    name: 'nickname',
+    label: 'Nickname',
+    defaultValue: { $bindState: '/form/nickname' },
+  },
   { unresolved: ['defaultValue'] },
 );
 // []
@@ -244,6 +250,13 @@ model instead:
   `@k8ordo/ui/icons` that needs nothing but a size is there, under its name in
   kebab-case without the suffix: `eye-closed` is `EyeClosedIcon`. `ChevronIcon`
   has an entry of its own, and `AlertIcon` is the `StatusIcon` entry.
+- **Fields** each take a required `label` and an optional `helpText`, and are
+  drawn through `FormControl`'s `renderInput`. The label is a `<label for>`
+  tied to the input, or, for a group (`Radio`, `RadioCard`, `CheckboxGroup`,
+  `CheckboxCard`, `RangeSlider`, `FileField`), the heading the group is named
+  by (`labelAs="group"`). The help text sits under the field and describes it.
+  `Checkbox` and `Switch` are not wrapped in `FormControl`: their `label` is
+  their own.
 - **Toasts** are a `Toast` entry, standing in for `useToast`: a widget whose
   `triggerLabel` button opens the toast through your application's
   `ToastProvider` (see [Drawing](#drawing)).

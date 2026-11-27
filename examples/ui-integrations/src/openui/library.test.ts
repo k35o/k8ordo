@@ -47,3 +47,23 @@ describe('openui library のプロンプト上の入れ子', () => {
     );
   });
 });
+
+describe('openui library の位置引数', () => {
+  it.each([
+    'TextField',
+    'Textarea',
+    'PasswordInput',
+    'NumberField',
+    'Slider',
+    'Select',
+    'Autocomplete',
+  ])('%s は name の次に label を書く', (name) => {
+    expect(signatureOf(name)).toMatch(
+      new RegExp(`^${name}\\(name: string, label: string, `, 'u'),
+    );
+  });
+
+  it('FileField は label から書く', () => {
+    expect(signatureOf('FileField')).toMatch(/^FileField\(label: string, /u);
+  });
+});

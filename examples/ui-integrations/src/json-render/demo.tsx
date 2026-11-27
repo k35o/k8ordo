@@ -171,12 +171,18 @@ export const jsonRenderSpec = {
     },
     slider: {
       type: 'Slider',
-      props: { name: 'volume', defaultValue: 40, min: 0, max: 100 },
+      props: {
+        name: 'volume',
+        label: '音量',
+        defaultValue: 40,
+        min: 0,
+        max: 100,
+      },
       children: [],
     },
     qty: {
       type: 'NumberField',
-      props: { name: 'qty', defaultValue: 3, min: 0, max: 10 },
+      props: { name: 'qty', label: '数量', defaultValue: 3, min: 0, max: 10 },
       children: [],
     },
     pager: {
@@ -198,6 +204,7 @@ export const jsonRenderSpec = {
       type: 'Select',
       props: {
         name: 'plan',
+        label: 'プラン',
         options: [
           { value: 'free', label: 'Free' },
           { value: 'pro', label: 'Pro' },
@@ -283,7 +290,7 @@ export const jsonRenderSpec = {
     },
     nickname: {
       type: 'TextField',
-      props: { name: 'nickname', placeholder: 'ニックネーム' },
+      props: { name: 'nickname', label: 'ニックネーム' },
       children: [],
     },
     agree: {

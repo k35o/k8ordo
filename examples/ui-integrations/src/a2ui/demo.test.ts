@@ -23,7 +23,14 @@ test('値を @path で結ばない入力欄は検証で弾かれる', () => {
       version: '1.0',
       updateComponents: {
         surfaceId: SURFACE,
-        components: [{ id: 'root', component: 'TextField', name: 'nickname' }],
+        components: [
+          {
+            id: 'root',
+            component: 'TextField',
+            name: 'nickname',
+            label: 'ニックネーム',
+          },
+        ],
       },
     },
   ]);

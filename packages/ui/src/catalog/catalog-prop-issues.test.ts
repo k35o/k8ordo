@@ -20,7 +20,11 @@ describe('catalogPropIssues', () => {
     expect(
       catalogPropIssues(
         'TextField',
-        { name: 'nickname', defaultValue: { $bindState: '/form/nickname' } },
+        {
+          name: 'nickname',
+          label: 'ニックネーム',
+          defaultValue: { $bindState: '/form/nickname' },
+        },
         { unresolved: ['defaultValue'] },
       ),
     ).toStrictEqual([]);
@@ -36,16 +40,34 @@ describe('catalogPropIssues', () => {
     ).toStrictEqual([]);
   });
 
+  it('入力欄の label が無ければ報告する', () => {
+    expect(catalogPropIssues('TextField', { name: 'nickname' })).toStrictEqual([
+      expect.stringContaining('TextField.label'),
+    ]);
+  });
+
   it('TextField の type には、日付や時刻を含む 1 行の欄の種類を書ける', () => {
     expect(
-      catalogPropIssues('TextField', { name: 'checkIn', type: 'date' }),
+      catalogPropIssues('TextField', {
+        name: 'checkIn',
+        label: 'チェックイン',
+        type: 'date',
+      }),
     ).toStrictEqual([]);
   });
 
   it('TextField の type に、ほかの項目が描く password と number は書けない', () => {
     expect([
-      ...catalogPropIssues('TextField', { name: 'secret', type: 'password' }),
-      ...catalogPropIssues('TextField', { name: 'count', type: 'number' }),
+      ...catalogPropIssues('TextField', {
+        name: 'secret',
+        label: '合言葉',
+        type: 'password',
+      }),
+      ...catalogPropIssues('TextField', {
+        name: 'count',
+        label: '個数',
+        type: 'number',
+      }),
     ]).toStrictEqual([
       expect.stringContaining('TextField.type'),
       expect.stringContaining('TextField.type'),
@@ -64,7 +86,12 @@ describe('catalogPropIssues', () => {
     'TextField の type が %s なら、その書式の defaultValue %s を書ける',
     (type, defaultValue) => {
       expect(
-        catalogPropIssues('TextField', { name: 'when', type, defaultValue }),
+        catalogPropIssues('TextField', {
+          name: 'when',
+          label: '日時',
+          type,
+          defaultValue,
+        }),
       ).toStrictEqual([]);
     },
   );
@@ -84,7 +111,12 @@ describe('catalogPropIssues', () => {
     'TextField の type が %s なら、書式の違う defaultValue %s を報告する',
     (type, defaultValue, format) => {
       expect(
-        catalogPropIssues('TextField', { name: 'when', type, defaultValue }),
+        catalogPropIssues('TextField', {
+          name: 'when',
+          label: '日時',
+          type,
+          defaultValue,
+        }),
       ).toStrictEqual([
         `TextField.defaultValue: Expected ${format} for type "${type}", received "${defaultValue}"`,
       ]);
@@ -95,10 +127,12 @@ describe('catalogPropIssues', () => {
     expect([
       ...catalogPropIssues('TextField', {
         name: 'note',
+        label: 'メモ',
         defaultValue: '2026/11/27',
       }),
       ...catalogPropIssues('TextField', {
         name: 'mail',
+        label: 'メールアドレス',
         type: 'email',
         defaultValue: '2026/11/27',
       }),
@@ -109,6 +143,7 @@ describe('catalogPropIssues', () => {
     expect(
       catalogPropIssues('TextField', {
         name: 3,
+        label: '日時',
         type: 'date',
         defaultValue: '2026/11/27',
       }),

@@ -160,7 +160,7 @@ examples/ui-integrations/
 │   │   ├── defs.ts                # Glue: builds the OpenUI library from the catalog
 │   │   ├── library.tsx            # Glue: the library with renderers ('use client')
 │   │   ├── prompt.ts              # Glue: the system prompt, without React
-│   │   ├── library.test.ts        # Every container takes every container as a child
+│   │   ├── library.test.ts        # Every container takes every container as a child; a field's label follows its name
 │   │   ├── library.browser.test.tsx  # A press reaches onAction with the form state; a label-less Card stays unpressable; a null prop is drawn as absent; an element whose props do not parse is drawn as nothing
 │   │   ├── demo.tsx               # OpenUI-Lang DSL rendered with library + Renderer
 │   │   ├── demo.test.ts           # The DSL parses and every statement reaches the tree

@@ -60,6 +60,11 @@ export const renderValue = message({
   en: 'A field also takes its value and a function that sets it. Where the value lives is up to the glue.',
 });
 
+export const renderLabel = message({
+  ja: '入力欄は`label`を必須で持ち、`FormControl`で描きます。`label`は欄を指す`<label>`になり、ラジオボタンのようなグループではグループの名前になります。任意の`helpText`は欄の下に出て、欄の説明になります。`Checkbox`と`Switch`は`FormControl`を使わず、自分の`label`で名前を持ちます。',
+  en: 'A field takes a required `label` and is drawn through `FormControl`. The label is a `<label>` that points at the field, or the name of a group such as radio buttons. An optional `helpText` appears under the field and describes it. `Checkbox` and `Switch` skip `FormControl` and are named by their own `label`.',
+});
+
 export const renderEvents = message({
   ja: '`events`を持つコンポーネントには、モデルが結び付けた操作の関数を`on`で渡します。結び付いていない`Card`は、押せる形になりません。',
   en: 'A component with `events` also takes `on`, the function of each event the model bound. A `Card` with nothing bound is not pressable.',
