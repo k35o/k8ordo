@@ -2,13 +2,16 @@ import type { Meta, StoryObj } from '@storybook/react-vite';
 import { clsx } from 'clsx';
 import { useState } from 'react';
 import type { FC } from 'react';
-import { expect, fn, waitFor } from 'storybook/test';
+import { expect, fn, screen, waitFor } from 'storybook/test';
 
-import { Popover } from '.';
+import { Popover, PopoverBase } from '.';
 import { afterRenderingUpdate } from '../../../../.storybook/rendering';
+import { tokenColor } from '../../../../.storybook/tokens';
+import { mergeRefs } from '../../../helpers/merge-refs';
 import type { Placement } from '../../../types/variables';
 import { Button } from '../../buttons/button';
-import { Modal } from '../modal';
+import { Dialog } from '../dialog';
+import { Tooltip } from '../tooltip';
 
 import styles from './popover.stories.module.css';
 
@@ -30,26 +33,31 @@ export const Default: Story = {
           </Button>
         )}
       />
-      <Popover.Content
-        renderItem={(props) => (
-          <div className={styles.panel} {...props}>
-            <div role="menuitem">ポップオーバーのコンテンツ</div>
-          </div>
-        )}
-      />
+      <Popover.Content label="ポップオーバー">
+        <div className={styles.panel}>
+          <p>ポップオーバーのコンテンツ</p>
+        </div>
+      </Popover.Content>
     </Popover.Root>
   ),
   play: async ({ canvas, userEvent }) => {
     const trigger = canvas.getByRole('button', {
       name: 'メニュー',
     });
+    await expect(trigger).toHaveAttribute('aria-haspopup', 'dialog');
     trigger.focus();
     await userEvent.keyboard('{Enter}');
+
+    // 公開の Popover は常に dialog で、名前は label、面は部品が描く
+    const panel = await screen.findByRole('dialog', { name: 'ポップオーバー' });
+    await expect(getComputedStyle(panel).backgroundColor).toBe(
+      tokenColor('--color-bg-raised'),
+    );
   },
 };
 
-// APG menu button パターン: メニュー項目から Tab で抜けたらメニューを閉じ、
-// trigger の aria-expanded を false に戻し、フォーカスは次のタブ順要素へ進む。
+// 中から Tab で抜けたら閉じ、trigger の aria-expanded を false に戻し、
+// フォーカスは次のタブ順要素へ進む。
 export const CloseOnTabOut: Story = {
   render: () => (
     <div className={styles.controls}>
@@ -61,15 +69,11 @@ export const CloseOnTabOut: Story = {
             </Button>
           )}
         />
-        <Popover.Content
-          renderItem={(props) => (
-            <div className={styles.panel} {...props}>
-              <button role="menuitem" type="button">
-                項目1
-              </button>
-            </div>
-          )}
-        />
+        <Popover.Content label="ポップオーバー">
+          <div className={styles.panel}>
+            <button type="button">項目1</button>
+          </div>
+        </Popover.Content>
       </Popover.Root>
       <Button size="md" type="button">
         次のフォーカス先
@@ -80,7 +84,7 @@ export const CloseOnTabOut: Story = {
     const trigger = canvas.getByRole('button', { name: 'メニュー' });
     await userEvent.click(trigger);
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    const item = canvas.getByRole('menuitem', { name: '項目1' });
+    const item = canvas.getByRole('button', { name: '項目1' });
     await waitFor(() => {
       expect(item).toHaveFocus();
     });
@@ -139,15 +143,11 @@ const ControllableRender = ({
             </Button>
           )}
         />
-        <Popover.Content
-          renderItem={(props) => (
-            <div className={styles.panel} {...props}>
-              <button role="menuitem" type="button">
-                項目1
-              </button>
-            </div>
-          )}
-        />
+        <Popover.Content label="ポップオーバー">
+          <div className={styles.panel}>
+            <button type="button">項目1</button>
+          </div>
+        </Popover.Content>
       </Popover.Root>
     </div>
   );
@@ -165,7 +165,7 @@ export const Controllable: Story = {
     await userEvent.click(canvas.getByRole('button', { name: '外から開く' }));
     await waitFor(() => {
       expect(trigger).toHaveAttribute('aria-expanded', 'true');
-      expect(canvas.getByRole('menuitem', { name: '項目1' })).toHaveFocus();
+      expect(canvas.getByRole('button', { name: '項目1' })).toHaveFocus();
     });
 
     // 内部の閉じる操作は onChange で外へ伝わる
@@ -187,7 +187,7 @@ export const ControlledCloseKeepsOutsideFocus: Story = {
     const trigger = canvas.getByRole('button', { name: 'メニュー' });
     await userEvent.click(canvas.getByRole('button', { name: '外から開く' }));
     await waitFor(() => {
-      expect(canvas.getByRole('menuitem', { name: '項目1' })).toHaveFocus();
+      expect(canvas.getByRole('button', { name: '項目1' })).toHaveFocus();
     });
 
     // ユーザーがポップオーバーの外へフォーカスを移す
@@ -217,15 +217,11 @@ export const DefaultOpen: Story = {
           </Button>
         )}
       />
-      <Popover.Content
-        renderItem={(props) => (
-          <div className={styles.panel} {...props}>
-            <button role="menuitem" type="button">
-              項目1
-            </button>
-          </div>
-        )}
-      />
+      <Popover.Content label="ポップオーバー">
+        <div className={styles.panel}>
+          <button type="button">項目1</button>
+        </div>
+      </Popover.Content>
     </Popover.Root>
   ),
   play: async ({ canvas }) => {
@@ -233,28 +229,29 @@ export const DefaultOpen: Story = {
       canvas.getByRole('button', { name: 'メニュー' }),
     ).toHaveAttribute('aria-expanded', 'true');
     await waitFor(() => {
-      expect(canvas.getByRole('menuitem', { name: '項目1' })).toBeVisible();
+      expect(canvas.getByRole('button', { name: '項目1' })).toBeVisible();
     });
   },
 };
 
+// 外側のクリックで閉じない元の部品で、2 つを同時に開いたままにする。
 const layerPopover = (name: string) => (
-  <Popover.Root closeOnClickAway={false} trapFocus={false} role="dialog">
-    <Popover.Trigger
+  <PopoverBase.Root closeOnClickAway={false} role="dialog" trapFocus={false}>
+    <PopoverBase.Trigger
       renderItem={(props) => (
         <Button {...props} size="md" type="button">
           {name}
         </Button>
       )}
     />
-    <Popover.Content
+    <PopoverBase.Content
       renderItem={(props) => (
-        <div aria-label={`${name}の中身`} className={styles.panel} {...props}>
+        <div aria-label={`${name}の中身`} className={styles.layer} {...props}>
           <p>{name}</p>
         </div>
       )}
     />
-  </Popover.Root>
+  </PopoverBase.Root>
 );
 
 // APG: Escape は最も内側（最後に開いた）レイヤーだけを閉じる。
@@ -290,7 +287,7 @@ export const EscapeClosesOnlyTopLayer: Story = {
 };
 
 const EscapeInModalRender = () => (
-  <Modal aria-label="モーダル" defaultOpen>
+  <Dialog defaultOpen label="モーダル">
     <div className={styles.modalBody}>
       <Popover.Root>
         <Popover.Trigger
@@ -300,21 +297,17 @@ const EscapeInModalRender = () => (
             </Button>
           )}
         />
-        <Popover.Content
-          renderItem={(props) => (
-            <div className={styles.panel} {...props}>
-              <button role="menuitem" type="button">
-                項目1
-              </button>
-            </div>
-          )}
-        />
+        <Popover.Content label="ポップオーバー">
+          <div className={styles.panel}>
+            <button type="button">項目1</button>
+          </div>
+        </Popover.Content>
       </Popover.Root>
     </div>
-  </Modal>
+  </Dialog>
 );
 
-// Modal の中で開いた Popover の Escape は preventDefault され、
+// Dialog の中で開いた Popover の Escape は preventDefault され、
 // ネイティブ dialog の close request まで届かない。
 export const EscapeInModal: Story = {
   render: () => <EscapeInModalRender />,
@@ -323,7 +316,7 @@ export const EscapeInModal: Story = {
     const trigger = canvas.getByRole('button', { name: 'メニュー' });
     await userEvent.click(trigger);
     await waitFor(() => {
-      expect(canvas.getByRole('menuitem', { name: '項目1' })).toHaveFocus();
+      expect(canvas.getByRole('button', { name: '項目1' })).toHaveFocus();
     });
 
     const prevented: boolean[] = [];
@@ -343,7 +336,7 @@ export const EscapeInModal: Story = {
       await expect(prevented).toEqual([true]);
       await expect(dialog.hasAttribute('open')).toBe(true);
 
-      // ポップオーバーが閉じたあとの Escape は誰も消費しない（Modal に届く）
+      // ポップオーバーが閉じたあとの Escape は誰も消費しない（Dialog に届く）
       await userEvent.keyboard('{Escape}');
       await expect(prevented).toEqual([true, false]);
     } finally {
@@ -388,13 +381,11 @@ export const Placements: Story = {
                 </Button>
               )}
             />
-            <Popover.Content
-              renderItem={(props) => (
-                <div className={styles.panel} {...props}>
-                  <div role="menuitem">{label}のポップオーバー</div>
-                </div>
-              )}
-            />
+            <Popover.Content label="ポップオーバー">
+              <div className={styles.panel}>
+                <p>{label}のポップオーバー</p>
+              </div>
+            </Popover.Content>
           </Popover.Root>
         </div>
       ))}
@@ -449,13 +440,11 @@ const placementStory = (placement: Placement): Story => ({
             </Button>
           )}
         />
-        <Popover.Content
-          renderItem={(props) => (
-            <div className={styles.panel} {...props}>
-              <div role="menuitem">{placement}</div>
-            </div>
-          )}
-        />
+        <Popover.Content label="ポップオーバー">
+          <div className={styles.panel}>
+            <p>{placement}</p>
+          </div>
+        </Popover.Content>
       </Popover.Root>
     </div>
   ),
@@ -513,13 +502,11 @@ const SwitchableWritingModePopover: FC = () => {
               </Button>
             )}
           />
-          <Popover.Content
-            renderItem={(props) => (
-              <div className={styles.panel} {...props}>
-                <div role="menuitem">縦書きの内容</div>
-              </div>
-            )}
-          />
+          <Popover.Content label="ポップオーバー">
+            <div className={styles.panel}>
+              <p>縦書きの内容</p>
+            </div>
+          </Popover.Content>
         </Popover.Root>
       </div>
     </div>
@@ -541,5 +528,100 @@ export const FollowsWritingMode: Story = {
     await waitFor(() => {
       expect(content).toHaveClass('writing-v');
     });
+  },
+};
+
+const openWrapperOf = async (content: Element): Promise<Element> =>
+  waitFor(() => {
+    const wrapper = content.closest('[popover]');
+    if (!wrapper?.matches(':popover-open')) {
+      throw new Error('popover did not open');
+    }
+    for (const animation of wrapper.getAnimations()) {
+      animation.finish();
+    }
+    return wrapper;
+  });
+
+/**
+ * trigger に anchor-name を書き込まない。trigger が自分の anchor-name を
+ * 持っていてもそのまま残り、content は trigger の下に並ぶ。
+ */
+export const KeepsTriggerAnchorName: Story = {
+  render: () => (
+    <div className={styles.centered}>
+      <Popover.Root placement="bottom">
+        <Popover.Trigger
+          renderItem={(props) => (
+            <button {...props} className={styles.ownAnchor} type="button">
+              開く
+            </button>
+          )}
+        />
+        <Popover.Content label="ポップオーバー">
+          <div className={styles.panel}>
+            <p>中身</p>
+          </div>
+        </Popover.Content>
+      </Popover.Root>
+    </div>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    const trigger = canvas.getByRole('button', { name: '開く' });
+    await userEvent.click(trigger);
+
+    const wrapper = await openWrapperOf(
+      await screen.findByRole('dialog', { name: 'ポップオーバー' }),
+    );
+    await expect(getComputedStyle(trigger).anchorName).toBe('--own-anchor');
+    await expect(trigger.style.getPropertyValue('anchor-name')).toBe('');
+    assertPlacement('bottom', trigger, wrapper);
+  },
+};
+
+/**
+ * ポップオーバーと tooltip の trigger が同じ要素（IconButton を trigger にした
+ * ときの形）でも、どちらも trigger を暗黙のアンカーにするので取り合わない。
+ */
+export const SharedTriggerWithTooltip: Story = {
+  render: () => (
+    <div className={styles.centered}>
+      <Popover.Root defaultOpen placement="bottom">
+        <Popover.Trigger
+          renderItem={(popoverProps) => (
+            <Tooltip.Root defaultOpen placement="top">
+              <Tooltip.Trigger
+                renderItem={(tooltipProps) => (
+                  <button
+                    {...popoverProps}
+                    {...tooltipProps}
+                    ref={mergeRefs(popoverProps.ref, tooltipProps.ref)}
+                    type="button"
+                  >
+                    共有
+                  </button>
+                )}
+              />
+              <Tooltip.Content>共有</Tooltip.Content>
+            </Tooltip.Root>
+          )}
+        />
+        <Popover.Content label="共有の設定">
+          <div className={styles.panel}>
+            <p>中身</p>
+          </div>
+        </Popover.Content>
+      </Popover.Root>
+    </div>
+  ),
+  play: async ({ canvas }) => {
+    const trigger = canvas.getByRole('button', { name: '共有' });
+    const dialog = await openWrapperOf(
+      await screen.findByRole('dialog', { name: '共有の設定' }),
+    );
+    const tooltip = await openWrapperOf(await screen.findByRole('tooltip'));
+
+    assertPlacement('bottom', trigger, dialog);
+    assertPlacement('top', trigger, tooltip);
   },
 };

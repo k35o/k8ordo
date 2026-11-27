@@ -1,5 +1,3 @@
-'use client';
-
 import type { Message } from '@k8ordo/i18n';
 import { Button, Heading } from '@k8ordo/ui';
 
@@ -46,31 +44,16 @@ export default function Home() {
           </h1>
           <p className={styles.description}>{m.home.description()}</p>
           <div className={styles.actions}>
-            <Button
-              renderItem={({ className, children }) => (
-                <a className={className} href={href('/:locale/ui')}>
-                  {children}
-                </a>
-              )}
-              size="md"
-              variant="solid"
-            >
+            <Button href={href('/:locale/ui')} size="md" variant="solid">
               {m.home.exploreUi()}
             </Button>
             <Button
               color="base"
-              renderItem={({ className, children }) => (
-                <a
-                  className={className}
-                  href="https://github.com/k35o/k8ordo"
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  {children}
-                </a>
-              )}
+              href="https://github.com/k35o/k8ordo"
+              rel="noopener noreferrer"
               size="md"
               startIcon={<GitHubIcon />}
+              target="_blank"
               variant="skeleton"
             >
               {m.common.github()}

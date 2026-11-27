@@ -175,10 +175,10 @@ Props (Message.Content):
     <Message.Copy value={text} />
     <Message.Regenerate
       disabled={status === 'submitted' || status === 'streaming'}
-      onAction={() => regenerate({ messageId: message.id })}
+      action={() => regenerate({ messageId: message.id })}
     />
     <Message.Feedback onChange={(value) => saveFeedback(message.id, value)} />
-    <Message.Action label="Share" onAction={() => share(message.id)}>
+    <Message.Action action={() => share(message.id)} label="Share">
       <LinkIcon size="sm" />
     </Message.Action>
   </Message.Actions>
@@ -186,7 +186,7 @@ Props (Message.Content):
 ```
 
 - `Copy` is an icon-only, `sm` [`CopyButton`](components.md#copybutton): it writes `value` to the clipboard, shows a check icon — or an error icon when the clipboard refuses — for two seconds, and announces 「コピーしました」 or 「コピーできませんでした」 through a `status` region. Nothing is thrown either way.
-- `Regenerate` and `Action` take `onAction`; a returned promise keeps the button busy (`aria-busy`, `aria-disabled`, presses ignored) until it settles, so `() => regenerate(...)` does not need its own pending state. The button keeps focus meanwhile.
+- `Regenerate` and `Action` take `action`, which runs in a transition: a returned promise keeps the button busy (`aria-busy`, `aria-disabled`, presses ignored) until it settles, so `() => regenerate(...)` does not need its own pending state. The button keeps focus meanwhile.
 - `Feedback` is a pair of toggle buttons (`aria-pressed`). Pressing the pressed one again clears it, so `onChange` receives `null`.
 
 Props (Message.Actions):
@@ -196,7 +196,7 @@ Props (Message.Actions):
 Props (Message.Action):
 
 - `label`: string (required; the accessible name and the tooltip)
-- `onAction`: `() => void | Promise<void>`
+- `action`: `() => void | Promise<void>`
 - `disabled`: boolean
 - `children`: ReactNode (the icon, `size="sm"`)
 
@@ -207,7 +207,7 @@ Props (Message.Copy):
 
 Props (Message.Regenerate):
 
-- `onAction`: `() => void | Promise<void>` (required)
+- `action`: `() => void | Promise<void>` (required)
 - `label`: string (default: `'再生成'`)
 - `disabled`: boolean
 
@@ -598,7 +598,7 @@ function ChatMessage({ message, chat }: { message: UIMessage; chat: Chat }) {
             disabled={
               chat.status === 'submitted' || chat.status === 'streaming'
             }
-            onAction={() => chat.regenerate({ messageId: message.id })}
+            action={() => chat.regenerate({ messageId: message.id })}
           />
           <Message.Feedback />
         </Message.Actions>

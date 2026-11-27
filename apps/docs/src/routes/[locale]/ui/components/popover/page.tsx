@@ -57,16 +57,9 @@ export default function PopoverPage() {
       </Button>
     )}
   />
-  <Popover.Content
-    renderItem={(props) => (
-      <div
-        className={styles.panel}
-        {...props}
-      >
-        <div role="menuitem">Popover content goes here.</div>
-      </div>
-    )}
-  />
+  <Popover.Content label="Details">
+    <p className={styles.body}>Popover content goes here.</p>
+  </Popover.Content>
 </Popover.Root>`}
           >
             <PopoverBasicPreview />
@@ -84,58 +77,9 @@ export default function PopoverPage() {
       <Button {...props} type="button">Top</Button>
     )}
   />
-  <Popover.Content
-    renderItem={(props) => (
-      <div className={styles.panel} {...props}>
-        <div role="menuitem">Top placement</div>
-      </div>
-    )}
-  />
-</Popover.Root>
-
-<Popover.Root placement="right">
-  <Popover.Trigger
-    renderItem={(props) => (
-      <Button {...props} type="button">Right</Button>
-    )}
-  />
-  <Popover.Content
-    renderItem={(props) => (
-      <div className={styles.panel} {...props}>
-        <div role="menuitem">Right placement</div>
-      </div>
-    )}
-  />
-</Popover.Root>
-
-<Popover.Root placement="bottom">
-  <Popover.Trigger
-    renderItem={(props) => (
-      <Button {...props} type="button">Bottom</Button>
-    )}
-  />
-  <Popover.Content
-    renderItem={(props) => (
-      <div className={styles.panel} {...props}>
-        <div role="menuitem">Bottom placement</div>
-      </div>
-    )}
-  />
-</Popover.Root>
-
-<Popover.Root placement="left">
-  <Popover.Trigger
-    renderItem={(props) => (
-      <Button {...props} type="button">Left</Button>
-    )}
-  />
-  <Popover.Content
-    renderItem={(props) => (
-      <div className={styles.panel} {...props}>
-        <div role="menuitem">Left placement</div>
-      </div>
-    )}
-  />
+  <Popover.Content label="Top placement">
+    <p className={styles.body}>Top placement</p>
+  </Popover.Content>
 </Popover.Root>`}
           >
             <PopoverPlacementPreview />

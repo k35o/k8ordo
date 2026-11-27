@@ -9,7 +9,7 @@ import { STORYBOOK_URL } from '../../../../../constants';
 import { propsOf } from '../../../../../data/component-props';
 import {
   TabsBasicPreview,
-  TabsDefaultSelectedPreview,
+  TabsControlledPreview,
 } from '../../../../../demos/ui/components/tabs-previews';
 import * as m from '../../../../../messages';
 
@@ -49,7 +49,7 @@ export default function TabsPage() {
             <Rich>{m.components.common.usageTitle()}</Rich>
           </Heading>
           <ComponentPreview
-            code={`<Tabs.Root ids={['overview', 'settings', 'history']}>
+            code={`<Tabs.Root defaultSelectedId="overview">
   <Tabs.List label="Navigation">
     <Tabs.Tab id="overview">Overview</Tabs.Tab>
     <Tabs.Tab id="settings">Settings</Tabs.Tab>
@@ -72,13 +72,15 @@ export default function TabsPage() {
 
         <div className={page.stack}>
           <Heading level="h3">
-            <Rich>{m.components.tabs.defaultSelectedTitle()}</Rich>
+            <Rich>{m.components.tabs.controlledTitle()}</Rich>
           </Heading>
+          <p className={page.mute}>
+            <Rich>{m.components.tabs.controlledDescription()}</Rich>
+          </p>
           <ComponentPreview
-            code={`<Tabs.Root
-  defaultSelectedId="settings"
-  ids={['overview', 'settings', 'history']}
->
+            code={`const [selectedId, setSelectedId] = useState('settings');
+
+<Tabs.Root onChange={setSelectedId} selectedId={selectedId}>
   <Tabs.List label="Navigation">
     <Tabs.Tab id="overview">Overview</Tabs.Tab>
     <Tabs.Tab id="settings">Settings</Tabs.Tab>
@@ -95,7 +97,7 @@ export default function TabsPage() {
   </Tabs.Panel>
 </Tabs.Root>`}
           >
-            <TabsDefaultSelectedPreview />
+            <TabsControlledPreview />
           </ComponentPreview>
         </div>
       </section>

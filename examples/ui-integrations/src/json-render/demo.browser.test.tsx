@@ -1,4 +1,4 @@
-import { UIProvider } from '@k8ordo/ui';
+import { ToastProvider } from '@k8ordo/ui';
 import { beforeEach, expect, it, vi } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
 
@@ -15,9 +15,9 @@ beforeEach(() => {
 
 it('spec のフォームがエラー無しで描画される', async () => {
   const screen = await render(
-    <UIProvider>
+    <ToastProvider>
       <JsonRenderDemo />
-    </UIProvider>,
+    </ToastProvider>,
   );
 
   await expect
@@ -33,9 +33,9 @@ it('spec のフォームがエラー無しで描画される', async () => {
 
 it('描画されたフィールドが状態を保持する', async () => {
   const screen = await render(
-    <UIProvider>
+    <ToastProvider>
       <JsonRenderDemo />
-    </UIProvider>,
+    </ToastProvider>,
   );
 
   const nickname = screen.getByPlaceholder('ニックネーム');

@@ -1,5 +1,1 @@
-import { Content, IconTrigger, Root, Trigger } from './list-box';
-
-// RSC の server 環境では client モジュールの export は参照プロキシになり、
-// オブジェクトごと export するとプロパティを引けないため、直接参照で合成する。
-export const ListBox = { Root, Content, Trigger, IconTrigger } as const;
+export { ListBox } from './list-box';

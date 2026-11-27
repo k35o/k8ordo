@@ -8,14 +8,11 @@ import styles from './alert-previews.module.css';
 export function AlertActionLinkPreview() {
   return (
     <Alert
-      action={{
-        label: 'Learn more',
-        renderItem: ({ children }) => (
-          <Anchor href="https://example.com" openInNewTab>
-            {children}
-          </Anchor>
-        ),
-      }}
+      action={
+        <Anchor href="https://example.com" openInNewTab>
+          Learn more
+        </Anchor>
+      }
       message="A new version is available."
       tone="info"
     />
@@ -25,18 +22,11 @@ export function AlertActionLinkPreview() {
 export function AlertActionButtonPreview() {
   return (
     <Alert
-      action={{
-        label: 'Open settings',
-        renderItem: ({ children }) => (
-          <button
-            className={styles.infoAction}
-            onClick={() => {}}
-            type="button"
-          >
-            {children}
-          </button>
-        ),
-      }}
+      action={
+        <button className={styles.infoAction} onClick={() => {}} type="button">
+          Open settings
+        </button>
+      }
       message="Your profile setup is incomplete."
       tone="warning"
     />
@@ -69,18 +59,15 @@ export function AlertWithActionPreview() {
   const [isVisible, setIsVisible] = useState(true);
   return isVisible ? (
     <Alert
-      action={{
-        label: 'Learn more',
-        renderItem: ({ children }) => (
-          <button
-            className={styles.primaryAction}
-            onClick={() => {}}
-            type="button"
-          >
-            {children}
-          </button>
-        ),
-      }}
+      action={
+        <button
+          className={styles.primaryAction}
+          onClick={() => {}}
+          type="button"
+        >
+          Learn more
+        </button>
+      }
       message="Some features may not work correctly in your browser. We recommend updating to the latest version."
       onClose={() => {
         setIsVisible(false);

@@ -6,13 +6,19 @@
   background-color: var(--color-bg-subtle);
   padding: calc(var(--spacing) * 1);
 
-  /* 項目自身のホバーと押下の地（Button は :not(.disabled):hover の詳細度）にも
-     勝つよう、その状態まで書く。詳細度が並べば、近いスコープのこちらが勝つ */
+  /* 項目自身のホバーと押下の地にも勝つよう、その状態まで書く。& は詳細度を
+     足さないので :scope を重ね、塗りの Button の :not(.disabled):hover と
+     詳細度を並べる。並べば、近いスコープのこちらが勝つ。:scope だけだと
+     Lightning CSS が前に & を補い、子孫の :scope を探して何にも当たらない */
   @scope (&) {
-    & > [aria-pressed='true'],
-    & > [aria-pressed='true']:hover,
-    & > [aria-pressed='true']:active {
+    &:scope > [aria-pressed='true'],
+    &:scope > [aria-pressed='true']:hover,
+    &:scope > [aria-pressed='true']:active {
       background-color: var(--color-bg-emphasize);
+    }
+
+    &:scope > [aria-pressed='true']:not(:disabled, [aria-disabled='true']) {
+      color: var(--color-fg-base);
     }
   }
 }

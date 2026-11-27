@@ -92,7 +92,6 @@ export const DatePicker: FC<Props> = ({
           setIsOpen(next);
         }}
         placement="bottom-end"
-        role="dialog"
       >
         <Popover.Trigger
           renderItem={(props) => (
@@ -111,33 +110,25 @@ export const DatePicker: FC<Props> = ({
             </button>
           )}
         />
-        <Popover.Content
-          renderItem={({ ref: contentRef, ...props }) => (
-            <div
-              {...props}
-              aria-label={messages.datePickerDialog}
-              className={styles.dialog}
-
-              ref={contentRef}
-            >
-              {isOpen ? (
-                <Calendar
-                  defaultValue={openedWith}
-                  max={asDate(max)}
-                  min={asDate(min)}
-                  onChange={(next) => {
-                    const input = inputRef.current;
-                    if (input !== null) {
-                      commitInputValue(input, next);
-                    }
-                    onChange?.(next);
-                    setIsOpen(false);
-                  }}
-                />
-              ) : null}
-            </div>
-          )}
-        />
+        <Popover.Content label={messages.datePickerDialog}>
+          <div className={styles.dialog}>
+            {isOpen ? (
+              <Calendar
+                defaultValue={openedWith}
+                max={asDate(max)}
+                min={asDate(min)}
+                onChange={(next) => {
+                  const input = inputRef.current;
+                  if (input !== null) {
+                    commitInputValue(input, next);
+                  }
+                  onChange?.(next);
+                  setIsOpen(false);
+                }}
+              />
+            ) : null}
+          </div>
+        </Popover.Content>
       </Popover.Root>
     </div>
   );

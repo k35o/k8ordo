@@ -47,7 +47,7 @@ export function TreeControlledPreview() {
         items={FILES}
         label="Files"
         onChange={setSelectedId}
-        onExpandedChange={setExpandedIds}
+        onExpandedIdsChange={setExpandedIds}
         selectedId={selectedId}
       />
       <p className={styles.selection}>Selected: {selectedId}</p>

@@ -1,17 +1,16 @@
 'use client';
 
 import { useEffect, useEffectEvent, useRef } from 'react';
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 
 import { Alert } from '../alert';
 import type { Status } from './../../../types/variables';
-import type { ToastAction } from './context';
 
 type ToastProps = {
   tone: Status;
   message: string;
   duration: number;
-  action?: ToastAction;
+  action?: ReactNode;
   isPaused?: boolean;
   onClose: () => void;
 };

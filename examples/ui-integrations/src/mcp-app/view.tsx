@@ -103,12 +103,12 @@ export function McpAppView({
       {canFullscreen && (
         <Stack direction="row" justify="end">
           <IconButton
-            label={isFullscreen ? 'チャットの中に戻す' : '全画面で開く'}
-            onAction={async () => {
+            action={async () => {
               await app.requestDisplayMode({
                 mode: isFullscreen ? 'inline' : 'fullscreen',
               });
             }}
+            label={isFullscreen ? 'チャットの中に戻す' : '全画面で開く'}
           >
             {isFullscreen ? <MinimizeIcon /> : <MaximizeIcon />}
           </IconButton>

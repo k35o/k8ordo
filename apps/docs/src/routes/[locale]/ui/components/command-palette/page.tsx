@@ -23,14 +23,14 @@ const USAGE = `const [isOpen, setIsOpen] = useState(false);
       label: 'New file',
       group: 'File',
       shortcut: ['⌘', 'N'],
-      onSelect: createFile,
+      onAction: createFile,
     },
     {
       id: 'theme',
       label: 'Toggle theme',
       group: 'View',
       keywords: ['dark', 'light'],
-      onSelect: toggleTheme,
+      onAction: toggleTheme,
     },
   ]}
 />`;

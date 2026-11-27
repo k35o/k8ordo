@@ -1,5 +1,10 @@
 import { clsx } from 'clsx';
-import type { FC, PropsWithChildren, ReactNode } from 'react';
+import type {
+  AnchorHTMLAttributes,
+  FC,
+  PropsWithChildren,
+  ReactNode,
+} from 'react';
 
 import { getMessages } from '../../../i18n/current';
 import { ChevronIcon } from '../../icons/chevron';
@@ -33,11 +38,16 @@ export const Separator: FC = () => (
   </li>
 );
 
+type RestProps = Omit<
+  AnchorHTMLAttributes<HTMLAnchorElement>,
+  'href' | 'children' | 'className' | 'style'
+>;
+
 type RenderBreadcrumbAnchorProps<T extends string> = {
   href: NoInfer<T>;
   className: string;
   children: ReactNode;
-};
+} & RestProps;
 
 const defaultRenderBreadcrumbAnchor = ({
   children,
@@ -51,17 +61,22 @@ export const Link = <T extends string>({
   current = false,
   children,
   renderAnchor = defaultRenderBreadcrumbAnchor,
-}: PropsWithChildren<{
-  href: T;
-  current?: boolean;
-  renderAnchor?: (props: RenderBreadcrumbAnchorProps<T>) => ReactNode;
-}>) =>
+  ...rest
+}: PropsWithChildren<
+  {
+    href: T;
+    /** 今のページ。リンクにせず `<span aria-current="page">` を描き、ほかの属性は付けない。 */
+    current?: boolean;
+    renderAnchor?: (props: RenderBreadcrumbAnchorProps<T>) => ReactNode;
+  } & RestProps
+>) =>
   current ? (
     <span aria-current="page" className={styles.current}>
       {children}
     </span>
   ) : (
     renderAnchor({
+      ...rest,
       href,
       className: clsx(styles.link, focusRing.ringNoBorder),
       children,

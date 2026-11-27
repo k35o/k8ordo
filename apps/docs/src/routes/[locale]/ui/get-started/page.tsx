@@ -13,13 +13,13 @@ const STYLES = `import '@k8ordo/ui/styles.css';`;
 const TAILWIND = `@import 'tailwindcss';
 @import '@k8ordo/ui/tailwind.css';`;
 
-const PROVIDER = `import { UIProvider } from '@k8ordo/ui';
+const PROVIDER = `import { ToastProvider } from '@k8ordo/ui';
 
 export function Root() {
   return (
-    <UIProvider>
+    <ToastProvider>
       <App />
-    </UIProvider>
+    </ToastProvider>
   );
 }`;
 

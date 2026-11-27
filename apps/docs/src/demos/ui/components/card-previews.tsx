@@ -9,7 +9,7 @@ export function CardActionPreview() {
   const [chosen, setChosen] = useState(false);
   return (
     <Card
-      onAction={() => {
+      action={() => {
         setChosen(true);
       }}
     >

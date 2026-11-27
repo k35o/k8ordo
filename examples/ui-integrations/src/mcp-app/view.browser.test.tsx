@@ -1,4 +1,4 @@
-import { UIProvider } from '@k8ordo/ui';
+import { ToastProvider } from '@k8ordo/ui';
 import { InMemoryTransport } from '@modelcontextprotocol/client';
 import { App } from '@modelcontextprotocol/ext-apps';
 import type { McpUiHostContext } from '@modelcontextprotocol/ext-apps';
@@ -66,9 +66,9 @@ const open = async (hostContext: McpUiHostContext = {}) => {
   await app.connect(appTransport);
 
   const screen = await render(
-    <UIProvider>
+    <ToastProvider>
       <McpAppView app={app} toolCall={toolCall} />
-    </UIProvider>,
+    </ToastProvider>,
   );
   return { bridge, screen, messages, modelContexts, displayModes };
 };

@@ -1,5 +1,5 @@
 import type { Message } from '@k8ordo/i18n';
-import { Heading } from '@k8ordo/ui';
+import { Button, Heading } from '@k8ordo/ui';
 import type { ReactNode } from 'react';
 
 import { PACKAGES } from '../data/packages';
@@ -8,7 +8,6 @@ import * as m from '../messages';
 import { CodeBlock } from './code-block';
 import { GitHubIcon } from './github-icon';
 import { InstallTabs } from './install-tabs';
-import { LinkButton } from './link-button';
 import { PageTitle } from './page-title';
 import { Rich } from './rich';
 
@@ -53,24 +52,26 @@ export function LandingHero({
           yarn={<CodeBlock code={`yarn add ${install}`} lang="bash" />}
         />
         <div className={styles.links}>
-          <LinkButton href={href(start.path)} variant="solid">
-            {start.label()}
-          </LinkButton>
-          <LinkButton
+          <Button href={href(start.path)}>{start.label()}</Button>
+          <Button
             color="base"
-            external
             href={`https://github.com/k35o/k8ordo/tree/main/packages/${directory}`}
+            rel="noopener noreferrer"
             startIcon={<GitHubIcon />}
+            target="_blank"
+            variant="skeleton"
           >
             {m.common.github()}
-          </LinkButton>
-          <LinkButton
+          </Button>
+          <Button
             color="base"
-            external
             href={`https://www.npmjs.com/package/${name}`}
+            rel="noopener noreferrer"
+            target="_blank"
+            variant="skeleton"
           >
             npm
-          </LinkButton>
+          </Button>
         </div>
       </div>
       <div className={styles.code}>{code}</div>

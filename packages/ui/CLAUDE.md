@@ -2,7 +2,7 @@
 
 `@k8ordo/ui` — the React component library in k8ordo. This file covers the
 package itself. The shared discipline (React 19 / RSC assumed,
-Baseline only, no polyfills) and how a new package joins are in the repository
+Baseline newly available only, no polyfills) and how a new package joins are in the repository
 root's [`CLAUDE.md`](../../CLAUDE.md).
 
 ## Package Commands
@@ -22,7 +22,7 @@ pnpm test --project=forced-colors            # Screenshot comparisons under forc
 pnpm test --project=print                    # Tokens and color-scheme under print media (src/styles/print.test.tsx)
 pnpm test --project=print-contrast-more      # The same under prefers-contrast: more
 pnpm test --project=tokens-css               # The built tokens.css alone on a page, with the OS set to dark (src/styles/tokens-css.test.tsx)
-pnpm test --project=form                     # Form checks a story's play cannot make, and FormValue (Playwright)
+pnpm test --project=form                     # Checks a story's play cannot make (real input, real :hover), FormValue included (Playwright)
 pnpm test --project=hooks src/internal/focus-trap.test.tsx # Single test file (needs its project)
 TEST_BROWSER=webkit pnpm test --project=hooks # One engine only (chromium / firefox / webkit)
 pnpm build                                   # vp pack + the DTCG tokens
@@ -58,7 +58,7 @@ A story that needs layout of its own puts it in `<name>.stories.module.css`.
 
 ### Boolean Props
 
-- **A boolean that describes state** → prefix with `is`: `isOpen`, `isActive`, `isStreaming`
+- **A boolean that describes state** → prefix with `is`: `isOpen`, `isStreaming`
 - **A boolean that selects a mode or variant** → no prefix: `interactive`, `animate`, `current`, `fullWidth`, `multiple`
 - **A boolean that maps 1:1 onto a native HTML attribute or ARIA state** → keep the native name: `disabled`, `checked`, `required`, `invalid` (it is forwarded straight to `aria-invalid`, so no `is` prefix)
 
@@ -70,66 +70,78 @@ library. Reuse `useControllableState`.
 
 - **State (controlled)**: `isOpen` for open/closed; a meaningful name such as `selectedId` or `value` for a selection.
 - **Initial value (uncontrolled)**: `defaultOpen` / `defaultValue` / `defaultSelectedId`.
-- **Change notification**: `onChange?: (next) => void` (a close-only action is `onClose?`).
+- **Change notification**: the component's main state notifies through `onChange?: (next) => void` (a close-only action is `onClose?`); any other state notifies through `on<Prop>Change`, named after its prop (`expandedIds` → `onExpandedIdsChange`, `selectedIds` → `onSelectedIdsChange`).
+- **Arrays**: a prop that takes an array takes it `readonly` (`readonly string[]`), and a notification hands over a new `string[]`, so a `useState<string[]>` setter can be passed as it is.
 
-For example: `Modal` and `Drawer` take `isOpen?` + `defaultOpen?` + `onClose?`;
-`Tabs.Root` takes `selectedId?` + `defaultSelectedId?` + `onChange?`;
+For example: `Dialog` and `Drawer` take `isOpen?` + `defaultOpen?` + `onClose?`;
+`Tabs.Root` takes `selectedId` + `onChange?`, or `defaultSelectedId` when uncontrolled;
 `Accordion.Item` takes `isOpen?` + `defaultOpen?` + `onChange?`.
 
 ### Prop vocabulary
 
-| prop        | Meaning                                       | Example values                                                                           |
-| ----------- | --------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `variant`   | Visual variant                                | `solid` / `outline` / `skeleton` / `shadow`                                              |
-| `color`     | Which color-token family to use               | Accents: `primary` / `secondary` / `base`; monochrome weight: `base` / `mute` / `subtle` |
-| `tone`      | Status semantics (this prop only)             | `neutral` / `info` / `success` / `warning` / `error`                                     |
-| `size`      | Size                                          | `sm` / `md` / `lg`                                                                       |
-| `label`     | Visible text or accessible name               | —                                                                                        |
-| `role`      | Which ARIA role to use                        | `dialog` / `menu` / `listbox`                                                            |
-| `side`      | Placement against a viewport edge             | `center` / `bottom` / `right` / `left`                                                   |
-| `placement` | Placement relative to an anchor (`Placement`) | `bottom-start`, …                                                                        |
-| `onAction`  | Activating an item or button (no event arg)   | `() => void` (`Button` / `IconButton` also accept a `Promise`)                           |
+| prop        | Meaning                                             | Example values                                                                           |
+| ----------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `variant`   | Visual variant                                      | `solid` / `outline` / `skeleton` / `shadow`                                              |
+| `color`     | Which color-token family to use                     | Accents: `primary` / `secondary` / `base`; monochrome weight: `base` / `mute` / `subtle` |
+| `tone`      | Status semantics (this prop only)                   | `neutral` / `info` / `success` / `warning` / `error`                                     |
+| `size`      | Size                                                | `sm` / `md` / `lg`                                                                       |
+| `label`     | Visible text or accessible name                     | —                                                                                        |
+| `role`      | Which ARIA role to use                              | `dialog` / `alertdialog`                                                                 |
+| `side`      | Placement against a viewport edge                   | `center` / `bottom` / `right` / `left`                                                   |
+| `placement` | Placement relative to an anchor (`Placement`)       | `bottom-start`, …                                                                        |
+| `action`    | Work a press runs in a transition, shown as pending | `() => void \| Promise<void>` (`Button` / `IconButton` / `Card` / `Message.Action`)      |
+| `onAction`  | Activating an item (no event arg), called as is     | `() => void` (`DropdownMenu.Item` / `ContextMenu.Item` / `CommandPaletteItem`)           |
 
-`type` is reserved for HTML attributes only (`button` / `submit`, input types).
+`type` is reserved for HTML attributes only (`button` / `submit` / `reset`, input types).
 Render props take a verb+noun form: `renderItem` / `renderAnchor` / `renderInput`.
 In generative-UI schemas the trigger wording is `triggerLabel` and the body text
 is `content` (`Toast` and `Alert` keep their component's `message`).
 
 ### Render props
 
-Because every component omits `className` and `style`, a render prop is the only
-escape hatch a caller has. There are two kinds, and they must not be blurred.
+Every component omits `className` and `style`, and a render prop is not a way
+around that: it exists to hand an element to someone else's component (a
+framework's `<Link>`) or to fill a slot. There are two kinds, and they must not
+be blurred.
 
-**Replacing the element** (`Button` / `IconButton` `renderItem`, `Anchor` /
-`Breadcrumb.Link` / `SideNav.Link` `renderAnchor`). The bag is _everything the component would
-have put on its own element_. For `Button` / `IconButton` that is the resolved
-`className`, the composed `children` (icons and the pending spinner included),
-`ref`, the click handler, the disabled and pending state, and the caller's
-remaining attributes. The link components own less: `Anchor`'s bag is `href` /
+**Replacing the element** (`renderAnchor` on `Button` / `IconButton` with
+`href`, `Anchor`, `Breadcrumb.Link`, `SideNav.Link`, `DropdownMenu.Item` /
+`ContextMenu.Item` with `href`, `Card` with `href`). The bag is _everything the
+component would have put on its own `<a>`_. For `Button` / `IconButton` that is
+`href`, the resolved `className`, the composed `children` (icons included),
+`ref`, the click handler, `aria-disabled`, and the caller's remaining anchor
+attributes (`IconButton` adds `aria-label` and the tooltip's handlers, chained
+with the caller's). A button is never replaced: `type`, `action` and the
+pending state belong to the `<button>` side, and `href` switches to the `<a>`
+side. The link components own less: `Anchor`'s bag is `href` /
 `className` / `children` / `target` / `rel` and the caller's remaining
 attributes, plus `kind` (`'internal' | 'external'`), which is not an attribute;
-`Breadcrumb.Link` takes no extra attributes, so its bag is `href` / `className` /
-`children`, and a `current` link renders a `<span>` without calling it;
+`Breadcrumb.Link`'s bag is `href` / `className` / `children` and the caller's
+remaining anchor attributes, and a `current` link renders a `<span>` without
+calling it;
 `SideNav.Link`'s bag is `href` / `className` / `children` / `aria-current` and
-the caller's remaining anchor attributes. Build that
+the caller's remaining anchor attributes; `DropdownMenu.Item` /
+`ContextMenu.Item`'s bag is `href` / `className` / `children` / `role` and the
+keyboard wiring (`id` / `ref` / `tabIndex` / `onFocus` / `onClick` /
+`onKeyDown`), all of which must be spread; `Card`'s bag is `href` /
+`className` / `aria-labelledby` and, with `openInNewTab`, `target` / `rel`,
+with no `children`, since the link takes its name from the content and the
+hidden new-tab wording through `aria-labelledby`. Build that
 object once and hand the same one to both branches — the render prop and the
 component's own element — so the two can never drift. A render prop that quietly
-drops `onClick` or `disabled` hands the caller a dead, undisabled element with
+drops `onClick` or `aria-disabled` hands the caller a dead, undisabled element with
 no warning.
 
-Two rules make such a bag usable on a tag other than the component's own:
-
-- Type the handlers and the `ref` for `HTMLElement`, not for the concrete
-  element. `ClipboardEventHandler<HTMLButtonElement>` will not go onto an `<a>`,
-  and a `RefObject` is invariant — pass the ref through `mergeRefs` so it is a
-  callback. Base the pass-through on `ButtonHTMLAttributes<HTMLElement>` rather
-  than on `ComponentPropsWithRef<'button'>`.
-- Ship `aria-disabled` next to `disabled`, and make the supplied click handler
-  return early with `preventDefault()` while disabled. `disabled` does nothing
-  on an `<a>`, so without both a "disabled" link still navigates.
+A component that renders either a `<button>` or an `<a>` takes the two shapes
+as overloads, the link one generic in its `href` (`<T extends string>`, handed
+back as `NoInfer<T>` so a typed route stays typed), the button one last: a
+single generic union leaves a handler's argument untyped, and `ComponentProps`
+reads the last signature. A disabled link ships `aria-disabled` and a click
+handler that calls `preventDefault()`, since `disabled` does nothing on an
+`<a>`.
 
 **Filling a slot** (`FormControl` `renderInput`, `Popover.Trigger` /
-`Tooltip.Trigger` / `FileField.Trigger` / `Alert` `action.renderItem`). The
+`Tooltip.Trigger` / `FileField.Trigger`). The
 component owns no element; the bag is wiring only — ids, ARIA relationships,
 open/close handlers — and the prop is required rather than optional.
 
@@ -150,6 +162,7 @@ The rest pass the value only, even when a real `<input>` is underneath:
 - `Slider`: `(value: number) => void`
 - `NumberField`: `(value: number | null) => void` (`null` is an empty field)
 - `CheckboxGroup.Root` / `CheckboxCard` / `Autocomplete`: `(value: string[]) => void`
+- `Tree`'s `onExpandedIdsChange`: `(ids: string[]) => void`
 - `RadioCard` (notifies per group rather than per option input): `(value: string) => void`
 - `ListBox`: `(value) => void`
 
@@ -214,7 +227,7 @@ wrapped into `@layer components` by its plugin, in Vite and in `vp pack` alike.
   with a compound class. `button.module.css` is the worked example.
 - **Variants are modifier classes** on the element itself
   (`styles.solidPrimary`, `styles.sm`), never data attributes: a caller who
-  copies only `className` from a `renderItem` bag must get the whole look.
+  copies only `className` from a `renderAnchor` bag must get the whole look.
   States the component already exposes as ARIA or native attributes are styled
   from those (`&[aria-pressed='true']`, `&:disabled`, `&:checked`).
 - **Map a prop to a class with an object** (`const SIZE = { … } as const`).
@@ -232,7 +245,12 @@ wrapped into `@layer components` by its plugin, in Vite and in `vp pack` alike.
   layer; join classes in JS). `&` gives a rule inside `@scope` no
   specificity, so `svg` there is (0,0,1) and loses to any class on the
   element: the icons' size classes are `:where()` for that reason, so a
-  component that sizes the icons inside it wins.
+  component that sizes the icons inside it wins. When a scoped rule must tie
+  with a class on the element it styles (`Toolbar`'s pressed ground over a
+  solid `Button`'s `:hover` and `:active` grounds), write `&:scope >`:
+  `:scope` adds one class of specificity, and on a tie the scoped rule wins
+  by proximity. A bare `:scope >` gets an `&` prepended by Lightning CSS and
+  matches nothing.
 - **Hover** is `@media (hover: hover) { .x:hover { … } }`, as Tailwind wrote it.
 - **Vertical writing**: prefer logical properties; where an element must
   change in vertical text, use `@container style(--writing: vertical) { … }`,
@@ -266,7 +284,7 @@ and fill a shape only where a line would not read (a dot, a half).
   catalog must not import a component, so its names live in a module of their
   own.
 
-### Compound Component (Dialog, Tabs, FileField pattern)
+### Compound Component (Tabs, Accordion, FileField pattern)
 
 The parts live in the `'use client'` module and are exported one by one; the
 `X.Root` object is assembled in `index.ts`, which has no directive.
@@ -331,16 +349,16 @@ which looks the dictionary up in `@k8ordo/i18n`'s `currentLocale()` — English
 when the application has defined no locale set. It is a plain function, not a
 hook, so wording never makes a component a client module:
 `src/components/compound-rsc.test.ts` keeps the ones that only read wording
-(`Spinner`, `Breadcrumb`, `Code`, `Alert`, `Callout`, `Reasoning`, `ToolInvocation`) free
+(`Spinner`, `Anchor`, `Card`, `Breadcrumb`, `Code`, `Alert`, `Callout`, `Reasoning`, `ToolInvocation`) free
 of `'use client'`. A new key goes into `messages.ts`, `ja.ts`, `en.ts`, and
 `usage.ts` (the components that draw it); there is no provider and no context.
 `pnpm generate:props` writes the key list in `docs/references/components.md`
-from `usage.ts`, and the docs site's i18n page reads it through the exported
-`messageUsage`.
+from `usage.ts`, and the same mapping into `docs/props.generated.json`
+(`messages`), which the docs site's i18n page reads.
 
 ### Pending state
 
-`Button` / `IconButton` waiting on their own action — an `onAction` promise, or
+`Button` / `IconButton` waiting on their own action — an `action` promise, or
 the form's action for a submit button — take `aria-busy` and `aria-disabled` and
 ignore presses in the click handler, but never native `disabled`. Chromium
 moves focus to `body` once the focused element is disabled, so a keyboard user
@@ -353,12 +371,16 @@ animation frames before `toHaveFocus()`.
 
 ### Content that gets replaced
 
-A change that swaps what is on screen (`Tabs`) is applied inside
-`startTransition`, and the swapped element is wrapped in
-`<ViewTransition default="none" enter="auto" exit="auto">`: React animates
-the swap with the platform's own cross-fade, and a panel that suspends keeps
-the current one on screen until it is ready. `default="none"` is what keeps
-an unrelated transition inside the panel — a `Button`'s action — from
+An element that gets swapped (`Tabs`' panels) is drawn from a deferred copy
+of the selection (`useDeferredValue`), while the selection's own marks — the
+selected tab, its indicator — follow the value at once. The swapped element
+is wrapped in `<ViewTransition default="none" enter="auto" exit="auto">`:
+React animates the deferred swap with the platform's own cross-fade, and a
+panel that suspends keeps the current one on screen until it is ready. Both
+hold when the controlled value arrives in a synchronous update (a store read
+through `useSyncExternalStore`, `@k8ordo/state` included), which a setter
+wrapped in `startTransition` could not promise. `default="none"` is what
+keeps an unrelated transition inside the panel — a `Button`'s action — from
 animating it. `base.css` turns every view transition off under
 `prefers-reduced-motion`, so a component never checks it itself.
 
@@ -402,7 +424,7 @@ Under `@media print` a `.dark` that contains no `.print-as-shown` goes back to l
 The stylesheet follows `prefers-contrast: more` and `forced-colors: active`; `@k8ordo/color-scheme` is not involved, since the OS owns both settings.
 
 - `tokens.css` redefines text and border tokens (and the dark `bg-emphasize`) inside `@media (prefers-contrast: more)` on `:root`, each as a `light-dark()` pair, so a consumer's later `:root` override still wins. A name only one side changes keeps the other side's usual value.
-- A surface outlined only by a shadow or a ground takes `highContrast.edge` (`src/components/_internal/high-contrast.module.css`): an inset outline under either setting, `--color-border-base` under `prefers-contrast: more` and `CanvasText` under forced colors. Every part of it, color and offset included, sits behind those media queries and `:not(:focus-visible)`, so a surface that takes focus itself (`Modal`'s `<dialog>`) keeps the browser's own focus ring untouched.
+- A surface outlined only by a shadow or a ground takes `highContrast.edge` (`src/components/_internal/high-contrast.module.css`): an inset outline under either setting, `--color-border-base` under `prefers-contrast: more` and `CanvasText` under forced colors. Every part of it, color and offset included, sits behind those media queries and `:not(:focus-visible)`, so a surface that takes focus itself (the `<dialog>` of `Dialog` and `Drawer`) keeps the browser's own focus ring untouched.
 - Under forced colors only system colors survive and shadows are dropped. Paint selected state with `var(--color-system-highlight)` / `var(--color-system-canvas-text)` inside `@media (forced-colors: active)`, never rely on `box-shadow` for a boundary or focus, and hide with `visibility: hidden`, not a transparent color (a transparent color is repainted).
 - A part that keeps its own colors with `forced-color-adjust: none` (`Code`'s color swatch, `ColorPicker`'s preview and tracks) is not repainted at all: its border, outline and focus ring keep whatever color the cascade gives them, a transparent one included, and its `box-shadow` stays. Give each of them a `--color-system-*` color inside `@media (forced-colors: active)` (`CanvasText`, the color the browser paints the others), and drop the shadow there. `ForcedColorsOwnColors` in `src/styles/high-contrast.stories.tsx` checks the three.
 
@@ -419,10 +441,10 @@ The stylesheet follows `prefers-contrast: more` and `forced-colors: active`; `@k
 - **Component tests** rely on Storybook stories as test fixtures via `@storybook/addon-vitest`. Writing a story IS writing a test.
 - **Hook tests** use `vitest-browser-react` for rendering hooks in a real browser.
 - **Form wiring** is a story too: every form field has a `WithForm` story that spreads `@k8ordo/form`'s `formFields` output onto it inside `ActionForm` (`.storybook/action-form.tsx`), whose action calls `parseForm` the way a Server Action would. Its play submits, fails on the server (`MemoField` refuses `却下`), resets, and reads `isDirty` from the `変更あり` / `変更なし` line. `parseForm` echoes the submitted values on success as well, so after any submission they are the fields' defaults and a reset goes back to them. `storybook/test`'s `userEvent` remembers what it typed and a form reset restores only the DOM, so type into a field with `fill` from the same file, which clears it first. `@k8ordo/form` is a devDependency and resolves from its `dist/`, so build it first on a fresh checkout.
-- A play's typing is a script's assignment, not a user edit, and the browser flags `tooShort` / `tooLong` only for a user edit. That check, and `FormValue`'s own tests, live in the `form` project (`src/components/form/**/*.test.tsx`, `src/components/_internal/**/*.test.tsx`): plain Vitest browser tests with Playwright's real input, one file at a time (`fileParallelism: false`), since Firefox hands focus between pages that run side by side. `styles.css` is not loaded there, so a visually hidden input (`srOnly`) cannot be clicked: press its label, as a user does; a test that reads the look imports `src/styles/index.css` itself.
+- A play's typing is a script's assignment, not a user edit, and the browser flags `tooShort` / `tooLong` only for a user edit; a play's pointer is synthetic, so it never puts an element under `:hover`. Those checks — the length flags, and a pressed `Toolbar` item keeping its ground under a real `:hover` — live with `FormValue`'s own tests in the `form` project (`src/components/form/**/*.test.tsx`, `src/components/_internal/**/*.test.tsx`, `src/components/buttons/**/*.test.tsx`): plain Vitest browser tests with Playwright's real input and pointer, one file at a time (`fileParallelism: false`), since Firefox hands focus between pages that run side by side. `styles.css` is not loaded there, so a visually hidden input (`srOnly`) cannot be clicked: press its label, as a user does; a test that reads the look imports `src/styles/index.css` itself.
 - **Helper tests** are standard unit tests, no browser needed.
 - **There is no jsdom project, and components are not written to survive one.** They call `ResizeObserver`, `matchMedia`, `dialog.showModal`, and the Popover API directly — no support checks, no null branches. Consumers are told to test in a real browser (`docs/GUIDE.md`); do not reintroduce a guard layer to make a synthetic DOM work.
-- Storybook preview wraps all stories in `UIProvider` with light/dark theme toggle, and defines a `@k8ordo/i18n` locale set (`.storybook/locales.ts`, default `ja`) so the built-in wording is Japanese; a story renders in English with `beforeEach: inEnglish` from the same file.
+- Storybook preview wraps all stories in `ToastProvider` with light/dark theme toggle, and defines a `@k8ordo/i18n` locale set (`.storybook/locales.ts`, default `ja`) so the built-in wording is Japanese; a story renders in English with `beforeEach: inEnglish` from the same file.
 - Every story runs twice: `components` in light and `components-dark` in dark (`storybookTest({ initialGlobals: { theme: 'dark' } })`), because axe only checks the colors on screen. A story that pins `parameters.theme` stays in that theme in both.
 - A form field in a story is given a name (`aria-label` in the meta `args`, and on any field a custom `render` draws), not a disabled `label` rule.
 - `src/styles/contrast.stories.tsx` renders every pair in `docs/references/color.md`'s contrast table, AAA rows under `color-contrast-enhanced`; keep the two in step.
@@ -430,7 +452,7 @@ The stylesheet follows `prefers-contrast: more` and `forced-colors: active`; `@k
 - A focus mark a play function cannot read (a range thumb is a pseudo-element; WebKit emulates forced colors as the media query alone, so a transparent outline still reads as transparent) is compared as screenshots, with and without focus, in `src/styles/forced-colors.test.tsx`, run by the `forced-colors` project (plain Vitest browser tests under `forcedColors: 'active'`). WebKit keeps the `box-shadow` ring, so those tests catch a regression only in Chromium and Firefox.
 - Print media has no Playwright context option either, so `src/styles/print.test.tsx` runs in a `print` project of its own and switches the page with the `emulateMedia` command defined there (`page.emulateMedia` on the Playwright side). It reads the names of the `light-dark()` tokens from the loaded stylesheet and compares the colors they give in print with the ones measured on screen, so it never copies a token value. `prefers-contrast: more` is not switched by that command: `print-contrast-more` runs the same file with `contrast: 'more'` as a context option, because Firefox's emulation never restyles the page when only the contrast changes (`matchMedia` flips, computed styles do not).
 - `./tokens.css` is checked on a page that loads nothing else: `src/styles/tokens-css.test.tsx` puts the built `dist/styles/tokens.css` into an iframe and compares the colors the tokens give there with the ones an element gets under its own `color-scheme`. Its `tokens-css` project sets the OS to dark as a context option (`colorScheme: 'dark'`): only then does a page without `.dark` staying light, or a page that overrides `color-scheme` turning dark, show anything. It reads `dist/`, so build first.
-- a11y addon fails a story on violations (`test: 'error'`), `color-contrast` included. Only overlay stories that axe misreads while they fade in turn `color-contrast` off for themselves: every `Modal` story, and one story each in `Dialog` and `Popover`.
+- a11y addon fails a story on violations (`test: 'error'`), `color-contrast` included. Only overlay stories that axe misreads while they fade in turn `color-contrast` off for themselves: every `Dialog` and `CommandPalette` story, and one story in `Popover`.
 - Mock date is set to `2023-01-02 12:34:56` in Storybook.
 
 ## Build Pipeline
@@ -453,15 +475,16 @@ The authoritative list is the `exports` map in `package.json`.
 ```
 @k8ordo/ui                     core UI components and public types (AI chat is under /ai, icons under /icons)
 @k8ordo/ui/icons               line icons (one module each) and BaseIcon
-@k8ordo/ui/i18n                ja / en, registerMessages, getMessages, messageUsage, and the Messages type
+@k8ordo/ui/i18n                ja / en, registerMessages, getMessages, and the Messages type
 @k8ordo/ui/ai                  AI chat components
 @k8ordo/ui/ai/response         Response renderer only
-@k8ordo/ui/code-block          CodeBlock (Server Component; shiki and server-only are dependencies)
+@k8ordo/ui/code-block          CodeBlock (Server Component; shiki is an optional peer, server-only a dependency)
 @k8ordo/ui/catalog             the generative-UI catalog, for no format in particular (server-safe)
 @k8ordo/ui/catalog/render      how each catalog component is drawn ('use client')
 @k8ordo/ui/tokens              design tokens as a DTCG resolver document
-@k8ordo/ui/props.json          machine-readable component props (docs/props.generated.json)
+@k8ordo/ui/props.json          machine-readable component props and wording keys (docs/props.generated.json)
 @k8ordo/ui/styles.css          layer order, tokens, reset and base (each component imports its own CSS)
 @k8ordo/ui/tokens.css          the tokens and the color-scheme rules of styles.css alone (no reset, no base)
 @k8ordo/ui/tailwind.css        Tailwind CSS 4 bridge, imported after tailwindcss (styles.css + utilities for the tokens)
+@k8ordo/ui/package.json        the manifest, for tools that read it
 ```

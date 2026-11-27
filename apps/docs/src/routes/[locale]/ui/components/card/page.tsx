@@ -94,7 +94,7 @@ export default function CardPage() {
     <a href="/tags/react">React</a>
   </div>
 </Card>
-<Card onAction={choose}>
+<Card action={choose}>
   <div className={styles.body}>Go with this plan</div>
 </Card>`}
           >

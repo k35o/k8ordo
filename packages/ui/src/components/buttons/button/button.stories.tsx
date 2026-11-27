@@ -134,7 +134,7 @@ export const EndIcon: Story = {
 
 export const AsyncAction: Story = {
   args: {
-    onAction: async () => {
+    action: async () => {
       await new Promise<void>((resolve) => {
         setTimeout(resolve, 1500);
       });
@@ -152,12 +152,12 @@ const actionUntilFinished = (): Promise<void> =>
   });
 
 /**
- * `onAction` の保留中も、押したボタンはフォーカスを持ち続ける。押せないことは
- * `aria-disabled` で伝え、もう一度押しても `onAction` は走らない。
+ * `action` の保留中も、押したボタンはフォーカスを持ち続ける。押せないことは
+ * `aria-disabled` で伝え、もう一度押しても `action` は走らない。
  */
 export const PendingKeepsFocus: Story = {
   args: {
-    onAction: fn(actionUntilFinished),
+    action: fn(actionUntilFinished),
   },
   play: async ({ args, canvas, userEvent }) => {
     const button = canvas.getByRole('button', { name: 'ボタン' });
@@ -175,7 +175,7 @@ export const PendingKeepsFocus: Story = {
 
       await userEvent.keyboard('{Enter}');
       await userEvent.click(button);
-      await expect(args.onAction).toHaveBeenCalledOnce();
+      await expect(args.action).toHaveBeenCalledOnce();
     } finally {
       // 終わらない非同期の transition は、同じ React の後続の transition を
       // すべて待たせる。途中で落ちても後のストーリーを巻き込まないよう片付ける
@@ -269,109 +269,227 @@ export const NativeAttributes: Story = {
  * `onClick` は先に呼ぶので、押下の検証には影響しない。
  */
 const withoutNavigation =
-  (onClick: MouseEventHandler<HTMLElement> | undefined) =>
-  (event: MouseEvent<HTMLElement>) => {
+  (onClick: MouseEventHandler<HTMLAnchorElement> | undefined) =>
+  (event: MouseEvent<HTMLAnchorElement>) => {
     onClick?.(event);
     event.preventDefault();
   };
 
-/**
- * `renderItem` は既定の `<button>` に渡るのと同じ props を受け取る。`<a>` を
- * 描画するときは `<button>` 専用の `disabled` / `type` だけ外して残りを展開
- * すれば、`className` と `children` に加えてクリック処理・`ref`・`aria-*` が
- * そのまま乗る。
- */
-export const RenderItemLink: Story = {
-  args: {
-    id: 'render-item-link',
-    onClick: fn(),
-    renderItem: ({
-      children,
-      disabled: _disabled,
-      onClick,
-      type: _type,
-      ...props
-    }) => (
-      <a href="#render-item" {...props} onClick={withoutNavigation(onClick)}>
-        {children}
-      </a>
-    ),
-  },
-  play: async ({ args, canvas, userEvent }) => {
-    const link = canvas.getByRole('link');
+const linkClick = fn();
 
-    await expect(link).toHaveAttribute('id', 'render-item-link');
+/**
+ * `href` があれば `<a>` を描く。ボタンと同じ見た目で、残りの属性は `<a>` に渡る。
+ */
+export const Link: Story = {
+  render: () => (
+    <Button
+      href="#link"
+      id="button-link"
+      onClick={(event) => {
+        linkClick();
+        event.preventDefault();
+      }}
+    >
+      リンク
+    </Button>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    linkClick.mockClear();
+    const link = canvas.getByRole('link', { name: 'リンク' });
+
+    await expect(link).toHaveAttribute('href', '#link');
+    await expect(link).toHaveAttribute('id', 'button-link');
+    await expect(link).not.toHaveAttribute('type');
     await expect(link).not.toHaveAttribute('aria-disabled');
-    // ボタンの className が <a> に渡り、ボタンの枠線で描かれる
+    // ボタンと同じクラスで、ボタンの枠線で描かれる
     await expect(link).toHaveStyle({ borderTopWidth: '2px' });
 
     await userEvent.click(link);
 
-    await expect(args.onClick).toHaveBeenCalled();
+    await expect(linkClick).toHaveBeenCalledOnce();
   },
 };
 
-export const RenderItemDisabled: Story = {
-  args: {
-    disabled: true,
-    onClick: fn(),
-    renderItem: ({
-      children,
-      disabled: _disabled,
-      onClick,
-      type: _type,
-      ...props
-    }) => (
-      <a href="#render-item" {...props} onClick={withoutNavigation(onClick)}>
-        {children}
-      </a>
-    ),
-  },
-  play: async ({ args, canvas, userEvent }) => {
-    const link = canvas.getByRole('link');
+const disabledLinkClick = fn();
+
+/**
+ * `<a>` には `disabled` が無いので、`aria-disabled` を付け、押しても遷移させない。
+ */
+export const LinkDisabled: Story = {
+  render: () => (
+    <Button disabled href="#disabled-link" onClick={disabledLinkClick}>
+      リンク
+    </Button>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    disabledLinkClick.mockClear();
+    const link = canvas.getByRole('link', { name: 'リンク' });
 
     await expect(link).toHaveAttribute('aria-disabled', 'true');
     await expect(link).toHaveStyle({ cursor: 'not-allowed' });
 
     await userEvent.click(link);
 
-    await expect(args.onClick).not.toHaveBeenCalled();
+    await expect(disabledLinkClick).not.toHaveBeenCalled();
+    await expect(window.location.hash).not.toBe('#disabled-link');
   },
 };
 
-const RenderItemButtonRender = () => {
-  const ref = useRef<HTMLButtonElement>(null);
-  const [tagName, setTagName] = useState('');
-  return (
-    <>
-      <Button
-        name="action"
-        onClick={() => {
-          setTagName(ref.current?.tagName ?? '');
-        }}
-        ref={ref}
-        renderItem={(props) => <button {...props} type="button" />}
-        value="save"
-      >
-        ボタン
-      </Button>
-      <p>{tagName}</p>
-    </>
-  );
+const renderedClick = fn();
+
+/**
+ * `renderAnchor` は `<a>` に渡るのと同じ props を受け取る。Next.js の `Link` の
+ * ようなリンク部品に、そのまま展開できる。
+ */
+export const RenderAnchor: Story = {
+  render: () => (
+    <Button
+      href="#render-anchor"
+      onClick={renderedClick}
+      renderAnchor={({ children, href, onClick, ...props }) => (
+        <a
+          {...props}
+          data-rendered=""
+          href={href}
+          onClick={withoutNavigation(onClick)}
+        >
+          {children}
+        </a>
+      )}
+      variant="outline"
+    >
+      リンク
+    </Button>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    renderedClick.mockClear();
+    const link = canvas.getByRole('link', { name: 'リンク' });
+
+    await expect(link).toHaveAttribute('data-rendered');
+    await expect(link).toHaveAttribute('href', '#render-anchor');
+    await expect(link).toHaveStyle({ borderTopWidth: '2px' });
+
+    await userEvent.click(link);
+
+    await expect(renderedClick).toHaveBeenCalledOnce();
+  },
 };
 
-/** `<button>` に描画するなら props をそのまま展開でき、ref も届く。 */
-export const RenderItemButton: Story = {
-  render: () => <RenderItemButtonRender />,
+/**
+ * `type="reset"` は属するフォームを既定値に戻す。送信ではないので、フォームの
+ * 送信中も保留にならない。
+ */
+export const Reset: Story = {
+  render: () => (
+    <form>
+      <input aria-label="名前" defaultValue="初期値" name="name" />
+      <Button type="reset" variant="outline">
+        戻す
+      </Button>
+    </form>
+  ),
   play: async ({ canvas, userEvent }) => {
-    const button = canvas.getByRole('button');
+    const input = canvas.getByRole('textbox', { name: '名前' });
+    const button = canvas.getByRole('button', { name: '戻す' });
 
-    await expect(button).toHaveAttribute('name', 'action');
-    await expect(button).toHaveAttribute('value', 'save');
-    await expect(button).toHaveAttribute('type', 'button');
-
+    await expect(button).toHaveAttribute('type', 'reset');
+    await userEvent.clear(input);
+    await userEvent.type(input, '書き換え');
     await userEvent.click(button);
 
-    await expect(canvas.getByRole('paragraph')).toHaveTextContent('BUTTON');
+    await expect(input).toHaveValue('初期値');
+  },
+};
+
+const resetWhileSubmitting = fn(actionUntilFinished);
+
+const ResetWhileSubmittingRender: FC = () => (
+  <form action={resetWhileSubmitting}>
+    <Button type="submit">送信</Button>
+    <Button type="reset" variant="outline">
+      戻す
+    </Button>
+  </form>
+);
+
+export const ResetWhileSubmitting: Story = {
+  render: () => <ResetWhileSubmittingRender />,
+  play: async ({ canvas, userEvent }) => {
+    const submit = canvas.getByRole('button', { name: '送信' });
+    const reset = canvas.getByRole('button', { name: '戻す' });
+
+    try {
+      await userEvent.click(submit);
+      await waitFor(() => {
+        expect(submit).toHaveAttribute('aria-busy', 'true');
+      });
+      await expect(reset).not.toHaveAttribute('aria-busy');
+      await expect(reset).not.toHaveAttribute('aria-disabled');
+    } finally {
+      // 終わらない非同期の transition は、同じ React の後続の transition を
+      // すべて待たせる。途中で落ちても後のストーリーを巻き込まないよう片付ける
+      finishAction();
+    }
+    await waitFor(() => {
+      expect(submit).not.toHaveAttribute('aria-busy');
+    });
+  },
+};
+
+/**
+ * スケルトンは、押された状態（`aria-pressed`）と今のページ（`aria-current`）を
+ * 文字色で示す。状態は ARIA の属性で渡し、見た目はそこから作る。塗りと枠線は
+ * 押した状態の見た目を持たず、呼び出し側が `variant` と `color` で選ぶ。
+ */
+export const Pressed: Story = {
+  render: () => (
+    <>
+      <Button aria-pressed variant="skeleton">
+        押した状態
+      </Button>
+      <Button aria-pressed={false} variant="skeleton">
+        押していない
+      </Button>
+      <Button aria-current="page" href="#current" variant="skeleton">
+        今のページ
+      </Button>
+      <Button aria-current="false" href="#other" variant="skeleton">
+        他のページ
+      </Button>
+      <Button aria-pressed variant="solid">
+        塗りの押した状態
+      </Button>
+      <Button aria-pressed variant="outline">
+        枠線の押した状態
+      </Button>
+    </>
+  ),
+  play: async ({ canvas }) => {
+    const info = tokenColor('--color-fg-info');
+    const mute = tokenColor('--color-fg-mute');
+    const primary = tokenColor('--color-primary-fg');
+
+    await expect(
+      getComputedStyle(canvas.getByRole('button', { name: '押した状態' }))
+        .color,
+    ).toBe(info);
+    await expect(
+      getComputedStyle(canvas.getByRole('button', { name: '押していない' }))
+        .color,
+    ).toBe(mute);
+    await expect(
+      getComputedStyle(canvas.getByRole('link', { name: '今のページ' })).color,
+    ).toBe(info);
+    await expect(
+      getComputedStyle(canvas.getByRole('link', { name: '他のページ' })).color,
+    ).toBe(mute);
+    await expect(
+      getComputedStyle(canvas.getByRole('button', { name: '塗りの押した状態' }))
+        .color,
+    ).toBe(primary);
+    await expect(
+      getComputedStyle(canvas.getByRole('button', { name: '枠線の押した状態' }))
+        .color,
+    ).toBe(primary);
   },
 };

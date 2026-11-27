@@ -1,20 +1,11 @@
 'use client';
 
-import { Button, Dialog, Modal } from '@k8ordo/ui';
+import { Button, Dialog } from '@k8ordo/ui';
 import { useState } from 'react';
 
 import styles from './dialog-previews.module.css';
 
 export function DialogBasicPreview() {
-  return (
-    <Dialog.Root>
-      <Dialog.Header onClose={() => {}} title="Dialog Title" />
-      <Dialog.Content>Dialog content here</Dialog.Content>
-    </Dialog.Root>
-  );
-}
-
-export function DialogWithModalPreview() {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <>
@@ -25,25 +16,15 @@ export function DialogWithModalPreview() {
       >
         Open Dialog
       </Button>
-      <Modal
+      <Dialog
         isOpen={isOpen}
         onClose={() => {
           setIsOpen(false);
         }}
-        side="center"
+        title="Confirmation"
       >
-        <Dialog.Root>
-          <Dialog.Header
-            onClose={() => {
-              setIsOpen(false);
-            }}
-            title="Confirmation"
-          />
-          <Dialog.Content>
-            <p>Are you sure you want to proceed?</p>
-          </Dialog.Content>
-        </Dialog.Root>
-      </Modal>
+        <p>Are you sure you want to proceed?</p>
+      </Dialog>
     </>
   );
 }
@@ -59,48 +40,94 @@ export function AlertDialogPreview() {
       >
         Delete Item
       </Button>
-      <Modal
+      <Dialog
+        description="This action cannot be undone."
         isOpen={isOpen}
         onClose={() => {
           setIsOpen(false);
         }}
-        side="center"
+        role="alertdialog"
+        title="Delete this item?"
       >
-        <Dialog.Root role="alertdialog">
-          <Dialog.Header
-            onClose={() => {
+        <div className={styles.actions}>
+          <Button
+            color="base"
+            onClick={() => {
               setIsOpen(false);
             }}
-            title="Delete Confirmation"
-          />
-          <Dialog.Content>
-            <div className={styles.body}>
-              <p>
-                Are you sure you want to delete this item? This action cannot be
-                undone.
-              </p>
-              <div className={styles.actions}>
-                <Button
-                  color="base"
-                  onClick={() => {
-                    setIsOpen(false);
-                  }}
-                  variant="outline"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  onClick={() => {
-                    setIsOpen(false);
-                  }}
-                >
-                  Delete
-                </Button>
-              </div>
-            </div>
-          </Dialog.Content>
-        </Dialog.Root>
-      </Modal>
+            variant="outline"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              setIsOpen(false);
+            }}
+          >
+            Delete
+          </Button>
+        </div>
+      </Dialog>
+    </>
+  );
+}
+
+export function DialogBottomPreview() {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <>
+      <Button
+        onClick={() => {
+          setIsOpen(true);
+        }}
+      >
+        Open Sheet
+      </Button>
+      <Dialog
+        isOpen={isOpen}
+        onClose={() => {
+          setIsOpen(false);
+        }}
+        side="bottom"
+        title="Share"
+      >
+        <p>Slides up from the bottom of the screen.</p>
+      </Dialog>
+    </>
+  );
+}
+
+export function DialogLabelPreview() {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <>
+      <Button
+        onClick={() => {
+          setIsOpen(true);
+        }}
+      >
+        Open Notice
+      </Button>
+      <Dialog
+        isOpen={isOpen}
+        label="Notice"
+        onClose={() => {
+          setIsOpen(false);
+        }}
+      >
+        <div className={styles.body}>
+          <p>The maintenance starts at 22:00.</p>
+          <div className={styles.actions}>
+            <Button
+              onClick={() => {
+                setIsOpen(false);
+              }}
+            >
+              OK
+            </Button>
+          </div>
+        </div>
+      </Dialog>
     </>
   );
 }

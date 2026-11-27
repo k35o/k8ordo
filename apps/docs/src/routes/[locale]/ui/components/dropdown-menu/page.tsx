@@ -1,4 +1,4 @@
-import { Anchor, Heading, Separator } from '@k8ordo/ui';
+import { Anchor, DropdownMenu, Heading, Separator } from '@k8ordo/ui';
 
 import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
@@ -13,6 +13,7 @@ import {
   DropdownMenuPlacementPreview,
   DropdownMenuSizesPreview,
 } from '../../../../../demos/ui/components/dropdown-menu-previews';
+import { href } from '../../../../../links';
 import * as m from '../../../../../messages';
 
 import page from '../../../../../styles/page.module.css';
@@ -87,6 +88,38 @@ export default function DropdownMenuPage() {
 </DropdownMenu.Root>`}
           >
             <DropdownMenuIconTriggerPreview />
+          </ComponentPreview>
+        </div>
+
+        <div className={page.stack}>
+          <Heading level="h3">
+            <Rich>{m.components.dropdownMenu.linksTitle()}</Rich>
+          </Heading>
+          <p>
+            <Rich>{m.components.dropdownMenu.linksDescription()}</Rich>
+          </p>
+          <ComponentPreview
+            code={`<DropdownMenu.Root>
+  <DropdownMenu.Trigger label="Guide" />
+  <DropdownMenu.Content>
+    <DropdownMenu.Item href="/ui/get-started" label="Get started" />
+    <DropdownMenu.Item href="/ui/theming" label="Theming" />
+  </DropdownMenu.Content>
+</DropdownMenu.Root>`}
+          >
+            <DropdownMenu.Root>
+              <DropdownMenu.Trigger label="Guide" />
+              <DropdownMenu.Content>
+                <DropdownMenu.Item
+                  href={href('/:locale/ui/get-started')}
+                  label="Get started"
+                />
+                <DropdownMenu.Item
+                  href={href('/:locale/ui/theming')}
+                  label="Theming"
+                />
+              </DropdownMenu.Content>
+            </DropdownMenu.Root>
           </ComponentPreview>
         </div>
 

@@ -29,7 +29,7 @@ export function CommandPalettePreview() {
       label: 'New file',
       group: 'File',
       shortcut: ['⌘', 'N'],
-      onSelect: () => {
+      onAction: () => {
         setLast('New file');
       },
     },
@@ -38,7 +38,7 @@ export function CommandPalettePreview() {
       label: 'Open file',
       group: 'File',
       shortcut: ['⌘', 'O'],
-      onSelect: () => {
+      onAction: () => {
         setLast('Open file');
       },
     },
@@ -47,7 +47,7 @@ export function CommandPalettePreview() {
       label: 'Toggle theme',
       group: 'View',
       keywords: ['dark', 'light'],
-      onSelect: () => {
+      onAction: () => {
         setLast('Toggle theme');
       },
     },

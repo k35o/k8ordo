@@ -1,7 +1,7 @@
 export type {
+  DialogSide,
   Direction,
   DrawerSide,
-  ModalSide,
   Option,
   Placement,
   Status,

@@ -40,7 +40,7 @@ const SAMPLE = `import { Button } from '@k8ordo/ui';
 
 export function Save({ onSave }: { onSave: () => Promise<void> }) {
   // 保存中は二重送信を防ぐ
-  return <Button onAction={onSave}>保存</Button>;
+  return <Button action={onSave}>保存</Button>;
 }`;
 
 export const Default: Story = {

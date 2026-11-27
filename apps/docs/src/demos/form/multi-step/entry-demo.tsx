@@ -86,7 +86,7 @@ export function EntryDemo({ fields }: Props) {
         {hydrated && (
           <div>
             <Button
-              onAction={() => {
+              onClick={() => {
                 const invalid = firstInvalidIn(stepOne.current);
                 if (invalid === undefined) {
                   setStep(1);
@@ -125,7 +125,7 @@ export function EntryDemo({ fields }: Props) {
           {hydrated && (
             <Button
               color="base"
-              onAction={() => {
+              onClick={() => {
                 setStep(0);
               }}
               variant="outline"

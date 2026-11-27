@@ -1,10 +1,9 @@
 'use client';
 
-import type { AlertAction } from '../alert';
+import type { ReactNode } from 'react';
+
 import { createSafeContext } from './../../../helpers/create-safe-context';
 import type { Status } from './../../../types/variables';
-
-export type ToastAction = AlertAction;
 
 export type ToastOptions = {
   /**
@@ -12,7 +11,8 @@ export type ToastOptions = {
    * （閉じるボタンでのみ閉じる）。既定は 5000ms。
    */
   duration?: number;
-  action?: ToastAction;
+  /** A link or button drawn in the toast, as `Alert`'s `action`. */
+  action?: ReactNode;
 };
 
 export type ToastType = {
@@ -20,7 +20,7 @@ export type ToastType = {
   tone: Status;
   message: string;
   duration: number;
-  action?: ToastAction;
+  action?: ReactNode;
   /**
    * 開いた時点のフォーカス位置。閉じたときの返還先候補として使う。
    * 参照を握り続けて DOM のリークを起こさないよう WeakRef で持つ。

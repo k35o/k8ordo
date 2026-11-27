@@ -33,10 +33,7 @@
 
 .popover {
   padding: calc(var(--spacing) * 4);
-  border-radius: var(--radius-lg);
-  background-color: var(--color-bg-raised);
   color: var(--color-fg-base);
-  box-shadow: var(--shadow-md);
 }
 
 .dropHint {

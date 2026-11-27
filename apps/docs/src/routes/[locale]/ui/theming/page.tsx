@@ -77,7 +77,7 @@ const OVERRIDE_VALUE = `:root {
 const Z_INDEX_USAGE = {
   raised: 'Autocomplete, Combobox, RangeSlider',
   overlay: 'Popover, DropdownMenu, ListBox, Tooltip',
-  modal: 'Modal, Drawer',
+  modal: 'Dialog, Drawer, CommandPalette',
   toast: 'Toast',
 } as const;
 

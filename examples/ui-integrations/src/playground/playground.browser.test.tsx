@@ -1,4 +1,4 @@
-import { UIProvider } from '@k8ordo/ui';
+import { ToastProvider } from '@k8ordo/ui';
 import { afterEach, expect, it, vi } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
 
@@ -50,9 +50,9 @@ const sentTurns = (
 
 const startIn = async (format: Format) => {
   const screen = await render(
-    <UIProvider>
+    <ToastProvider>
       <Playground />
-    </UIProvider>,
+    </ToastProvider>,
   );
   await screen.getByRole('combobox', { name: '形式' }).selectOptions(format);
   await screen.getByRole('button', { name: 'Claude に作らせる' }).click();
@@ -65,9 +65,9 @@ const jsonLines = (values: object[]): string =>
 const generateIn = async (format: Format, text: string) => {
   respondWith([ndjson([{ type: 'text', text }, { type: 'done' }])]);
   const screen = await render(
-    <UIProvider>
+    <ToastProvider>
       <Playground />
-    </UIProvider>,
+    </ToastProvider>,
   );
   await screen.getByRole('combobox', { name: '形式' }).selectOptions(format);
   await screen.getByRole('button', { name: 'Claude に作らせる' }).click();
@@ -89,9 +89,9 @@ it('A2UI: 途中で切れて届いたメッセージを組み立てて描き、�
   ]);
   respondWith([stream.slice(0, 25), stream.slice(25)]);
   const screen = await render(
-    <UIProvider>
+    <ToastProvider>
       <Playground />
-    </UIProvider>,
+    </ToastProvider>,
   );
   await screen.getByRole('button', { name: 'Claude に作らせる' }).click();
 
@@ -170,9 +170,9 @@ it('OpenUI: カタログに無い部品を食い違いとして出し、描け�
 it('dev サーバーの外では口が無いことを伝える', async () => {
   respondWith([], { status: 404 });
   const screen = await render(
-    <UIProvider>
+    <ToastProvider>
       <Playground />
-    </UIProvider>,
+    </ToastProvider>,
   );
 
   await screen.getByRole('button', { name: 'Claude に作らせる' }).click();

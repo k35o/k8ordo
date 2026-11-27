@@ -1,4 +1,4 @@
-import { UIProvider } from '@k8ordo/ui';
+import { ToastProvider } from '@k8ordo/ui';
 import { beforeEach, expect, it, vi } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
 
@@ -17,9 +17,9 @@ beforeEach(() => {
 
 it('DSL のフォームがエラー無しで描画される', async () => {
   const screen = await render(
-    <UIProvider>
+    <ToastProvider>
       <OpenUiDemo />
-    </UIProvider>,
+    </ToastProvider>,
   );
 
   await expect
@@ -37,9 +37,9 @@ it('描画されたフィールドが状態を保持する', async () => {
   // 表示されるだけなら context 無しでも成立しうる書き方がある。値の往復まで
   // 見て初めて、ビューが本物の <Renderer> の状態につながっていると言える。
   const screen = await render(
-    <UIProvider>
+    <ToastProvider>
       <OpenUiDemo />
-    </UIProvider>,
+    </ToastProvider>,
   );
 
   const nickname = screen.getByPlaceholder('ニックネーム');

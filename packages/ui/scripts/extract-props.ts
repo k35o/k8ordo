@@ -3,7 +3,9 @@
  * exported component, used by both `docs/references/components.md` and the docs
  * site's `PropsTable`. Each component also carries its category: the folder
  * under `src/components/` it is declared in, which the README, components.md,
- * and the docs site's navigation are grouped by.
+ * and the docs site's navigation are grouped by. The file also carries the
+ * built-in wording's keys with the components that draw each
+ * (`src/i18n/usage.ts`), which the docs site's i18n page lists.
  *
  * Single source of truth:
  *   src/**\/*.tsx (the types themselves) ──(this)──► docs/props.generated.json
@@ -50,6 +52,8 @@ import {
   TypeFlags,
 } from 'typescript/unstable/sync';
 import type { Symbol as TsSymbol, Type } from 'typescript/unstable/sync';
+
+import { messageUsage } from '../src/i18n/usage.ts';
 
 const PACKAGE_DIR = fileURLToPath(new URL('..', import.meta.url));
 const TSCONFIG = fileURLToPath(new URL('../tsconfig.json', import.meta.url));
@@ -353,7 +357,7 @@ const inheritsOf = (
   };
 };
 
-/** Resolves a compound member (`Dialog.Root`) back to the `const Root` it aliases. */
+/** Resolves a compound member (`Tabs.Root`) back to the `const Root` it aliases. */
 const resolveDeclaration = (symbol: TsSymbol): Node | undefined => {
   const declaration = declarationOf(symbol);
   if (!declaration) return undefined;
@@ -372,10 +376,6 @@ const resolveDeclaration = (symbol: TsSymbol): Node | undefined => {
   }
   return declaration;
 };
-
-/** A Context exported to be rendered as its own provider. */
-const isContext = (type: Type): boolean =>
-  checker.typeToString(type).startsWith('Context<');
 
 const categoryOf = (name: string, declaration: Node): string => {
   const file = declaration.getSourceFile().fileName;
@@ -398,41 +398,23 @@ const componentFrom = (name: string, symbol: TsSymbol): Component | null => {
   if (!declaration) return null;
 
   const type = checker.getTypeOfSymbolAtLocation(symbol, declaration);
-  const [signature] = checker.getSignaturesOfType(type, SignatureKind.Call);
+  const signatures = checker.getSignaturesOfType(type, SignatureKind.Call);
+  // A component typed as overloads (`Button`: a link shape and a button
+  // shape) is read off its implementation, whose parameter is the union of
+  // every shape; the first overload alone would document one of them.
+  const implementation =
+    signatures.length > 1 &&
+    isVariableDeclaration(declaration) &&
+    declaration.initializer &&
+    isArrowFunction(declaration.initializer)
+      ? checker.getSignaturesOfType(
+          checker.getTypeAtLocation(declaration.initializer),
+          SignatureKind.Call,
+        )
+      : signatures;
+  const [signature] = implementation;
   if (!signature) return null;
   const category = categoryOf(name, declaration);
-
-  // A Context is callable through React's `Provider`, so it is a component
-  // here — but its props are declared in @types/react, which the own-prop
-  // filter below would drop, leaving `<PortalRootProvider value>` documented
-  // with no `value`. Read them as they are: the value, and the children.
-  if (isContext(type)) {
-    const [providerProps] = signature.getParameters();
-    if (!providerProps) return null;
-    const propsType = checker.getTypeOfSymbolAtLocation(
-      providerProps,
-      declaration,
-    );
-    const props = checker
-      .getPropertiesOfType(propsType)
-      .map((prop): Prop => {
-        const propType = checker.getTypeOfSymbolAtLocation(prop, declaration);
-        return {
-          name: prop.name,
-          // `value` is declared as the type parameter, `T`; only the checker
-          // has the Context's argument in its place. `children` is
-          // `ReactNode` as written, which the checker would expand.
-          types:
-            prop.name === 'value'
-              ? typeStrings(propType)
-              : (declaredTypeStrings(prop) ?? typeStrings(propType)),
-          defaultValue: null,
-          required: !(prop.flags & SymbolFlags.Optional),
-        };
-      })
-      .toSorted(byRequiredThenName);
-    return { name, category, props, inherits: null, omitted: [] };
-  }
 
   const [paramSymbol] = signature.getParameters();
   if (!paramSymbol) {
@@ -481,7 +463,7 @@ for (const entry of ENTRIES) {
 
   for (const exported of checker.getExportsOfModule(moduleSymbol)) {
     const { name } = exported;
-    // Hooks (`useToast`, `usePortalRoot`) also have call signatures.
+    // Hooks (`useToast`) also have call signatures.
     if (!/^[A-Z]/u.test(name)) continue;
     if (seen.has(name)) continue;
     seen.add(name);
@@ -500,8 +482,6 @@ for (const entry of ENTRIES) {
     const declaration = declarationOf(symbol);
     if (!declaration) continue;
     const type = checker.getTypeOfSymbolAtLocation(symbol, declaration);
-    // A Context's `Provider` and `Consumer` are not parts of a compound.
-    if (isContext(type)) continue;
     const parts = checker
       .getPropertiesOfType(type)
       .filter((part) => /^[A-Z]/u.test(part.name))
@@ -517,14 +497,19 @@ api.close();
 
 components.sort((a, b) => a.name.localeCompare(b.name));
 
-const output = `${JSON.stringify({ components }, null, 2)}\n`;
+const messages = Object.entries(messageUsage).map(([key, usedBy]) => ({
+  key,
+  usedBy,
+}));
+const generated = { components, messages };
+const output = `${JSON.stringify(generated, null, 2)}\n`;
 
 if (process.argv.includes('--check')) {
   // Compared as data, not as text: the committed file goes through the
   // formatter after this script writes it, so the bytes legitimately differ.
   const current = await readFile(OUT_PATH, 'utf8').catch(() => 'null');
   const same =
-    JSON.stringify(JSON.parse(current)) === JSON.stringify({ components });
+    JSON.stringify(JSON.parse(current)) === JSON.stringify(generated);
   if (!same) {
     console.error(
       'docs/props.generated.json is stale. Run `pnpm generate:props`.',

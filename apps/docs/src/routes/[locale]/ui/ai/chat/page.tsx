@@ -199,7 +199,7 @@ const ACTIONS = `<Message.Root avatar={avatar} from="assistant">
   <Message.Content>{text}</Message.Content>
   <Message.Actions>
     <Message.Copy value={text} />
-    <Message.Regenerate onAction={() => regenerate({ messageId: message.id })} />
+    <Message.Regenerate action={() => regenerate({ messageId: message.id })} />
     <Message.Feedback onChange={(value) => saveFeedback(message.id, value)} />
   </Message.Actions>
 </Message.Root>`;
