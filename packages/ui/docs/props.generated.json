@@ -981,6 +981,12 @@
           "required": false
         },
         {
+          "name": "required",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
           "name": "value",
           "types": ["readonly string[]"],
           "defaultValue": null,
@@ -1039,6 +1045,12 @@
         {
           "name": "ref",
           "types": ["Ref<HTMLFieldSetElement>"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "required",
+          "types": ["boolean"],
           "defaultValue": null,
           "required": false
         },
@@ -4048,7 +4060,7 @@
         {
           "name": "required",
           "types": ["boolean"],
-          "defaultValue": "false",
+          "defaultValue": null,
           "required": false
         },
         {

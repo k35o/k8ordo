@@ -1208,7 +1208,7 @@ A group of checkboxes, one per entry in `options`: the multiple-choice counterpa
 
 The group's selection lives in `value` / `onChange`, or in `defaultValue` when uncontrolled: the values of the checked options. That is a different thing from a lone `Checkbox` holding a boolean in `checked` — do not conflate them. `value` and `defaultValue` take a readonly array, and `onChange` receives a new `string[]` of the checked values in option order, so a `useState<string[]>` setter can be passed as it is.
 
-It renders a `fieldset[role="group"]`, so `aria-labelledby` is required: `<FormControl labelAs="group">` draws the element it points at. Convey that the group is required through that element — `FormControl`'s required mark is part of the group's name in `'group'` mode. `role="group"` does not allow `aria-required`, so do not put it on the group.
+It renders a `fieldset[role="group"]`, so `aria-labelledby` is required: `<FormControl labelAs="group">` draws the element it points at. Convey that the group is required through that element — `FormControl`'s required mark is part of the group's name in `'group'` mode. `role="group"` does not allow `aria-required`, so do not put it on the group. `required` is accepted so that `FormControl`'s props spread onto the group as they are, and is written to no element: a `<fieldset>` takes no `required`, and on a checkbox it would mean that box must be checked. Check the count with a rule of your own, or with `@k8ordo/form`'s, which a schema's `.min()` derives.
 
 `name` goes on every box. It is optional and nothing fills it in: without a `name` the boxes submit nothing, which is what a group that only drives the page (`DataTable`'s column menu) wants even inside a form.
 
@@ -1241,6 +1241,7 @@ Props:
 - `name`: `string`
 - `onChange`: `(value: string[]) => void`
 - `ref`: `Ref<HTMLFieldSetElement>`
+- `required`: `boolean`
 - `value`: `readonly string[]`
 - Other props are forwarded to `FieldsetHTMLAttributes<HTMLFieldSetElement>`, except `className` / `style` / `children` / `role`.
 
@@ -1248,7 +1249,10 @@ Props:
 
 A card-styled checkbox. Uncontrolled, the selection and its look follow the
 checkboxes themselves (`:checked`), so a form reset restores both; `onChange`
-receives the checked values in document order.
+receives the checked values in document order. Like `CheckboxGroup`, it takes
+`required` from `FormControl`'s props and writes it to no element; wrap it in
+`<FormControl labelAs="group" required>`, whose mark is part of the group's
+name.
 
 ```tsx
 import { CheckboxCard } from '@k8ordo/ui';
@@ -1279,6 +1283,7 @@ Props:
 - `invalid`: `boolean` (default: `false`)
 - `onChange`: `(value: string[]) => void`
 - `ref`: `Ref<HTMLFieldSetElement>`
+- `required`: `boolean`
 - `value`: `readonly string[]`
 - Other props are forwarded to `FieldsetHTMLAttributes<HTMLFieldSetElement>`, except `className` / `style` / `children` / `role`.
 
@@ -1367,9 +1372,13 @@ import { Slider } from '@k8ordo/ui';
   onChange={onChange}
   invalid={false}
   disabled={false}
-  required={false}
 />;
 ```
+
+`required` is accepted, so `FormControl`'s props and `@k8ordo/form`'s `input`
+spread onto the slider as they are, and is written to no element: HTML does
+not allow it on a range, and a range always has a value, so there is nothing
+to require.
 
 Props:
 
@@ -1400,6 +1409,10 @@ a `role="group"`: name it with `aria-label` or `aria-labelledby`
 as that name followed by the built-in `rangeSliderStart` / `rangeSliderEnd`
 wording.
 
+As on `Slider`, `required` is accepted and written to no thumb. In
+`<FormControl labelAs="group" required>` the mark is part of the group's
+name, so each thumb's name carries it.
+
 ```tsx
 import { RangeSlider } from '@k8ordo/ui';
 
@@ -1422,7 +1435,7 @@ Props:
 - `name`: `readonly [string, string]`
 - `onChange`: `(value: [number, number]) => void`
 - `ref`: `Ref<HTMLDivElement>`
-- `required`: `boolean` (default: `false`)
+- `required`: `boolean`
 - `step`: `number` (default: `1`)
 - `value`: `readonly [number, number]`
 - Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style` / `children` / `role`.

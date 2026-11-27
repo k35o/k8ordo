@@ -16,6 +16,9 @@ type BaseProps = {
   name?: string;
   options: readonly Option[];
   ref?: Ref<HTMLFieldSetElement>;
+  // fieldset にも、1 つのチェックボックスにも「1 つ以上」を求める required は無い。
+  // FormControl の束を広げても属性として描かないように受けて捨てる
+  required?: boolean;
 } & Omit<
   FieldsetHTMLAttributes<HTMLFieldSetElement>,
   | 'className'
@@ -52,6 +55,7 @@ export const CheckboxGroup: FC<Props> = ({
   onChange,
   options,
   ref,
+  required: _required,
   value,
   ...rest
 }) => {

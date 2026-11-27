@@ -214,6 +214,8 @@ export const WithForm: Story = {
     const submit = () =>
       userEvent.click(canvas.getByRole('button', { name: '送信' }));
 
+    await expect(volume()).not.toHaveAttribute('required');
+
     // reset で描画時の値に戻り、isDirty も下りる
     slide(30);
     await expect(await canvas.findByText('変更あり')).toBeVisible();

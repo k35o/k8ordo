@@ -29,6 +29,9 @@ type BaseProps = {
   invalid?: boolean;
   options: readonly CheckboxCardOption[];
   ref?: Ref<HTMLFieldSetElement>;
+  // fieldset にも、1 つのチェックボックスにも「1 つ以上」を求める required は無い。
+  // FormControl の束を広げても属性として描かないように受けて捨てる
+  required?: boolean;
 } & Omit<
   FieldsetHTMLAttributes<HTMLFieldSetElement>,
   | 'className'
@@ -64,6 +67,7 @@ export const CheckboxCard: FC<Props> = ({
   defaultValue,
   onChange,
   ref,
+  required: _required,
   ...rest
 }) => {
   const groupId = useId();

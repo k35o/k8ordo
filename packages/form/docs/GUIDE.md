@@ -839,8 +839,11 @@ arrives as an `input` event, the way typing does.
 **A group takes its name from `FormControl`.** `Radio`, `RadioCard`,
 `CheckboxGroup` and `CheckboxCard` are a group each, so `labelAs="group"`
 draws the label as the heading the group reads its name from, the required
-mark included. `Autocomplete` keeps the default, a `<label>` for its text
-input.
+mark included. On a checkbox group, `required={tags.required}` shows only as
+that mark: `FormControl` passes it on, and `CheckboxGroup` and `CheckboxCard`
+write it to no element — a `<fieldset>` takes no `required`, and a box with
+one would have to be checked itself — while the count rule does the checking.
+`Autocomplete` keeps the default, a `<label>` for its text input.
 
 **Radios take the spread.** The advice under [Radio groups](#radio-groups) is
 about a hand-written `<input type="radio">`. `Radio` and `RadioCard` read an

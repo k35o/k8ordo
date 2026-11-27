@@ -60,7 +60,9 @@ const toNumber = (value: number | string | undefined, fallback: number) => {
 export const Slider: FC<Props> = ({
   invalid = false,
   disabled = false,
-  required = false,
+  // HTML は range に required を許さず、range は常に値を持つ。FormControl の束や
+  // formFields を広げても属性として描かないように受けて捨てる
+  required: _required,
   value,
   defaultValue,
   onChange,
@@ -145,7 +147,6 @@ export const Slider: FC<Props> = ({
         }}
         onKeyDown={chain(onKeyDown, pending ? ignoreStepKeys : undefined)}
         ref={mergedRef}
-        required={required}
         step={step}
         type="range"
       />

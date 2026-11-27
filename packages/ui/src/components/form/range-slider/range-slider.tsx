@@ -27,8 +27,10 @@ type BaseProps = {
   invalid?: boolean;
   disabled?: boolean;
   /**
-   * 両方のつまみの input に渡す。range は常に値を持つので必須の検査には
-   * 掛からないが、読み上げには必須の欄として伝わる（Slider と同じ扱い）。
+   * FormControl の props をそのまま広げられるように受け取り、どの要素にも
+   * 書かない。HTML は range に required を許さず、range は常に値を持つ。
+   * 必須であることは `<FormControl labelAs="group" required>` の印が
+   * グループの名前に入って伝わり、各つまみはその名前を読む。
    */
   required?: boolean;
   ref?: Ref<HTMLDivElement>;
@@ -67,7 +69,7 @@ export const RangeSlider: FC<Props> = ({
   onChange,
   invalid = false,
   disabled = false,
-  required = false,
+  required: _required,
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
   'aria-describedby': ariaDescribedBy,
@@ -199,7 +201,6 @@ export const RangeSlider: FC<Props> = ({
         onChange={commit('start')}
         onKeyDown={pending ? ignoreStepKeys : undefined}
         ref={startRef}
-        required={required}
         step={step}
         type="range"
       />
@@ -218,7 +219,6 @@ export const RangeSlider: FC<Props> = ({
         onChange={commit('end')}
         onKeyDown={pending ? ignoreStepKeys : undefined}
         ref={endRef}
-        required={required}
         step={step}
         type="range"
       />

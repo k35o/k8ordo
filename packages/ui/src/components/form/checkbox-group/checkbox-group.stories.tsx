@@ -92,25 +92,27 @@ export const UncontrolledNotifiesInOptionOrder: Story = {
 
 export const Required: Story = {
   render: () => (
-    <div>
-      <p className={styles.requiredGroupLabel} id="frameworks-required-label">
-        フレームワーク
-        <span className={styles.requiredMark}>必須</span>
-      </p>
-      <CheckboxGroup
-        aria-labelledby="frameworks-required-label"
-        defaultValue={[]}
-        name="frameworks-required"
-        options={FRAMEWORKS.slice(0, 2)}
-      />
-    </div>
+    <FormControl
+      label="フレームワーク"
+      labelAs="group"
+      renderInput={(props) => (
+        <CheckboxGroup
+          {...props}
+          defaultValue={[]}
+          name="frameworks-required"
+          options={FRAMEWORKS.slice(0, 2)}
+        />
+      )}
+      required
+    />
   ),
-  play: async ({ canvas }) => {
+  play: async ({ canvas, canvasElement }) => {
     // role="group" は aria-required を許可していない（axe: aria-allowed-attr）ので、
     // 必須であることはグループのアクセシブルネームで伝える
     const group = canvas.getByRole('group', { name: 'フレームワーク 必須' });
 
     await expect(group).not.toHaveAttribute('aria-required');
+    await expect(canvasElement.querySelector('[required]')).toBeNull();
   },
 };
 

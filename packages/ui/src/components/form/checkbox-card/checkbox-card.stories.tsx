@@ -231,6 +231,11 @@ export const WithForm: Story = {
     const submit = () =>
       userEvent.click(canvas.getByRole('button', { name: '送信' }));
 
+    await expect(
+      canvas.getByRole('group', { name: '好きなもの 必須' }),
+    ).not.toHaveAttribute('required');
+    await expect(card('React')).not.toBeRequired();
+
     // 1 つもチェックせずに送ると スキーマの .min(1) の文言を出し、最初のカードへフォーカスを移す
     await fill(userEvent, memoField(), 'よろしく');
     await submit();
