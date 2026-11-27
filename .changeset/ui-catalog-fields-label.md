@@ -19,6 +19,6 @@
 - `Autocomplete(name, label, options, defaultValue, invalid, disabled, helpText)`
 - `FileField(label, triggerLabel, multiple, maxFiles, clearable, dropzone, helpText)`
 
-もとから`label`を持つ`DatePicker`、`RangeSlider`、`ColorPicker`、`Radio`、`RadioCard`、`Combobox`、`CheckboxGroup`、`CheckboxCard`は並びを変えず、`helpText`を末尾に足しました。
+もとから`label`を`name`の直後に持つ`DatePicker`、`RangeSlider`、`ColorPicker`、`Radio`、`RadioCard`、`Combobox`は並びを変えず、`helpText`を末尾に足しました。
 
 移行するときは、保存したspecやプロンプトの`TextField`、`Textarea`、`PasswordInput`、`NumberField`、`Slider`、`Select`、`Autocomplete`、`FileField`に`label`を書き足します。OpenUI Langでは、上の並びに合わせて引数を書き直します。2番目の引数は`label`として読まれるので、書き直さずに残した文字列は、ほかのpropの値が別のpropに入って描かれます。`TextField("email", "you@example.com", "k8o@example.com")`は、`TextField("email", "メールアドレス", "you@example.com", "k8o@example.com")`にします。

@@ -1060,13 +1060,11 @@ type CheckboxCardIntegrationProps = LabelIntegrationProps & {
 export const checkboxCardProps = z
   .object({
     name: z.string(),
+    label: fieldLabel(),
     options: z.array(radioCardOption).min(1),
     defaultValue: z.array(z.string()).optional(),
     invalid: z.boolean().optional(),
     disabled: z.boolean().optional(),
-    // RadioCard は label を 2 番目に持つが、こちらは後から足したので末尾に置く
-    // （冒頭「キーの並び順は契約」参照）
-    label: fieldLabel(),
     helpText: fieldHelpText(),
   })
   .superRefine(
@@ -1104,10 +1102,9 @@ type CheckboxGroupIntegrationProps = LabelIntegrationProps & {
 export const checkboxGroupProps = z
   .object({
     name: z.string(),
+    label: fieldLabel(),
     options: z.array(selectOption).min(1),
     defaultValue: z.array(z.string()).optional(),
-    // 後から足したので末尾に置く（冒頭「キーの並び順は契約」参照）
-    label: fieldLabel(),
     helpText: fieldHelpText(),
   })
   .superRefine(
