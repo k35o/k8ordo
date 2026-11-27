@@ -1293,6 +1293,15 @@ Props:
 
 ### Radio
 
+A `div[role="radiogroup"]` of real `input[type="radio"]` elements, named
+through the required `aria-labelledby`. `name` is optional. Without one, the
+radios share a name made with `useId`: the browser groups radios by name for
+single selection and arrow-key roving, so a radio group always has one, and two
+groups never take each other's selection. `RadioCard` does the same. The
+checkbox groups (`CheckboxGroup`, `CheckboxCard`) fill in no name, since a box
+needs none to work and one without a name submits nothing. Pass `name` to
+submit the choice.
+
 ```tsx
 import { Radio } from '@k8ordo/ui';
 

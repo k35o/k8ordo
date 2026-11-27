@@ -2,6 +2,7 @@
 
 import { clsx } from 'clsx';
 import type { ChangeEvent, FC, HTMLAttributes, Ref } from 'react';
+import { useId } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import type { Option } from '../../../types/variables';
@@ -51,6 +52,7 @@ export const Radio: FC<Props> = ({
   ...rest
 }) => {
   const { pending } = useFormStatus();
+  const groupName = useId();
   const isControlled = value !== undefined;
   const disabledResolved = disabled || pending;
 
@@ -79,7 +81,7 @@ export const Radio: FC<Props> = ({
             aria-disabled={pending || undefined}
             className={clsx(srOnly.srOnly, styles.input)}
             disabled={disabled}
-            name={name ?? labelledbyId}
+            name={name ?? groupName}
             onChange={(event) => {
               onChange?.(option.value, event);
             }}
