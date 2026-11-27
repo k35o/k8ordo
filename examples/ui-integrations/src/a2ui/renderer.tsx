@@ -105,11 +105,8 @@ export const a2uiCatalog = schemas.withEntries(
   [],
 );
 
-/** Draws every surface the processor holds, as the agent creates and deletes them. */
-export const A2uiSurfaces: FC<{ processor: MessageProcessor }> = ({
-  processor,
-}) => {
-  const subscribe = useCallback(
+const useSurfaceChanges = (processor: MessageProcessor) =>
+  useCallback(
     (onChange: () => void) => {
       const created = processor.onSurfaceCreated(onChange);
       const deleted = processor.onSurfaceDeleted(onChange);
@@ -120,7 +117,28 @@ export const A2uiSurfaces: FC<{ processor: MessageProcessor }> = ({
     },
     [processor],
   );
-  const surfaces = useSyncExternalStore(subscribe, () => surfacesOf(processor));
+
+/** Draws the surface `surfaceId` of the processor, from when the agent creates it until it deletes it. */
+export const A2uiSurfaceOf: FC<{
+  processor: MessageProcessor;
+  surfaceId: string;
+}> = ({ processor, surfaceId }) => {
+  const surface = useSyncExternalStore(
+    useSurfaceChanges(processor),
+    () => processor.model.surfacesMap.get(surfaceId) ?? null,
+  );
+  return surface === null ? null : (
+    <A2uiSurface surface={toReactSurface(surface)} />
+  );
+};
+
+/** Draws every surface the processor holds, as the agent creates and deletes them. */
+export const A2uiSurfaces: FC<{ processor: MessageProcessor }> = ({
+  processor,
+}) => {
+  const surfaces = useSyncExternalStore(useSurfaceChanges(processor), () =>
+    surfacesOf(processor),
+  );
   return surfaces.map((surface) => (
     <A2uiSurface
       key={`${String(idOf(processor))}:${surface.id}`}

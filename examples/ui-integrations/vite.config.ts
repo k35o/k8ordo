@@ -16,6 +16,7 @@ type Handler = (
 ) => Promise<void>;
 
 type GenerateModule = { handleGenerate: Handler };
+type UiChatModule = { handleUiChat: Handler };
 type McpModule = { handleMcp: Handler };
 type ChatModule = { handleChat: Handler; handleResource: Handler };
 
@@ -125,8 +126,8 @@ const mcpApps = (): Plugin => {
 
 // 鍵で Claude を呼ぶ口なので、配る build ではなく手元の dev サーバーにだけ置く。
 // ssrLoadModule で読み、プロンプトやつなぎの変更を再起動なしで反映する
-const generateEndpoint = (): Plugin => ({
-  name: 'ui-integrations:generate',
+const claudeEndpoints = (): Plugin => ({
+  name: 'ui-integrations:claude',
   apply: 'serve',
   configureServer(server) {
     route(server, '/api/generate', 'POST', async () => {
@@ -134,6 +135,12 @@ const generateEndpoint = (): Plugin => ({
         '/src/playground/server.ts',
       )) as GenerateModule;
       return handleGenerate;
+    });
+    route(server, '/api/ui-chat', 'POST', async () => {
+      const { handleUiChat } = (await server.ssrLoadModule(
+        '/src/ui-chat/server.ts',
+      )) as UiChatModule;
+      return handleUiChat;
     });
   },
 });
@@ -146,7 +153,7 @@ const browsers = (['chromium', 'firefox', 'webkit'] as const).filter(
 );
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), generateEndpoint(), mcpApps()],
+  plugins: [react(), tailwindcss(), claudeEndpoints(), mcpApps()],
   // 既定の target では Lightning CSS が ui の light-dark() と :dir() を
   // 書き換え、意味が変わる。ui の GUIDE のとおり、ui が組まれている版に向ける
   build: { cssTarget: ['chrome146', 'edge146', 'firefox151', 'safari26'] },
