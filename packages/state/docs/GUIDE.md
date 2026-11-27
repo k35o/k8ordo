@@ -798,7 +798,9 @@ takes over on hydration.
 `parseCookies(request.cookies)` returned as `initialCookie` — in
 `@k8ordo/framework`'s server mode, say — and neither render shows the
 defaults. Without a request (static mode), the cookie takes over on
-hydration.
+hydration. Either option may be `undefined`, which is the same as leaving
+it out, so a component shared by a page that has the value and one that
+does not passes its prop straight through.
 
 Everything else — entry, local, session, memory — renders its defaults on the
 server by construction: those places do not exist there.

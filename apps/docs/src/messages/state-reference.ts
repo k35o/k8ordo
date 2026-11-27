@@ -276,8 +276,8 @@ export const appStateKeys = message({
 });
 
 export const appStateOptions = message({
-  ja: 'サーバーで読んだ値。`initialUrl`は`url`を持つページの状態にだけ、`initialCookie`はCookieの状態にだけ渡せます。',
-  en: 'What the server read. `initialUrl` is accepted only by a page state with `url`, `initialCookie` only by a cookie state.',
+  ja: 'サーバーで読んだ値。`initialUrl`は`url`を持つページの状態にだけ、`initialCookie`はCookieの状態にだけ渡せます。`undefined`を渡すと、渡さなかったときと同じです。',
+  en: 'What the server read. `initialUrl` is accepted only by a page state with `url`, `initialCookie` only by a cookie state. Passing `undefined` is the same as leaving it out.',
 });
 
 export const appStateReturns = message({
