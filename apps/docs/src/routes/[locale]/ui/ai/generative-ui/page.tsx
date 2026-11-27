@@ -15,7 +15,7 @@ const EXAMPLE_URL =
 
 const CATALOG = `import { catalog } from '@k8ordo/ui/catalog';
 
-catalog.TextField.description; // 'Single-line text input.'
+catalog.TextField.description; // 'Single-line text input. type picks …'
 catalog.TextField.props; // z.object({ name, placeholder, defaultValue, … })
 catalog.TextField.value; // { prop: 'defaultValue', initial: (props) => … }
 catalog.Button.events; // { press: 'The user pressed the button.' }

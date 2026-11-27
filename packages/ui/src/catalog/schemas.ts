@@ -17,6 +17,7 @@ import type { Skeleton } from '../components/feedback/skeleton';
 import type { Spinner } from '../components/feedback/spinner';
 import type { ColorPicker } from '../components/form/color-picker';
 import type { FormControl } from '../components/form/form-control';
+import type { TextInputType } from '../components/form/text-field';
 import type { Textarea } from '../components/form/textarea';
 import type { AlertIcon } from '../components/icons/alert';
 import type { ChevronIcon } from '../components/icons/chevron';
@@ -617,7 +618,7 @@ const textInputShape = {
   readOnly: z.boolean().optional(),
 };
 
-type TextFieldIntegrationProps = {
+type TextInputIntegrationProps = {
   name: string;
   placeholder?: string;
   defaultValue?: string;
@@ -625,11 +626,94 @@ type TextFieldIntegrationProps = {
   disabled?: boolean;
   readOnly?: boolean;
 };
-export const textFieldProps = z.object({
-  ...textInputShape,
-}) satisfies z.ZodType<TextFieldIntegrationProps>;
 
-type TextareaIntegrationProps = TextFieldIntegrationProps & {
+// prop をまたぐ検査は、読む prop が通っていれば、ほかの prop の誤りと一緒に
+// 返す。zod の既定では、どこかに誤りがあると検査ごと飛ばし、モデルに 2 度
+// 直させることになる。そのとき検査に届く値は確かめる前の値もありうる
+const whenParsed =
+  (...keys: readonly string[]) =>
+  (payload: z.core.ParsePayload): boolean =>
+    payload.issues.every((issue) => {
+      const [key] = issue.path ?? [];
+      return typeof key === 'string' && !keys.includes(key);
+    });
+
+const DATE_TIME_FORMATS: ReadonlyMap<
+  string,
+  { format: string; schema: z.ZodType<string> }
+> = new Map([
+  ['date', { format: 'YYYY-MM-DD', schema: z.iso.date() }],
+  ['time', { format: 'HH:MM or HH:MM:SS', schema: z.iso.time() }],
+  [
+    'datetime-local',
+    {
+      format: 'YYYY-MM-DDTHH:MM or YYYY-MM-DDTHH:MM:SS',
+      schema: z.iso.datetime({ local: true }),
+    },
+  ],
+  [
+    'month',
+    {
+      format: 'YYYY-MM',
+      schema: z.string().regex(/^\d{4}-(?:0[1-9]|1[0-2])$/u),
+    },
+  ],
+  [
+    'week',
+    {
+      format: 'YYYY-Www',
+      schema: z.string().regex(/^\d{4}-W(?:0[1-9]|[1-4]\d|5[0-3])$/u),
+    },
+  ],
+]);
+
+const defaultValueFitsType = (
+  props: { type?: unknown; defaultValue?: unknown },
+  ctx: z.RefinementCtx,
+): void => {
+  const { type, defaultValue } = props;
+  if (typeof type !== 'string' || typeof defaultValue !== 'string') {
+    return;
+  }
+  const kind = DATE_TIME_FORMATS.get(type);
+  if (kind !== undefined && !kind.schema.safeParse(defaultValue).success) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['defaultValue'],
+      message: `Expected ${kind.format} for type "${type}", received "${defaultValue}"`,
+    });
+  }
+};
+
+type TextFieldIntegrationProps = TextInputIntegrationProps & {
+  type?: TextInputType;
+};
+export const textFieldProps = z
+  .object({
+    ...textInputShape,
+    type: z
+      .enum([
+        'text',
+        'email',
+        'tel',
+        'url',
+        'search',
+        'date',
+        'time',
+        'datetime-local',
+        'month',
+        'week',
+      ])
+      .optional()
+      .describe(
+        'Kind of value the field takes (text when omitted); a date or time kind holds the input format, such as YYYY-MM-DD for date',
+      ),
+  })
+  .superRefine(defaultValueFitsType, {
+    when: whenParsed('type', 'defaultValue'),
+  }) satisfies z.ZodType<TextFieldIntegrationProps>;
+
+type TextareaIntegrationProps = TextInputIntegrationProps & {
   rows?: ComponentProps<typeof Textarea>['rows'];
   autoResize?: ComponentProps<typeof Textarea>['autoResize'];
 };
@@ -1222,6 +1306,8 @@ export type _EnumCoverage = [
   AssertCovered<
     CoversComponent<ComponentProps<typeof Dialog>['side'], DialogProps['side']>
   >,
+  // TextField の type は任意の文字列も受けるので、1 行の欄として並べた候補と比べる
+  AssertCovered<CoversComponent<TextInputType, TextFieldProps['type']>>,
   AssertCovered<
     CoversComponent<ComponentProps<typeof Drawer>['side'], DrawerProps['side']>
   >,

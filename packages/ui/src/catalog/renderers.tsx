@@ -294,6 +294,7 @@ export function renderTextField(
       }}
       placeholder={props.placeholder}
       readOnly={props.readOnly}
+      type={props.type}
       value={value}
     />
   );

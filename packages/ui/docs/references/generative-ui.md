@@ -48,7 +48,7 @@ import { renderers } from '@k8ordo/ui/catalog/render';
 ```ts
 catalog.TextField;
 // {
-//   description: 'Single-line text input.',
+//   description: 'Single-line text input. type picks the kind of value: …',
 //   props: z.object({ name, placeholder, defaultValue, … }),
 //   value: { prop: 'defaultValue', initial: (props) => props.defaultValue ?? '' },
 // }
@@ -190,6 +190,12 @@ Unknown props are reported too. zod drops a key the schema does not know rather
 than failing, so a prop the model invented would otherwise pass and render as if
 it were not there. Run it on every element of a spec, after the format's own
 structural check, and send the issues back as a repair prompt.
+
+A `TextField` whose `type` is a date or time kind takes a `defaultValue` in the
+input format of that kind, as `DatePicker` does: `YYYY-MM-DD` for `date`,
+`HH:MM` or `HH:MM:SS` for `time`, `YYYY-MM-DDTHH:MM` for `datetime-local`,
+`YYYY-MM` for `month`, and `YYYY-Www` for `week`. Another value is reported
+under `TextField.defaultValue`, along with any other issue of the field.
 
 A prop the format resolves later, such as one a json-render spec binds with
 `{ "$bindState": "/form/name" }`, cannot be checked as a value yet. Name it in

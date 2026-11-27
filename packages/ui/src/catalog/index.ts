@@ -251,7 +251,8 @@ export const catalog = {
     props: s.toastProps,
   }),
   TextField: entry({
-    description: 'Single-line text input.',
+    description:
+      'Single-line text input. type picks the kind of value: an email address, a URL, a date, a time, and so on. A password is a PasswordInput, and a number a NumberField.',
     props: s.textFieldProps,
     value: {
       prop: 'defaultValue',

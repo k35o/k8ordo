@@ -49,6 +49,21 @@ describe('操作を結んだ部品の描画', () => {
   });
 });
 
+describe('入力欄の描画', () => {
+  it('TextField は type の種類の入力欄を描く', () => {
+    const html = renderToStaticMarkup(
+      renderers.TextField({
+        props: { name: 'checkIn', type: 'date' },
+        children: [],
+        value: '2026-11-27',
+        setValue: () => {},
+      }),
+    );
+
+    expect(html).toMatch(/<input[^>]*type="date"/u);
+  });
+});
+
 describe('Toast の描画', () => {
   const toast = {
     props: { triggerLabel: '通知を表示', tone: 'success', message: '保存した' },
