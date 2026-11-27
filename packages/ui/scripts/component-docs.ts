@@ -118,15 +118,18 @@ export const regroupSections = (
   );
 };
 
-/** Joins words into lines of at most 80 columns, as the hand-wrapped prose is. */
-export const wrap = (words: string[]): string => {
+/**
+ * Joins words into lines of at most 80 columns, as the hand-wrapped prose is,
+ * starting every line after the first with `indent`.
+ */
+export const wrap = (words: string[], indent = ''): string => {
   const wrapped: string[] = [];
   for (const word of words) {
     const current = wrapped.at(-1);
     if (current !== undefined && current.length + 1 + word.length <= 80) {
       wrapped[wrapped.length - 1] = `${current} ${word}`;
     } else {
-      wrapped.push(word);
+      wrapped.push(current === undefined ? word : `${indent}${word}`);
     }
   }
   return `${wrapped.join('\n')}\n`;

@@ -462,7 +462,7 @@ pnpm add zod
 // Server-safe: build the format's system prompt from it
 import { catalog, catalogPropIssues, catalogRules } from '@k8ordo/ui/catalog';
 
-catalog.Button.description; // 'Action button. With href it renders as a link (<a>).'
+catalog.Button.description; // 'Action button. With href it renders as a link (<a>) and reports no press.'
 catalog.TextField.value; // { prop: 'defaultValue', initial: (props) => … }
 catalogPropIssues('Button', { label: 'OK', colour: 'primary' });
 // ['Button: Unknown prop "colour". Allowed props: label, variant, …']
@@ -476,17 +476,11 @@ import { renderers } from '@k8ordo/ui/catalog/render';
 renderers.Button({ props: { label: 'Save' }, children: [] });
 ```
 
-Components in the catalog:
-
-- **Layout / containers**: `Stack`, `Grid`, `Card`, `Form`, `Carousel`
-- **Buttons / nav**: `Button`, `IconButton`, `CopyButton`, `Toolbar`, `Anchor`, `Breadcrumb`, `Pagination`, `Stepper`, `SideNav`
-- **Display**: `Badge`, `Heading`, `Avatar`, `Code`, `Kbd`, `EmptyState`, `Icon`, `Alert`, `Callout`, `Spinner`, `Progress`, `Skeleton`, `Separator`, `Tabs`, `Accordion`, `Table`, `DataTable`, `Tree`
-- **Overlays (self-contained widgets)**: `Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`, `DropdownMenuItem`, `Toast`
-- **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `RangeSlider`, `DatePicker`, `Calendar`, `ColorPicker`, `Combobox`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`
-
-The rest of the exports — `CommandPalette`, `ContextMenu`, `ResizablePanels`,
-and the AI chat components among them — are left out on purpose;
-[docs/references/generative-ui.md](docs/references/generative-ui.md#what-the-catalog-leaves-out)
+[docs/references/generative-ui.md](docs/references/generative-ui.md#what-the-catalog-covers)
+lists the entries of the catalog. The exports it does not have —
+`CommandPalette`, `ContextMenu`, `ResizablePanels`, and the AI chat components
+among them — are left out on purpose, and
+[the same page](docs/references/generative-ui.md#what-the-catalog-leaves-out)
 says why.
 
 Overlays are **self-contained widgets**: a `Dialog`/`Drawer`/`Popover` declares its own trigger button via `triggerLabel`, manages open/close internally, and renders the supplied children inside the surface. This lets a model generate UIs that include overlays without modelling imperative open/close state. `Tooltip`/`DropdownMenu`/`Toast` follow the same pattern (trigger + content); `Toast` opens its toast through your application's `ToastProvider`.

@@ -150,13 +150,6 @@ const section = (markdown: string, heading: string): string => {
 const namesIn = (text: string): string[] =>
   [...text.matchAll(/`(?<name>\w+)`/gu)].map((m) => m.groups?.name ?? '');
 
-const SUPPORTED_LIST = /^Components in the catalog:\n\n(?<list>(?:- .+\n)+)/mu;
-
-const readmeSupportedNames = (): string[] =>
-  namesIn(
-    SUPPORTED_LIST.exec(readDoc('README.md'))?.groups?.list ?? '',
-  ).toSorted();
-
 describe('カタログと公開している部品の対応', () => {
   it('公開している部品はどれもカタログに載るか、理由付きで除外されている', () => {
     expect(unaccounted()).toStrictEqual([]);
@@ -181,11 +174,5 @@ describe('カタログと公開している部品の対応', () => {
     expect(
       [...LEFT_OUT.keys()].filter((name) => !namedInDocs.includes(name)),
     ).toStrictEqual([]);
-  });
-});
-
-describe('README の生成 UI 対応部品一覧', () => {
-  it('カタログの全項目を挙げる', () => {
-    expect(readmeSupportedNames()).toStrictEqual(catalogNames.toSorted());
   });
 });

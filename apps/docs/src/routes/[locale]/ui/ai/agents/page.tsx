@@ -87,7 +87,7 @@ export default function AiAgents() {
 Colors, spacing, radii and font weights go through semantic tokens —
 never raw values such as \`bg-teal-500\` or \`font-semibold\`.
 Look up component props in \`docs/references/components.md\` (the AI chat
-components in \`docs/references/ai-chat.md\`, the generative UI adapters in
+components in \`docs/references/ai-chat.md\`, the generative-UI catalog in
 \`docs/references/generative-ui.md\`) instead of recalling them;
 a component that is listed in none of them does not exist.`}
           lang="md"

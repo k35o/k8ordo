@@ -280,6 +280,29 @@ prompt({
 
 ## What the catalog covers
 
+The entries, under the category of the component each one draws. An entry that
+is no exported component of its own is under Catalog only.
+
+<!-- generated:catalog-entries -->
+
+- **Buttons**: `Button`, `IconButton`, `CopyButton`, `Toolbar`
+- **Navigation**: `Anchor`, `Breadcrumb`, `Pagination`, `Stepper`, `SideNav`,
+  `Tabs`
+- **Forms**: `Form`, `TextField`, `Textarea`, `PasswordInput`, `NumberField`,
+  `Slider`, `RangeSlider`, `DatePicker`, `Calendar`, `ColorPicker`, `Combobox`,
+  `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`,
+  `CheckboxGroup`, `Autocomplete`, `FileField`
+- **Data display**: `Card`, `Carousel`, `Badge`, `Heading`, `Avatar`, `Code`,
+  `Kbd`, `Accordion`, `Table`, `DataTable`, `Tree`
+- **Feedback**: `EmptyState`, `Alert`, `Callout`, `Spinner`, `Progress`,
+  `Skeleton`
+- **Overlays**: `Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`,
+  `ListBox`
+- **Layout**: `Stack`, `Grid`, `Separator`
+- **Catalog only**: `Icon`, `DropdownMenuItem`, `Toast`
+
+<!-- /generated:catalog-entries -->
+
 Most entries are the exported component of the same name. A few are shaped for a
 model instead:
 
