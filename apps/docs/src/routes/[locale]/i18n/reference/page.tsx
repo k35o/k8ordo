@@ -126,7 +126,7 @@ export default function I18nReferencePage() {
       requested: Iterable<string | null | undefined>,
     ) => L;
     negotiateRequest: (
-      request: Request,
+      request: { headers: Headers },
       options?: NegotiateRequestOptions,
     ) => L;
     localize: (pathname: string, locale: L) => string;
@@ -337,15 +337,17 @@ function message<A extends readonly unknown[]>(
       <ApiEntry
         fields={[
           {
-            name: 'cookie',
-            type: 'string',
-            description: t.negotiateOptionsCookie,
+            name: 'chosen',
+            type: 'string | null | undefined',
+            description: t.negotiateOptionsChosen,
           },
         ]}
         from={FROM}
         id="negotiate-request-options"
         name="NegotiateRequestOptions"
-        signature="type NegotiateRequestOptions = { cookie?: string };"
+        signature={`type NegotiateRequestOptions = {
+  chosen?: string | null | undefined;
+};`}
         summary={t.negotiateOptionsSummary}
       />
 

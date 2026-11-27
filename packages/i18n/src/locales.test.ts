@@ -127,43 +127,32 @@ describe('negotiateRequest', () => {
     expect(locales.negotiateRequest(request({}))).toBe('ja');
   });
 
-  it("puts the visitor's choice in the named cookie before the header", () => {
+  it("puts the visitor's choice before the header", () => {
+    const asks = request({ 'accept-language': 'en' });
+    expect(locales.negotiateRequest(asks, { chosen: 'ja' })).toBe('ja');
+    expect(locales.negotiateRequest(asks, { chosen: 'ja-JP' })).toBe('ja');
+  });
+
+  it('falls through to the header when there is no choice, or it is not a locale of the set', () => {
+    const asks = request({ 'accept-language': 'en' });
+    expect(locales.negotiateRequest(asks)).toBe('en');
+    expect(locales.negotiateRequest(asks, { chosen: undefined })).toBe('en');
+    expect(locales.negotiateRequest(asks, { chosen: null })).toBe('en');
+    expect(locales.negotiateRequest(asks, { chosen: 'fr' })).toBe('en');
+    expect(locales.negotiateRequest(asks, { chosen: 'en_US' })).toBe('en');
+  });
+
+  it('reads no cookie of its own: the choice is what the caller hands it', () => {
     expect(
       locales.negotiateRequest(
-        request({
-          'accept-language': 'en',
-          cookie: 'theme=dark; locale=ja; other=1',
-        }),
-        { cookie: 'locale' },
-      ),
-    ).toBe('ja');
-    expect(
-      locales.negotiateRequest(
-        request({ 'accept-language': 'ja', cookie: 'locale="en"' }),
-        { cookie: 'locale' },
+        request({ 'accept-language': 'en', cookie: 'locale=ja' }),
       ),
     ).toBe('en');
   });
 
-  it('falls through to the header when the cookie is missing, unnamed, or not a locale of the set', () => {
-    const headers = { 'accept-language': 'en' };
-    expect(
-      locales.negotiateRequest(request(headers), { cookie: 'locale' }),
-    ).toBe('en');
-    expect(
-      locales.negotiateRequest(request({ ...headers, cookie: 'locale=ja' })),
-    ).toBe('en');
-    expect(
-      locales.negotiateRequest(request({ ...headers, cookie: 'locale=fr' }), {
-        cookie: 'locale',
-      }),
-    ).toBe('en');
-    expect(
-      locales.negotiateRequest(
-        request({ ...headers, cookie: 'xlocale=ja; locale_=ja' }),
-        { cookie: 'locale' },
-      ),
-    ).toBe('en');
+  it("takes anything with the request's headers, as a page's request prop has them", () => {
+    const headers = new Headers({ 'accept-language': 'en' });
+    expect(locales.negotiateRequest({ headers })).toBe('en');
   });
 });
 

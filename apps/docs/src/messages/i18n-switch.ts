@@ -110,8 +110,8 @@ export const rememberTitle = message({
 });
 
 export const rememberWhy = message({
-  ja: 'サーバーの`negotiateRequest`は、このCookieを`Accept-Language`より先に読みます。',
-  en: 'On the server, `negotiateRequest` reads this cookie before `Accept-Language`.',
+  ja: 'サーバーでこのCookieの値を`negotiateRequest`の`chosen`に渡すと、`Accept-Language`より先に使われます。',
+  en: 'On the server, pass this cookie’s value to `negotiateRequest` as `chosen`, and it comes before `Accept-Language`.',
 });
 
 export const rememberCallCallout = message({
@@ -125,8 +125,8 @@ export const rememberDefaults = message({
 });
 
 export const rememberName = message({
-  ja: "Cookieの名前はアプリが決めます。読む側の`negotiateRequest`にも、同じ名前を`{ cookie: 'locale' }`のように渡します。読む側の書き方は",
-  en: "The app chooses the cookie’s name. Pass the same name to the `negotiateRequest` that reads it, as `{ cookie: 'locale' }`. The reading side is covered in ",
+  ja: "Cookieの名前と値の形はアプリが決めます。`@k8ordo/i18n`はCookieを読みません。読む側は同じ名前で値を読み、`{ chosen: cookies().get('locale') }`のように渡します。読む側の書き方は",
+  en: "The app chooses the cookie’s name and the shape of its value; `@k8ordo/i18n` reads no cookie. The reading side reads the value by the same name and passes it on, as `{ chosen: cookies().get('locale') }`. The reading side is covered in ",
 });
 
 export const rememberStatic = message({

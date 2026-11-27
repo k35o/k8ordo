@@ -1,5 +1,4 @@
 import { parseAcceptLanguage } from './accept-language';
-import { readCookie } from './cookie';
 import { browserPathname, inBrowser, localeStorage, register } from './current';
 import type { LocaleStorage } from './current';
 import { intlFormats } from './format';
@@ -84,15 +83,16 @@ export type Locales<
   readonly negotiate: (requested: Iterable<string | null | undefined>) => L;
   /**
    * The locale a request asks for, for a server that answers before any
-   * page renders — sending `/` to a locale. The cookie named in `options`
-   * comes first, when the request carries it: it is the visitor's own choice,
-   * written where they switched language. Then the `Accept-Language` header,
-   * in its order of preference. Each goes through `negotiate`, so a cookie
-   * holding a locale the set no longer has falls through to the header, and
-   * nothing matching is the default.
+   * page renders — sending `/` to a locale. `options.chosen` comes first: the
+   * visitor's own choice, read from wherever the application keeps it. Then
+   * the `Accept-Language` header, in its order of preference. Both go
+   * through `negotiate`, so a choice holding a locale the set no longer has
+   * falls through to the header, and nothing matching is the default.
+   * `request` is anything with the request's `headers` — a `Request`, or
+   * `@k8ordo/framework`'s `request` prop.
    */
   readonly negotiateRequest: (
-    request: Request,
+    request: { readonly headers: Headers },
     options?: NegotiateRequestOptions,
   ) => L;
   /**
@@ -130,12 +130,13 @@ export type Locales<
 
 export type NegotiateRequestOptions = {
   /**
-   * The cookie holding the visitor's choice (`'locale'`). The name is the
-   * application's: whatever writes it — a language switcher's
-   * `cookieStore.set` — uses the same one. Omitted, only `Accept-Language`
-   * is read.
+   * The locale the visitor chose before, as the application read it — a
+   * cookie its language switcher wrote (`cookies().get('locale')` under
+   * `@k8ordo/framework`), the language of a signed-in visitor's profile.
+   * `null` and `undefined` are no choice, and only `Accept-Language` is
+   * read.
    */
-  readonly cookie?: string;
+  readonly chosen?: string | null | undefined;
 };
 
 export type LocalesOptions<D extends string> = {
@@ -288,18 +289,13 @@ export const defineLocales = <
   };
 
   const negotiateRequest = (
-    request: Request,
-    { cookie }: NegotiateRequestOptions = {},
-  ): L => {
-    const chosen =
-      cookie === undefined
-        ? null
-        : readCookie(request.headers.get('cookie'), cookie);
-    return negotiate([
-      ...(chosen === null ? [] : [chosen]),
+    request: { readonly headers: Headers },
+    { chosen }: NegotiateRequestOptions = {},
+  ): L =>
+    negotiate([
+      chosen,
       ...parseAcceptLanguage(request.headers.get('accept-language')),
     ]);
-  };
 
   const delocalize = (pathname: string): Delocalized<L> => {
     const first = pathname.split('/')[1] ?? '';

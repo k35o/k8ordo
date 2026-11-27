@@ -239,8 +239,8 @@ export const rootServerStatusCallout = message({
 });
 
 export const rootServerGuard = message({
-  ja: "serverモードだけで使えます。`/`へのリクエストには、ページを描画する前に`(home)/guard.ts`が応答します。`negotiateRequest`でロケールを選び、`redirect(href('/:locale', { locale }))`でそのロケールのURLへ送ります。リダイレクトは`Response`を組まずに`redirect()`で書き、URLはリンクと同じく`href()`で作ります。",
-  en: "Server mode only. Requests for `/` are answered by `(home)/guard.ts` before any page renders. It picks a locale with `negotiateRequest` and sends the visitor to that locale’s URL with `redirect(href('/:locale', { locale }))`. A redirect is `redirect()`, not a `Response` built by hand, and its URL comes from `href()`, as a link’s does.",
+  ja: "serverモードだけで使えます。`/`へのリクエストには、ページを描画する前に`(home)/guard.ts`が応答します。`cookies().get('locale')`で読んだ前回の選択を`chosen`に渡し、`negotiateRequest`でロケールを選びます。`redirect(href('/:locale', { locale }))`で、そのロケールのURLへ送ります。リダイレクトは`Response`を組まずに`redirect()`で書き、URLはリンクと同じく`href()`で作ります。",
+  en: "Server mode only. Requests for `/` are answered by `(home)/guard.ts` before any page renders. It hands the earlier choice, read with `cookies().get('locale')`, to `negotiateRequest` as `chosen` to pick a locale, and sends the visitor to that locale’s URL with `redirect(href('/:locale', { locale }))`. A redirect is `redirect()`, not a `Response` built by hand, and its URL comes from `href()`, as a link’s does.",
 });
 
 export const rootServerGroup = message({

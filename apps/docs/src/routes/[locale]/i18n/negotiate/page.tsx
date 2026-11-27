@@ -28,14 +28,17 @@ const HEADER = `import { parseAcceptLanguage } from '@k8ordo/i18n';
 parseAcceptLanguage('en-US;q=0.8, ja, en;q=0.9');
 // ['ja', 'en', 'en-US']`;
 
-const REQUEST = `locales.negotiateRequest(request, { cookie: 'locale' });`;
+const REQUEST = `locales.negotiateRequest(request, {
+  chosen: cookies().get('locale'),
+});`;
 
 const REDIRECT = `import { locales } from '../i18n';
 
-export function redirectToLocale(request: Request): Response {
-  const locale = locales.negotiateRequest(request, {
-    cookie: 'locale',
-  });
+export function redirectToLocale(
+  request: Request,
+  chosen: string | undefined,
+): Response {
+  const locale = locales.negotiateRequest(request, { chosen });
   return new Response(null, {
     status: 307,
     headers: { location: locales.localize('/', locale) },
@@ -127,6 +130,9 @@ export default function I18nNegotiatePage() {
           <Rich>{t.requestCookie()}</Rich>
         </p>
         <p>
+          <Rich>{t.requestSource()}</Rich>
+        </p>
+        <p>
           <Rich>{t.requestWriterBefore()}</Rich>
           <LocaleAnchor path="/:locale/i18n/switch">
             {m.i18n.navSwitch()}
@@ -138,12 +144,12 @@ export default function I18nNegotiatePage() {
       <DocSection id="server" title={t.serverTitle}>
         <CodeBlock
           callouts={{
-            4: t.serverGuardCallout(),
-            8: t.serverStatusCallout(),
+            7: t.serverGuardCallout(),
+            9: t.serverStatusCallout(),
           }}
           code={REDIRECT}
           lang="ts"
-          marks={{ 4: 'highlight', 8: 'highlight', 9: 'highlight' }}
+          marks={{ 7: 'highlight', 9: 'highlight', 10: 'highlight' }}
           title="src/lib/redirect-to-locale.ts"
         />
         <p>

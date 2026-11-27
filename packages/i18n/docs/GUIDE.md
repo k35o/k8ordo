@@ -115,7 +115,7 @@ the definition, not later.
 | `default`             | The tag used when nothing names one.                                              |
 | `is(value)`           | Membership as a type guard.                                                       |
 | `negotiate(…)`        | The best supported tag for a preference list.                                     |
-| `negotiateRequest(…)` | The best supported tag for a `Request`: a cookie, then `Accept-Language`.         |
+| `negotiateRequest(…)` | The best supported tag for a request: the choice given, then `Accept-Language`.   |
 | `localize`            | `'/ui'` → `'/en/ui'`; `'/'` → `'/en'`.                                            |
 | `delocalize`          | `'/en/ui'` → `{ locale: 'en', pathname: '/ui' }`; `'/x'` → `{ locale: null, … }`. |
 | `paramsSchema`        | The `[locale]` segment's schema (Standard Schema; no schema library).             |
@@ -157,17 +157,19 @@ so a choice that may not have been made goes in front as it is:
 
 ```ts
 locales.negotiate(navigator.languages); // in the browser
-locales.negotiateRequest(request, { cookie: 'locale' }); // on a server
+locales.negotiateRequest(request, { chosen: cookies().get('locale') }); // on a server
 ```
 
-`negotiateRequest(request, { cookie? })` is the server's form. The cookie
-named by `cookie` comes first when the request carries it — the locale the
-visitor chose before, written where they switched language — then the
-`Accept-Language` header in its order of preference. Both go through
-`negotiate`, so a cookie still holding a locale the set no longer lists falls
-through to the header. The name is the application's: a language switcher
-that writes it and the server that reads it agree on one. Without `cookie`,
-only the header is read.
+`negotiateRequest(request, { chosen? })` is the server's form. `chosen` comes
+first — the locale the visitor chose before — then the `Accept-Language`
+header in its order of preference. Both go through `negotiate`, so a choice
+still holding a locale the set no longer lists falls through to the header,
+and a `chosen` of `null` or `undefined` — no choice yet — leaves only the
+header. Where the choice comes from is the application's: a cookie the
+language switcher wrote, read with `@k8ordo/framework`'s `cookies().get()`,
+or the language of a signed-in visitor's profile. The package reads no
+cookie itself. `request` is anything with the request's `headers`: a
+`Request`, or the `request` prop a page receives.
 
 ```ts
 // the language switcher, in the browser
@@ -384,7 +386,7 @@ before, then `Accept-Language` — and ends the request with `redirect()`:
 ```ts
 // src/routes/(home)/guard.ts
 import { href } from '@k8ordo/framework';
-import { redirect } from '@k8ordo/framework/server';
+import { cookies, redirect } from '@k8ordo/framework/server';
 import type { Guard } from '@k8ordo/framework/server';
 
 import { locales } from '../../i18n';
@@ -392,7 +394,9 @@ import { locales } from '../../i18n';
 const guard: Guard<'/'> = ({ request }) => {
   redirect(
     href('/:locale', {
-      locale: locales.negotiateRequest(request, { cookie: 'locale' }),
+      locale: locales.negotiateRequest(request, {
+        chosen: cookies().get('locale'),
+      }),
     }),
   );
 };

@@ -93,14 +93,14 @@ const HOME_TREE = `src/routes/
     page.tsx`;
 
 const HOME_GUARD = `import { href } from '@k8ordo/framework';
-import { redirect } from '@k8ordo/framework/server';
+import { cookies, redirect } from '@k8ordo/framework/server';
 import type { Guard } from '@k8ordo/framework/server';
 
 import { locales } from '../../i18n';
 
 const guard: Guard<'/'> = ({ request }) => {
   const locale = locales.negotiateRequest(request, {
-    cookie: 'locale',
+    chosen: cookies().get('locale'),
   });
   redirect(href('/:locale', { locale }));
 };

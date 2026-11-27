@@ -71,8 +71,8 @@ export const localesNegotiate = message({
 });
 
 export const localesNegotiateRequest = message({
-  ja: '`Request`からロケールを選びます。`options.cookie`で名前を渡したCookieを先に読み、次に`Accept-Language`を読みます。',
-  en: 'Picks a locale for a `Request`. The cookie named by `options.cookie` is read first, then `Accept-Language`.',
+  ja: 'リクエストのヘッダーからロケールを選びます。`options.chosen`の値を先に使い、次に`Accept-Language`を読みます。`Request`のほか、`headers`を持つオブジェクトを渡せます。',
+  en: 'Picks a locale from a request’s headers: the value of `options.chosen` first, then `Accept-Language`. It takes a `Request`, or any object with `headers`.',
 });
 
 export const localesLocalize = message({
@@ -322,9 +322,9 @@ export const negotiateOptionsSummary = message({
   en: 'The type of `negotiateRequest`’s second argument.',
 });
 
-export const negotiateOptionsCookie = message({
-  ja: '訪問者が選んだ言語を持つCookieの名前。省くと`Accept-Language`だけを読みます。',
-  en: 'The name of the cookie holding the visitor’s choice. Without it, only `Accept-Language` is read.',
+export const negotiateOptionsChosen = message({
+  ja: "訪問者が前に選んだ言語。アプリが読んだ値を渡します（`cookies().get('locale')`など）。`null`か`undefined`なら、`Accept-Language`だけを読みます。",
+  en: "The language the visitor chose before, as the app read it (`cookies().get('locale')`, say). With `null` or `undefined`, only `Accept-Language` is read.",
 });
 
 export const delocalizedSummary = message({

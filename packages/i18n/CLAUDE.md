@@ -97,9 +97,17 @@ pnpm check         # check:write to auto-fix
   that is not BCP 47 is skipped, and so is a `null` or `undefined` entry —
   a choice not made yet — so a caller puts a value it may not have in front
   of the list as it is rather than filtering it out.
-  `negotiateRequest` is the same `negotiate` over the named cookie's value
-  followed by `parseAcceptLanguage`'s list — never a rule of its own. The
-  cookie name is the caller's; the package does not pick one.
+  `negotiateRequest` is the same `negotiate` over `chosen` followed by
+  `parseAcceptLanguage`'s list — never a rule of its own.
+- **The package reads no cookie.** Where the visitor's choice is kept — a
+  cookie of whatever name and encoding, a `@k8ordo/state` cookie state, a
+  profile — is the application's; `negotiateRequest` takes the value it read
+  as `chosen` and the browser puts the same value in front of
+  `navigator.languages`, so both sides order the list one way. Do not bring
+  back a cookie name option or a `Cookie` header parser: it fixed the
+  cookie's format (a raw tag), which no other tool of the family writes.
+  `negotiateRequest` reads only `request.headers`, so a `Request` and the
+  framework's `request` prop both fit.
 - **`delocalize` says `null`, never the default.** The root layout and the
   404 page choose the fallback visibly.
 
@@ -115,7 +123,6 @@ src/
   register.ts         Register (the one interface) and RegisteredLocale
   format.ts           the set's Intl members (dateTimeFormat, …), cached
   accept-language.ts  parseAcceptLanguage(): header → preference list
-  cookie.ts           readCookie(): one value out of a Cookie header (internal)
   index.ts
 ```
 
