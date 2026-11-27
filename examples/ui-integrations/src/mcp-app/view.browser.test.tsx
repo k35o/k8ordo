@@ -6,11 +6,11 @@ import { AppBridge } from '@modelcontextprotocol/ext-apps/app-bridge';
 import { afterEach, expect, it, vi } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
 
-import type { ShowUiInput } from '../mcp/show-ui';
+import type { ScreenInput } from '../a2ui/screen';
 import { watchToolCall } from './tool-call';
 import { McpAppView } from './view';
 
-const form: ShowUiInput = {
+const form: ScreenInput = {
   components: [
     { id: 'root', component: 'Stack', children: ['nickname', 'save'] },
     {

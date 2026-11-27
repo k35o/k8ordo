@@ -6,11 +6,11 @@ import type { App } from '@modelcontextprotocol/ext-apps';
 import { useCallback, useEffect, useMemo, useSyncExternalStore } from 'react';
 
 import { A2uiSurfaces, a2uiCatalog } from '../a2ui/renderer';
+import type { ScreenInput } from '../a2ui/screen.ts';
 import { messagesOf, reportOf, stateOf } from '../mcp/show-ui.ts';
-import type { ShowUiInput } from '../mcp/show-ui.ts';
 import type { ToolCall } from './tool-call';
 
-const processorOf = (input: ShowUiInput): MessageProcessor => {
+const processorOf = (input: ScreenInput): MessageProcessor => {
   const processor = new MessageProcessor([a2uiCatalog]);
   for (const message of messagesOf(input)) {
     processor.processMessagesWithErrors(message);

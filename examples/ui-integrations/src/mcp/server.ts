@@ -5,13 +5,8 @@ import {
 } from '@modelcontextprotocol/ext-apps/server';
 import { McpServer } from '@modelcontextprotocol/server';
 
-import {
-  APP_URI,
-  issuesOf,
-  SHOW_UI,
-  showUiDescription,
-  showUiInput,
-} from './show-ui.ts';
+import { screenInput } from '../a2ui/screen.ts';
+import { APP_URI, issuesOf, SHOW_UI, showUiDescription } from './show-ui.ts';
 
 /**
  * The MCP server with the `show_ui` tool and the App that draws its screens.
@@ -30,7 +25,7 @@ export const createMcpServer = ({
     {
       title: 'Show a screen',
       description: showUiDescription,
-      inputSchema: showUiInput,
+      inputSchema: screenInput,
       _meta: { ui: { resourceUri: APP_URI } },
     },
     (input) => {
