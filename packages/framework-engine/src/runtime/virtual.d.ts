@@ -3,7 +3,8 @@
 
 /**
  * The application's `src/i18n.ts`, for its locale set to register itself in
- * the browser; nothing for an application without one.
+ * each environment before any route file runs; nothing for an application
+ * without one.
  */
 declare module 'virtual:k8ordo/locales' {}
 
