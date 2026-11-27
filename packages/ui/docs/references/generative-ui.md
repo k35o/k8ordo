@@ -256,7 +256,8 @@ model instead:
   `CheckboxCard`, `RangeSlider`, `FileField`), the heading the group is named
   by (`labelAs="group"`). The help text sits under the field and describes it.
   `Checkbox` and `Switch` are not wrapped in `FormControl`: their `label` is
-  their own, and they draw `helpText` themselves.
+  their own, and they draw `helpText` themselves. `ListBox` is a button that
+  opens a list, and its required `label` names the button.
 - **Toasts** are a `Toast` entry, standing in for `useToast`: a widget whose
   `triggerLabel` button opens the toast through your application's
   `ToastProvider` (see [Drawing](#drawing)).
@@ -264,9 +265,9 @@ model instead:
   self-contained widgets. Each declares its own trigger with `triggerLabel` and
   handles opening and closing itself. `Dialog` opens in the center or along the
   bottom edge and `Drawer` along the left or right one, each by its `side`, as
-  the components do. The items of a
-  `DropdownMenu` are its children, each a `DropdownMenuItem` with its own
-  `press`, so the menu needs no event of its own to say which item was chosen.
+  the components do. The items of a `DropdownMenu` are its children, each a
+  `DropdownMenuItem` with its own `press`, so the menu needs no event of its
+  own to say which item was chosen.
 - **Compound components** (`Tabs`, `Accordion`, `Table`, `Breadcrumb`, …) are
   one entry each, with their parts flattened into data such as
   `tabs: [{ label, content }]`. `Carousel` is one container entry whose

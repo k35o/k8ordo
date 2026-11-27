@@ -377,7 +377,8 @@ export const catalog = {
     },
   }),
   ListBox: entry({
-    description: 'Single-choice list in a popup.',
+    description:
+      'Button showing the chosen option that opens a list in a popup for picking one; label names the button.',
     props: s.listBoxProps,
     value: { prop: 'defaultValue', initial: firstOption },
   }),

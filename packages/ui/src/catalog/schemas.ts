@@ -1008,13 +1008,17 @@ type ListBoxIntegrationProps = {
   name: string;
   options: readonly SelectOption[];
   defaultValue?: string;
-  label?: ComponentProps<typeof ListBox>['label'];
+  label: NonNullable<ComponentProps<typeof ListBox>['label']>;
 };
 export const listBoxProps = z.object({
-  name: z.string(),
+  name: z.string().describe('State key the chosen value is stored under'),
+  label: z
+    .string()
+    .describe(
+      'Name of the button that opens the list, read out before the chosen option',
+    ),
   options: z.array(selectOption).min(1),
   defaultValue: z.string().optional(),
-  label: z.string().optional().describe('Accessible name of the trigger'),
 }) satisfies z.ZodType<ListBoxIntegrationProps>;
 
 type CheckboxGroupIntegrationProps = LabelIntegrationProps & {

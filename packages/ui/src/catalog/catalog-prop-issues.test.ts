@@ -46,6 +46,15 @@ describe('catalogPropIssues', () => {
     ]);
   });
 
+  it('ListBox の label が無ければ報告する', () => {
+    expect(
+      catalogPropIssues('ListBox', {
+        name: 'sort',
+        options: [{ value: 'new', label: '新しい順' }],
+      }),
+    ).toStrictEqual([expect.stringContaining('ListBox.label')]);
+  });
+
   it('TextField の type には、日付や時刻を含む 1 行の欄の種類を書ける', () => {
     expect(
       catalogPropIssues('TextField', {

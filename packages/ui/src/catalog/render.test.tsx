@@ -320,6 +320,21 @@ describe('入力欄の描画', () => {
   ])('%s の helpText は、自分の欄の説明になる', (_, node) => {
     expect(inputDescriptionOf(renderToStaticMarkup(node))).toBe('あとで外せる');
   });
+
+  it('ListBox の label は、リストを開くボタンの名前になる', () => {
+    const html = renderToStaticMarkup(
+      renderers.ListBox({
+        props: { name: 'sort', label: '並び順', options },
+        children: [],
+        value: 's',
+        setValue: ignore,
+      }),
+    );
+
+    expect(namedBy(html, '並び順')).toContainEqual(
+      expect.stringMatching(/^<button /u),
+    );
+  });
 });
 
 describe('Toast の描画', () => {

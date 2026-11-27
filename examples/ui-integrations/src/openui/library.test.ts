@@ -57,6 +57,7 @@ describe('openui library の位置引数', () => {
     'Slider',
     'Select',
     'Autocomplete',
+    'ListBox',
   ])('%s は name の次に label を書く', (name) => {
     expect(signatureOf(name)).toMatch(
       new RegExp(`^${name}\\(name: string, label: string, `, 'u'),
