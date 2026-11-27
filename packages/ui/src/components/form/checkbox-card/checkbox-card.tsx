@@ -41,13 +41,13 @@ type BaseProps = {
 >;
 
 type ControlledProps = {
-  value: string[];
+  value: readonly string[];
   onChange: (value: string[]) => void;
   defaultValue?: never;
 };
 
 type UncontrolledProps = {
-  defaultValue?: string[];
+  defaultValue?: readonly string[];
   value?: never;
   onChange?: (value: string[]) => void;
 };

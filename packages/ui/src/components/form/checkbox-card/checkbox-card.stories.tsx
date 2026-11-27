@@ -85,7 +85,7 @@ export const Default: Story = {
 
 export const DefaultValue: Story = {
   args: {
-    defaultValue: ['history', 'share'],
+    defaultValue: ['history', 'share'] as const,
   },
   render: (props) => (
     <div>

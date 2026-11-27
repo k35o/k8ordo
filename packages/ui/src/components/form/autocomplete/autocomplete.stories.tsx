@@ -94,7 +94,7 @@ export const Disabled: Story = {
 export const DisabledWithValues: Story = {
   render: () => (
     <Autocomplete
-      defaultValue={['16']}
+      defaultValue={['16'] as const}
       disabled
       id="autocomplete-disabled-values"
       options={[

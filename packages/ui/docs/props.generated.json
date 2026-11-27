@@ -290,7 +290,7 @@
         },
         {
           "name": "defaultValue",
-          "types": ["string[]"],
+          "types": ["readonly string[]"],
           "defaultValue": null,
           "required": false
         },
@@ -314,7 +314,7 @@
         },
         {
           "name": "value",
-          "types": ["string[]"],
+          "types": ["readonly string[]"],
           "defaultValue": null,
           "required": false
         }
@@ -946,7 +946,7 @@
         },
         {
           "name": "defaultValue",
-          "types": ["string[]"],
+          "types": ["readonly string[]"],
           "defaultValue": null,
           "required": false
         },
@@ -970,7 +970,7 @@
         },
         {
           "name": "value",
-          "types": ["string[]"],
+          "types": ["readonly string[]"],
           "defaultValue": null,
           "required": false
         }

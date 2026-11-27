@@ -1025,11 +1025,11 @@ Props:
 
 - `id`: `string` (required)
 - `options`: `readonly Option[]` (required)
-- `defaultValue`: `string[]`
+- `defaultValue`: `readonly string[]`
 - `invalid`: `boolean` (default: `false`)
 - `onChange`: `(value: string[]) => void`
 - `ref`: `Ref<HTMLInputElement>`
-- `value`: `string[]`
+- `value`: `readonly string[]`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `children` / `autoComplete` / `aria-autocomplete` / `aria-controls` / `aria-expanded` / `aria-activedescendant`.
 
 ### ColorPicker
@@ -1246,11 +1246,11 @@ Props:
 
 - `aria-labelledby`: `string` (required)
 - `options`: `readonly CheckboxCardOption[]` (required)
-- `defaultValue`: `string[]`
+- `defaultValue`: `readonly string[]`
 - `invalid`: `boolean` (default: `false`)
 - `onChange`: `(value: string[]) => void`
 - `ref`: `Ref<HTMLFieldSetElement>`
-- `value`: `string[]`
+- `value`: `readonly string[]`
 - Other props are forwarded to `FieldsetHTMLAttributes<HTMLFieldSetElement>`, except `className` / `style` / `children` / `role`.
 
 ### Radio
