@@ -359,7 +359,11 @@ unchanged (each field's `WithForm` story holds it to that). Five rules follow:
 - **Submit a composite through `FormValue`** (`src/components/_internal/form-value.tsx`)
   when the visible part is not the element that submits (`Autocomplete`).
   Not `type="hidden"`: it is barred from constraint validation, cannot take
-  focus, and with nothing selected no element carries the name at all.
+  focus, and with nothing selected no element carries the name at all. The
+  submitting element is `aria-hidden` and `tabIndex={-1}`, and passes focus on
+  to the visible part, so a failed submission's focus lands where a person
+  works. `FileField` treats its own `<input type="file">` the same way, and
+  hands the label and description to the trigger's bag.
 - **A field that carries its own label draws its own message.** `Checkbox`
   and `Switch` are not wrapped in `FormControl`, so they take `errorText` /
   `helpText` and draw them through `FieldMessage`
@@ -374,9 +378,11 @@ not labelled: through a required `aria-labelledby`, or on `RangeSlider`
 through `aria-label` or `aria-labelledby`. `FormControl`'s
 `labelAs="group"` draws the heading `aria-labelledby` points at as a
 `<span id>`: a `<label for>` cannot label a group, and a `<fieldset>` around
-one nests a second group with the same name. A field that puts the `id` on a
-text input (`ColorPicker`, `DatePicker`, `Combobox`, `Autocomplete`) keeps
-`'label'`.
+one nests a second group with the same name. `FileField` takes `'group'` too:
+its trigger is a button named through `aria-labelledby`, and a button takes no
+`required`, so the mark in the heading is what says the field is required. A
+field that puts the `id` on a text input (`ColorPicker`, `DatePicker`,
+`Combobox`, `Autocomplete`) keeps `'label'`.
 
 ### Built-in wording
 

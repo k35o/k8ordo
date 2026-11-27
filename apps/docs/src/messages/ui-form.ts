@@ -71,8 +71,8 @@ export const mapGroup = message({
 });
 
 export const mapFile = message({
-  ja: '`z.file()`：`FileField.Root`。`FileField.Trigger`と`FileField.ItemList`を中に置きます。',
-  en: '`z.file()`: `FileField.Root`, with a `FileField.Trigger` and a `FileField.ItemList` inside.',
+  ja: '`z.file()`：`FileField.Root`。`FileField.Trigger`と`FileField.ItemList`を中に置き、`FormControl`には`labelAs="group"`を付けます。',
+  en: '`z.file()`: `FileField.Root`, with a `FileField.Trigger` and a `FileField.ItemList` inside, and `labelAs="group"` on `FormControl`.',
 });
 
 export const choiceTitle = message({

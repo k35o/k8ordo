@@ -2340,7 +2340,7 @@
         {
           "name": "renderItem",
           "types": [
-            "(props: { onClick: () => void; disabled: boolean; invalid: boolean; }) => ReactElement"
+            "(props: { id: string; 'aria-labelledby': string | undefined; 'aria-describedby': string | undefined; ref: (node: HTMLElement | null) => void; onClick: () => void; disabled: boolean; }) => ReactElement"
           ],
           "defaultValue": null,
           "required": true

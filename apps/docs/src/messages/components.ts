@@ -673,6 +673,14 @@ export const fileField = {
     ja: 'ファイルを選ぶ入力欄です。選ぶボタンとドロップ領域、選んだファイルの一覧を組み合わせて作ります。',
     en: 'A file field, composed from a trigger, a dropzone and the list of chosen files.',
   }),
+  triggerTitle: message({
+    ja: '選ぶボタンとラベル',
+    en: 'The trigger and the label',
+  }),
+  triggerDescription: message({
+    ja: '送信する`<input type="file">`は見えず、Tabでも止まりません。操作するのは`FileField.Trigger`のボタンです。`renderItem`が受け取る`id`、`aria-labelledby`、`aria-describedby`、`ref`、`onClick`、`disabled`をボタンに展開します。`FormControl`には`labelAs="group"`を付けて包みます。ボタンの名前は欄のラベルとボタンの文字になり、ヘルプやエラーの文がボタンの説明になります。ボタンは`required`を持てないので、必須の印もボタンの名前に入れて伝えます。送信に失敗してフォーカスが欄へ移るときも、ボタンにフォーカスが移ります。',
+    en: 'The `<input type="file">` that submits is hidden and out of the Tab order; what a person operates is the `FileField.Trigger` button. Spread the `id`, `aria-labelledby`, `aria-describedby`, `ref`, `onClick` and `disabled` that `renderItem` receives onto the button. Wrap it in `FormControl` with `labelAs="group"`: the button is named by the field’s label followed by its own text, and the help or error text describes it. A button cannot take `required`, so the required mark goes into its name as well. When a failed submission moves focus to the field, focus lands on the button.',
+  }),
   dropzoneTitle: message({
     ja: 'ドロップでの追加',
     en: 'Adding files by drop',

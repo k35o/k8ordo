@@ -92,7 +92,7 @@ duration-150 ease-out`.
 
 - Put the label above the input (a left-aligned label reads badly in Japanese)
 - Put the error message directly under the input, in `--color-fg-error` at `--font-size-sm`
-- Mark a required field after its label: `FormControl`'s `required` draws the built-in `required` wording there. A single field's mark is hidden from screen readers, since the input's own `required` already says it; a group's mark (`labelAs="group"`) is part of the group's name, since a group cannot be required itself
+- Mark a required field after its label: `FormControl`'s `required` draws the built-in `required` wording there. A single field's mark is hidden from screen readers, since the input's own `required` already says it; with `labelAs="group"` — a group, or `FileField`, whose trigger is a button — the mark is part of the name, since neither a group nor a button can be required itself
 - Validate on submit; keep real-time validation to a minimum
 - Use the `FormControl` component so labels and errors stay consistent. `Checkbox` and `Switch` carry their own label instead, and take `errorText` / `helpText` themselves
 

@@ -503,14 +503,18 @@ import {
   <RadioCard {...props} options={plans} />
 )} />
 
-<FileField.Root accept="image/*" multiple>
-  <FileField.Trigger
-    renderItem={({ onClick, disabled }) => (
-      <Button disabled={disabled} onClick={onClick}>Choose files</Button>
-    )}
-  />
-  <FileField.ItemList />
-</FileField.Root>
+// So does FileField: its trigger is a button, which cannot be required, so the
+// required mark has to be part of the name the trigger reads
+<FormControl label="Photos" labelAs="group" required renderInput={(props) => (
+  <FileField.Root {...props} accept="image/*" multiple>
+    <FileField.Trigger
+      renderItem={(wiring) => (
+        <Button {...wiring}>Choose files</Button>
+      )}
+    />
+    <FileField.ItemList />
+  </FileField.Root>
+)} />
 ```
 
 With `@k8ordo/form`, spread what `form.field(name).input` derives onto the

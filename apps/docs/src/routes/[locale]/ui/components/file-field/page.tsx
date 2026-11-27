@@ -13,6 +13,7 @@ import {
   FileFieldDisabledPreview,
   FileFieldDropzonePreview,
   FileFieldInvalidPreview,
+  FileFieldLabelledPreview,
   FileFieldMultiplePreview,
 } from '../../../../../demos/ui/components/file-field-previews';
 import * as m from '../../../../../messages';
@@ -55,16 +56,43 @@ export default function FileFieldPage() {
           <ComponentPreview
             code={`<FileField.Root accept="image/*" multiple={false}>
   <FileField.Trigger
-    renderItem={({ disabled, onClick }) => (
-      <Button disabled={disabled} onClick={onClick}>
-        Select File
-      </Button>
+    renderItem={(wiring) => (
+      <Button {...wiring}>Select File</Button>
     )}
   />
   <FileField.ItemList clearable />
 </FileField.Root>`}
           >
             <FileFieldBasicPreview />
+          </ComponentPreview>
+        </div>
+
+        <div className={page.stack}>
+          <Heading level="h3">
+            <Rich>{m.components.fileField.triggerTitle()}</Rich>
+          </Heading>
+          <p className={page.mute}>
+            <Rich>{m.components.fileField.triggerDescription()}</Rich>
+          </p>
+          <ComponentPreview
+            code={`<FormControl
+  helpText="PDF, up to 5 MB"
+  label="Attachment"
+  labelAs="group"
+  renderInput={(props) => (
+    <FileField.Root {...props} accept=".pdf" multiple={false}>
+      <FileField.Trigger
+        renderItem={(wiring) => (
+          <Button {...wiring}>Select File</Button>
+        )}
+      />
+      <FileField.ItemList clearable />
+    </FileField.Root>
+  )}
+  required
+/>`}
+          >
+            <FileFieldLabelledPreview />
           </ComponentPreview>
         </div>
 
@@ -93,10 +121,8 @@ export default function FileFieldPage() {
             code={`{/* Accept only PDF and Word documents */}
 <FileField.Root accept=".pdf,.doc,.docx" multiple={false}>
   <FileField.Trigger
-    renderItem={({ disabled, onClick }) => (
-      <Button disabled={disabled} onClick={onClick}>
-        Select Document
-      </Button>
+    renderItem={(wiring) => (
+      <Button {...wiring}>Select Document</Button>
     )}
   />
   <FileField.ItemList clearable />
@@ -113,10 +139,8 @@ export default function FileFieldPage() {
           <ComponentPreview
             code={`<FileField.Root maxFiles={3} multiple>
   <FileField.Trigger
-    renderItem={({ disabled, onClick }) => (
-      <Button disabled={disabled} onClick={onClick}>
-        Select Files (max 3)
-      </Button>
+    renderItem={(wiring) => (
+      <Button {...wiring}>Select Files (max 3)</Button>
     )}
   />
   <FileField.ItemList clearable />
@@ -133,10 +157,8 @@ export default function FileFieldPage() {
           <ComponentPreview
             code={`<FileField.Root disabled multiple={false}>
   <FileField.Trigger
-    renderItem={({ disabled, onClick }) => (
-      <Button disabled={disabled} onClick={onClick}>
-        Select File
-      </Button>
+    renderItem={(wiring) => (
+      <Button {...wiring}>Select File</Button>
     )}
   />
   <FileField.ItemList clearable />
@@ -153,10 +175,8 @@ export default function FileFieldPage() {
           <ComponentPreview
             code={`<FileField.Root invalid multiple={false}>
   <FileField.Trigger
-    renderItem={({ disabled, onClick }) => (
-      <Button disabled={disabled} onClick={onClick}>
-        Select File
-      </Button>
+    renderItem={(wiring) => (
+      <Button {...wiring}>Select File</Button>
     )}
   />
   <FileField.ItemList clearable />

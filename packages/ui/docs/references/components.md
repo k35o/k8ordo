@@ -706,7 +706,7 @@ Props:
 
 `renderInput` receives `{ id, 'aria-describedby', 'aria-labelledby', disabled, invalid, required }`.
 
-The wrapper is a `<div>`, and `labelAs` picks the element that draws the label. `'label'` (the default) gives a `<label htmlFor>` pointing at the field. `'group'` gives a `<span id>` with the same look, the required mark included, for a component that is a group itself — `Radio`, `RadioCard`, `CheckboxGroup`, `CheckboxCard`, and `RangeSlider` — and names it through `aria-labelledby`. A `<label>` cannot label a group, and a `<fieldset>` around one would nest a second group with the same name, so `'group'` renders neither. `ColorPicker`, `DatePicker`, `Combobox`, and `Autocomplete` put the `id` on a text input, so they keep `'label'`.
+The wrapper is a `<div>`, and `labelAs` picks the element that draws the label. `'label'` (the default) gives a `<label htmlFor>` pointing at the field. `'group'` gives a `<span id>` with the same look, the required mark included, for a component that is a group itself — `Radio`, `RadioCard`, `CheckboxGroup`, `CheckboxCard`, and `RangeSlider` — and names it through `aria-labelledby`. A `<label>` cannot label a group, and a `<fieldset>` around one would nest a second group with the same name, so `'group'` renders neither. `FileField` takes `'group'` too: what a person reaches is its trigger, a button named through `aria-labelledby`, and a button cannot be required. `ColorPicker`, `DatePicker`, `Combobox`, and `Autocomplete` put the `id` on a text input, so they keep `'label'`.
 
 ```tsx
 <FormControl
@@ -717,7 +717,7 @@ The wrapper is a `<div>`, and `labelAs` picks the element that draws the label. 
 />
 ```
 
-`required` draws the built-in `required` wording after the label and passes `required: true` to `renderInput`. With `'label'` the mark is `aria-hidden`: the field's own `required` already tells a screen reader, so the name stays the label alone. With `'group'` the mark is part of the group's name, since `role="group"` does not take `aria-required`.
+`required` draws the built-in `required` wording after the label and passes `required: true` to `renderInput`. With `'label'` the mark is `aria-hidden`: the field's own `required` already tells a screen reader, so the name stays the label alone. With `'group'` the mark is part of the name, since neither a `role="group"` nor `FileField`'s trigger button takes `aria-required`.
 
 A non-empty `errorText` is what makes the field invalid: it is drawn under the field in place of `helpText`, describes the field instead, and `renderInput` receives `invalid: true`. There is no `invalid` prop to keep in step with it. To mark a field invalid without a message, pass `invalid` to the field itself inside `renderInput`.
 
@@ -1486,27 +1486,42 @@ Props:
 
 ### FileField
 
-File upload, as a composite pattern.
+File upload, as a composite pattern. The `<input type="file">` that submits
+is visually hidden, `aria-hidden`, and out of the Tab order; what a person
+reaches is the trigger. `FileField.Trigger`'s `renderItem` receives the wiring
+for it — `id`, `aria-labelledby` (the field's label, then the trigger's own
+text), `aria-describedby` (the root's), `ref`, `onClick`, and `disabled` —
+and nothing else, so it spreads onto a `Button` as it is. When a form moves focus to the hidden input after a failed
+submission, it goes on to the trigger, which `FormControl`'s error text
+already describes.
+
+Wrap it in `<FormControl labelAs="group">`. The only element that carries
+`required` is the hidden input, and a button cannot take it, so the trigger
+says the field is required through its name: in `'group'` mode the mark is
+part of the heading the trigger reads, giving "Photos Required Choose files".
 
 ```tsx
-import { FileField } from '@k8ordo/ui';
+import { FileField, FormControl } from '@k8ordo/ui';
 
-<FileField.Root accept="image/*" multiple maxFiles={5}>
-  <FileField.Trigger
-    renderItem={({ onClick, disabled }) => (
-      <Button onClick={onClick} disabled={disabled}>
-        Choose files
-      </Button>
-    )}
-  />
-  <FileField.ItemList />
-</FileField.Root>;
+<FormControl
+  label="Photos"
+  labelAs="group"
+  required
+  renderInput={(props) => (
+    <FileField.Root {...props} accept="image/*" multiple maxFiles={5}>
+      <FileField.Trigger
+        renderItem={(wiring) => <Button {...wiring}>Choose files</Button>}
+      />
+      <FileField.ItemList />
+    </FileField.Root>
+  )}
+/>;
 ```
 
 `FileField.Dropzone` is an area files can be dropped onto. Left empty, it holds
-the built-in `fileFieldDrop` wording and a "choose files" button, so the field
-stays usable by keyboard; pass children to lay it out yourself (put a
-`FileField.Trigger` inside). Dropped files are added exactly like picked ones:
+the built-in `fileFieldDrop` wording and a "choose files" button wired as a
+trigger, so the field stays usable by keyboard; pass children to lay it out
+yourself (put a `FileField.Trigger` inside). Dropped files are added exactly like picked ones:
 they respect `multiple` and `maxFiles`, land in the input so they are
 submitted, and are announced with an `input` event so a form sees the change.
 A dropped folder is skipped (choose folders through the picker with
@@ -1558,7 +1573,7 @@ Props (FileField.ItemList):
 
 Props (FileField.Trigger):
 
-- `renderItem`: `(props: { onClick: () => void; disabled: boolean; invalid: boolean; }) => ReactElement` (required)
+- `renderItem`: `(props: { id: string; 'aria-labelledby': string | undefined; 'aria-describedby': string | undefined; ref: (node: HTMLElement | null) => void; onClick: () => void; disabled: boolean; }) => ReactElement` (required)
 
 ## Data display
 

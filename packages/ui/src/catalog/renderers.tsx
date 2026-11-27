@@ -1314,8 +1314,8 @@ export const FileFieldWidget: FC<{ props: FileFieldProps }> = ({ props }) => {
   const messages = getMessages();
   const trigger = (
     <FileField.Trigger
-      renderItem={({ onClick, disabled }) => (
-        <Button disabled={disabled} onClick={onClick} variant="outline">
+      renderItem={(wiring) => (
+        <Button {...wiring} variant="outline">
           {u(props.triggerLabel) ?? messages.fileFieldTrigger}
         </Button>
       )}

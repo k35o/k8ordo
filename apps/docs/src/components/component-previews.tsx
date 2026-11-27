@@ -325,11 +325,7 @@ export const componentPreviews = {
   FileField: (
     <FileField.Root accept="image/*" multiple={false}>
       <FileField.Trigger
-        renderItem={({ disabled, onClick }) => (
-          <Button disabled={disabled} onClick={onClick}>
-            Select File
-          </Button>
-        )}
+        renderItem={(wiring) => <Button {...wiring}>Select File</Button>}
       />
     </FileField.Root>
   ),

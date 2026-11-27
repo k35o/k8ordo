@@ -824,16 +824,16 @@ each action included — restores the echo, `isDirty` reads them, and a value a
 component changes in code — a stepper, a chosen option, a removed file —
 arrives as an `input` event, the way typing does.
 
-| Schema                                             | Component                                       | What to pass besides `{...props} {...input}`                  |
-| -------------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------- |
-| `z.string()`                                       | `TextField`, `Textarea`                         | —                                                             |
-| `z.email()`, `z.url()`, `z.iso.*()`                | `TextField`                                     | —                                                             |
-| a password                                         | `PasswordInput`                                 | —                                                             |
-| `z.coerce.number()`                                | `NumberField`, `Slider`                         | —                                                             |
-| `z.enum([…])`                                      | `Select`, `Radio`, `RadioCard`                  | `options`; `labelAs="group"` on `FormControl` for radios      |
-| `z.boolean()`, `z.literal(true)`, `z.stringbool()` | `Checkbox`, `Switch`                            | `label` and `errorText`; no `FormControl`, so no `{...props}` |
-| `z.array(z.enum([…]))`                             | `CheckboxGroup`, `CheckboxCard`, `Autocomplete` | `options`; `labelAs="group"` on `FormControl` for boxes       |
-| `z.file()`                                         | `FileField.Root`                                | a `FileField.Trigger` and `FileField.ItemList`                |
+| Schema                                             | Component                                       | What to pass besides `{...props} {...input}`                                       |
+| -------------------------------------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `z.string()`                                       | `TextField`, `Textarea`                         | —                                                                                  |
+| `z.email()`, `z.url()`, `z.iso.*()`                | `TextField`                                     | —                                                                                  |
+| a password                                         | `PasswordInput`                                 | —                                                                                  |
+| `z.coerce.number()`                                | `NumberField`, `Slider`                         | —                                                                                  |
+| `z.enum([…])`                                      | `Select`, `Radio`, `RadioCard`                  | `options`; `labelAs="group"` on `FormControl` for radios                           |
+| `z.boolean()`, `z.literal(true)`, `z.stringbool()` | `Checkbox`, `Switch`                            | `label` and `errorText`; no `FormControl`, so no `{...props}`                      |
+| `z.array(z.enum([…]))`                             | `CheckboxGroup`, `CheckboxCard`, `Autocomplete` | `options`; `labelAs="group"` on `FormControl` for boxes                            |
+| `z.file()`                                         | `FileField.Root`                                | a `FileField.Trigger` and `FileField.ItemList`; `labelAs="group"` on `FormControl` |
 
 **A group takes its name from `FormControl`.** `Radio`, `RadioCard`,
 `CheckboxGroup` and `CheckboxCard` are a group each, so `labelAs="group"`
@@ -842,7 +842,10 @@ mark included. On a checkbox group, `required={tags.required}` shows only as
 that mark: `FormControl` passes it on, and `CheckboxGroup` and `CheckboxCard`
 write it to no element — a `<fieldset>` takes no `required`, and a box with
 one would have to be checked itself — while the count rule does the checking.
-`Autocomplete` keeps the default, a `<label>` for its text input.
+`FileField` takes `'group'` as well: what a person presses is its trigger, a
+button that reads its name from the heading and cannot take `required`, so
+the mark there is what says a file is required. `Autocomplete` keeps the
+default, a `<label>` for its text input.
 
 **Radios take the spread.** The advice under [Radio groups](#radio-groups) is
 about a hand-written `<input type="radio">`. `Radio` and `RadioCard` read an
