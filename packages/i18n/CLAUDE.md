@@ -116,6 +116,9 @@ pnpm check         # check:write to auto-fix
   framework's `request` prop both fit.
 - **`delocalize` says `null`, never the default.** The root layout and the
   404 page choose the fallback visibly.
+- **`localize` replaces a leading locale segment, and only one of the
+  set's.** The pathname `usePathname` returns goes in as it is; a first
+  segment the set does not have (`/fr/…`) is kept, since it may be a page.
 
 ## Layout
 

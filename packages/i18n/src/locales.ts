@@ -96,9 +96,11 @@ export type Locales<
     options?: NegotiateRequestOptions,
   ) => L;
   /**
-   * `'/ui'` → `'/en/ui'`, `'/'` → `'/en'`. Hand it a pathname without a
-   * locale segment, as `delocalize` returns one: that is not checked, so
-   * `localize('/en/ui', 'ja')` is `'/ja/en/ui'`.
+   * The same pathname in `locale`: a leading segment that is one of the
+   * set's locales is replaced (`'/ja/ui'` → `'/en/ui'`), and one is put in
+   * front otherwise (`'/ui'` → `'/en/ui'`, `'/'` → `'/en'`, `'/fr/ui'` →
+   * `'/en/fr/ui'`). So the pathname `usePathname` returns takes the page on
+   * screen to another locale as it is.
    */
   readonly localize: (pathname: string, locale: L) => string;
   /** The inverse: `'/en/ui'` → `{ locale: 'en', pathname: '/ui' }`, `'/x'` → `{ locale: null, pathname: '/x' }`. */
@@ -154,17 +156,6 @@ const parseTag = (tag: string): Intl.Locale | null => {
   } catch {
     return null;
   }
-};
-
-/** `'/ui'` → `'/en/ui'`; `'/'` and `''` → `'/en'`. Pure over strings, so it lives outside the set. */
-const localize = (pathname: string, locale: string): string => {
-  const rest = pathname === '/' || pathname === '' ? '' : pathname;
-  if (rest !== '' && !rest.startsWith('/')) {
-    throw new TypeError(
-      `localize: ${JSON.stringify(pathname)} is not a pathname — it does not start with "/"`,
-    );
-  }
-  return `/${locale}${rest}`;
 };
 
 /**
@@ -302,6 +293,16 @@ export const defineLocales = <
     if (!is(first)) return { locale: null, pathname };
     const rest = pathname.slice(first.length + 1);
     return { locale: first, pathname: rest === '' ? '/' : rest };
+  };
+
+  const localize = (pathname: string, locale: L): string => {
+    if (pathname !== '' && !pathname.startsWith('/')) {
+      throw new TypeError(
+        `localize: ${JSON.stringify(pathname)} is not a pathname — it does not start with "/"`,
+      );
+    }
+    const rest = delocalize(pathname === '' ? '/' : pathname).pathname;
+    return rest === '/' ? `/${locale}` : `/${locale}${rest}`;
   };
 
   const getLocale = (): L => {

@@ -76,8 +76,8 @@ export const localesNegotiateRequest = message({
 });
 
 export const localesLocalize = message({
-  ja: "pathnameの先頭にロケールの区間を付けます。`'/ui'`は`'/en/ui'`に、`'/'`は`'/en'`になります。",
-  en: "Puts a locale segment in front of a pathname. `'/ui'` becomes `'/en/ui'`, and `'/'` becomes `'/en'`.",
+  ja: "pathnameのロケールの区間を置き換えます。先頭の区間がロケールでなければ、区間を付けます。`'/ja/ui'`と`'/ui'`は`'/en/ui'`に、`'/'`は`'/en'`になります。",
+  en: "Replaces a pathname’s locale segment, or puts one in front when the first segment is not a locale. `'/ja/ui'` and `'/ui'` become `'/en/ui'`, and `'/'` becomes `'/en'`.",
 });
 
 export const localesDelocalize = message({

@@ -80,12 +80,6 @@ const SYMPTOMS: readonly Symptom[] = [
     link: { path: '/:locale/ui/i18n', label: m.nav.i18n },
   },
   {
-    id: 'double',
-    title: t.doubleTitle,
-    cause: t.doubleCause,
-    fix: t.doubleFix,
-  },
-  {
     id: 'not-found',
     title: t.notFoundTitle,
     cause: t.notFoundCause,

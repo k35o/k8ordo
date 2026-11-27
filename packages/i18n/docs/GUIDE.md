@@ -116,7 +116,7 @@ the definition, not later.
 | `is(value)`           | Membership as a type guard.                                                       |
 | `negotiate(…)`        | The best supported tag for a preference list.                                     |
 | `negotiateRequest(…)` | The best supported tag for a request: the choice given, then `Accept-Language`.   |
-| `localize`            | `'/ui'` → `'/en/ui'`; `'/'` → `'/en'`.                                            |
+| `localize`            | `'/ui'` → `'/en/ui'`; `'/'` → `'/en'`; `'/ja/ui'` → `'/en/ui'`.                   |
 | `delocalize`          | `'/en/ui'` → `{ locale: 'en', pathname: '/ui' }`; `'/x'` → `{ locale: null, … }`. |
 | `paramsSchema`        | The `[locale]` segment's schema (Standard Schema; no schema library).             |
 | `getLocale()`         | The locale of the render in progress. Not a hook.                                 |
@@ -353,9 +353,17 @@ the page in the default.
 
 **In the browser**, the URL is the locale: the first segment of
 `location.pathname`, read when a message is called. Changing locale is a
-navigation to the same pathname under the other segment
-(`locales.localize(locales.delocalize(pathname).pathname, 'en')`), which
-re-renders the page; there is no state to keep in sync.
+navigation to the same pathname under the other segment, which re-renders
+the page; there is no state to keep in sync. `localize` replaces the
+pathname's locale segment with the one it is given, so the pathname the page
+is on goes in as it is:
+
+```tsx
+function ToEnglish() {
+  const pathname = usePathname();
+  return <a href={withBase(locales.localize(pathname, 'en'))}>English</a>;
+}
+```
 
 Under Vite's `base` (`base: '/docs/'`), the segment read is the first one
 below it — `/docs/en/ui` is in `en` — as the route table's `[locale]` sits
@@ -552,8 +560,10 @@ script runs, and a visitor without JavaScript keeps the default.
   `href('/:locale/products/:id', { id })` then reads the current locale;
   `href('/:locale', { locale: 'en' })` overrides it, and
   `navigation.navigate(href(…))` goes there from code. Neither package
-  imports the other: the line above is the application's. `localize` / `delocalize` remain for a pathname in hand —
-  the language switcher, which takes the page it is on to another locale.
+  imports the other: the line above is the application's. `localize`
+  remains for a pathname in hand — the language switcher, which reads the
+  page it is on with `const pathname = usePathname()` and takes it to
+  another locale with `withBase(locales.localize(pathname, locale))`.
 
 - **`@k8ordo/ui`**: its built-in strings read `currentLocale()` from this
   package — the locale messages render in, or `null` (English there) when no

@@ -11,8 +11,8 @@ export const urlTitle = message({
 });
 
 export const urlSegments = message({
-  ja: '`delocalize`は、pathnameの先頭にあるロケールの区間を外します。`localize`は、pathnameの先頭にロケールの区間を付けます。',
-  en: '`delocalize` takes the locale segment off the front of a pathname. `localize` puts one on.',
+  ja: '`delocalize`は、pathnameの先頭にあるロケールの区間を外します。`localize`は、先頭のロケールの区間を指定したロケールに置き換えます。先頭がロケールでなければ、区間を付けます。',
+  en: '`delocalize` takes the locale segment off the front of a pathname. `localize` replaces that segment with the locale it is given, or puts one on when there is none.',
 });
 
 export const urlNull = message({
@@ -26,8 +26,8 @@ export const urlRoot = message({
 });
 
 export const urlPitfall = message({
-  ja: '`localize`は、区間がすでに付いているかを確かめません。`localize(\'/en/ui\', \'ja\')`は`/ja/en/ui`になるので、`delocalize`したpathnameを渡します。`/`で始まらない値は`TypeError`になります（`localize: "products" is not a pathname — it does not start with "/"`）。',
-  en: '`localize` does not check for a segment that is already there: `localize(\'/en/ui\', \'ja\')` is `/ja/en/ui`, so pass it a pathname that went through `delocalize`. A value that does not start with `/` is a `TypeError` (`localize: "products" is not a pathname — it does not start with "/"`).',
+  ja: '`localize`は、集合に無い先頭の区間をそのまま残します。`localize(\'/fr/ui\', \'en\')`は`/en/fr/ui`です。`/`で始まらない値は`TypeError`になります（`localize: "products" is not a pathname — it does not start with "/"`）。',
+  en: '`localize` keeps a first segment that is not one of the set’s locales: `localize(\'/fr/ui\', \'en\')` is `/en/fr/ui`. A value that does not start with `/` is a `TypeError` (`localize: "products" is not a pathname — it does not start with "/"`).',
 });
 
 export const demoTitle = message({
@@ -64,14 +64,9 @@ export const switcherTitle = message({
   en: 'Switcher links',
 });
 
-export const switcherDelocalizeCallout = message({
-  ja: '今のpathnameからロケールの区間を外す',
-  en: 'Takes the locale segment off the current pathname',
-});
-
 export const switcherLocalizeCallout = message({
-  ja: '各ロケールの区間を付けた切り替え先',
-  en: 'The destination with each locale’s segment put on',
+  ja: '今のpathnameの区間を各ロケールに置き換えた切り替え先',
+  en: 'The current pathname with its segment swapped for each locale',
 });
 
 export const switcherPathname = message({

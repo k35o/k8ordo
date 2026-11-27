@@ -190,6 +190,15 @@ describe('localize / delocalize', () => {
     });
   });
 
+  it('replaces a leading locale segment rather than stacking another, and keeps a segment outside the set', () => {
+    expect(locales.localize('/en/ui', 'ja')).toBe('/ja/ui');
+    expect(locales.localize('/ja/ui', 'ja')).toBe('/ja/ui');
+    expect(locales.localize('/en', 'ja')).toBe('/ja');
+    expect(locales.localize('/en/', 'ja')).toBe('/ja');
+    expect(locales.localize('/fr/ui', 'en')).toBe('/en/fr/ui');
+    expect(locales.localize('/english', 'en')).toBe('/en/english');
+  });
+
   it('refuses to localize something that is not a pathname', () => {
     expect(() => locales.localize('ui', 'en')).toThrow(/not a pathname/u);
   });

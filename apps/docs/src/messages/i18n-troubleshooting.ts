@@ -160,21 +160,6 @@ export const uiMissingFix = message({
   en: "Call `registerMessages('fr', fr)` from `@k8ordo/ui/i18n` in the module that defines the locale set. See the `@k8ordo/ui` guide to ",
 });
 
-export const doubleTitle = message({
-  ja: 'ロケールが2つ並ぶ切り替え先のURL',
-  en: 'A switcher URL with two locales',
-});
-
-export const doubleCause = message({
-  ja: 'ロケールの区間が付いたままのpathnameを`localize`に渡しています。`localize`は、区間がすでにあるかを確かめません。',
-  en: 'A pathname that still has its locale segment was passed to `localize`. `localize` does not check whether one is already there.',
-});
-
-export const doubleFix = message({
-  ja: '先に`delocalize`で区間を外し、その`pathname`を`localize`に渡します。',
-  en: 'Take the segment off with `delocalize` first, and pass its `pathname` to `localize`.',
-});
-
 export const notFoundTitle = message({
   ja: '既定の言語のままの404ページ',
   en: 'A 404 page left in the default language',

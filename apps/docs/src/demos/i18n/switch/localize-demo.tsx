@@ -65,10 +65,10 @@ export function LocalizeDemo() {
           </Code>
         </Row>
         {locales.all.map((target) => {
-          const outcome = localizeTo(pathname, target);
+          const outcome = localizeTo(input, target);
           return (
             <Row
-              call={`localize(${quote(pathname)}, ${quote(target)})`}
+              call={`localize(${quote(input)}, ${quote(target)})`}
               key={target}
             >
               {outcome.ok ? (
