@@ -191,6 +191,11 @@ export const pageNotFoundServer = message({
   en: 'Under server mode, a document is not sent until the page’s own component has returned: the status goes out before the body, so it waits for a possible `notFound()`. A client navigation streams from the start without waiting for the page. When the page calls `notFound()` there, the browser loads the same URL again as a document, and the server answers it with the `404`.',
 });
 
+export const pageNotFoundGuard = message({
+  ja: 'serverモードでは、`guard.ts`と`route.ts`も`notFound()`を呼べます。そのURLには、いちばん近い`not-found.tsx`が404で答えます。guardの下のページは実行されません。JSONのように別の形の404を返したい`route.ts`は、その`Response`を返します。',
+  en: 'Under server mode, a `guard.ts` and a `route.ts` may call `notFound()` too. The URL is answered by the nearest `not-found.tsx` under a 404, and the page below the guard never runs. A `route.ts` that wants a 404 of another shape, such as JSON, returns that `Response` instead.',
+});
+
 export const pageNotFoundDeep = message({
   ja: 'serverモードで、ページが返って応答が始まった後に`<Suspense>`の下から`notFound()`を呼んでも、404にはなりません。ほかの例外と同じく、いちばん近い`error.tsx`が捕捉します。',
   en: 'Under server mode, once the page has returned and the response has started, calling `notFound()` from under a `<Suspense>` no longer gives a 404. The nearest `error.tsx` catches it like any other error.',
@@ -217,11 +222,16 @@ export const redirectStatic = message({
 });
 
 export const redirectServer = message({
-  ja: 'serverモードでは、`GET`と`HEAD`に`307`を返し、`permanent`なら`308`を返します。ほかのメソッドには`405`を返します。クライアント側の遷移の行き先がリダイレクトなら、ブラウザが文書として読み込み直して行き先へ移ります。Server Actionの最後に訪問者を別のページへ送るには、`redirect()`を使います。使い方は',
-  en: 'Under server mode, a `GET` or `HEAD` gets a `307`, or a `308` when `permanent`, and any other method a `405`. A client navigation that meets a redirect has the browser load it as a document and follow it. To send the visitor elsewhere at the end of a Server Action, use `redirect()`, covered in ',
+  ja: 'serverモードでは、`GET`と`HEAD`に`307`を返し、`permanent`なら`308`を返します。ほかのメソッドには`405`を返します。クライアント側の遷移の行き先がリダイレクトなら、ブラウザが文書として読み込み直して行き先へ移ります。Server Actionや`guard.ts`、`route.ts`から訪問者を別のページへ送るには、`redirect()`を使います。使い方は',
+  en: 'Under server mode, a `GET` or `HEAD` gets a `307`, or a `308` when `permanent`, and any other method a `405`. A client navigation that meets a redirect has the browser load it as a document and follow it. To send the visitor elsewhere from a Server Action, a `guard.ts` or a `route.ts`, use `redirect()`, covered in ',
+});
+
+export const redirectUrl = message({
+  ja: '`redirect.ts`の行き先と`redirect()`の引数は、書き方が違います。`redirect.ts`の`to`はルート表のパターンで、`base`を付けず、`:name`には一致したURLの値が入ります。`redirect()`はURLを受け取るので、`href()`の戻り値を渡します。`href()`の結果には`base`が付いています。',
+  en: 'A `redirect.ts` target and the argument of `redirect()` are spelled differently. A `redirect.ts` `to` is a pattern in the route table’s terms: no `base`, and each `:name` filled from the matched URL. `redirect()` takes a URL, so hand it what `href()` returns, base included.',
 });
 
 export const redirectType = message({
-  ja: "default exportの型は、`@k8ordo/framework/server`の`RedirectTarget`です。`export default '/products' satisfies RedirectTarget`と書くと、その場で形を検査できます。`import type`で読み込めば、`@k8ordo/framework/server`を使えないstaticモードでもビルドは通ります。",
-  en: "The default export’s type is `RedirectTarget` from `@k8ordo/framework/server`. Write `export default '/products' satisfies RedirectTarget` to check the shape where it is written. Static mode refuses `@k8ordo/framework/server`, but an `import type` of it passes a static build.",
+  ja: "default exportの型は、`@k8ordo/framework`の`RedirectTarget`です。`export default '/products' satisfies RedirectTarget`と書くと、その場で形を検査できます。`redirect.ts`はどちらのモードでも使うファイルなので、型もどちらのモードでも読めるルートから出ています。",
+  en: "The default export’s type is `RedirectTarget` from `@k8ordo/framework`. Write `export default '/products' satisfies RedirectTarget` to check the shape where it is written. A `redirect.ts` works in either mode, so its type comes from the root, which either mode reads.",
 });

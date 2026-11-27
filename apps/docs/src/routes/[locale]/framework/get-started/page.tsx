@@ -12,7 +12,7 @@ const CONFIG = `import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [framework({ mode: 'static' })],
+  plugins: [framework({ mode: 'static', site: 'https://example.com' })],
 });`;
 
 const TSCONFIG = `{
@@ -74,6 +74,9 @@ export default function FrameworkGetStartedPage() {
         />
         <p>
           <Rich>{t.configPlugins()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.configSite()}</Rich>
         </p>
         <p>
           <Rich>{t.configMode()}</Rich>

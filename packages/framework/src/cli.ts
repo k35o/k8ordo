@@ -10,9 +10,9 @@ when it begins, and builds nothing.
 
 /**
  * `.k8ordo/` without a build: the config resolved as `vite build` resolves
- * it, and the engine's plugin, which knows the routes directory and the
- * mode, asked to generate. No environment is built and no page rendered, so
- * `paths` and whatever data a page reads are never touched.
+ * it, and the engine's plugin, which knows the mode, asked to generate. No
+ * environment is built and no page rendered, so a `paths.ts` and whatever
+ * data a page reads are never touched.
  */
 const generate = async (): Promise<void> => {
   const config = await resolveConfig({}, 'build', 'production', 'production');

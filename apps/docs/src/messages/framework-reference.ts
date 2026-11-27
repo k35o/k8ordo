@@ -56,19 +56,19 @@ export const frameworkMode = message({
   en: "`'static'` or `'server'`, with no default. `'static'` renders pages at build time, into an app that runs with no server. `'server'` renders pages per request, in an app that runs on a server.",
 });
 
-export const frameworkRoutesDir = message({
-  ja: 'ルートのディレクトリです。プロジェクトのルートからの相対パスで、既定は`src/routes`です。変えても、生成されるファイルは`.k8ordo/`に書かれます。',
-  en: 'The route directory, relative to the project root. `src/routes` by default. The generated files go to `.k8ordo/` either way.',
-});
-
 export const frameworkReactCompiler = message({
   ja: '両モードで使えます。`true`にすると、クライアントコンポーネントをReact Compiler（Rust版。`@vitejs/plugin-react`の`compiler`）で変換します。アプリに`oxc-transform-react`を入れておく必要があります。Server Componentと、クライアントコンポーネントをサーバーで描くHTMLには掛かりません。既定は`false`です。',
   en: 'Either mode. With `true`, client components are compiled with React Compiler (the Rust one, through `@vitejs/plugin-react`’s `compiler`). The application needs `oxc-transform-react` installed. Server Components, and the HTML a client component renders on the server, are left as written. `false` by default.',
 });
 
+export const frameworkHeaders = message({
+  ja: '両モードで使えます。どの応答にも付けるヘッダーです。ページでもビルドのファイルでも、`404`でもリダイレクトでも付きます。`vite dev`、`vite preview`、`serve`が送り、serverモードではハンドラが自分の応答に足し、staticモードのビルドは`_headers`（`vercel()`ならそのルート）に書きます。`guard.ts`や`route.ts`が同じ名前で付けたヘッダーは、そちらが残ります。',
+  en: 'Either mode. Headers every response carries, whether a page, a file of the build, a `404` or a redirect. `vite dev`, `vite preview` and `serve` send them, the handler adds them to its own answers under server mode, and a static build writes them into `_headers` (or `vercel()`’s routes). A header a `guard.ts` or a `route.ts` set under the same name stays.',
+});
+
 export const frameworkSite = message({
-  ja: 'staticモードだけ。サイトの配信元です（`https://example.com`）。渡すと、ビルドが`sitemap.xml`も書きます。`route.ts`が受け取る`request.url`のoriginにもなります。`sitemap.xml`を書く`route.ts`もあると、ビルドが止まります。',
-  en: 'Static mode only. The origin the site is served from, such as `https://example.com`. With it, the build also writes `sitemap.xml`. It is also the origin of the `request.url` a `route.ts` receives. A `route.ts` that writes `sitemap.xml` as well stops the build.',
+  ja: 'staticモードでは必須。サイトの配信元のoriginで、パスは含めません（`https://example.com`）。ビルドがページと`route.ts`に頼むリクエストのoriginになり、`route.ts`が受け取る`request.url`のoriginもこの値です。ビルドは書いたページをこのoriginで並べた`sitemap.xml`も書きます。`sitemap.xml`を書く`route.ts`があれば、ビルドはそちらを使います。',
+  en: 'Required under static mode. The origin the site is served from, with no path, such as `https://example.com`. Every request the build makes to a page or a `route.ts` is under it, so it is the origin of the `request.url` a `route.ts` receives. The build also writes `sitemap.xml`, listing the pages it wrote at this origin; a `route.ts` that writes `sitemap.xml` is used instead.',
 });
 
 export const frameworkCsp = message({
@@ -87,8 +87,12 @@ export const frameworkCaveats = [
     en: "`site` or `csp` written beside `mode: 'server'` is a type error.",
   }),
   message({
-    ja: '`paths`というオプションはありません。渡すと、設定を読んだ時点で`framework() takes no paths — …`のエラーになります。パラメータの値は、そのディレクトリの`paths.ts`が返します。',
-    en: 'There is no `paths` option. Passing one fails when the config loads, with `framework() takes no paths — …`. A parameter’s values come from the `paths.ts` in its directory.',
+    ja: 'ルートのファイルは常に`src/routes/`に置きます。置き場を変えるオプションはありません。',
+    en: 'The route files always live in `src/routes/`. No option moves them.',
+  }),
+  message({
+    ja: "そのモードが受け取らないキーを渡すと、設定を読んだ時点で`framework() takes no routesDir — under mode: 'static' it takes mode, reactCompiler, headers, site, csp`のように、受け取るキーを挙げたエラーになります。",
+    en: "A key the mode does not take fails when the config loads, naming the keys it does: `framework() takes no routesDir — under mode: 'static' it takes mode, reactCompiler, headers, site, csp`.",
   }),
   message({
     ja: '`reactCompiler: true`で`oxc-transform-react`が入っていないと、`vite dev`も`vite build`も設定を読んだ時点で、Reactのプラグインのエラー`React Compiler requires the optional …`で止まります。エラーが名指す`react({ compiler: true })`は、`framework()`が代わりに渡しているオプションです。',
@@ -181,8 +185,8 @@ export const fallbackNote = message({
 });
 
 export const pathsDefault = message({
-  ja: "default export：そのディレクトリのパラメータの値を、文字列の配列かそのPromiseで返す関数です。上のディレクトリのパラメータを引数として受け取ります。型は`Paths<'/:locale/posts/:id'>`のように、そのディレクトリまでのパターンで付けます。",
-  en: "Default export: a function that returns the values of its directory’s parameter, as an array of strings or a promise of one. It receives the parameters of the directories above it. Type it by the pattern down to its directory, as in `Paths<'/:locale/posts/:id'>`.",
+  ja: "default export：そのディレクトリのパラメータの値を、配列かそのPromiseで返す関数です。値の型はリンクの`href()`が受け取る型と同じです。上のディレクトリのパラメータを、そのディレクトリより上にあるレイアウトの`paramsSchema`が読んだ形で引数として受け取ります。型は`Paths<'/:locale/posts/:id'>`のように、そのディレクトリまでのパターンで付けます。",
+  en: "Default export: a function that returns the values of its directory’s parameter, as an array or a promise of one, typed as a link’s `href()` takes them. It receives the parameters of the directories above it as the `paramsSchema` exports of the layouts above its directory read them. Type it by the pattern down to its directory, as in `Paths<'/:locale/posts/:id'>`.",
 });
 
 export const pathsPlace = message({
@@ -231,8 +235,8 @@ export const rootTitle = message({
 });
 
 export const rootDescription = message({
-  ja: 'どれも`@k8ordo/router`のexportを、名前で再exportしています。`paths.ts`のdefault exportの型`Paths`だけは、フレームワーク自身のものです。`useParams`と`useRoute`は、フレームワークが描画しない`<Router>`を読むので含みません。ページは`params`をpropsで受け取ります。それぞれの説明は`@k8ordo/router`の',
-  en: 'Each is an export of `@k8ordo/router`, re-exported by name, except `Paths`: the framework’s own type for the default export of a `paths.ts`. `useParams` and `useRoute` are not among them: they read a `<Router>` the framework never renders. A page receives `params` as a prop instead. Each one is described on the ',
+  ja: 'どれも`@k8ordo/router`のexportを、名前で再exportしています。`paths.ts`のdefault exportの型`Paths`と、`redirect.ts`のdefault exportの型`RedirectTarget`だけは、フレームワーク自身のものです。`useParams`と`useRoute`は、フレームワークが描画しない`<Router>`を読むので含みません。ページは`params`をpropsで受け取ります。それぞれの説明は`@k8ordo/router`の',
+  en: 'Each is an export of `@k8ordo/router`, re-exported by name, except `Paths` and `RedirectTarget`: the framework’s own types for the default export of a `paths.ts` and of a `redirect.ts`. `useParams` and `useRoute` are not among them: they read a `<Router>` the framework never renders. A page receives `params` as a prop instead. Each one is described on the ',
 });
 
 export const rootLinkTail = message({
@@ -460,8 +464,8 @@ export const routeRequestCookies = message({
 });
 
 export const redirectTargetSummary = message({
-  ja: '`redirect.ts`がdefault exportする値の型です。`satisfies RedirectTarget`と書くと、書いたその場で形を検査できます。型だけのimportなので、staticモードでも使えます。',
-  en: 'The type of what a `redirect.ts` default-exports. Write `satisfies RedirectTarget` to check the shape where it is written. It is a type-only import, so static mode may use it too.',
+  ja: '`redirect.ts`がdefault exportする値の型です。`satisfies RedirectTarget`と書くと、書いたその場で形を検査できます。`redirect.ts`はどちらのモードでも使うファイルなので、型も`@k8ordo/framework`からimportします。',
+  en: 'The type of what a `redirect.ts` default-exports. Write `satisfies RedirectTarget` to check the shape where it is written. A `redirect.ts` works in either mode, so its type is imported from `@k8ordo/framework`.',
 });
 
 export const serveSummary = message({

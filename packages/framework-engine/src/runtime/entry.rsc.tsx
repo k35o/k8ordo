@@ -30,6 +30,8 @@ import type { Leaf } from 'virtual:k8ordo/routes';
 
 import type { Mode } from '../host';
 import { noticeCancel } from './cancel';
+import { SAID_NOT_FOUND } from './ended';
+import type { SaidNotFound } from './ended';
 import type * as SsrEntry from './entry.ssr';
 import { runGuards } from './guard';
 import { PageShown } from './page-shown';
@@ -51,11 +53,12 @@ import {
 } from './payload';
 import type { ClientDeps, Payload } from './payload';
 import { isPayloadPath, pagePathFor } from './payload-path';
-import { Redirect, resolveRedirects } from './redirect';
+import { Redirect, redirectResponse, resolveRedirects } from './redirect';
 import { renderMatch, renderNotFound } from './render';
 import { fileRequest, routeRequestOf } from './request';
 import {
   answer,
+  currentCookies,
   inPhase,
   signingNonce,
   withRequest,
@@ -73,9 +76,6 @@ type ActionResult = {
 };
 
 const redirectFor = resolveRedirects(redirects);
-
-const redirectResponse = (to: string, status: number): Response =>
-  new Response(null, { status, headers: { location: to } });
 
 /**
  * Where Vite serves the application, as the build was told (`base`). A host
@@ -141,26 +141,36 @@ const withDeclared = (response: Response): Response => {
 
 /**
  * What a `paths.ts` answers when asked for its parameter's values, given the
- * params above it. The build into files asks through here, from the built
- * bundle, so the file runs as the pages do — the application's aliases, and
- * the module instances the pages read their data through. Whatever it
- * returned is handed back as it is: the build is what says a value is not one.
+ * params above it as the build spelled them. The build into files, and
+ * `vite dev`, ask through here, from the RSC environment, so the file runs
+ * as the pages do — the application's aliases, and the module instances the
+ * pages read their data through. The params above are first read by the
+ * schemas of the layouts in the directories above the file's, and the file
+ * receives what they produced; when one of them refuses, the file is not
+ * asked and the answer is `null`. Otherwise whatever it returned is handed
+ * back as it is, as `values`: the build is what says a value is not one.
  */
 export const pathValues = async (
   file: string,
-  params: Readonly<Record<string, string>>,
-): Promise<unknown> => {
-  const load = paths[file];
-  if (load === undefined) {
+  above: Readonly<Record<string, string>>,
+): Promise<{ readonly values: unknown } | null> => {
+  const supply = paths[file];
+  if (supply === undefined) {
     throw new Error(`${file} is not a paths.ts of this build`);
   }
-  const { default: values } = await load();
+  const accepted = parseParams(supply.schemas, above);
+  if (accepted === null) return null;
+  const { default: values } = await supply.load();
   if (typeof values !== 'function') {
     throw new TypeError(
       `${file} has to export default a function returning its parameter's values`,
     );
   }
-  return (values as (above: typeof params) => unknown)(params);
+  return {
+    values: await (
+      values as (params: Readonly<Record<string, unknown>>) => unknown
+    )(accepted.params),
+  };
 };
 
 /** A request for a shell: the URL is the shell pathname itself. */
@@ -465,18 +475,21 @@ const respond = async (request: Request): Promise<Response> => {
   const declared = match === null ? null : redirectFor(match.pattern, pathname);
   if (declared !== null) return answerRedirect(request, declared);
 
-  if (
+  // A guard or a route.ts that said notFound() leaves the URL to the nearest
+  // not-found.tsx, as if nothing had answered it.
+  const ended =
     match !== null &&
     leaf !== undefined &&
     routeModules[match.pattern] !== undefined
-  ) {
-    return answerRoute(request, match, parsed, leaf, wantsPayload);
-  }
+      ? await answerRoute(request, match, parsed, leaf, wantsPayload)
+      : await refusedBeforePage(
+          wantsPayload ? pageRequestOf(request, url, pathname) : request,
+          found,
+        );
+  if (ended instanceof Response) return ended;
+  const disowned = ended === SAID_NOT_FOUND;
 
-  const refused = await refusedBeforePage(request, url, found);
-  if (refused !== null) return refused;
-
-  const isAction = request.method === 'POST';
+  const isAction = request.method === 'POST' && !disowned;
   const addressed = request.headers.get(ACTION_ID_HEADER) !== null;
   const temporaryReferences = createTemporaryReferenceSet();
   // An action answers the request as much as a guard does: it reads and
@@ -500,7 +513,7 @@ const respond = async (request: Request): Promise<Response> => {
   // because that browser has nothing to apply a payload with.
   const answersPayload = wantsPayload || addressed;
   const contentType = answersPayload ? PAYLOAD_TYPE : HTML_TYPE;
-  const missing = match === null || match.pattern.endsWith('/*');
+  const missing = disowned || match === null || match.pattern.endsWith('/*');
   // ページでない答え（not-found）のステータスは描く前に決まるので、HEAD は
   // ここで答える。描いてから本文を捨てると、誰も受け取らない本文のために
   // データ取得まで走る。ページは notFound() と言うかもしれないので描く
@@ -512,7 +525,7 @@ const respond = async (request: Request): Promise<Response> => {
   }
   const routeRequest =
     import.meta.env.K8ORDO_MODE === 'server'
-      ? routeRequestOf(request)
+      ? routeRequestOf(request, currentCookies())
       : fileRequest;
   const ssr = await import.meta.viteRsc.loadModule<typeof SsrEntry>(
     'ssr',
@@ -584,32 +597,35 @@ const respond = async (request: Request): Promise<Response> => {
       : watchPage(componentOf(shown), <PageShown />);
   let showsPage = page?.followed === true;
   let status = missing ? 404 : 200;
-  let { enter } = parsed;
+  const disownedBy = disowned ? await nearestNotFound() : null;
+  let { enter } = disownedBy ?? parsed;
   let rendered = render(
     // An action that redirected renders nothing: the client is about to
     // leave this page for the one it was sent to.
-    action.redirect === undefined
-      ? match === null
-        ? renderNotFound(routes, pathname, routeRequest)
-        : renderMatch(
-            // A catch-all renders its not-found, read. A shell's layouts
-            // receive the params it fills, and nothing for the ones it
-            // leaves to the browser.
-            missing
-              ? await withNotFound(match)
-              : shell === undefined
-                ? match
-                : { ...match, params: shell.known },
-            {
-              pathname,
-              params: parsed.params,
-              request: routeRequest,
-              page: page?.Page,
-              search,
-              shell: shell !== undefined,
-            },
-          )
-      : null,
+    disownedBy === null
+      ? action.redirect === undefined
+        ? match === null
+          ? renderNotFound(routes, pathname, routeRequest)
+          : renderMatch(
+              // A catch-all renders its not-found, read. A shell's layouts
+              // receive the params it fills, and nothing for the ones it
+              // leaves to the browser.
+              missing
+                ? await withNotFound(match)
+                : shell === undefined
+                  ? match
+                  : { ...match, params: shell.known },
+              {
+                pathname,
+                params: parsed.params,
+                request: routeRequest,
+                page: page?.Page,
+                search,
+                shell: shell !== undefined,
+              },
+            )
+        : null
+      : disownedBy.tree,
     enter,
     readSearch === undefined ? undefined : url.search,
     // A shell carries the nearest not-found, rendered with it in the context
@@ -696,7 +712,7 @@ const answerRoute = async (
   parsed: ParsedParams,
   module: Leaf,
   wantsPayload: boolean,
-): Promise<Response> => {
+): Promise<Response | SaidNotFound> => {
   // A route has no payload. A client navigation that asks for one gets
   // something that is not, and loads the document instead — as it would
   // from a static host, where no index.rsc sits beside the file.
@@ -712,15 +728,22 @@ const answerRoute = async (
   );
 };
 
+// guard は URL からページを判断し、戻り先を組む。クライアント遷移のペイロード
+// の要求にも、文書の要求と同じページの URL を見せる。本文のある要求は作り直さない
+const pageRequestOf = (request: Request, url: URL, pathname: string): Request =>
+  request.method === 'GET' || request.method === 'HEAD'
+    ? new Request(new URL(`${withBase(pathname)}${url.search}`, url), request)
+    : request;
+
 /**
  * What answers a page's request before anything renders, if anything does: a
  * method a page does not take, a Server Action from another origin, a guard.
  */
 const refusedBeforePage = async (
   request: Request,
-  url: URL,
   { match, parsed }: Found,
-): Promise<Response | null> => {
+): Promise<Response | SaidNotFound | null> => {
+  const url = new URL(request.url);
   if (!METHODS.includes(request.method)) {
     return new Response('method not allowed', {
       status: 405,

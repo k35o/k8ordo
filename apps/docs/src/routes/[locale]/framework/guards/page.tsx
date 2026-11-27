@@ -18,15 +18,15 @@ const TREE = `src/routes/
       page.tsx`;
 
 const ADMIN = `import { href } from '@k8ordo/framework';
-import { cookies } from '@k8ordo/framework/server';
+import { cookies, redirect } from '@k8ordo/framework/server';
 import type { Guard } from '@k8ordo/framework/server';
 
-const guard: Guard<'/admin'> = () => {
-  if (cookies().has('session')) return;
-  return new Response(null, {
-    status: 303,
-    headers: { location: href('/login') },
-  });
+import { sessionOf } from '../../lib/session.server';
+
+const guard: Guard<'/admin'> = async () => {
+  const session = await sessionOf(cookies().get('session'));
+  if (session === null) redirect(href('/login'));
+  if (!session.admin) return new Response('admins only', { status: 403 });
 };
 
 export default guard;`;
@@ -60,17 +60,20 @@ export default function FrameworkGuardsPage() {
       <DocSection id="end" title={t.endTitle}>
         <CodeBlock
           callouts={{
-            6: t.endPassCallout(),
-            7: t.endStopCallout(),
-            9: t.endLocationCallout(),
+            9: t.endRedirectCallout(),
+            10: t.endResponseCallout(),
+            11: t.endPassCallout(),
           }}
           code={ADMIN}
           lang="ts"
-          marks={{ 6: 'highlight', 7: 'highlight' }}
+          marks={{ 9: 'highlight', 10: 'highlight' }}
           title="src/routes/admin/guard.ts"
         />
         <p>
           <Rich>{t.endResponse()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.endUrl()}</Rich>
         </p>
         <p>
           <Rich>{t.endContext()}</Rich>

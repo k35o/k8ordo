@@ -101,8 +101,8 @@ export const redirectAnswer = message({
 });
 
 export const redirectPages = message({
-  ja: '`redirect()`は渡したURLに`base`を付けません。ページの描画中にリダイレクトするAPIはなく、ページのURLを変えたときは`redirect.ts`を置きます。書き方は',
-  en: '`redirect()` does not add `base` to the URL it is given. There is no API for redirecting while a page renders; when a page’s URL changes, add a `redirect.ts`; see ',
+  ja: '`redirect()`は渡したURLに`base`を付けません。`guard.ts`と`route.ts`でも同じように使え、そこでは`303`で応答します。ページの描画中に呼ぶとエラーになります。ページのURLを変えたときは`redirect.ts`を置きます。書き方は',
+  en: '`redirect()` does not add `base` to the URL it is given. A `guard.ts` and a `route.ts` use it the same way, answering with a `303`. Called while a page renders, it fails; when a page’s URL changes, add a `redirect.ts`; see ',
 });
 
 export const contextTitle = message({

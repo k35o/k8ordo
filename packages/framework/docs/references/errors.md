@@ -124,7 +124,11 @@ is also what a URL nothing matches gets from such an application; under
 `mode: 'static'` no `404.html` is written, so such a URL gets the host's own 404.
 
 `notFound()` is the page's word about itself: thrown from the page's own
-component, before it returns.
+component, before it returns. Under `mode: 'server'` a `guard.ts` and a
+`route.ts` say it the same way, and the URL is answered with the same
+not-found under the same 404 — the page below the guard never runs, and a
+`route.ts` that wants a 404 of its own shape returns that `Response`
+instead.
 
 **Under `mode: 'server'` a document waits for its page.** A status leaves
 before the body it heads, so a page's HTML is not sent until the page's own
@@ -172,12 +176,10 @@ send to `/:locale/new`, and `old/[...path]/redirect.ts` can send to
 spelled it (server mode only, as every `[...name]` directory is). A redirect holds its place in the table as a page
 does, so a literal directory beside a `[slug]/redirect.ts` keeps its URL; a
 directory that redirects has no page to render, so it cannot hold both. The
-generated table checks the default export's shape; `RedirectTarget` is that
-type, for a file that wants the error where it is written
-(`export default '/products' satisfies RedirectTarget`, with
-`import type { RedirectTarget } from '@k8ordo/framework/server'`, which
-`mode: 'static'` lets through; `import { type RedirectTarget }` is kept as an
-import of the module under `verbatimModuleSyntax`, and refused).
+generated table checks the default export's shape; `RedirectTarget`, on the
+root `@k8ordo/framework` as every type a file of either mode is written
+against, is that type, for a file that wants the error where it is written
+(`export default '/products' satisfies RedirectTarget`).
 
 **Under `mode: 'server'`** the answer to a `GET` or `HEAD` is a `307`, or a
 `308` when `permanent`, and any other method gets a `405`; a client
@@ -191,6 +193,10 @@ ever send the status; there is no `index.rsc` beside it, so a client
 navigation to it hands the URL to the browser, which loads that page and
 follows it.
 
-A Server Action sends the visitor elsewhere with `redirect()` instead
+A Server Action, a `guard.ts` and a `route.ts` send the visitor elsewhere
+with `redirect()` instead
 ([Ending with a redirect](actions.md#ending-with-a-redirect)), under
-`mode: 'server'` only.
+`mode: 'server'` only. The two speak different languages: a `redirect.ts`
+`to` is a pattern in the table's terms — no base, `:name` filled from the
+params it matched — while `redirect()` takes a URL, what `href()` returns,
+base included.

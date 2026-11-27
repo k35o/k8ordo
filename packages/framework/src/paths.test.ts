@@ -9,13 +9,14 @@ import {
   catchAllPatterns,
   dirFor,
   patternsNeedingPaths,
-  patternsOf,
+  answeringPatterns,
   planPaths,
   planRefusals,
   shadowedShells,
   shellPathname,
   suppliedFrom,
 } from './paths';
+import type { Asked, ShellLocation } from './paths';
 
 const treeOf = (files: readonly string[]) => {
   const { tree, problems } = parseRouteTree(files);
@@ -23,89 +24,84 @@ const treeOf = (files: readonly string[]) => {
   return tree;
 };
 
-describe('patternsOf', () => {
-  it('walks groups without giving them a segment', () => {
+// paths.ts が言った値: 書く pathname と、殻の立つ場所
+const supplied = (
+  paths: readonly string[],
+  shells: readonly ShellLocation[] = [],
+) => ({ paths, shells });
+
+describe('answeringPatterns', () => {
+  it('walks groups without giving them a segment, and leaves the catch-all out', () => {
     expect(
-      patternsOf(
-        treeOf(['page.tsx', '(docs)/guide/page.tsx', 'products/[id]/page.tsx']),
-      ),
+      answeringPatterns(
+        treeOf([
+          'page.tsx',
+          'not-found.tsx',
+          '(docs)/guide/page.tsx',
+          'products/[id]/page.tsx',
+        ]),
+      ).map(({ pattern }) => pattern),
     ).toStrictEqual(['/', '/guide', '/products/:id']);
   });
 });
 
 describe('planPaths', () => {
   it('takes every parameterless route without being told', () => {
-    const plan = planPaths(treeOf(['page.tsx', 'about/page.tsx']), []);
+    const plan = planPaths(
+      treeOf(['page.tsx', 'about/page.tsx']),
+      supplied([]),
+    );
     expect(plan.paths).toStrictEqual(['/', '/about']);
     expect(plan.unresolved).toStrictEqual([]);
   });
 
   it('refuses to build when a param route has no supplied path', () => {
-    const plan = planPaths(treeOf(['page.tsx', 'products/[id]/page.tsx']), []);
+    const plan = planPaths(
+      treeOf(['page.tsx', 'products/[id]/page.tsx']),
+      supplied([]),
+    );
     expect(plan.unresolved).toStrictEqual(['/products/:id']);
   });
 
   it('accepts the supplied paths that cover a pattern', () => {
-    const plan = planPaths(treeOf(['page.tsx', 'products/[id]/page.tsx']), [
-      '/products/1',
-      '/products/2',
-      '/elsewhere',
-    ]);
+    const plan = planPaths(
+      treeOf(['page.tsx', 'products/[id]/page.tsx']),
+      supplied(['/products/1', '/products/2', '/elsewhere']),
+    );
     expect(plan.paths).toStrictEqual(['/', '/products/1', '/products/2']);
     expect(plan.unresolved).toStrictEqual([]);
   });
 
   it('refuses a supplied path no route wants', () => {
     // 打ち間違いは「そのページが無いサイト」になって出荷される
-    const plan = planPaths(treeOf(['page.tsx', 'products/[id]/page.tsx']), [
-      '/products/1',
-      '/produtcs/2',
-    ]);
+    const plan = planPaths(
+      treeOf(['page.tsx', 'products/[id]/page.tsx']),
+      supplied(['/products/1', '/produtcs/2']),
+    );
     expect(plan.unusable).toStrictEqual(['/produtcs/2']);
   });
 
   it('takes a path the table already has as redundant, not wrong', () => {
-    const plan = planPaths(treeOf(['page.tsx', 'about/page.tsx']), ['/about']);
+    const plan = planPaths(
+      treeOf(['page.tsx', 'about/page.tsx']),
+      supplied(['/about']),
+    );
     expect(plan.unusable).toStrictEqual([]);
     expect(plan.paths).toStrictEqual(['/', '/about']);
   });
 
   it('reads a trailing slash as the same pathname the router does', () => {
-    const plan = planPaths(treeOf(['page.tsx', 'products/[id]/page.tsx']), [
-      '/products/1/',
-    ]);
+    const plan = planPaths(
+      treeOf(['page.tsx', 'products/[id]/page.tsx']),
+      supplied(['/products/1/']),
+    );
     expect(plan.unusable).toStrictEqual([]);
     expect(plan.unresolved).toStrictEqual([]);
     expect(plan.paths).toStrictEqual(['/', '/products/1']);
   });
 
-  it('refuses a supplied path that still holds a parameter, naming the page that has no fallback.tsx', () => {
-    // パラメータが 2 つある表を 1 つだけ展開すると、こういう値が残る
-    const plan = planPaths(
-      treeOf(['page.tsx', '[locale]/blog/[slug]/page.tsx']),
-      ['/ja/blog/:slug'],
-    );
-    expect(plan.held).toStrictEqual([
-      { location: '/ja/blog/:slug', file: '[locale]/blog/[slug]/page.tsx' },
-    ]);
-    expect(plan.unusable).toStrictEqual([]);
-    expect(plan.unresolved).toStrictEqual(['/:locale/blog/:slug']);
-    expect(planRefusals(plan, [])).toContain(
-      'these pathnames still hold a parameter, and only a page with a fallback.tsx beside it takes one: /ja/blog/:slug ([locale]/blog/[slug]/page.tsx has none)',
-    );
-  });
-
-  it('says a route.ts holding a parameter cannot have a fallback.tsx', () => {
-    const plan = planPaths(treeOf(['page.tsx', 'feed/[id]/route.ts']), [
-      '/feed/:id',
-    ]);
-    expect(planRefusals(plan, [])).toContain(
-      'these pathnames still hold a parameter, and only a page with a fallback.tsx beside it takes one: /feed/:id (feed/[id]/route.ts cannot have one)',
-    );
-  });
-
   it('never renders the catch-all as a page of its own', () => {
-    const plan = planPaths(treeOf(['page.tsx', 'not-found.tsx']), []);
+    const plan = planPaths(treeOf(['page.tsx', 'not-found.tsx']), supplied([]));
     expect(plan.paths).toStrictEqual(['/']);
     expect(plan.unresolved).toStrictEqual([]);
   });
@@ -256,7 +252,7 @@ describe('planPaths for a page with a fallback.tsx', () => {
   ];
 
   it('stands the bare shell at the pattern when nothing is supplied', () => {
-    const plan = planPaths(treeOf(posts), []);
+    const plan = planPaths(treeOf(posts), supplied([]));
     expect(plan.unresolved).toStrictEqual([]);
     expect(plan.paths).toStrictEqual(['/']);
     expect(plan.shells).toStrictEqual([
@@ -269,7 +265,7 @@ describe('planPaths for a page with a fallback.tsx', () => {
   });
 
   it('builds the values supplied beside the bare shell', () => {
-    const plan = planPaths(treeOf(posts), ['/posts/1', '/posts/2']);
+    const plan = planPaths(treeOf(posts), supplied(['/posts/1', '/posts/2']));
     expect(plan.paths).toStrictEqual(['/', '/posts/1', '/posts/2']);
     expect(plan.shells.map((shell) => shell.location)).toStrictEqual([
       '/posts/:id',
@@ -277,11 +273,16 @@ describe('planPaths for a page with a fallback.tsx', () => {
   });
 
   it('stands the shells at the supplied locations instead of the bare pattern', () => {
-    const plan = planPaths(treeOf(localized), [
-      '/en/posts/:id',
-      '/ja/posts/:id',
-      '/en/posts/1',
-    ]);
+    const plan = planPaths(
+      treeOf(localized),
+      supplied(
+        ['/en/posts/1'],
+        [
+          { location: '/en/posts/:id', pattern: '/:locale/posts/:id' },
+          { location: '/ja/posts/:id', pattern: '/:locale/posts/:id' },
+        ],
+      ),
+    );
     expect(plan.paths).toStrictEqual(['/', '/en/posts/1']);
     expect(plan.shells).toStrictEqual([
       {
@@ -297,37 +298,14 @@ describe('planPaths for a page with a fallback.tsx', () => {
     ]);
   });
 
-  it('gives a location to the first pattern in table order it fits', () => {
-    const plan = planPaths(
-      treeOf([
-        'page.tsx',
-        '[locale]/posts/[id]/page.tsx',
-        '[locale]/posts/[id]/fallback.tsx',
-        '[section]/[slug]/[id]/page.tsx',
-        '[section]/[slug]/[id]/fallback.tsx',
-      ]),
-      ['/en/posts/:id', '/en/news/:id'],
-    );
-    expect(
-      plan.shells.map(({ pattern, location }) => [pattern, location]),
-    ).toStrictEqual([
-      ['/:locale/posts/:id', '/en/posts/:id'],
-      ['/:section/:slug/:id', '/en/news/:id'],
-    ]);
-  });
-
-  it('refuses a location whose parameter names are not its pattern’s', () => {
-    const plan = planPaths(treeOf(localized), ['/en/posts/:slug']);
-    expect(plan.misnamed).toStrictEqual([
-      { location: '/en/posts/:slug', pattern: '/:locale/posts/:id' },
-    ]);
-    expect(planRefusals(plan, [])).toContain(
-      "these shell locations name parameters that are not their pattern's: /en/posts/:slug (/:locale/posts/:id)",
-    );
-  });
-
   it('refuses a supplied location that leaves open a parameter a layout above receives', () => {
-    const plan = planPaths(treeOf(localized), ['/:locale/posts/:id']);
+    const plan = planPaths(
+      treeOf(localized),
+      supplied(
+        [],
+        [{ location: '/:locale/posts/:id', pattern: '/:locale/posts/:id' }],
+      ),
+    );
     expect(plan.closed).toStrictEqual([
       {
         location: '/:locale/posts/:id',
@@ -342,7 +320,7 @@ describe('planPaths for a page with a fallback.tsx', () => {
   });
 
   it('refuses the bare shell when a layout above receives one of its parameters', () => {
-    const plan = planPaths(treeOf(localized), ['/en/posts/1']);
+    const plan = planPaths(treeOf(localized), supplied(['/en/posts/1']));
     expect(plan.shells).toStrictEqual([]);
     expect(plan.closed).toStrictEqual([
       {
@@ -358,22 +336,42 @@ describe('planPaths for a page with a fallback.tsx', () => {
   });
 
   it.each([
-    ['a value', '/posts/!fallback'],
-    ['a shell location', '/!fallback/posts/:id'],
-    ['an escaped spelling', '/posts/%21fallback'],
-  ])('refuses %s with a segment the build keeps for shells', (_, path) => {
-    const plan = planPaths(treeOf(posts), [path]);
-    expect(plan.reserved).toStrictEqual([path]);
-    expect(planRefusals(plan, [])).toContain(
-      `a paths.ts returned !fallback, which the build keeps for shells: ${path}`,
-    );
-  });
+    ['a value', supplied(['/posts/!fallback']), '/posts/!fallback'],
+    [
+      'a shell location',
+      supplied(
+        [],
+        [{ location: '/!fallback/posts/:id', pattern: '/posts/:id' }],
+      ),
+      '/!fallback/posts/:id',
+    ],
+    [
+      'an escaped spelling',
+      supplied(['/posts/%21fallback']),
+      '/posts/%21fallback',
+    ],
+  ])(
+    'refuses %s with a segment the build keeps for shells',
+    (_, given, path) => {
+      const plan = planPaths(treeOf(posts), given);
+      expect(plan.reserved).toStrictEqual([path]);
+      expect(planRefusals(plan, [])).toContain(
+        `a paths.ts returned !fallback, which the build keeps for shells: ${path}`,
+      );
+    },
+  );
 
   it('writes a shell once however often its location is supplied, a trailing slash included', () => {
-    const plan = planPaths(treeOf(localized), [
-      '/en/posts/:id',
-      '/en/posts/:id/',
-    ]);
+    const plan = planPaths(
+      treeOf(localized),
+      supplied(
+        [],
+        [
+          { location: '/en/posts/:id', pattern: '/:locale/posts/:id' },
+          { location: '/en/posts/:id/', pattern: '/:locale/posts/:id' },
+        ],
+      ),
+    );
     expect(plan.shells.map((shell) => shell.pathname)).toStrictEqual([
       '/en/posts/!fallback',
     ]);
@@ -397,7 +395,7 @@ describe('shadowedShells', () => {
       '[lang]/[id]/page.tsx',
       '[lang]/[id]/fallback.tsx',
     ]);
-    const plan = planPaths(tree, ['/docs/intro']);
+    const plan = planPaths(tree, supplied(['/docs/intro']));
     const shadowed = shadowedShells(tree, plan.shells, new Set(plan.paths));
     expect(shadowed).toStrictEqual([
       {
@@ -422,7 +420,13 @@ describe('shadowedShells', () => {
 
   it('names the one URL a pattern declared first meets the shell at, when the build did not write it', () => {
     const tree = treeOf(besideNew);
-    const plan = planPaths(tree, ['/ja/posts/:id', '/en/posts/new']);
+    const plan = planPaths(
+      tree,
+      supplied(
+        ['/en/posts/new'],
+        [{ location: '/ja/posts/:id', pattern: '/:locale/posts/:id' }],
+      ),
+    );
     const shadowed = shadowedShells(tree, plan.shells, new Set(plan.paths));
     expect(shadowed).toStrictEqual([
       {
@@ -445,11 +449,13 @@ describe('shadowedShells', () => {
       '[locale]/posts/[id]/page.tsx',
       '[locale]/posts/[id]/fallback.tsx',
     ]);
-    const plan = planPaths(tree, [
-      '/ja/posts/:id',
-      '/ja/posts/first',
-      '/ja/posts/1',
-    ]);
+    const plan = planPaths(
+      tree,
+      supplied(
+        ['/ja/posts/first', '/ja/posts/1'],
+        [{ location: '/ja/posts/:id', pattern: '/:locale/posts/:id' }],
+      ),
+    );
     expect(
       shadowedShells(tree, plan.shells, new Set(plan.paths)),
     ).toStrictEqual([]);
@@ -463,7 +469,7 @@ describe('shadowedShells', () => {
       '[lang]/[id]/page.tsx',
       '[lang]/[id]/fallback.tsx',
     ]);
-    const plan = planPaths(tree, []);
+    const plan = planPaths(tree, supplied([]));
     expect(
       shadowedShells(tree, plan.shells, new Set(plan.paths)),
     ).toStrictEqual([]);
@@ -474,10 +480,19 @@ describe('suppliedFrom', () => {
   const asked: Array<[string, Record<string, string>]> = [];
   const answering =
     (values: Record<string, (params: Record<string, string>) => unknown>) =>
-    (file: string, params: Readonly<Record<string, string>>): unknown => {
-      asked.push([file, { ...params }]);
-      return values[file]?.(params);
+    (file: string, above: Readonly<Record<string, string>>): Promise<Asked> => {
+      asked.push([file, { ...above }]);
+      return Promise.resolve({ values: values[file]?.(above) });
     };
+  const refusing =
+    (
+      refused: Readonly<Record<string, string>>,
+      asking: ReturnType<typeof answering>,
+    ) =>
+    (file: string, above: Readonly<Record<string, string>>): Promise<Asked> =>
+      Object.entries(refused).some(([name, value]) => above[name] === value)
+        ? Promise.resolve(null)
+        : asking(file, above);
 
   it('writes every page, route.ts and redirect.ts below a parameter for each of its values', async () => {
     const tree = treeOf([
@@ -488,13 +503,13 @@ describe('suppliedFrom', () => {
       'blog/[slug]/old/redirect.ts',
     ]);
 
-    const { locations, problems } = await suppliedFrom(
+    const found = await suppliedFrom(
       tree,
       answering({ 'blog/[slug]/paths.ts': () => ['a', 'b'] }),
     );
 
-    expect(problems).toStrictEqual([]);
-    expect(planPaths(tree, locations).paths).toStrictEqual([
+    expect(found.problems).toStrictEqual([]);
+    expect(planPaths(tree, found).paths).toStrictEqual([
       '/',
       '/blog/a',
       '/blog/b',
@@ -514,7 +529,7 @@ describe('suppliedFrom', () => {
       '[locale]/posts/[id]/paths.ts',
     ]);
 
-    const { locations } = await suppliedFrom(
+    const { paths } = await suppliedFrom(
       tree,
       answering({
         '[locale]/paths.ts': () => ['ja', 'en'],
@@ -528,11 +543,7 @@ describe('suppliedFrom', () => {
       ['[locale]/posts/[id]/paths.ts', { locale: 'ja' }],
       ['[locale]/posts/[id]/paths.ts', { locale: 'en' }],
     ]);
-    expect(locations).toStrictEqual([
-      '/ja/posts/1',
-      '/ja/posts/2',
-      '/en/posts/1',
-    ]);
+    expect(paths).toStrictEqual(['/ja/posts/1', '/ja/posts/2', '/en/posts/1']);
   });
 
   it('puts a shell at each value above a fallback.tsx, where no paths.ts gives its own parameter values', async () => {
@@ -544,12 +555,12 @@ describe('suppliedFrom', () => {
       '[locale]/posts/[id]/fallback.tsx',
     ]);
 
-    const { locations } = await suppliedFrom(
+    const found = await suppliedFrom(
       tree,
       answering({ '[locale]/paths.ts': () => ['ja', 'en'] }),
     );
 
-    expect(planPaths(tree, locations).shells).toStrictEqual([
+    expect(planPaths(tree, found).shells).toStrictEqual([
       {
         pattern: '/:locale/posts/:id',
         location: '/ja/posts/:id',
@@ -573,12 +584,10 @@ describe('suppliedFrom', () => {
 
     const plan = planPaths(
       tree,
-      (
-        await suppliedFrom(
-          tree,
-          answering({ 'posts/[id]/paths.ts': () => ['1'] }),
-        )
-      ).locations,
+      await suppliedFrom(
+        tree,
+        answering({ 'posts/[id]/paths.ts': () => ['1'] }),
+      ),
     );
 
     expect(plan.paths).toStrictEqual(['/', '/posts/1']);
@@ -587,13 +596,43 @@ describe('suppliedFrom', () => {
     ]);
   });
 
-  it('leaves a parameter with neither a paths.ts nor a fallback.tsx for the build to refuse', async () => {
-    const tree = treeOf(['page.tsx', 'tags/[tag]/page.tsx']);
+  it('stands a shell a literal directory declared first would hide, and leaves naming that to shadowedShells', async () => {
+    const tree = treeOf([
+      'page.tsx',
+      'ja/posts/[id]/page.tsx',
+      '[locale]/paths.ts',
+      '[locale]/posts/[id]/page.tsx',
+      '[locale]/posts/[id]/fallback.tsx',
+    ]);
 
     const plan = planPaths(
       tree,
-      (await suppliedFrom(tree, answering({}))).locations,
+      await suppliedFrom(
+        tree,
+        answering({ '[locale]/paths.ts': () => ['ja'] }),
+      ),
     );
+
+    expect(plan.shells.map((shell) => shell.location)).toStrictEqual([
+      '/ja/posts/:id',
+    ]);
+    expect(
+      shadowedShells(tree, plan.shells, new Set(plan.paths)),
+    ).toStrictEqual([
+      {
+        location: '/ja/posts/:id',
+        fallback: '[locale]/posts/[id]/fallback.tsx',
+        pattern: '/ja/posts/:id',
+        file: 'ja/posts/[id]/page.tsx',
+        url: null,
+      },
+    ]);
+  });
+
+  it('leaves a parameter with neither a paths.ts nor a fallback.tsx for the build to refuse', async () => {
+    const tree = treeOf(['page.tsx', 'tags/[tag]/page.tsx']);
+
+    const plan = planPaths(tree, await suppliedFrom(tree, answering({})));
 
     expect(planRefusals(plan, [])).toStrictEqual([
       "static build needs the values of /tags/:tag — a paths.ts in each parameter's directory returns them, and a fallback.tsx beside a page answers the ones the build does not write",
@@ -607,12 +646,12 @@ describe('suppliedFrom', () => {
       'tags/[tag]/paths.ts',
     ]);
 
-    const { locations } = await suppliedFrom(
+    const { paths } = await suppliedFrom(
       tree,
       answering({ 'tags/[tag]/paths.ts': () => ['café', 'a b', 'a*b', ':id'] }),
     );
 
-    expect(locations).toStrictEqual([
+    expect(paths).toStrictEqual([
       '/tags/caf%C3%A9',
       '/tags/a%20b',
       '/tags/a%2Ab',
@@ -620,20 +659,76 @@ describe('suppliedFrom', () => {
     ]);
   });
 
-  it('says so when a paths.ts returns anything but non-empty strings', async () => {
+  it('spells a value as a link does, and hands the paths.ts below that spelling, which is what its page reads', async () => {
+    asked.length = 0;
+    const tree = treeOf([
+      'page.tsx',
+      '(archive)/[year]/paths.ts',
+      '(archive)/[year]/[flag]/page.tsx',
+      '(archive)/[year]/[flag]/paths.ts',
+    ]);
+
+    const { paths, problems } = await suppliedFrom(
+      tree,
+      answering({
+        '(archive)/[year]/paths.ts': () => [2026, 2026n, '2026'],
+        '(archive)/[year]/[flag]/paths.ts': () => [true, false],
+      }),
+    );
+
+    expect(problems).toStrictEqual([]);
+    expect(asked).toStrictEqual([
+      ['(archive)/[year]/paths.ts', {}],
+      ['(archive)/[year]/[flag]/paths.ts', { year: '2026' }],
+    ]);
+    expect(paths).toStrictEqual(['/2026/true', '/2026/false']);
+  });
+
+  it('names the paths.ts files below values a schema above them refuses, and writes nothing under those values', async () => {
+    const tree = treeOf([
+      'page.tsx',
+      '[year]/paths.ts',
+      '[year]/[slug]/page.tsx',
+      '[year]/[slug]/paths.ts',
+    ]);
+
+    const { paths, problems } = await suppliedFrom(
+      tree,
+      refusing(
+        { year: 'last' },
+        answering({
+          '[year]/paths.ts': () => ['2024', 'last'],
+          '[year]/[slug]/paths.ts': () => ['entry'],
+        }),
+      ),
+    );
+
+    expect(paths).toStrictEqual(['/2024/entry']);
+    expect(problems).toStrictEqual([
+      'the paths.ts files stand where a params schema refuses the values above them, so they were not asked: /last/:slug ([year]/[slug]/paths.ts)',
+    ]);
+  });
+
+  it('says so when a paths.ts returns anything but values with a spelling', async () => {
     const tree = treeOf([
       'page.tsx',
       'tags/[tag]/page.tsx',
       'tags/[tag]/paths.ts',
+      'posts/[id]/page.tsx',
+      'posts/[id]/paths.ts',
     ]);
 
     const { problems } = await suppliedFrom(
       tree,
-      answering({ 'tags/[tag]/paths.ts': () => [1, ''] }),
+      answering({
+        'tags/[tag]/paths.ts': () => ['a', ''],
+        'posts/[id]/paths.ts': () => [1, { id: 2 }],
+      }),
     );
 
-    expect(problems).toStrictEqual([
-      'tags/[tag]/paths.ts has to return an array of non-empty strings, the values of :tag',
+    expect(problems.toSorted()).toStrictEqual([
+      'posts/[id]/paths.ts has to return an array of the values of :id, each a non-empty string, a number, a bigint or a boolean',
+      'tags/[tag]/paths.ts has to return an array of the values of :tag, each a non-empty string, a number, a bigint or a boolean',
     ]);
   });
 

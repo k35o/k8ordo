@@ -115,7 +115,12 @@ const checkName = (name: string): void => {
 export const createCookies = (
   incoming: ReadonlyMap<string, string>,
   url: URL,
-): { readonly cookies: Cookies; readonly lines: () => string[] } => {
+): {
+  readonly cookies: Cookies;
+  readonly lines: () => string[];
+  /** The cookies as they stand: what the request carried, written over. */
+  readonly current: () => ReadonlyMap<string, string>;
+} => {
   const secureByDefault = securesByDefault(url);
   const values = new Map(incoming);
   const lines = new Map<string, string>();
@@ -147,5 +152,9 @@ export const createCookies = (
       );
     },
   };
-  return { cookies, lines: () => [...lines.values()] };
+  return {
+    cookies,
+    lines: () => [...lines.values()],
+    current: () => new Map(values),
+  };
 };

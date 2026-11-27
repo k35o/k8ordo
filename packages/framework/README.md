@@ -55,7 +55,7 @@ export default defineConfig({
   plugins: [
     framework({
       mode: 'static',
-      site: 'https://example.com', // writes a sitemap.xml too
+      site: 'https://example.com', // the origin it is served from: its URLs, sitemap.xml
     }),
   ],
 });
@@ -96,7 +96,7 @@ export default async function ProductPage({
 import type { Paths } from '@k8ordo/framework';
 
 const paths: Paths<'/products/:id'> = async () =>
-  (await listProducts()).map((product) => String(product.id));
+  (await listProducts()).map((product) => product.id);
 
 export default paths;
 ```
@@ -133,7 +133,8 @@ export async function createTalk(_previous: FormState, formData: FormData) {
 ```
 
 The built handler, `dist/rsc/index.js`, is a plain
-`(request: Request) => Promise<Response>` that needs nothing from its runtime
+`(request: Request, context?: HandlerContext) => Promise<Response>`
+(`context.waitUntil` is the host's own) that needs nothing from its runtime
 but `AsyncLocalStorage`, so Node.js, Bun, Deno and Cloudflare Workers
 (`nodejs_compat`) all run it, and `vercel()` from `@k8ordo/framework/vercel`
 writes a build for Vercel.

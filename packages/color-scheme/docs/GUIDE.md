@@ -163,6 +163,7 @@ import { themeColor } from './src/lib/theme-color';
 
 framework({
   mode: 'static',
+  site: 'https://example.com',
   csp: {
     'script-src': ["'self'", await colorSchemeScriptHash({ themeColor })],
   },

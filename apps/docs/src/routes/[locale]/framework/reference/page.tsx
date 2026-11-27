@@ -49,6 +49,7 @@ import type {
   NavigateToOptions,
   PageProps,
   Paths,
+  RedirectTarget,
   RegisteredNavigablePattern,
   RegisteredPageParams,
   RegisteredParams,
@@ -154,14 +155,14 @@ export default function FrameworkReferencePage() {
             description: t.frameworkMode,
           },
           {
-            name: 'options.routesDir',
-            type: 'string',
-            description: t.frameworkRoutesDir,
-          },
-          {
             name: 'options.reactCompiler',
             type: 'boolean',
             description: t.frameworkReactCompiler,
+          },
+          {
+            name: 'options.headers',
+            type: 'Readonly<Record<string, string>>',
+            description: t.frameworkHeaders,
           },
           {
             name: 'options.site',
@@ -208,6 +209,16 @@ export default function FrameworkReferencePage() {
           <Rich>{t.rootLinkTail()}</Rich>
         </p>
       </DocSection>
+
+      <ApiEntry
+        from="@k8ordo/framework"
+        id="redirect-target"
+        name="RedirectTarget"
+        signature={`type RedirectTarget =
+  | string
+  | { to: string; permanent?: boolean };`}
+        summary={t.redirectTargetSummary}
+      />
 
       <ApiEntry
         caveats={t.cookiesCaveats}
@@ -401,16 +412,6 @@ export default function FrameworkReferencePage() {
   readonly cookies: ReadonlyMap<string, string>;
 };`}
         summary={t.routeRequestSummary}
-      />
-
-      <ApiEntry
-        from={SERVER}
-        id="redirect-target"
-        name="RedirectTarget"
-        signature={`type RedirectTarget =
-  | string
-  | { to: string; permanent?: boolean };`}
-        summary={t.redirectTargetSummary}
       />
 
       <ApiEntry

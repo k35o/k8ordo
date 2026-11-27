@@ -293,7 +293,7 @@ describe('the built request handler', () => {
 });
 
 describe('a cookie state a Server Action writes', () => {
-  it('is read on the next request as the values the action wrote', async () => {
+  it('is rendered in the action’s own answer, and read on the next request, as the values the action wrote', async () => {
     const html = await (await handler(new Request(`${ORIGIN}/`))).text();
     expect(html).toContain('density:comfortable');
     const response = await handler(
@@ -308,6 +308,7 @@ describe('a cookie state a Server Action writes', () => {
     expect(line).toBe(
       'k8ordo-state.prefs=%7B%22density%22%3A%22compact%22%7D; Path=/; Max-Age=34560000; Secure; SameSite=Lax',
     );
+    expect(await response.text()).toContain('density:compact');
 
     // ブラウザは Set-Cookie の名前と値の組を、そのまま次のリクエストに付ける
     const next = await handler(

@@ -7,7 +7,7 @@ import { visits } from '../visits';
 export default function HomePage() {
   countLater();
   return (
-    <h1 data-nonce={nonce()} data-home={home}>
+    <h1 data-nonce={nonce()} data-home={home.path}>
       visits: {visits() ?? 'none'}
     </h1>
   );

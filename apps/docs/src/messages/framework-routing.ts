@@ -234,13 +234,13 @@ export const rootServerChooseCallout = message({
 });
 
 export const rootServerStatusCallout = message({
-  ja: '訪問者ごとに答えが変わるので、308でなく307',
-  en: '307, not 308: the answer depends on who asks',
+  ja: 'guardの`redirect()`は303。`href()`がViteの`base`を付ける',
+  en: 'A guard’s `redirect()` answers 303; `href()` adds Vite’s `base`',
 });
 
 export const rootServerGuard = message({
-  ja: 'serverモードだけで使えます。`/`へのリクエストには、ページを描画する前に`(home)/guard.ts`が応答します。`negotiateRequest`でロケールを選び、そのロケールのURLへの`307`を返します。`localize`の結果にはViteの`base`が付かないので、`withBase`で付けます。',
-  en: 'Server mode only. Requests for `/` are answered by `(home)/guard.ts` before any page renders. It picks a locale with `negotiateRequest` and returns a `307` to that locale’s URL. `localize` leaves out Vite’s `base`, so `withBase` adds it.',
+  ja: "serverモードだけで使えます。`/`へのリクエストには、ページを描画する前に`(home)/guard.ts`が応答します。`negotiateRequest`でロケールを選び、`redirect(href('/:locale', { locale }))`でそのロケールのURLへ送ります。リダイレクトは`Response`を組まずに`redirect()`で書き、URLはリンクと同じく`href()`で作ります。",
+  en: "Server mode only. Requests for `/` are answered by `(home)/guard.ts` before any page renders. It picks a locale with `negotiateRequest` and sends the visitor to that locale’s URL with `redirect(href('/:locale', { locale }))`. A redirect is `redirect()`, not a `Response` built by hand, and its URL comes from `href()`, as a link’s does.",
 });
 
 export const rootServerGroup = message({
@@ -443,8 +443,8 @@ export const routeStaticTitle = message({
 });
 
 export const routeStatic = message({
-  ja: 'ビルドがURLごとに`GET`を1回呼び、返った`Response`をそのURLのファイルとして書き出します。`feed.xml/route.ts`なら`dist/client/feed.xml`です。パラメータを持つ`route.ts`は、ページと同じく上の`paths.ts`が返した値ごとに書き出されます。`framework()`に`site`を渡していれば、`request.url`のoriginはその値です。',
-  en: 'The build calls `GET` once per URL and writes the `Response` it returns as the file at that URL: `feed.xml/route.ts` becomes `dist/client/feed.xml`. A `route.ts` with parameters is written once per value the `paths.ts` files above it return, as a page is. With `site` given to `framework()`, the origin of `request.url` is that value.',
+  ja: 'ビルドがURLごとに`GET`を1回呼び、返った`Response`をそのURLのファイルとして書き出します。`feed.xml/route.ts`なら`dist/client/feed.xml`です。パラメータを持つ`route.ts`は、ページと同じく上の`paths.ts`が返した値ごとに書き出されます。`request.url`のoriginは、`framework()`に渡した`site`です。',
+  en: 'The build calls `GET` once per URL and writes the `Response` it returns as the file at that URL: `feed.xml/route.ts` becomes `dist/client/feed.xml`. A `route.ts` with parameters is written once per value the `paths.ts` files above it return, as a page is. The origin of `request.url` is the `site` given to `framework()`.',
 });
 
 export const routeRefusedLead = message({

@@ -26,8 +26,8 @@ export const readFields = [
     en: '`request.headers`: the request’s headers, as `Headers`.',
   }),
   message({
-    ja: '`request.cookies`：`Cookie`ヘッダーをCookieの名前で引ける`ReadonlyMap`です。同じ名前が2つあれば最初の値を使います。値は、囲む引用符を外してパーセントデコードした文字列です。',
-    en: '`request.cookies`: the `Cookie` header read by name into a `ReadonlyMap`. The first of a repeated name wins. Surrounding quotes are removed and the value is percent-decoded.',
+    ja: '`request.cookies`：Cookieを名前で引ける`ReadonlyMap`です。`Cookie`ヘッダーに、同じリクエストの中でguardやServer Actionが`cookies()`で書いた値を重ねたものです。同じ名前が2つあれば最初の値を使います。値は、囲む引用符を外してパーセントデコードした文字列です。届いたままのヘッダーは`request.headers.get("cookie")`で読めます。',
+    en: '`request.cookies`: the cookies by name, as a `ReadonlyMap`: the `Cookie` header with what a guard or a Server Action wrote through `cookies()` in the same request laid over it. The first of a repeated name wins. Surrounding quotes are removed and the value is percent-decoded. The header as it arrived is `request.headers.get("cookie")`.',
   }),
 ] as const;
 
@@ -72,8 +72,8 @@ export const cookiesEncode = message({
 });
 
 export const cookiesAfter = message({
-  ja: 'アクションのあとに再描画したページの`request.cookies`には、リクエストのCookieだけが入ります。アクションが書いた値は入りません。',
-  en: 'In the page re-rendered after an action, `request.cookies` holds only the request’s cookies. What the action wrote is not in it.',
+  ja: 'アクションのあとに再描画したページの`request.cookies`には、アクションが書いた値が入ります。JavaScriptの無いフォームで設定を変えても、その答えのページが新しい値で描かれます。',
+  en: 'In the page re-rendered after an action, `request.cookies` holds what the action wrote, so a setting changed by a form posted without JavaScript is drawn with its new value in that very answer.',
 });
 
 export const optionsTitle = message({

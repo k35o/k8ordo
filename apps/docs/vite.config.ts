@@ -10,7 +10,7 @@ export default defineConfig({
   plugins: [
     framework({
       mode: 'static',
-      // 配信元。これがあるとビルドが sitemap.xml も書く
+      // site は配信元の origin。request.url の origin と sitemap.xml の URL になる
       site: 'https://ordo.k8o.me',
     }),
     betterCssModules(),

@@ -128,16 +128,19 @@ import type { Paths } from '@k8ordo/framework';
 import { listProducts } from '../../../lib/catalog.server';
 
 const paths: Paths<'/products/:id'> = async () =>
-  (await listProducts()).map((product) => String(product.id));
+  (await listProducts()).map((product) => product.id);
 
 export default paths;
 ```
 
 Its default export is a function returning the values the directory's
-parameter takes: an array of strings, or a promise of one. `Paths<Pattern>`
-is its type — exported from `@k8ordo/framework`, a type only — where the
-pattern is the directory's own, ending in that parameter; the generated
-table checks each file against it.
+parameter takes: an array, or a promise of one. `Paths<Pattern>` is its
+type — exported from `@k8ordo/framework`, a type only — where the pattern
+is the directory's own, ending in that parameter; the generated table checks
+each file against it. **A value is what a link to the page takes**: the
+`paramsSchema` output where the page's stack declares one — a number for the
+`id` above, so the catalog's ids go in as they are — and anything with one
+spelling (a string, a number, a bigint or a boolean) where none does.
 
 **It runs where the pages run.** The build asks from the built RSC bundle,
 and `vite dev` through the RSC environment's module runner: the module graph
@@ -170,27 +173,53 @@ import type { Paths } from '@k8ordo/framework';
 import { postsIn } from '../../../../lib/posts.server';
 
 const paths: Paths<'/:locale/posts/:id'> = async ({ locale }) =>
-  (await postsIn(locale)).map((post) => String(post.id));
+  (await postsIn(locale)).map((post) => post.id);
 
 export default paths;
 ```
 
-The params arrive as the strings the files above returned — no
-`paramsSchema` has run. A `paths.ts` below a parameter whose directory has
-none cannot be asked, and the build refuses:
+**The params arrive as the layouts above read them.** Each value above is
+spelled as the build writes it, then run through the `paramsSchema` exports
+of the layouts in the directories above this `paths.ts`'s, outer first. The
+page beside it and a layout in its own directory take no part: they may read
+the value this file is being asked for, which nobody has yet. Their type is
+exactly what those schemas produce, and the string for a parameter none of
+them reads: `locale` is the locale `[locale]/layout.tsx`'s schema accepted.
+When two `paths.ts` share a pattern under different layouts, as sibling route
+groups can, the type is what both of them receive: a `year` one reads as a
+number and the other leaves alone is `number | string`.
+A directory needs no page of its own for its values to be read: with
+`[year]/layout.tsx` reading `year` through
+`z.object({ year: z.coerce.number() })` and no page at `[year]/`,
+`[year]/paths.ts` may return `'2024'`, and `[year]/[slug]/paths.ts`
+receives `year` as the number `2024`.
+
+Values above that one of those schemas refuses are never handed over: the
+`paths.ts` below is not asked under them, and the build refuses, as it does
+for a shell standing there:
+
+```
+the paths.ts files stand where a params schema refuses the values above them, so they were not asked: /last/:slug ([year]/[slug]/paths.ts)
+```
+
+A `paths.ts` below a parameter whose directory has none cannot be asked,
+and the build refuses:
 
 ```
 [locale]/posts/[id]/paths.ts is asked for its values once per value of the parameters above it, and /:locale/posts still holds one — give that parameter's directory a paths.ts too
 ```
 
-**A value is the segment as a visitor reads it** — `café`, `a b` — not
-URL-escaped; the build escapes it for the URL and writes the file under the
-unescaped name. Values are non-empty strings, so an id is spelled
-(`String(product.id)`), and a value repeated is written once:
+**The build spells a value as `href` does** — `String(value)`, escaped for
+the URL — so `café` and `a b` are returned as a visitor reads them, and the
+file is written under the unescaped name. A string must not be empty, and a
+value spelled twice is written once:
 
 ```
-tags/[tag]/paths.ts has to return an array of non-empty strings, the values of :tag
+tags/[tag]/paths.ts has to return an array of the values of :tag, each a non-empty string, a number, a bigint or a boolean
 ```
+
+The spelling is the one the page's `paramsSchema` reads back, as for a
+link; a value it refuses stops the build (below).
 
 A value that is `..` names a file outside the output, and `!fallback` is the
 segment the build keeps for shells:
@@ -226,13 +255,7 @@ one error, with any page that failed to render, so fixing one does not reveal
 the next.
 
 `paths.ts` belongs in a `[param]` directory and nowhere else
-([What the build refuses](routing.md#what-the-build-refuses)), and
-`framework()` takes no `paths` option — passing one throws when the config
-loads:
-
-```
-framework() takes no paths — a parameter's values come from a paths.ts in its directory under routes/
-```
+([What the build refuses](routing.md#what-the-build-refuses)).
 
 Under `mode: 'server'` a `paths.ts` is never read and nothing of it is
 built in, so the same `routes/` works in both modes.
@@ -363,7 +386,7 @@ import type { Paths } from '@k8ordo/framework';
 import { listPosts } from '../../../lib/posts.server';
 
 const paths: Paths<'/posts/:id'> = async () =>
-  (await listPosts()).map((post) => String(post.id));
+  (await listPosts()).map((post) => post.id);
 
 export default paths;
 ```

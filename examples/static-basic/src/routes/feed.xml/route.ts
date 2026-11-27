@@ -3,7 +3,7 @@ import type { RouteContext } from '@k8ordo/framework';
 import { listProducts } from '../../lib/catalog.server';
 
 // ビルドはこの GET を 1 度呼び、答えを dist/client/feed.xml に書く。
-// site を渡したビルドでは、request の origin がサイトの配信元になる
+// site は配信元の origin。request.url の origin と sitemap.xml の URL になる
 export async function GET({ request }: RouteContext<'/feed.xml'>) {
   const { origin } = new URL(request.url);
   const items = (await listProducts())

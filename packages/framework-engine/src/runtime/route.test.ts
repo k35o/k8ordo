@@ -1,7 +1,11 @@
+import { notFound } from '@k8ordo/router';
 import { describe, expect, it } from 'vite-plus/test';
 
+import { SAID_NOT_FOUND } from './ended';
+import { redirect } from './redirect';
 import { cookies, withRequest } from './request-scope';
 import { methodNotAllowed, methodsOf, routeAnswerFor, runRoute } from './route';
+import type { AnyRouteModule } from './route';
 
 const get = () => new Response('feed', { headers: { 'x-kind': 'feed' } });
 const post = () => new Response(null, { status: 201 });
@@ -16,24 +20,35 @@ const context = (method: string) => ({
   params: {},
 });
 
+const responseOf = async (
+  module: AnyRouteModule,
+  method: string,
+): Promise<Response> => {
+  const answered = await runRoute(
+    routeAnswerFor(module, method)!,
+    context(method),
+  );
+  if (!(answered instanceof Response)) {
+    throw new TypeError(`the route.ts ended with ${String(answered)}`);
+  }
+  return answered;
+};
+
 describe('a route.ts', () => {
   it('answers a method it exports', async () => {
-    const found = routeAnswerFor({ GET: get }, 'GET');
-    expect(found).not.toBeNull();
-    const response = await runRoute(found!, context('GET'));
+    expect(routeAnswerFor({ GET: get }, 'GET')).not.toBeNull();
+    const response = await responseOf({ GET: get }, 'GET');
     expect(await response.text()).toBe('feed');
   });
 
   it('answers HEAD from its GET, with the headers and without the body', async () => {
-    const found = routeAnswerFor({ GET: get }, 'HEAD');
-    const response = await runRoute(found!, context('HEAD'));
+    const response = await responseOf({ GET: get }, 'HEAD');
     expect(response.headers.get('x-kind')).toBe('feed');
     expect(response.body).toBeNull();
   });
 
   it('prefers a HEAD of its own', async () => {
-    const found = routeAnswerFor({ GET: get, HEAD: ownHead }, 'HEAD');
-    const response = await runRoute(found!, context('HEAD'));
+    const response = await responseOf({ GET: get, HEAD: ownHead }, 'HEAD');
     expect(response.headers.get('x-kind')).toBe('own');
   });
 
@@ -61,6 +76,23 @@ describe('a route.ts', () => {
         ),
       ).resolves.toBeInstanceOf(Response);
     });
+  });
+
+  it('ends with a 303 to the URL redirect() names', async () => {
+    const response = await withRequest(context('POST').request, () =>
+      responseOf({ POST: () => redirect('/thanks') }, 'POST'),
+    );
+    expect(response.status).toBe(303);
+    expect(response.headers.get('location')).toBe('/thanks');
+  });
+
+  it('ends with the not-found when it says notFound()', async () => {
+    await expect(
+      runRoute(
+        routeAnswerFor({ GET: () => notFound() }, 'GET')!,
+        context('GET'),
+      ),
+    ).resolves.toBe(SAID_NOT_FOUND);
   });
 
   it('refuses an answer that is not a Response', async () => {

@@ -59,13 +59,15 @@ type MergedOutput<Schemas extends readonly unknown[]> =
 /**
  * A pattern's params after the schemas along its stack have run — outer
  * layouts first, the page last — each replacing the strings it names with
- * what it produced. Params no schema names stay strings.
+ * what it produced. Params no schema names stay strings. A union of stacks
+ * gives the union of what each one produces.
  */
 export type ParsedParams<
   Pattern extends string,
   Schemas extends readonly unknown[],
-> = Omit<ParamsOf<Pattern>, keyof MergedOutput<Schemas>> &
-  MergedOutput<Schemas>;
+> = Schemas extends unknown
+  ? Omit<ParamsOf<Pattern>, keyof MergedOutput<Schemas>> & MergedOutput<Schemas>
+  : never;
 
 /** `{ '/products/:id': [schema, …] }` → `{ '/products/:id': { id: number } }` */
 export type ParsedParamsMap<

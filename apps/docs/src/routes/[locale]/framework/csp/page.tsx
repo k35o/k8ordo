@@ -17,6 +17,7 @@ export default defineConfig({
   plugins: [
     framework({
       mode: 'static',
+      site: 'https://example.com',
       csp: {
         'script-src': ["'self'"],
         'object-src': ["'none'"],
@@ -34,6 +35,7 @@ export default defineConfig({
   plugins: [
     framework({
       mode: 'static',
+      site: 'https://example.com',
       csp: {
         'script-src': ["'self'", await colorSchemeScriptHash()],
         'object-src': ["'none'"],
@@ -101,11 +103,11 @@ export default function FrameworkCspPage() {
             code={OPTION_CONFIG}
             lang="ts"
             marks={{
-              8: 'highlight',
               9: 'highlight',
               10: 'highlight',
               11: 'highlight',
               12: 'highlight',
+              13: 'highlight',
             }}
             title="vite.config.ts"
           />
@@ -126,7 +128,7 @@ export default function FrameworkCspPage() {
           <CodeBlock
             code={OWN_CONFIG}
             lang="ts"
-            marks={{ 1: 'highlight', 10: 'highlight' }}
+            marks={{ 1: 'highlight', 11: 'highlight' }}
             title="vite.config.ts"
           />
           <p>

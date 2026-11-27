@@ -24,7 +24,7 @@ dist/
         index.rsc
     404.html              not-found.tsx, rendered
     client-files.json     what each page loads beyond its payload, for a navigation to link ahead
-    sitemap.xml           every page above, when `site` is set
+    sitemap.xml           every page above, at `site`'s origin
     _redirects            how a host reaches the shells, when there are any
     assets/…              the client bundle
   rsc/  ssr/              the machinery that produced the above
@@ -628,7 +628,7 @@ const acceptsMarkdown = [
 
 export default defineConfig({
   plugins: [
-    framework({ mode: 'static' }),
+    framework({ mode: 'static', site: 'https://example.com' }),
     vercel({
       beforeFiles: [
         {
@@ -743,6 +743,7 @@ export default defineConfig({
   plugins: [
     framework({
       mode: 'static',
+      site: 'https://example.com',
       headers: {
         'X-Content-Type-Options': 'nosniff',
         'Referrer-Policy': 'strict-origin-when-cross-origin',
@@ -812,7 +813,7 @@ An application served below the root of its origin — `https://example.com/docs
 // vite.config.ts
 export default defineConfig({
   base: '/docs/',
-  plugins: [framework({ mode: 'static' })],
+  plugins: [framework({ mode: 'static', site: 'https://example.com' })],
 });
 ```
 
@@ -828,11 +829,10 @@ the way:
 - A `redirect.ts` target is written from the root, like the table, and is
   sent with the base in front; one that names another origin is sent as
   written.
-- Under `mode: 'server'`, a redirect the application builds itself is sent
-  as written: `redirect()` from a Server Action, and the `location` of a
-  `Response` a `guard.ts` returns. Both are URLs, so build them with
-  `href()` — `redirect(href('/talks'))`, `location: href('/login')` — or
-  give a pathname built some other way its base with `withBase()`.
+- Under `mode: 'server'`, a redirect the application asks for is sent as
+  written: `redirect()` from a Server Action, a `guard.ts` or a `route.ts`.
+  It takes a URL, so build it with `href()` — `redirect(href('/talks'))` —
+  or give a pathname built some other way its base with `withBase()`.
 - A URL outside the base is none of the application's: the handler answers
   it with a `404`, and the client runtime leaves it to the browser.
 

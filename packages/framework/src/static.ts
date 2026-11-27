@@ -23,6 +23,7 @@ import {
   readServerStylesheets,
   REEXPORTS_ALL,
   ROUTE_METHODS,
+  ROUTES_DIR,
   scanRoutes,
   SERVER_STYLESHEETS_HEADER,
   serverActionModules,
@@ -64,7 +65,7 @@ import {
   fileAt,
   isConcrete,
   patternsNeedingPaths,
-  patternsOf,
+  answeringPatterns,
   planPaths,
   planRefusals,
   routeFileRefusals,
@@ -72,7 +73,7 @@ import {
   SITEMAP_PATHNAME,
   suppliedFrom,
 } from './paths';
-import type { PathPlan, Shell } from './paths';
+import type { Asked, PathPlan, Shell } from './paths';
 import {
   builtRules,
   cloudflareCounts,
@@ -95,13 +96,14 @@ export type StaticOptions = EngineOptions & {
    */
   readonly mode: 'static';
   /**
-   * The origin the site is served from — `https://example.com`. With it the
-   * build also writes `sitemap.xml`, listing every page it rendered at its
-   * URL, Vite's `base` included; without it, no sitemap, because a sitemap of
-   * relative URLs is not one. A `route.ts` that writes `sitemap.xml` is the
-   * application's own list, and the build leaves the file to it.
+   * The origin the site is served from — `https://example.com`, with no
+   * path. The build asks for every page and `route.ts` under it, so it is
+   * the origin of the `request.url` a `route.ts` reads, and it writes
+   * `sitemap.xml`, listing every page it rendered at its URL, Vite's `base`
+   * included. A `route.ts` that writes `sitemap.xml` is the application's
+   * own list, and the build leaves the file to it.
    */
-  readonly site?: string;
+  readonly site: string;
   /**
    * The `Content-Security-Policy` every page carries, as directives and
    * their sources. The framework decides no policy: it writes this one into
@@ -115,6 +117,11 @@ export type StaticOptions = EngineOptions & {
 };
 
 type Handler = (request: Request) => Promise<Response>;
+
+type PathValues = (
+  file: string,
+  above: Readonly<Record<string, string>>,
+) => Promise<Asked>;
 
 /**
  * What a host adapter writes a static build from, once every file is in
@@ -176,8 +183,6 @@ const filesBelow = async (dir: string): Promise<string[]> =>
 
 const messageOf = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
-
-const ORIGIN = 'http://k8ordo.localhost';
 
 const WANTS_SERVER = "this application wants mode: 'server'";
 
@@ -266,8 +271,12 @@ const READ_BY_NAME = new Set(['route', 'page']);
  * There is no server here, and the build refuses a Server Action, because a
  * file cannot receive one.
  */
-export const staticMode = (options: StaticOptions): Plugin[] => {
+export const staticMode = (
+  options: StaticOptions,
+  host: { readonly runtimeDir: string },
+): Plugin[] => {
   const { csp } = options;
+  const { origin } = new URL(options.site);
   const unwritablePolicy = csp === undefined ? [] : policyProblems(csp);
   if (unwritablePolicy.length > 0) {
     throw new Error(
@@ -310,38 +319,32 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
             ),
         declared: failed
           ? []
-          : patternsOf(tree)
-              .filter((pattern) => !pattern.endsWith('/*'))
-              .map((pattern) => ({
-                pattern,
-                matcher: new URLPattern({ pathname: pattern }),
-              })),
+          : answeringPatterns(tree).map(({ pattern }) => ({
+              pattern,
+              matcher: new URLPattern({ pathname: pattern }),
+            })),
       };
     })());
 
   /**
-   * A paths.ts under `vite dev`, read through the RSC environment's runner —
-   * the graph the pages are in, so it sees the application's aliases and an
-   * edit to it, or to what it imports, is what the next call reads.
+   * A paths.ts under `vite dev`, asked through the handler's own entry in the
+   * RSC environment's runner — the graph the pages are in, so it sees the
+   * application's aliases, an edit to it, or to what it imports, is what the
+   * next call reads, and it receives the params above as the build hands them.
    */
   const devValues = async (
     file: string,
-    params: Readonly<Record<string, string>>,
-  ): Promise<unknown> => {
+    above: Readonly<Record<string, string>>,
+  ): Promise<Asked> => {
     const environment = devServer?.environments.rsc;
     if (environment === undefined || !('runner' in environment)) {
       throw new Error('the rsc environment cannot run a paths.ts');
     }
     const { runner } = environment as RunnableDevEnvironment;
-    const { default: values } = (await runner.import(
-      path.join(routesDir, file),
-    )) as { default?: unknown };
-    if (typeof values !== 'function') {
-      throw new TypeError(
-        `${fromRoot(file)} has to export default a function returning its parameter's values`,
-      );
-    }
-    return (values as (above: typeof params) => unknown)(params);
+    const { pathValues } = (await runner.import(
+      path.join(host.runtimeDir, 'entry.rsc.mjs'),
+    )) as { pathValues: PathValues };
+    return pathValues(file, above);
   };
 
   /**
@@ -367,7 +370,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         }
         return NO_PLAN;
       }
-      const plan = planPaths(tree, supplied.locations);
+      const plan = planPaths(tree, supplied);
       for (const refusal of [
         ...supplied.problems,
         ...planRefusals(
@@ -401,7 +404,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
       return false;
     }
     // RSC プラグインと同じく originalUrl を読む。base はそちらに残っている
-    const url = new URL(request.originalUrl ?? request.url ?? '/', ORIGIN);
+    const url = new URL(request.originalUrl ?? request.url ?? '/', origin);
     const own = withoutBase(url.pathname, base);
     if (own === null) {
       return false;
@@ -568,7 +571,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
 
     configResolved(config) {
       ({ root, plugins, base, logger } = config);
-      routesDir = path.resolve(root, options.routesDir ?? 'src/routes');
+      routesDir = path.resolve(root, ROUTES_DIR);
     },
 
     configureServer: {
@@ -599,7 +602,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         request: Connect.IncomingMessage,
         response: ServerResponse,
       ): Promise<boolean> => {
-        const url = new URL(`${ORIGIN}${request.url ?? '/'}`);
+        const url = new URL(`${origin}${request.url ?? '/'}`);
         if (withoutBase(url.pathname, config.base) === null) return false;
         if (request.method !== 'GET' && request.method !== 'HEAD') {
           response.writeHead(405, { allow: 'GET, HEAD' }).end();
@@ -728,14 +731,11 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
           pathToFileURL(path.resolve(root, rscOut, 'index.js')).href
         )) as {
           default: Handler;
-          pathValues: (
-            file: string,
-            params: Readonly<Record<string, string>>,
-          ) => Promise<unknown>;
+          pathValues: PathValues;
           payloadOf: (response: Response) => ArrayBuffer | undefined;
         };
         const supplied = await suppliedFrom(tree, built.pathValues);
-        const plan = planPaths(tree, supplied.locations);
+        const plan = planPaths(tree, supplied);
         const answers = answersOf(tree, plan.paths);
         // RSC の仕組みは action とリクエストの API をどちらのモードでもコンパイル
         // するので、static で受けないと言えるのはビルドが断るときだけ
@@ -756,8 +756,6 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
 
         // outDir はすでに絶対パスのことがあるので resolve で受ける
         const clientDir = path.resolve(root, client.build.outDir);
-        const origin =
-          options.site === undefined ? ORIGIN : new URL(options.site).origin;
         const render: Render = {
           handler: built.default,
           payloadOf: built.payloadOf,
@@ -802,14 +800,11 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
             : [],
         );
         // アプリが route.ts で書いた sitemap.xml は、そのサイトの一覧。上書きしない
-        const listed =
-          answers.get(SITEMAP_PATHNAME)?.kind === 'route'
-            ? undefined
-            : options.site;
-        if (listed !== undefined) {
+        const listed = answers.get(SITEMAP_PATHNAME)?.kind !== 'route';
+        if (listed) {
           await writeSitemap(
             clientDir,
-            listed,
+            origin,
             plan.paths
               .filter((pathname) => !notPages.includes(pathname))
               .map((pathname) => withBase(pathname, base)),
@@ -854,7 +849,7 @@ export const staticMode = (options: StaticOptions): Plugin[] => {
         builder.config.logger.info(
           `k8ordo: wrote ${summaryOf(plan, {
             notFound: notFoundAt !== null,
-            sitemap: listed !== undefined,
+            sitemap: listed,
           })}`,
         );
       },
@@ -1089,7 +1084,6 @@ const renderPage = async (
   // リダイレクトにペイロードは無い。クライアントの遷移は index.rsc に何も
   // 見つけず、URL をブラウザに渡し、上の HTML がリダイレクトする
   if (status === 307 || status === 308) return { kind: 'redirect', pathname };
-  if (status !== 200) return { kind: 'document', files, payload: null };
   // 200 の文書は、描いたペイロードを必ず持つ。持たないなら約束が破れているので、
   // index.rsc の無いページを黙って書かない
   if (payload === null) return failed('render', pathname);
@@ -1198,12 +1192,12 @@ const writeClientFiles = async (
 
 const writeSitemap = async (
   clientDir: string,
-  site: string,
+  origin: string,
   pathnames: readonly string[],
 ): Promise<void> => {
   await writeFile(
     path.join(clientDir, 'sitemap.xml'),
-    sitemap(site, pathnames),
+    sitemap(origin, pathnames),
   );
 };
 
@@ -1298,8 +1292,9 @@ const writeHtml = async (
   }
   const nonce = response.headers.get(NONCE_HEADER);
   if (nonce === null) {
-    await writeFile(file, Buffer.from(await response.arrayBuffer()));
-    return written;
+    throw new Error(
+      `${url} answered HTML without saying the nonce it signed its scripts with`,
+    );
   }
   await writeFile(file, asFile(await response.text(), nonce, csp));
   const named = response.headers.get(CLIENT_DEPS_HEADER);

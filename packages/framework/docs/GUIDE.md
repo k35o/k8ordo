@@ -35,6 +35,7 @@ misplaced one fails either build.
 
 Towards `mode: 'static'`:
 
+- add `site`, the origin the site is served from,
 - give every parameter's directory a `paths.ts` that returns its values —
   and, for values the build cannot know, put a `fallback.tsx` beside the
   page
@@ -133,7 +134,9 @@ exception, and puts the framework in `dependencies`
 import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
 
-export default defineConfig({ plugins: [framework({ mode: 'static' })] });
+export default defineConfig({
+  plugins: [framework({ mode: 'static', site: 'https://example.com' })],
+});
 // or framework({ mode: 'server' })
 ```
 
@@ -258,7 +261,9 @@ The package is split by where the code runs.
   `navigateTo`, `bindParams`, `notFound`, `usePathname`,
   `usePendingPathname`, `useMatch`, `matchPath`, `withBase`, and the types
   `PageProps`, `LayoutProps`, `RouteContext` and `ErrorProps`, re-exported
-  from `@k8ordo/router`. `useParams` and `useRoute` are not among them: they
+  from `@k8ordo/router`, with the two types of its own a route file of
+  either mode is written against: `Paths` (a `paths.ts`) and
+  `RedirectTarget` (a `redirect.ts`). `useParams` and `useRoute` are not among them: they
   read a `<Router>` the framework never renders, and a page receives
   `params` as a prop instead.
 - `@k8ordo/framework/vite` — `framework()`, for `vite.config.ts` only. It
@@ -266,8 +271,7 @@ The package is split by where the code runs.
 - `@k8ordo/framework/server` — server mode only. What code inside the
   request handler imports: `cookies()`, `responseHeaders()`,
   `requestHeaders()`, `redirect()`, `nonce()`, `waitUntil()`, and the types
-  `Guard`, `GuardContext`, `RouteRequest`, `RedirectTarget` and
-  `HandlerContext`.
+  `Guard`, `GuardContext`, `RouteRequest` and `HandlerContext`.
 - `@k8ordo/framework/serve` — `serve`, the Node.js server for a build: what
   `dist/server.js` runs, for a server of your own to import. A static build
   it serves as a static host does, its `_redirects` applied.
@@ -289,8 +293,16 @@ dev dependencies.
 
 ## The options
 
-`framework()` takes `mode`, which is required, `routesDir`, the route
-directory (default `src/routes`), and `reactCompiler`, in either mode.
+`framework()` takes `mode`, which is required, and `reactCompiler` and
+`headers`, in either mode. The route files always live in `src/routes/`.
+Any other key
+stops the config as it loads, naming the keys the mode takes — a
+`vite.config.js` is never type-checked, and a key spelt wrong would
+otherwise do nothing:
+
+```
+framework() takes no reactcompiler — under mode: 'static' it takes mode, reactCompiler, headers, site, csp
+```
 
 `reactCompiler: true` compiles the client components with React Compiler —
 the Rust one, `oxc-transform-react`, through `@vitejs/plugin-react`'s
@@ -303,17 +315,54 @@ read the config, with React's plugin's own error
 what runs in the browser is compiled; Server Components, and the HTML a
 client component renders on the server, are left as written.
 
+`headers` is one set of response headers every answer carries, whatever
+answered it — a page, a file of the build, a `404`, a redirect: sent by
+`vite dev`, `vite preview` and `serve`, added by the handler to its own
+answers under `mode: 'server'`, and written into `_headers` (and `vercel()`'s
+routes) for a static host. A header a `guard.ts` or a `route.ts` set under
+the same name wins
+([Headers on every response](references/deploy.md#headers-on-every-response)).
+
 Two more describe files, so only `mode: 'static'` takes them — passing
 them with `mode: 'server'` is a type error:
 
-- `site` — the origin the site is served from, `https://example.com`. With
-  it the build also writes `sitemap.xml`, listing every page it rendered;
-  without it there is no sitemap, because a sitemap of relative URLs is not
-  one. A `route.ts` that writes `sitemap.xml` is the application's own
-  list, and the build leaves the file to it
-  ([Routing](references/routing.md#under-static-mode)).
+- `site`, required — the origin the site is served from,
+  `https://example.com`, with no path (Vite's `base` says where under it).
+  The build asks for every page and `route.ts` under it, so it is the
+  origin of the `request.url` a `route.ts` reads, and writes
+  `sitemap.xml`, listing every page it rendered at that origin. A
+  `route.ts` that writes `sitemap.xml` is the application's own list, and
+  the build leaves the file to it
+  ([Routing](references/routing.md#under-static-mode)). A value that is not
+  an origin stops the config as it loads.
 - `csp` — the Content-Security-Policy each page carries
   ([Content Security Policy](references/csp.md#static-mode-hashes-in-a-meta)).
+
+## Testing
+
+What needs no request — a `paramsSchema`, a module under `src/lib/`, a
+client component — is an ordinary module, tested as one. What answers a
+request is tested through the handler the build wrote, the same function a
+host calls:
+
+```ts
+// after `vite build` under mode: 'server'
+import handler from '../dist/rsc/index.js';
+
+const response = await handler(new Request('https://example.test/account'));
+expect(response.status).toBe(303); // the guard sent the visitor to sign in
+expect(response.headers.get('location')).toBe('/login');
+```
+
+A guard, a `route.ts` and a Server Action are tested this way rather than
+called by hand: `cookies()`, `responseHeaders()`, `requestHeaders()`,
+`nonce()` and `waitUntil()` belong to a request in progress, and outside
+one they throw `… needs a request`. For a real HTTP round trip — the
+`Set-Cookie` a browser would store, a compressed answer — `serve()` from
+`@k8ordo/framework/serve` runs the build on `port: 0`, a free port, and
+`close()` stops it ([Running the build](references/deploy.md#running-the-build)).
+A static build is tested by the files it wrote under `dist/client/`, or
+served the same way, as a static host serves them.
 
 ## References
 

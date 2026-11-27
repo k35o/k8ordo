@@ -450,7 +450,10 @@ method it does not export gets a `405` whose `Allow` names the ones it does.
 The guards above it run first. A `POST` to a `route.ts` is not held to the
 same-origin rule a Server Action is — what posts to one, a webhook, is not a
 form on this site — so it checks what it needs itself. It answers the request
-as much as a guard does: [`cookies()`](guards.md#cookies),
+as much as a guard does, and ends it the same ways: `redirect(url)` answers
+with a `303`, and `notFound()` with the nearest `not-found.tsx` under a 404
+— a `route.ts` that wants a 404 of another shape, JSON say, returns its own
+`Response`. [`cookies()`](guards.md#cookies),
 `responseHeaders()` and `requestHeaders()` work inside it, and
 [`waitUntil()`](guards.md#work-after-the-answer) keeps the host running for
 what it goes on with after answering — from inside a stream it answered
@@ -461,8 +464,9 @@ with, too.
 The build calls its `GET` once for each pathname the site has — a pattern
 with params takes its values from the `paths.ts` files above it, as a
 page's does ([Parameters](params.md#routes-with-parameters)) — with a request whose
-origin is `site` when that option is given (an RSS feed's links are
-absolute), and writes what it answered as the file at that pathname:
+origin is `site`, the origin `framework()` requires under static mode (an
+RSS feed's links are absolute, as above), and writes what it answered as the
+file at that pathname:
 `dist/client/feed.xml`. A file keeps no type of its own, so a static host
 serves it with the type its extension says — `vite preview` and `serve` too,
 which send a file with no extension as `application/octet-stream`. On
@@ -499,9 +503,8 @@ static build writes a route.ts as the file its GET answers, and these cannot be 
 
 `sitemap.xml` is the exception: a `route.ts` there is the application's own
 list of the site, with the dates and priorities only it knows, so the build
-writes none of its own and leaves the file to it — `site` given or not. Keep
-`site` all the same: it is the origin of the `request.url` every `route.ts`
-is handed, which a sitemap's absolute URLs are built from. Rules of your own for a host go in
+writes none of its own and leaves the file to it, building its absolute URLs
+from the `request.url` it is handed, whose origin is `site`. Rules of your own for a host go in
 `public/_redirects`, which the build adds to its own. `vite dev` does not
 stop: only the build writes the files.
 
@@ -649,7 +652,7 @@ reads only the framework.
 clone — a CI checkout among them — has neither until something writes them.
 `k8ordo generate`, the package's command, writes them and stops there: it
 reads the Vite config in the working directory as `vite build` does, so the
-`mode` and `routesDir` given to `framework()` are the ones it uses, then
+`mode` given to `framework()` is the one it uses, then
 builds nothing and renders no page — no `paths.ts` is read, and nothing a
 page reads is touched. A `routes/` with the problems of
 [What the build refuses](#what-the-build-refuses) fails it as it fails the
@@ -750,7 +753,10 @@ import mdx from '@mdx-js/rollup';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [{ enforce: 'pre', ...mdx() }, framework({ mode: 'static' })],
+  plugins: [
+    { enforce: 'pre', ...mdx() },
+    framework({ mode: 'static', site: 'https://example.com' }),
+  ],
 });
 ```
 

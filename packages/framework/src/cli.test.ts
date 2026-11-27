@@ -73,24 +73,19 @@ const generated = (root: string, file: string): Promise<string> =>
   readFile(path.join(root, '.k8ordo', file), 'utf8');
 
 describe('k8ordo generate', { timeout: 30_000 }, () => {
-  it('writes .k8ordo/ from the routes directory vite.config.ts names, never reading a paths.ts or building', async () => {
+  it('writes .k8ordo/ from the mode vite.config.ts names, never reading a paths.ts or building', async () => {
     const root = await app(
       `import { framework } from '@k8ordo/framework/vite';
 
 export default {
-  plugins: [
-    framework({
-      mode: 'static',
-      routesDir: 'app/routes',
-    }),
-  ],
+  plugins: [framework({ mode: 'static', site: 'https://example.test' })],
 };
 `,
       {
-        'app/routes/layout.tsx': ROUTE,
-        'app/routes/page.tsx': ROUTE,
-        'app/routes/posts/[id]/page.tsx': ROUTE,
-        'app/routes/posts/[id]/paths.ts':
+        'src/routes/layout.tsx': ROUTE,
+        'src/routes/page.tsx': ROUTE,
+        'src/routes/posts/[id]/page.tsx': ROUTE,
+        'src/routes/posts/[id]/paths.ts':
           "throw new Error('paths.ts was read');\nexport default () => [];\n",
       },
     );
@@ -100,13 +95,13 @@ export default {
     expect(code).toBe(0);
     expect((await readdir(root)).toSorted()).toStrictEqual([
       '.k8ordo',
-      'app',
       'node_modules',
       'package.json',
+      'src',
       'vite.config.ts',
     ]);
     expect(await generated(root, 'routes.gen.ts')).toContain(
-      "'../app/routes/posts/[id]/page'",
+      "'../src/routes/posts/[id]/page'",
     );
     expect(await generated(root, 'register.gen.ts')).not.toContain(
       'request: RouteRequest',
@@ -134,7 +129,9 @@ export default { plugins: [framework({ mode: 'server' })] };
     const root = await app(
       `import { framework } from '@k8ordo/framework/vite';
 
-export default { plugins: [framework({ mode: 'static' })] };
+export default {
+  plugins: [framework({ mode: 'static', site: 'https://example.test' })],
+};
 `,
       {
         'src/routes/page.tsx': ROUTE,

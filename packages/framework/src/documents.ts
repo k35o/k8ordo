@@ -12,12 +12,13 @@ const escapeMarkup = (value: string): string =>
     .replaceAll("'", '&apos;');
 
 /**
- * The sitemap protocol's one required element per URL: `<loc>`. The site is
- * taken as given, without a trailing slash, and the pathname as the URL
- * carries it, escaped for XML.
+ * The sitemap protocol's one required element per URL: `<loc>`, the origin
+ * followed by the pathname as the URL carries it, escaped for XML.
  */
-export const sitemap = (site: string, pathnames: readonly string[]): string => {
-  const origin = site.endsWith('/') ? site.slice(0, -1) : site;
+export const sitemap = (
+  origin: string,
+  pathnames: readonly string[],
+): string => {
   const urls = pathnames
     .toSorted()
     .map(

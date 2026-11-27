@@ -8,7 +8,7 @@ const HERO_CONFIG = `import { framework } from '@k8ordo/framework/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [framework({ mode: 'static' })],
+  plugins: [framework({ mode: 'static', site: 'https://example.com' })],
 });`;
 
 const HERO_PAGE = `export default function ProductsPage() {
@@ -26,7 +26,7 @@ const CLAIM_ROUTES = `src/routes/
     page.tsx
     [id]/page.tsx`;
 
-const CLAIM_STATIC = `framework({ mode: 'static' });`;
+const CLAIM_STATIC = `framework({ mode: 'static', site: 'https://example.com' });`;
 
 const CLAIM_STATIC_RUN = `vite build`;
 

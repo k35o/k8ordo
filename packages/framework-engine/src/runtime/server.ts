@@ -1,9 +1,10 @@
 /**
  * `@k8ordo/framework/server`: what code inside the request handler imports
  * under mode: 'server' — the response API a guard and a Server Action answer
- * through, a Server Action's `redirect()`, the nonce the answer's inline
+ * through, `redirect()` from a guard, a route.ts or a Server Action, the
+ * nonce the answer's inline
  * scripts carry, `waitUntil()` for what goes on after the answer, and the
- * types a route file names — and `HandlerContext`, what a runtime calling the
+ * types a request-answering route file names — and `HandlerContext`, what a runtime calling the
  * built handler itself hands it beside the request. The framework points that
  * entry at this file in the runtime it copies rather than at a bundle of its
  * own, so an application's import and the handler are one module: one
@@ -13,7 +14,6 @@
  * mode: 'static' the build refuses any module importing it.
  */
 export { redirect } from './redirect';
-export type { RedirectTarget } from './redirect';
 export type { RouteRequest } from './request';
 export type { Guard, GuardContext } from './guard';
 export {

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import { Redirect, redirect, resolveRedirects } from './redirect';
+import { inPhase, withRequest } from './request-scope';
 
 describe('redirect', () => {
   it('throws a Redirect carrying where it sends the visitor', () => {
@@ -12,6 +13,27 @@ describe('redirect', () => {
     }
     expect(caught).toBeInstanceOf(Redirect);
     expect(caught).toMatchObject({ to: '/talks' });
+  });
+
+  it.each(['guard', 'route', 'action'] as const)(
+    'ends what answers the request in the %s phase',
+    (phase) => {
+      expect(() =>
+        withRequest(new Request('https://example.test/'), () =>
+          inPhase(phase, () => redirect('/talks')),
+        ),
+      ).toThrow(Redirect);
+    },
+  );
+
+  it('refuses by name while a page renders, which answers nothing', () => {
+    expect(() =>
+      withRequest(new Request('https://example.test/'), () =>
+        redirect('/talks'),
+      ),
+    ).toThrow(
+      'redirect() ends what answers the request, and a page is a render — redirect from a guard.ts, a route.ts or a Server Action, or answer the URL with a redirect.ts (it was asked for /talks)',
+    );
   });
 });
 

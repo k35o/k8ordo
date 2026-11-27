@@ -43,8 +43,20 @@ const vercelOf = (config: ResolvedConfig) => {
 
 describe('vercel', () => {
   it.each([
-    ['after', () => [framework({ mode: 'static' }), vercel()]],
-    ['before', () => [vercel(), framework({ mode: 'static' })]],
+    [
+      'after',
+      () => [
+        framework({ mode: 'static', site: 'https://example.test' }),
+        vercel(),
+      ],
+    ],
+    [
+      'before',
+      () => [
+        vercel(),
+        framework({ mode: 'static', site: 'https://example.test' }),
+      ],
+    ],
   ])(
     'accepts static mode placed %s framework(), leaving its output to the static build, which has the pages',
     async (_side, plugins) => {
@@ -76,7 +88,10 @@ describe('vercel', () => {
           configFile: false,
           logLevel: 'silent',
           base: '/site/',
-          plugins: [framework({ mode: 'static' }), vercel()],
+          plugins: [
+            framework({ mode: 'static', site: 'https://example.test' }),
+            vercel(),
+          ],
           environments: { client: { build: { outDir: 'out/app' } } },
         },
         'build',
@@ -132,7 +147,10 @@ describe('vercel', () => {
     "refuses %s under mode: 'static', where there is no function",
     async (_name, options) => {
       await expect(
-        resolved([framework({ mode: 'static' }), vercel(options)]),
+        resolved([
+          framework({ mode: 'static', site: 'https://example.test' }),
+          vercel(options),
+        ]),
       ).rejects.toThrow(
         "vercel() takes maxDuration and regions under mode: 'server' only — under mode: 'static' there is no function for them to configure",
       );

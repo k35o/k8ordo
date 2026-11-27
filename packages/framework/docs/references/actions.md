@@ -67,8 +67,11 @@ export async function signIn(_previous: FormState, formData: FormData) {
 
 What an action writes goes on its answer: the page it re-rendered, the `303`
 to where it redirected, or the payload the client runtime applies. The page
-re-rendered after it sees the cookies the request carried in `request`, not
-what the action wrote.
+re-rendered after it reads what the action wrote: `request.cookies` is the
+request's cookies with every write of the guards and the action laid over
+them, so a preference changed by a form posted without JavaScript is drawn
+with its new value in that very answer. `request.headers.get('cookie')`
+stays the header as it arrived.
 
 **An action runs in the context of the page it was posted to.** A call
 posts to the URL of the page on screen, whose params schemas run for that
@@ -111,5 +114,9 @@ posted by the client runtime is answered with a payload that tells the
 router to navigate there. The target is a URL, sent as given — build it with
 `href()`, which carries Vite's `base` when the application is served under
 one, where a `redirect.ts` target is a pattern in the table's terms and gets
-the base put in front. `redirect()` is for actions: a page that should
-send the visitor elsewhere is a `redirect.ts`, where the build can see it.
+the base put in front. `redirect()` ends what answers a request — a Server
+Action, a [`guard.ts`](guards.md#guards) or a
+[`route.ts`](routing.md#under-server-mode), the last two with a `303`. A page
+is a render, not an answer: called while one renders, `redirect()` throws by
+name, and a page that should send the visitor elsewhere is a `redirect.ts`,
+where the build can see it, or a guard.

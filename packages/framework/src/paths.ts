@@ -14,15 +14,16 @@ import type {
   RouteDir,
 } from '@k8ordo/framework-engine';
 import { normalizePathname } from '@k8ordo/router';
+import type { ParamValue } from '@k8ordo/router';
 
 /**
- * Every pattern the table declares — pages, redirects and catch-alls — in
- * the order the matcher will try them. The engine's one walk, so the build
- * and the prerenderer agree; a redirect is a URL the site has, so it is a
- * file the site writes.
+ * Every pattern the table declares that answers a URL of its own — pages,
+ * route.ts and redirects, not the catch-alls — in the order the matcher
+ * will try them. The engine's one walk, so the build and the prerenderer
+ * agree; a redirect is a URL the site has, so it is a file the site writes.
  */
-export const patternsOf = (dir: RouteDir): string[] =>
-  declaredPatterns(dir).map((each) => each.pattern);
+export const answeringPatterns = (dir: RouteDir): DeclaredPattern[] =>
+  declaredPatterns(dir).filter((each) => each.kind !== 'notFound');
 
 /** A `:name` segment: a parameter a pattern, or a shell location, leaves open. */
 const PARAM_SEGMENT = /^:[A-Za-z_]\w*$/u;
@@ -45,7 +46,9 @@ export const isConcrete = (pattern: string): boolean =>
  * served. The build says so rather than choosing.
  */
 export const catchAllPatterns = (dir: RouteDir): string[] =>
-  patternsOf(dir).filter((pattern) => pattern.endsWith('/*'));
+  declaredPatterns(dir)
+    .filter((each) => each.kind === 'notFound')
+    .map((each) => each.pattern);
 
 /** A table with more than one catch-all, which no static host can serve. */
 export const catchAllRefusals = (dir: RouteDir): string[] => {
@@ -80,9 +83,9 @@ export const catchAllPath = (dir: RouteDir): string | null => {
     .map((segment) => (segment.startsWith(':') ? NOT_FOUND_SEGMENT : segment));
   const depth = Math.max(
     prefix.length + 1,
-    ...patternsOf(dir)
-      .filter((each) => !each.endsWith('/*'))
-      .map((each) => each.split('/').filter(Boolean).length + 1),
+    ...answeringPatterns(dir).map(
+      ({ pattern: each }) => each.split('/').filter(Boolean).length + 1,
+    ),
   );
   const filler = Array.from(
     { length: depth - prefix.length },
@@ -96,9 +99,9 @@ export const catchAllPath = (dir: RouteDir): string | null => {
  * it is rendered as the not-found file, never as a page of its own.
  */
 export const patternsNeedingPaths = (dir: RouteDir): string[] =>
-  patternsOf(dir).filter(
-    (pattern) => !isConcrete(pattern) && !pattern.endsWith('/*'),
-  );
+  answeringPatterns(dir)
+    .map((each) => each.pattern)
+    .filter((pattern) => !isConcrete(pattern));
 
 /**
  * A shell location's pathname: each segment it leaves to the browser replaced
@@ -131,7 +134,7 @@ export type ClosedShell = {
   /** Left unknown, though a layout above the fallback.tsx receives them. */
   readonly params: readonly string[];
   readonly layout: string;
-  /** Supplied by `paths`, or the bare pattern standing in for none. */
+  /** Reached by the walk of the paths.ts files, or the bare pattern standing in for none. */
   readonly supplied: boolean;
 };
 
@@ -142,38 +145,19 @@ export type PathPlan = {
   readonly shells: readonly Shell[];
   /** Patterns that need values nobody supplied. */
   readonly unresolved: readonly string[];
-  /** Supplied pathnames no pattern wanted, and any that are not pathnames. */
+  /** Supplied pathnames no pattern wanted. */
   readonly unusable: readonly string[];
-  /** Supplied pathnames holding a parameter, for a pattern with no fallback.tsx. */
-  readonly held: ReadonlyArray<{
-    readonly location: string;
-    readonly file: string;
-  }>;
-  /** Supplied shell locations whose parameter names are not their pattern's. */
-  readonly misnamed: ReadonlyArray<{
-    readonly location: string;
-    readonly pattern: string;
-  }>;
   /** Shell locations leaving open a param a layout above receives. */
   readonly closed: readonly ClosedShell[];
   /** Supplied pathnames with a segment the build keeps for shells. */
   readonly reserved: readonly string[];
 };
 
-/**
- * Whether a location is one the pattern answers, segment by segment: a
- * literal needs the same literal; a parameter takes a value, or the same
- * `:name` left open — any `:name`, when names are not compared.
- */
-const fits = (pattern: string, location: string, byName = true): boolean => {
-  const wanted = pattern.split('/');
-  const given = location.split('/');
-  if (wanted.length !== given.length) return false;
-  return wanted.every((segment, index) => {
-    const at = given[index] as string;
-    if (!isParamSegment(segment)) return segment === at;
-    return !isParamSegment(at) || !byName || at === segment;
-  });
+/** A place a shell stands, and the pattern whose fallback.tsx renders it. */
+export type ShellLocation = {
+  /** `/ja/posts/:id`: the values above it, the params it leaves open. */
+  readonly location: string;
+  readonly pattern: string;
 };
 
 /**
@@ -184,94 +168,78 @@ const fits = (pattern: string, location: string, byName = true): boolean => {
  * build did not write.
  *
  * The other direction counts too: a supplied path nothing matched is a typo
- * that would cost exactly the page it was meant to add, and a supplied value
- * that still contains a parameter (`/ja/blog/:slug` — what expanding only one
- * of two parameters leaves behind) would be written to disk as a directory
- * literally named `:slug` — unless its page has a fallback.tsx, when it is
- * where that shell stands. URLPattern accepts both, so this has to say no.
- *
- * A location goes to the first pattern in table order it fits, which is the
- * pattern whose URLs a host's rule for it will catch.
+ * that would cost exactly the page it was meant to add, so it is named.
  */
 export const planPaths = (
   tree: RouteDir,
-  supplied: readonly string[],
+  supplied: {
+    readonly paths: readonly string[];
+    readonly shells: readonly ShellLocation[];
+  },
 ): PathPlan => {
-  const patterns = patternsOf(tree);
-  const declared = declaredPatterns(tree).filter(
-    (each) => each.kind !== 'notFound',
-  );
+  const declared = answeringPatterns(tree);
   const shapes = new Map(
     fallbackShapes(tree).map((shape) => [shape.pattern, shape]),
   );
-  const paths = patterns.filter((pattern) => isConcrete(pattern));
+  const paths = declared
+    .map((each) => each.pattern)
+    .filter((pattern) => isConcrete(pattern));
   const unresolved: string[] = [];
   const unusable: string[] = [];
-  const held: Array<{ location: string; file: string }> = [];
-  const misnamed: Array<{ location: string; pattern: string }> = [];
   const closed: ClosedShell[] = [];
   const reserved: string[] = [];
   const located = new Map<string, Shell[]>();
   // 場所を渡されたパターン。閉じた場所だけでも、素の殻の誤りを重ねて言わない
   const offered = new Set<string>();
+  // 殻の置き場の名前。%21fallback も復号すれば同じディレクトリになる
+  const keptForShells = (path: string): boolean =>
+    path
+      .split('/')
+      .some((segment) => decodePathname(segment) === FALLBACK_SEGMENT);
   // 末尾スラッシュは同じ pathname。ルーターがそう扱う以上、ビルドも揃える。
   const usable: string[] = [];
 
-  for (const raw of supplied) {
+  for (const raw of supplied.paths) {
     const path = normalizePathname(raw);
-    // 殻の置き場の名前。%21fallback も復号すれば同じディレクトリになる
-    if (
-      path
-        .split('/')
-        .some((segment) => decodePathname(segment) === FALLBACK_SEGMENT)
-    ) {
-      reserved.push(path);
+    if (keptForShells(path)) reserved.push(path);
+    else usable.push(path);
+  }
+  for (const { location: raw, pattern } of supplied.shells) {
+    const location = normalizePathname(raw);
+    if (keptForShells(location)) {
+      reserved.push(location);
       continue;
     }
-    if (isConcrete(path)) {
-      usable.push(path);
-      continue;
-    }
-    if (path.includes('*')) {
-      unusable.push(path);
-      continue;
-    }
-    const first = declared.find((each) => fits(each.pattern, path));
-    if (first === undefined) {
-      const loosely = declared.find((each) => fits(each.pattern, path, false));
-      if (loosely === undefined) unusable.push(path);
-      else misnamed.push({ location: path, pattern: loosely.pattern });
-      continue;
-    }
-    const shape = shapes.get(first.pattern);
+    const shape = shapes.get(pattern);
     if (shape === undefined) {
-      held.push({ location: path, file: first.file });
-      continue;
+      throw new TypeError(
+        `${location} is a shell location for ${pattern}, whose page has no fallback.tsx`,
+      );
     }
-    offered.add(first.pattern);
-    const outside = unknownOf(path).filter(
+    offered.add(pattern);
+    const outside = unknownOf(location).filter(
       (name) => !shape.open.includes(name),
     );
     if (outside.length > 0) {
       closed.push({
-        location: path,
+        location,
         params: outside,
         layout: shape.layout ?? '',
         supplied: true,
       });
       continue;
     }
-    located.set(first.pattern, [
-      ...(located.get(first.pattern) ?? []),
-      { pattern: first.pattern, location: path, pathname: shellPathname(path) },
+    located.set(pattern, [
+      ...(located.get(pattern) ?? []),
+      { pattern, location, pathname: shellPathname(location) },
     ]);
   }
   // 表がそのまま持っているパスを渡してくるのは冗長なだけで、誤りではない。
   const used = new Set<string>(paths);
   const shells: Shell[] = [];
 
-  for (const pattern of patterns) {
-    if (isConcrete(pattern) || pattern.endsWith('/*')) continue;
+  for (const { pattern } of declared) {
+    if (isConcrete(pattern)) continue;
     const matcher = new URLPattern({ pathname: pattern });
     const covered = usable.filter((path) => matcher.test({ pathname: path }));
     paths.push(...covered);
@@ -315,16 +283,16 @@ export const planPaths = (
     ),
     unresolved,
     unusable,
-    held,
-    misnamed,
     closed,
     reserved,
   };
 };
 
 export type Supplied = {
-  /** Pathnames to write and shell locations, as `planPaths` takes them. */
-  readonly locations: readonly string[];
+  /** Pathnames to write, as `planPaths` takes them. */
+  readonly paths: readonly string[];
+  /** Where the shells stand, as `planPaths` takes them. */
+  readonly shells: readonly ShellLocation[];
   /** A paths.ts that could not be asked, or answered with something else than values. */
   readonly problems: readonly string[];
 };
@@ -342,16 +310,26 @@ type At = {
  * characters this module reads a pathname by: `*`, and the `:` that would
  * make a value starting with one a parameter left open.
  */
-const segmentOf = (value: string): string =>
-  encodeURIComponent(value).replaceAll('*', '%2A').replaceAll(':', '%3A');
+const segmentOf = (spelling: string): string =>
+  encodeURIComponent(spelling).replaceAll('*', '%2A').replaceAll(':', '%3A');
 
-const valuesFrom = (returned: unknown): string[] | null =>
-  Array.isArray(returned) &&
-  returned.every(
-    (value): value is string => typeof value === 'string' && value !== '',
-  )
-    ? [...new Set(returned)]
+const isValue = (value: unknown): value is ParamValue =>
+  (typeof value === 'string' && value !== '') ||
+  typeof value === 'number' ||
+  typeof value === 'bigint' ||
+  typeof value === 'boolean';
+
+const spellingsFrom = (returned: unknown): string[] | null =>
+  Array.isArray(returned) && returned.every(isValue)
+    ? [...new Set(returned.map(String))]
     : null;
+
+/**
+ * What asking a `paths.ts` came to: what it returned, or `null` when a
+ * schema of a layout above its directory refused the values above it, so it
+ * was not asked.
+ */
+export type Asked = { readonly values: unknown } | null;
 
 /**
  * What the `paths.ts` files say the site holds: each is asked for its
@@ -367,33 +345,48 @@ const valuesFrom = (returned: unknown): string[] | null =>
  * keeps a shell for the rest. Everything else is left for `planPaths` to
  * call unresolved.
  *
- * A value is the segment as a visitor reads it, escaped here for the URL.
+ * A value is what a link to the page takes, and is spelled here as `href`
+ * spells it. A paths.ts below is handed the spellings above it, so
+ * `valuesOf` can read them as the layouts above its directory do — not the
+ * values as returned, which no page ever receives — and a paths.ts under
+ * values one of those refuses is a problem, as a shell there is.
  */
 export const suppliedFrom = async (
   tree: RouteDir,
-  valuesOf: (file: string, params: Readonly<Record<string, string>>) => unknown,
+  valuesOf: (
+    file: string,
+    above: Readonly<Record<string, string>>,
+  ) => Promise<Asked>,
 ): Promise<Supplied> => {
-  const locations: string[] = [];
+  const paths: string[] = [];
+  const shells: ShellLocation[] = [];
   const problems = new Set<string>();
+  const refused: string[] = [];
 
-  const walk = async (dir: RouteDir, ats: readonly At[]): Promise<void> => {
+  const walk = async (
+    dir: RouteDir,
+    ats: readonly At[],
+    pattern: string,
+  ): Promise<void> => {
     const answers = dir.page ?? dir.route ?? dir.redirect;
     const shell = dir.page !== null && dir.fallback !== null;
     if (answers !== null) {
       for (const at of ats) {
-        // 値を持たない pathname は表がそのまま持っている
-        if (at.open ? shell : Object.keys(at.params).length > 0) {
-          locations.push(at.path);
-        }
+        if (at.open) {
+          if (shell) shells.push({ location: at.path, pattern });
+          // 値を持たない pathname は表がそのまま持っている
+        } else if (Object.keys(at.params).length > 0) paths.push(at.path);
       }
     }
     await Promise.all(
       dir.children.map(async (child) => {
-        if (child.kind === 'group') return walk(child, ats);
+        if (child.kind === 'group') return walk(child, ats, pattern);
+        const below = `${pattern === '/' ? '' : pattern}${child.key}`;
         if (child.kind !== 'param') {
           return walk(
             child,
             ats.map((at) => ({ ...at, path: `${at.path}${child.key}` })),
+            below,
           );
         }
         const name = child.key.slice(2);
@@ -403,8 +396,8 @@ export const suppliedFrom = async (
           open: true,
         });
         const { paths: file } = child;
-        if (file === null) return walk(child, ats.map(opened));
-        const below = await Promise.all(
+        if (file === null) return walk(child, ats.map(opened), below);
+        const reached = await Promise.all(
           ats.map(async (at): Promise<At[]> => {
             if (at.open) {
               problems.add(
@@ -412,17 +405,22 @@ export const suppliedFrom = async (
               );
               return [];
             }
-            const values = valuesFrom(await valuesOf(file, at.params));
-            if (values === null) {
+            const asked = await valuesOf(file, at.params);
+            if (asked === null) {
+              refused.push(`${at.path}/:${name} (${file})`);
+              return [];
+            }
+            const spellings = spellingsFrom(asked.values);
+            if (spellings === null) {
               problems.add(
-                `${file} has to return an array of non-empty strings, the values of :${name}`,
+                `${file} has to return an array of the values of :${name}, each a non-empty string, a number, a bigint or a boolean`,
               );
               return [];
             }
             return [
-              ...values.map((value) => ({
-                path: `${at.path}/${segmentOf(value)}`,
-                params: { ...at.params, [name]: value },
+              ...spellings.map((spelling) => ({
+                path: `${at.path}/${segmentOf(spelling)}`,
+                params: { ...at.params, [name]: spelling },
                 open: false,
               })),
               // 挙げなかった値には、このディレクトリのページの殻が答える
@@ -432,13 +430,24 @@ export const suppliedFrom = async (
             ];
           }),
         );
-        return walk(child, below.flat());
+        return walk(child, reached.flat(), below);
       }),
     );
   };
-  await walk(tree, [{ path: '', params: {}, open: false }]);
+  await walk(tree, [{ path: '', params: {}, open: false }], '/');
 
-  return { locations, problems: [...problems] };
+  return {
+    paths,
+    shells,
+    problems: [
+      ...problems,
+      ...(refused.length > 0
+        ? [
+            `the paths.ts files stand where a params schema refuses the values above them, so they were not asked: ${refused.toSorted().join(', ')}`,
+          ]
+        : []),
+    ],
+  };
 };
 
 export type ShadowedShell = {
@@ -466,9 +475,7 @@ export const shadowedShells = (
   shells: readonly Shell[],
   built: ReadonlySet<string>,
 ): ShadowedShell[] => {
-  const declared = declaredPatterns(tree).filter(
-    (each) => each.kind !== 'notFound',
-  );
+  const declared = answeringPatterns(tree);
   const shapes = new Map<string, FallbackShape>(
     fallbackShapes(tree).map((shape) => [shape.pattern, shape]),
   );
@@ -547,23 +554,6 @@ export const planRefusals = (
     ...(plan.unusable.length > 0
       ? [
           `the paths.ts files returned pathnames no route wants: ${plan.unusable.join(', ')}`,
-        ]
-      : []),
-    ...(plan.held.length > 0
-      ? [
-          `these pathnames still hold a parameter, and only a page with a fallback.tsx beside it takes one: ${plan.held
-            .map(
-              ({ location, file }) =>
-                `${location} (${file} ${isPage(file) ? 'has none' : 'cannot have one'})`,
-            )
-            .join(', ')}`,
-        ]
-      : []),
-    ...(plan.misnamed.length > 0
-      ? [
-          `these shell locations name parameters that are not their pattern's: ${plan.misnamed
-            .map(({ location, pattern }) => `${location} (${pattern})`)
-            .join(', ')}`,
         ]
       : []),
     ...(suppliedClosed.length > 0
@@ -647,9 +637,7 @@ export const answersOf = (
   dir: RouteDir,
   pathnames: readonly string[],
 ): Map<string, DeclaredPattern> => {
-  const declared = declaredPatterns(dir).filter(
-    (each) => each.kind !== 'notFound',
-  );
+  const declared = answeringPatterns(dir);
   return new Map(
     pathnames.flatMap((pathname) => {
       const answer = declared.find((each) =>
