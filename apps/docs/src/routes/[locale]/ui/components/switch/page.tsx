@@ -128,6 +128,40 @@ export default function SwitchPage() {
             />
           </ComponentPreview>
         </div>
+
+        <div className={page.stack}>
+          <Heading level="h3">
+            <Rich>{m.components.switchInput.helpTextTitle()}</Rich>
+          </Heading>
+          <ComponentPreview
+            code={`<Switch
+  helpText="Turning it off stops sharing at once."
+  label="Share with guests"
+/>`}
+          >
+            <Switch
+              helpText="Turning it off stops sharing at once."
+              label="Share with guests"
+            />
+          </ComponentPreview>
+        </div>
+
+        <div className={page.stack}>
+          <Heading level="h3">
+            <Rich>{m.components.switchInput.errorTextTitle()}</Rich>
+          </Heading>
+          <ComponentPreview
+            code={`<Switch
+  errorText="An admin has to approve sharing first."
+  label="Share with guests"
+/>`}
+          >
+            <Switch
+              errorText="An admin has to approve sharing first."
+              label="Share with guests"
+            />
+          </ComponentPreview>
+        </div>
       </section>
       <Separator color="mute" />
 

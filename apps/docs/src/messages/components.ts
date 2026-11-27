@@ -289,6 +289,14 @@ export const checkbox = {
     ja: '制御モード',
     en: 'Controlled',
   }),
+  helpTextTitle: message({
+    ja: 'ヘルプテキスト',
+    en: 'Help text',
+  }),
+  errorTextTitle: message({
+    ja: 'エラーテキスト',
+    en: 'Error text',
+  }),
 };
 
 export const checkboxCard = {
@@ -334,6 +342,14 @@ export const switchInput = {
   controlledTitle: message({
     ja: '制御モード',
     en: 'Controlled',
+  }),
+  helpTextTitle: message({
+    ja: 'ヘルプテキスト',
+    en: 'Help text',
+  }),
+  errorTextTitle: message({
+    ja: 'エラーテキスト',
+    en: 'Error text',
   }),
 };
 

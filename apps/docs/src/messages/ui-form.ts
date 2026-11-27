@@ -61,8 +61,8 @@ export const mapEnum = message({
 });
 
 export const mapBoolean = message({
-  ja: '`z.boolean()`、`z.literal(true)`、`z.stringbool()`：`Checkbox`か`Switch`。`label`を渡し、`FormControl`は使いません。`z.stringbool()`の`input`に入る`value`も、そのまま`<input>`に渡ります。',
-  en: '`z.boolean()`, `z.literal(true)`, `z.stringbool()`: `Checkbox` or `Switch`. Pass a `label`; they need no `FormControl`. The `value` in a `z.stringbool()` field’s `input` reaches the `<input>` as well.',
+  ja: '`z.boolean()`、`z.literal(true)`、`z.stringbool()`：`Checkbox`か`Switch`。`label`と`errorText`を渡し、`FormControl`は使いません。エラーの文は`Checkbox`と`Switch`が自分で表示します。`z.stringbool()`の`input`に入る`value`も、そのまま`<input>`に渡ります。',
+  en: '`z.boolean()`, `z.literal(true)`, `z.stringbool()`: `Checkbox` or `Switch`. Pass `label` and `errorText`; they need no `FormControl` and draw the error text themselves. The `value` in a `z.stringbool()` field’s `input` reaches the `<input>` as well.',
 });
 
 export const mapGroup = message({

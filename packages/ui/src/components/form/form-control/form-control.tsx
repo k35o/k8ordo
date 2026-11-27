@@ -6,6 +6,7 @@ import type { FC, HTMLAttributes, ReactElement, Ref } from 'react';
 
 import { getMessages } from '../../../i18n/current';
 
+import fieldMessage from '../../_internal/field-message.module.css';
 import styles from './form-control.module.css';
 
 type FormControlProps = {
@@ -78,13 +79,16 @@ export const FormControl: FC<FormControlProps> = ({
       {invalid && hasErrorText ? (
         <p
           aria-live="polite"
-          className={clsx(styles.message, styles.error)}
+          className={clsx(fieldMessage.message, fieldMessage.error)}
           id={`${id}-feedback`}
         >
           {errorText}
         </p>
       ) : hasHelpText ? (
-        <p className={clsx(styles.message, styles.help)} id={`${id}-helptext`}>
+        <p
+          className={clsx(fieldMessage.message, fieldMessage.help)}
+          id={`${id}-helptext`}
+        >
           {helpText}
         </p>
       ) : null}

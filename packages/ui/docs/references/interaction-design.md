@@ -94,7 +94,7 @@ duration-150 ease-out`.
 - Put the error message directly under the input, in `--color-fg-error` at `--font-size-sm`
 - Mark required fields with `*` after the label
 - Validate on submit; keep real-time validation to a minimum
-- Use the `FormControl` component so labels and errors stay consistent
+- Use the `FormControl` component so labels and errors stay consistent. `Checkbox` and `Switch` carry their own label instead, and take `errorText` / `helpText` themselves
 
 ```tsx
 import { FormControl, TextField } from '@k8ordo/ui';

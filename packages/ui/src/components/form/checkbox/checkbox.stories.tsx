@@ -233,6 +233,47 @@ export const Invalid: Story = {
   },
 };
 
+export const ErrorText: Story = {
+  args: {
+    errorText: '同意してください',
+    helpText: '規約は利用を始める前に読んでください',
+    label: '規約に同意する',
+  },
+  play: async ({ canvas }) => {
+    const checkbox = canvas.getByRole('checkbox', { name: '規約に同意する' });
+
+    await expect(checkbox).toHaveAttribute('aria-invalid', 'true');
+    await expect(checkbox).toHaveAccessibleDescription('同意してください');
+    await expect(
+      canvas.queryByText('規約は利用を始める前に読んでください'),
+    ).not.toBeInTheDocument();
+  },
+};
+
+export const HelpText: Story = {
+  args: {
+    'aria-describedby': 'checkbox-help-extra',
+    helpText: 'あとから設定で変えられます',
+    label: 'お知らせを受け取る',
+  },
+  render: (props) => (
+    <div className={styles.column}>
+      <Checkbox {...props} />
+      <span id="checkbox-help-extra">週に1回まで</span>
+    </div>
+  ),
+  play: async ({ canvas }) => {
+    const checkbox = canvas.getByRole('checkbox', {
+      name: 'お知らせを受け取る',
+    });
+
+    await expect(checkbox).toHaveAttribute('aria-invalid', 'false');
+    await expect(checkbox).toHaveAccessibleDescription(
+      '週に1回まで あとから設定で変えられます',
+    );
+  },
+};
+
 // 全選択の途中のように、一部だけ選ばれている状態を示す。DOM の
 // indeterminate に写るので、読み上げでも「一部選択」になる
 export const Indeterminate: Story = {
@@ -281,14 +322,11 @@ const ConsentForm = () => (
     {(form) => {
       const agree = form.field('agree');
       return (
-        <>
-          <Checkbox
-            {...agree.input}
-            invalid={agree.invalid}
-            label="規約に同意する"
-          />
-          <p>{agree.error}</p>
-        </>
+        <Checkbox
+          {...agree.input}
+          errorText={agree.error}
+          label="規約に同意する"
+        />
       );
     }}
   </ActionForm>
@@ -305,6 +343,13 @@ export const WithForm: Story = {
     await submit();
     await expect(await canvas.findByText('同意してください')).toBeVisible();
     await waitFor(() => expect(canvas.getByRole('checkbox')).toHaveFocus());
+    await expect(canvas.getByRole('checkbox')).toHaveAccessibleDescription(
+      '同意してください',
+    );
+    await expect(canvas.getByRole('checkbox')).toHaveAttribute(
+      'aria-invalid',
+      'true',
+    );
 
     // reset でチェックが外れ、isDirty も下りる
     await userEvent.click(canvas.getByText('規約に同意する'));

@@ -1155,6 +1155,22 @@ import { Checkbox } from '@k8ordo/ui';
 <Checkbox label="In stock only" name="inStock" value="true" />
 ```
 
+`Checkbox` carries its own label, so it is not wrapped in `FormControl`. It
+draws a field's message itself instead: `errorText` (or, when there is none,
+`helpText`) is drawn under the box the way `FormControl` draws it, and the
+input is described by it, after any `aria-describedby` you pass. A non-empty
+`errorText` also sets `aria-invalid` and the invalid look, as `invalid` does;
+`invalid` alone marks the box without a message. With `@k8ordo/form`, pass
+`errorText={field.error}`.
+
+```tsx
+<Checkbox
+  {...agree.input}
+  errorText={agree.error}
+  label="I agree to the terms"
+/>
+```
+
 `indeterminate` shows the mixed state — some of a set selected — and sets the
 input's `indeterminate` property, so it is announced as partly checked.
 `labelHidden` keeps `label` as the accessible name but does not draw it, for a
@@ -1165,6 +1181,8 @@ Props:
 - `label`: `string` (required)
 - `checked`: `boolean`
 - `defaultChecked`: `boolean`
+- `errorText`: `string`
+- `helpText`: `string`
 - `indeterminate`: `boolean` (default: `false`)
 - `invalid`: `boolean` (default: `false`)
 - `labelHidden`: `boolean` (default: `false`)
@@ -1399,7 +1417,7 @@ Props:
 
 ### Switch
 
-A toggle switch. It is a checkbox underneath (`role="switch"`), so `value` is, as on `Checkbox`, the string it submits under its `name` when on, and `checked` / `defaultChecked` hold the state.
+A toggle switch. It is a checkbox underneath (`role="switch"`), so `value` is, as on `Checkbox`, the string it submits under its `name` when on, and `checked` / `defaultChecked` hold the state. Like `Checkbox`, it carries its own label and draws `errorText` / `helpText` itself, describing the input with them; a non-empty `errorText` sets `aria-invalid`.
 
 ```tsx
 import { Switch } from '@k8ordo/ui';
@@ -1419,6 +1437,8 @@ Props:
 - `label`: `string` (required)
 - `checked`: `boolean`
 - `defaultChecked`: `boolean`
+- `errorText`: `string`
+- `helpText`: `string`
 - `invalid`: `boolean` (default: `false`)
 - `onChange`: `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLInputElement>`

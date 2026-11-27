@@ -209,6 +209,40 @@ export const ForwardsRef: Story = {
   },
 };
 
+export const ErrorText: Story = {
+  args: {
+    errorText: '管理者の承認が必要です',
+    helpText: 'オフにすると、すぐに止まります',
+    label: '外部への共有',
+  },
+  play: async ({ canvas }) => {
+    const switchElement = canvas.getByRole('switch', { name: '外部への共有' });
+
+    await expect(switchElement).toHaveAttribute('aria-invalid', 'true');
+    await expect(switchElement).toHaveAccessibleDescription(
+      '管理者の承認が必要です',
+    );
+    await expect(
+      canvas.queryByText('オフにすると、すぐに止まります'),
+    ).not.toBeInTheDocument();
+  },
+};
+
+export const HelpText: Story = {
+  args: {
+    helpText: 'オフにすると、すぐに止まります',
+    label: '外部への共有',
+  },
+  play: async ({ canvas }) => {
+    const switchElement = canvas.getByRole('switch', { name: '外部への共有' });
+
+    await expect(switchElement).toHaveAttribute('aria-invalid', 'false');
+    await expect(switchElement).toHaveAccessibleDescription(
+      'オフにすると、すぐに止まります',
+    );
+  },
+};
+
 const notification = z.object({ notify: z.boolean(), memo });
 const notificationFields = formFields(notification);
 const received = fn();
@@ -225,7 +259,7 @@ const NotificationForm = () => (
         <>
           <Switch
             {...notify.input}
-            invalid={notify.invalid}
+            errorText={notify.error}
             label="通知を受け取る"
           />
           <MemoField field={form.field('memo')} />

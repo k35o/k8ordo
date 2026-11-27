@@ -88,6 +88,40 @@ export default function CheckboxPage() {
             <Checkbox defaultChecked disabled label="Checked disabled" />
           </ComponentPreview>
         </div>
+
+        <div className={page.stack}>
+          <Heading level="h3">
+            <Rich>{m.components.checkbox.helpTextTitle()}</Rich>
+          </Heading>
+          <ComponentPreview
+            code={`<Checkbox
+  helpText="You can turn this off in settings."
+  label="Email me about new releases"
+/>`}
+          >
+            <Checkbox
+              helpText="You can turn this off in settings."
+              label="Email me about new releases"
+            />
+          </ComponentPreview>
+        </div>
+
+        <div className={page.stack}>
+          <Heading level="h3">
+            <Rich>{m.components.checkbox.errorTextTitle()}</Rich>
+          </Heading>
+          <ComponentPreview
+            code={`<Checkbox
+  errorText="Agree to the terms to continue."
+  label="I agree to the terms"
+/>`}
+          >
+            <Checkbox
+              errorText="Agree to the terms to continue."
+              label="I agree to the terms"
+            />
+          </ComponentPreview>
+        </div>
       </section>
       <Separator color="mute" />
 

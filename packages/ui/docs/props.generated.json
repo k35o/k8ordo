@@ -887,6 +887,18 @@
           "required": false
         },
         {
+          "name": "errorText",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "helpText",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
           "name": "indeterminate",
           "types": ["boolean"],
           "defaultValue": "false",
@@ -4880,6 +4892,18 @@
         {
           "name": "defaultChecked",
           "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "errorText",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "helpText",
+          "types": ["string"],
           "defaultValue": null,
           "required": false
         },

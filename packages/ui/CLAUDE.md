@@ -318,7 +318,7 @@ export const MyComponent = { Root, Part } as const;
 ### Form fields
 
 A field must work when `@k8ordo/form`'s `formFields` output is spread onto it
-unchanged (each field's `WithForm` story holds it to that). Four rules follow:
+unchanged (each field's `WithForm` story holds it to that). Five rules follow:
 
 - **Accept the derived attribute types.** `input` carries `type` as a string
   (none on a plain text field), `min` / `max` as numbers, `step` as
@@ -341,6 +341,13 @@ unchanged (each field's `WithForm` story holds it to that). Four rules follow:
   when the visible part is not the element that submits (`Autocomplete`).
   Not `type="hidden"`: it is barred from constraint validation, cannot take
   focus, and with nothing selected no element carries the name at all.
+- **A field that carries its own label draws its own message.** `Checkbox`
+  and `Switch` are not wrapped in `FormControl`, so they take `errorText` /
+  `helpText` and draw them through `FieldMessage`
+  (`src/components/_internal/field-message.tsx`), whose look
+  (`field-message.module.css`) `FormControl` shares. The wrapper is always
+  rendered: adding it only when a message appears would remount the input
+  and drop the focus the form just moved there after a failed submission.
 
 ### Built-in wording
 
