@@ -33,7 +33,7 @@ import { ICON_NAMES } from './icon-names';
 /**
  * React は `import type` でしか読まない。`@k8ordo/ui/catalog` はサーバーでも
  * 読み込めることを約束していて、形式のつなぎはこのスキーマからプロンプトを作り、
- * モデルの出力を確かめる。描き方は ./renderers（'use client'）に置く。
+ * モデルの出力を確かめる。描き方は ./render（'use client'）に置く。
  *
  * ## 二重メンテ防止
  *
