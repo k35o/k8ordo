@@ -1,16 +1,126 @@
-import type { IncomingMessage, ServerResponse } from 'node:http';
+import { createServer } from 'node:http';
+import type { IncomingMessage, Server, ServerResponse } from 'node:http';
+import type { AddressInfo } from 'node:net';
+import { fileURLToPath } from 'node:url';
 
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import { playwright } from '@vitest/browser-playwright';
-import type { Plugin } from 'vite';
+import { build } from 'vite';
+import type { Plugin, ViteDevServer } from 'vite';
 import { defineConfig } from 'vite-plus';
 
-type GenerateModule = {
-  handleGenerate: (
-    request: IncomingMessage,
-    response: ServerResponse,
-  ) => Promise<void>;
+type Handler = (
+  request: IncomingMessage,
+  response: ServerResponse,
+) => Promise<void>;
+
+type GenerateModule = { handleGenerate: Handler };
+type McpModule = { handleMcp: Handler };
+type ChatModule = { handleChat: Handler; handleResource: Handler };
+
+const route = (
+  server: ViteDevServer,
+  path: string,
+  method: string | null,
+  load: () => Handler | Promise<Handler>,
+): void => {
+  server.middlewares.use(path, (request, response, next) => {
+    if (method !== null && request.method !== method) {
+      next();
+      return;
+    }
+    void (async () => {
+      try {
+        await (
+          await load()
+        )(request, response);
+      } catch (error) {
+        next(error);
+      }
+    })();
+  });
+};
+
+// MCP Apps の仕様は、App を入れるサンドボックスをホストと別のオリジンに置くよう
+// 求める。同じ dev サーバーを別のポートでも聞かせ、そちらから配る
+const mcpApps = (): Plugin => {
+  let sandbox: Server | null = null;
+  let watcher: { close: () => Promise<void> } | null = null;
+
+  const sandboxPort = (server: ViteDevServer): Promise<number> =>
+    new Promise((resolve) => {
+      sandbox ??= createServer(server.middlewares).listen(0, 'localhost');
+      const listening = sandbox;
+      const resolvePort = () => {
+        resolve((listening.address() as AddressInfo).port);
+      };
+      if (listening.listening) {
+        resolvePort();
+      } else {
+        listening.once('listening', resolvePort);
+      }
+    });
+
+  return {
+    name: 'ui-integrations:mcp-apps',
+    apply: 'serve',
+    configureServer(server) {
+      const load = async <M>(path: string): Promise<M> =>
+        (await server.ssrLoadModule(path)) as M;
+
+      route(server, '/mcp', null, async () => {
+        const { handleMcp } = await load<McpModule>('/src/mcp/http.ts');
+        return handleMcp;
+      });
+      route(server, '/api/chat', 'POST', async () => {
+        const { handleChat } = await load<ChatModule>(
+          '/src/mcp-chat/server.ts',
+        );
+        return handleChat;
+      });
+      route(server, '/api/mcp-app/resource', 'POST', async () => {
+        const { handleResource } = await load<ChatModule>(
+          '/src/mcp-chat/server.ts',
+        );
+        return handleResource;
+      });
+      route(
+        server,
+        '/api/mcp-app/sandbox',
+        'GET',
+        () => async (_request, response) => {
+          const port = await sandboxPort(server);
+          response.setHeader('content-type', 'application/json; charset=utf-8');
+          response.end(
+            JSON.stringify({
+              url: `http://localhost:${String(port)}/mcp-app-sandbox.html`,
+            }),
+          );
+        },
+      );
+
+      // MCP サーバーが返す App は 1 枚の HTML にビルドしたもの。dev の間は
+      // 書き換えるたびに作り直す
+      if (process.env.VITEST === undefined) {
+        void build({
+          configFile: fileURLToPath(
+            new URL('vite.mcp-app.config.ts', import.meta.url),
+          ),
+          logLevel: 'warn',
+          build: { watch: {} },
+        }).then((output) => {
+          if ('close' in output) {
+            watcher = output;
+          }
+        });
+      }
+    },
+    async closeBundle() {
+      sandbox?.close();
+      await watcher?.close();
+    },
+  };
 };
 
 // 鍵で Claude を呼ぶ口なので、配る build ではなく手元の dev サーバーにだけ置く。
@@ -19,21 +129,11 @@ const generateEndpoint = (): Plugin => ({
   name: 'ui-integrations:generate',
   apply: 'serve',
   configureServer(server) {
-    server.middlewares.use('/api/generate', (request, response, next) => {
-      if (request.method !== 'POST') {
-        next();
-        return;
-      }
-      void (async () => {
-        try {
-          const endpoint = (await server.ssrLoadModule(
-            '/src/playground/server.ts',
-          )) as GenerateModule;
-          await endpoint.handleGenerate(request, response);
-        } catch (error) {
-          next(error);
-        }
-      })();
+    route(server, '/api/generate', 'POST', async () => {
+      const { handleGenerate } = (await server.ssrLoadModule(
+        '/src/playground/server.ts',
+      )) as GenerateModule;
+      return handleGenerate;
     });
   },
 });
@@ -46,7 +146,7 @@ const browsers = (['chromium', 'firefox', 'webkit'] as const).filter(
 );
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), generateEndpoint()],
+  plugins: [react(), tailwindcss(), generateEndpoint(), mcpApps()],
   // 既定の target では Lightning CSS が ui の light-dark() と :dir() を
   // 書き換え、意味が変わる。ui の GUIDE のとおり、ui が組まれている版に向ける
   build: { cssTarget: ['chrome146', 'edge146', 'firefox151', 'safari26'] },

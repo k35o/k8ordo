@@ -1,0 +1,6 @@
+/* iframe の中は、ホストのページとは別の文書。地の色を塗らないと、暗い配色でも
+   ホストの白い地が透けたり、ブラウザが白い地を敷いたりする */
+body {
+  background-color: var(--color-bg-base);
+  color: var(--color-fg-base);
+}

@@ -6,6 +6,7 @@ import { catalogRules } from '@k8ordo/ui/catalog';
 import { prompt as a2uiPrompt } from '../a2ui/prompt';
 import { catalog as jsonRenderCatalog } from '../json-render/catalog';
 import { prompt as openuiPrompt } from '../openui/prompt';
+import { readJson } from '../read-json';
 import { parseGenerateRequest } from './request';
 import type { Format, GenerateEvent } from './request';
 
@@ -38,18 +39,6 @@ const systemPromptOf = (format: Format): string =>
       UPDATE_RULES[format]
     }`,
   ].join('\n');
-
-const readJson = async (request: IncomingMessage): Promise<unknown> => {
-  const chunks: Buffer[] = [];
-  for await (const chunk of request) {
-    chunks.push(chunk as Buffer);
-  }
-  try {
-    return JSON.parse(Buffer.concat(chunks).toString('utf8'));
-  } catch {
-    return undefined;
-  }
-};
 
 const messageOf = (error: unknown): string => {
   if (error instanceof Anthropic.AuthenticationError) {

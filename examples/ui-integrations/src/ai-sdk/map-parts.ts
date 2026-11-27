@@ -7,7 +7,7 @@ import {
   isTextUIPart,
   isToolUIPart,
 } from 'ai';
-import type { UIMessage } from 'ai';
+import type { DynamicToolUIPart, ToolUIPart, UIMessage } from 'ai';
 
 export type MappedPart =
   | { kind: 'text'; text: string }
@@ -21,6 +21,8 @@ export type MappedPart =
       output?: unknown;
       errorText?: string;
       approval?: ToolApproval;
+      /** AI SDK の part そのもの。MCP App を描く `MCPAppRenderer` に渡す */
+      part: ToolUIPart | DynamicToolUIPart;
     }
   | { kind: 'file'; url: string; mediaType: string; filename?: string }
   | {
@@ -59,6 +61,7 @@ export const mapMessageParts = (message: UIMessage): MappedPart[] => {
         output: part.state === 'output-available' ? part.output : undefined,
         errorText: part.state === 'output-error' ? part.errorText : undefined,
         approval: part.approval,
+        part,
       });
     } else if (isFileUIPart(part)) {
       result.push({

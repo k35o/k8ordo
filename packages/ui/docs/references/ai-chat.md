@@ -470,6 +470,7 @@ type MappedPart =
       output?: unknown;
       errorText?: string;
       approval?: ToolApproval; // the part's own approval object, id included
+      part: ToolUIPart | DynamicToolUIPart; // the AI SDK part itself, for MCPAppRenderer
     }
   | { kind: 'file'; url: string; mediaType: string; filename?: string }
   | {
@@ -616,6 +617,33 @@ export function Chat() {
 ```
 
 `examples/ui-integrations` in the repository runs this against the real `useChat`, with a scripted transport in place of a model.
+
+### MCP Apps
+
+A tool from an MCP server can come with an App ([MCP Apps](https://github.com/modelcontextprotocol/ext-apps)): a `ui://` HTML resource the host draws in a sandboxed iframe. The AI SDK puts it in the tool part's `toolMetadata.app` when the tools come from `@ai-sdk/mcp`'s `createMCPClient` with `mcpAppClientCapabilities`, and draws it with `MCPAppRenderer` from `@ai-sdk/react`. Hand it `part.part` from `mapMessageParts`, in place of `ToolInvocation`, inside `Message.Root`:
+
+```tsx
+import { MCPAppRenderer } from '@ai-sdk/react';
+
+if (part.kind === 'tool' && part.part.toolMetadata?.app !== undefined) {
+  return (
+    <MCPAppRenderer
+      key={part.toolCallId}
+      part={part.part}
+      sandbox={{ url: sandboxUrl }} // a page of yours, on another origin
+      loadResource={loadResource} // reads the ui:// resource on your server
+      hostContext={{ theme: 'light' }}
+      handlers={{
+        sendMessage: (params) => {
+          /* chat.sendMessage(...) */
+        },
+      }}
+    />
+  );
+}
+```
+
+`examples/ui-integrations` keeps the whole of it under test: the sandbox page, the chat that sizes the App and opens it fullscreen, and an MCP server whose App draws A2UI screens with `@k8ordo/ui`, following the host's light or dark.
 
 ## Combining with generative UI
 
