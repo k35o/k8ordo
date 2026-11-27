@@ -190,15 +190,10 @@ export const CheckMarkFollowsReset: Story = {
 const submittedValue = (checkbox: HTMLInputElement) =>
   new FormData(checkbox.form ?? undefined).get(checkbox.name);
 
-export const SubmitsItemValue: Story = {
+export const SubmitsValue: Story = {
   render: () => (
     <form>
-      <Checkbox
-        defaultChecked
-        itemValue="yes"
-        label="in stock"
-        name="inStock"
-      />
+      <Checkbox defaultChecked label="in stock" name="inStock" value="yes" />
     </form>
   ),
   play: async ({ canvas }) => {
@@ -210,7 +205,7 @@ export const SubmitsItemValue: Story = {
   },
 };
 
-export const SubmitsOnWithoutItemValue: Story = {
+export const SubmitsOnWithoutValue: Story = {
   render: () => (
     <form>
       <Checkbox defaultChecked label="agree" name="agree" />
@@ -323,6 +318,42 @@ export const WithForm: Story = {
     await submit();
     await waitFor(() =>
       expect(received).toHaveBeenLastCalledWith({ agree: true }),
+    );
+  },
+};
+
+const stockFilter = z.object({
+  inStock: z.stringbool({ truthy: ['yes'] }).default(false),
+});
+const stockFilterFields = formFields(stockFilter);
+const receivedFilter = fn();
+
+const StockFilterForm = () => (
+  <ActionForm
+    fields={stockFilterFields}
+    onReceive={receivedFilter}
+    serve={(data) => parseForm(stockFilter, data)}
+  >
+    {(form) => (
+      <Checkbox {...form.field('inStock').input} label="在庫ありのみ" />
+    )}
+  </ActionForm>
+);
+
+export const WithStringboolForm: Story = {
+  render: () => <StockFilterForm />,
+  play: async ({ canvas, userEvent }) => {
+    const checkbox = canvas.getByRole<HTMLInputElement>('checkbox', {
+      name: '在庫ありのみ',
+    });
+
+    await expect(submittedValue(checkbox)).toBeNull();
+    await userEvent.click(checkbox);
+    await expect(submittedValue(checkbox)).toBe('yes');
+
+    await userEvent.click(canvas.getByRole('button', { name: '送信' }));
+    await waitFor(() =>
+      expect(receivedFilter).toHaveBeenLastCalledWith({ inStock: true }),
     );
   },
 };

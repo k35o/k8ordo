@@ -899,12 +899,6 @@
           "required": false
         },
         {
-          "name": "itemValue",
-          "types": ["string"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
           "name": "labelHidden",
           "types": ["boolean"],
           "defaultValue": "false",
@@ -923,10 +917,16 @@
           "types": ["Ref<HTMLInputElement>"],
           "defaultValue": null,
           "required": false
+        },
+        {
+          "name": "value",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
         }
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
-      "omitted": ["type", "className", "style", "value", "children"]
+      "omitted": ["type", "className", "style", "children"]
     },
     {
       "name": "CheckboxCard",
@@ -4902,10 +4902,16 @@
           "types": ["Ref<HTMLInputElement>"],
           "defaultValue": null,
           "required": false
+        },
+        {
+          "name": "value",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
         }
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
-      "omitted": ["type", "role", "className", "style", "value", "children"]
+      "omitted": ["type", "role", "className", "style", "children"]
     },
     {
       "name": "Table.Body",

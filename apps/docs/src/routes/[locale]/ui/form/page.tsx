@@ -1,4 +1,3 @@
-import { Pitfall } from '../../../../components/callout';
 import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
@@ -106,11 +105,6 @@ export default function UiFormPage() {
       </DocSection>
 
       <DocSection id="exceptions" title={t.exceptionsTitle}>
-        <Pitfall>
-          <p>
-            <Rich>{t.exceptionStringbool()}</Rich>
-          </p>
-        </Pitfall>
         <p>
           <Rich>{t.exceptionNumber()}</Rich>
         </p>

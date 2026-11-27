@@ -1140,7 +1140,7 @@ Props:
 
 The label is passed as the `label` prop, not as children. `onChange` is `(checked, event)`.
 
-`itemValue` is the input's `value`: the string a checked box submits under its `name`. Without it the box renders no `value` and submits the browser's default, `on`. There is no `value` prop — on a checkbox it is easily mistaken for the checked state, which is `checked`.
+`value` is the input's native `value`: the string a checked box submits under its `name`. Without it the box submits the browser's default, `on`. It never sets the checked state — that is `checked` / `defaultChecked`. `@k8ordo/form` puts it in the `input` of a `z.stringbool()` field (the schema's spelling of `true`), so spreading that `input` is enough.
 
 ```tsx
 import { Checkbox } from '@k8ordo/ui';
@@ -1152,7 +1152,7 @@ import { Checkbox } from '@k8ordo/ui';
 <Checkbox defaultChecked label="I agree" />
 
 // Submits inStock=true when checked, instead of inStock=on
-<Checkbox itemValue="true" label="In stock only" name="inStock" />
+<Checkbox label="In stock only" name="inStock" value="true" />
 ```
 
 `indeterminate` shows the mixed state — some of a set selected — and sets the
@@ -1167,11 +1167,11 @@ Props:
 - `defaultChecked`: `boolean`
 - `indeterminate`: `boolean` (default: `false`)
 - `invalid`: `boolean` (default: `false`)
-- `itemValue`: `string`
 - `labelHidden`: `boolean` (default: `false`)
 - `onChange`: `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLInputElement>`
-- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `value` / `children`.
+- `value`: `string`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `children`.
 
 ### CheckboxGroup
 
@@ -1399,7 +1399,7 @@ Props:
 
 ### Switch
 
-A toggle switch.
+A toggle switch. It is a checkbox underneath (`role="switch"`), so `value` is, as on `Checkbox`, the string it submits under its `name` when on, and `checked` / `defaultChecked` hold the state.
 
 ```tsx
 import { Switch } from '@k8ordo/ui';
@@ -1422,7 +1422,8 @@ Props:
 - `invalid`: `boolean` (default: `false`)
 - `onChange`: `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLInputElement>`
-- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `value` / `children`.
+- `value`: `string`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `children`.
 
 ### FileField
 

@@ -76,11 +76,11 @@ export const CheckboxGroup: FC<Props> = ({
             ? { defaultChecked: defaultValue?.includes(option.value) }
             : { checked: value.includes(option.value) })}
           disabled={disabled}
-          itemValue={option.value}
           key={option.value}
           label={option.label}
           name={name}
           onChange={handleChange}
+          value={option.value}
         />
       ))}
     </fieldset>

@@ -268,3 +268,38 @@ export const WithForm: Story = {
     );
   },
 };
+
+const digest = z.object({
+  weekly: z.stringbool({ truthy: ['yes'] }).default(false),
+});
+const digestFields = formFields(digest);
+const receivedDigest = fn();
+
+const DigestForm = () => (
+  <ActionForm
+    fields={digestFields}
+    onReceive={receivedDigest}
+    serve={(data) => parseForm(digest, data)}
+  >
+    {(form) => (
+      <Switch {...form.field('weekly').input} label="週ごとにまとめる" />
+    )}
+  </ActionForm>
+);
+
+export const WithStringboolForm: Story = {
+  render: () => <DigestForm />,
+  play: async ({ canvas, userEvent }) => {
+    const switchElement = canvas.getByRole<HTMLInputElement>('switch', {
+      name: '週ごとにまとめる',
+    });
+
+    await expect(switchElement).toHaveAttribute('value', 'yes');
+
+    await userEvent.click(switchElement);
+    await userEvent.click(canvas.getByRole('button', { name: '送信' }));
+    await waitFor(() =>
+      expect(receivedDigest).toHaveBeenLastCalledWith({ weekly: true }),
+    );
+  },
+};

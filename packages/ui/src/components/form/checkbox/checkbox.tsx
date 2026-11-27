@@ -16,10 +16,10 @@ import styles from './checkbox.module.css';
 type BaseProps = {
   indeterminate?: boolean;
   invalid?: boolean;
-  itemValue?: string;
   label: string;
   labelHidden?: boolean;
   ref?: Ref<HTMLInputElement>;
+  value?: string;
 } & Omit<
   InputHTMLAttributes<HTMLInputElement>,
   | 'type'
@@ -47,7 +47,6 @@ type UncontrolledProps = {
 type Props = BaseProps & (ControlledProps | UncontrolledProps);
 
 export const Checkbox: FC<Props> = ({
-  itemValue,
   disabled = false,
   indeterminate = false,
   invalid = false,
@@ -96,7 +95,6 @@ export const Checkbox: FC<Props> = ({
         }}
         ref={mergedRef}
         type="checkbox"
-        value={itemValue}
       />
       <span aria-hidden className={clsx(styles.box, invalid && styles.invalid)}>
         {indeterminate ? <MinusIcon size="sm" /> : <CheckIcon size="sm" />}

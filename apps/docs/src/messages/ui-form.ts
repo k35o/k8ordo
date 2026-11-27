@@ -61,8 +61,8 @@ export const mapEnum = message({
 });
 
 export const mapBoolean = message({
-  ja: '`z.boolean()`、`z.literal(true)`：`Checkbox`か`Switch`。`label`を渡し、`FormControl`は使いません。',
-  en: '`z.boolean()`, `z.literal(true)`: `Checkbox` or `Switch`. Pass a `label`; they need no `FormControl`.',
+  ja: '`z.boolean()`、`z.literal(true)`、`z.stringbool()`：`Checkbox`か`Switch`。`label`を渡し、`FormControl`は使いません。`z.stringbool()`の`input`に入る`value`も、そのまま`<input>`に渡ります。',
+  en: '`z.boolean()`, `z.literal(true)`, `z.stringbool()`: `Checkbox` or `Switch`. Pass a `label`; they need no `FormControl`. The `value` in a `z.stringbool()` field’s `input` reaches the `<input>` as well.',
 });
 
 export const mapGroup = message({
@@ -98,11 +98,6 @@ export const choiceSelect = message({
 export const exceptionsTitle = message({
   ja: '注意点',
   en: 'Caveats',
-});
-
-export const exceptionStringbool = message({
-  ja: '`z.stringbool()`のフィールドに`Checkbox`を使うと、展開した`value`が`<input>`に渡らず、ブラウザの既定の`on`が送られます。`z.stringbool()`は初期設定のままなら`on`を`true`と読みます。`truthy`を変えると、送られた`on`はスキーマに合わない値になります。`@k8ordo/state`がURLに書く値とも一致しません。このフィールドは`<input {...field.input} />`で直接描画してください。',
-  en: 'A spread `value` does not reach the `<input>` inside `Checkbox`, so a `z.stringbool()` field drawn with it submits the browser’s `on`. An unconfigured `z.stringbool()` reads `on` as `true`. With a custom `truthy`, the submitted `on` no longer fits the schema, and it differs from the value `@k8ordo/state` writes to the URL. Render that field as a plain `<input {...field.input} />`.',
 });
 
 export const exceptionNumber = message({

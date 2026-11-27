@@ -827,26 +827,20 @@ each action included — restores the echo, `isDirty` reads them, and a value a
 component changes in code — a stepper, a chosen option, a removed file —
 arrives as an `input` event, the way typing does.
 
-| Schema                                            | Component                                       | What to pass besides `{...props} {...input}`              |
-| ------------------------------------------------- | ----------------------------------------------- | --------------------------------------------------------- |
-| `z.string()`, `z.email()`, `z.url()`, `z.iso.*()` | `TextField`, `Textarea`                         | —                                                         |
-| a password                                        | `PasswordInput`                                 | —                                                         |
-| `z.coerce.number()`                               | `NumberField`, `Slider`                         | —                                                         |
-| `z.enum([…])`                                     | `Select`, `Radio`, `RadioCard`                  | `options`; `labelAs="legend"` on `FormControl` for radios |
-| `z.boolean()`, `z.literal(true)`                  | `Checkbox`, `Switch`                            | `label`, and no `{...props}`: they need no `FormControl`  |
-| `z.array(z.enum([…]))`                            | `CheckboxGroup`, `CheckboxCard`, `Autocomplete` | `options`; `labelAs="legend"` on `FormControl` for boxes  |
-| `z.file()`                                        | `FileField.Root`                                | a `FileField.Trigger` and `FileField.ItemList`            |
+| Schema                                             | Component                                       | What to pass besides `{...props} {...input}`              |
+| -------------------------------------------------- | ----------------------------------------------- | --------------------------------------------------------- |
+| `z.string()`, `z.email()`, `z.url()`, `z.iso.*()`  | `TextField`, `Textarea`                         | —                                                         |
+| a password                                         | `PasswordInput`                                 | —                                                         |
+| `z.coerce.number()`                                | `NumberField`, `Slider`                         | —                                                         |
+| `z.enum([…])`                                      | `Select`, `Radio`, `RadioCard`                  | `options`; `labelAs="legend"` on `FormControl` for radios |
+| `z.boolean()`, `z.literal(true)`, `z.stringbool()` | `Checkbox`, `Switch`                            | `label`, and no `{...props}`: they need no `FormControl`  |
+| `z.array(z.enum([…]))`                             | `CheckboxGroup`, `CheckboxCard`, `Autocomplete` | `options`; `labelAs="legend"` on `FormControl` for boxes  |
+| `z.file()`                                         | `FileField.Root`                                | a `FileField.Trigger` and `FileField.ItemList`            |
 
 **Radios take the spread.** The advice under [Radio groups](#radio-groups) is
 about a hand-written `<input type="radio">`. `Radio` and `RadioCard` read an
 enum's `input` the other way round: `defaultValue` is the selected option and
 `required` reaches every radio.
-
-**A `z.stringbool()` box is the exception.** A spread `value` does not reach
-`Checkbox`'s input, so a `z.stringbool()` box drawn with it submits the
-browser's `on` — which the default `z.stringbool()` reads as `true`, but a
-custom `truthy`, and the URL state writes, do not share. Render a plain
-`<input {...field.input} />` there.
 
 **A `Select` needs a placeholder for `required` to mean anything.** Put
 `{ value: '', label: '…' }` first in `options`; a `<select>` without an empty

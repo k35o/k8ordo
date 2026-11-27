@@ -91,6 +91,6 @@ export const boolean = message({
 });
 
 export const booleanUi = message({
-  ja: '`@k8ordo/ui`の`Checkbox`は、`input`に含まれる`value`を`<input>`に渡しません。この欄は素の`<input>`で描画します。詳しくは',
-  en: '`@k8ordo/ui`’s `Checkbox` does not pass the `value` in `input` to its `<input>`. Render this field as a plain `<input>`. See ',
+  ja: '`@k8ordo/ui`の`Checkbox`と`Switch`にも、`input`をそのまま展開できます。`value`も`<input>`に渡ります。詳しくは',
+  en: '`@k8ordo/ui`’s `Checkbox` and `Switch` take the spread `input` as it is, `value` included. See ',
 });

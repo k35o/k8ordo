@@ -15,6 +15,7 @@ type BaseProps = {
   invalid?: boolean;
   label: string;
   ref?: Ref<HTMLInputElement>;
+  value?: string;
 } & Omit<
   InputHTMLAttributes<HTMLInputElement>,
   | 'type'
