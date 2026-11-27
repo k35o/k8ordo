@@ -1807,26 +1807,6 @@
       "omitted": []
     },
     {
-      "name": "DateField",
-      "category": "form",
-      "props": [
-        {
-          "name": "invalid",
-          "types": ["boolean"],
-          "defaultValue": "false",
-          "required": false
-        },
-        {
-          "name": "ref",
-          "types": ["Ref<HTMLInputElement>"],
-          "defaultValue": null,
-          "required": false
-        }
-      ],
-      "inherits": "InputHTMLAttributes<HTMLInputElement>",
-      "omitted": ["className", "style", "type", "children"]
-    },
-    {
       "name": "DatePicker",
       "category": "form",
       "props": [

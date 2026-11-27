@@ -193,6 +193,22 @@ export const textField = {
     ja: 'プレースホルダー',
     en: 'Placeholder',
   }),
+  dateTimeTitle: message({
+    ja: '日付と時刻',
+    en: 'Date and time',
+  }),
+  dateTimeDescription: message({
+    ja: '`type`が`date`や`time`のときは、ブラウザの日付や時刻の入力欄になります。値はネイティブの文字列で、日付なら`YYYY-MM-DD`です。範囲はブラウザが検証します。数字の幅をそろえるので、値が変わっても桁は横にずれません。',
+    en: 'With a `type` of `date`, `time` and the like, it is the browser’s own date or time input. The value is the native string, `YYYY-MM-DD` for a date, and the browser checks the range. The digits are tabular, so they do not shift sideways as the value changes.',
+  }),
+  formTitle: message({
+    ja: '`@k8ordo/form`との組み合わせ',
+    en: 'With `@k8ordo/form`',
+  }),
+  formDescription: message({
+    ja: '`z.iso.date()`から作った`input`をそのまま展開できます。導いた`type`も、取り除かずに渡せます。',
+    en: 'Spread the `input` derived from `z.iso.date()` as it is. The derived `type` goes with it.',
+  }),
   disabledTitle: message({
     ja: '無効',
     en: 'Disabled',
@@ -506,37 +522,6 @@ export const rangeSlider = {
   disabledTitle: message({
     ja: '無効',
     en: 'Disabled',
-  }),
-};
-
-export const dateField = {
-  description: message({
-    ja: 'ブラウザの日付の入力欄（`type="date"`）です。値は`YYYY-MM-DD`の文字列です。',
-    en: 'The browser’s own date input (`type="date"`). The value is a `YYYY-MM-DD` string.',
-  }),
-  minMaxTitle: message({
-    ja: '最小値と最大値',
-    en: 'Min and max',
-  }),
-  minMaxDescription: message({
-    ja: '範囲はブラウザが検証します。範囲の外の日付は`rangeUnderflow`か`rangeOverflow`になります。',
-    en: 'The browser checks the range. A date outside it reports `rangeUnderflow` or `rangeOverflow`.',
-  }),
-  disabledTitle: message({
-    ja: '無効',
-    en: 'Disabled',
-  }),
-  invalidTitle: message({
-    ja: 'エラー',
-    en: 'Invalid',
-  }),
-  formTitle: message({
-    ja: '`@k8ordo/form`との組み合わせ',
-    en: 'With `@k8ordo/form`',
-  }),
-  formDescription: message({
-    ja: '`z.iso.date()`から作った`input`をそのまま展開できます。`type`を取り除く必要はありません。',
-    en: 'Spread the `input` derived from `z.iso.date()` as it is. There is no need to take `type` out.',
   }),
 };
 

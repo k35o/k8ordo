@@ -136,6 +136,37 @@ export const DateInput: Story = {
   },
 };
 
+const DATE_AND_TIME_TYPES = [
+  'date',
+  'time',
+  'datetime-local',
+  'month',
+  'week',
+] as const;
+
+export const DateAndTimeAlignDigits: Story = {
+  render: () => (
+    <div className={styles.column}>
+      <TextField aria-label="text" />
+      {DATE_AND_TIME_TYPES.map((type) => (
+        <TextField aria-label={type} key={type} type={type} />
+      ))}
+    </div>
+  ),
+  play: async ({ canvas }) => {
+    await expect(
+      getComputedStyle(canvas.getByLabelText('text')).fontVariantNumeric,
+    ).toBe('normal');
+    await Promise.all(
+      DATE_AND_TIME_TYPES.map(async (type) => {
+        await expect(
+          getComputedStyle(canvas.getByLabelText(type)).fontVariantNumeric,
+        ).toBe('tabular-nums');
+      }),
+    );
+  },
+};
+
 const profile = z.object({
   title: z.string().min(1, 'タイトルを入力してください'),
   email: z.email('メールアドレスの形式で入力してください'),

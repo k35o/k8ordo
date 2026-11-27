@@ -744,6 +744,25 @@ import { TextField } from '@k8ordo/ui';
 `type` also accepts any string, so the `type` `@k8ordo/form` derives
 (`email`, `url`, `date`, `time`, `datetime-local`, …) spreads as it is.
 
+A date or time input (`date`, `time`, `datetime-local`, `month`, `week`) is the
+browser's own `<input>`: the value is the native string (`YYYY-MM-DD` for a
+date, `''` when empty), and the browser checks `min` / `max` / `required`
+itself. Its digits are tabular, so they do not shift sideways as the value
+changes. A field derived from `z.iso.date()` spreads with nothing taken out:
+
+```tsx
+import { FormControl, TextField } from '@k8ordo/ui';
+
+const eventDate = form.field('eventDate'); // z.iso.date()
+
+<FormControl
+  errorText={eventDate.error}
+  label="Date"
+  required={eventDate.required}
+  renderInput={(props) => <TextField {...props} {...eventDate.input} />}
+/>;
+```
+
 Props:
 
 - `children`: `ReactNode`
@@ -851,40 +870,12 @@ Props:
 - `value`: `number` | `null`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `children`.
 
-### DateField
-
-A native `<input type="date">` styled like `TextField`. The value is a
-`YYYY-MM-DD` string (`''` when empty), and the browser checks `min` / `max` /
-`required` itself. `onChange` is the native event, as with `TextField`.
-
-It accepts what `@k8ordo/form` derives from `z.iso.date()` as is: spread the
-field's `input` and nothing needs to be taken out. `type` is always `date`, so a
-`type` in the spread does not replace it.
-
-```tsx
-import { DateField, FormControl } from '@k8ordo/ui';
-
-const eventDate = form.field('eventDate'); // z.iso.date()
-
-<FormControl
-  errorText={eventDate.error}
-  label="Date"
-  required={eventDate.required}
-  renderInput={(props) => <DateField {...props} {...eventDate.input} />}
-/>;
-```
-
-Props:
-
-- `invalid`: `boolean` (default: `false`)
-- `ref`: `Ref<HTMLInputElement>`
-- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `className` / `style` / `type` / `children`.
-
 ### DatePicker
 
-`DateField` with a button that opens `Calendar` in a popover. The field is the
-same native `<input type="date">`, so typing a date, `name`, `required`, and
-`min` / `max` all work as they do on `DateField`, and spreading a derived
+A date `TextField` with a button that opens `Calendar` in a popover. The field
+is the same native `<input type="date">`, so typing a date, `name`, `required`,
+and `min` / `max` all work as they do on a `TextField` with `type="date"`, and
+spreading a derived
 `@k8ordo/form` field works the same way. `onChange` takes the value
 (`YYYY-MM-DD`, `''` when cleared), not the event, because a date picked from the
 calendar has no input event of its own.
@@ -930,8 +921,8 @@ Month and weekday names, and the first day of the week, follow the same locale
 as the built-in wording (i18n, below). Today is marked with
 `aria-current="date"` in the visitor's time zone, which only the browser knows,
 so the calendar renders in the browser alone: the server writes an empty box of
-the same size. It submits nothing; inside a form, use `DatePicker` or
-`DateField`.
+the same size. It submits nothing; inside a form, use `DatePicker` or a
+`TextField` with `type="date"`.
 
 ```tsx
 import { Calendar } from '@k8ordo/ui';

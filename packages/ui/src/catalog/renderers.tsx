@@ -34,7 +34,6 @@ import { CheckboxCard } from '../components/form/checkbox-card';
 import { CheckboxGroup } from '../components/form/checkbox-group';
 import { ColorPicker } from '../components/form/color-picker';
 import { Combobox } from '../components/form/combobox';
-import { DateField } from '../components/form/date-field';
 import { DatePicker } from '../components/form/date-picker';
 import { FileField } from '../components/form/file-field';
 import { Form } from '../components/form/form';
@@ -521,7 +520,7 @@ const DateFieldView: FC<{
 }> = ({ props, value, onChange }) => (
   <LabeledField label={props.label}>
     {(labelId) => (
-      <DateField
+      <TextField
         aria-labelledby={labelId}
         disabled={u(props.disabled)}
         invalid={u(props.invalid)}
@@ -532,6 +531,7 @@ const DateFieldView: FC<{
           onChange(event.target.value);
         }}
         required={u(props.required)}
+        type="date"
         value={value}
       />
     )}

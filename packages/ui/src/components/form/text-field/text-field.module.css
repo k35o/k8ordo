@@ -8,6 +8,16 @@
   inline-size: 100%;
 }
 
+.root:is(
+  [type='date'],
+  [type='time'],
+  [type='datetime-local'],
+  [type='month'],
+  [type='week']
+) {
+  font-variant-numeric: tabular-nums;
+}
+
 .root:read-only {
   cursor: not-allowed;
   background-color: var(--color-bg-subtle);

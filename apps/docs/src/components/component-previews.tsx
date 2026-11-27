@@ -22,7 +22,6 @@ import {
   ContextMenu,
   CopyButton,
   DataTable,
-  DateField,
   DatePicker,
   DropdownMenu,
   EmptyState,
@@ -235,11 +234,6 @@ export const componentPreviews = {
   TextField: <TextField placeholder="Enter your name" />,
   Textarea: <Textarea placeholder="Enter text" rows={3} />,
   NumberField: <NumberField placeholder="0" />,
-  DateField: (
-    <div className={styles.dateField}>
-      <DateField aria-label="Date" defaultValue="2026-09-30" />
-    </div>
-  ),
   DatePicker: (
     <div className={styles.datePicker}>
       <DatePicker aria-label="Check-in" defaultValue="2026-09-30" />
