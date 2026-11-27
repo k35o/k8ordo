@@ -33,7 +33,7 @@ When installed via npm, these docs live under `node_modules/@k8ordo/i18n/docs/`.
   from on each side, `/` (`redirect(href('/:locale', …))` from a
   `guard.ts` in server mode, an effect in static mode) and `<html lang>` / `dir`, the static build's
   `[locale]/paths.ts`, and pairing with `@k8ordo/router` / `@k8ordo/ui` /
-  `@k8ordo/form`.
+  `@k8ordo/form` (and zod's default wording in the request's locale).
 
 ## Entry point
 

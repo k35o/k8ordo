@@ -682,7 +682,11 @@ export const signup = defineForm(schema, [
 ```
 
 The definition stays at module scope; `formFields(signup)` is called in the
-render, as everywhere, so the rules come out worded for that request.
+render, as everywhere, so the rules come out worded for that request. zod's
+own wording, for a check written without a message, follows the request once
+its configuration reads the locale; `@k8ordo/i18n`'s guide
+(`node_modules/@k8ordo/i18n/docs/GUIDE.md`, the `@k8ordo/form` item of
+"Alongside the rest of k8ordo") shows the module that does it.
 
 ## Asking the server about one field
 

@@ -630,6 +630,37 @@ export function DocumentLocale() {
   more. Anywhere else — an action run outside the framework, a job — call it
   inside `locales.run`.
 
+  A check written without `{ error }` speaks zod's own wording, and zod
+  keeps one configuration for the whole process (`z.config`), so a fixed
+  `z.config(z.locales.en())` answers every request in English. To word
+  those checks in the request's locale as well, make the configuration read
+  the locale each time zod reports, from a module of its own:
+
+  ```ts
+  // src/lib/zod-locale.ts
+  import type { Variants } from '@k8ordo/i18n';
+  import * as z from 'zod'; // or 'zod/mini'
+
+  import { locales } from '../i18n';
+
+  const zodLocales = {
+    ja: z.locales.ja(),
+    en: z.locales.en(),
+  } satisfies Variants<{ localeError: z.core.$ZodErrorMap }>;
+
+  z.config({
+    localeError: (issue) => zodLocales[locales.getLocale()].localeError(issue),
+  });
+  ```
+
+  Import it first in every module that declares a schema
+  (`import './zod-locale';` at the top of `src/lib/talk-form.ts`). Keep it
+  out of `src/i18n.ts`: the framework loads that file in the browser too, and
+  zod would come with it. `satisfies Variants<…>` makes a locale added to the
+  set and missing here a type error. This is the fallback for the checks
+  left without a message; a message per check is still how to word the ones
+  a person reads.
+
 ## What it guarantees
 
 - A locale outside the list never reaches a page: the schema refuses it.
