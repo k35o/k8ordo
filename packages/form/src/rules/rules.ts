@@ -22,13 +22,17 @@ export type RuleMessage = string | (() => string);
 
 /**
  * A rule as it crosses to the client. A function cannot cross the RSC
- * boundary, so `formFields` has already called it.
+ * boundary, so `formFields` has already called it. Besides the declared rules,
+ * `formFields` adds the count a checkbox group's array schema allows
+ * (`.min()` / `.max()`), worded by zod.
  */
-export type DerivedRule = RuleOf<string, string>;
+export type DerivedRule =
+  | RuleOf<string, string>
+  | { kind: 'minChecked'; field: string; min: number; message: string }
+  | { kind: 'maxChecked'; field: string; max: number; message: string };
 
 type RuleOf<Field extends string, Message> =
   | { kind: 'sameAs'; field: Field; other: Field; message: Message }
-  | { kind: 'minChecked'; field: Field; min: number; message: Message }
   | {
       kind: 'requiredWhen';
       field: Field;
@@ -47,13 +51,6 @@ export const sameAs = <Field extends string>(
   message: RuleMessage,
 ): Rule<Field> => ({ kind: 'sameAs', field, other, message });
 
-/** At least `min` boxes sharing this name must be checked. */
-export const minChecked = <Field extends string>(
-  field: Field,
-  min: number,
-  message: RuleMessage,
-): Rule<Field> => ({ kind: 'minChecked', field, min, message });
-
 /** Required only while another field holds a particular value. */
 export const requiredWhen = <Field extends string>(
   field: Field,
@@ -64,19 +61,19 @@ export const requiredWhen = <Field extends string>(
 
 const first = (values: Values, name: string): string => values(name)[0] ?? '';
 
-const holds = (rule: Rule, values: Values): boolean => {
+const holds = (rule: Rule | DerivedRule, values: Values): boolean => {
   switch (rule.kind) {
     case 'sameAs':
       return first(values, rule.field) === first(values, rule.other);
     case 'minChecked':
       return values(rule.field).length >= rule.min;
+    case 'maxChecked':
+      return values(rule.field).length <= rule.max;
     case 'requiredWhen':
       return (
         first(values, rule.when) !== rule.equals ||
         first(values, rule.field) !== ''
       );
-    default:
-      return true;
   }
 };
 
@@ -90,5 +87,8 @@ export const deriveRule = (rule: Rule): DerivedRule => ({
 });
 
 /** The message when the rule is broken, or undefined when it holds. */
-export const breachOf = (rule: Rule, values: Values): string | undefined =>
+export const breachOf = (
+  rule: Rule | DerivedRule,
+  values: Values,
+): string | undefined =>
   holds(rule, values) ? undefined : textOf(rule.message);

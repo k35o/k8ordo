@@ -56,8 +56,8 @@ export const dates = message({
 });
 
 export const datesCoerce = message({
-  ja: '`Date`として受け取るには`z.coerce.date()`を使います。この場合はテキストの入力欄になります。`z.date()`は文字列を受け付けないので、`formFields`が`フォームが送信できる値がありません`というエラーにします。',
-  en: 'To receive a `Date`, use `z.coerce.date()`. It becomes a text field. `z.date()` accepts no string, so `formFields` throws (`フォームが送信できる値がありません`).',
+  ja: '`Date`として受け取るには`z.coerce.date()`を使います。この場合はテキストの入力欄になります。`z.date()`は文字列を受け付けないので、`formFields`が`this schema accepts no string`というエラーにします。',
+  en: 'To receive a `Date`, use `z.coerce.date()`. It becomes a text field. `z.date()` accepts no string, so `formFields` throws (`this schema accepts no string`).',
 });
 
 export const numbersTitle = message({
@@ -151,8 +151,8 @@ export const stringbool = message({
 });
 
 export const stringboolUnchecked = message({
-  ja: 'チェックが無いときは何も送らないので、`.default(false)`か`.optional()`を付けます。`.default(true)`は、`formFields`が`false を送れません`というエラーにします。',
-  en: 'An unchecked box submits nothing, so add `.default(false)` or `.optional()`. `formFields` throws on `.default(true)` (`false を送れません`).',
+  ja: 'チェックが無いときは何も送らないので、`.default(false)`か`.optional()`を付けます。`.default(true)`は、`formFields`が`the box can never submit false`というエラーにします。',
+  en: 'An unchecked box submits nothing, so add `.default(false)` or `.optional()`. `formFields` throws on `.default(true)` (`the box can never submit false`).',
 });
 
 export const groupTitle = message({
@@ -161,18 +161,13 @@ export const groupTitle = message({
 });
 
 export const group = message({
-  ja: '`z.array(z.enum())`は、同じ`name`を持つチェックボックスの集まりになります。チェックされた値を配列で受け取り、1つも無ければ`[]`です。',
-  en: '`z.array(z.enum())` becomes a group of checkboxes sharing one `name`. The checked values arrive as an array, and none checked is `[]`.',
+  ja: '`z.array(z.enum())`は、同じ`name`を持つチェックボックスの集まりになります。チェックされた値を配列で受け取り、1つも無ければ`[]`です。送信に失敗したあとは、チェックされていた値が`input.defaultValue`に配列で入ります。手で書くチェックボックスには`input`を展開せず、`name`を渡して`defaultChecked`をこの配列から決めます。',
+  en: '`z.array(z.enum())` becomes a group of checkboxes sharing one `name`. The checked values arrive as an array, and none checked is `[]`. After a failed submission, what was checked is on `input.defaultValue` as an array. Do not spread `input` onto a hand-written checkbox: pass its `name` and set `defaultChecked` from that array.',
 });
 
-export const groupMinBefore = message({
-  ja: '`.min(2)`のような下限はHTMLの属性にならないので、ブラウザでは確かめません。ブラウザでも確かめるには、',
-  en: 'A lower bound such as `.min(2)` has no HTML attribute, so the browser does not check it. To check it in the browser too, declare the `minChecked` rule on ',
-});
-
-export const groupMinAfter = message({
-  ja: 'の`minChecked`を宣言します。',
-  en: '.',
+export const groupMin = message({
+  ja: '`.min(2)`や`.max(3)`のような個数の制限は、HTMLの属性になりません。`formFields`がブラウザで確かめるルールとして導き、文言はzodのものを使います。`.min()`が1つ以上を求めるときは、入力欄の`required`が`true`になります。ラベルの必須の印に使います。',
+  en: 'A count bound such as `.min(2)` or `.max(3)` has no HTML attribute. `formFields` derives it as a rule the browser runs, in zod’s own wording. When `.min()` asks for at least one, the field’s `required` is `true`; use it for the label’s required marker.',
 });
 
 export const filesTitle = message({

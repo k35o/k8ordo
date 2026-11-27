@@ -13,7 +13,7 @@ import styles from './form-demo.module.css';
 
 type Props = {
   /** `formFields(demoState.url)` の結果。Server Component で導かれ、props で渡る。 */
-  fields: FormFields<'q' | 'min' | 'inStock', never>;
+  fields: FormFields<typeof demoState.url>;
 };
 
 export function FormDemo({ fields }: Props) {

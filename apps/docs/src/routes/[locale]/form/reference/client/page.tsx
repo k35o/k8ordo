@@ -67,7 +67,7 @@ export default function FormReferenceClientPage() {
           },
           {
             name: 'array',
-            type: '(path) => ArrayView',
+            type: '(path) => ArrayView<Source, path>',
             description: t.formHookArray,
           },
           {
@@ -86,11 +86,18 @@ export default function FormReferenceClientPage() {
         id="use-form"
         name="useForm"
         params={[
-          { name: 'fields', type: 'FormFields', description: t.formHookFields },
+          {
+            name: 'fields',
+            type: 'FormFields<Source>',
+            description: t.formHookFields,
+          },
           { name: 'state', type: 'FormState', description: t.formHookState },
         ]}
-        returns={{ type: 'UseFormReturn', description: t.formHookReturns }}
-        signature="useForm(fields: FormFields, state?: FormState): UseFormReturn"
+        returns={{
+          type: 'UseFormReturn<Source>',
+          description: t.formHookReturns,
+        }}
+        signature="useForm(fields: FormFields<Source>, state?: FormState): UseFormReturn<Source>"
         summary={t.formHookSummary}
       >
         <CodeBlock code={USE_FORM_EXAMPLE} lang="tsx" title="talk-form.tsx" />
@@ -110,7 +117,7 @@ export default function FormReferenceClientPage() {
       <ApiEntry
         caveats={t.fieldViewCaveats}
         fields={[
-          { name: 'input', type: 'FieldInput', description: t.fieldViewInput },
+          { name: 'input', type: 'Input', description: t.fieldViewInput },
           {
             name: 'error',
             type: 'string | undefined',
@@ -126,8 +133,8 @@ export default function FormReferenceClientPage() {
         from={FROM}
         id="field-view"
         name="FieldView"
-        signature={`type FieldView = {
-  input: FieldInput;
+        signature={`type FieldView<Input = FieldInput> = {
+  input: Input;
   error: string | undefined;
   invalid: boolean;
   required: boolean;
@@ -137,7 +144,11 @@ export default function FormReferenceClientPage() {
 
       <ApiEntry
         fields={[
-          { name: 'rows', type: 'RowView[]', description: t.arrayViewRows },
+          {
+            name: 'rows',
+            type: 'RowView<Source, Path>[]',
+            description: t.arrayViewRows,
+          },
           { name: 'add', type: '() => void', description: t.arrayViewAdd },
           { name: 'canAdd', type: 'boolean', description: t.arrayViewCanAdd },
           {
@@ -159,8 +170,11 @@ export default function FormReferenceClientPage() {
         from={FROM}
         id="array-view"
         name="ArrayView"
-        signature={`type ArrayView = {
-  rows: RowView[];
+        signature={`type ArrayView<
+  Source extends ObjectSchema | FormDefinition,
+  Path extends array paths of Source,
+> = {
+  rows: RowView<Source, Path>[];
   add: () => void;
   canAdd: boolean;
   canRemove: boolean;
@@ -179,7 +193,7 @@ export default function FormReferenceClientPage() {
           { name: 'index', type: 'number', description: t.rowViewIndex },
           {
             name: 'field',
-            type: '(itemKey?: string) => FieldView',
+            type: '(itemKey) => FieldView<input of itemKey>',
             description: t.rowViewField,
           },
           { name: 'remove', type: '() => void', description: t.rowViewRemove },
@@ -187,10 +201,15 @@ export default function FormReferenceClientPage() {
         from={FROM}
         id="row-view"
         name="RowView"
-        signature={`type RowView = {
+        signature={`type RowView<
+  Source extends ObjectSchema | FormDefinition,
+  Path extends array paths of Source,
+> = {
   key: string;
   index: number;
-  field: (itemKey?: string) => FieldView;
+  field: <Key extends keys of one row of Path>(
+    itemKey: Key,
+  ) => FieldView<input of Key>;
   remove: () => void;
 };`}
         summary={t.rowViewSummary}
@@ -244,14 +263,14 @@ export default function FormReferenceClientPage() {
           },
           {
             name: 'revalidate',
-            type: "UseFormReturn['revalidate']",
+            type: '(control) => void',
             description: t.asyncCheckRevalidate,
           },
         ]}
         returns={{ type: 'AsyncCheck', description: t.asyncCheckReturns }}
         signature={`useAsyncCheck(
   check: (value: string) => Promise<string | undefined>,
-  revalidate: UseFormReturn['revalidate'],
+  revalidate: (control) => void,
 ): AsyncCheck`}
         summary={t.asyncCheckSummary}
       >
@@ -278,12 +297,12 @@ export default function FormReferenceClientPage() {
         fields={[
           {
             name: 'fields',
-            type: 'Record<FieldPath, DerivedField>',
+            type: '{ [path]: DerivedField<Input> }',
             description: t.formFieldsTypeFields,
           },
           {
             name: 'arrays',
-            type: 'Record<ArrayPath, DerivedArray>',
+            type: '{ [path]: DerivedArray<Source, path> }',
             description: t.formFieldsTypeArrays,
           },
           {
@@ -300,9 +319,9 @@ export default function FormReferenceClientPage() {
         from={FROM}
         id="form-fields"
         name="FormFields"
-        signature={`type FormFields<FieldPath, ArrayPath, StringCheckboxPath> = {
-  fields: Record<FieldPath, DerivedField>;
-  arrays: Record<ArrayPath, DerivedArray>;
+        signature={`type FormFields<Source extends ObjectSchema | FormDefinition> = {
+  fields: { [Path in field paths of Source]: DerivedField<input of Path> };
+  arrays: { [Path in array paths of Source]: DerivedArray<Source, Path> };
   rules: DerivedRule[];
   dropped: DroppedCheck[];
 };`}

@@ -17,14 +17,12 @@ const HERO_FORM = `const title = form.field('title');
 
 <input {...title.input} />`;
 
-const HERO_HTML = `<input name="title" type="text" required
-  minlength="1" maxlength="120">`;
+const HERO_HTML = `<input name="title" required minlength="1" maxlength="120">`;
 
 const CLAIM_SCHEMA = `const fields = formFields(talkSchema);
 
 fields.fields.title.input;
-// { name: 'title', type: 'text', required: true,
-//   minLength: 1, maxLength: 120 }
+// { name: 'title', required: true, minLength: 1, maxLength: 120 }
 
 fields.fields.title.messages.tooLong;
 // 'Too big: expected string to have <=120 characters'`;

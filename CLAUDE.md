@@ -39,10 +39,12 @@ English, because an AI coding assistant consumes it directly:
 - `packages/*/docs/**` — shipped inside every npm package and read out of `node_modules/@k8ordo/<name>/docs/`
 - `.claude/skills/**`
 - Any string a generator writes into those files (see `packages/ui/scripts/generate-component-docs.ts`)
+- Any text a published package emits at run time for the developer — a thrown error, a `console` warning, a string inside a value it returns. An agent reads it in a stack trace or a failing test, next to docs that are English already. This does not cover the localized copy a component shows the person using the page (`@k8ordo/ui`'s dictionaries, zod's locale messages): that follows the page's locale.
 
 Japanese is fine elsewhere: commit messages, PR and issue text, code comments,
-tooling output meant for a developer, and the documentation site's own copy
-(which is bilingual with Japanese as the default locale).
+output of the repository's own tooling (scripts, generators, CI), and the
+documentation site's own copy (which is bilingual with Japanese as the default
+locale).
 
 ## Commands
 

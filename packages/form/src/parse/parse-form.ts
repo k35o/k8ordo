@@ -1,10 +1,10 @@
+import { safeParse } from 'zod/v4/core';
 import type { output } from 'zod/v4/core';
 
 import type { ControlKind } from '../derive/attributes';
 import { asDefinition } from '../rules/define-form';
 import type { FormDefinition } from '../rules/define-form';
 import { breachOf } from '../rules/rules';
-import { asProbe } from '../schema/object-schema';
 import type { ObjectSchema } from '../schema/object-schema';
 import { INDEX, schemaMap } from '../schema/walk';
 import type { ArrayNode } from '../schema/walk';
@@ -74,7 +74,7 @@ const isUntouched = (kind: ControlKind, value: unknown): boolean => {
 const describeMissing = (missing: string[]): string => {
   const shown = missing.slice(0, 5).join(', ');
   return missing.length > 5
-    ? `${shown} … ほか${String(missing.length - 5)}件`
+    ? `${shown} … and ${String(missing.length - 5)} more`
     : shown;
 };
 
@@ -92,10 +92,10 @@ export const parseForm = <Shape extends ObjectSchema>(
   formData: FormData,
 ): ParseResult<output<Shape>> => {
   const { schema, rules } = asDefinition(input);
-  const map = schemaMap(schema);
+  const map = schemaMap(schema, 'parseForm');
   const raw: Record<string, unknown> = {};
   const missing: string[] = [];
-  const secrets = new Set<string>();
+  const unechoed = new Set<string>();
   const groups = new Set<string>();
 
   const rows = rowCounts(formData, map.arrays);
@@ -116,8 +116,8 @@ export const parseForm = <Shape extends ObjectSchema>(
           );
 
     for (const name of names) {
-      if (leaf.json.input === 'password') {
-        secrets.add(name);
+      if (leaf.json.input === 'password' || leaf.kind === 'file') {
+        unechoed.add(name);
       }
 
       if (leaf.group !== undefined) {
@@ -158,12 +158,12 @@ export const parseForm = <Shape extends ObjectSchema>(
 
   if (missing.length > 0) {
     throw new Error(
-      `[@k8ordo/form] スキーマにあるフィールドが送信されていません: ${describeMissing(missing)}\n` +
-        'input に name が付いていないか、その入力欄が描画されていない可能性があります。',
+      `parseForm: the submission has no entry for these fields of the schema: ${describeMissing(missing)}. ` +
+        'Render each one, with the name from its input.',
     );
   }
 
-  const result = asProbe(schema).safeParse(raw);
+  const result = safeParse(schema, raw);
 
   // Evaluated against the submitted values, exactly as the browser evaluates
   // them against the live form. Same function, same inputs, same verdict —
@@ -187,7 +187,7 @@ export const parseForm = <Shape extends ObjectSchema>(
     values[name] = strings(name);
   }
   for (const [name, value] of formData.entries()) {
-    if (typeof value !== 'string' || secrets.has(name) || groups.has(name)) {
+    if (typeof value !== 'string' || unechoed.has(name) || groups.has(name)) {
       continue;
     }
     const existing = values[name];
@@ -210,7 +210,7 @@ export const parseForm = <Shape extends ObjectSchema>(
   if (result.success && Object.keys(breaches).length === 0) {
     return {
       success: true,
-      data: result.data as output<Shape>,
+      data: result.data,
       state: { values, rows, token },
     };
   }

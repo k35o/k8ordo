@@ -1,8 +1,8 @@
 import { message } from '@k8ordo/i18n';
 
 export const introduction = message({
-  ja: 'パスワードの確認や「2つ以上選ぶ」のように、複数の入力欄にまたがる検証をルールとして宣言します。ルールはブラウザとサーバーで同じ判定になります。',
-  en: 'Declare checks that span several fields, such as a password confirmation or “pick at least two”, as rules. A rule gives the same verdict in the browser and on the server.',
+  ja: 'パスワードの確認や「却下のときだけ理由を求める」のように、複数の入力欄にまたがる検証をルールとして宣言します。ルールはブラウザとサーバーで同じ判定になります。',
+  en: 'Declare checks that span several fields, such as a password confirmation or “a reason only when rejecting”, as rules. A rule gives the same verdict in the browser and on the server.',
 });
 
 export const declareTitle = message({
@@ -45,9 +45,9 @@ export const kindSameAs = message({
   en: '`sameAs(field, other, message)`: `field` must equal `other`. Use it to confirm a password.',
 });
 
-export const kindMinChecked = message({
-  ja: '`minChecked(field, min, message)`：同じ名前のチェックボックスのうち、`min`個以上にチェックが入っていることを求めます。',
-  en: '`minChecked(field, min, message)`: at least `min` of the checkboxes sharing the name must be checked.',
+export const kindGroupCount = message({
+  ja: 'チェックボックスの集まりで選べる個数は、ルールではなくスキーマの`.min()`と`.max()`で書きます。HTMLの属性にはならないので、`formFields`がブラウザで確かめるルールとして導きます。文言はzodのものです。',
+  en: 'How many boxes of a checkbox group may be checked is written in the schema, with `.min()` and `.max()`, not as a rule. No HTML attribute carries it, so `formFields` derives it as a rule the browser runs, in zod’s own wording.',
 });
 
 export const kindRequiredWhen = message({
@@ -101,8 +101,8 @@ export const refineTitle = message({
 });
 
 export const refineServer = message({
-  ja: '3つのルールで書けない検証は、`.refine()`で書きます。`.refine()`はサーバーでしか動きません。',
-  en: 'Write any check the three rules cannot express as a `.refine()`. A `.refine()` runs only on the server.',
+  ja: '2つのルールで書けない検証は、`.refine()`で書きます。`.refine()`はサーバーでしか動きません。',
+  en: 'Write any check the two rules cannot express as a `.refine()`. A `.refine()` runs only on the server.',
 });
 
 export const refineWhole = message({

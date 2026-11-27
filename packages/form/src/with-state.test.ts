@@ -46,10 +46,10 @@ describe('a GET form over a @k8ordo/state url schema', () => {
 
   it('submits a checked box as the string state writes for true', () => {
     expect(listState.search({ inStock: true })).toBe(
-      `inStock=${String(formFields(listState.url).fields.inStock.input.value)}`,
+      `inStock=${formFields(listState.url).fields.inStock.input.value}`,
     );
     expect(spelled.search({ gift: true })).toBe(
-      `gift=${String(formFields(spelled.url).fields.gift.input.value)}`,
+      `gift=${formFields(spelled.url).fields.gift.input.value}`,
     );
   });
 

@@ -1,9 +1,4 @@
-import {
-  defineForm,
-  formFields,
-  minChecked,
-  parseForm,
-} from '@k8ordo/form/server';
+import { formFields, parseForm } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
 import type { ComponentProps } from 'react';
@@ -13,7 +8,6 @@ import { z } from 'zod';
 import {
   ActionForm,
   fill,
-  listOf,
   memo,
   MemoField,
 } from '../../../../.storybook/action-form';
@@ -188,13 +182,12 @@ export const CheckMarkFollowsReset: Story = {
   },
 };
 
-const favorites = defineForm(
-  z.object({
-    tags: z.array(z.enum(['react', 'vue', 'svelte'])).min(1),
-    memo,
-  }),
-  [minChecked('tags', 1, '1つ以上選んでください')],
-);
+const favorites = z.object({
+  tags: z
+    .array(z.enum(['react', 'vue', 'svelte']))
+    .min(1, '1つ以上選んでください'),
+  memo,
+});
 const favoritesFields = formFields(favorites);
 const received = fn();
 const TAGS = [
@@ -209,7 +202,7 @@ const FavoritesForm = () => (
     onReceive={received}
     serve={(data) => parseForm(favorites, data)}
   >
-    {(form, state) => {
+    {(form) => {
       const tags = form.field('tags');
       return (
         <>
@@ -219,12 +212,7 @@ const FavoritesForm = () => (
             label="好きなもの"
             labelAs="legend"
             renderInput={(props) => (
-              <CheckboxCard
-                {...props}
-                {...tags.input}
-                defaultValue={listOf(state.values?.tags)}
-                options={TAGS}
-              />
+              <CheckboxCard {...props} {...tags.input} options={TAGS} />
             )}
             required={tags.required}
           />
@@ -244,7 +232,7 @@ export const WithForm: Story = {
     const submit = () =>
       userEvent.click(canvas.getByRole('button', { name: '送信' }));
 
-    // 1 つもチェックせずに送ると minChecked の文言を出し、最初のカードへフォーカスを移す
+    // 1 つもチェックせずに送ると スキーマの .min(1) の文言を出し、最初のカードへフォーカスを移す
     await fill(userEvent, memoField(), 'よろしく');
     await submit();
     await expect(

@@ -121,10 +121,10 @@ const patternVerdict = (
   flags: string | undefined,
 ): string | undefined => {
   if (flags !== undefined && flags !== '' && flags !== 'u') {
-    return `フラグ '${flags}' は HTML の pattern に存在しないため、ブラウザ側だけ判定が変わります`;
+    return `the pattern attribute has no flag '${flags}', so the browser would judge the value differently`;
   }
   if (!source.startsWith('^') || !source.endsWith('$')) {
-    return 'HTML の pattern は全体一致、zod の regex は部分一致のため、^…$ で括られていない正規表現は意味が変わります';
+    return 'the pattern attribute matches the whole value while a zod regex matches a part of it, so a regex not wrapped in ^…$ would mean something else in the browser';
   }
   const compiles = ((): boolean => {
     try {
@@ -135,7 +135,7 @@ const patternVerdict = (
   })();
   return compiles
     ? undefined
-    : 'ブラウザは pattern を v フラグで解釈し、コンパイルできない正規表現は黙って無視します';
+    : 'browsers compile pattern with the v flag and silently ignore a regex that does not compile with it';
 };
 
 /** Whether a JSON Schema `format` names what a control submits, not a refinement of it. */
@@ -182,7 +182,7 @@ export const attributesFor = (
       dropped.push({
         field: name,
         reason:
-          'accept はファイル選択ダイアログの候補を絞るだけで、ブラウザは選ばれたファイルの MIME タイプを検査しません',
+          'accept only narrows what the file picker offers; the browser does not check the type of the file chosen',
       });
     }
     if (schema.minLength !== undefined || schema.maxLength !== undefined) {
@@ -191,7 +191,7 @@ export const attributesFor = (
       dropped.push({
         field: name,
         reason:
-          'ファイルサイズの制限に対応する HTML 属性はありません（minlength / maxlength は type="file" では無視されます）',
+          'no HTML attribute bounds the size of a file (minlength / maxlength do not apply to type="file")',
       });
     }
     return { input, dropped };
@@ -200,11 +200,10 @@ export const attributesFor = (
   if (schema.anyOf !== undefined) {
     // A scalar union renders as a plain text input; whatever constraints live
     // inside the branches cannot be lifted out without picking a branch.
-    input.type = 'text';
     dropped.push({
       field: name,
       reason:
-        'nullable / union の中の制約は、どの枝を検査すべきか決まらないため属性に落ちません',
+        'constraints inside a nullable or a union have no attribute, since no single branch is the one to check',
     });
     return { input, dropped };
   }
@@ -238,7 +237,7 @@ export const attributesFor = (
       } else {
         dropped.push({
           field: name,
-          reason: `exclusiveMinimum ${String(schema.exclusiveMinimum)} — HTML の min は境界を含むため表現できません`,
+          reason: `exclusiveMinimum ${String(schema.exclusiveMinimum)} cannot be expressed: the min attribute includes its bound`,
         });
       }
     }
@@ -254,7 +253,7 @@ export const attributesFor = (
       } else {
         dropped.push({
           field: name,
-          reason: `exclusiveMaximum ${String(schema.exclusiveMaximum)} — HTML の max は境界を含むため表現できません`,
+          reason: `exclusiveMaximum ${String(schema.exclusiveMaximum)} cannot be expressed: the max attribute includes its bound`,
         });
       }
     }
@@ -267,19 +266,21 @@ export const attributesFor = (
     // z.custom() and z.unknown() all become — carries nothing to build a
     // control from. A text input is the only thing left, but nothing about it
     // is derived, so it is reported rather than presented as a derivation.
-    input.type = 'text';
     dropped.push({
       field: name,
       reason:
-        'スキーマから制約を読み取れないため（transform / pipe / custom など）、type="text" 以外は何も導出できません。ブラウザ側では何も検査されません',
+        'the schema exposes no constraints (a transform, a pipe or a custom check), so the field is a bare text input and the browser checks nothing on it',
     });
     return { input, dropped };
   }
 
-  input.type =
+  const type =
     schema.format === undefined
-      ? 'text'
-      : (FORMAT_TO_INPUT_TYPE[schema.format] ?? 'text');
+      ? undefined
+      : FORMAT_TO_INPUT_TYPE[schema.format];
+  if (type !== undefined && type !== 'text') {
+    input.type = type;
+  }
 
   if (isFiniteNumber(schema.minLength) && schema.minLength > 0) {
     input.minLength = schema.minLength;
@@ -295,7 +296,7 @@ export const attributesFor = (
         )
       : [schema.pattern];
 
-  if (TYPES_WITHOUT_PATTERN.has(input.type)) {
+  if (input.type !== undefined && TYPES_WITHOUT_PATTERN.has(input.type)) {
     // type="date" already constrains the value far more tightly than the
     // format's own regex would, so losing that one costs nothing. A regex
     // stacked on top is a different check, and it is lost all the same.
@@ -309,7 +310,7 @@ export const attributesFor = (
     if (ignored.length > 0) {
       dropped.push({
         field: name,
-        reason: `pattern は type="${input.type}" では無視されます`,
+        reason: `pattern is ignored on type="${input.type}"`,
       });
     }
   } else if (patterns.length > 1) {
@@ -317,7 +318,7 @@ export const attributesFor = (
     // schema, which cannot say which of the stacked regexes a value failed.
     dropped.push({
       field: name,
-      reason: `HTML の pattern は 1 つしか持てないため、重ねた ${String(patterns.length)} 個の正規表現はブラウザでは検査されません`,
+      reason: `the pattern attribute holds one regex, so the browser checks none of the ${String(patterns.length)} stacked ones`,
     });
   } else if (patterns[0] !== undefined) {
     const verdict = patternVerdict(patterns[0], hints.flags);

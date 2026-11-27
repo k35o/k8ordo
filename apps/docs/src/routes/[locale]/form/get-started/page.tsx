@@ -60,9 +60,11 @@ import { useForm } from '@k8ordo/form';
 import type { FormFields, FormState } from '@k8ordo/form';
 import { useActionState } from 'react';
 
+import type { talkSchema } from '../lib/schema';
+
 type Props = {
   action: (prev: FormState, formData: FormData) => Promise<FormState>;
-  fields: FormFields<'title' | 'eventUrl' | 'minutes', never>;
+  fields: FormFields<typeof talkSchema>;
 };
 
 export function TalkForm({ action, fields }: Props) {
@@ -164,18 +166,26 @@ export default function FormGetStartedPage() {
 
       <DocSection id="form" title={t.formTitle}>
         <CodeBlock
-          callouts={{ 14: t.formHookCallout(), 20: t.formPropsCallout() }}
+          callouts={{
+            11: t.formTypeCallout(),
+            16: t.formHookCallout(),
+            22: t.formPropsCallout(),
+          }}
           code={FORM}
           lang="tsx"
           marks={{
-            13: 'highlight',
-            14: 'highlight',
-            20: 'highlight',
+            11: 'highlight',
+            15: 'highlight',
+            16: 'highlight',
             22: 'highlight',
             24: 'highlight',
+            26: 'highlight',
           }}
           title="src/components/talk-form.tsx"
         />
+        <p>
+          <Rich>{t.formType()}</Rich>
+        </p>
         <p>
           <Rich>{t.formHook()}</Rich>
         </p>

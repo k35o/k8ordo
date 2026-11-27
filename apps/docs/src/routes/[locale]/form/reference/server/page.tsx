@@ -54,8 +54,11 @@ export default function FormReferenceServerPage() {
             description: t.formFieldsInput,
           },
         ]}
-        returns={{ type: 'FormFields', description: t.formFieldsReturns }}
-        signature="formFields(input: ZodObject | FormDefinition): FormFields"
+        returns={{
+          type: 'FormFields<typeof input>',
+          description: t.formFieldsReturns,
+        }}
+        signature="formFields(input: ZodObject | FormDefinition): FormFields<typeof input>"
         summary={t.formFieldsSummary}
       />
 
@@ -111,20 +114,6 @@ export default function FormReferenceServerPage() {
         returns={RULE_RETURNS}
         signature="sameAs(field: FieldPath, other: FieldPath, message: RuleMessage): Rule"
         summary={t.sameAsSummary}
-      />
-
-      <ApiEntry
-        from={FROM}
-        id="min-checked"
-        name="minChecked"
-        params={[
-          RULE_PARAMS.field,
-          { name: 'min', type: 'number', description: t.ruleMin },
-          RULE_PARAMS.message,
-        ]}
-        returns={RULE_RETURNS}
-        signature="minChecked(field: FieldPath, min: number, message: RuleMessage): Rule"
-        summary={t.minCheckedSummary}
       />
 
       <ApiEntry

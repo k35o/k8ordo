@@ -6,12 +6,13 @@ import { Button, Code, FormControl, TextField } from '@k8ordo/ui';
 import { useState } from 'react';
 
 import * as m from '../../../messages';
+import type { orderSchema } from './order-schema';
 
 import styles from './order-demo.module.css';
 
 type Props = {
   /** ページの Server Component が `formFields(orderSchema)` で導いたもの。 */
-  fields: FormFields<never, 'items'>;
+  fields: FormFields<typeof orderSchema>;
 };
 
 // 静的なサイトで送信先が無いので、送れる値になったところで止め、送られる

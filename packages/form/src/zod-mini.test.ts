@@ -27,7 +27,7 @@ describe('a schema written with zod/mini', () => {
     expect(fields.title.messages.valueMissing).toBe(
       'タイトルを入力してください',
     );
-    expect(arrays.items.item.name?.input.name).toBe('items[{index}].name');
+    expect(arrays.items.item.name.input.name).toBe('items[{index}].name');
   });
 
   it('marks a secret through the registry, which mini has instead of .meta()', () => {
@@ -55,6 +55,25 @@ describe('a schema written with zod/mini', () => {
     expect(result.data?.tags).toStrictEqual(['a', 'b']);
   });
 
+  it("runs a checkbox group's count in its own wording here too", () => {
+    const { rules } = formFields(
+      zm.object({
+        tags: zm
+          .array(zm.enum(['a', 'b']))
+          .check(zm.minLength(1, '1つ以上選んでください')),
+      }),
+    );
+
+    expect(rules).toStrictEqual([
+      {
+        kind: 'minChecked',
+        field: 'tags',
+        min: 1,
+        message: '1つ以上選んでください',
+      },
+    ]);
+  });
+
   it('pairs a wrapped object and a wrapped array with their JSON nodes', () => {
     const { fields, arrays } = formFields(
       zm.object({
@@ -64,7 +83,7 @@ describe('a schema written with zod/mini', () => {
     );
 
     expect(fields['profile.bio'].input.name).toBe('profile.bio');
-    expect(arrays.links.item.url?.input.name).toBe('links[{index}].url');
+    expect(arrays.links.item.url.input.name).toBe('links[{index}].url');
   });
 
   it('reads the format and the regex flags behind a wrapper', () => {

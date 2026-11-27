@@ -6,12 +6,13 @@ import { Button, FormControl, PasswordInput, TextField } from '@k8ordo/ui';
 import { useState } from 'react';
 
 import * as m from '../../../messages';
+import type { signupDefinition } from './signup-definition';
 
 import styles from './signup-demo.module.css';
 
 type Props = {
   /** ページの Server Component が `formFields(signupDefinition)` で導いたもの。 */
-  fields: FormFields<'handle' | 'password' | 'confirm', never>;
+  fields: FormFields<typeof signupDefinition>;
 };
 
 // 静的なサイトで送信先が無いので、送れる値になったところで止めて知らせる。

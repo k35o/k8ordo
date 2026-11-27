@@ -33,9 +33,8 @@ describe('formFields', () => {
       }),
     );
 
-    expect(fields.title.input).toMatchObject({
+    expect(fields.title.input).toStrictEqual({
       name: 'title',
-      type: 'text',
       required: true,
       minLength: 1,
       maxLength: 120,
@@ -43,6 +42,21 @@ describe('formFields', () => {
     expect(fields.eventUrl.input.type).toBe('url');
     expect(fields.eventDate.input.type).toBe('date');
     expect(fields.blogId.input).toMatchObject({ type: 'number', step: 1 });
+  });
+
+  it('writes no type where the control is a plain text input, its default', () => {
+    const { fields } = formFields(
+      z.object({
+        plain: z.string(),
+        id: z.uuid(),
+        address: z.ipv4(),
+        either: z.union([z.string(), z.literal(1)]),
+      }),
+    );
+
+    for (const field of Object.values(fields)) {
+      expect(field.input).not.toHaveProperty('type');
+    }
   });
 
   it('marks a field required only when the schema rejects an empty string', () => {
@@ -183,7 +197,7 @@ describe('formFields', () => {
     expect(fields.at.input.type).toBe('datetime-local');
     expect(dropped).toHaveLength(1);
     expect(dropped[0]?.reason).toContain('pattern');
-    expect(dropped[0]?.reason).not.toContain('タイムゾーン');
+    expect(dropped[0]?.reason).not.toContain('time zone');
   });
 
   it('drops a pattern the browser would ignore rather than emitting it', () => {
@@ -206,9 +220,26 @@ describe('formFields', () => {
         .refine((v) => v.password === v.confirm, { path: ['confirm'] }),
     );
 
-    expect(dropped).toHaveLength(1);
-    expect(dropped[0]?.field).toBe('(schema)');
-    expect(dropped[0]?.reason).toContain('クライアントでは検査されません');
+    expect(dropped).toStrictEqual([
+      {
+        field: '(schema)',
+        reason:
+          'an object-level check (.refine() and the like) has no HTML constraint attribute, so the browser does not run it',
+      },
+    ]);
+  });
+
+  it('words the object-level checks it reports by how many there are', () => {
+    const { dropped } = formFields(
+      z
+        .object({ password: z.string(), confirm: z.string() })
+        .refine((v) => v.password === v.confirm)
+        .refine((v) => v.password !== ''),
+    );
+
+    expect(dropped.map((entry) => entry.reason)).toStrictEqual([
+      '2 object-level checks (.refine() and the like) have no HTML constraint attribute, so the browser does not run them',
+    ]);
   });
 
   it('leaves a checkbox the server would accept unchecked without required', () => {
@@ -239,7 +270,7 @@ describe('formFields', () => {
       }),
     );
 
-    expect(fields.strict.input.type).toBe('text');
+    expect(fields.strict.input).not.toHaveProperty('type');
     expect(dropped.some((entry) => entry.field === 'strict')).toBe(true);
     expect(fields.local.input.type).toBe('datetime-local');
   });
@@ -290,22 +321,26 @@ describe('formFields', () => {
       z.object({ note: z.string().min(3).nullable() }),
     );
 
-    expect(fields.note.input.type).toBe('text');
+    expect(fields.note.input).not.toHaveProperty('type');
     expect(fields.note.input.minLength).toBeUndefined();
     expect(dropped.some((entry) => entry.field === 'note')).toBe(true);
   });
 
   it('derives an array of enums as one shared-name checkbox group', () => {
-    const { fields, arrays, dropped } = formFields(
+    const { fields, arrays, rules, dropped } = formFields(
       z.object({ tags: z.array(z.enum(['a', 'b', 'c'])).min(2) }),
     );
 
     // One leaf, no rows: every box submits under the same name.
     expect(arrays).toStrictEqual({});
     expect(fields.tags.input).toStrictEqual({ name: 'tags' });
-    // "At least two" has no HTML attribute; the report points at minChecked.
-    const report = dropped.find((entry) => entry.field === 'tags');
-    expect(report?.reason).toContain('minChecked');
+    expect(fields.tags.group).toStrictEqual({
+      minItems: 2,
+      maxItems: undefined,
+    });
+    // "At least two" has no HTML attribute; it crosses as a rule instead.
+    expect(dropped).toStrictEqual([]);
+    expect(rules.map((rule) => rule.kind)).toStrictEqual(['minChecked']);
   });
 
   it('refuses a number no control can submit rather than deriving a dead form', () => {
@@ -366,13 +401,13 @@ describe('formFields', () => {
 
     // A text input still submits something the schema accepts, so the form
     // works — but nothing about it was derived, and saying so is the point.
-    expect(fields.transformed.input.type).toBe('text');
+    expect(fields.transformed.input).not.toHaveProperty('type');
     expect(fields.transformed.input.minLength).toBeUndefined();
     expect(dropped.map((entry) => entry.field)).toStrictEqual([
       'transformed',
       'opaque',
     ]);
-    expect(dropped[0]?.reason).toContain('検査されません');
+    expect(dropped[0]?.reason).toContain('the browser checks nothing');
   });
 
   it('gives a stringbool checkbox the value its schema writes for true', () => {
@@ -436,17 +471,17 @@ describe('formFields', () => {
     expect(fields.optional.input.required).toBeUndefined();
   });
 
-  it('refuses a leaf no text control can satisfy', () => {
+  it('refuses a leaf no text control can satisfy, naming the coercing schema only where zod has one', () => {
     expect(() => formFields(z.object({ when: z.date() }))).toThrow(
-      /文字列を受け付けない/u,
+      /accepts no string.*; use z\.coerce\.date\(\) instead of z\.date\(\)$/u,
     );
-    expect(() => formFields(z.object({ big: z.bigint() }))).toThrow(
-      /文字列を受け付けない/u,
+    expect(() => formFields(z.object({ big: z.bigint().optional() }))).toThrow(
+      /accepts no string.*; use z\.coerce\.bigint\(\) instead of z\.bigint\(\)$/u,
     );
     // A nullable number is as unsatisfiable as a bare one, and reaches the
     // refusal as an anyOf node rather than through the numeric branch.
     expect(() => formFields(z.object({ n: z.number().nullable() }))).toThrow(
-      /文字列を受け付けない/u,
+      /^formFields: 'n': this schema accepts no string, so nothing a form submits can satisfy it$/u,
     );
   });
 
@@ -461,9 +496,9 @@ describe('formFields', () => {
       }),
     );
 
-    expect(fields.nullableNumber.input.type).toBe('text');
-    expect(fields.when.input.type).toBe('text');
-    expect(fields.big.input.type).toBe('text');
+    expect(fields.nullableNumber.input).not.toHaveProperty('type');
+    expect(fields.when.input).not.toHaveProperty('type');
+    expect(fields.big.input).not.toHaveProperty('type');
   });
 
   it('derives a file control, its accepted types, and what HTML cannot carry', () => {
@@ -484,11 +519,11 @@ describe('formFields', () => {
     // required has to come from the same "nothing was entered" the parse sends.
     expect(fields.optional.input.required).toBeUndefined();
     // A byte bound is not minlength, and no attribute carries it.
-    expect(fields.attachment.input.minLength).toBeUndefined();
-    expect(fields.attachment.input.maxLength).toBeUndefined();
+    expect(fields.attachment.input).not.toHaveProperty('minLength');
+    expect(fields.attachment.input).not.toHaveProperty('maxLength');
     expect(
       dropped.find((entry) => entry.field === 'attachment')?.reason,
-    ).toContain('ファイルサイズ');
+    ).toContain('size of a file');
   });
 
   it('reports that accept only suggests the types the server enforces', () => {
@@ -524,13 +559,12 @@ describe('the dropped report outside production', () => {
 
     expect(warn).toHaveBeenCalledTimes(1);
     const message = String(warn.mock.calls[0]?.[0]);
-    expect(message).toContain('@k8ordo/form');
+    expect(message).toMatch(/^formFields: /u);
     for (const entry of first.dropped) {
       expect(message).toContain(entry.field);
       expect(message).toContain(entry.reason);
     }
-    // 「サーバーでは検査される」ことを読む人に伝える
-    expect(message).toContain('サーバー');
+    expect(message).toContain('server');
   });
 
   it('stays silent when nothing was dropped', () => {

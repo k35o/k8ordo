@@ -10,6 +10,15 @@
  * where the walk refuses the schema outright, as it does a nullable object.
  */
 
+import type {
+  CheckboxGroupInput,
+  CheckboxInput,
+  FieldInput,
+  FileInput,
+  NumberInput,
+  StringCheckboxInput,
+} from './types';
+
 type Join<Prefix extends string, Key extends string> = Prefix extends ''
   ? Key
   : `${Prefix}.${Key}`;
@@ -45,47 +54,57 @@ type IsEnum<Schema> =
     ? true
     : false;
 
-export type FieldPathsOf<Schema, Prefix extends string = ''> =
+/**
+ * Each field path paired with the type of its `input`. One walk yields both,
+ * so the paths `field()` accepts and the inputs it returns cannot disagree.
+ */
+type FieldEntriesOf<Schema, Prefix extends string = ''> =
   Unwrap<Schema> extends infer Bare
     ? IsArray<Bare> extends true
       ? IsEnum<ArrayElement<Bare>> extends true
-        ? Prefix extends ''
-          ? never
-          : Prefix
+        ? [Prefix, CheckboxGroupInput]
         : never
       : Bare extends { shape: infer Shape }
         ? {
-            [Key in keyof Shape & string]: FieldPathsOf<
+            [Key in keyof Shape & string]: FieldEntriesOf<
               Shape[Key],
               Join<Prefix, Key>
             >;
           }[keyof Shape & string]
-        : Prefix extends ''
-          ? never
-          : Prefix
+        : [Prefix, LeafInputOf<Schema>]
     : never;
+
+export type FieldPathsOf<Schema> = FieldEntriesOf<Schema>[0];
+
+export type FieldInputsOf<Schema> = {
+  [Entry in FieldEntriesOf<Schema> as Entry[0]]: Entry[1];
+};
 
 /**
  * No recursion into an array's element: a repeat inside a repeat has no
  * unambiguous name, and the runtime walk refuses it too.
  */
-export type ArrayPathsOf<Schema, Prefix extends string = ''> =
+type ArrayEntriesOf<Schema, Prefix extends string = ''> =
   Unwrap<Schema> extends infer Bare
     ? IsArray<Bare> extends true
       ? IsEnum<ArrayElement<Bare>> extends true
         ? never
         : Prefix extends ''
           ? never
-          : Prefix
+          : [Prefix, FieldInputsOf<ArrayElement<Bare>>]
       : Bare extends { shape: infer Shape }
         ? {
-            [Key in keyof Shape & string]: ArrayPathsOf<
+            [Key in keyof Shape & string]: ArrayEntriesOf<
               Shape[Key],
               Join<Prefix, Key>
             >;
           }[keyof Shape & string]
         : never
     : never;
+
+export type ArrayInputsOf<Schema> = {
+  [Entry in ArrayEntriesOf<Schema> as Entry[0]]: Entry[1];
+};
 
 /**
  * The one control whose `input` carries a `value` is a checkbox whose schema
@@ -109,22 +128,31 @@ type EncodesTrueAsString<Schema> = Schema extends {
   : false;
 
 /**
- * The field paths whose `input` carries the string a checked box submits.
- * Arrays need no case of their own: neither a checkbox group nor repeated rows
- * take a string in.
+ * `Unwrap` without `.nullable()`, which turns a leaf's JSON node into a union
+ * and so the control into a bare text input — the leaf no longer derives the
+ * control its own type names.
  */
-export type StringCheckboxPathsOf<Schema, Prefix extends string = ''> =
-  Unwrap<Schema> extends infer Bare
-    ? Bare extends { shape: infer Shape }
-      ? {
-          [Key in keyof Shape & string]: StringCheckboxPathsOf<
-            Shape[Key],
-            Join<Prefix, Key>
-          >;
-        }[keyof Shape & string]
-      : Prefix extends ''
-        ? never
-        : EncodesTrueAsString<Bare> extends true
-          ? Prefix
-          : never
+type UnwrapLeaf<Schema> = Schema extends {
+  _zod: { def: { type: 'nullable' } };
+}
+  ? Schema
+  : Schema extends { _zod: { def: { innerType: infer Inner } } }
+    ? UnwrapLeaf<Inner>
+    : Schema;
+
+type InputOfType<Type> = [Type] extends ['number']
+  ? NumberInput
+  : [Type] extends ['boolean']
+    ? CheckboxInput
+    : [Type] extends ['file']
+      ? FileInput
+      : FieldInput;
+
+type LeafInputOf<Schema> =
+  UnwrapLeaf<Schema> extends infer Leaf
+    ? EncodesTrueAsString<Leaf> extends true
+      ? StringCheckboxInput
+      : Leaf extends { _zod: { def: { type: infer Type } } }
+        ? InputOfType<Type>
+        : FieldInput
     : never;

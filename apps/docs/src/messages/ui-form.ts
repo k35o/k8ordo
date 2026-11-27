@@ -21,8 +21,8 @@ export const see = message({
 });
 
 export const basicSpread = message({
-  ja: '`FormControl`には`label`と`errorText`、`invalid`、`required`だけを渡します。`id`と`aria-*`の結び付けは`FormControl`が作ります。`input`は`FormControl`から受け取ったpropsのあとに展開します。取り除いておく属性はありません。`TextField`は日付や時刻の`type`でも、その`type`の入力欄として描画します。`Textarea`は`<textarea>`に無い`type`を捨てます。',
-  en: 'Give `FormControl` only `label`, `errorText`, `invalid` and `required`; it creates the `id` and the `aria-*` links itself. Spread `input` after the props `FormControl` hands over, with nothing taken out first. `TextField` renders the date and time types as well, and `Textarea` drops the `type` a `<textarea>` does not have.',
+  ja: '`FormControl`には`label`と`errorText`、`invalid`、`required`だけを渡します。`id`と`aria-*`の結び付けは`FormControl`が作ります。`input`は`FormControl`から受け取ったpropsのあとに展開します。取り除いておく属性はありません。`@k8ordo/form`はネイティブの要素が受け取る属性だけを出します。ただの文字列の欄には`type`を付けず、`min`と`max`は数で出します。`TextField`は日付や時刻の`type`でも、その`type`の入力欄として描画します。ただの文字列の欄は、そのまま`Textarea`に展開できます。',
+  en: 'Give `FormControl` only `label`, `errorText`, `invalid` and `required`; it creates the `id` and the `aria-*` links itself. Spread `input` after the props `FormControl` hands over, with nothing taken out first. `@k8ordo/form` writes only attributes the native element takes: no `type` on a plain string field, and `min` and `max` as numbers. `TextField` renders the date and time types as well, and a plain string field spreads onto `Textarea` as it is.',
 });
 
 export const basicDom = message({
@@ -81,8 +81,8 @@ export const choiceTitle = message({
 });
 
 export const choiceGroup = message({
-  ja: 'チェックボックスの集まりの値は、送信後に`state.values`へ配列で入ります。`input`には`name`しか入っていないので、この配列を`defaultValue`で渡します。`minChecked`は`Autocomplete`にも効きます。`Autocomplete`は、何も選んでいなくても残る隠れた`<select multiple>`で値を送り、エラーはこの要素に付きます。失敗したあとのフォーカスは、この要素から入力欄へ移ります。',
-  en: 'A checkbox group’s value comes back in `state.values` as an array. `input` carries only the `name`, so pass that array as `defaultValue`. `minChecked` applies to `Autocomplete` too. It submits through a hidden `<select multiple>` that stays even with nothing selected, and the error is attached to that element. Focus sent there after a failure moves on to the text input.',
+  ja: 'チェックボックスの集まりでは、送信後にチェックされていた値が`input.defaultValue`へ配列で入ります。`CheckboxGroup.Root`、`CheckboxCard`、`Autocomplete`は`defaultValue`に配列を受け取るので、`input`を展開するだけで戻ります。スキーマの`.min()`と`.max()`から導く個数のルールは、`Autocomplete`にも効きます。`Autocomplete`は、何も選んでいなくても残る隠れた`<select multiple>`で値を送り、エラーはこの要素に付きます。失敗したあとのフォーカスは、この要素から入力欄へ移ります。',
+  en: 'For a checkbox group, what was checked comes back on `input.defaultValue` as an array after a submission. `CheckboxGroup.Root`, `CheckboxCard` and `Autocomplete` take an array as `defaultValue`, so spreading `input` restores it. The count rule derived from the schema’s `.min()` and `.max()` applies to `Autocomplete` too. It submits through a hidden `<select multiple>` that stays even with nothing selected, and the error is attached to that element. Focus sent there after a failure moves on to the text input.',
 });
 
 export const choiceRadio = message({

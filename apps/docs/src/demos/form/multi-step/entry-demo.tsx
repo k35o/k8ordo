@@ -6,12 +6,13 @@ import { Button, FormControl, TextField } from '@k8ordo/ui';
 import { useRef, useState, useSyncExternalStore } from 'react';
 
 import * as m from '../../../messages';
+import type { entrySchema } from './entry-schema';
 
 import styles from './entry-demo.module.css';
 
 type Props = {
   /** ページの Server Component が `formFields(entrySchema)` で導いたもの。 */
-  fields: FormFields<'name' | 'email' | 'title' | 'minutes', never>;
+  fields: FormFields<typeof entrySchema>;
 };
 
 const subscribe = () => () => {};

@@ -6,12 +6,13 @@ import { Badge, Button, Code } from '@k8ordo/ui';
 import { useState } from 'react';
 
 import * as m from '../../../messages';
+import type { ratingSchema } from './rating-schema';
 
 import styles from './rating-demo.module.css';
 
 type Props = {
   /** ページの Server Component が `formFields(ratingSchema)` で導いたもの。 */
-  fields: FormFields<'rating', never>;
+  fields: FormFields<typeof ratingSchema>;
 };
 
 const STARS = [1, 2, 3, 4, 5] as const;

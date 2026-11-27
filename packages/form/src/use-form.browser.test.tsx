@@ -9,7 +9,7 @@ import { formFields } from './derive/form-fields';
 import { HiddenValue } from './hidden-value';
 import { parseForm } from './parse/parse-form';
 import { defineForm } from './rules/define-form';
-import { minChecked, requiredWhen, sameAs } from './rules/rules';
+import { requiredWhen, sameAs } from './rules/rules';
 import type { FormState } from './types';
 import { useForm } from './use-form';
 
@@ -193,11 +193,7 @@ const Choice: FC<{ state?: FormState }> = ({ state = NO_STATE }) => {
         <option value="red">red</option>
         <option value="blue">blue</option>
       </select>
-      <input
-        aria-label="agree"
-        type="checkbox"
-        {...form.field('agree').input}
-      />
+      <input aria-label="agree" {...form.field('agree').input} />
       <p data-testid="dirty">{String(form.isDirty)}</p>
     </form>
   );
@@ -221,6 +217,7 @@ const SubmittedPick: FC<{ lockedTags?: string[] }> = ({ lockedTags }) => {
   );
   const form = useForm(pickFields, state);
   const tags = state.values?.tags;
+  const tagsInput = form.field('tags').input;
 
   return (
     <form {...form.props} action={formAction}>
@@ -238,8 +235,8 @@ const SubmittedPick: FC<{ lockedTags?: string[] }> = ({ lockedTags }) => {
         <select
           aria-label="tags"
           multiple
-          {...form.field('tags').input}
-          defaultValue={lockedTags ?? (Array.isArray(tags) ? tags : [])}
+          {...tagsInput}
+          defaultValue={lockedTags ?? tagsInput.defaultValue}
         >
           <option value="a">a</option>
           <option value="b">b</option>
@@ -269,19 +266,47 @@ const Group: FC<{ state: FormState }> = ({ state }) => {
       {(['a', 'b'] as const).map((option) => (
         <input
           aria-label={option}
-          defaultChecked={
-            Array.isArray(state.values?.tags) &&
-            state.values.tags.includes(option)
-          }
+          defaultChecked={tags.input.defaultValue?.includes(option)}
           key={option}
+          name={tags.input.name}
           type="checkbox"
-          {...tags.input}
           value={option}
         />
       ))}
       <p data-testid="group-input">{JSON.stringify(tags.input)}</p>
     </form>
   );
+};
+
+const rowGroupSchema = z.object({
+  people: z.array(z.object({ tags: z.array(z.enum(['a', 'b'])) })),
+});
+const rowGroupFields = formFields(rowGroupSchema);
+
+const RowGroup: FC<{ state: FormState }> = ({ state }) => {
+  const form = useForm(rowGroupFields, state);
+
+  return (
+    <form {...form.props}>
+      {form.array('people').rows.map((row) => (
+        <p data-testid="row-group-input" key={row.key}>
+          {JSON.stringify(row.field('tags').input)}
+        </p>
+      ))}
+    </form>
+  );
+};
+
+const UnknownField: FC = () => {
+  const form = useForm(groupFields);
+  let message = '';
+  try {
+    // @ts-expect-error untyped code can still ask for a path the schema lacks
+    form.field('nope');
+  } catch (error) {
+    message = error instanceof Error ? error.message : '';
+  }
+  return <p data-testid="unknown-field">{message}</p>;
 };
 
 const asyncSchema = z.object({ slug: z.string() });
@@ -456,11 +481,11 @@ const Filter: FC = () => {
   );
 };
 
-const topics = defineForm(
-  z.object({ topics: z.array(z.enum(['a', 'b', 'c'])) }),
-  [minChecked('topics', 2, '2つ以上選んでください')],
+const topicsFields = formFields(
+  z.object({
+    topics: z.array(z.enum(['a', 'b', 'c'])).min(2, '2つ以上選んでください'),
+  }),
 );
-const topicsFields = formFields(topics);
 
 const Topics: FC<{ action: (formData: FormData) => void }> = ({ action }) => {
   const form = useForm(topicsFields);
@@ -472,12 +497,13 @@ const Topics: FC<{ action: (formData: FormData) => void }> = ({ action }) => {
         <input
           aria-label={option}
           key={option}
+          name={field.input.name}
           type="checkbox"
-          {...field.input}
           value={option}
         />
       ))}
       <p data-testid="topics-error">{field.error ?? ''}</p>
+      <p data-testid="topics-required">{String(field.required)}</p>
       <button type="submit">send</button>
     </form>
   );
@@ -1102,7 +1128,7 @@ describe('useForm in a browser', () => {
     await expect.element(screen.getByLabelText('agree')).not.toBeChecked();
   });
 
-  it('restores a one-box group per option, never as a value on every box', async () => {
+  it('echoes a one-box group as an array on input.defaultValue', async () => {
     const formData = new FormData();
     formData.append('tags', 'a');
     const { state } = parseForm(groupSchema, formData);
@@ -1113,7 +1139,29 @@ describe('useForm in a browser', () => {
     await expect.element(screen.getByLabelText('b')).not.toBeChecked();
     await expect
       .element(screen.getByTestId('group-input'))
-      .toHaveTextContent('{"name":"tags"}');
+      .toHaveTextContent('{"name":"tags","defaultValue":["a"]}');
+  });
+
+  it('echoes a checkbox group inside a row on its input as well', async () => {
+    const formData = new FormData();
+    formData.append('people[0].tags', 'b');
+    const { state } = parseForm(rowGroupSchema, formData);
+
+    const screen = await render(<RowGroup state={state} />);
+
+    await expect
+      .element(screen.getByTestId('row-group-input'))
+      .toHaveTextContent('{"name":"people[0].tags","defaultValue":["b"]}');
+  });
+
+  it('names useForm and the path when asked for a field the schema lacks', async () => {
+    const screen = await render(<UnknownField />);
+
+    await expect
+      .element(screen.getByTestId('unknown-field'))
+      .toHaveTextContent(
+        "useForm: the schema has no field 'nope'; reach a field inside repeated rows through array()",
+      );
   });
 
   it('hears a HiddenValue change for isDirty like any other control', async () => {
@@ -1262,7 +1310,16 @@ describe('useForm in a browser', () => {
     });
   });
 
-  it('stops a submission on a checkbox group rule and focuses the group', async () => {
+  it('marks a group required when its schema needs a box, without requiring any one box', async () => {
+    const screen = await render(<Topics action={vi.fn()} />);
+
+    await expect
+      .element(screen.getByTestId('topics-required'))
+      .toHaveTextContent('true');
+    await expect.element(screen.getByLabelText('a')).not.toBeRequired();
+  });
+
+  it('stops a submission on the count a group schema allows and focuses the group', async () => {
     const action = vi.fn<(formData: FormData) => void>();
     const screen = await render(<Topics action={action} />);
 

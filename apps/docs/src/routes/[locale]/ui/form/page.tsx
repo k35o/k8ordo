@@ -18,7 +18,6 @@ const BASIC = `const title = form.field('title');
 />`;
 
 const GROUP = `const tags = form.field('tags');
-const checked = state.values?.tags;
 
 <FormControl
   errorText={tags.error}
@@ -29,7 +28,6 @@ const checked = state.values?.tags;
     <CheckboxCard
       {...props}
       {...tags.input}
-      defaultValue={Array.isArray(checked) ? checked : []}
       options={options}
     />
   )}
@@ -93,7 +91,7 @@ export default function UiFormPage() {
         <CodeBlock
           code={GROUP}
           lang="tsx"
-          marks={{ 13: 'highlight' }}
+          marks={{ 11: 'highlight' }}
           title="tags-field.tsx"
         />
         <p>
