@@ -256,7 +256,7 @@ model instead:
   `CheckboxCard`, `RangeSlider`, `FileField`), the heading the group is named
   by (`labelAs="group"`). The help text sits under the field and describes it.
   `Checkbox` and `Switch` are not wrapped in `FormControl`: their `label` is
-  their own.
+  their own, and they draw `helpText` themselves.
 - **Toasts** are a `Toast` entry, standing in for `useToast`: a widget whose
   `triggerLabel` button opens the toast through your application's
   `ToastProvider` (see [Drawing](#drawing)).

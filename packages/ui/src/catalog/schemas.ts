@@ -15,8 +15,10 @@ import type { Callout } from '../components/feedback/callout';
 import type { EmptyState } from '../components/feedback/empty-state';
 import type { Skeleton } from '../components/feedback/skeleton';
 import type { Spinner } from '../components/feedback/spinner';
+import type { Checkbox } from '../components/form/checkbox';
 import type { ColorPicker } from '../components/form/color-picker';
 import type { FormControl } from '../components/form/form-control';
+import type { Switch } from '../components/form/switch';
 import type { TextInputType } from '../components/form/text-field';
 import type { Textarea } from '../components/form/textarea';
 import type { AlertIcon } from '../components/icons/alert';
@@ -896,12 +898,14 @@ type CheckboxIntegrationProps = {
   label: string;
   defaultChecked?: boolean;
   disabled?: boolean;
+  helpText?: ComponentProps<typeof Checkbox>['helpText'];
 };
 export const checkboxProps = z.object({
   name: z.string(),
   label: z.string(),
   defaultChecked: z.boolean().optional(),
   disabled: z.boolean().optional(),
+  helpText: fieldHelpText(),
 }) satisfies z.ZodType<CheckboxIntegrationProps>;
 
 type SwitchIntegrationProps = {
@@ -911,6 +915,7 @@ type SwitchIntegrationProps = {
   disabled?: boolean;
   invalid?: boolean;
   required?: boolean;
+  helpText?: ComponentProps<typeof Switch>['helpText'];
 };
 export const switchProps = z.object({
   name: z.string(),
@@ -919,6 +924,7 @@ export const switchProps = z.object({
   disabled: z.boolean().optional(),
   invalid: z.boolean().optional(),
   required: z.boolean().optional(),
+  helpText: fieldHelpText(),
 }) satisfies z.ZodType<SwitchIntegrationProps>;
 
 type SelectOption = { value: string; label: string };

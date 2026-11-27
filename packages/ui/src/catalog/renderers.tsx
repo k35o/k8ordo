@@ -340,6 +340,7 @@ export function renderCheckbox(
     <Checkbox
       checked={checked}
       disabled={props.disabled}
+      helpText={props.helpText}
       label={props.label}
       name={props.name}
       onChange={onChange}
@@ -356,6 +357,7 @@ export function renderSwitch(
     <Switch
       checked={checked}
       disabled={props.disabled}
+      helpText={props.helpText}
       invalid={props.invalid}
       label={props.label}
       name={props.name}

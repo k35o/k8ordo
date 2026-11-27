@@ -61,8 +61,8 @@ export const renderValue = message({
 });
 
 export const renderLabel = message({
-  ja: '入力欄は`label`を必須で持ち、`FormControl`で描きます。`label`は欄を指す`<label>`になり、ラジオボタンのようなグループではグループの名前になります。任意の`helpText`は欄の下に出て、欄の説明になります。`Checkbox`と`Switch`は`FormControl`を使わず、自分の`label`で名前を持ちます。',
-  en: 'A field takes a required `label` and is drawn through `FormControl`. The label is a `<label>` that points at the field, or the name of a group such as radio buttons. An optional `helpText` appears under the field and describes it. `Checkbox` and `Switch` skip `FormControl` and are named by their own `label`.',
+  ja: '入力欄は`label`を必須で持ち、`FormControl`で描きます。`label`は欄を指す`<label>`になり、ラジオボタンのようなグループではグループの名前になります。任意の`helpText`は欄の下に出て、欄の説明になります。`Checkbox`と`Switch`は`FormControl`を使わず、`label`と`helpText`を自分で描きます。',
+  en: 'A field takes a required `label` and is drawn through `FormControl`. The label is a `<label>` that points at the field, or the name of a group such as radio buttons. An optional `helpText` appears under the field and describes it. `Checkbox` and `Switch` skip `FormControl` and draw their `label` and `helpText` themselves.',
 });
 
 export const renderEvents = message({

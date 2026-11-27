@@ -67,16 +67,23 @@ const controlOf = (html: string, label: string): string | undefined => {
     : new RegExp(`<[a-z]+ [^>]*id="${escaped(id)}"[^>]*>`, 'u').exec(html)?.[0];
 };
 
-const descriptionOf = (html: string, label: string): string | undefined => {
-  const id = /aria-describedby="([^"]+)"/u.exec(
-    controlOf(html, label) ?? '',
-  )?.[1];
+const describedBy = (
+  html: string,
+  control: string | undefined,
+): string | undefined => {
+  const id = /aria-describedby="([^"]+)"/u.exec(control ?? '')?.[1];
   return id === undefined
     ? undefined
-    : new RegExp(`<p[^>]*id="${escaped(id)}"[^>]*>([^<]*)<`, 'u').exec(
+    : new RegExp(`<[a-z]+ [^>]*id="${escaped(id)}"[^>]*>([^<]*)<`, 'u').exec(
         html,
       )?.[1];
 };
+
+const descriptionOf = (html: string, label: string): string | undefined =>
+  describedBy(html, controlOf(html, label));
+
+const inputDescriptionOf = (html: string): string | undefined =>
+  describedBy(html, /<input [^>]*>/u.exec(html)?.[0]);
 
 const namedBy = (html: string, label: string): string[] => {
   const id = new RegExp(`<span[^>]*id="([^"]+)"[^>]*>${label}<`, 'u').exec(
@@ -289,6 +296,29 @@ describe('入力欄の描画', () => {
     );
 
     expect(descriptionOf(html, '名前')).toBe('20 文字まで');
+  });
+
+  it.each([
+    [
+      'Checkbox',
+      renderers.Checkbox({
+        props: { name: 'agree', label: '同意する', helpText: 'あとで外せる' },
+        children: [],
+        value: false,
+        setValue: ignore,
+      }),
+    ],
+    [
+      'Switch',
+      renderers.Switch({
+        props: { name: 'notify', label: '通知', helpText: 'あとで外せる' },
+        children: [],
+        value: false,
+        setValue: ignore,
+      }),
+    ],
+  ])('%s の helpText は、自分の欄の説明になる', (_, node) => {
+    expect(inputDescriptionOf(renderToStaticMarkup(node))).toBe('あとで外せる');
   });
 });
 
