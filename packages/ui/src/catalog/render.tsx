@@ -123,8 +123,6 @@ export const renderers: { [N in CatalogName]: Renderer<N> } = {
     ui.renderSlider(props, value, setValue),
   RangeSlider: ({ props, value, setValue }) =>
     ui.renderRangeSlider(props, value, setValue),
-  DateField: ({ props, value, setValue }) =>
-    ui.renderDateField(props, value, setValue),
   DatePicker: ({ props, value, setValue }) =>
     ui.renderDatePicker(props, value, setValue),
   Calendar: ({ props, value, setValue }) =>

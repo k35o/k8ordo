@@ -88,7 +88,6 @@ import type {
   CodeProps,
   ColorPickerProps,
   DataTableProps,
-  DateFieldProps,
   DatePickerProps,
   GridProps,
   DialogProps,
@@ -498,39 +497,6 @@ export function renderColorPicker(
   onChange: (next: string) => void,
 ): ReactNode {
   return <ColorPickerView onChange={onChange} props={props} value={value} />;
-}
-
-const DateFieldView: FC<{
-  props: DateFieldProps;
-  value: string;
-  onChange: (next: string) => void;
-}> = ({ props, value, onChange }) => (
-  <LabeledField label={props.label}>
-    {(labelId) => (
-      <TextField
-        aria-labelledby={labelId}
-        disabled={props.disabled}
-        invalid={props.invalid}
-        max={props.max}
-        min={props.min}
-        name={props.name}
-        onChange={(event) => {
-          onChange(event.target.value);
-        }}
-        required={props.required}
-        type="date"
-        value={value}
-      />
-    )}
-  </LabeledField>
-);
-
-export function renderDateField(
-  props: DateFieldProps,
-  value: string,
-  onChange: (next: string) => void,
-): ReactNode {
-  return <DateFieldView onChange={onChange} props={props} value={value} />;
 }
 
 const DatePickerView: FC<{

@@ -301,15 +301,6 @@ export const catalog = {
         props.defaultValue ?? [props.min ?? 0, props.max ?? 100],
     },
   }),
-  DateField: entry({
-    description:
-      'Date input with a visible label. Dates are YYYY-MM-DD strings.',
-    props: s.dateFieldProps,
-    value: {
-      prop: 'defaultValue',
-      initial: (props) => props.defaultValue ?? '',
-    },
-  }),
   DatePicker: entry({
     description:
       'Date input with a visible label and a button that opens a calendar. Dates are YYYY-MM-DD strings.',
