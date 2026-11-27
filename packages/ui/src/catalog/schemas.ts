@@ -20,8 +20,6 @@ import type { ColorPicker } from '../components/form/color-picker';
 import type { Switch } from '../components/form/switch';
 import type { TextInputType } from '../components/form/text-field';
 import type { Textarea } from '../components/form/textarea';
-import type { AlertIcon } from '../components/icons/alert';
-import type { ChevronIcon } from '../components/icons/chevron';
 import type { Grid } from '../components/layout/grid';
 import type { Separator } from '../components/layout/separator';
 import type { Stack } from '../components/layout/stack';
@@ -153,24 +151,6 @@ export const copyButtonProps = z.object({
   iconOnly: z.boolean().optional(),
   size: z.enum(['sm', 'md', 'lg']).optional(),
 }) satisfies z.ZodType<CopyButtonIntegrationProps>;
-
-type ChevronIconIntegrationProps = {
-  direction: ComponentProps<typeof ChevronIcon>['direction'];
-  size?: ComponentProps<typeof ChevronIcon>['size'];
-};
-export const chevronIconProps = z.object({
-  direction: z.enum(['up', 'down', 'left', 'right']),
-  size: z.enum(['sm', 'md', 'lg']).optional(),
-}) satisfies z.ZodType<ChevronIconIntegrationProps>;
-
-type StatusIconIntegrationProps = {
-  status: ComponentProps<typeof AlertIcon>['status'];
-  size?: ComponentProps<typeof AlertIcon>['size'];
-};
-export const statusIconProps = z.object({
-  status: z.enum(['success', 'info', 'warning', 'error']),
-  size: z.enum(['sm', 'md', 'lg']).optional(),
-}) satisfies z.ZodType<StatusIconIntegrationProps>;
 
 type BadgeIntegrationProps = {
   label: string;
@@ -1223,8 +1203,6 @@ export type RadioCardProps = z.infer<typeof radioCardProps>;
 export type CheckboxCardProps = z.infer<typeof checkboxCardProps>;
 export type PaginationProps = z.infer<typeof paginationProps>;
 export type GridProps = z.infer<typeof gridProps>;
-export type ChevronIconProps = z.infer<typeof chevronIconProps>;
-export type StatusIconProps = z.infer<typeof statusIconProps>;
 export type FormProps = z.infer<typeof formProps>;
 export type DialogProps = z.infer<typeof dialogProps>;
 export type DrawerProps = z.infer<typeof drawerProps>;
@@ -1367,20 +1345,6 @@ export type _EnumCoverage = [
       CopyButtonProps['size']
     >
   >,
-  AssertCovered<
-    CoversComponent<
-      ComponentProps<typeof ChevronIcon>['direction'],
-      ChevronIconProps['direction']
-    >
-  >,
-  AssertCovered<
-    CoversComponent<
-      ComponentProps<typeof AlertIcon>['status'],
-      StatusIconProps['status']
-    >
-  >,
-  // ChevronIcon / AlertIcon の size は本体が xs〜3xl まで持つが、生成 UI では
-  // iconName と同様 sm/md/lg の安全な部分集合に意図的に絞るため被覆検査しない。
   AssertCovered<
     CoversComponent<
       ComponentProps<typeof Stack>['direction'],

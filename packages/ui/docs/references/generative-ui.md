@@ -249,7 +249,9 @@ model instead:
 - **Icons** are one `Icon` entry whose `name` picks the glyph. Every icon in
   `@k8ordo/ui/icons` that needs nothing but a size is there, under its name in
   kebab-case without the suffix: `eye-closed` is `EyeClosedIcon`. `ChevronIcon`
-  has an entry of its own, and `AlertIcon` is the `StatusIcon` entry.
+  and `AlertIcon` are not there by name: each draws one of the icons above,
+  picked by `direction` or `status`, so a spec names that icon instead
+  (`chevron-down`, `circle-check`).
 - **Fields** each take a required `label` and an optional `helpText`, and are
   drawn through `FormControl`'s `renderInput`. The label is a `<label for>`
   tied to the input, or, for a group (`Radio`, `RadioCard`, `CheckboxGroup`,

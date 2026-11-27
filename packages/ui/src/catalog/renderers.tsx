@@ -54,8 +54,6 @@ import { Slider } from '../components/form/slider';
 import { Switch } from '../components/form/switch';
 import { TextField } from '../components/form/text-field';
 import { Textarea } from '../components/form/textarea';
-import { AlertIcon } from '../components/icons/alert';
-import { ChevronIcon } from '../components/icons/chevron';
 import { Grid } from '../components/layout/grid';
 import { Separator } from '../components/layout/separator';
 import { Stack } from '../components/layout/stack';
@@ -90,7 +88,6 @@ import type {
   CheckboxCardProps,
   CheckboxGroupProps,
   CheckboxProps,
-  ChevronIconProps,
   CodeProps,
   ColorPickerProps,
   DataTableProps,
@@ -124,7 +121,6 @@ import type {
   SliderProps,
   SpinnerProps,
   StackProps,
-  StatusIconProps,
   StepperProps,
   SwitchProps,
   TableProps,
@@ -620,15 +616,6 @@ export function renderPagination(
 export function renderIcon(props: IconProps): ReactNode {
   const IconComponent = iconMap[props.name];
   return <IconComponent size={props.size ?? 'md'} />;
-}
-
-// 汎用 Icon に乗せられない、追加引数が必要なアイコンを独立コンポーネントとして公開する。
-export function renderChevronIcon(props: ChevronIconProps): ReactNode {
-  return <ChevronIcon direction={props.direction} size={props.size ?? 'md'} />;
-}
-
-export function renderStatusIcon(props: StatusIconProps): ReactNode {
-  return <AlertIcon size={props.size ?? 'md'} status={props.status} />;
 }
 
 export function renderIconButton(

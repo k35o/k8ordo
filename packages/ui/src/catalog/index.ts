@@ -158,15 +158,6 @@ export const catalog = {
     props: s.emptyStateProps,
   }),
   Icon: entry({ description: 'Icon, chosen by name.', props: s.iconProps }),
-  ChevronIcon: entry({
-    description: 'Arrow icon. direction sets which way it points.',
-    props: s.chevronIconProps,
-  }),
-  StatusIcon: entry({
-    description:
-      'Icon for a status (success/info/warning/error). It is decorative; to show a message, use Alert.',
-    props: s.statusIconProps,
-  }),
   Alert: entry({
     description:
       'Alert that reports a status. message is a string or an array of strings.',

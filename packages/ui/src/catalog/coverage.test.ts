@@ -15,7 +15,8 @@ import { catalog } from './index';
 vi.mock('server-only', () => ({}));
 
 const RENAMED_IN_CATALOG: ReadonlyMap<string, string> = new Map([
-  ['AlertIcon', 'StatusIcon'],
+  ['AlertIcon', 'Icon'],
+  ['ChevronIcon', 'Icon'],
   ['ToastProvider', 'Toast'],
   ['useToast', 'Toast'],
 ]);
