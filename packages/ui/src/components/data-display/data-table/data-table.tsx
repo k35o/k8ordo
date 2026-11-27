@@ -132,9 +132,8 @@ const ColumnMenu = <Row,>({
           <p className={styles.columnMenuTitle} id={titleId}>
             {messages.dataTableColumns}
           </p>
-          <CheckboxGroup.Root
+          <CheckboxGroup
             aria-labelledby={titleId}
-            name={`${titleId}-columns`}
             onChange={(next) => {
               onHiddenColumnIdsChange(
                 hideable
@@ -142,16 +141,12 @@ const ColumnMenu = <Row,>({
                   .filter((id) => !next.includes(id)),
               );
             }}
+            options={hideable.map((column) => ({
+              value: column.id,
+              label: column.header,
+            }))}
             value={visible}
-          >
-            {hideable.map((column) => (
-              <CheckboxGroup.Item
-                itemValue={column.id}
-                key={column.id}
-                label={column.header}
-              />
-            ))}
-          </CheckboxGroup.Root>
+          />
         </div>
       </Popover.Content>
     </Popover.Root>

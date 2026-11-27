@@ -1175,55 +1175,45 @@ Props:
 
 ### CheckboxGroup
 
-A group of checkboxes. The children are `CheckboxGroup.Item` (= `Checkbox`), and `itemValue` is required.
+A group of checkboxes, one per entry in `options`: the multiple-choice counterpart of `Radio`, with the same `options` shape.
 
-The group's selection lives in `value` / `onChange` (`string[]`). That is a different thing from a lone `Checkbox` holding a boolean in `checked` — do not conflate them.
+The group's selection lives in `value` / `onChange`, or in `defaultValue` when uncontrolled: the values of the checked options. That is a different thing from a lone `Checkbox` holding a boolean in `checked` — do not conflate them. `value` and `defaultValue` take a readonly array, and `onChange` receives a new `string[]` of the checked values in option order, so a `useState<string[]>` setter can be passed as it is.
 
 It renders a `fieldset[role="group"]`, so `aria-labelledby` is required. Convey that the group is required through the referenced label element (for example `FormControl`'s required marker). `role="group"` does not allow `aria-required`, so do not put it on the group.
 
-Uncontrolled, the selection lives in the checkboxes themselves: `onChange`
-receives the checked values in document order, and a form reset puts the boxes
-back to `defaultValue` without leaving a stale selection behind.
+`name` goes on every box. It is optional and nothing fills it in: without a `name` the boxes submit nothing, which is what a group that only drives the page (`DataTable`'s column menu) wants even inside a form.
+
+Uncontrolled, the selection lives in the checkboxes themselves, so a form reset
+puts the boxes back to `defaultValue` without leaving a stale selection behind.
 
 ```tsx
 import { CheckboxGroup } from '@k8ordo/ui';
 
 <p id="interests-label">Areas of interest</p>
-<CheckboxGroup.Root
+<CheckboxGroup
   aria-labelledby="interests-label"
   name="interests"
-  value={values}
   onChange={setValues}
->
-  <CheckboxGroup.Item itemValue="music" label="Music" />
-  <CheckboxGroup.Item itemValue="movie" label="Film" />
-</CheckboxGroup.Root>;
+  options={[
+    { value: 'music', label: 'Music' },
+    { value: 'movie', label: 'Film' },
+  ]}
+  value={values}
+/>;
 ```
 
-Props (CheckboxGroup.Item):
-
-- `label`: `string` (required)
-- `checked`: `boolean`
-- `defaultChecked`: `boolean`
-- `indeterminate`: `boolean` (default: `false`)
-- `invalid`: `boolean` (default: `false`)
-- `itemValue`: `string`
-- `labelHidden`: `boolean` (default: `false`)
-- `onChange`: `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void`
-- `ref`: `Ref<HTMLInputElement>`
-- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `value` / `children`.
-
-Props (CheckboxGroup.Root):
+Props:
 
 - `aria-labelledby`: `string` (required)
-- `name`: `string` (required)
-- `children`: `ReactNode`
-- `defaultValue`: `string[]`
+- `options`: `readonly Option[]` (required)
+- `defaultValue`: `readonly string[]`
+- `disabled`: `boolean` (default: `false`)
 - `invalid`: `boolean` (default: `false`)
+- `name`: `string`
 - `onChange`: `(value: string[]) => void`
 - `ref`: `Ref<HTMLFieldSetElement>`
-- `value`: `string[]`
-- Other props are forwarded to `FieldsetHTMLAttributes<HTMLFieldSetElement>`, except `className` / `style` / `role`.
+- `value`: `readonly string[]`
+- Other props are forwarded to `FieldsetHTMLAttributes<HTMLFieldSetElement>`, except `className` / `style` / `children` / `role`.
 
 ### CheckboxCard
 

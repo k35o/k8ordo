@@ -11,18 +11,23 @@ import {
   memo,
   MemoField,
 } from '../../../../.storybook/action-form';
-import { Checkbox } from '../checkbox';
 import { FormControl } from '../form-control';
 
 import styles from './checkbox-group.stories.module.css';
 
-const meta: Meta<typeof CheckboxGroup.Root> = {
+const meta: Meta<typeof CheckboxGroup> = {
   title: 'components/form/checkbox-group',
-  component: CheckboxGroup.Root,
+  component: CheckboxGroup,
 };
 
 export default meta;
-type Story = StoryObj<typeof CheckboxGroup.Root>;
+type Story = StoryObj<typeof CheckboxGroup>;
+
+const FRAMEWORKS = [
+  { value: 'react', label: 'React' },
+  { value: 'vue', label: 'Vue' },
+  { value: 'svelte', label: 'Svelte' },
+] as const;
 
 const DefaultRender = () => {
   const [value, setValue] = useState(['react']);
@@ -32,16 +37,13 @@ const DefaultRender = () => {
       <p className={styles.groupLabel} id="frameworks-label">
         フレームワーク
       </p>
-      <CheckboxGroup.Root
+      <CheckboxGroup
         aria-labelledby="frameworks-label"
         name="frameworks"
         onChange={setValue}
+        options={FRAMEWORKS}
         value={value}
-      >
-        <Checkbox itemValue="react" label="React" />
-        <Checkbox itemValue="vue" label="Vue" />
-        <Checkbox itemValue="svelte" label="Svelte" />
-      </CheckboxGroup.Root>
+      />
     </div>
   );
 };
@@ -66,6 +68,28 @@ export const Default: Story = {
   },
 };
 
+export const UncontrolledNotifiesInOptionOrder: Story = {
+  args: { onChange: fn() },
+  render: ({ onChange }) => (
+    <div>
+      <p className={styles.groupLabel} id="frameworks-uncontrolled-label">
+        フレームワーク
+      </p>
+      <CheckboxGroup
+        aria-labelledby="frameworks-uncontrolled-label"
+        defaultValue={['svelte']}
+        onChange={onChange}
+        options={FRAMEWORKS}
+      />
+    </div>
+  ),
+  play: async ({ args, canvas, userEvent }) => {
+    await userEvent.click(canvas.getByRole('checkbox', { name: 'React' }));
+
+    await expect(args.onChange).toHaveBeenLastCalledWith(['react', 'svelte']);
+  },
+};
+
 export const Required: Story = {
   render: () => (
     <div>
@@ -73,14 +97,12 @@ export const Required: Story = {
         フレームワーク
         <span className={styles.requiredMark}>必須</span>
       </p>
-      <CheckboxGroup.Root
+      <CheckboxGroup
         aria-labelledby="frameworks-required-label"
         defaultValue={[]}
         name="frameworks-required"
-      >
-        <CheckboxGroup.Item itemValue="react" label="React" />
-        <CheckboxGroup.Item itemValue="vue" label="Vue" />
-      </CheckboxGroup.Root>
+        options={FRAMEWORKS.slice(0, 2)}
+      />
     </div>
   ),
   play: async ({ canvas }) => {
@@ -98,18 +120,36 @@ export const Disabled: Story = {
       <p className={styles.groupLabel} id="frameworks-disabled-label">
         フレームワーク
       </p>
-      <CheckboxGroup.Root
+      <CheckboxGroup
         aria-labelledby="frameworks-disabled-label"
-        defaultValue={['vue']}
+        defaultValue={['vue'] as const}
         disabled
         name="frameworks-disabled"
-      >
-        <Checkbox itemValue="react" label="React" />
-        <Checkbox itemValue="vue" label="Vue" />
-        <Checkbox itemValue="svelte" label="Svelte" />
-      </CheckboxGroup.Root>
+        options={FRAMEWORKS}
+      />
     </div>
   ),
+};
+
+export const WithoutNameSubmitsNothing: Story = {
+  render: () => (
+    <form aria-label="filters">
+      <p className={styles.groupLabel} id="frameworks-unnamed-label">
+        フレームワーク
+      </p>
+      <CheckboxGroup
+        aria-labelledby="frameworks-unnamed-label"
+        defaultValue={['react']}
+        options={FRAMEWORKS}
+      />
+    </form>
+  ),
+  play: async ({ canvas }) => {
+    const form = canvas.getByRole<HTMLFormElement>('form', { name: 'filters' });
+
+    await expect(canvas.getByRole('checkbox', { name: 'React' })).toBeChecked();
+    await expect([...new FormData(form).entries()]).toStrictEqual([]);
+  },
 };
 
 const RefRender = () => {
@@ -120,15 +160,13 @@ const RefRender = () => {
       <p className={styles.label} id="frameworks-ref-label">
         フレームワーク
       </p>
-      <CheckboxGroup.Root
+      <CheckboxGroup
         aria-labelledby="frameworks-ref-label"
         defaultValue={[]}
         name="frameworks-ref"
+        options={FRAMEWORKS.slice(0, 2)}
         ref={ref}
-      >
-        <CheckboxGroup.Item itemValue="react" label="React" />
-        <CheckboxGroup.Item itemValue="vue" label="Vue" />
-      </CheckboxGroup.Root>
+      />
       <button
         onClick={() => {
           ref.current?.querySelector('input')?.focus();
@@ -158,11 +196,6 @@ const favorites = z.object({
 });
 const favoritesFields = formFields(favorites);
 const received = fn();
-const TAGS = [
-  { value: 'react', label: 'React' },
-  { value: 'vue', label: 'Vue' },
-  { value: 'svelte', label: 'Svelte' },
-];
 
 const FavoritesForm = () => (
   <ActionForm
@@ -180,15 +213,7 @@ const FavoritesForm = () => (
             label="好きなもの"
             labelAs="legend"
             renderInput={(props) => (
-              <CheckboxGroup.Root {...props} {...tags.input}>
-                {TAGS.map((tag) => (
-                  <CheckboxGroup.Item
-                    itemValue={tag.value}
-                    key={tag.value}
-                    label={tag.label}
-                  />
-                ))}
-              </CheckboxGroup.Root>
+              <CheckboxGroup {...props} {...tags.input} options={FRAMEWORKS} />
             )}
             required={tags.required}
           />

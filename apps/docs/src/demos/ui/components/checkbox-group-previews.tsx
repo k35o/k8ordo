@@ -1,9 +1,15 @@
 'use client';
 
-import { Checkbox, CheckboxGroup } from '@k8ordo/ui';
+import { CheckboxGroup } from '@k8ordo/ui';
 import { useState } from 'react';
 
 import styles from './checkbox-group-previews.module.css';
+
+const FRAMEWORKS = [
+  { value: 'react', label: 'React' },
+  { value: 'vue', label: 'Vue' },
+  { value: 'svelte', label: 'Svelte' },
+] as const;
 
 export function CheckboxGroupControlledPreview() {
   const [value, setValue] = useState(['react']);
@@ -13,16 +19,13 @@ export function CheckboxGroupControlledPreview() {
       <p className={styles.groupLabel} id="cg-controlled-label">
         Frameworks
       </p>
-      <CheckboxGroup.Root
+      <CheckboxGroup
         aria-labelledby="cg-controlled-label"
         name="frameworks"
         onChange={setValue}
+        options={FRAMEWORKS}
         value={value}
-      >
-        <Checkbox itemValue="react" label="React" />
-        <Checkbox itemValue="vue" label="Vue" />
-        <Checkbox itemValue="svelte" label="Svelte" />
-      </CheckboxGroup.Root>
+      />
     </div>
   );
 }

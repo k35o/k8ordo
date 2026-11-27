@@ -979,71 +979,7 @@
       "omitted": ["className", "style", "children", "role"]
     },
     {
-      "name": "CheckboxGroup.Item",
-      "category": "form",
-      "props": [
-        {
-          "name": "label",
-          "types": ["string"],
-          "defaultValue": null,
-          "required": true
-        },
-        {
-          "name": "checked",
-          "types": ["boolean"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "defaultChecked",
-          "types": ["boolean"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "indeterminate",
-          "types": ["boolean"],
-          "defaultValue": "false",
-          "required": false
-        },
-        {
-          "name": "invalid",
-          "types": ["boolean"],
-          "defaultValue": "false",
-          "required": false
-        },
-        {
-          "name": "itemValue",
-          "types": ["string"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "labelHidden",
-          "types": ["boolean"],
-          "defaultValue": "false",
-          "required": false
-        },
-        {
-          "name": "onChange",
-          "types": [
-            "(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void"
-          ],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "ref",
-          "types": ["Ref<HTMLInputElement>"],
-          "defaultValue": null,
-          "required": false
-        }
-      ],
-      "inherits": "InputHTMLAttributes<HTMLInputElement>",
-      "omitted": ["type", "className", "style", "value", "children"]
-    },
-    {
-      "name": "CheckboxGroup.Root",
+      "name": "CheckboxGroup",
       "category": "form",
       "props": [
         {
@@ -1053,27 +989,33 @@
           "required": true
         },
         {
-          "name": "name",
-          "types": ["string"],
+          "name": "options",
+          "types": ["readonly Option[]"],
           "defaultValue": null,
           "required": true
         },
         {
-          "name": "children",
-          "types": ["ReactNode"],
+          "name": "defaultValue",
+          "types": ["readonly string[]"],
           "defaultValue": null,
           "required": false
         },
         {
-          "name": "defaultValue",
-          "types": ["string[]"],
-          "defaultValue": null,
+          "name": "disabled",
+          "types": ["boolean"],
+          "defaultValue": "false",
           "required": false
         },
         {
           "name": "invalid",
           "types": ["boolean"],
           "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "name",
+          "types": ["string"],
+          "defaultValue": null,
           "required": false
         },
         {
@@ -1090,13 +1032,13 @@
         },
         {
           "name": "value",
-          "types": ["string[]"],
+          "types": ["readonly string[]"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "FieldsetHTMLAttributes<HTMLFieldSetElement>",
-      "omitted": ["className", "style", "role"]
+      "omitted": ["className", "style", "children", "role"]
     },
     {
       "name": "CheckIcon",

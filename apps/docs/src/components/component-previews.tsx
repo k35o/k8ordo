@@ -106,6 +106,11 @@ const checkboxCardOptions = [
   { value: 'comments', label: 'Inline comments' },
 ] as const;
 
+const checkboxGroupOptions = [
+  { value: 'react', label: 'React' },
+  { value: 'vue', label: 'Vue' },
+] as const;
+
 const listBoxOptions = [
   { value: 'apple', label: 'Apple' },
   { value: 'banana', label: 'Banana' },
@@ -270,14 +275,11 @@ export const componentPreviews = {
       <p className={styles.groupLabel} id="preview-checkbox-group">
         Frameworks
       </p>
-      <CheckboxGroup.Root
+      <CheckboxGroup
         aria-labelledby="preview-checkbox-group"
         defaultValue={['react']}
-        name="preview-frameworks"
-      >
-        <CheckboxGroup.Item itemValue="react" label="React" />
-        <CheckboxGroup.Item itemValue="vue" label="Vue" />
-      </CheckboxGroup.Root>
+        options={checkboxGroupOptions}
+      />
     </div>
   ),
   Switch: <Switch defaultChecked label="Switch" />,

@@ -7,11 +7,7 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
-import {
-  CheckboxControlledPreview,
-  CheckboxGroupControlledPreview,
-  CheckboxGroupDisabledPreview,
-} from '../../../../../demos/ui/components/checkbox-previews';
+import { CheckboxControlledPreview } from '../../../../../demos/ui/components/checkbox-previews';
 import * as m from '../../../../../messages';
 
 import page from '../../../../../styles/page.module.css';
@@ -92,44 +88,6 @@ export default function CheckboxPage() {
             <Checkbox defaultChecked disabled label="Checked disabled" />
           </ComponentPreview>
         </div>
-
-        <div className={page.stack}>
-          <Heading level="h3">Group</Heading>
-          <ComponentPreview
-            code={`<p id="checkbox-group-label">Frameworks</p>
-<CheckboxGroup.Root
-  aria-labelledby="checkbox-group-label"
-  name="frameworks"
-  onChange={setValue}
-  value={value}
->
-  <Checkbox itemValue="react" label="React" />
-  <Checkbox itemValue="vue" label="Vue" />
-  <Checkbox itemValue="svelte" label="Svelte" />
-</CheckboxGroup.Root>`}
-          >
-            <CheckboxGroupControlledPreview />
-          </ComponentPreview>
-        </div>
-
-        <div className={page.stack}>
-          <Heading level="h3">Group Disabled</Heading>
-          <ComponentPreview
-            code={`<p id="checkbox-group-disabled-label">Frameworks</p>
-<CheckboxGroup.Root
-  aria-labelledby="checkbox-group-disabled-label"
-  defaultValue={['vue']}
-  disabled
-  name="frameworks-disabled"
->
-  <Checkbox itemValue="react" label="React" />
-  <Checkbox itemValue="vue" label="Vue" />
-  <Checkbox itemValue="svelte" label="Svelte" />
-</CheckboxGroup.Root>`}
-          >
-            <CheckboxGroupDisabledPreview />
-          </ComponentPreview>
-        </div>
       </section>
       <Separator color="mute" />
 
@@ -140,15 +98,6 @@ export default function CheckboxPage() {
         <PropsTable
           inherits={inheritsOf('Checkbox')}
           items={propsOf('Checkbox')}
-        />
-      </section>
-      <Separator color="mute" />
-
-      <section className={page.stack}>
-        <Heading level="h2">CheckboxGroup.Root Props</Heading>
-        <PropsTable
-          inherits={inheritsOf('CheckboxGroup.Root')}
-          items={propsOf('CheckboxGroup.Root')}
         />
       </section>
     </div>

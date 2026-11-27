@@ -1239,20 +1239,13 @@ export function renderCheckboxGroup(
   return (
     <LabeledField label={props.label}>
       {(labelId) => (
-        <CheckboxGroup.Root
+        <CheckboxGroup
           aria-labelledby={labelId}
           name={props.name}
           onChange={onChange}
+          options={props.options}
           value={value}
-        >
-          {props.options.map((option) => (
-            <CheckboxGroup.Item
-              itemValue={option.value}
-              key={option.value}
-              label={option.label}
-            />
-          ))}
-        </CheckboxGroup.Root>
+        />
       )}
     </LabeledField>
   );

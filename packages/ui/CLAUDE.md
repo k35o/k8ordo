@@ -161,7 +161,7 @@ The rest pass the value only, even when a real `<input>` is underneath:
 
 - `Slider`: `(value: number) => void`
 - `NumberField`: `(value: number | null) => void` (`null` is an empty field)
-- `CheckboxGroup.Root` / `CheckboxCard` / `Autocomplete`: `(value: string[]) => void`
+- `CheckboxGroup` / `CheckboxCard` / `Autocomplete`: `(value: string[]) => void`
 - `Tree`'s `onExpandedIdsChange`: `(ids: string[]) => void`
 - `RadioCard` (notifies per group rather than per option input): `(value: string) => void`
 - `ListBox`: `(value) => void`

@@ -10,6 +10,7 @@ import type {
 } from 'react';
 import { useId } from 'react';
 
+import { checkedValuesAround } from '../../_internal/checked-values';
 import { CheckIcon } from '../../icons/check';
 
 import srOnly from '../../_internal/sr-only.module.css';
@@ -68,17 +69,8 @@ export const CheckboxCard: FC<Props> = ({
   const groupId = useId();
   const isControlled = value !== undefined;
 
-  // 非制御のときは値を state に写さず DOM に持たせる。form の reset は change を
-  // 飛ばさずに checked を戻すので、写した state は取り残される。通知する値も、
-  // 変更を受けた時点の各 input の checked から読む
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const inputs =
-      event.currentTarget
-        .closest('fieldset')
-        ?.querySelectorAll<HTMLInputElement>('input[type="checkbox"]') ?? [];
-    onChange?.(
-      [...inputs].filter((input) => input.checked).map((input) => input.value),
-    );
+    onChange?.(checkedValuesAround(event.currentTarget));
   };
 
   return (

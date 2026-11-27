@@ -9,7 +9,6 @@ import { mergeRefs } from '../../../helpers/merge-refs';
 import { ignoreClick } from '../../_internal/ignore-changes';
 import { CheckIcon } from '../../icons/check';
 import { MinusIcon } from '../../icons/minus';
-import { useCheckboxGroupContext } from '../checkbox-group/checkbox-group';
 
 import srOnly from '../../_internal/sr-only.module.css';
 import styles from './checkbox.module.css';
@@ -48,7 +47,6 @@ type UncontrolledProps = {
 type Props = BaseProps & (ControlledProps | UncontrolledProps);
 
 export const Checkbox: FC<Props> = ({
-  name,
   itemValue,
   disabled = false,
   indeterminate = false,
@@ -61,13 +59,7 @@ export const Checkbox: FC<Props> = ({
   ref,
   ...rest
 }) => {
-  const groupContext = useCheckboxGroupContext();
   const { pending } = useFormStatus();
-  const groupItemValue = itemValue ?? '';
-
-  if (groupContext && (itemValue === undefined || itemValue === '')) {
-    throw new Error('Checkbox inside CheckboxGroup requires itemValue');
-  }
 
   // indeterminate は属性ではなく DOM のプロパティにしか無い
   const indeterminateRef = useCallback(
@@ -81,14 +73,7 @@ export const Checkbox: FC<Props> = ({
     [ref, indeterminateRef],
   );
 
-  const disabledNative = disabled || groupContext?.disabled === true;
-  const disabledResolved = disabledNative || pending;
-  const isChecked = groupContext
-    ? groupContext.value?.includes(groupItemValue)
-    : checked;
-  const isDefaultChecked = groupContext
-    ? groupContext.defaultValue.includes(groupItemValue)
-    : defaultChecked;
+  const disabledResolved = disabled || pending;
 
   return (
     <label
@@ -101,20 +86,12 @@ export const Checkbox: FC<Props> = ({
     >
       <input
         {...rest}
-        {...(isChecked === undefined
-          ? { defaultChecked: isDefaultChecked }
-          : { checked: isChecked })}
+        {...(checked === undefined ? { defaultChecked } : { checked })}
         aria-disabled={pending || undefined}
         aria-invalid={invalid}
         className={clsx(srOnly.srOnly, styles.input)}
-        disabled={disabledNative}
-        name={groupContext?.name ?? name}
+        disabled={disabled}
         onChange={(event) => {
-          if (groupContext) {
-            groupContext.notifyChange(event);
-            return;
-          }
-
           onChange?.(event.target.checked, event);
         }}
         ref={mergedRef}
