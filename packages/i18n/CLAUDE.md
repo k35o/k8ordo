@@ -114,8 +114,13 @@ pnpm check         # check:write to auto-fix
   cookie's format (a raw tag), which no other tool of the family writes.
   `negotiateRequest` reads only `request.headers`, so a `Request` and the
   framework's `request` prop both fit.
-- **`delocalize` says `null`, never the default.** The root layout and the
-  404 page choose the fallback visibly.
+- **`delocalize` says `null`, never the default.** It reports what a
+  pathname spells and nothing else. The fallback is `getLocale()`'s, and
+  that is what the docs have the root layout's `<html lang dir>` read: the
+  locale the schemas accepted, which is the one every message under it
+  renders in, a 404 included. Do not document a second way to write
+  `<html lang>` from the pathname; on a 404 whose `not-found.tsx` sits above
+  `[locale]` the two disagree.
 - **`localize` replaces a leading locale segment, and only one of the
   set's.** The pathname `usePathname` returns goes in as it is; a first
   segment the set does not have (`/fr/…`) is kept, since it may be a page.

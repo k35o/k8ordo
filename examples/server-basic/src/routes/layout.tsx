@@ -5,12 +5,18 @@ import type { ReactNode } from 'react';
 
 import { SchemeToggle } from '../components/scheme';
 import { Where } from '../components/where';
+import { locales } from '../i18n';
 
 // ディレクティブなし = Server Component（既定）
 export default function RootLayout({ children }: { children: ReactNode }) {
+  const locale = locales.getLocale();
   return (
     // スクリプトがサーバーの描いていない dark を足すので、その差分は報告させない
-    <html lang="en" suppressHydrationWarning>
+    <html
+      dir={locales.definitions[locale].dir}
+      lang={locale}
+      suppressHydrationWarning
+    >
       <head>
         <meta charSet="utf-8" />
         {/* 描く前に <html> へクラスを付けるインラインスクリプトを、この応答の

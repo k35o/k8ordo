@@ -288,14 +288,14 @@ export const htmlTitle = message({
   en: '`<html lang>` and `dir`',
 });
 
-export const htmlPathname = message({
-  ja: 'ルートレイアウトは`[locale]`より上にありますが、描画しているURLを`pathname`で受け取ります。`delocalize`でその先頭の区間を読み、`<html>`の`lang`と`dir`に書きます。先頭の区間がロケールでないときは`null`が返るので、既定のロケールを補います。',
-  en: 'The root layout sits above `[locale]`, but it receives the URL being rendered as `pathname`. Read its first segment with `delocalize`, and write it into `lang` and `dir` on `<html>`. When that segment is not a locale, `delocalize` returns `null`, and the default locale fills in.',
+export const htmlGetLocale = message({
+  ja: 'ルートレイアウトは`[locale]`より上にありますが、`locales.getLocale()`で今のロケールを読めます。描画は、スキーマがパラメータを検証したあとに始まるからです。読んだロケールを、`<html>`の`lang`と`dir`に書きます。',
+  en: 'The root layout sits above `[locale]`, but `locales.getLocale()` reads the current locale there, because rendering starts after the schemas have validated the params. Write it into `lang` and `dir` on `<html>`.',
 });
 
-export const htmlGetLocale = message({
-  ja: '描画は、スキーマがパラメータを検証したあとに始まります。`[locale]`のレイアウトが`paramsSchema`をexportしていれば、ルートレイアウトで`locales.getLocale()`を呼んでも同じロケールが返ります。`not-found.tsx`を`[locale]`の下に置いていれば、404でも同じです。',
-  en: 'Rendering starts after the schemas have validated the params. With `paramsSchema` exported from the `[locale]` layout, `locales.getLocale()` called in the root layout returns the same locale. So does a 404, as long as `not-found.tsx` sits under `[locale]`.',
+export const htmlDefault = message({
+  ja: '`[locale]`の外のページでは、既定のロケールが返ります。404では、`not-found.tsx`より上のレイアウトのスキーマが受け付けたロケールが返ります。どちらも、そのページの文言が使うロケールと同じです。',
+  en: 'Outside `[locale]`, it returns the default locale. On a 404, it returns the locale the schemas of the layouts above `not-found.tsx` accepted. Either way, it is the locale the page’s messages use.',
 });
 
 export const orderTitle = message({

@@ -469,15 +469,14 @@ useEffect(() => {
 
 ### `<html lang>` and `dir`
 
-The root layout sits above `[locale]` and receives `pathname`. On a page the
-schema has already run for that page, so `locales.getLocale()` is right, and
-`locales.delocalize(pathname).locale ?? locales.default` says the same thing
-in terms of the URL alone. On a 404 they agree too: the schema runs over the
-catch-all's params, so `getLocale()` is the URL's locale where it names one
-and the default where it does not, as `delocalize` reads it.
+The root layout sits above `[locale]` and reads the locale the way a message
+does, with `locales.getLocale()`. On a page the schema has already run for
+that page, and a 404 runs the schemas of the layouts above its
+`not-found.tsx`, so it is the locale the page's own messages render in — the
+URL's where a schema accepted it, the default where none did:
 
 ```tsx
-const locale = locales.delocalize(pathname).locale ?? locales.default;
+const locale = locales.getLocale();
 
 <html dir={locales.definitions[locale].dir} lang={locale}>
 ```
@@ -540,6 +539,30 @@ read the pathname it was rendered for, so they agree with the text written
 there. Once it is hydrated, `@k8ordo/framework` renders it again where the
 visitor is, so its client components come out in their locale once the
 script runs, and a visitor without JavaScript keeps the default.
+
+The root layout is a Server Component, so the `404.html`'s `<html lang>` and
+`dir` stay the default's as well. A client component the not-found page
+renders puts the visitor's on once the page is rendered where they are —
+`getLocale()` reads the pathname the HTML was rendered for while it
+hydrates, and the URL after, so the effect runs again then:
+
+```tsx
+'use client';
+
+import { useEffect } from 'react';
+
+import { locales } from '../i18n';
+
+// rendered by not-found.tsx
+export function DocumentLocale() {
+  const locale = locales.getLocale();
+  useEffect(() => {
+    document.documentElement.lang = locale;
+    document.documentElement.dir = locales.definitions[locale].dir;
+  }, [locale]);
+  return null;
+}
+```
 
 ## Alongside the rest of k8ordo
 

@@ -149,12 +149,8 @@ const HTML_LANG = `import type { LayoutProps } from '@k8ordo/framework';
 
 import { locales } from '../i18n';
 
-export default function RootLayout({
-  children,
-  pathname,
-}: LayoutProps<'/'>) {
-  const locale =
-    locales.delocalize(pathname).locale ?? locales.default;
+export default function RootLayout({ children }: LayoutProps<'/'>) {
+  const locale = locales.getLocale();
 
   return (
     <html dir={locales.definitions[locale].dir} lang={locale}>
@@ -509,14 +505,14 @@ export default function FrameworkRoutingPage() {
         <CodeBlock
           code={HTML_LANG}
           lang="tsx"
-          marks={{ 7: 'highlight', 10: 'highlight', 13: 'highlight' }}
+          marks={{ 6: 'highlight', 9: 'highlight' }}
           title="src/routes/layout.tsx"
         />
         <p>
-          <Rich>{t.htmlPathname()}</Rich>
+          <Rich>{t.htmlGetLocale()}</Rich>
         </p>
         <p>
-          <Rich>{t.htmlGetLocale()}</Rich>
+          <Rich>{t.htmlDefault()}</Rich>
         </p>
       </DocSection>
 
