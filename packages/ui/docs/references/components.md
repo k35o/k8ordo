@@ -1107,7 +1107,8 @@ and move through it (`Alt+ArrowDown` opens it without entering it), `Escape`
 closes it and, pressed again, drops what was typed. Keys pressed while an IME is
 composing belong to the IME.
 
-Without `search`, typing filters `options` by label. With `search`, typing
+Without `search`, typing filters `options` by label, case-insensitively in the
+language of `@k8ordo/i18n`'s current locale. With `search`, typing
 calls it for the options instead — each call gets a `signal` that aborts when
 the text changes again, so pass it to `fetch` — and `options` becomes the list
 shown before anything is typed and where the current value's label is looked
