@@ -1,6 +1,5 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
-import { anthropic } from '@ai-sdk/anthropic';
 import {
   createMCPClient,
   mcpAppClientCapabilities,
@@ -8,47 +7,17 @@ import {
   splitMCPAppTools,
 } from '@ai-sdk/mcp';
 import type { MCPClient } from '@ai-sdk/mcp';
-import {
-  APICallError,
-  convertToModelMessages,
-  LoadAPIKeyError,
-  pipeUIMessageStreamToResponse,
-  stepCountIs,
-  streamText,
-  toUIMessageStream,
-} from 'ai';
 
+import { answerWithClaude, parseChatRequest } from '../ai-sdk/endpoint';
 import { readJson } from '../read-json';
-import { parseChatRequest, parseResourceRequest } from './request';
+import { parseResourceRequest } from './request';
 
-const MODEL = 'claude-opus-5-5';
-
-const instructionsOf = (modelContext: readonly string[]): string =>
-  [
-    'You are the assistant of a chat that can show the user screens built with @k8ordo/ui. Answer in the language the user writes in.',
-    'When a screen helps the user more than prose, such as a form to fill in, a table to compare, or a choice to make, call show_ui instead of describing the screen. Keep the prose around a screen short.',
-    'A user message that begins with "The user acted on the screen." reports what the user did on a screen you showed: the event, its context, and the state of the screen.',
-    'What the user enters on a screen also reaches you with their next message, so a screen needs a button only for the user to act, not for you to read a field.',
-    ...(modelContext.length === 0
-      ? []
-      : [
-          '',
-          'What the screens in the chat hold now. The user may have changed them since your last answer:',
-          ...modelContext,
-        ]),
-  ].join('\n');
-
-const messageOf = (error: unknown): string => {
-  if (LoadAPIKeyError.isInstance(error)) {
-    return 'ANTHROPIC_API_KEY がありません。fnox exec -P anthropic -- pnpm dev で起動してください。';
-  }
-  if (APICallError.isInstance(error)) {
-    return error.statusCode === 401
-      ? 'Claude API の認証に失敗しました。fnox exec -P anthropic -- pnpm dev で起動してください。'
-      : `Claude API のエラー（${String(error.statusCode)}）: ${error.message}`;
-  }
-  return error instanceof Error ? error.message : String(error);
-};
+const INSTRUCTIONS = [
+  'You are the assistant of a chat that can show the user screens built with @k8ordo/ui. Answer in the language the user writes in.',
+  'When a screen helps the user more than prose, such as a form to fill in, a table to compare, or a choice to make, call show_ui instead of describing the screen. Keep the prose around a screen short.',
+  'A user message that begins with "The user acted on the screen." reports what the user did on a screen you showed: the event, its context, and the state of the screen.',
+  'What the user enters on a screen also reaches you with their next message, so a screen needs a button only for the user to act, not for you to read a field.',
+];
 
 // MCP サーバーは同じ dev サーバーの /mcp にいる。別のホストのサーバーを
 // つなぐときと同じく、HTTP でつなぐ
@@ -80,22 +49,11 @@ export const handleChat = async (
   const client = await connect(request);
   try {
     const { modelVisible } = splitMCPAppTools(await client.listTools());
-    const tools = client.toolsFromDefinitions(modelVisible);
-    const result = streamText({
-      model: anthropic(MODEL),
-      instructions: instructionsOf(parsed.modelContext),
-      messages: await convertToModelMessages(parsed.messages),
-      tools,
-      stopWhen: stepCountIs(4),
-      providerOptions: { anthropic: { effort: 'medium' } },
-    });
-    await pipeUIMessageStreamToResponse({
+    await answerWithClaude({
       response,
-      stream: toUIMessageStream({
-        stream: result.stream,
-        tools,
-        onError: messageOf,
-      }),
+      request: parsed,
+      instructions: INSTRUCTIONS,
+      tools: client.toolsFromDefinitions(modelVisible),
     });
   } finally {
     await client.close();
