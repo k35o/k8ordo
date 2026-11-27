@@ -286,6 +286,10 @@ export const select = {
     ja: '必須',
     en: 'Required',
   }),
+  requiredDescription: message({
+    ja: '`placeholder`を渡すと、値が空文字の選択肢を先頭に置きます。空の選択肢が無い`<select>`はいつもどれかが選ばれているので、`required`はこの選択肢があるときだけ働きます。この選択肢も選べるので、任意の欄は未選択に戻せます。',
+    en: '`placeholder` puts an option whose value is the empty string first. A `<select>` without one always has a choice selected, so `required` takes effect only with it. The option stays selectable, so an optional field can go back to no choice.',
+  }),
   defaultValueTitle: message({
     ja: '既定値',
     en: 'Default value',

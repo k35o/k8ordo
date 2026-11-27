@@ -81,6 +81,9 @@ export default function SelectPage() {
           <Heading level="h3">
             <Rich>{m.components.select.requiredTitle()}</Rich>
           </Heading>
+          <p className={page.mute}>
+            <Rich>{m.components.select.requiredDescription()}</Rich>
+          </p>
           <ComponentPreview
             code={`<Select
   id="select-required"
@@ -89,6 +92,7 @@ export default function SelectPage() {
   invalid={false}
   required
   options={options}
+  placeholder="Choose a fruit"
 />`}
           >
             <Select
@@ -98,6 +102,7 @@ export default function SelectPage() {
               invalid={false}
               required
               options={options}
+              placeholder="Choose a fruit"
             />
           </ComponentPreview>
         </div>

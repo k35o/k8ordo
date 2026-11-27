@@ -866,9 +866,10 @@ The spread `value` of a `z.stringbool()` box lands on `Checkbox`'s and
 `Switch`'s `value`, the string a checked box submits, so the box submits the
 schema's own `true` ([Checkboxes that submit a string](#checkboxes-that-submit-a-string)).
 
-**A `Select` needs a placeholder for `required` to mean anything.** Put
-`{ value: '', label: '…' }` first in `options`; a `<select>` without an empty
-option always has a choice selected.
+**A `Select` needs a `placeholder` for `required` to mean anything.** A
+`<select>` without an empty option always has a choice selected; `placeholder`
+puts one first, with the value `''`, which `parseForm` reads as no choice — a
+required enum reports it as missing, an optional one parses to `undefined`.
 
 **A checkbox group echoes as an array.** `input.defaultValue` is what was
 checked, so the group components take the spread with nothing added:

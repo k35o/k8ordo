@@ -58,6 +58,28 @@ export const Invalid: Story = {
   },
 };
 
+export const Placeholder: Story = {
+  args: {
+    defaultValue: undefined,
+    placeholder: '選んでください',
+    required: true,
+  },
+  play: async ({ canvas, userEvent }) => {
+    const select = canvas.getByRole<HTMLSelectElement>('combobox');
+
+    await expect(select).toHaveValue('');
+    await expect(select.options[0]?.text).toBe('選んでください');
+    await expect(select).toBeInvalid();
+
+    await userEvent.selectOptions(select, '8');
+    await expect(select).toBeValid();
+
+    await userEvent.selectOptions(select, '');
+    await expect(select).toHaveValue('');
+    await expect(select).toBeInvalid();
+  },
+};
+
 // フォーカスの輪が付いても、不正な値の枠線は消えない。枠を描くのは
 // <select> を包む要素
 export const InvalidWhileFocused: Story = {
@@ -215,7 +237,6 @@ const planChoice = z.object({
 });
 const planChoiceFields = formFields(planChoice);
 const PLANS = [
-  { value: '', label: '選んでください' },
   { value: 'free', label: '無料' },
   { value: 'pro', label: 'プロ' },
 ];
@@ -233,7 +254,12 @@ const PlanForm = () => (
             errorText={plan.error}
             label="プラン"
             renderInput={(props) => (
-              <Select {...props} {...plan.input} options={PLANS} />
+              <Select
+                {...props}
+                {...plan.input}
+                options={PLANS}
+                placeholder="選んでください"
+              />
             )}
             required={plan.required}
           />

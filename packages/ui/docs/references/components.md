@@ -995,13 +995,23 @@ Props:
 - `options`: `readonly Option[]` (required)
 - `children`: `ReactNode`
 - `invalid`: `boolean` (default: `false`)
+- `placeholder`: `string`
 - `ref`: `Ref<HTMLSelectElement>`
 - Other props are forwarded to `SelectHTMLAttributes<HTMLSelectElement>`, except `className` / `style`.
 
 React applies a `<select>`'s `defaultValue` only when it mounts; `Select` also
 applies a later one, so the next reset — React's after a form action included —
-goes back to it. With `required`, put a placeholder option whose `value` is
-`''` first; leaving it selected fails validation.
+goes back to it.
+
+`placeholder` puts an option whose `value` is `''` first, labelled with it. A
+`<select>` without such an option always has a choice selected, so `required`
+means something only with one: leaving the placeholder selected fails
+validation. It stays selectable, so an optional field can be set back to no
+choice; `@k8ordo/form`'s `parseForm` reads `''` as no choice either way.
+
+```tsx
+<Select name="plan" options={plans} placeholder="Choose a plan" required />
+```
 
 ### Autocomplete
 

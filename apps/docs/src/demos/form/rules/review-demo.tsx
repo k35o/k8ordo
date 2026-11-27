@@ -51,10 +51,10 @@ export function ReviewDemo({ fields }: Props) {
             {...props}
             {...decision.input}
             options={[
-              { value: '', label: m.formRules.demoChoose() },
               { value: 'accept', label: m.formRules.demoAccept() },
               { value: 'reject', label: m.formRules.demoReject() },
             ]}
+            placeholder={m.formRules.demoChoose()}
           />
         )}
         required={decision.required}

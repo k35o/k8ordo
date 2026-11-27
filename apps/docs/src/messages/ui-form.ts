@@ -91,8 +91,8 @@ export const choiceRadio = message({
 });
 
 export const choiceSelect = message({
-  ja: "`Select`で`required`を効かせるには、`options`の先頭に`{ value: '', label: '…' }`を置きます。空の選択肢が無い`<select>`は、いつもどれかが選ばれています。",
-  en: "For `required` to take effect on a `Select`, put `{ value: '', label: '…' }` first in `options`. A `<select>` without an empty option always has a choice selected.",
+  ja: '`Select`で`required`を効かせるには、`placeholder`を渡します。空の選択肢が無い`<select>`は、いつもどれかが選ばれているからです。`placeholder`は値が空文字の選択肢を先頭に置きます。`parseForm`はこの値を未選択として読むので、必須のenumではエラーになり、任意のenumでは`undefined`になります。',
+  en: 'For `required` to take effect on a `Select`, pass `placeholder`: a `<select>` without an empty option always has a choice selected. `placeholder` puts an option whose value is the empty string first, and `parseForm` reads that as no choice, so a required enum reports it and an optional one parses to `undefined`.',
 });
 
 export const exceptionsTitle = message({

@@ -4299,6 +4299,12 @@
           "required": false
         },
         {
+          "name": "placeholder",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
           "name": "ref",
           "types": ["Ref<HTMLSelectElement>"],
           "defaultValue": null,
