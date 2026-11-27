@@ -65,6 +65,14 @@ order, so an optional key is only ever appended. A new required key breaks every
 saved string of its entry anyway, so it goes where it reads best: a field's
 `label` comes right after its `name`.
 
+Some entries' `props` also check props against each other (see
+[Checking what a model wrote](#checking-what-a-model-wrote)). zod keeps such a
+check only on the schema it was written on: `.omit()`, `.pick()`, and
+`.partial()` throw on these entries, and `.extend()` throws when it replaces a
+key, so a glue that derives a schema from one uses `.safeExtend()`. The checks
+do not reach JSON Schema either (`z.toJSONSchema` leaves them out): only a zod
+parse, or `catalogPropIssues`, applies them.
+
 ## Drawing
 
 `renderers` has the same names as `catalog`. Call one with props that fit the
@@ -193,16 +201,31 @@ than failing, so a prop the model invented would otherwise pass and render as if
 it were not there. Run it on every element of a spec, after the format's own
 structural check, and send the issues back as a repair prompt.
 
-A `TextField` whose `type` is a date or time kind takes a `defaultValue` in the
-input format of that kind, as `DatePicker` does: `YYYY-MM-DD` for `date`,
-`HH:MM` or `HH:MM:SS` for `time`, `YYYY-MM-DDTHH:MM` for `datetime-local`,
-`YYYY-MM` for `month`, and `YYYY-Www` for `week`. Another value is reported
-under `TextField.defaultValue`, along with any other issue of the field.
+Props are also checked against each other, each issue under the path it is at
+and in the same round as the other issues of the component, as long as the
+props the check reads are valid themselves. Every row of a `Table` or
+`DataTable` must have as many cells as there are columns, and a `TextField`
+whose `type` is a date or time kind takes a `defaultValue` in the input format
+of that kind, as `DatePicker` does: `YYYY-MM-DD` for `date`, `HH:MM` or
+`HH:MM:SS` for `time`, `YYYY-MM-DDTHH:MM` for `datetime-local`, `YYYY-MM` for
+`month`, and `YYYY-Www` for `week`:
+
+```ts
+catalogPropIssues('Table', {
+  caption: 3,
+  columns: [{ label: 'Name' }, { label: 'Qty' }],
+  rows: [['Apple', '3'], ['Orange']],
+});
+// [
+//   'Table.caption: Invalid input: expected string, received number',
+//   'Table.rows.1: Expected 2 cells (one per column), received 1',
+// ]
+```
 
 A prop the format resolves later, such as one a json-render spec binds with
 `{ "$bindState": "/form/name" }`, cannot be checked as a value yet. Name it in
 `unresolved`: its name is still checked, its value is not, and a required one
-is not reported missing.
+is not reported missing. A check across props that needs it is not made.
 
 ```ts
 catalogPropIssues(

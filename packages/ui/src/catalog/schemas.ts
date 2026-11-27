@@ -256,6 +256,38 @@ export const accordionProps = z.object({
     .describe('Accordion items, each with a title and a plain-text body'),
 }) satisfies z.ZodType<AccordionIntegrationProps>;
 
+// prop をまたぐ検査は、読む prop が通っていれば、ほかの prop の誤りと一緒に
+// 返す。zod の既定では、どこかに誤りがあると検査ごと飛ばし、モデルに 2 度
+// 直させることになる。そのとき検査に届く値は確かめる前の値もありうる
+const whenParsed =
+  (...keys: readonly string[]) =>
+  (payload: z.core.ParsePayload): boolean =>
+    payload.issues.every((issue) => {
+      const [key] = issue.path ?? [];
+      return typeof key === 'string' && !keys.includes(key);
+    });
+
+// catalogPropIssues は形式が後で解決する prop を外して確かめるので、columns
+// や rows が無いまま呼ばれることもある
+const rowsFitColumns = (
+  props: { columns?: unknown; rows?: unknown },
+  ctx: z.RefinementCtx,
+): void => {
+  if (!Array.isArray(props.columns) || !Array.isArray(props.rows)) {
+    return;
+  }
+  const { length } = props.columns;
+  for (const [index, row] of (props.rows as unknown[]).entries()) {
+    if (Array.isArray(row) && row.length !== length) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['rows', index],
+        message: `Expected ${length} cells (one per column), received ${row.length}`,
+      });
+    }
+  }
+};
+
 type TableIntegrationProps = {
   caption?: string;
   columns: ReadonlyArray<{
@@ -264,22 +296,26 @@ type TableIntegrationProps = {
   }>;
   rows: readonly string[][];
 };
-export const tableProps = z.object({
-  caption: z.string().optional(),
-  columns: z
-    .array(
-      z.object({
-        label: z.string(),
-        align: z.enum(['left', 'center', 'right']).optional(),
-      }),
-    )
-    .min(1),
-  rows: z
-    .array(z.array(z.string()))
-    .describe(
-      'Cell strings of each row, in the same order and number as columns',
-    ),
-}) satisfies z.ZodType<TableIntegrationProps>;
+export const tableProps = z
+  .object({
+    caption: z.string().optional(),
+    columns: z
+      .array(
+        z.object({
+          label: z.string(),
+          align: z.enum(['left', 'center', 'right']).optional(),
+        }),
+      )
+      .min(1),
+    rows: z
+      .array(z.array(z.string()))
+      .describe(
+        'Cell strings of each row, in the same order and number as columns',
+      ),
+  })
+  .superRefine(rowsFitColumns, {
+    when: whenParsed('columns', 'rows'),
+  }) satisfies z.ZodType<TableIntegrationProps>;
 
 // DataTable は制御型だが、生成 UI には状態を持つ場所が無いので、並べ替えと
 // 選択を中で持つ自己完結の部品にする（オーバーレイと同じ扱い）
@@ -293,24 +329,28 @@ type DataTableIntegrationProps = {
   rows: readonly string[][];
   selectable?: boolean;
 };
-export const dataTableProps = z.object({
-  label: z.string().describe('Accessible name of the table'),
-  columns: z
-    .array(
-      z.object({
-        label: z.string(),
-        align: z.enum(['left', 'center', 'right']).optional(),
-        sortable: z.boolean().optional(),
-      }),
-    )
-    .min(1),
-  rows: z
-    .array(z.array(z.string()))
-    .describe(
-      'Cell strings of each row, in the same order and number as columns',
-    ),
-  selectable: z.boolean().optional(),
-}) satisfies z.ZodType<DataTableIntegrationProps>;
+export const dataTableProps = z
+  .object({
+    label: z.string().describe('Accessible name of the table'),
+    columns: z
+      .array(
+        z.object({
+          label: z.string(),
+          align: z.enum(['left', 'center', 'right']).optional(),
+          sortable: z.boolean().optional(),
+        }),
+      )
+      .min(1),
+    rows: z
+      .array(z.array(z.string()))
+      .describe(
+        'Cell strings of each row, in the same order and number as columns',
+      ),
+    selectable: z.boolean().optional(),
+  })
+  .superRefine(rowsFitColumns, {
+    when: whenParsed('columns', 'rows'),
+  }) satisfies z.ZodType<DataTableIntegrationProps>;
 
 // 入れ子のスキーマは JSON Schema で再帰になり、モデルにも書き崩されやすい。
 // 平らな一覧にして、親は parentId で指す
@@ -620,17 +660,6 @@ type TextInputIntegrationProps = {
   disabled?: boolean;
   readOnly?: boolean;
 };
-
-// prop をまたぐ検査は、読む prop が通っていれば、ほかの prop の誤りと一緒に
-// 返す。zod の既定では、どこかに誤りがあると検査ごと飛ばし、モデルに 2 度
-// 直させることになる。そのとき検査に届く値は確かめる前の値もありうる
-const whenParsed =
-  (...keys: readonly string[]) =>
-  (payload: z.core.ParsePayload): boolean =>
-    payload.issues.every((issue) => {
-      const [key] = issue.path ?? [];
-      return typeof key === 'string' && !keys.includes(key);
-    });
 
 const DATE_TIME_FORMATS: ReadonlyMap<
   string,

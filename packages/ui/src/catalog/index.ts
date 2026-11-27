@@ -17,7 +17,15 @@ export type CatalogValue<P, V> = {
 export type CatalogEntry<P extends z.ZodObject = z.ZodObject, V = never> = {
   /** What the component is, for the model. English, whatever the app's locale. */
   description: string;
-  /** The props a model may write. The key order is part of the contract (see `schemas.ts`). */
+  /**
+   * The props a model may write. The key order is part of the contract (see `schemas.ts`).
+   *
+   * Some entries also check props against each other (a `Table` row against
+   * its columns, a date `TextField`'s `defaultValue` against its `type`). zod keeps such a check only on this schema, and JSON Schema
+   * leaves it out: derive a schema from it with `.safeExtend()` (`.omit()`,
+   * `.pick()`, and `.partial()` throw), and apply the checks with a zod parse
+   * or `catalogPropIssues`.
+   */
   props: P;
   /** Present when the component lays out children of its own (Stack, Card, Dialog…). */
   children?: true;
@@ -425,7 +433,7 @@ export type CatalogValueOf<N extends CatalogName> =
  * system prompt (json-render's `customRules`, OpenUI's `additionalRules`).
  */
 export const catalogRules: readonly string[] = [
-  'Every row in rows of a Table must have exactly as many cells as there are columns.',
+  'Every row in rows of a Table or DataTable must have exactly as many cells as there are columns.',
   'An href must be an absolute URL starting with https:// or http://, or a path starting with a single /.',
   'The content of Tabs and Accordion must be plain text; components cannot be nested inside it.',
 ];
@@ -438,7 +446,9 @@ export type CatalogPropIssuesOptions = {
   /**
    * Props whose value the format resolves later, such as one a json-render
    * spec binds with `{ "$bindState": "/form/name" }`. Their names are still
-   * checked; their values are not, and a required one may be among them.
+   * checked; their values are not, and a required one may be among them. A
+   * check across props that needs one of them, such as a `Table` row against
+   * the columns, is not made.
    */
   unresolved?: readonly string[];
 };
@@ -451,6 +461,12 @@ export type CatalogPropIssuesOptions = {
  * Unknown props are reported as well: zod drops a key the schema does not
  * know instead of failing, so a prop the model invented would otherwise pass
  * and render as if it were not there.
+ *
+ * Props are also checked against each other, each issue under the path it is
+ * at and along with the other issues, once the props a check reads are valid:
+ * every row of a `Table` or `DataTable` against the columns
+ * (`Table.rows.2: …`), and the `defaultValue` of a `TextField` with a date or
+ * time `type` against that kind's input format (`TextField.defaultValue: …`).
  *
  * @example
  * catalogPropIssues('Button', { label: 'OK', colour: 'primary' });
@@ -470,16 +486,10 @@ export const catalogPropIssues = (
   const unresolved = (options.unresolved ?? []).filter((key) =>
     Object.hasOwn(full.shape, key),
   );
-  const schema =
-    unresolved.length === 0
-      ? full
-      : z.object(
-          Object.fromEntries(
-            Object.entries(full.shape).filter(
-              ([key]) => !unresolved.includes(key),
-            ),
-          ),
-        );
+  // z.object で組み直すと、prop をまたぐ検査（Table の行と列など）まで落ちる
+  const schema = full.safeExtend(
+    Object.fromEntries(unresolved.map((key) => [key, z.unknown().optional()])),
+  );
   const values =
     typeof props === 'object' && props !== null
       ? Object.fromEntries(

@@ -1,4 +1,6 @@
 import { Catalog, MessageProcessor } from '@a2ui/web_core';
+import { catalog, catalogPropIssues } from '@k8ordo/ui/catalog';
+import type { CatalogName } from '@k8ordo/ui/catalog';
 import { z } from 'zod';
 
 import { CATALOG_ID, catalogDocument } from './catalog.ts';
@@ -102,9 +104,13 @@ export const screenMessages = (
 
 const schemas = Catalog.fromJson(catalogDocument);
 
+const isCatalogName = (name: string): name is CatalogName =>
+  Object.hasOwn(catalog, name);
+
 /**
  * What A2UI refuses in `step`, carried out after the steps `before`, checked
- * against the catalog's schemas only.
+ * against the catalog's schemas; once A2UI accepts it, what the catalog's own
+ * checks refuse, which the glue would leave undrawn.
  */
 export const screenIssues = (
   step: ScreenStep,
@@ -133,7 +139,7 @@ export const screenIssues = (
   for (const message of before.flatMap(screenMessages)) {
     processor.processMessagesWithErrors(message);
   }
-  return [
+  const refused = [
     ...unknown,
     ...rootless,
     ...screenMessages(step).flatMap((message) =>
@@ -142,4 +148,31 @@ export const screenIssues = (
         .map(({ error }) => `${error.code}: ${error.message}`),
     ),
   ];
+  if (refused.length > 0) {
+    return refused;
+  }
+  // JSON Schema は zod の検査（Table の行と列、options に無い defaultValue）を
+  // 持たない。描くときに外す部品を、ここでモデルに返す
+  return (step.input.components ?? []).flatMap(propIssuesOf);
+};
+
+const isBound = (value: unknown): boolean =>
+  typeof value === 'object' && value !== null && '@path' in value;
+
+const propIssuesOf = ({
+  id,
+  component,
+  ...rest
+}: z.infer<typeof components>[number]): string[] => {
+  if (!isCatalogName(component)) {
+    return [];
+  }
+  const own = Object.fromEntries(
+    Object.keys(catalog[component].props.shape)
+      .filter((key) => key in rest)
+      .map((key) => [key, rest[key]]),
+  );
+  return catalogPropIssues(component, own, {
+    unresolved: Object.keys(own).filter((key) => isBound(own[key])),
+  }).map((issue) => `[${id}] ${issue}`);
 };

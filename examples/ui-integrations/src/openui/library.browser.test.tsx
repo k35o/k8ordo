@@ -117,6 +117,21 @@ it('// で始まる href の Anchor は、別のサイトへのリンクとし�
   expect(screen.container.querySelectorAll('a')).toHaveLength(0);
 });
 
+it('列の数と違う行のある Table は描かない', async () => {
+  const { screen } = await mount(
+    [
+      'root = Stack("column", "md", null, null, null, [title, prices])',
+      'title = Heading("料金", "h3")',
+      'prices = Table(null, [{label: "プラン"}, {label: "料金"}], [["Free", "¥0"], ["Pro"]])',
+    ].join('\n'),
+  );
+
+  await expect
+    .element(screen.getByRole('heading', { name: '料金' }))
+    .toBeInTheDocument();
+  expect(screen.getByRole('table').elements()).toHaveLength(0);
+});
+
 it('Form の中の欄の値も、フォームの状態に乗って届く', async () => {
   const { screen, onAction } = await mount(
     [

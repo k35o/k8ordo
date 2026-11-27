@@ -184,6 +184,70 @@ describe('catalogPropIssues', () => {
     ]);
   });
 
+  it.each([
+    ['Table', {}],
+    ['DataTable', { label: '在庫' }],
+  ])('%s のセルの数が列の数と違う行を、行の位置で報告する', (type, own) => {
+    expect(
+      catalogPropIssues(type, {
+        ...own,
+        columns: [{ label: '品名' }, { label: '数' }],
+        rows: [['りんご', '3'], ['みかん'], ['ぶどう', '5', '箱']],
+      }),
+    ).toStrictEqual([
+      `${type}.rows.1: Expected 2 cells (one per column), received 1`,
+      `${type}.rows.2: Expected 2 cells (one per column), received 3`,
+    ]);
+  });
+
+  it('Table の行と列の食い違いは、ほかの prop の誤りと一緒に報告する', () => {
+    expect(
+      catalogPropIssues('Table', {
+        caption: 3,
+        columns: [{ label: '品名' }, { label: '数' }],
+        rows: [['みかん']],
+      }),
+    ).toStrictEqual([
+      'Table.caption: Invalid input: expected string, received number',
+      'Table.rows.0: Expected 2 cells (one per column), received 1',
+    ]);
+  });
+
+  it('Table の列そのものが誤っていれば、行と列は比べない', () => {
+    expect(
+      catalogPropIssues('Table', {
+        columns: [{ label: 3 }, { label: '数' }],
+        rows: [['みかん']],
+      }),
+    ).toStrictEqual([expect.stringContaining('Table.columns.0.label')]);
+  });
+
+  it('Table の行と列を、後で解決しない prop どうしで確かめる', () => {
+    expect(
+      catalogPropIssues(
+        'Table',
+        {
+          caption: { $state: '/caption' },
+          columns: [{ label: '品名' }, { label: '数' }],
+          rows: [['みかん']],
+        },
+        { unresolved: ['caption'] },
+      ),
+    ).toStrictEqual([
+      'Table.rows.0: Expected 2 cells (one per column), received 1',
+    ]);
+  });
+
+  it('Table の rows を後で解決するときは、行と列を確かめない', () => {
+    expect(
+      catalogPropIssues(
+        'Table',
+        { columns: [{ label: '品名' }], rows: { $state: '/rows' } },
+        { unresolved: ['rows'] },
+      ),
+    ).toStrictEqual([]);
+  });
+
   it('後で解決すると言われても、知らない prop は報告する', () => {
     expect(
       catalogPropIssues(

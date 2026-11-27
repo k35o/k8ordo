@@ -131,6 +131,31 @@ describe('screenIssues', () => {
     expect(issues[0]).toMatch(/^VALIDATION_FAILED: .*Button/);
   });
 
+  it('JSON Schema が通しても、描くときに外す部品は catalog の検査で返す', () => {
+    expect(
+      screenIssues({
+        kind: 'show',
+        screen: 'table',
+        input: {
+          components: [
+            {
+              id: 'root',
+              component: 'Table',
+              columns: [{ label: '品目' }, { label: '数' }],
+              rows: [['みかん']],
+            },
+          ],
+        },
+      }),
+    ).toStrictEqual([
+      '[root] Table.rows.0: Expected 2 cells (one per column), received 1',
+    ]);
+  });
+
+  it('@path で結んだ値は、描く前の形のまま catalog の検査を通す', () => {
+    expect(screenIssues(shown)).toStrictEqual([]);
+  });
+
   it('前に出した画面への変更は、その画面の上で確かめる', () => {
     const update: ScreenStep = {
       kind: 'update',

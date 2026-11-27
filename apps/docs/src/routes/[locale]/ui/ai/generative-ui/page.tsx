@@ -194,6 +194,9 @@ export default function GenerativeUi() {
           <Rich>{t.validateUnknown()}</Rich>
         </p>
         <p className={page.mute}>
+          <Rich>{t.validateAcross()}</Rich>
+        </p>
+        <p className={page.mute}>
           <Rich>{t.validateRepair()}</Rich>
         </p>
       </section>

@@ -125,6 +125,11 @@ export const validateUnknown = message({
   en: 'zod drops a key it does not know instead of failing, so a prop missing from the schema is reported as an issue too.',
 });
 
+export const validateAcross = message({
+  ja: 'propどうしの関係も確かめ、ほかの誤りと一緒に返します。`Table`と`DataTable`にセルの数が列の数と違う行があれば、`Table.rows.1`のように行の位置を付けて返します。日付や時刻の`type`を持つ`TextField`では、`defaultValue`がその種類の書式に合うかを確かめます。',
+  en: 'Props are checked against each other too, and those issues come back with the rest. A row of a `Table` or `DataTable` whose number of cells differs from the number of columns comes back with its position, as `Table.rows.1`. A `TextField` with a date or time `type` must have a `defaultValue` in that kind’s format.',
+});
+
 export const validateRepair = message({
   ja: '形式の構造の検証のあとに要素ごとに呼び、集めた誤りをモデルに送り返します。',
   en: 'Call it for every element after the format’s own structural check, and send the issues back to the model.',
