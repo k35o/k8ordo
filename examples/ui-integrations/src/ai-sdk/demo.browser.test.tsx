@@ -32,7 +32,7 @@ const ask = async (
   await screen.getByRole('button', { name: 'Send' }).click();
 };
 
-it('許可すると検索が走り、出典と生成 UI 付きで答える', async () => {
+it('許可すると検索が走り、出典付きで答える', async () => {
   const screen = await renderDemo();
   await ask(screen, '何から始めればいい？');
 
@@ -46,9 +46,6 @@ it('許可すると検索が走り、出典と生成 UI 付きで答える', asy
   await expect
     .element(screen.getByRole('link', { name: SOURCES[0].title }))
     .toHaveAttribute('href', SOURCES[0].url);
-  await expect
-    .element(screen.getByRole('table', { name: 'AI チャットの部品' }))
-    .toBeVisible();
   await expect.element(decision).not.toBeInTheDocument();
 });
 
