@@ -486,7 +486,7 @@ type MappedPart =
 
 Order is preserved. `step-start`, `custom`, and `reasoning-file` parts are skipped.
 
-Render each part as its own row under `Message.Root` — the children stack in a column. Files and sources read better as one list each, so pull them out with `filter` and skip them in the loop. A `data` part is yours: pick the ones you know by `name`, and validate what the model put in them before drawing it.
+Render each part as its own row under `Message.Root` — the children stack in a column. Files and sources read better as one list each, so pull them out with `filter` and skip them in the loop.
 
 ```tsx
 'use client';
@@ -504,10 +504,8 @@ import { BotMessageIcon } from '@k8ordo/ui/icons';
 import { lastAssistantMessageIsCompleteWithApprovalResponses } from 'ai';
 import type { UIMessage } from 'ai';
 
-// copied from examples/ui-integrations: the AI SDK glue and the json-render glue
+// copied from examples/ui-integrations: the AI SDK glue
 import { mapMessageParts } from './ai-sdk/map-parts';
-import { validateGeneratedSpec } from './json-render/catalog';
-import { JsonRenderUI } from './json-render/registry';
 
 type Chat = ReturnType<typeof useChat>;
 
@@ -571,12 +569,6 @@ function ChatMessage({ message, chat }: { message: UIMessage; chat: Chat }) {
               state={part.state}
             />
           );
-        }
-        if (part.kind === 'data' && part.name === 'ui') {
-          const result = validateGeneratedSpec(part.data);
-          return result.ok ? (
-            <JsonRenderUI key={key} spec={result.spec} />
-          ) : null;
         }
         return null;
       })}
@@ -647,17 +639,44 @@ if (part.kind === 'tool' && part.part.toolMetadata?.app !== undefined) {
 
 ## Combining with generative UI
 
-A UI spec returned by an LLM as a tool result can be rendered inside a chat bubble, with the glue of the format you use (here json-render's, copied from `examples/ui-integrations`). See the [generative UI reference](generative-ui.md) for details.
+With the AI SDK, generative UI in a chat is a tool whose part you draw: the model calls a tool such as `show_ui` with the screen as its input, and the chat draws the tool part with the glue of the format you use, copied from `examples/ui-integrations` (see the [generative UI reference](generative-ui.md)). The part's `input` grows while the call streams in (`state: 'input-streaming'`), so the screen can appear as it arrives. A part in `output-error` is a call your server refused: take its screen away.
+
+What the user does on the screen goes back as their next message. Send it as a `data` part, so that the chat shows a short line while the model reads the whole action:
 
 ```tsx
 'use client';
 import { Message } from '@k8ordo/ui/ai';
 
-import { JsonRenderUI } from './json-render/registry';
+// in the loop over mapMessageParts(message)
+if (part.kind === 'tool' && part.name === 'show_ui') {
+  return part.state === 'output-error' ? null : (
+    <Screen input={part.input} key={part.toolCallId} /> // your format's glue
+  );
+}
+if (part.kind === 'data' && part.name === 'action') {
+  return (
+    <Message.Content key={key}>{(part.data as Action).text}</Message.Content>
+  );
+}
 
-<Message.Root from="assistant">
-  <Message.Content>
-    <JsonRenderUI spec={spec} />
-  </Message.Content>
-</Message.Root>;
+// when the user presses something on a screen
+void chat.sendMessage({ parts: [{ type: 'data-action', data: action }] });
 ```
+
+On the server, `convertToModelMessages` turns the part into text for the model through `convertDataPart`, with the action and the state of the screen:
+
+```ts
+const result = streamText({
+  model,
+  tools,
+  messages: await convertToModelMessages(messages, {
+    tools,
+    convertDataPart: (part) =>
+      part.type === 'data-action'
+        ? { type: 'text', text: `The user acted: ${JSON.stringify(part.data)}` }
+        : undefined,
+  }),
+});
+```
+
+`examples/ui-integrations` keeps such a chat under test: Claude shows screens written in A2UI with `show_ui`, answers a press by changing the screen in place with `update_ui`, and receives what every screen holds with each request.

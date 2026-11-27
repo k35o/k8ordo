@@ -208,8 +208,6 @@ const AI_SDK = `import { Attachment, Reasoning, Source, ToolInvocation } from '@
 import { Response } from '@k8ordo/ui/ai/response';
 
 import { mapMessageParts } from './ai-sdk/map-parts';
-import { validateGeneratedSpec } from './json-render/catalog';
-import { JsonRenderUI } from './json-render/registry';
 
 const parts = mapMessageParts(message);
 const files = parts.filter((part) => part.kind === 'file');
@@ -255,10 +253,6 @@ const sources = parts.filter((part) => part.kind === 'source');
         />
       );
     }
-    if (part.kind === 'data' && part.name === 'ui') {
-      const result = validateGeneratedSpec(part.data);
-      return result.ok ? <JsonRenderUI key={i} spec={result.spec} /> : null;
-    }
     return null;
   })}
   {sources.length > 0 && (
@@ -270,16 +264,29 @@ const sources = parts.filter((part) => part.kind === 'source');
   )}
 </Message.Root>`;
 
-const JSON_RENDER = `'use client';
-import { Message } from '@k8ordo/ui/ai';
+const GENERATIVE_UI = `if (part.kind === 'tool' && part.name === 'show_ui') {
+  return part.state === 'output-error' ? null : (
+    <Screen input={part.input} key={part.toolCallId} />
+  );
+}
+if (part.kind === 'data' && part.name === 'action') {
+  const { text } = part.data as Action;
+  return <Message.Content key={i}>{text}</Message.Content>;
+}
 
-import { JsonRenderUI } from './json-render/registry';
+const onPress = (action: Action) => {
+  void sendMessage({
+    parts: [{ type: 'data-action', data: action }],
+  });
+};`;
 
-<Message.Root from="assistant">
-  <Message.Content>
-    <JsonRenderUI spec={spec} />
-  </Message.Content>
-</Message.Root>`;
+const CONVERT_DATA_PART = `const modelMessages = await convertToModelMessages(messages, {
+  tools,
+  convertDataPart: (part) =>
+    part.type === 'data-action'
+      ? { type: 'text', text: JSON.stringify(part.data) }
+      : undefined,
+});`;
 
 export default function AiChat() {
   return (
@@ -467,7 +474,7 @@ export default function AiChat() {
         <CodeBlock
           code={AI_SDK}
           lang="tsx"
-          marks={{ 8: 'highlight', 9: 'highlight', 10: 'highlight' }}
+          marks={{ 6: 'highlight', 7: 'highlight', 8: 'highlight' }}
         />
         <p className={page.mute}>
           <Rich>{t.aiSdkTypes()}</Rich>
@@ -483,14 +490,22 @@ export default function AiChat() {
 
       <section className={page.stack}>
         <Heading level="h2">
-          <Rich>{t.jsonRenderTitle()}</Rich>
+          <Rich>{t.generativeTitle()}</Rich>
         </Heading>
-        <CodeBlock code={JSON_RENDER} lang="tsx" />
+        <CodeBlock code={GENERATIVE_UI} lang="tsx" />
         <p className={page.mute}>
-          <Rich>{t.jsonRenderDescription()}</Rich>
+          <Rich>{t.generativeTool()}</Rich>
         </p>
         <p className={page.mute}>
-          <Rich>{t.jsonRenderAdapter()}</Rich>
+          <Rich>{t.generativeAction()}</Rich>
+        </p>
+        <CodeBlock code={CONVERT_DATA_PART} lang="ts" />
+        <p className={page.mute}>
+          <Rich>{t.generativeServer()}</Rich>
+        </p>
+        <p className={page.mute}>
+          <Rich>{t.generativeExample()}</Rich>
+          <Rich>{t.generativeAdapter()}</Rich>
           <LocaleAnchor path="/:locale/ui/ai/generative-ui">
             Generative UI
           </LocaleAnchor>

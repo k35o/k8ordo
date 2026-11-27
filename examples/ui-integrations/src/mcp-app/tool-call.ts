@@ -1,11 +1,11 @@
 import type { CallToolResult } from '@modelcontextprotocol/client';
 import type { App } from '@modelcontextprotocol/ext-apps';
 
-import { showUiInput } from '../mcp/show-ui.ts';
-import type { ShowUiInput } from '../mcp/show-ui.ts';
+import { screenInput } from '../a2ui/screen.ts';
+import type { ScreenInput } from '../a2ui/screen.ts';
 
 export type ToolCallSnapshot = {
-  input: ShowUiInput | null;
+  input: ScreenInput | null;
   result: CallToolResult | null;
 };
 
@@ -29,7 +29,7 @@ export const watchToolCall = (app: App): ToolCall => {
   };
 
   app.addEventListener('toolinput', ({ arguments: args }) => {
-    const parsed = showUiInput.safeParse(args);
+    const parsed = screenInput.safeParse(args);
     update({ input: parsed.success ? parsed.data : null });
   });
   app.addEventListener('toolresult', (result) => {

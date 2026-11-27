@@ -7,12 +7,13 @@ This example belongs to `@k8ordo/ui` and keeps the **glue** between its catalog 
 This example showcases:
 
 - k8ordo UI setup in a Vite project (Vite+ / `vp` toolchain)
-- **A2UI glue** (`src/a2ui/`): the A2UI 1.0 catalog document, built from `@k8ordo/ui/catalog` with zod's JSON Schema, and the React catalog for `@a2ui/react`'s `MessageProcessor`; scripted messages rendered with a field bound to the data model
+- **A2UI glue** (`src/a2ui/`): the A2UI 1.0 catalog document, built from `@k8ordo/ui/catalog` with zod's JSON Schema, the React catalog for `@a2ui/react`'s `MessageProcessor`, and a screen as the input of a tool (`screen.ts`), which the chat and the MCP server share; scripted messages rendered with a field bound to the data model
 - **json-render glue** (`src/json-render/`): the catalog, the registry, and `validateGeneratedSpec`, built by mapping over `@k8ordo/ui/catalog`; a typed `UISpec` rendered with `<JsonRenderUI />`
 - **OpenUI glue** (`src/openui/`): the library and the React-free `prompt()`, built the same way; an OpenUI-Lang DSL string rendered with `library` + `Renderer`
-- **AI SDK glue** (`src/ai-sdk/map-parts.ts`): `mapMessageParts`, which maps `useChat` messages onto the chat components — tool approval, attachments, sources, a `data-ui` part rendered as generative UI, and copy / regenerate / feedback — driven by a scripted transport, so no server or API key is needed
+- **AI SDK glue** (`src/ai-sdk/map-parts.ts`): `mapMessageParts`, which maps `useChat` messages onto the chat components — tool approval, attachments, sources, and copy / regenerate / feedback — driven by a scripted transport, so no server or API key is needed
 - **MCP Apps glue**, both sides of it: an MCP server (`src/mcp/`) whose `show_ui` tool takes a screen written as A2UI components and gives it an App (`src/mcp-app/`) that draws it with `@k8ordo/ui`, built into one HTML file; and a chat (`src/mcp-chat/`) that draws the App of a tool part with the AI SDK's `MCPAppRenderer`, in a sandbox page served from another origin (`public/mcp-app-sandbox.html`). The same server runs over stdio for Claude Desktop — see [Trying the MCP App in Claude Desktop](#trying-the-mcp-app-in-claude-desktop)
 - **Playground** (`src/playground/`), the 生成 UI tab of the page this example serves: ask Claude (`claude-opus-5-5`) for a screen in any of the three formats and watch it render as it streams, next to whether it keeps to the catalog, the state its fields write to, and the conversation. Press what it drew, and the action goes back to Claude with the state of every field; its answer is laid over the same screen — see [Trying it with a real model](#trying-it-with-a-real-model)
+- **Chat** (`src/ui-chat/`), the チャット tab of the page: ask Claude for a screen, and it calls `show_ui` with A2UI components; the chat draws it in the page as the tool input streams in. What you press becomes your next message, shown as the event's `userMessage` and read by Claude as the action and the screen's state, and Claude answers on the same screen with `update_ui` — see [Chat](#chat-srcui-chat)
 - **MCP Apps chat** (`src/mcp-chat/`), the MCP Apps tab of the page: ask Claude for a screen, and it calls `show_ui`; the App draws in the chat, follows the page's light or dark, and opens fullscreen. What you press goes back to Claude as your next message, and what you type reaches its context before you send anything
 - Tailwind CSS 4 integration and TypeScript
 
@@ -55,7 +56,7 @@ fnox exec -P anthropic -- pnpm dev
 
 The endpoint refuses requests from another origin, since it spends the key. The tests run without a key: they stand in for the endpoint with fixed answers.
 
-The MCP Apps tab works the same way through `/api/chat`, which answers an AI SDK chat with Claude (`@ai-sdk/anthropic`, reading `ANTHROPIC_API_KEY`) and hands it the tools of the MCP server at `/mcp` on the same dev server. The dev server also rebuilds the App whenever its source changes, and serves the sandbox page on a second port, since MCP Apps requires the sandbox to be on another origin than the host.
+The チャット tab works the same way through `/api/ui-chat`, and the MCP Apps tab through `/api/chat`: each answers an AI SDK chat with Claude (`@ai-sdk/anthropic`, reading `ANTHROPIC_API_KEY`). `/api/chat` hands Claude the tools of the MCP server at `/mcp` on the same dev server. The dev server also rebuilds the App whenever its source changes, and serves the sandbox page on a second port, since MCP Apps requires the sandbox to be on another origin than the host.
 
 ### Trying the MCP App in Claude Desktop
 
@@ -88,14 +89,16 @@ Ask Claude for a form, and it draws one with `@k8ordo/ui` in the conversation, i
 ```
 examples/ui-integrations/
 ├── src/
-│   ├── app.tsx                    # The page: the playground and the MCP Apps chat, in two tabs
+│   ├── app.tsx                    # The page: the playground, the chat, and the MCP Apps chat, in three tabs
 │   ├── read-json.ts               # Reads a JSON request body on the dev server
 │   ├── prompt-language.test.ts    # The prompts the glue builds are English and say how a field binds
 │   ├── a2ui/
 │   │   ├── catalog.ts             # Glue: the A2UI catalog document (server-safe)
 │   │   ├── catalog.test.ts        # The document holds every component and loads as an A2UI Catalog
 │   │   ├── prompt.ts              # Glue: the system prompt for A2UI messages (server-safe)
-│   │   ├── renderer.tsx           # Glue: the React catalog and <A2uiSurfaces /> ('use client')
+│   │   ├── screen.ts              # Glue: a screen as a tool's input, its A2UI messages, and its checks (server-safe)
+│   │   ├── screen.test.ts         # What the checks report, on a new screen and on a change to one
+│   │   ├── renderer.tsx           # Glue: the React catalog, <A2uiSurfaces />, and <A2uiSurfaceOf /> ('use client')
 │   │   ├── demo.tsx               # Scripted messages, a field bound to the data model
 │   │   ├── demo.test.ts           # The messages pass validation; an unbound field does not
 │   │   ├── demo.browser.test.tsx  # The surface renders and writes input back to the data model
@@ -111,16 +114,17 @@ examples/ui-integrations/
 │   ├── ai-sdk/
 │   │   ├── map-parts.ts           # Glue: UIMessage.parts → parts for the chat components
 │   │   ├── map-parts.test.ts      # Every part kind maps, in order
+│   │   ├── endpoint.ts            # Reads a chat request and answers it with Claude (dev server only)
+│   │   ├── endpoint.test.ts       # Requests from another origin, and malformed ones, are refused
 │   │   ├── demo.tsx               # useChat rendered with @k8ordo/ui/ai via mapMessageParts
 │   │   ├── scripted-transport.ts  # A ChatTransport that streams fixed replies instead of a model
-│   │   ├── demo.test.ts           # The SDK-assembled reply keeps its approval id; the data-ui spec validates
+│   │   ├── demo.test.ts           # The SDK-assembled reply keeps its approval id
 │   │   └── demo.browser.test.tsx  # Approve / deny, attach, regenerate, and feedback through the real useChat
 │   ├── mcp/
-│   │   ├── show-ui.ts             # Glue: the show_ui tool (A2UI components in, A2UI messages out) and its checks
+│   │   ├── show-ui.ts             # Glue: the show_ui tool, a screen of src/a2ui/screen.ts on one surface
 │   │   ├── server.ts              # Glue: the MCP server with show_ui and the App's ui:// resource
 │   │   ├── http.ts                # /mcp: the server over Streamable HTTP (dev server only)
 │   │   ├── stdio.ts               # The server over stdio, for Claude Desktop (run by Node as it is)
-│   │   ├── show-ui.test.ts        # What the checks report, and the messages a call becomes
 │   │   └── server.test.ts         # The tool points at the App; the App is one HTML file; a broken screen is an error
 │   ├── mcp-app/
 │   │   ├── main.tsx               # The App's entry (mcp-app.html, built into one file by vite.mcp-app.config.ts)
@@ -129,11 +133,20 @@ examples/ui-integrations/
 │   │   └── view.browser.test.tsx  # Against ext-apps' AppBridge: drawing, messages, model context, theme, fullscreen
 │   ├── mcp-chat/
 │   │   ├── server.ts              # /api/chat and /api/mcp-app/resource: Claude with the MCP server's tools (dev server only)
-│   │   ├── request.ts             # Checks a request before the key is used
+│   │   ├── request.ts             # Checks a request for a ui:// resource
 │   │   ├── app-frame.tsx          # Glue: MCPAppRenderer in the chat, with size, fullscreen, and theme
 │   │   ├── chat.tsx               # useChat, drawing the App of each tool part that has one
-│   │   ├── request.test.ts        # Requests from another origin, and malformed ones, are refused
+│   │   ├── request.test.ts        # Only ui:// resources, and only from the same origin
 │   │   └── chat.browser.test.tsx  # A fake App in the real sandbox: its message and model context reach the next request
+│   ├── ui-chat/
+│   │   ├── server.ts              # /api/ui-chat: Claude with show_ui and update_ui (dev server only)
+│   │   ├── tools.ts               # Glue: show_ui and update_ui, each call checked on top of the screens before it
+│   │   ├── screens.ts             # Glue: the calls of a conversation, the data-action part, and the report the model reads
+│   │   ├── board.ts               # Glue: the chat's screens as the surfaces of one MessageProcessor, as the calls stream in
+│   │   ├── chat.tsx               # useChat, drawing each screen where its tool part is and sending presses back
+│   │   ├── tools.test.ts          # Calls that pass, and the ones refused
+│   │   ├── screens.test.ts        # Which calls count, and what the model reads of a press
+│   │   └── chat.browser.test.tsx  # Streaming in, a press sent back with the state, an answer laid over the screen
 │   ├── json-render/
 │   │   ├── catalog.ts             # Glue: the json-render catalog, UISpec, validateGeneratedSpec (server-safe)
 │   │   ├── catalog.test.ts        # What validateGeneratedSpec accepts and reports
@@ -247,10 +260,43 @@ const chat = useChat({
 ```
 
 Attachments come from `PromptInput` (`accept` turns them on) and go to
-`sendMessage` as a `FileList`. The reply's `data-ui` part carries a json-render
-spec, which is checked with `validateGeneratedSpec` before `<JsonRenderUI>`
-draws it. `scriptedTransport` stands in for the model: it streams the same UI
-message chunks a server would, so the demo runs without a backend.
+`sendMessage` as a `FileList`. `scriptedTransport` stands in for the model: it
+streams the same UI message chunks a server would, so the demo runs without a
+backend.
+
+### Chat (`src/ui-chat/`)
+
+The AI SDK's own way to generative UI is a tool whose part the chat draws.
+On `/api/ui-chat`, Claude has two tools: `show_ui`, whose input is a screen
+written as A2UI components (the same input as the MCP server's), and
+`update_ui`, which changes a screen shown before in place. A screen's id is the
+id of the `show_ui` call that showed it. The server checks each call against
+the catalog on top of the screens the conversation built, and a call that
+breaks it goes back to Claude as a tool error to fix.
+
+The chat draws every screen as a surface of one A2UI `MessageProcessor`
+(`board.ts`): a screen appears while its tool input streams in, one component
+at a time; an `update_ui` call changes the surface it names; and a call the
+server refused takes its screen away. `<A2uiSurfaceOf>` draws a surface where
+its tool part is.
+
+What the user presses goes back as their next message, as a data part:
+
+```tsx
+board.processor.model.onAction.subscribe((payload) => {
+  void chat.sendMessage(
+    { parts: [{ type: 'data-action', data: board.actionOf(payload) }] },
+    { body: { modelContext: contextOf(board.dataModels()) } },
+  );
+});
+```
+
+The chat shows the event's `userMessage` as the user's message (the pressed
+component's `label` when the model wrote none), and the server turns the part
+into a report of the action and the screen's whole data model with
+`convertToModelMessages`' `convertDataPart`. Every request carries what each
+screen holds now as `modelContext`, so what the user typed without pressing
+anything reaches Claude too. A press while a reply streams is not sent.
 
 ### MCP Apps (`src/mcp/`, `src/mcp-app/`, `src/mcp-chat/`)
 
@@ -270,9 +316,9 @@ error that says what to fix. The App:
   and keeps `@k8ordo/ui`'s look otherwise;
 - offers fullscreen when the host has it.
 
-Each call of `show_ui` is a screen of its own. Unlike the playground, an answer
-is not laid over the screen before it: MCP Apps gives the model no way to reach
-an App it has already shown.
+Each call of `show_ui` is a screen of its own. Unlike the playground and the
+chat, an answer is not laid over the screen before it: MCP Apps gives the model
+no way to reach an App it has already shown.
 
 The chat side is the AI SDK's: `/api/chat` connects to the MCP server with
 `createMCPClient` (passing `mcpAppClientCapabilities`), gives the model the
@@ -293,7 +339,7 @@ MCP Apps default when it declares none), and relays the messages both ways.
 - `@json-render/core`, `@json-render/react` (json-render glue)
 - `@openuidev/react-lang`, `@openuidev/lang-core` (OpenUI glue)
 - `ai`, `@ai-sdk/react` (AI SDK glue)
-- `@modelcontextprotocol/ext-apps`, `@modelcontextprotocol/client`, `@modelcontextprotocol/core` (the App), `@modelcontextprotocol/server`, `@modelcontextprotocol/node` (the MCP server), `@ai-sdk/mcp` (the chat's MCP client), `@ai-sdk/anthropic` (the chat's endpoint, dev only), `vite-plugin-singlefile` (the App's build)
+- `@modelcontextprotocol/ext-apps`, `@modelcontextprotocol/client`, `@modelcontextprotocol/core` (the App), `@modelcontextprotocol/server`, `@modelcontextprotocol/node` (the MCP server), `@ai-sdk/mcp` (the chat's MCP client), `@ai-sdk/anthropic` (the chats' endpoints, dev only), `vite-plugin-singlefile` (the App's build)
 - `zod` (the catalog's schemas)
 - `tailwindcss`, `@tailwindcss/vite` (Tailwind CSS 4)
 
@@ -302,7 +348,7 @@ MCP Apps default when it declares none), and relays the messages both ways.
 - `pnpm dev` - Start the development server (`vp dev`)
 - `pnpm build` - Build for production (`vp build`), then the App
 - `pnpm build:mcp-app` - Build the MCP App into one HTML file (`dist/mcp-app/mcp-app.html`)
-- `pnpm test` - Run the tests (`vp test`): the `spec` project checks the glue, the demo spec and DSL, and the scripted replies against the AI SDK, and the `render` project mounts the demos and the playground in headless Chromium, Firefox, and WebKit
+- `pnpm test` - Run the tests (`vp test`): the `spec` project checks the glue, the demo spec and DSL, and the scripted replies against the AI SDK, and the `render` project mounts the demos, the playground, and the chats in headless Chromium, Firefox, and WebKit
 - `pnpm typecheck` - Run TypeScript type checking
 - `pnpm check` - Run Oxlint/Oxfmt linting/formatting checks (`vp check`)
 - `pnpm check:write` - Run `vp check --fix` to auto-fix issues

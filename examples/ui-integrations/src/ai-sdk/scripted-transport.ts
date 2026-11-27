@@ -6,8 +6,6 @@ import {
 } from 'ai';
 import type { ChatTransport, UIMessage, UIMessageChunk } from 'ai';
 
-import type { UISpec } from '../json-render/catalog';
-
 export const SEARCH_TOOL = 'searchDocs';
 
 export const SOURCES = [
@@ -20,41 +18,6 @@ export const SOURCES = [
     title: 'Chatbot Tool Usage — AI SDK',
   },
 ] as const;
-
-/** 回答に添える data パーツ（`data-ui`）。json-render の spec を運ぶ */
-export const answerSpec = {
-  root: 'root',
-  elements: {
-    root: {
-      type: 'Card',
-      props: { variant: 'outline' },
-      children: ['body'],
-    },
-    body: {
-      type: 'Stack',
-      props: { direction: 'column', gap: 'sm' },
-      children: ['title', 'steps'],
-    },
-    title: {
-      type: 'Heading',
-      props: { label: '組み立てる順番', level: 'h4' },
-      children: [],
-    },
-    steps: {
-      type: 'Table',
-      props: {
-        caption: 'AI チャットの部品',
-        columns: [{ label: '段階' }, { label: '部品' }],
-        rows: [
-          ['骨組み', 'Conversation / Message / PromptInput'],
-          ['中身', 'Response / Reasoning / ToolInvocation'],
-          ['添え物', 'Attachment / Source / Message.Actions'],
-        ],
-      },
-      children: [],
-    },
-  },
-} satisfies UISpec;
 
 const textChunks = (id: string, text: string): UIMessageChunk[] => [
   { type: 'text-start', id },
@@ -144,7 +107,6 @@ const continueAfterApproval = (
       url: source.url,
       title: source.title,
     })),
-    { type: 'data-ui', id: 'answer-ui', data: answerSpec },
     { type: 'finish-step' },
     { type: 'finish' },
   ];
