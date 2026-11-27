@@ -9,8 +9,10 @@ import type {
   Ref,
 } from 'react';
 import { useId } from 'react';
+import { useFormStatus } from 'react-dom';
 
 import { checkedValuesAround } from '../../_internal/checked-values';
+import { ignoreClick } from '../../_internal/ignore-changes';
 import { CheckIcon } from '../../icons/check';
 
 import srOnly from '../../_internal/sr-only.module.css';
@@ -72,6 +74,8 @@ export const CheckboxCard: FC<Props> = ({
 }) => {
   const groupId = useId();
   const isControlled = value !== undefined;
+  const { pending } = useFormStatus();
+  const disabledResolved = disabled || pending;
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     onChange?.(checkedValuesAround(event.currentTarget));
@@ -81,7 +85,7 @@ export const CheckboxCard: FC<Props> = ({
     <fieldset
       {...rest}
       aria-labelledby={labelledbyId}
-      className={clsx(styles.root, disabled && styles.rootDisabled)}
+      className={clsx(styles.root, disabledResolved && styles.rootDisabled)}
       ref={ref}
       role="group"
     >
@@ -97,15 +101,19 @@ export const CheckboxCard: FC<Props> = ({
             className={clsx(
               styles.card,
               invalid && styles.invalid,
-              optionDisabled && styles.disabled,
+              (optionDisabled || pending) && styles.disabled,
             )}
             id={optionId}
             key={option.value}
+            onClickCapture={pending ? ignoreClick : undefined}
           >
             <input
               aria-describedby={
                 hasDescription ? `${optionId}-description` : undefined
               }
+              aria-disabled={pending || undefined}
+              // role="group" は aria-invalid を持てないので、ボックスごとに付ける
+              aria-invalid={invalid}
               aria-labelledby={`${optionId}-label`}
               {...(isControlled
                 ? { checked: value.includes(option.value) }

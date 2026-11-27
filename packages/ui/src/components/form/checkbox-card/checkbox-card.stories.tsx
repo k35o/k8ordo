@@ -11,6 +11,11 @@ import {
   memo,
   MemoField,
 } from '../../../../.storybook/action-form';
+import {
+  finishPending,
+  PendingForm,
+} from '../../../../.storybook/pending-form';
+import { afterRenderingUpdate } from '../../../../.storybook/rendering';
 import { FormControl } from '../form-control';
 import { CheckboxCard } from './checkbox-card';
 
@@ -109,6 +114,72 @@ export const Disabled: Story = {
     defaultValue: ['comments'],
   },
   render: DefaultValue.render,
+};
+
+export const Invalid: Story = {
+  args: {
+    invalid: true,
+  },
+  render: (props) => <DefaultRender {...props} />,
+  play: async ({ canvas }) => {
+    await expect(canvas.getAllByRole('checkbox')).toHaveLength(3);
+    await Promise.all(
+      canvas.getAllByRole('checkbox').map(async (checkbox) => {
+        await expect(checkbox).toHaveAttribute('aria-invalid', 'true');
+      }),
+    );
+  },
+};
+
+export const PendingKeepsFocus: Story = {
+  args: { onChange: fn() },
+  render: (props) => (
+    <PendingForm>
+      <p id={props['aria-labelledby']}>Enable collaboration features</p>
+      <CheckboxCard
+        aria-labelledby={props['aria-labelledby']}
+        defaultValue={['comments']}
+        name="features"
+        onChange={props.onChange}
+        options={props.options}
+      />
+    </PendingForm>
+  ),
+  play: async ({ args, canvas, userEvent }) => {
+    const comments = canvas.getByRole<HTMLInputElement>('checkbox', {
+      name: 'Inline comments',
+    });
+    const share = canvas.getByRole('checkbox', { name: 'Share links' });
+
+    try {
+      comments.focus();
+      comments.form?.requestSubmit();
+      await canvas.findByText('送信中');
+      await afterRenderingUpdate();
+
+      await expect(comments).toHaveFocus();
+      await Promise.all(
+        canvas.getAllByRole('checkbox').map(async (checkbox) => {
+          await expect(checkbox).toHaveAttribute('aria-disabled', 'true');
+        }),
+      );
+
+      await userEvent.keyboard(' ');
+      await userEvent.click(canvas.getByText('Share links'));
+      await expect(comments).toBeChecked();
+      await expect(share).not.toBeChecked();
+    } finally {
+      finishPending();
+    }
+    await waitFor(async () => {
+      await expect(comments).not.toHaveAttribute('aria-disabled');
+    });
+    await expect(args.onChange).not.toHaveBeenCalled();
+
+    await userEvent.click(canvas.getByText('Version history'));
+    await expect(args.onChange).toHaveBeenCalledOnce();
+    await expect(args.onChange).toHaveBeenCalledWith(['history', 'comments']);
+  },
 };
 
 const RefRender = () => {

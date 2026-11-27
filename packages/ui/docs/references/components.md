@@ -1210,6 +1210,8 @@ The group's selection lives in `value` / `onChange`, or in `defaultValue` when u
 
 It renders a `fieldset[role="group"]`, so `aria-labelledby` is required: `<FormControl labelAs="group">` draws the element it points at. Convey that the group is required through that element — `FormControl`'s required mark is part of the group's name in `'group'` mode. `role="group"` does not allow `aria-required`, so do not put it on the group. `required` is accepted so that `FormControl`'s props spread onto the group as they are, and is written to no element: a `<fieldset>` takes no `required`, and on a checkbox it would mean that box must be checked. Check the count with a rule of your own, or with `@k8ordo/form`'s, which a schema's `.min()` derives.
 
+`invalid` — which `FormControl`'s props carry while its `errorText` is not empty — goes to every box as `aria-invalid` and the invalid look, since `role="group"` does not take `aria-invalid` either.
+
 `name` goes on every box. It is optional and nothing fills it in: without a `name` the boxes submit nothing, which is what a group that only drives the page (`DataTable`'s column menu) wants even inside a form.
 
 Uncontrolled, the selection lives in the checkboxes themselves, so a form reset
@@ -1252,7 +1254,9 @@ checkboxes themselves (`:checked`), so a form reset restores both; `onChange`
 receives the checked values in document order. Like `CheckboxGroup`, it takes
 `required` from `FormControl`'s props and writes it to no element; wrap it in
 `<FormControl labelAs="group" required>`, whose mark is part of the group's
-name.
+name. `invalid` sets `aria-invalid` on every box as well as the look —
+`role="group"` does not take `aria-invalid` — and while the form's action is
+pending the boxes take `aria-disabled` and ignore presses, as `Checkbox` does.
 
 ```tsx
 import { CheckboxCard } from '@k8ordo/ui';
@@ -1320,7 +1324,7 @@ Props:
 
 ### RadioCard
 
-A card-styled radio button. Real `input[type="radio"]` elements sit inside a `fieldset[role="radiogroup"]`, so arrow-key roving and single selection are left to the browser. Reach them from tests with `getByRole('radio', { checked })`. `required` goes to every radio, and an uncontrolled selection's look follows `:checked`, so a form reset restores it.
+A card-styled radio button. Real `input[type="radio"]` elements sit inside a `fieldset[role="radiogroup"]`, so arrow-key roving and single selection are left to the browser. Reach them from tests with `getByRole('radio', { checked })`. `required` goes to every radio, and an uncontrolled selection's look follows `:checked`, so a form reset restores it. `invalid` sets `aria-invalid` on the group as well as the look, and while the form's action is pending the radios take `aria-disabled` and ignore presses and arrow keys, as `Radio` does.
 
 ```tsx
 import { RadioCard } from '@k8ordo/ui';

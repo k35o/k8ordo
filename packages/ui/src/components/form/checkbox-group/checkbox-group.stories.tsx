@@ -133,6 +133,33 @@ export const Disabled: Story = {
   ),
 };
 
+export const Invalid: Story = {
+  render: () => (
+    <div>
+      <p className={styles.groupLabel} id="frameworks-invalid-label">
+        フレームワーク
+      </p>
+      <CheckboxGroup
+        aria-labelledby="frameworks-invalid-label"
+        invalid
+        name="frameworks-invalid"
+        options={FRAMEWORKS}
+      />
+    </div>
+  ),
+  play: async ({ canvas }) => {
+    await expect(
+      canvas.getByRole('group', { name: 'フレームワーク' }),
+    ).not.toHaveAttribute('aria-invalid');
+    await expect(canvas.getAllByRole('checkbox')).toHaveLength(3);
+    await Promise.all(
+      canvas.getAllByRole('checkbox').map(async (checkbox) => {
+        await expect(checkbox).toHaveAttribute('aria-invalid', 'true');
+      }),
+    );
+  },
+};
+
 export const WithoutNameSubmitsNothing: Story = {
   render: () => (
     <form aria-label="filters">
@@ -240,6 +267,10 @@ export const WithForm: Story = {
     await expect(
       await canvas.findByText('1つ以上選んでください'),
     ).toBeVisible();
+    await expect(canvas.getByRole('checkbox', { name: 'Vue' })).toHaveAttribute(
+      'aria-invalid',
+      'true',
+    );
 
     // reset のあとも、次の操作は既定値から数える
     await userEvent.click(canvas.getByText('React'));

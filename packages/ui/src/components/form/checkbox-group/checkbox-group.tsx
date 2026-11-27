@@ -69,7 +69,6 @@ export const CheckboxGroup: FC<Props> = ({
   return (
     <fieldset
       {...rest}
-      aria-invalid={invalid}
       aria-labelledby={labelledbyId}
       className={clsx(styles.root, disabled && styles.disabled)}
       ref={ref}
@@ -80,6 +79,8 @@ export const CheckboxGroup: FC<Props> = ({
             ? { defaultChecked: defaultValue?.includes(option.value) }
             : { checked: value.includes(option.value) })}
           disabled={disabled}
+          // role="group" は aria-invalid を持てないので、ボックスごとに付ける
+          invalid={invalid}
           key={option.value}
           label={option.label}
           name={name}
