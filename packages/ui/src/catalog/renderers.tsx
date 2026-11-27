@@ -1005,7 +1005,7 @@ export const DialogWidget: FC<{ props: DialogProps; children: ReactNode }> = ({
   children,
 }) => (
   <OverlayWidget
-    side="center"
+    side={props.side}
     title={props.title}
     triggerLabel={props.triggerLabel}
   >

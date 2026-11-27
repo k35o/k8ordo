@@ -220,12 +220,13 @@ export const catalog = {
   }),
   Dialog: entry({
     description:
-      'Centered dialog that opens from a button labeled triggerLabel.',
+      'Dialog over the page that a button labeled triggerLabel opens, headed by title with a close button. side puts it in the center (the default) or along the bottom edge.',
     props: s.dialogProps,
     children: true,
   }),
   Drawer: entry({
-    description: 'Side drawer that opens from a button labeled triggerLabel.',
+    description:
+      'Panel along the left or right edge of the page (side, right by default) that a button labeled triggerLabel opens, headed by title with a close button.',
     props: s.drawerProps,
     children: true,
   }),

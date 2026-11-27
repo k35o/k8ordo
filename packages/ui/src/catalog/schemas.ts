@@ -25,6 +25,7 @@ import type { Separator } from '../components/layout/separator';
 import type { Stack } from '../components/layout/stack';
 import type { Breadcrumb } from '../components/navigation/breadcrumb';
 import type { Stepper } from '../components/navigation/stepper';
+import type { Dialog } from '../components/overlays/dialog';
 import type { Drawer } from '../components/overlays/drawer';
 import type { ListBox } from '../components/overlays/list-box';
 import type { Modal } from '../components/overlays/modal';
@@ -1031,10 +1032,15 @@ export const modalProps = z.object({
   side: z.enum(['center', 'bottom', 'right', 'left']).optional(),
 }) satisfies z.ZodType<ModalIntegrationProps>;
 
-type DialogIntegrationProps = { triggerLabel: string; title: string };
+type DialogIntegrationProps = {
+  triggerLabel: string;
+  title: string;
+  side?: ComponentProps<typeof Dialog>['side'];
+};
 export const dialogProps = z.object({
   triggerLabel: z.string().describe('Text of the button that opens the dialog'),
   title: z.string(),
+  side: z.enum(['center', 'bottom']).optional(),
 }) satisfies z.ZodType<DialogIntegrationProps>;
 
 type DrawerIntegrationProps = {
@@ -1230,6 +1236,9 @@ export type _EnumCoverage = [
   >,
   AssertCovered<
     CoversComponent<ComponentProps<typeof Modal>['side'], ModalProps['side']>
+  >,
+  AssertCovered<
+    CoversComponent<ComponentProps<typeof Dialog>['side'], DialogProps['side']>
   >,
   AssertCovered<
     CoversComponent<ComponentProps<typeof Drawer>['side'], DrawerProps['side']>
