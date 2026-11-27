@@ -107,6 +107,11 @@ model, wrote it.
 of a `Button` inside it. A `Button` or `Card` with `href` is a link and reports
 no press.
 
+Draw the generated UI inside your application's `ToastProvider`, the one its own
+`useToast` reads. A `Toast` opens its toast there, in the same region, under the
+same limit, as the application's own. Outside one, drawing a `Toast` fails with
+`useToast`'s error.
+
 ## Connecting a format
 
 The glue for a format does three things, each by mapping over `catalog`:
@@ -233,11 +238,11 @@ model instead:
   `@k8ordo/ui/icons` that needs nothing but a size is there, under its name in
   kebab-case without the suffix: `eye-closed` is `EyeClosedIcon`. `ChevronIcon`
   has an entry of its own, and `AlertIcon` is the `StatusIcon` entry.
-- **Toasts** are a `Toast` entry, standing in for `ToastProvider` and
-  `useToast`: a self-contained widget whose `triggerLabel` button shows the
-  toast.
+- **Toasts** are a `Toast` entry, standing in for `useToast`: a widget whose
+  `triggerLabel` button opens the toast through your application's
+  `ToastProvider` (see [Drawing](#drawing)).
 - **Overlays** (`Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`,
-  `DropdownMenu`) are self-contained widgets too. Each declares its own trigger
+  `DropdownMenu`) are self-contained widgets. Each declares its own trigger
   with `triggerLabel` and handles opening and closing itself. The items of a
   `DropdownMenu` are its children, each a `DropdownMenuItem` with its own
   `press`, so the menu needs no event of its own to say which item was chosen.

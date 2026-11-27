@@ -138,6 +138,9 @@ export default function GenerativeUi() {
         <p className={page.mute}>
           <Rich>{t.renderEvents()}</Rich>
         </p>
+        <p className={page.mute}>
+          <Rich>{t.renderToast()}</Rich>
+        </p>
       </section>
 
       <Separator color="mute" />

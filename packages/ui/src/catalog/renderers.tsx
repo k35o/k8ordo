@@ -26,7 +26,7 @@ import { EmptyState } from '../components/feedback/empty-state';
 import { Progress } from '../components/feedback/progress';
 import { Skeleton } from '../components/feedback/skeleton';
 import { Spinner } from '../components/feedback/spinner';
-import { ToastProvider, useToast } from '../components/feedback/toast';
+import { useToast } from '../components/feedback/toast';
 import { Autocomplete } from '../components/form/autocomplete';
 import { Calendar } from '../components/form/calendar';
 import { Checkbox } from '../components/form/checkbox';
@@ -1131,8 +1131,7 @@ export function renderDropdownMenuItem(
   );
 }
 
-// ToastProvider はラッパー側で巻く必要があるため、ローカルにも 1 段被せる。
-const ToastTriggerInner: FC<{ props: ToastProps }> = ({ props }) => {
+export const ToastWidget: FC<{ props: ToastProps }> = ({ props }) => {
   const { open } = useToast();
   return (
     <Button
@@ -1188,12 +1187,6 @@ export const DataTableWidget: FC<{ props: DataTableProps }> = ({ props }) => {
     />
   );
 };
-
-export const ToastWidget: FC<{ props: ToastProps }> = ({ props }) => (
-  <ToastProvider>
-    <ToastTriggerInner props={props} />
-  </ToastProvider>
-);
 
 export function renderListBox(
   props: ListBoxProps,

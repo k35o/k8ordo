@@ -489,11 +489,12 @@ and the AI chat components among them — are left out on purpose;
 [docs/references/generative-ui.md](docs/references/generative-ui.md#what-the-catalog-leaves-out)
 says why.
 
-Overlays are **self-contained widgets**: a `Modal`/`Dialog`/`Drawer`/`Popover` declares its own trigger button via `triggerLabel`, manages open/close internally, and renders the supplied children inside the surface. This lets a model generate UIs that include overlays without modelling imperative open/close state. `Tooltip`/`DropdownMenu`/`Toast` follow the same self-contained pattern (trigger + content).
+Overlays are **self-contained widgets**: a `Modal`/`Dialog`/`Drawer`/`Popover` declares its own trigger button via `triggerLabel`, manages open/close internally, and renders the supplied children inside the surface. This lets a model generate UIs that include overlays without modelling imperative open/close state. `Tooltip`/`DropdownMenu`/`Toast` follow the same pattern (trigger + content); `Toast` opens its toast through your application's `ToastProvider`.
 
 > **Notes**
 >
 > - Make sure `@k8ordo/ui/styles.css` (or `tailwind.css` in Tailwind CSS 4 projects) is loaded.
+> - Draw the generated UI inside your application's `ToastProvider`. Outside one, a `Toast` fails with `useToast`'s own error.
 > - `Tabs` panels are text content (`tabs: [{ label, content }]`); rich-component panels are a future enhancement.
 
 ## Accessibility

@@ -65,6 +65,11 @@ export const renderEvents = message({
   en: 'A component with `events` also takes `on`, the function of each event the model bound. A `Card` with nothing bound is not pressable.',
 });
 
+export const renderToast = message({
+  ja: '描いたUIは、アプリの`ToastProvider`の中に置きます。`Toast`は、そのプロバイダの領域にトーストを出します。プロバイダの外で描くと、`useToast must be used within a ToastProvider`のエラーになります。',
+  en: 'Draw the generated UI inside the application’s `ToastProvider`. `Toast` opens its toast in that provider’s region. Drawn outside one, it fails with `useToast must be used within a ToastProvider`.',
+});
+
 export const glueTitle = message({
   ja: '形式とのつなぎ',
   en: 'Connecting a format',

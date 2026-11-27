@@ -196,7 +196,10 @@ leaving out a field's value bound to the format's state. The format's own
 validation lets more through: JSON Schema carries none of zod's own checks, and
 OpenUI does not check `pattern`. An element whose props do not parse is drawn
 as nothing (`<Unparsed />`), and its issues reach an `UnparsedContext` if one
-is provided, which the playground shows beside the format's own.
+is provided, which the playground shows beside the format's own. Every format
+draws inside the application's `ToastProvider` (`src/main.tsx`, and
+`src/mcp-app/main.tsx` for the App), which the `Toast` component opens its
+toast through; an application that copies the glue draws inside its own.
 
 An event is `press` today (`Button`, `IconButton`, `Card`, `DropdownMenuItem`),
 and each format writes it its own way:

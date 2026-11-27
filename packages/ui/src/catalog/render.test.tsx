@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vite-plus/test';
 
+import { ToastProvider } from '../components/feedback/toast';
 import { renderers } from './render';
 
 const press = (): void => {};
@@ -45,5 +46,26 @@ describe('操作を結んだ部品の描画', () => {
     );
 
     expect(html).toMatch(/^<a [^>]*href="\/articles\/1"/u);
+  });
+});
+
+describe('Toast の描画', () => {
+  const toast = {
+    props: { triggerLabel: '通知を表示', tone: 'success', message: '保存した' },
+    children: [],
+  } as const;
+
+  it('アプリの ToastProvider の中に、トーストを出すボタンを描く', () => {
+    const html = renderToStaticMarkup(
+      <ToastProvider>{renderers.Toast(toast)}</ToastProvider>,
+    );
+
+    expect(html).toMatch(/<button[^>]*>.*通知を表示/u);
+  });
+
+  it('ToastProvider の外では、useToast のエラーになる', () => {
+    expect(() => renderToStaticMarkup(renderers.Toast(toast))).toThrow(
+      'useToast must be used within a ToastProvider',
+    );
   });
 });
