@@ -435,7 +435,7 @@ export type CatalogValueOf<N extends CatalogName> =
  */
 export const catalogRules: readonly string[] = [
   'Every row in rows of a Table must have exactly as many cells as there are columns.',
-  'An href must be an absolute URL starting with https:// or http://, or a path starting with /.',
+  'An href must be an absolute URL starting with https:// or http://, or a path starting with a single /.',
   'The content of Tabs and Accordion must be plain text; components cannot be nested inside it.',
 ];
 

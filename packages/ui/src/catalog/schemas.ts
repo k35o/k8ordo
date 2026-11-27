@@ -79,15 +79,19 @@ import { ICON_NAMES } from './icon-names';
 
 /**
  * LLM 生成の `href` は `<a href>` に直接渡るため、`javascript:` や `data:` の
- * スキームが通ると XSS になる。`http(s)://` 始まり、または `/` から始まる
+ * スキームが通ると XSS になる。`http(s)://` 始まり、または `/` 1 つから始まる
  * 相対パスのみを許可する。`z.url()` は `javascript:` を拒否しないため正規表現で
  * 明示的にブロックしている。
+ *
+ * `//host` と `/\host` はスキームを省いた別のサイトの URL で、`/` で始まっても
+ * パスではない。ブラウザは URL の途中のタブと改行を読み飛ばすので、`/<タブ>/host`
+ * も同じ URL になる。どれも弾く。
  */
 const safeUrl = z
   .string()
   .regex(
-    /^(https?:\/\/|\/)/u,
-    'Only an http:// or https:// URL, or a path starting with /, is allowed',
+    /^(?:https?:\/\/|\/(?![/\\]))[^\t\n\r]*$/u,
+    'Only an http:// or https:// URL, or a path starting with a single /, is allowed',
   );
 
 type ButtonIntegrationProps = {

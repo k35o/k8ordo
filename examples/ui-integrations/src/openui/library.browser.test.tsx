@@ -102,6 +102,21 @@ it('スキーマに合わない要素は、ほかを描いたまま何も描か�
   expect(consoleError).not.toHaveBeenCalled();
 });
 
+it('// で始まる href の Anchor は、別のサイトへのリンクとして描かない', async () => {
+  const { screen } = await mount(
+    [
+      'root = Stack("column", "md", null, null, null, [title, link])',
+      'title = Heading("リンク", "h3")',
+      'link = Anchor("x", "//evil.example")',
+    ].join('\n'),
+  );
+
+  await expect
+    .element(screen.getByRole('heading', { name: 'リンク' }))
+    .toBeInTheDocument();
+  expect(screen.container.querySelectorAll('a')).toHaveLength(0);
+});
+
 it('Form の中の欄の値も、フォームの状態に乗って届く', async () => {
   const { screen, onAction } = await mount(
     [

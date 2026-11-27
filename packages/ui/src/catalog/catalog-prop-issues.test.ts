@@ -162,6 +162,28 @@ describe('catalogPropIssues', () => {
     ]);
   });
 
+  it('href には http(s) の URL と、/ 1 つで始まるパスを書ける', () => {
+    expect([
+      ...catalogPropIssues('Anchor', {
+        label: 'Docs',
+        href: 'https://example.com/docs',
+      }),
+      ...catalogPropIssues('Anchor', { label: 'Docs', href: '/docs' }),
+      ...catalogPropIssues('Anchor', { label: 'Top', href: '/' }),
+    ]).toStrictEqual([]);
+  });
+
+  it.each([
+    ['スキームを省いた別のサイト', '//evil.example/docs'],
+    ['\\ で書いた別のサイト', '/\\evil.example/docs'],
+    ['タブを挟んで // になる別のサイト', '/\t/evil.example/docs'],
+    ['改行を挟んで // になる別のサイト', '/\n/evil.example/docs'],
+  ])('href の %s は報告する', (_, href) => {
+    expect(catalogPropIssues('Anchor', { label: 'Docs', href })).toStrictEqual([
+      'Anchor.href: Only an http:// or https:// URL, or a path starting with a single /, is allowed',
+    ]);
+  });
+
   it('後で解決すると言われても、知らない prop は報告する', () => {
     expect(
       catalogPropIssues(

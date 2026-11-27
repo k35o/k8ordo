@@ -30,12 +30,17 @@ describe('LLM に渡す文言', () => {
         href: 'ftp://example.com/docs',
         rel: 'x',
       }),
+      ...catalogPropIssues('Button', {
+        label: 'Docs',
+        href: '//evil.example/docs',
+      }),
       ...catalogPropIssues('Marquee', {}),
     ];
 
     expect(issues).toStrictEqual(
       expect.arrayContaining([
         expect.stringContaining('Anchor.href'),
+        expect.stringContaining('Button.href'),
         expect.stringContaining('Unknown prop "rel"'),
         expect.stringContaining('Unknown component type "Marquee"'),
       ]),
