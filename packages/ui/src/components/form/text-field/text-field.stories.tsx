@@ -191,7 +191,7 @@ const ProfileForm = () => (
 export const WithForm: Story = {
   render: () => <ProfileForm />,
   play: async ({ canvas, userEvent }) => {
-    // FormControl のラベルは必須のバッジまで名前に含むので、前方で引く
+    // FormControl のラベルの文字は必須の印まで含むので、前方で引く
     const field = (label: string) =>
       canvas.getByLabelText(label, { exact: false });
     const submit = () =>

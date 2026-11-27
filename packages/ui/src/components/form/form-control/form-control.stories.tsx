@@ -68,9 +68,10 @@ export const Required: Story = {
     required: true,
   },
   play: async ({ canvas }) => {
-    const input = canvas.getByRole('textbox', { name: 'メールアドレス 必須' });
+    const input = canvas.getByRole('textbox', { name: 'メールアドレス' });
 
     await expect(input).toBeRequired();
+    await expect(canvas.getByText('必須')).toBeVisible();
   },
 };
 

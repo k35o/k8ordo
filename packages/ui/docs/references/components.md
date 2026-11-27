@@ -700,6 +700,8 @@ Props:
 
 The wrapper is a `<div>`, and `labelAs` picks the element that draws the label. `'label'` (the default) gives a `<label htmlFor>` pointing at the field. `'group'` gives a `<span id>` with the same look, the required mark included, for a component that is a group itself — `Radio`, `RadioCard`, `CheckboxGroup`, `CheckboxCard`, and `RangeSlider` — and names it through `aria-labelledby`. A `<label>` cannot label a group, and a `<fieldset>` around one would nest a second group with the same name, so `'group'` renders neither. `ColorPicker`, `DatePicker`, `Combobox`, and `Autocomplete` put the `id` on a text input, so they keep `'label'`.
 
+`required` draws the built-in `required` wording after the label and passes `required: true` to `renderInput`. With `'label'` the mark is `aria-hidden`: the field's own `required` already tells a screen reader, so the name stays the label alone. With `'group'` the mark is part of the group's name, since `role="group"` does not take `aria-required`.
+
 ```tsx
 <FormControl
   label="Plan"

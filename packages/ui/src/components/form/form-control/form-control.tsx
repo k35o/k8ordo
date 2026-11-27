@@ -51,24 +51,27 @@ export const FormControl: FC<FormControlProps> = ({
         ? `${id}-helptext`
         : undefined;
   const labelId = `${id}-label`;
-  const labelContent = (
-    <>
-      {label}
-      {required && <span className={styles.required}>{messages.required}</span>}
-    </>
-  );
 
   return (
     <div {...rest} className={styles.root} ref={ref}>
       {labelAs === 'label' ? (
         <label className={styles.label} htmlFor={id} id={labelId}>
-          {labelContent}
+          {label}
+          {required && (
+            // 入力欄の required が必須を読み上げるので、印まで名前に入れると二重になる
+            <span aria-hidden className={styles.required}>
+              {messages.required}
+            </span>
+          )}
         </label>
       ) : (
         // label の for はグループを指せず、fieldset と legend で包むとグループの
         // 中にもう 1 つグループができる。名前は中の部品が aria-labelledby で読む
         <span className={styles.label} id={labelId}>
-          {labelContent}
+          {label}
+          {required && (
+            <span className={styles.required}>{messages.required}</span>
+          )}
         </span>
       )}
       {renderInput({
