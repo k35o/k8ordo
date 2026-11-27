@@ -68,6 +68,8 @@ When installed via npm, these docs live under `node_modules/@k8ordo/i18n/docs/`.
   inside an application it does not know (`@k8ordo/ui`'s built-in text). `message(variants)`
   declares one message — text in every locale, or a function of the same
   parameters in every locale — and returns `Message<Args>`, a function that
-  renders the current locale's text. Types: `Locales`, `LocaleOf`, `LocaleDefinition`, `IntlFormats`, `LocaleDateTimeFormatOptions`, `Message`,
+  renders the current locale's text, and throws where no set is defined
+  (`@k8ordo/framework` runs `src/i18n.ts` before any route file; a test or a
+  Storybook preview imports it). Types: `Locales`, `LocaleOf`, `LocaleDefinition`, `IntlFormats`, `LocaleDateTimeFormatOptions`, `Message`,
   `Variants`, `Register`, `RegisteredLocale`, `Delocalized`,
   `LocaleParamsSchema`, `LocalesOptions`, `NegotiateRequestOptions`.

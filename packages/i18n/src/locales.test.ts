@@ -265,6 +265,23 @@ describe('message', () => {
       /no text for "en"/u,
     );
   });
+
+  it('throws where no set is defined rather than picking a variant, even while a locale is named', () => {
+    const key = Symbol.for('@k8ordo/i18n/locales');
+    const registry = globalThis as { [key]?: unknown };
+    const saved = registry[key];
+    try {
+      registry[key] = undefined;
+      expect(() => nav.home()).toThrow(
+        /no locale set is defined here — the module that calls defineLocales has to run before any message/u,
+      );
+      expect(() => locales.run('en', () => nav.home())).toThrow(
+        /no locale set is defined here/u,
+      );
+    } finally {
+      registry[key] = saved;
+    }
+  });
 });
 
 describe('getLocale / run (server)', () => {

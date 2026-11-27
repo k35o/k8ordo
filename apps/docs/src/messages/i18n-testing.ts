@@ -5,6 +5,21 @@ export const introduction = message({
   en: 'The locale that messages and `getLocale()` read depends on where the test runs. Under Node, `locales.run` selects it; in a browser, the URL does.',
 });
 
+export const loadTitle = message({
+  ja: '集合を先に読み込む',
+  en: 'Load the set first',
+});
+
+export const loadNoEntry = message({
+  ja: 'テストランナーとStorybookは、`@k8ordo/framework`の入口を通りません。集合を定義するモジュールを読み込まないまま文言を呼ぶと、`message: no locale set is defined here`のエラーになります。',
+  en: 'A test runner and Storybook do not go through `@k8ordo/framework`’s entries. A message called before the module defining the set has loaded throws `message: no locale set is defined here`.',
+});
+
+export const loadWhere = message({
+  ja: "Vitestの`setupFiles`に挙げたファイルの先頭で、`src/i18n.ts`をimportします。Storybookでは、`.storybook/preview.tsx`の先頭に`import '../src/i18n';`と書きます。",
+  en: "Import `src/i18n.ts` at the top of a file listed in Vitest’s `setupFiles`. In Storybook, put `import '../src/i18n';` at the top of `.storybook/preview.tsx`.",
+});
+
 export const nodeTitle = message({
   ja: 'Nodeのテスト',
   en: 'Tests under Node',

@@ -25,6 +25,13 @@ const SYMPTOMS: readonly Symptom[] = [
     fix: t.missingFix,
   },
   {
+    id: 'no-set',
+    title: t.noSetTitle,
+    cause: t.noSetCause,
+    fix: t.noSetFix,
+    link: { path: '/:locale/i18n/testing', label: m.i18n.navTesting },
+  },
+  {
     id: 'untyped',
     title: t.untypedTitle,
     cause: t.untypedCause,

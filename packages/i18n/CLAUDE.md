@@ -66,12 +66,18 @@ pnpm check         # check:write to auto-fix
   so `message()` can tell an unknown segment (`/fr/…` on a 404 page) from a
   locale, and can render the default when nothing names one. An application
   has one set; a test that defines others re-defines the one its messages
-  read. Before any set registers, no segment is a locale and a message
-  renders its first variant: there is nothing to tell a locale from a path
-  by. `@k8ordo/framework`'s browser entry imports `src/i18n.ts`
-  (`virtual:k8ordo/locales`) so the set is there before anything renders.
-- **Refuse where it is read, name what is missing.** A message lacking the
-  named locale throws from the call, listing the variants present. An empty
+  read. Before any set registers, a message throws, naming the module that
+  has to run: there is nothing to tell a locale from a path by and no
+  default to fall back on, and picking a variant would be a wrong language
+  rendered without a word. `currentLocale()` answers `null` there instead,
+  for a library such as `@k8ordo/ui` that renders in applications with no
+  set at all. `@k8ordo/framework`'s three entries (browser, RSC, SSR)
+  import `src/i18n.ts` (`virtual:k8ordo/locales`) before any route file, so
+  under the framework the throw means there is no `src/i18n.ts`; a test or
+  a Storybook preview imports it itself.
+- **Refuse where it is read, name what is missing.** A message read where
+  no set is defined throws, and so does one lacking the named locale,
+  listing the variants present. An empty
   set, a tag that is not BCP 47, a default outside the list, a time zone
   `Intl.DateTimeFormat` refuses (or a missing one, which it would quietly
   replace with the runtime's own), and a `dir` other than `ltr` / `rtl`

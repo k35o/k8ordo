@@ -365,11 +365,17 @@ base back from the router's `withBase` (imported from `@k8ordo/framework` in
 a framework application).
 
 A first segment that is not one of the set's locales is no locale, and the
-default applies, so a 404 page never throws on `/fr/…`. Until the set is
-defined in the browser, no segment is a locale and every message is in its
-first variant: the module that defines it has to run there too.
-`@k8ordo/framework` loads `src/i18n.ts` in the browser before anything
-renders; anywhere else, import it from a client module that runs first.
+default applies, so a 404 page never throws on `/fr/…`.
+
+**On either side, the set has to be defined before a message is called.**
+The set is what tells a locale from a path and gives the default, so a
+message called where no set is defined throws, naming the module that has to
+run first, rather than rendering some variant. `@k8ordo/framework` runs
+`src/i18n.ts` before any route file, in the browser and on the server, so
+nothing is left to wire there. Anywhere else, import the module that
+defines the set from code that runs first on each side — in the browser, a
+client module the root renders. A test or a Storybook preview does the same
+(see [Testing](#testing)).
 
 `locales.getLocale()` reads the same source for code that needs the tag
 itself: `<html lang>`, a language switcher, an `Intl` API the set does not
@@ -598,6 +604,8 @@ script runs, and a visitor without JavaScript keeps the default.
   by `@k8ordo/framework`'s generated files, or by hand.
   From JavaScript, or through `as`, it throws where it is read, naming the
   locale and the variants present — never `undefined`.
+- A message never guesses a language: read where no set is defined, it
+  throws, naming the module that has to run first.
 - Arguments to a function message are typed by the function.
 - A page under `[locale]` never renders in a locale its URL does not spell:
   on the server its schema accepted that locale, and in the browser the URL
@@ -620,3 +628,19 @@ itself replaces the set messages read: the last one defined wins. In a
 browser environment, `history.replaceState(null, '', '/en/…')` is the locale
 and `run` throws; an environment that defines `document`, such as jsdom or
 happy-dom, counts as one.
+
+A test runner and Storybook run none of the framework's entries, so nothing
+there has defined the set: a message called directly, or by a component a
+test or a story renders, throws. Import `src/i18n.ts` once before them — in
+a file the Vitest config lists in `setupFiles`, and at the top of
+`.storybook/preview.tsx`:
+
+```ts
+// vitest.setup.ts, listed in test.setupFiles
+import './src/i18n';
+```
+
+```ts
+// .storybook/preview.tsx
+import '../src/i18n';
+```

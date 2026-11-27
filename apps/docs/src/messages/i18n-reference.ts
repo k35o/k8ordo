@@ -182,8 +182,8 @@ export const messageCaveats = [
     en: 'Once `Register` carries the locale type, a declaration missing a locale is a type error. A missing locale the types did not catch throws a `TypeError` such as `message: no text for "en" in ["ja"]` where the message is read.',
   }),
   message({
-    ja: 'どこにもロケールが指定されていないときは、既定のロケールの文を返します。集合がまだ定義されていない環境では、既定のロケールの代わりに最初に書いた文を返します。',
-    en: 'When nothing names a locale, it returns the default locale’s text. In an environment where no set has been defined yet, it returns the first text written instead.',
+    ja: 'どこにもロケールが指定されていないときは、既定のロケールの文を返します。集合が定義されていないところで呼ぶと、`message: no locale set is defined here`のエラーになります。',
+    en: 'When nothing names a locale, it returns the default locale’s text. Called where no set is defined, it throws `message: no locale set is defined here`.',
   }),
   message({
     ja: '引数の型は、型注釈を書いたロケールの関数から推論されます。どこにも書かないと`unknown`になります。少なくとも1つに書くか、`message<[name: string]>({ … })`のように型引数で渡します。',
@@ -194,6 +194,16 @@ export const messageCaveats = [
     en: 'The declaration has no side effect, so a bundler drops a message nothing calls.',
   }),
 ] as const;
+
+export const messageTestingBefore = message({
+  ja: 'テストとStorybookで集合を読み込む書き方は',
+  en: 'Loading the set in tests and in Storybook is covered in ',
+});
+
+export const messageTestingAfter = message({
+  ja: 'を見てください。',
+  en: '.',
+});
 
 export const messageTypeSummary = message({
   ja: '`message`が返す関数の型です。文言をpropsで受け取るコンポーネントは、この型で受け取ります。',

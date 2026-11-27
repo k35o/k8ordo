@@ -25,6 +25,21 @@ export const missingFix = message({
   en: 'The error names the missing locale and the ones the message has. Add the missing text. With the locale type in `Register`, this is a type error at the declaration.',
 });
 
+export const noSetTitle = message({
+  ja: '`message: no locale set is defined here`',
+  en: '`message: no locale set is defined here`',
+});
+
+export const noSetCause = message({
+  ja: '集合を定義するモジュールが読み込まれる前に、文言を呼んでいます。`@k8ordo/framework`のアプリでは、`src/i18n.ts`が無いか、集合を別のモジュールで定義しています。テストやStorybookでは、`src/i18n.ts`を読み込んでいません。',
+  en: 'A message is called before the module defining the set has loaded. In an `@k8ordo/framework` app, there is no `src/i18n.ts`, or the set is defined in another module. In a test or in Storybook, `src/i18n.ts` was never imported.',
+});
+
+export const noSetFix = message({
+  ja: '`@k8ordo/framework`のアプリでは、集合を`src/i18n.ts`から`locales`という名前でexportします。テストとStorybookでは、セットアップファイルと`.storybook/preview.tsx`で`src/i18n.ts`をimportします。書き方は',
+  en: 'In an `@k8ordo/framework` app, export the set from `src/i18n.ts` as `locales`. In tests and Storybook, import `src/i18n.ts` from a setup file and from `.storybook/preview.tsx`. For how, see ',
+});
+
 export const untypedTitle = message({
   ja: '型エラーにならない文の不足',
   en: 'A missing locale that is not a type error',

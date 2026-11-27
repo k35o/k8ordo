@@ -1,7 +1,11 @@
 import { ApiEntry } from '../../../../components/api-entry';
 import { CodeBlock } from '../../../../components/code-block';
 import { DocPage } from '../../../../components/doc-page';
+import { LocaleAnchor } from '../../../../components/locale-anchor';
+import { Rich } from '../../../../components/rich';
 import * as m from '../../../../messages';
+
+import styles from '../../../../styles/pages/i18n/reference.module.css';
 
 const t = m.i18nReference;
 const FROM = '@k8ordo/i18n';
@@ -212,6 +216,13 @@ function message<A extends readonly unknown[]>(
           lang="ts"
           title="src/messages/nav.ts"
         />
+        <p className={styles.example}>
+          <Rich>{t.messageTestingBefore()}</Rich>
+          <LocaleAnchor path="/:locale/i18n/testing">
+            {m.i18n.navTesting()}
+          </LocaleAnchor>
+          <Rich>{t.messageTestingAfter()}</Rich>
+        </p>
       </ApiEntry>
 
       <ApiEntry
