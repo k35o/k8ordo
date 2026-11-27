@@ -206,7 +206,6 @@ entry in [docs/references/components.md](docs/references/components.md).
 - [CheckboxGroup](docs/references/components.md#checkboxgroup)
 - [ColorPicker](docs/references/components.md#colorpicker)
 - [Combobox](docs/references/components.md#combobox)
-- [DateField](docs/references/components.md#datefield)
 - [DatePicker](docs/references/components.md#datepicker)
 - [FileField](docs/references/components.md#filefield)
 - [Form](docs/references/components.md#form)

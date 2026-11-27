@@ -34,7 +34,6 @@ const accent = form.field('accent');
 
 <FormControl
   errorText={accent.error}
-  invalid={accent.invalid}
   label="Accent color"
   required={accent.required}
   renderInput={(props) => <ColorPicker {...props} {...accent.input} />}

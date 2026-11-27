@@ -70,11 +70,11 @@ duration-150 ease-out`.
 ## Focus management
 
 - Use `:focus-visible`, not `:focus` — no ring appears on a mouse click
-- A date or time `<input>` is the exception and takes the ring on `:focus` as well. Its inner parts (year, month, day) hold the focus, and WebKit then matches `:focus` on the input but never `:focus-visible`. Chromium and Firefox match `:focus-visible` on such a field whenever it has focus, a mouse click included, so `:focus` adds nothing there. `DateField` and `TextField` do this
+- A date or time `<input>` is the exception and takes the ring on `:focus` as well. Its inner parts (year, month, day) hold the focus, and WebKit then matches `:focus` on the input but never `:focus-visible`. Chromium and Firefox match `:focus-visible` on such a field whenever it has focus, a mouse click included, so `:focus` adds nothing there. `TextField` does this
 - Keep the focus ring consistent with `--shadow-ring-info`
 - Clear the default outline before applying the ring, and give it back under forced colors, where the ring (a shadow) disappears
 - Keep focus on a button that is waiting on its own action: show the wait with `aria-busy` and `aria-disabled` and ignore presses, rather than setting `disabled`. Chromium moves focus to `body` when the focused element becomes disabled, so the keyboard user who pressed it loses their place. `Button` and `IconButton` do this for `action`
-- For the same reason, a text field whose form's action is pending turns `readOnly`, not `disabled`, and ignores the keys that would change its value, so the user who pressed Enter in it keeps their place. `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `DateField`, `DatePicker`, `ColorPicker`, `Combobox`, and `Autocomplete` do this. `readOnly` does not apply to a checkbox, radio, range, or select, yet Enter in one still submits the form through its submit button, so `Checkbox`, `Radio`, `Switch`, `Slider`, `RangeSlider`, and `Select` take `aria-disabled` instead and ignore what would change their value. A checkbox or radio cancels the click in the capture phase and stops it there: cancelled any later, React's change tracking has already recorded the toggle the browser then undoes, calls `onChange` for it, and misses the next real one. A range ignores the arrow, Home, End, and Page keys and the pointer; a select ignores those keys, Space, F4, typed characters, and the pointer
+- For the same reason, a text field whose form's action is pending turns `readOnly`, not `disabled`, and ignores the keys that would change its value, so the user who pressed Enter in it keeps their place. `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `DatePicker`, `ColorPicker`, `Combobox`, and `Autocomplete` do this. `readOnly` does not apply to a checkbox, radio, range, or select, yet Enter in one still submits the form through its submit button, so `Checkbox`, `Radio`, `Switch`, `CheckboxCard`, `RadioCard`, `Slider`, `RangeSlider`, and `Select` take `aria-disabled` instead and ignore what would change their value. A checkbox or radio cancels the click in the capture phase and stops it there: cancelled any later, React's change tracking has already recorded the toggle the browser then undoes, calls `onChange` for it, and misses the next real one. A range ignores the arrow, Home, End, and Page keys and the pointer; a select ignores those keys, Space, F4, typed characters, and the pointer
 
 ```css
 .control:focus-visible {
@@ -92,9 +92,9 @@ duration-150 ease-out`.
 
 - Put the label above the input (a left-aligned label reads badly in Japanese)
 - Put the error message directly under the input, in `--color-fg-error` at `--font-size-sm`
-- Mark required fields with `*` after the label
+- Mark a required field after its label: `FormControl`'s `required` draws the built-in `required` wording there. A single field's mark is hidden from screen readers, since the input's own `required` already says it; with `labelAs="group"` — a group, or `FileField`, whose trigger is a button — the mark is part of the name, since neither a group nor a button can be required itself
 - Validate on submit; keep real-time validation to a minimum
-- Use the `FormControl` component so labels and errors stay consistent
+- Use the `FormControl` component so labels and errors stay consistent. `Checkbox` and `Switch` carry their own label instead, and take `errorText` / `helpText` themselves
 
 ```tsx
 import { FormControl, TextField } from '@k8ordo/ui';

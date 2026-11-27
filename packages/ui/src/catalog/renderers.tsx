@@ -34,7 +34,6 @@ import { CheckboxCard } from '../components/form/checkbox-card';
 import { CheckboxGroup } from '../components/form/checkbox-group';
 import { ColorPicker } from '../components/form/color-picker';
 import { Combobox } from '../components/form/combobox';
-import { DateField } from '../components/form/date-field';
 import { DatePicker } from '../components/form/date-picker';
 import { FileField } from '../components/form/file-field';
 import { Form } from '../components/form/form';
@@ -521,7 +520,7 @@ const DateFieldView: FC<{
 }> = ({ props, value, onChange }) => (
   <LabeledField label={props.label}>
     {(labelId) => (
-      <DateField
+      <TextField
         aria-labelledby={labelId}
         disabled={u(props.disabled)}
         invalid={u(props.invalid)}
@@ -532,6 +531,7 @@ const DateFieldView: FC<{
           onChange(event.target.value);
         }}
         required={u(props.required)}
+        type="date"
         value={value}
       />
     )}
@@ -1239,20 +1239,13 @@ export function renderCheckboxGroup(
   return (
     <LabeledField label={props.label}>
       {(labelId) => (
-        <CheckboxGroup.Root
+        <CheckboxGroup
           aria-labelledby={labelId}
           name={props.name}
           onChange={onChange}
+          options={props.options}
           value={value}
-        >
-          {props.options.map((option) => (
-            <CheckboxGroup.Item
-              itemValue={option.value}
-              key={option.value}
-              label={option.label}
-            />
-          ))}
-        </CheckboxGroup.Root>
+        />
       )}
     </LabeledField>
   );
@@ -1321,8 +1314,8 @@ export const FileFieldWidget: FC<{ props: FileFieldProps }> = ({ props }) => {
   const messages = getMessages();
   const trigger = (
     <FileField.Trigger
-      renderItem={({ onClick, disabled }) => (
-        <Button disabled={disabled} onClick={onClick} variant="outline">
+      renderItem={(wiring) => (
+        <Button {...wiring} variant="outline">
           {u(props.triggerLabel) ?? messages.fileFieldTrigger}
         </Button>
       )}
@@ -1353,7 +1346,6 @@ export function renderFormControl(
     <FormControl
       errorText={u(props.errorText)}
       helpText={u(props.helpText)}
-      invalid={u(props.invalid)}
       label={props.label}
       renderInput={(inputProps) =>
         fieldType === 'textarea' ? (

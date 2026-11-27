@@ -25,6 +25,7 @@ const priceMax = form.field('priceMax');
 
 <FormControl
   label="Price"
+  labelAs="group"
   renderInput={(props) => (
     <RangeSlider
       {...props}

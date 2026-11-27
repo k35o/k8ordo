@@ -190,7 +190,6 @@ const SoundForm = () => (
         <>
           <FormControl
             errorText={volume.error}
-            invalid={volume.invalid}
             label="音量"
             renderInput={(props) => <Slider {...props} {...volume.input} />}
             required={volume.required}
@@ -214,6 +213,8 @@ export const WithForm: Story = {
     const memoField = () => canvas.getByLabelText('メモ', { exact: false });
     const submit = () =>
       userEvent.click(canvas.getByRole('button', { name: '送信' }));
+
+    await expect(volume()).not.toHaveAttribute('required');
 
     // reset で描画時の値に戻り、isDirty も下りる
     slide(30);

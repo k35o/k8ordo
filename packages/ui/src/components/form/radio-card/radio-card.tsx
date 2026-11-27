@@ -3,6 +3,9 @@
 import { clsx } from 'clsx';
 import type { FC, FieldsetHTMLAttributes, ReactNode, Ref } from 'react';
 import { useId } from 'react';
+import { useFormStatus } from 'react-dom';
+
+import { ignoreClick } from '../../_internal/ignore-changes';
 
 import srOnly from '../../_internal/sr-only.module.css';
 import styles from './radio-card.module.css';
@@ -61,12 +64,15 @@ export const RadioCard: FC<Props> = ({
 }) => {
   const groupId = useId();
   const isControlled = value !== undefined;
+  const { pending } = useFormStatus();
+  const disabledResolved = disabled || pending;
 
   return (
     <fieldset
       {...rest}
+      aria-invalid={invalid}
       aria-labelledby={labelledbyId}
-      className={clsx(styles.root, disabled && styles.disabled)}
+      className={clsx(styles.root, disabledResolved && styles.disabled)}
       ref={ref}
       role="radiogroup"
     >
@@ -82,15 +88,17 @@ export const RadioCard: FC<Props> = ({
             className={clsx(
               styles.card,
               invalid ? styles.invalid : styles.valid,
-              optionDisabled && styles.optionDisabled,
+              (optionDisabled || pending) && styles.optionDisabled,
             )}
             id={optionId}
             key={option.value}
+            onClickCapture={pending ? ignoreClick : undefined}
           >
             <input
               aria-describedby={
                 hasDescription ? `${optionId}-description` : undefined
               }
+              aria-disabled={pending || undefined}
               aria-labelledby={`${optionId}-label`}
               {...(isControlled
                 ? { checked: value === option.value }

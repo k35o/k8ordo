@@ -52,7 +52,6 @@ export function OrderDemo({ fields }: Props) {
             <div className={styles.name}>
               <FormControl
                 errorText={name.error}
-                invalid={name.invalid}
                 label={m.formNested.demoLabelName()}
                 renderInput={(props) => (
                   <TextField {...props} {...name.input} autoComplete="off" />
@@ -63,7 +62,6 @@ export function OrderDemo({ fields }: Props) {
             <div className={styles.quantity}>
               <FormControl
                 errorText={quantity.error}
-                invalid={quantity.invalid}
                 label={m.formNested.demoLabelQuantity()}
                 renderInput={(props) => (
                   <TextField {...props} {...quantity.input} />

@@ -1,115 +1,93 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { createContext, use, useMemo } from 'react';
-import type {
-  ChangeEvent,
-  FC,
-  FieldsetHTMLAttributes,
-  PropsWithChildren,
-  Ref,
-} from 'react';
+import type { ChangeEvent, FC, FieldsetHTMLAttributes, Ref } from 'react';
+
+import type { Option } from '../../../types/variables';
+import { checkedValuesAround } from '../../_internal/checked-values';
+import { Checkbox } from '../checkbox';
 
 import styles from './checkbox-group.module.css';
 
-type CheckboxGroupContextValue = {
-  /** 制御モードの値。非制御では undefined で、各項目は defaultValue から始める */
-  value: string[] | undefined;
-  defaultValue: string[];
-  disabled: boolean;
-  name: string;
-  notifyChange: (event: ChangeEvent<HTMLInputElement>) => void;
-};
-
-const CheckboxGroupContext = createContext<
-  CheckboxGroupContextValue | undefined
->(undefined);
-
-export const useCheckboxGroupContext = () => use(CheckboxGroupContext);
-
-type RootBaseProps = PropsWithChildren<
-  {
-    'aria-labelledby': string;
-    invalid?: boolean;
-    name: string;
-    ref?: Ref<HTMLFieldSetElement>;
-  } & Omit<
-    FieldsetHTMLAttributes<HTMLFieldSetElement>,
-    | 'className'
-    | 'style'
-    | 'onChange'
-    | 'defaultValue'
-    | 'name'
-    | 'aria-labelledby'
-    | 'role'
-  >
+type BaseProps = {
+  'aria-labelledby': string;
+  disabled?: boolean;
+  invalid?: boolean;
+  name?: string;
+  options: readonly Option[];
+  ref?: Ref<HTMLFieldSetElement>;
+  // fieldset にも、1 つのチェックボックスにも「1 つ以上」を求める required は無い。
+  // FormControl の束を広げても属性として描かないように受けて捨てる
+  required?: boolean;
+} & Omit<
+  FieldsetHTMLAttributes<HTMLFieldSetElement>,
+  | 'className'
+  | 'style'
+  | 'children'
+  | 'onChange'
+  | 'defaultValue'
+  | 'disabled'
+  | 'name'
+  | 'aria-labelledby'
+  | 'role'
 >;
 
-type RootControlledProps = {
-  value: string[];
+type ControlledProps = {
+  value: readonly string[];
   onChange: (value: string[]) => void;
   defaultValue?: never;
 };
 
-type RootUncontrolledProps = {
-  defaultValue?: string[];
+type UncontrolledProps = {
+  defaultValue?: readonly string[];
   value?: never;
   onChange?: (value: string[]) => void;
 };
 
-type RootProps = RootBaseProps & (RootControlledProps | RootUncontrolledProps);
+type Props = BaseProps & (ControlledProps | UncontrolledProps);
 
-const Root: FC<RootProps> = ({
+export const CheckboxGroup: FC<Props> = ({
   'aria-labelledby': labelledbyId,
-  children,
   defaultValue,
   disabled = false,
   invalid = false,
   name,
   onChange,
+  options,
   ref,
+  required: _required,
   value,
   ...rest
 }) => {
-  // 非制御のときは値を state に写さず DOM に持たせる。form の reset は change を
-  // 飛ばさずに checked を戻すので、写した state は取り残される
-  const contextValue = useMemo<CheckboxGroupContextValue>(
-    () => ({
-      value,
-      defaultValue: defaultValue ?? [],
-      disabled,
-      name,
-      notifyChange: (event) => {
-        const inputs =
-          event.currentTarget
-            .closest('fieldset')
-            ?.querySelectorAll<HTMLInputElement>(
-              `input[type="checkbox"][name="${CSS.escape(name)}"]`,
-            ) ?? [];
-        onChange?.(
-          [...inputs]
-            .filter((input) => input.checked)
-            .map((input) => input.value),
-        );
-      },
-    }),
-    [value, defaultValue, disabled, name, onChange],
-  );
+  const handleChange = (
+    _checked: boolean,
+    event: ChangeEvent<HTMLInputElement>,
+  ) => {
+    onChange?.(checkedValuesAround(event.currentTarget));
+  };
 
   return (
     <fieldset
       {...rest}
-      aria-invalid={invalid}
       aria-labelledby={labelledbyId}
       className={clsx(styles.root, disabled && styles.disabled)}
-
       ref={ref}
     >
-      <CheckboxGroupContext value={contextValue}>
-        {children}
-      </CheckboxGroupContext>
+      {options.map((option) => (
+        <Checkbox
+          {...(value === undefined
+            ? { defaultChecked: defaultValue?.includes(option.value) }
+            : { checked: value.includes(option.value) })}
+          disabled={disabled}
+          // role="group" は aria-invalid を持てないので、ボックスごとに付ける
+          invalid={invalid}
+          key={option.value}
+          label={option.label}
+          name={name}
+          onChange={handleChange}
+          value={option.value}
+        />
+      ))}
     </fieldset>
   );
 };
-
-export { Root as CheckboxGroupRoot };

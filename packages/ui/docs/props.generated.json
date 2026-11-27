@@ -290,7 +290,7 @@
         },
         {
           "name": "defaultValue",
-          "types": ["string[]"],
+          "types": ["readonly string[]"],
           "defaultValue": null,
           "required": false
         },
@@ -314,7 +314,7 @@
         },
         {
           "name": "value",
-          "types": ["string[]"],
+          "types": ["readonly string[]"],
           "defaultValue": null,
           "required": false
         }
@@ -887,6 +887,18 @@
           "required": false
         },
         {
+          "name": "errorText",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "helpText",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
           "name": "indeterminate",
           "types": ["boolean"],
           "defaultValue": "false",
@@ -896,12 +908,6 @@
           "name": "invalid",
           "types": ["boolean"],
           "defaultValue": "false",
-          "required": false
-        },
-        {
-          "name": "itemValue",
-          "types": ["string"],
-          "defaultValue": null,
           "required": false
         },
         {
@@ -923,10 +929,16 @@
           "types": ["Ref<HTMLInputElement>"],
           "defaultValue": null,
           "required": false
+        },
+        {
+          "name": "value",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
         }
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
-      "omitted": ["type", "className", "style", "value", "children"]
+      "omitted": ["type", "className", "style", "children"]
     },
     {
       "name": "CheckboxCard",
@@ -946,7 +958,7 @@
         },
         {
           "name": "defaultValue",
-          "types": ["string[]"],
+          "types": ["readonly string[]"],
           "defaultValue": null,
           "required": false
         },
@@ -969,8 +981,14 @@
           "required": false
         },
         {
+          "name": "required",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
           "name": "value",
-          "types": ["string[]"],
+          "types": ["readonly string[]"],
           "defaultValue": null,
           "required": false
         }
@@ -979,71 +997,7 @@
       "omitted": ["className", "style", "children", "role"]
     },
     {
-      "name": "CheckboxGroup.Item",
-      "category": "form",
-      "props": [
-        {
-          "name": "label",
-          "types": ["string"],
-          "defaultValue": null,
-          "required": true
-        },
-        {
-          "name": "checked",
-          "types": ["boolean"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "defaultChecked",
-          "types": ["boolean"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "indeterminate",
-          "types": ["boolean"],
-          "defaultValue": "false",
-          "required": false
-        },
-        {
-          "name": "invalid",
-          "types": ["boolean"],
-          "defaultValue": "false",
-          "required": false
-        },
-        {
-          "name": "itemValue",
-          "types": ["string"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "labelHidden",
-          "types": ["boolean"],
-          "defaultValue": "false",
-          "required": false
-        },
-        {
-          "name": "onChange",
-          "types": [
-            "(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void"
-          ],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "ref",
-          "types": ["Ref<HTMLInputElement>"],
-          "defaultValue": null,
-          "required": false
-        }
-      ],
-      "inherits": "InputHTMLAttributes<HTMLInputElement>",
-      "omitted": ["type", "className", "style", "value", "children"]
-    },
-    {
-      "name": "CheckboxGroup.Root",
+      "name": "CheckboxGroup",
       "category": "form",
       "props": [
         {
@@ -1053,27 +1007,33 @@
           "required": true
         },
         {
-          "name": "name",
-          "types": ["string"],
+          "name": "options",
+          "types": ["readonly Option[]"],
           "defaultValue": null,
           "required": true
         },
         {
-          "name": "children",
-          "types": ["ReactNode"],
+          "name": "defaultValue",
+          "types": ["readonly string[]"],
           "defaultValue": null,
           "required": false
         },
         {
-          "name": "defaultValue",
-          "types": ["string[]"],
-          "defaultValue": null,
+          "name": "disabled",
+          "types": ["boolean"],
+          "defaultValue": "false",
           "required": false
         },
         {
           "name": "invalid",
           "types": ["boolean"],
           "defaultValue": "false",
+          "required": false
+        },
+        {
+          "name": "name",
+          "types": ["string"],
+          "defaultValue": null,
           "required": false
         },
         {
@@ -1089,14 +1049,20 @@
           "required": false
         },
         {
+          "name": "required",
+          "types": ["boolean"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
           "name": "value",
-          "types": ["string[]"],
+          "types": ["readonly string[]"],
           "defaultValue": null,
           "required": false
         }
       ],
       "inherits": "FieldsetHTMLAttributes<HTMLFieldSetElement>",
-      "omitted": ["className", "style", "role"]
+      "omitted": ["className", "style", "children", "role"]
     },
     {
       "name": "CheckIcon",
@@ -1387,12 +1353,6 @@
           "required": false
         },
         {
-          "name": "type",
-          "types": ["string"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
           "name": "value",
           "types": ["string"],
           "defaultValue": null,
@@ -1400,7 +1360,7 @@
         }
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
-      "omitted": ["className", "style", "children"]
+      "omitted": ["type", "className", "style", "children"]
     },
     {
       "name": "ColorScaleIcon",
@@ -1457,12 +1417,6 @@
           "required": false
         },
         {
-          "name": "type",
-          "types": ["string"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
           "name": "value",
           "types": ["string"],
           "defaultValue": null,
@@ -1471,6 +1425,7 @@
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
       "omitted": [
+        "type",
         "role",
         "className",
         "style",
@@ -1839,26 +1794,6 @@
       ],
       "inherits": null,
       "omitted": []
-    },
-    {
-      "name": "DateField",
-      "category": "form",
-      "props": [
-        {
-          "name": "invalid",
-          "types": ["boolean"],
-          "defaultValue": "false",
-          "required": false
-        },
-        {
-          "name": "ref",
-          "types": ["Ref<HTMLInputElement>"],
-          "defaultValue": null,
-          "required": false
-        }
-      ],
-      "inherits": "InputHTMLAttributes<HTMLInputElement>",
-      "omitted": ["className", "style", "type", "children"]
     },
     {
       "name": "DatePicker",
@@ -2358,7 +2293,7 @@
         },
         {
           "name": "defaultValue",
-          "types": ["File[]", "string"],
+          "types": ["File[]"],
           "defaultValue": null,
           "required": false
         },
@@ -2405,7 +2340,7 @@
         {
           "name": "renderItem",
           "types": [
-            "(props: { onClick: () => void; disabled: boolean; invalid: boolean; }) => ReactElement"
+            "(props: { id: string; 'aria-labelledby': string | undefined; 'aria-describedby': string | undefined; ref: (node: HTMLElement | null) => void; onClick: () => void; disabled: boolean; }) => ReactElement"
           ],
           "defaultValue": null,
           "required": true
@@ -2561,20 +2496,14 @@
           "required": false
         },
         {
-          "name": "invalid",
-          "types": ["boolean"],
-          "defaultValue": "false",
-          "required": false
-        },
-        {
           "name": "labelAs",
-          "types": ["'label'", "'legend'"],
+          "types": ["'label'", "'group'"],
           "defaultValue": "'label'",
           "required": false
         },
         {
           "name": "ref",
-          "types": ["Ref<HTMLElement>"],
+          "types": ["Ref<HTMLDivElement>"],
           "defaultValue": null,
           "required": false
         },
@@ -2585,7 +2514,7 @@
           "required": false
         }
       ],
-      "inherits": "HTMLAttributes<HTMLElement>",
+      "inherits": "HTMLAttributes<HTMLDivElement>",
       "omitted": ["className", "style", "children"]
     },
     {
@@ -3360,14 +3289,14 @@
         },
         {
           "name": "max",
-          "types": ["number", "string"],
-          "defaultValue": null,
+          "types": ["number"],
+          "defaultValue": "Number.MAX_SAFE_INTEGER",
           "required": false
         },
         {
           "name": "min",
-          "types": ["number", "string"],
-          "defaultValue": null,
+          "types": ["number"],
+          "defaultValue": "Number.MIN_SAFE_INTEGER",
           "required": false
         },
         {
@@ -4100,7 +4029,7 @@
         {
           "name": "required",
           "types": ["boolean"],
-          "defaultValue": "false",
+          "defaultValue": null,
           "required": false
         },
         {
@@ -4370,6 +4299,12 @@
           "required": false
         },
         {
+          "name": "placeholder",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
           "name": "ref",
           "types": ["Ref<HTMLSelectElement>"],
           "defaultValue": null,
@@ -4597,14 +4532,14 @@
         },
         {
           "name": "max",
-          "types": ["number", "string"],
-          "defaultValue": null,
+          "types": ["number"],
+          "defaultValue": "100",
           "required": false
         },
         {
           "name": "min",
-          "types": ["number", "string"],
-          "defaultValue": null,
+          "types": ["number"],
+          "defaultValue": "0",
           "required": false
         },
         {
@@ -4942,6 +4877,18 @@
           "required": false
         },
         {
+          "name": "errorText",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
+          "name": "helpText",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
+        },
+        {
           "name": "invalid",
           "types": ["boolean"],
           "defaultValue": "false",
@@ -4960,10 +4907,16 @@
           "types": ["Ref<HTMLInputElement>"],
           "defaultValue": null,
           "required": false
+        },
+        {
+          "name": "value",
+          "types": ["string"],
+          "defaultValue": null,
+          "required": false
         }
       ],
       "inherits": "InputHTMLAttributes<HTMLInputElement>",
-      "omitted": ["type", "role", "className", "style", "value", "children"]
+      "omitted": ["type", "role", "className", "style", "children"]
     },
     {
       "name": "Table.Body",
@@ -5308,12 +5261,6 @@
         {
           "name": "ref",
           "types": ["Ref<HTMLTextAreaElement>"],
-          "defaultValue": null,
-          "required": false
-        },
-        {
-          "name": "type",
-          "types": ["string"],
           "defaultValue": null,
           "required": false
         }
@@ -5884,14 +5831,6 @@
     },
     {
       "key": "numberFieldDecrement",
-      "usedBy": ["NumberField"]
-    },
-    {
-      "key": "numberFieldRangeUnderflow",
-      "usedBy": ["NumberField"]
-    },
-    {
-      "key": "numberFieldRangeOverflow",
       "usedBy": ["NumberField"]
     },
     {

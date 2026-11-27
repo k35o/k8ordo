@@ -32,7 +32,6 @@ export { CheckboxCard, type CheckboxCardOption } from './form/checkbox-card';
 export { CheckboxGroup } from './form/checkbox-group';
 export { ColorPicker, type ColorPickerSwatch } from './form/color-picker';
 export { Combobox, type ComboboxSearch } from './form/combobox';
-export { DateField } from './form/date-field';
 export { DatePicker } from './form/date-picker';
 export { FileField } from './form/file-field';
 export { Form } from './form/form';

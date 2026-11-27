@@ -7,11 +7,7 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
-import {
-  CheckboxControlledPreview,
-  CheckboxGroupControlledPreview,
-  CheckboxGroupDisabledPreview,
-} from '../../../../../demos/ui/components/checkbox-previews';
+import { CheckboxControlledPreview } from '../../../../../demos/ui/components/checkbox-previews';
 import * as m from '../../../../../messages';
 
 import page from '../../../../../styles/page.module.css';
@@ -94,40 +90,36 @@ export default function CheckboxPage() {
         </div>
 
         <div className={page.stack}>
-          <Heading level="h3">Group</Heading>
+          <Heading level="h3">
+            <Rich>{m.components.checkbox.helpTextTitle()}</Rich>
+          </Heading>
           <ComponentPreview
-            code={`<p id="checkbox-group-label">Frameworks</p>
-<CheckboxGroup.Root
-  aria-labelledby="checkbox-group-label"
-  name="frameworks"
-  onChange={setValue}
-  value={value}
->
-  <Checkbox itemValue="react" label="React" />
-  <Checkbox itemValue="vue" label="Vue" />
-  <Checkbox itemValue="svelte" label="Svelte" />
-</CheckboxGroup.Root>`}
+            code={`<Checkbox
+  helpText="You can turn this off in settings."
+  label="Email me about new releases"
+/>`}
           >
-            <CheckboxGroupControlledPreview />
+            <Checkbox
+              helpText="You can turn this off in settings."
+              label="Email me about new releases"
+            />
           </ComponentPreview>
         </div>
 
         <div className={page.stack}>
-          <Heading level="h3">Group Disabled</Heading>
+          <Heading level="h3">
+            <Rich>{m.components.checkbox.errorTextTitle()}</Rich>
+          </Heading>
           <ComponentPreview
-            code={`<p id="checkbox-group-disabled-label">Frameworks</p>
-<CheckboxGroup.Root
-  aria-labelledby="checkbox-group-disabled-label"
-  defaultValue={['vue']}
-  disabled
-  name="frameworks-disabled"
->
-  <Checkbox itemValue="react" label="React" />
-  <Checkbox itemValue="vue" label="Vue" />
-  <Checkbox itemValue="svelte" label="Svelte" />
-</CheckboxGroup.Root>`}
+            code={`<Checkbox
+  errorText="Agree to the terms to continue."
+  label="I agree to the terms"
+/>`}
           >
-            <CheckboxGroupDisabledPreview />
+            <Checkbox
+              errorText="Agree to the terms to continue."
+              label="I agree to the terms"
+            />
           </ComponentPreview>
         </div>
       </section>
@@ -140,15 +132,6 @@ export default function CheckboxPage() {
         <PropsTable
           inherits={inheritsOf('Checkbox')}
           items={propsOf('Checkbox')}
-        />
-      </section>
-      <Separator color="mute" />
-
-      <section className={page.stack}>
-        <Heading level="h2">CheckboxGroup.Root Props</Heading>
-        <PropsTable
-          inherits={inheritsOf('CheckboxGroup.Root')}
-          items={propsOf('CheckboxGroup.Root')}
         />
       </section>
     </div>

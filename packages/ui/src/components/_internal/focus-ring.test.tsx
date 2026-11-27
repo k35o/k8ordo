@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
 import { page, userEvent } from 'vitest/browser';
 
-import { DateField } from '../form/date-field';
 import { TextField } from '../form/text-field';
 
 import '../../styles/index.css';
@@ -22,7 +21,10 @@ const ringShadow = () => {
 };
 
 const FIELDS: Array<[name: string, render: () => ReactNode]> = [
-  ['DateField', () => <DateField aria-label="対象" />],
+  [
+    'type="date" の TextField',
+    () => <TextField aria-label="対象" type="date" />,
+  ],
   [
     'type="time" の TextField',
     () => <TextField aria-label="対象" type="time" />,

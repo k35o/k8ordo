@@ -21,6 +21,15 @@ included: `Tabs.Root`, `Accordion.Item`, `Popover.Trigger`, and the rest are
 composed outside the client modules, so the parts resolve on the server. Only
 the interactive parts carry `'use client'`.
 
+What a Server Component cannot do is pass a client part a function other
+than a Server Action. A part whose required prop is a function — the
+`renderItem` of `Popover.Trigger`, `Tooltip.Trigger`, `ContextMenu.Trigger`,
+`Toolbar.Item`, and `FileField.Trigger`, `DataTable`'s `getRowId` and a
+column's `cell` — is rendered from a Client Component, as is any part given
+`onChange` or another handler. `FormControl` and `Form` are not client
+modules: a Server Component renders them with `renderInput` and with a Server
+Action as `action`, and only the fields inside are client parts.
+
 ## Render props
 
 Two different contracts are spelled `render*`, and mixing them up is the usual
@@ -606,7 +615,7 @@ Props:
 
 Form components are used together with `FormControl`'s `renderInput` pattern. Every form component except `FileField` supports both controlled and uncontrolled use; `FileField.Root` takes only `defaultValue` and keeps the selected files itself.
 
-`ref` reaches the real element (`input` / `textarea` / `select` / `fieldset`). `FileField` uses a ref internally but composes it with yours, so the `ref` you pass still reaches the element. `Radio` (a group that renders several inputs) puts its `ref` on the radiogroup `<div>`, and `FormControl` (a wrapper) on its wrapper element — a `<div>`, or a `<fieldset>` with `labelAs="legend"`.
+`ref` reaches the real element (`input` / `textarea` / `select` / `fieldset`). `FileField` uses a ref internally but composes it with yours, so the `ref` you pass still reaches the element. `Radio` (a group that renders several inputs) puts its `ref` on the radiogroup `<div>`, and `FormControl` (a wrapper) on its wrapper `<div>`.
 
 An uncontrolled field keeps its value in the DOM, so a form reset — `form.reset()`, a reset button, or React resetting the form after an action — puts it back to its `defaultValue`, and a `defaultValue` that changes after mount (the values a failed submission echoes back) is where the next reset goes. A value a component changes in code (a stepper, a chosen option, a removed file) is announced with an `input` event, so a form library listening on the `<form>` hears it like typing.
 
@@ -690,15 +699,27 @@ Props:
 - `disabled`: `boolean` (default: `false`)
 - `errorText`: `string`
 - `helpText`: `string`
-- `invalid`: `boolean` (default: `false`)
-- `labelAs`: `'label'` | `'legend'` (default: `'label'`)
-- `ref`: `Ref<HTMLElement>`
+- `labelAs`: `'label'` | `'group'` (default: `'label'`)
+- `ref`: `Ref<HTMLDivElement>`
 - `required`: `boolean` (default: `false`)
-- Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style` / `children`.
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style` / `children`.
 
 `renderInput` receives `{ id, 'aria-describedby', 'aria-labelledby', disabled, invalid, required }`.
 
-The wrapper element depends on `labelAs`. `'label'` (the default) gives `<div>` + `<label htmlFor>`; `'legend'` gives `<fieldset>` + `<legend>`. `<fieldset>` is used only for `legend`, so that a single field never becomes an unnamed group. Pass `labelAs="legend"` when wrapping a group input such as `Radio` or `CheckboxGroup`.
+The wrapper is a `<div>`, and `labelAs` picks the element that draws the label. `'label'` (the default) gives a `<label htmlFor>` pointing at the field. `'group'` gives a `<span id>` with the same look, the required mark included, for a component that is a group itself — `Radio`, `RadioCard`, `CheckboxGroup`, `CheckboxCard`, and `RangeSlider` — and names it through `aria-labelledby`. A `<label>` cannot label a group, and a `<fieldset>` around one would nest a second group with the same name, so `'group'` renders neither. `FileField` takes `'group'` too: what a person reaches is its trigger, a button named through `aria-labelledby`, and a button cannot be required. `ColorPicker`, `DatePicker`, `Combobox`, and `Autocomplete` put the `id` on a text input, so they keep `'label'`.
+
+```tsx
+<FormControl
+  label="Plan"
+  labelAs="group"
+  required
+  renderInput={(props) => <RadioCard {...props} options={plans} />}
+/>
+```
+
+`required` draws the built-in `required` wording after the label and passes `required: true` to `renderInput`. With `'label'` the mark is `aria-hidden`: the field's own `required` already tells a screen reader, so the name stays the label alone. With `'group'` the mark is part of the name, since neither a `role="group"` nor `FileField`'s trigger button takes `aria-required`.
+
+A non-empty `errorText` is what makes the field invalid: it is drawn under the field in place of `helpText`, describes the field instead, and `renderInput` receives `invalid: true`. There is no `invalid` prop to keep in step with it. To mark a field invalid without a message, pass `invalid` to the field itself inside `renderInput`.
 
 ### TextField
 
@@ -722,6 +743,25 @@ import { TextField } from '@k8ordo/ui';
 
 `type` also accepts any string, so the `type` `@k8ordo/form` derives
 (`email`, `url`, `date`, `time`, `datetime-local`, …) spreads as it is.
+
+A date or time input (`date`, `time`, `datetime-local`, `month`, `week`) is the
+browser's own `<input>`: the value is the native string (`YYYY-MM-DD` for a
+date, `''` when empty), and the browser checks `min` / `max` / `required`
+itself. Its digits are tabular, so they do not shift sideways as the value
+changes. A field derived from `z.iso.date()` spreads with nothing taken out:
+
+```tsx
+import { FormControl, TextField } from '@k8ordo/ui';
+
+const eventDate = form.field('eventDate'); // z.iso.date()
+
+<FormControl
+  errorText={eventDate.error}
+  label="Date"
+  required={eventDate.required}
+  renderInput={(props) => <TextField {...props} {...eventDate.input} />}
+/>;
+```
 
 Props:
 
@@ -753,11 +793,10 @@ Props:
 - `fullHeight`: `boolean` (default: `false`)
 - `invalid`: `boolean` (default: `false`)
 - `ref`: `Ref<HTMLTextAreaElement>`
-- `type`: `string`
 - Other props are forwarded to `TextareaHTMLAttributes<HTMLTextAreaElement>`, except `className` / `style`.
 
-`type` is accepted and dropped: a `<textarea>` has none. A `pattern` is not
-checked by the browser on a `<textarea>` either.
+A `<textarea>` has no `type`, and the browser does not check a `pattern` on
+one.
 
 ### NumberField
 
@@ -797,20 +836,23 @@ range. `required` reaches the input itself, so an empty required field fails
 native validation.
 
 The input is `type="text"` (so it can format to `precision` and step with the
-arrow keys), which the browser does not range-check — so the field does it: a
-value below `min` or above `max` is reported with `setCustomValidity`, using
-the `numberFieldRangeUnderflow` / `numberFieldRangeOverflow` wording. Leaving the
-field clamps the value into range. A message set by someone else on the same
-input — a form library's cross-field rule — is left alone.
+arrow keys), which the browser does not range-check — so the field keeps the
+value in range itself: leaving the field, or pressing Enter in it (not while an
+IME is composing), clamps a value below `min` or above `max` into range, the
+same commit either way. A form submitted with Enter therefore sends the clamped
+value. The field sets no validity message of its own, so whatever reports an
+out-of-range value — the server's schema, when JavaScript has not run — keeps
+its own wording.
 
-`min`, `max`, and an uncontrolled `defaultValue` also take strings, and `step`
-takes `'any'`. `@k8ordo/form` derives numeric `min` / `max`, a `step` of
-`'any'` unless the schema sets one, and echoes the submitted text as a string
-`defaultValue`. `precision` defaults to the
-number of decimals in `step`; with `step="any"` the value is not rounded.
+`min` and `max` are numbers. An uncontrolled `defaultValue` also takes a
+string, and `step` takes `'any'`: `@k8ordo/form` derives numeric `min` /
+`max`, a `step` of `'any'` unless the schema sets one, and echoes the
+submitted text as a string `defaultValue`. `precision` defaults to the number
+of decimals in `step`; with `step="any"` the value is not rounded.
 
 A value the field writes itself — an arrow key, a stepper press, formatting on
-blur — is announced with one `input` event, and `onChange` is still called once.
+blur or Enter — is announced with one `input` event, and `onChange` is still
+called once.
 
 A form reset — `form.reset()`, a reset button, or React resetting the form after
 an action — puts an uncontrolled field back to `defaultValue` (or to empty) and
@@ -821,8 +863,8 @@ Props:
 
 - `defaultValue`: `number` | `string`
 - `invalid`: `boolean` (default: `false`)
-- `max`: `number` | `string`
-- `min`: `number` | `string`
+- `max`: `number` (default: `Number.MAX_SAFE_INTEGER`)
+- `min`: `number` (default: `Number.MIN_SAFE_INTEGER`)
 - `onChange`: `(value: number | null) => void`
 - `precision`: `number`
 - `ref`: `Ref<HTMLInputElement>`
@@ -830,41 +872,12 @@ Props:
 - `value`: `number` | `null`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `children`.
 
-### DateField
-
-A native `<input type="date">` styled like `TextField`. The value is a
-`YYYY-MM-DD` string (`''` when empty), and the browser checks `min` / `max` /
-`required` itself. `onChange` is the native event, as with `TextField`.
-
-It accepts what `@k8ordo/form` derives from `z.iso.date()` as is: spread the
-field's `input` and nothing needs to be taken out. `type` is always `date`, so a
-`type` in the spread does not replace it.
-
-```tsx
-import { DateField, FormControl } from '@k8ordo/ui';
-
-const eventDate = form.field('eventDate'); // z.iso.date()
-
-<FormControl
-  errorText={eventDate.error}
-  invalid={eventDate.invalid}
-  label="Date"
-  required={eventDate.required}
-  renderInput={(props) => <DateField {...props} {...eventDate.input} />}
-/>;
-```
-
-Props:
-
-- `invalid`: `boolean` (default: `false`)
-- `ref`: `Ref<HTMLInputElement>`
-- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `className` / `style` / `type` / `children`.
-
 ### DatePicker
 
-`DateField` with a button that opens `Calendar` in a popover. The field is the
-same native `<input type="date">`, so typing a date, `name`, `required`, and
-`min` / `max` all work as they do on `DateField`, and spreading a derived
+A date `TextField` with a button that opens `Calendar` in a popover. The field
+is the same native `<input type="date">`, so typing a date, `name`, `required`,
+and `min` / `max` all work as they do on a `TextField` with `type="date"`, and
+spreading a derived
 `@k8ordo/form` field works the same way. `onChange` takes the value
 (`YYYY-MM-DD`, `''` when cleared), not the event, because a date picked from the
 calendar has no input event of its own.
@@ -910,8 +923,8 @@ Month and weekday names, and the first day of the week, follow the same locale
 as the built-in wording (i18n, below). Today is marked with
 `aria-current="date"` in the visitor's time zone, which only the browser knows,
 so the calendar renders in the browser alone: the server writes an empty box of
-the same size. It submits nothing; inside a form, use `DatePicker` or
-`DateField`.
+the same size. It submits nothing; inside a form, use `DatePicker` or a
+`TextField` with `type="date"`.
 
 ```tsx
 import { Calendar } from '@k8ordo/ui';
@@ -982,13 +995,23 @@ Props:
 - `options`: `readonly Option[]` (required)
 - `children`: `ReactNode`
 - `invalid`: `boolean` (default: `false`)
+- `placeholder`: `string`
 - `ref`: `Ref<HTMLSelectElement>`
 - Other props are forwarded to `SelectHTMLAttributes<HTMLSelectElement>`, except `className` / `style`.
 
 React applies a `<select>`'s `defaultValue` only when it mounts; `Select` also
 applies a later one, so the next reset — React's after a form action included —
-goes back to it. With `required`, put a placeholder option whose `value` is
-`''` first; leaving it selected fails validation.
+goes back to it.
+
+`placeholder` puts an option whose `value` is `''` first, labelled with it. A
+`<select>` without such an option always has a choice selected, so `required`
+means something only with one: leaving the placeholder selected fails
+validation. It stays selectable, so an optional field can be set back to no
+choice; `@k8ordo/form`'s `parseForm` reads `''` as no choice either way.
+
+```tsx
+<Select name="plan" options={plans} placeholder="Choose a plan" required />
+```
 
 ### Autocomplete
 
@@ -1025,11 +1048,11 @@ Props:
 
 - `id`: `string` (required)
 - `options`: `readonly Option[]` (required)
-- `defaultValue`: `string[]`
+- `defaultValue`: `readonly string[]`
 - `invalid`: `boolean` (default: `false`)
 - `onChange`: `(value: string[]) => void`
 - `ref`: `Ref<HTMLInputElement>`
-- `value`: `string[]`
+- `value`: `readonly string[]`
 - Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `children` / `autoComplete` / `aria-autocomplete` / `aria-controls` / `aria-expanded` / `aria-activedescendant`.
 
 ### ColorPicker
@@ -1077,9 +1100,8 @@ Props:
 - `onChange`: `(value: string) => void`
 - `ref`: `Ref<HTMLInputElement>`
 - `swatches`: `readonly ColorPickerSwatch[]`
-- `type`: `string`
 - `value`: `string`
-- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `className` / `style` / `children`.
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `children`.
 
 ### Combobox
 
@@ -1095,7 +1117,8 @@ and move through it (`Alt+ArrowDown` opens it without entering it), `Escape`
 closes it and, pressed again, drops what was typed. Keys pressed while an IME is
 composing belong to the IME.
 
-Without `search`, typing filters `options` by label. With `search`, typing
+Without `search`, typing filters `options` by label, case-insensitively in the
+language of `@k8ordo/i18n`'s current locale. With `search`, typing
 calls it for the options instead — each call gets a `signal` that aborts when
 the text changes again, so pass it to `fetch` — and `options` becomes the list
 shown before anything is typed and where the current value's label is looked
@@ -1132,15 +1155,14 @@ Props:
 - `options`: `readonly Option[]`
 - `ref`: `Ref<HTMLInputElement>`
 - `search`: `ComboboxSearch`
-- `type`: `string`
 - `value`: `string`
-- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `role` / `className` / `style` / `children` / `autoComplete` / `aria-autocomplete` / `aria-controls` / `aria-expanded` / `aria-activedescendant`.
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `children` / `autoComplete` / `aria-autocomplete` / `aria-controls` / `aria-expanded` / `aria-activedescendant`.
 
 ### Checkbox
 
 The label is passed as the `label` prop, not as children. `onChange` is `(checked, event)`.
 
-`itemValue` is the input's `value`: the string a checked box submits under its `name`. Without it the box renders no `value` and submits the browser's default, `on`. There is no `value` prop — on a checkbox it is easily mistaken for the checked state, which is `checked`.
+`value` is the input's native `value`: the string a checked box submits under its `name`. Without it the box submits the browser's default, `on`. It never sets the checked state — that is `checked` / `defaultChecked`. `@k8ordo/form` puts it in the `input` of a `z.stringbool()` field (the schema's spelling of `true`), so spreading that `input` is enough.
 
 ```tsx
 import { Checkbox } from '@k8ordo/ui';
@@ -1152,7 +1174,23 @@ import { Checkbox } from '@k8ordo/ui';
 <Checkbox defaultChecked label="I agree" />
 
 // Submits inStock=true when checked, instead of inStock=on
-<Checkbox itemValue="true" label="In stock only" name="inStock" />
+<Checkbox label="In stock only" name="inStock" value="true" />
+```
+
+`Checkbox` carries its own label, so it is not wrapped in `FormControl`. It
+draws a field's message itself instead: `errorText` (or, when there is none,
+`helpText`) is drawn under the box the way `FormControl` draws it, and the
+input is described by it, after any `aria-describedby` you pass. A non-empty
+`errorText` also sets `aria-invalid` and the invalid look, as `invalid` does;
+`invalid` alone marks the box without a message. With `@k8ordo/form`, pass
+`errorText={field.error}`.
+
+```tsx
+<Checkbox
+  {...agree.input}
+  errorText={agree.error}
+  label="I agree to the terms"
+/>
 ```
 
 `indeterminate` shows the mixed state — some of a set selected — and sets the
@@ -1165,71 +1203,71 @@ Props:
 - `label`: `string` (required)
 - `checked`: `boolean`
 - `defaultChecked`: `boolean`
+- `errorText`: `string`
+- `helpText`: `string`
 - `indeterminate`: `boolean` (default: `false`)
 - `invalid`: `boolean` (default: `false`)
-- `itemValue`: `string`
 - `labelHidden`: `boolean` (default: `false`)
 - `onChange`: `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLInputElement>`
-- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `value` / `children`.
+- `value`: `string`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `children`.
 
 ### CheckboxGroup
 
-A group of checkboxes. The children are `CheckboxGroup.Item` (= `Checkbox`), and `itemValue` is required.
+A group of checkboxes, one per entry in `options`: the multiple-choice counterpart of `Radio`, with the same `options` shape.
 
-The group's selection lives in `value` / `onChange` (`string[]`). That is a different thing from a lone `Checkbox` holding a boolean in `checked` — do not conflate them.
+The group's selection lives in `value` / `onChange`, or in `defaultValue` when uncontrolled: the values of the checked options. That is a different thing from a lone `Checkbox` holding a boolean in `checked` — do not conflate them. `value` and `defaultValue` take a readonly array, and `onChange` receives a new `string[]` of the checked values in option order, so a `useState<string[]>` setter can be passed as it is.
 
-It renders a `fieldset[role="group"]`, so `aria-labelledby` is required. Convey that the group is required through the referenced label element (for example `FormControl`'s required marker). `role="group"` does not allow `aria-required`, so do not put it on the group.
+It renders a `fieldset[role="group"]`, so `aria-labelledby` is required: `<FormControl labelAs="group">` draws the element it points at. Convey that the group is required through that element — `FormControl`'s required mark is part of the group's name in `'group'` mode. `role="group"` does not allow `aria-required`, so do not put it on the group. `required` is accepted so that `FormControl`'s props spread onto the group as they are, and is written to no element: a `<fieldset>` takes no `required`, and on a checkbox it would mean that box must be checked. Check the count with a rule of your own, or with `@k8ordo/form`'s, which a schema's `.min()` derives.
 
-Uncontrolled, the selection lives in the checkboxes themselves: `onChange`
-receives the checked values in document order, and a form reset puts the boxes
-back to `defaultValue` without leaving a stale selection behind.
+`invalid` — which `FormControl`'s props carry while its `errorText` is not empty — goes to every box as `aria-invalid` and the invalid look, since `role="group"` does not take `aria-invalid` either.
+
+`name` goes on every box. It is optional and nothing fills it in: without a `name` the boxes submit nothing, which is what a group that only drives the page (`DataTable`'s column menu) wants even inside a form.
+
+Uncontrolled, the selection lives in the checkboxes themselves, so a form reset
+puts the boxes back to `defaultValue` without leaving a stale selection behind.
 
 ```tsx
 import { CheckboxGroup } from '@k8ordo/ui';
 
 <p id="interests-label">Areas of interest</p>
-<CheckboxGroup.Root
+<CheckboxGroup
   aria-labelledby="interests-label"
   name="interests"
-  value={values}
   onChange={setValues}
->
-  <CheckboxGroup.Item itemValue="music" label="Music" />
-  <CheckboxGroup.Item itemValue="movie" label="Film" />
-</CheckboxGroup.Root>;
+  options={[
+    { value: 'music', label: 'Music' },
+    { value: 'movie', label: 'Film' },
+  ]}
+  value={values}
+/>;
 ```
 
-Props (CheckboxGroup.Item):
-
-- `label`: `string` (required)
-- `checked`: `boolean`
-- `defaultChecked`: `boolean`
-- `indeterminate`: `boolean` (default: `false`)
-- `invalid`: `boolean` (default: `false`)
-- `itemValue`: `string`
-- `labelHidden`: `boolean` (default: `false`)
-- `onChange`: `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void`
-- `ref`: `Ref<HTMLInputElement>`
-- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `className` / `style` / `value` / `children`.
-
-Props (CheckboxGroup.Root):
+Props:
 
 - `aria-labelledby`: `string` (required)
-- `name`: `string` (required)
-- `children`: `ReactNode`
-- `defaultValue`: `string[]`
+- `options`: `readonly Option[]` (required)
+- `defaultValue`: `readonly string[]`
+- `disabled`: `boolean` (default: `false`)
 - `invalid`: `boolean` (default: `false`)
+- `name`: `string`
 - `onChange`: `(value: string[]) => void`
 - `ref`: `Ref<HTMLFieldSetElement>`
-- `value`: `string[]`
-- Other props are forwarded to `FieldsetHTMLAttributes<HTMLFieldSetElement>`, except `className` / `style` / `role`.
+- `required`: `boolean`
+- `value`: `readonly string[]`
+- Other props are forwarded to `FieldsetHTMLAttributes<HTMLFieldSetElement>`, except `className` / `style` / `children` / `role`.
 
 ### CheckboxCard
 
 A card-styled checkbox. Uncontrolled, the selection and its look follow the
 checkboxes themselves (`:checked`), so a form reset restores both; `onChange`
-receives the checked values in document order.
+receives the checked values in document order. Like `CheckboxGroup`, it takes
+`required` from `FormControl`'s props and writes it to no element; wrap it in
+`<FormControl labelAs="group" required>`, whose mark is part of the group's
+name. `invalid` sets `aria-invalid` on every box as well as the look —
+`role="group"` does not take `aria-invalid` — and while the form's action is
+pending the boxes take `aria-disabled` and ignore presses, as `Checkbox` does.
 
 ```tsx
 import { CheckboxCard } from '@k8ordo/ui';
@@ -1256,14 +1294,24 @@ Props:
 
 - `aria-labelledby`: `string` (required)
 - `options`: `readonly CheckboxCardOption[]` (required)
-- `defaultValue`: `string[]`
+- `defaultValue`: `readonly string[]`
 - `invalid`: `boolean` (default: `false`)
 - `onChange`: `(value: string[]) => void`
 - `ref`: `Ref<HTMLFieldSetElement>`
-- `value`: `string[]`
+- `required`: `boolean`
+- `value`: `readonly string[]`
 - Other props are forwarded to `FieldsetHTMLAttributes<HTMLFieldSetElement>`, except `className` / `style` / `children` / `role`.
 
 ### Radio
+
+A `div[role="radiogroup"]` of real `input[type="radio"]` elements, named
+through the required `aria-labelledby`. `name` is optional. Without one, the
+radios share a name made with `useId`: the browser groups radios by name for
+single selection and arrow-key roving, so a radio group always has one, and two
+groups never take each other's selection. `RadioCard` does the same. The
+checkbox groups (`CheckboxGroup`, `CheckboxCard`) fill in no name, since a box
+needs none to work and one without a name submits nothing. Pass `name` to
+submit the choice.
 
 ```tsx
 import { Radio } from '@k8ordo/ui';
@@ -1296,7 +1344,7 @@ Props:
 
 ### RadioCard
 
-A card-styled radio button. Real `input[type="radio"]` elements sit inside a `fieldset[role="radiogroup"]`, so arrow-key roving and single selection are left to the browser. Reach them from tests with `getByRole('radio', { checked })`. `required` goes to every radio, and an uncontrolled selection's look follows `:checked`, so a form reset restores it.
+A card-styled radio button. Real `input[type="radio"]` elements sit inside a `fieldset[role="radiogroup"]`, so arrow-key roving and single selection are left to the browser. Reach them from tests with `getByRole('radio', { checked })`. `required` goes to every radio, and an uncontrolled selection's look follows `:checked`, so a form reset restores it. `invalid` sets `aria-invalid` on the group as well as the look, and while the form's action is pending the radios take `aria-disabled` and ignore presses and arrow keys, as `Radio` does.
 
 ```tsx
 import { RadioCard } from '@k8ordo/ui';
@@ -1334,8 +1382,9 @@ Props:
 ### Slider
 
 A range slider. Uncontrolled, the value lives in the input, so a form reset
-puts it back to `defaultValue` and the filled track follows. `min`, `max`, and
-an uncontrolled `defaultValue` also take strings, and `step` takes `'any'`.
+puts it back to `defaultValue` and the filled track follows. `min` and `max`
+are numbers; an uncontrolled `defaultValue` also takes a string, and `step`
+takes `'any'`, as `@k8ordo/form` derives them.
 
 ```tsx
 import { Slider } from '@k8ordo/ui';
@@ -1348,16 +1397,20 @@ import { Slider } from '@k8ordo/ui';
   onChange={onChange}
   invalid={false}
   disabled={false}
-  required={false}
 />;
 ```
+
+`required` is accepted, so `FormControl`'s props and `@k8ordo/form`'s `input`
+spread onto the slider as they are, and is written to no element: HTML does
+not allow it on a range, and a range always has a value, so there is nothing
+to require.
 
 Props:
 
 - `defaultValue`: `number` | `string`
 - `invalid`: `boolean` (default: `false`)
-- `max`: `number` | `string`
-- `min`: `number` | `string`
+- `max`: `number` (default: `100`)
+- `min`: `number` (default: `0`)
 - `onChange`: `(value: number) => void`
 - `ref`: `Ref<HTMLInputElement>`
 - `step`: `number` | `'any'` (default: `1`)
@@ -1377,8 +1430,13 @@ pair `[lower, upper]`.
 the thumbs keep their values in the DOM, so a form's reset and its dirty check
 (value against default value) work on them as on any input. The whole slider is
 a `role="group"`: name it with `aria-label` or `aria-labelledby`
-(`FormControl`'s `renderInput` props work), and each thumb is read as that name
-followed by the built-in `rangeSliderStart` / `rangeSliderEnd` wording.
+(`<FormControl labelAs="group">`'s `renderInput` props), and each thumb is read
+as that name followed by the built-in `rangeSliderStart` / `rangeSliderEnd`
+wording.
+
+As on `Slider`, `required` is accepted and written to no thumb. In
+`<FormControl labelAs="group" required>` the mark is part of the group's
+name, so each thumb's name carries it.
 
 ```tsx
 import { RangeSlider } from '@k8ordo/ui';
@@ -1402,14 +1460,14 @@ Props:
 - `name`: `readonly [string, string]`
 - `onChange`: `(value: [number, number]) => void`
 - `ref`: `Ref<HTMLDivElement>`
-- `required`: `boolean` (default: `false`)
+- `required`: `boolean`
 - `step`: `number` (default: `1`)
 - `value`: `readonly [number, number]`
 - Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style` / `children` / `role`.
 
 ### Switch
 
-A toggle switch.
+A toggle switch. It is a checkbox underneath (`role="switch"`), so `value` is, as on `Checkbox`, the string it submits under its `name` when on, and `checked` / `defaultChecked` hold the state. Like `Checkbox`, it carries its own label and draws `errorText` / `helpText` itself, describing the input with them; a non-empty `errorText` sets `aria-invalid`.
 
 ```tsx
 import { Switch } from '@k8ordo/ui';
@@ -1429,35 +1487,52 @@ Props:
 - `label`: `string` (required)
 - `checked`: `boolean`
 - `defaultChecked`: `boolean`
+- `errorText`: `string`
+- `helpText`: `string`
 - `invalid`: `boolean` (default: `false`)
 - `onChange`: `(checked: boolean, event: ChangeEvent<HTMLInputElement>) => void`
 - `ref`: `Ref<HTMLInputElement>`
-- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `value` / `children`.
+- `value`: `string`
+- Other props are forwarded to `InputHTMLAttributes<HTMLInputElement>`, except `type` / `role` / `className` / `style` / `children`.
 
 ### FileField
 
-File upload, as a composite pattern. A string `defaultValue` is accepted and
-ignored.
+File upload, as a composite pattern. The `<input type="file">` that submits
+is visually hidden, `aria-hidden`, and out of the Tab order; what a person
+reaches is the trigger. `FileField.Trigger`'s `renderItem` receives the wiring
+for it — `id`, `aria-labelledby` (the field's label, then the trigger's own
+text), `aria-describedby` (the root's), `ref`, `onClick`, and `disabled` —
+and nothing else, so it spreads onto a `Button` as it is. When a form moves focus to the hidden input after a failed
+submission, it goes on to the trigger, which `FormControl`'s error text
+already describes.
+
+Wrap it in `<FormControl labelAs="group">`. The only element that carries
+`required` is the hidden input, and a button cannot take it, so the trigger
+says the field is required through its name: in `'group'` mode the mark is
+part of the heading the trigger reads, giving "Photos Required Choose files".
 
 ```tsx
-import { FileField } from '@k8ordo/ui';
+import { FileField, FormControl } from '@k8ordo/ui';
 
-<FileField.Root accept="image/*" multiple maxFiles={5}>
-  <FileField.Trigger
-    renderItem={({ onClick, disabled }) => (
-      <Button onClick={onClick} disabled={disabled}>
-        Choose files
-      </Button>
-    )}
-  />
-  <FileField.ItemList />
-</FileField.Root>;
+<FormControl
+  label="Photos"
+  labelAs="group"
+  required
+  renderInput={(props) => (
+    <FileField.Root {...props} accept="image/*" multiple maxFiles={5}>
+      <FileField.Trigger
+        renderItem={(wiring) => <Button {...wiring}>Choose files</Button>}
+      />
+      <FileField.ItemList />
+    </FileField.Root>
+  )}
+/>;
 ```
 
 `FileField.Dropzone` is an area files can be dropped onto. Left empty, it holds
-the built-in `fileFieldDrop` wording and a "choose files" button, so the field
-stays usable by keyboard; pass children to lay it out yourself (put a
-`FileField.Trigger` inside). Dropped files are added exactly like picked ones:
+the built-in `fileFieldDrop` wording and a "choose files" button wired as a
+trigger, so the field stays usable by keyboard; pass children to lay it out
+yourself (put a `FileField.Trigger` inside). Dropped files are added exactly like picked ones:
 they respect `multiple` and `maxFiles`, land in the input so they are
 submitted, and are announced with an `input` event so a form sees the change.
 A dropped folder is skipped (choose folders through the picker with
@@ -1474,8 +1549,8 @@ submitted:
   alone would keep only the files just picked. A rewrite is announced with an
   `input` event.
 - Removing a file from `ItemList` removes it from the input.
-- A `File[]` `defaultValue` is submitted as well as listed, and a form reset
-  puts both back to it (to an empty list without one).
+- The files in `defaultValue` are submitted as well as listed, and a form
+  reset puts both back to them (to an empty list without one).
 - `onChange` receives that whole list — not only the files just picked or
   dropped — after every pick, drop, and removal. Only a pick passes the
   `event`.
@@ -1490,7 +1565,7 @@ submitted:
 Props (Root):
 
 - `children`: `ReactNode`
-- `defaultValue`: `File[]` | `string`
+- `defaultValue`: `File[]`
 - `invalid`: `boolean` (default: `false`)
 - `maxFiles`: `number`
 - `onChange`: `(files: FileList | null, event?: ChangeEvent<HTMLInputElement>) => void`
@@ -1509,7 +1584,7 @@ Props (FileField.ItemList):
 
 Props (FileField.Trigger):
 
-- `renderItem`: `(props: { onClick: () => void; disabled: boolean; invalid: boolean; }) => ReactElement` (required)
+- `renderItem`: `(props: { id: string; 'aria-labelledby': string | undefined; 'aria-describedby': string | undefined; ref: (node: HTMLElement | null) => void; onClick: () => void; disabled: boolean; }) => ReactElement` (required)
 
 ## Data display
 
@@ -2914,7 +2989,7 @@ are `string`.
 - Combobox: `comboboxToggle`, `comboboxEmpty`, `comboboxFailed`
 - FileField: `fileFieldRemove`
 - FileField.Dropzone / FileField (generative UI): `fileFieldTrigger`, `fileFieldDrop`
-- NumberField: `numberFieldIncrement`, `numberFieldDecrement`, `numberFieldRangeUnderflow` (`{min}` is replaced), `numberFieldRangeOverflow` (`{max}` is replaced)
+- NumberField: `numberFieldIncrement`, `numberFieldDecrement`
 - RangeSlider: `rangeSliderStart`, `rangeSliderEnd`
 - Calendar / DatePicker: `calendarPreviousMonth`, `calendarNextMonth`
 - DatePicker: `datePickerOpen`, `datePickerDialog`

@@ -101,10 +101,6 @@ export const pages = {
     path: '/:locale/ui/components/data-table',
     description: m.components.dataTable.description,
   },
-  DateField: {
-    path: '/:locale/ui/components/date-field',
-    description: m.components.dateField.description,
-  },
   DatePicker: {
     path: '/:locale/ui/components/date-picker',
     description: m.components.datePicker.description,

@@ -136,6 +136,37 @@ export const DateInput: Story = {
   },
 };
 
+const DATE_AND_TIME_TYPES = [
+  'date',
+  'time',
+  'datetime-local',
+  'month',
+  'week',
+] as const;
+
+export const DateAndTimeAlignDigits: Story = {
+  render: () => (
+    <div className={styles.column}>
+      <TextField aria-label="text" />
+      {DATE_AND_TIME_TYPES.map((type) => (
+        <TextField aria-label={type} key={type} type={type} />
+      ))}
+    </div>
+  ),
+  play: async ({ canvas }) => {
+    await expect(
+      getComputedStyle(canvas.getByLabelText('text')).fontVariantNumeric,
+    ).toBe('normal');
+    await Promise.all(
+      DATE_AND_TIME_TYPES.map(async (type) => {
+        await expect(
+          getComputedStyle(canvas.getByLabelText(type)).fontVariantNumeric,
+        ).toBe('tabular-nums');
+      }),
+    );
+  },
+};
+
 const profile = z.object({
   title: z.string().min(1, 'タイトルを入力してください'),
   email: z.email('メールアドレスの形式で入力してください'),
@@ -159,21 +190,18 @@ const ProfileForm = () => (
         <>
           <FormControl
             errorText={title.error}
-            invalid={title.invalid}
             label="タイトル"
             renderInput={(props) => <TextField {...props} {...title.input} />}
             required={title.required}
           />
           <FormControl
             errorText={email.error}
-            invalid={email.invalid}
             label="メール"
             renderInput={(props) => <TextField {...props} {...email.input} />}
             required={email.required}
           />
           <FormControl
             errorText={birthday.error}
-            invalid={birthday.invalid}
             label="誕生日"
             renderInput={(props) => (
               <TextField {...props} {...birthday.input} />
@@ -191,7 +219,7 @@ const ProfileForm = () => (
 export const WithForm: Story = {
   render: () => <ProfileForm />,
   play: async ({ canvas, userEvent }) => {
-    // FormControl のラベルは必須のバッジまで名前に含むので、前方で引く
+    // FormControl のラベルの文字は必須の印まで含むので、前方で引く
     const field = (label: string) =>
       canvas.getByLabelText(label, { exact: false });
     const submit = () =>

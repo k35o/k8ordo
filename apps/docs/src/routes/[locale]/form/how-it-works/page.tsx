@@ -166,7 +166,6 @@ export default function FormHowItWorksPage() {
             t.nonGuaranteeDropped,
             t.nonGuaranteeBeforeJs,
             t.nonGuaranteeRefine,
-            t.nonGuaranteeNumberField,
             t.nonGuaranteeFile,
           ].map((item) => (
             <li key={item()}>

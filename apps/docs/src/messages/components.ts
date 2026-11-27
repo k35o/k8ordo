@@ -193,6 +193,22 @@ export const textField = {
     ja: 'プレースホルダー',
     en: 'Placeholder',
   }),
+  dateTimeTitle: message({
+    ja: '日付と時刻',
+    en: 'Date and time',
+  }),
+  dateTimeDescription: message({
+    ja: '`type`が`date`や`time`のときは、ブラウザの日付や時刻の入力欄になります。値はネイティブの文字列で、日付なら`YYYY-MM-DD`です。範囲はブラウザが検証します。数字の幅をそろえるので、値が変わっても桁は横にずれません。',
+    en: 'With a `type` of `date`, `time` and the like, it is the browser’s own date or time input. The value is the native string, `YYYY-MM-DD` for a date, and the browser checks the range. The digits are tabular, so they do not shift sideways as the value changes.',
+  }),
+  formTitle: message({
+    ja: '`@k8ordo/form`との組み合わせ',
+    en: 'With `@k8ordo/form`',
+  }),
+  formDescription: message({
+    ja: '`z.iso.date()`から作った`input`をそのまま展開できます。導いた`type`も、取り除かずに渡せます。',
+    en: 'Spread the `input` derived from `z.iso.date()` as it is. The derived `type` goes with it.',
+  }),
   disabledTitle: message({
     ja: '無効',
     en: 'Disabled',
@@ -239,6 +255,10 @@ export const numberField = {
     ja: '最小値と最大値',
     en: 'Min and max',
   }),
+  minMaxDescription: message({
+    ja: '範囲の外の値は、フォーカスを外したときと`Enter`を押したときに範囲に収めます。`Enter`でフォームを送信するときも、範囲に収めた値が送られます。',
+    en: 'An out-of-range value is clamped into range when the field is left and when `Enter` is pressed in it, so a form submitted with `Enter` sends the clamped value.',
+  }),
   disabledTitle: message({
     ja: '無効',
     en: 'Disabled',
@@ -266,6 +286,10 @@ export const select = {
     ja: '必須',
     en: 'Required',
   }),
+  requiredDescription: message({
+    ja: '`placeholder`を渡すと、値が空文字の選択肢を先頭に置きます。空の選択肢が無い`<select>`はいつもどれかが選ばれているので、`required`はこの選択肢があるときだけ働きます。この選択肢も選べるので、任意の欄は未選択に戻せます。',
+    en: '`placeholder` puts an option whose value is the empty string first. A `<select>` without one always has a choice selected, so `required` takes effect only with it. The option stays selectable, so an optional field can go back to no choice.',
+  }),
   defaultValueTitle: message({
     ja: '既定値',
     en: 'Default value',
@@ -288,6 +312,14 @@ export const checkbox = {
   controlledTitle: message({
     ja: '制御モード',
     en: 'Controlled',
+  }),
+  helpTextTitle: message({
+    ja: 'ヘルプテキスト',
+    en: 'Help text',
+  }),
+  errorTextTitle: message({
+    ja: 'エラーテキスト',
+    en: 'Error text',
   }),
 };
 
@@ -334,6 +366,14 @@ export const switchInput = {
   controlledTitle: message({
     ja: '制御モード',
     en: 'Controlled',
+  }),
+  helpTextTitle: message({
+    ja: 'ヘルプテキスト',
+    en: 'Help text',
+  }),
+  errorTextTitle: message({
+    ja: 'エラーテキスト',
+    en: 'Error text',
   }),
 };
 
@@ -493,37 +533,6 @@ export const rangeSlider = {
   }),
 };
 
-export const dateField = {
-  description: message({
-    ja: 'ブラウザの日付の入力欄（`type="date"`）です。値は`YYYY-MM-DD`の文字列です。',
-    en: 'The browser’s own date input (`type="date"`). The value is a `YYYY-MM-DD` string.',
-  }),
-  minMaxTitle: message({
-    ja: '最小値と最大値',
-    en: 'Min and max',
-  }),
-  minMaxDescription: message({
-    ja: '範囲はブラウザが検証します。範囲の外の日付は`rangeUnderflow`か`rangeOverflow`になります。',
-    en: 'The browser checks the range. A date outside it reports `rangeUnderflow` or `rangeOverflow`.',
-  }),
-  disabledTitle: message({
-    ja: '無効',
-    en: 'Disabled',
-  }),
-  invalidTitle: message({
-    ja: 'エラー',
-    en: 'Invalid',
-  }),
-  formTitle: message({
-    ja: '`@k8ordo/form`との組み合わせ',
-    en: 'With `@k8ordo/form`',
-  }),
-  formDescription: message({
-    ja: '`z.iso.date()`から作った`input`をそのまま展開できます。`type`を取り除く必要はありません。',
-    en: 'Spread the `input` derived from `z.iso.date()` as it is. There is no need to take `type` out.',
-  }),
-};
-
 export const colorPicker = {
   description: message({
     ja: '色を`#rrggbb`で選ぶ入力欄です。色相と彩度、明度のつまみと、見本から選べます。',
@@ -668,6 +677,14 @@ export const fileField = {
     ja: 'ファイルを選ぶ入力欄です。選ぶボタンとドロップ領域、選んだファイルの一覧を組み合わせて作ります。',
     en: 'A file field, composed from a trigger, a dropzone and the list of chosen files.',
   }),
+  triggerTitle: message({
+    ja: '選ぶボタンとラベル',
+    en: 'The trigger and the label',
+  }),
+  triggerDescription: message({
+    ja: '送信する`<input type="file">`は見えず、Tabでも止まりません。操作するのは`FileField.Trigger`のボタンです。`renderItem`が受け取る`id`、`aria-labelledby`、`aria-describedby`、`ref`、`onClick`、`disabled`をボタンに展開します。`FormControl`には`labelAs="group"`を付けて包みます。ボタンの名前は欄のラベルとボタンの文字になり、ヘルプやエラーの文がボタンの説明になります。ボタンは`required`を持てないので、必須の印もボタンの名前に入れて伝えます。送信に失敗してフォーカスが欄へ移るときも、ボタンにフォーカスが移ります。',
+    en: 'The `<input type="file">` that submits is hidden and out of the Tab order; what a person operates is the `FileField.Trigger` button. Spread the `id`, `aria-labelledby`, `aria-describedby`, `ref`, `onClick` and `disabled` that `renderItem` receives onto the button. Wrap it in `FormControl` with `labelAs="group"`: the button is named by the field’s label followed by its own text, and the help or error text describes it. A button cannot take `required`, so the required mark goes into its name as well. When a failed submission moves focus to the field, focus lands on the button.',
+  }),
   dropzoneTitle: message({
     ja: 'ドロップでの追加',
     en: 'Adding files by drop',
@@ -696,8 +713,8 @@ export const fileField = {
 
 export const formControl = {
   description: message({
-    ja: '入力欄にラベルとヘルプ、エラーの表示を付けるラッパーです。入力欄は`renderInput`で描きます。',
-    en: 'A wrapper that gives a field its label, help text and error text. The field itself is drawn in `renderInput`.',
+    ja: '入力欄にラベルとヘルプ、エラーの表示を付けるラッパーです。入力欄は`renderInput`で描きます。`Radio`のようなグループには`labelAs="group"`を付け、ラベルをグループの名前にします。Client Componentではないので、Server Componentからも`renderInput`を渡せます。',
+    en: 'A wrapper that gives a field its label, help text and error text. The field itself is drawn in `renderInput`. For a group such as `Radio`, `labelAs="group"` makes the label the group’s name. It is not a Client Component, so a Server Component can pass it `renderInput` too.',
   }),
   helpTextTitle: message({
     ja: 'ヘルプテキスト',
@@ -710,6 +727,10 @@ export const formControl = {
   requiredTitle: message({
     ja: '必須',
     en: 'Required',
+  }),
+  groupTitle: message({
+    ja: 'グループ',
+    en: 'Group',
   }),
   disabledTitle: message({
     ja: '無効',

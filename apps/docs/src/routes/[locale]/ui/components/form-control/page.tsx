@@ -11,6 +11,7 @@ import {
   FormControlBasicPreview,
   FormControlDisabledPreview,
   FormControlErrorTextPreview,
+  FormControlGroupPreview,
   FormControlHelpTextPreview,
   FormControlRequiredPreview,
 } from '../../../../../demos/ui/components/form-control-previews';
@@ -93,7 +94,6 @@ export default function FormControlPage() {
           <ComponentPreview
             code={`<FormControl
   errorText="This field is required."
-  invalid
   label="Email"
   renderInput={(props) => (
     <TextField {...props} />
@@ -121,6 +121,29 @@ export default function FormControlPage() {
 />`}
           >
             <FormControlRequiredPreview />
+          </ComponentPreview>
+        </div>
+
+        <div className={page.stack}>
+          <Heading level="h3">
+            <Rich>{m.components.formControl.groupTitle()}</Rich>
+          </Heading>
+          <ComponentPreview
+            code={`<FormControl
+  label="Plan"
+  labelAs="group"
+  renderInput={(props) => (
+    <Radio
+      {...props}
+      options={[
+        { value: 'free', label: 'Free' },
+        { value: 'pro', label: 'Pro' },
+      ]}
+    />
+  )}
+/>`}
+          >
+            <FormControlGroupPreview />
           </ComponentPreview>
         </div>
 

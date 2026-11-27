@@ -17,8 +17,10 @@ const PENDING_MIGRATION = new Set<string>();
 const COMPONENTS_DIR = join(import.meta.dirname, '.');
 
 // 組み込みの文言は getMessages() で読む。hook ではないので、文言を読むためだけに
-// 'use client' を付ける理由は無い。Server Component から描ける部品をここに固定する。
+// 'use client' を付ける理由は無い。useId は react-server の書き出しにもあるので、
+// id を作るためだけに付ける理由も無い。Server Component から描ける部品をここに固定する。
 const SERVER_COMPONENTS = [
+  '_internal/field-message.tsx',
   'ai/_internal/attachment-preview.tsx',
   'ai/attachment/attachment.tsx',
   'ai/reasoning/reasoning.tsx',
@@ -29,6 +31,8 @@ const SERVER_COMPONENTS = [
   'feedback/alert/alert.tsx',
   'feedback/callout/callout.tsx',
   'feedback/spinner/spinner.tsx',
+  'form/form/form.tsx',
+  'form/form-control/form-control.tsx',
   'navigation/anchor/anchor.tsx',
   'navigation/breadcrumb/breadcrumb.tsx',
 ];
@@ -72,7 +76,7 @@ describe('複合コンポーネントの合成位置', () => {
 
 describe('Server Component から描ける部品', () => {
   describe('正常系', () => {
-    it("組み込みの文言を読むだけの部品を 'use client' にしない", () => {
+    it("文言を読むか id を作るだけの部品と、それが呼ぶモジュールを 'use client' にしない", () => {
       const clientModules = SERVER_COMPONENTS.filter((path) =>
         CLIENT_DIRECTIVE.test(readFileSync(join(COMPONENTS_DIR, path), 'utf8')),
       );

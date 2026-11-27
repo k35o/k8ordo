@@ -350,7 +350,6 @@ const AddressForm = () => (
       return (
         <FormControl
           errorText={prefecture.error}
-          invalid={prefecture.invalid}
           label="都道府県"
           renderInput={(props) => (
             <Combobox {...props} {...prefecture.input} options={PREFECTURES} />

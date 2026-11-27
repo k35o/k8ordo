@@ -190,15 +190,10 @@ export const CheckMarkFollowsReset: Story = {
 const submittedValue = (checkbox: HTMLInputElement) =>
   new FormData(checkbox.form ?? undefined).get(checkbox.name);
 
-export const SubmitsItemValue: Story = {
+export const SubmitsValue: Story = {
   render: () => (
     <form>
-      <Checkbox
-        defaultChecked
-        itemValue="yes"
-        label="in stock"
-        name="inStock"
-      />
+      <Checkbox defaultChecked label="in stock" name="inStock" value="yes" />
     </form>
   ),
   play: async ({ canvas }) => {
@@ -210,7 +205,7 @@ export const SubmitsItemValue: Story = {
   },
 };
 
-export const SubmitsOnWithoutItemValue: Story = {
+export const SubmitsOnWithoutValue: Story = {
   render: () => (
     <form>
       <Checkbox defaultChecked label="agree" name="agree" />
@@ -235,6 +230,47 @@ export const Invalid: Story = {
     await expect(
       canvas.getByRole('checkbox', { name: 'invalid checkbox' }),
     ).toHaveAttribute('aria-invalid', 'true');
+  },
+};
+
+export const ErrorText: Story = {
+  args: {
+    errorText: '同意してください',
+    helpText: '規約は利用を始める前に読んでください',
+    label: '規約に同意する',
+  },
+  play: async ({ canvas }) => {
+    const checkbox = canvas.getByRole('checkbox', { name: '規約に同意する' });
+
+    await expect(checkbox).toHaveAttribute('aria-invalid', 'true');
+    await expect(checkbox).toHaveAccessibleDescription('同意してください');
+    await expect(
+      canvas.queryByText('規約は利用を始める前に読んでください'),
+    ).not.toBeInTheDocument();
+  },
+};
+
+export const HelpText: Story = {
+  args: {
+    'aria-describedby': 'checkbox-help-extra',
+    helpText: 'あとから設定で変えられます',
+    label: 'お知らせを受け取る',
+  },
+  render: (props) => (
+    <div className={styles.column}>
+      <Checkbox {...props} />
+      <span id="checkbox-help-extra">週に1回まで</span>
+    </div>
+  ),
+  play: async ({ canvas }) => {
+    const checkbox = canvas.getByRole('checkbox', {
+      name: 'お知らせを受け取る',
+    });
+
+    await expect(checkbox).toHaveAttribute('aria-invalid', 'false');
+    await expect(checkbox).toHaveAccessibleDescription(
+      '週に1回まで あとから設定で変えられます',
+    );
   },
 };
 
@@ -286,14 +322,11 @@ const ConsentForm = () => (
     {(form) => {
       const agree = form.field('agree');
       return (
-        <>
-          <Checkbox
-            {...agree.input}
-            invalid={agree.invalid}
-            label="規約に同意する"
-          />
-          <p>{agree.error}</p>
-        </>
+        <Checkbox
+          {...agree.input}
+          errorText={agree.error}
+          label="規約に同意する"
+        />
       );
     }}
   </ActionForm>
@@ -310,6 +343,13 @@ export const WithForm: Story = {
     await submit();
     await expect(await canvas.findByText('同意してください')).toBeVisible();
     await waitFor(() => expect(canvas.getByRole('checkbox')).toHaveFocus());
+    await expect(canvas.getByRole('checkbox')).toHaveAccessibleDescription(
+      '同意してください',
+    );
+    await expect(canvas.getByRole('checkbox')).toHaveAttribute(
+      'aria-invalid',
+      'true',
+    );
 
     // reset でチェックが外れ、isDirty も下りる
     await userEvent.click(canvas.getByText('規約に同意する'));
@@ -323,6 +363,42 @@ export const WithForm: Story = {
     await submit();
     await waitFor(() =>
       expect(received).toHaveBeenLastCalledWith({ agree: true }),
+    );
+  },
+};
+
+const stockFilter = z.object({
+  inStock: z.stringbool({ truthy: ['yes'] }).default(false),
+});
+const stockFilterFields = formFields(stockFilter);
+const receivedFilter = fn();
+
+const StockFilterForm = () => (
+  <ActionForm
+    fields={stockFilterFields}
+    onReceive={receivedFilter}
+    serve={(data) => parseForm(stockFilter, data)}
+  >
+    {(form) => (
+      <Checkbox {...form.field('inStock').input} label="在庫ありのみ" />
+    )}
+  </ActionForm>
+);
+
+export const WithStringboolForm: Story = {
+  render: () => <StockFilterForm />,
+  play: async ({ canvas, userEvent }) => {
+    const checkbox = canvas.getByRole<HTMLInputElement>('checkbox', {
+      name: '在庫ありのみ',
+    });
+
+    await expect(submittedValue(checkbox)).toBeNull();
+    await userEvent.click(checkbox);
+    await expect(submittedValue(checkbox)).toBe('yes');
+
+    await userEvent.click(canvas.getByRole('button', { name: '送信' }));
+    await waitFor(() =>
+      expect(receivedFilter).toHaveBeenLastCalledWith({ inStock: true }),
     );
   },
 };

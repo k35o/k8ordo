@@ -14,7 +14,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 
-import { en } from '../src/i18n/en.ts';
 import type { Messages } from '../src/i18n/messages.ts';
 import { messageUsage } from '../src/i18n/usage.ts';
 import { fillGenerated, regroupSections, wrap } from './component-docs.ts';
@@ -191,21 +190,11 @@ const renderIcons = (): string => {
   return wrap(['The', 'icons:', ...icons]);
 };
 
-/** A key whose text carries `{min}` gets that noted, since a translation keeps it. */
-const keyLabel = (key: keyof Messages): string => {
-  const placeholders = [...en[key].matchAll(/\{\w+\}/gu)].map(
-    ([placeholder]) => `\`${placeholder}\``,
-  );
-  if (placeholders.length === 0) return `\`${key}\``;
-  const verb = placeholders.length === 1 ? 'is' : 'are';
-  return `\`${key}\` (${placeholders.join(' and ')} ${verb} replaced)`;
-};
-
 const renderMessageKeys = (): string => {
   const rows = new Map<string, string[]>();
   for (const key of Object.keys(messageUsage) as Array<keyof Messages>) {
     const usedBy = messageUsage[key].join(' / ');
-    rows.set(usedBy, [...(rows.get(usedBy) ?? []), keyLabel(key)]);
+    rows.set(usedBy, [...(rows.get(usedBy) ?? []), `\`${key}\``]);
   }
   return [...rows]
     .map(([usedBy, keys]) => `- ${usedBy}: ${keys.join(', ')}\n`)

@@ -20,7 +20,7 @@ import { useFormStatus } from 'react-dom';
 
 import { mergeRefs } from '../../../helpers/merge-refs';
 import { useControllableState, useWritingMode } from '../../../hooks';
-import { getMessages } from '../../../i18n/current';
+import { getLocale, getMessages } from '../../../i18n/current';
 import type { Option } from '../../../types/variables';
 import { FormValue } from '../../_internal/form-value';
 import { ChevronIcon } from '../../icons/chevron';
@@ -43,8 +43,6 @@ type BaseProps = {
   options?: readonly Option[];
   /** 打った文字で候補を探す。打ち直すと前の問い合わせは `signal` で打ち切る。 */
   search?: ComboboxSearch;
-  // @k8ordo/form の formFields は type を導くので受けて捨てる
-  type?: string;
   // フォームライブラリの register が入力値を読めるよう、ref は combobox の input に向ける
   ref?: Ref<HTMLInputElement>;
 } & Omit<
@@ -81,14 +79,15 @@ type Props = BaseProps & (ControlledProps | UncontrolledProps);
 
 const NO_OPTIONS: readonly Option[] = [];
 
-const matches = (option: Option, text: string) =>
-  option.label.toLocaleLowerCase().includes(text.trim().toLocaleLowerCase());
+const matches = (option: Option, text: string, locale: string) =>
+  option.label
+    .toLocaleLowerCase(locale)
+    .includes(text.trim().toLocaleLowerCase(locale));
 
 export const Combobox: FC<Props> = ({
   invalid = false,
   options: optionsProp,
   search,
-  type: _type,
   value,
   defaultValue,
   onChange,
@@ -104,6 +103,7 @@ export const Combobox: FC<Props> = ({
   ...rest
 }) => {
   const messages = getMessages();
+  const locale = getLocale();
   const options = optionsProp ?? NO_OPTIONS;
   const baseId = useId();
   const listboxId = `${baseId}-listbox`;
@@ -136,7 +136,7 @@ export const Combobox: FC<Props> = ({
     search === undefined
       ? text === null
         ? options
-        : options.filter((option) => matches(option, text))
+        : options.filter((option) => matches(option, text, locale))
       : text === null || text.trim() === ''
         ? options
         : (found ?? NO_OPTIONS);

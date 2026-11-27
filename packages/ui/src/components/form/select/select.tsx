@@ -17,12 +17,18 @@ import styles from './select.module.css';
 type Props = {
   invalid?: boolean;
   options: readonly Option[];
+  /**
+   * 先頭に置く、値が `''` の選択肢の表示名。選べるので、任意の欄は未選択に
+   * 戻せる。`required` の欄では、選ぶまで `valueMissing` になる。
+   */
+  placeholder?: string;
   ref?: Ref<HTMLSelectElement>;
 } & Omit<SelectHTMLAttributes<HTMLSelectElement>, 'className' | 'style'>;
 
 export const Select: FC<Props> = ({
   invalid = false,
   options,
+  placeholder,
   disabled = false,
   defaultValue,
   onKeyDown,
@@ -71,6 +77,9 @@ export const Select: FC<Props> = ({
         ref={mergedRef}
         {...rest}
       >
+        {placeholder === undefined ? null : (
+          <option value="">{placeholder}</option>
+        )}
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}

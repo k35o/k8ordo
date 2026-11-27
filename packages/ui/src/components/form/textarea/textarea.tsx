@@ -12,9 +12,6 @@ type Props = {
   fullHeight?: boolean;
   autoResize?: boolean;
   ref?: Ref<HTMLTextAreaElement>;
-  // <textarea> に type は無い。@k8ordo/form の formFields は z.string() に
-  // type="text" を導くので、広げても属性として描かないように受けて捨てる
-  type?: string;
 } & Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, 'className' | 'style'>;
 
 export const Textarea: FC<Props> = ({
@@ -23,7 +20,6 @@ export const Textarea: FC<Props> = ({
   autoResize = false,
   readOnly,
   ref,
-  type: _type,
   value,
   onInput,
   ...rest

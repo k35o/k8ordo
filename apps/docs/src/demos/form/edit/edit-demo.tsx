@@ -48,7 +48,6 @@ export function EditDemo({ fields }: Props) {
       </div>
       <FormControl
         errorText={title.error}
-        invalid={title.invalid}
         label={m.formEdit.demoLabelTitle()}
         renderInput={(props) => (
           <TextField {...props} defaultValue={TALK.title} {...title.input} />

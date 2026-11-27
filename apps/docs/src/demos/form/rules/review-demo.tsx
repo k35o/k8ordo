@@ -45,32 +45,29 @@ export function ReviewDemo({ fields }: Props) {
     >
       <FormControl
         errorText={decision.error}
-        invalid={decision.invalid}
         label={m.formRules.demoLabelDecision()}
         renderInput={(props) => (
           <Select
             {...props}
             {...decision.input}
             options={[
-              { value: '', label: m.formRules.demoChoose() },
               { value: 'accept', label: m.formRules.demoAccept() },
               { value: 'reject', label: m.formRules.demoReject() },
             ]}
+            placeholder={m.formRules.demoChoose()}
           />
         )}
         required={decision.required}
       />
       <FormControl
         errorText={reason.error}
-        invalid={reason.invalid}
         label={m.formRules.demoLabelReason()}
         renderInput={(props) => <Textarea {...props} {...reason.input} />}
       />
       <FormControl
         errorText={aspects.error}
-        invalid={aspects.invalid}
         label={m.formRules.demoLabelAspects()}
-        labelAs="legend"
+        labelAs="group"
         renderInput={(props) => (
           <CheckboxCard
             {...props}

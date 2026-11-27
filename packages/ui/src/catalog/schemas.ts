@@ -1005,7 +1005,6 @@ type FormControlIntegrationProps = {
   helpText?: string;
   errorText?: string;
   required?: boolean;
-  invalid?: boolean;
 };
 export const formControlProps = z.object({
   label: z.string(),
@@ -1016,7 +1015,6 @@ export const formControlProps = z.object({
   helpText: z.string().optional(),
   errorText: z.string().optional(),
   required: z.boolean().optional(),
-  invalid: z.boolean().optional(),
 }) satisfies z.ZodType<FormControlIntegrationProps>;
 
 export const formProps = z.object({});

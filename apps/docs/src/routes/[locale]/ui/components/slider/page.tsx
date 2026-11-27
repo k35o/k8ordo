@@ -50,16 +50,10 @@ export default function SliderPage() {
   defaultValue={50}
   disabled={false}
   invalid={false}
-  required={false}
 />`}
           >
             <div className={styles.frame}>
-              <Slider
-                defaultValue={50}
-                disabled={false}
-                invalid={false}
-                required={false}
-              />
+              <Slider defaultValue={50} disabled={false} invalid={false} />
             </div>
           </ComponentPreview>
         </div>
@@ -73,7 +67,6 @@ export default function SliderPage() {
   defaultValue={20}
   disabled={false}
   invalid={false}
-  required={false}
   max={50}
   min={10}
   step={5}
@@ -84,7 +77,6 @@ export default function SliderPage() {
                 defaultValue={20}
                 disabled={false}
                 invalid={false}
-                required={false}
                 max={50}
                 min={10}
                 step={5}
@@ -102,16 +94,10 @@ export default function SliderPage() {
   defaultValue={30}
   disabled
   invalid={false}
-  required={false}
 />`}
           >
             <div className={styles.frame}>
-              <Slider
-                defaultValue={30}
-                disabled
-                invalid={false}
-                required={false}
-              />
+              <Slider defaultValue={30} disabled invalid={false} />
             </div>
           </ComponentPreview>
         </div>

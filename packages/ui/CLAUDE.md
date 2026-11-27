@@ -161,7 +161,7 @@ The rest pass the value only, even when a real `<input>` is underneath:
 
 - `Slider`: `(value: number) => void`
 - `NumberField`: `(value: number | null) => void` (`null` is an empty field)
-- `CheckboxGroup.Root` / `CheckboxCard` / `Autocomplete`: `(value: string[]) => void`
+- `CheckboxGroup` / `CheckboxCard` / `Autocomplete`: `(value: string[]) => void`
 - `Tree`'s `onExpandedIdsChange`: `(ids: string[]) => void`
 - `RadioCard` (notifies per group rather than per option input): `(value: string) => void`
 - `ListBox`: `(value) => void`
@@ -313,19 +313,38 @@ export const MyComponent = { Root, Part } as const;
   `export const X = {` inside a `'use client'` file.
 - Use `createContext` + `use()` (or `createSafeContext`) for sharing state between parts
 - Use `useId()` for accessible `aria-labelledby`/`aria-describedby` connections
-- `'use client'` directive at top when using hooks
+- `'use client'` directive at top when using state, effects, context, or event
+  handlers. The hooks React's server build exports too (`useId`, `useMemo`,
+  `useCallback`) do not need it: `FormControl`'s only hook is `useId`, so it
+  stays a Server Component and a Server Component can hand it `renderInput`.
+  A server-safe module calls nothing a `'use client'` module exports — on the
+  server those exports are references, not functions — which is why
+  `_internal/field-message.tsx`, whose `hasErrorText` `FormControl` calls, is
+  in `compound-rsc.test.ts`'s list as well
 
 ### Form fields
 
 A field must work when `@k8ordo/form`'s `formFields` output is spread onto it
-unchanged (each field's `WithForm` story holds it to that). Four rules follow:
+unchanged (each field's `WithForm` story holds it to that). Five rules follow:
 
-- **Accept the derived attribute types.** `input` carries `type` as a string
-  (none on a plain text field), `min` / `max` as numbers, `step` as
-  `number | 'any'`, and the echoed `defaultValue` as a string — an array of the
-  checked options on a checkbox group, and none on a file field. Widen a prop to
-  take them, or take one and drop it (`Textarea`'s `type`); never make the
-  caller destructure it away.
+- **Take the native attributes; the form emits values that fit them.** A
+  field's props are the attributes of the element it renders, never wider
+  than React types them and narrower where the field reads the value itself
+  (`NumberField` and `Slider` take `min` / `max` as numbers only, and
+  `Slider`'s `step` as `number | 'any'`). `@k8ordo/form` emits only values that
+  fit: no `type` on a plain text field, `min` / `max` as numbers, `step` as
+  `number | 'any'`, and
+  the echoed `defaultValue` as a string — an array of the checked options on a
+  checkbox group, none on a file field. Never widen a prop, or take one and
+  drop it, for the form's sake: when the two disagree, change what
+  `@k8ordo/form` emits. An attribute the element lacks or the field fixes
+  itself is not a prop (`Textarea` has no `type`; `Combobox` and
+  `ColorPicker` fix `type="text"`). The one exception is `required`, which
+  `FormControl`'s props carry to every field: `CheckboxGroup`,
+  `CheckboxCard`, `Slider`, and `RangeSlider` accept it and write it to no
+  element, since no element they render takes it — a `<fieldset>` has no
+  `required`, and HTML bars it on a range, which always has a value. A
+  group's name says it instead, through `labelAs="group"`'s mark.
 - **Keep an uncontrolled value in the DOM.** Pass `defaultValue` /
   `defaultChecked` to the element, not a `value` / `checked` mirrored from
   state: a form reset — React's after every action included — restores the
@@ -340,7 +359,30 @@ unchanged (each field's `WithForm` story holds it to that). Four rules follow:
 - **Submit a composite through `FormValue`** (`src/components/_internal/form-value.tsx`)
   when the visible part is not the element that submits (`Autocomplete`).
   Not `type="hidden"`: it is barred from constraint validation, cannot take
-  focus, and with nothing selected no element carries the name at all.
+  focus, and with nothing selected no element carries the name at all. The
+  submitting element is `aria-hidden` and `tabIndex={-1}`, and passes focus on
+  to the visible part, so a failed submission's focus lands where a person
+  works. `FileField` treats its own `<input type="file">` the same way, and
+  hands the label and description to the trigger's bag.
+- **A field that carries its own label draws its own message.** `Checkbox`
+  and `Switch` are not wrapped in `FormControl`, so they take `errorText` /
+  `helpText` and draw them through `FieldMessage`
+  (`src/components/_internal/field-message.tsx`), whose look
+  (`field-message.module.css`) `FormControl` shares. The wrapper is always
+  rendered: adding it only when a message appears would remount the input
+  and drop the focus the form just moved there after a failed submission.
+
+A field that is a group itself (`Radio`, `RadioCard`, `CheckboxGroup`,
+`CheckboxCard`, `RangeSlider`: a `radiogroup` or `group` element) is named,
+not labelled: through a required `aria-labelledby`, or on `RangeSlider`
+through `aria-label` or `aria-labelledby`. `FormControl`'s
+`labelAs="group"` draws the heading `aria-labelledby` points at as a
+`<span id>`: a `<label for>` cannot label a group, and a `<fieldset>` around
+one nests a second group with the same name. `FileField` takes `'group'` too:
+its trigger is a button named through `aria-labelledby`, and a button takes no
+`required`, so the mark in the heading is what says the field is required. A
+field that puts the `id` on a text input (`ColorPicker`, `DatePicker`,
+`Combobox`, `Autocomplete`) keeps `'label'`.
 
 ### Built-in wording
 
@@ -350,7 +392,8 @@ when the application has defined no locale set. It is a plain function, not a
 hook, so wording never makes a component a client module:
 `src/components/compound-rsc.test.ts` keeps the ones that only read wording
 (`Spinner`, `Anchor`, `Card`, `Breadcrumb`, `Code`, `Alert`, `Callout`, `Reasoning`, `ToolInvocation`) free
-of `'use client'`. A new key goes into `messages.ts`, `ja.ts`, `en.ts`, and
+of `'use client'`, along with `FormControl` (wording and `useId`) and `Form`
+(no hook at all). A new key goes into `messages.ts`, `ja.ts`, `en.ts`, and
 `usage.ts` (the components that draw it); there is no provider and no context.
 `pnpm generate:props` writes the key list in `docs/references/components.md`
 from `usage.ts`, and the same mapping into `docs/props.generated.json`

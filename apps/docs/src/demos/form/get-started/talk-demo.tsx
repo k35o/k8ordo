@@ -39,7 +39,6 @@ export function TalkDemo({ fields }: Props) {
     >
       <FormControl
         errorText={title.error}
-        invalid={title.invalid}
         label={m.formGetStarted.tryLabelTitle()}
         renderInput={(props) => (
           <TextField {...props} {...title.input} autoComplete="off" />
@@ -48,7 +47,6 @@ export function TalkDemo({ fields }: Props) {
       />
       <FormControl
         errorText={eventUrl.error}
-        invalid={eventUrl.invalid}
         label={m.formGetStarted.tryLabelEventUrl()}
         renderInput={(props) => (
           <TextField {...props} {...eventUrl.input} autoComplete="off" />
@@ -57,7 +55,6 @@ export function TalkDemo({ fields }: Props) {
       />
       <FormControl
         errorText={minutes.error}
-        invalid={minutes.invalid}
         label={m.formGetStarted.tryLabelMinutes()}
         renderInput={(props) => <TextField {...props} {...minutes.input} />}
         required={minutes.required}

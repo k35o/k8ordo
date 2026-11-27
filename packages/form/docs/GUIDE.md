@@ -298,9 +298,7 @@ const [state, formAction] = useActionState(
 
 **The wording cannot drift.** Client messages are obtained by running the
 schema against a probe value, so the text shown next to the input is the text
-zod itself produces. A custom `min(1, '…')` reaches both sides. The one
-exception is a range message from `@k8ordo/ui`'s `NumberField` (see
-[Working with @k8ordo/ui](#working-with-k8ordoui)).
+zod itself produces. A custom `min(1, '…')` reaches both sides.
 
 **`required` means the same thing on both sides.** JSON Schema's `required`
 means "the key is present", but a form always submits something for every
@@ -562,7 +560,7 @@ listed in `dropped`.
 After a submission `tags.input.defaultValue` holds what was checked as an
 array — `['a']` for one box, `[]` for none — typed `string[]`
 (`CheckboxGroupInput`). A component that takes the checked options as its
-`defaultValue` — a `<select multiple>`, or `@k8ordo/ui`'s `CheckboxGroup.Root`,
+`defaultValue` — a `<select multiple>`, or `@k8ordo/ui`'s `CheckboxGroup`,
 `CheckboxCard` and `Autocomplete` — takes the spread as it is. A hand-written
 box takes the `name` and reads `defaultChecked` from the array, as above: a
 spread would put the whole array on every box. The same holds for a group
@@ -800,15 +798,14 @@ request — which is the correct behaviour, not a broken one.
 `@k8ordo/form` does not depend on `@k8ordo/ui`; the fields in `@k8ordo/ui`
 take what `formFields` derives as it is. Spread `input` onto the field after
 `FormControl`'s props. `FormControl` gets only what it uses — the label, the
-error, `invalid`, `required` — and generates the `id` and `aria-*` links
-itself.
+error, `required` — and generates the `id` and `aria-*` links itself. A
+non-empty `error` is what marks the field invalid, so `invalid` is not passed.
 
 ```tsx
 const title = form.field('title');
 
 <FormControl
   errorText={title.error}
-  invalid={title.invalid}
   label="タイトル"
   required={title.required}
   renderInput={(props) => <TextField {...props} {...title.input} />}
@@ -827,30 +824,52 @@ each action included — restores the echo, `isDirty` reads them, and a value a
 component changes in code — a stepper, a chosen option, a removed file —
 arrives as an `input` event, the way typing does.
 
-| Schema                                            | Component                                            | What to pass besides `{...props} {...input}`               |
-| ------------------------------------------------- | ---------------------------------------------------- | ---------------------------------------------------------- |
-| `z.string()`, `z.email()`, `z.url()`, `z.iso.*()` | `TextField`, `Textarea`                              | —                                                          |
-| a password                                        | `PasswordInput`                                      | —                                                          |
-| `z.coerce.number()`                               | `NumberField`, `Slider`                              | —                                                          |
-| `z.enum([…])`                                     | `Select`, `Radio`, `RadioCard`                       | `options`; `labelAs="legend"` on `FormControl` for radios  |
-| `z.boolean()`, `z.literal(true)`                  | `Checkbox`, `Switch`                                 | `label`, and no `{...props}`: they need no `FormControl`   |
-| `z.array(z.enum([…]))`                            | `CheckboxGroup.Root`, `CheckboxCard`, `Autocomplete` | the options; `labelAs="legend"` on `FormControl` for boxes |
-| `z.file()`                                        | `FileField.Root`                                     | a `FileField.Trigger` and `FileField.ItemList`             |
+| Schema                                             | Component                                       | What to pass besides `{...props} {...input}`                                       |
+| -------------------------------------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `z.string()`                                       | `TextField`, `Textarea`                         | —                                                                                  |
+| `z.email()`, `z.url()`, `z.iso.*()`                | `TextField`                                     | —                                                                                  |
+| a password                                         | `PasswordInput`                                 | —                                                                                  |
+| `z.coerce.number()`                                | `NumberField`, `Slider`                         | —                                                                                  |
+| `z.enum([…])`                                      | `Select`, `Radio`, `RadioCard`                  | `options`; `labelAs="group"` on `FormControl` for radios                           |
+| `z.boolean()`, `z.literal(true)`, `z.stringbool()` | `Checkbox`, `Switch`                            | `label` and `errorText`; no `FormControl`, so no `{...props}`                      |
+| `z.array(z.enum([…]))`                             | `CheckboxGroup`, `CheckboxCard`, `Autocomplete` | `options`; `labelAs="group"` on `FormControl` for boxes                            |
+| `z.file()`                                         | `FileField.Root`                                | a `FileField.Trigger` and `FileField.ItemList`; `labelAs="group"` on `FormControl` |
+
+**A group takes its name from `FormControl`.** `Radio`, `RadioCard`,
+`CheckboxGroup` and `CheckboxCard` are a group each, so `labelAs="group"`
+draws the label as the heading the group reads its name from, the required
+mark included. On a checkbox group, `required={tags.required}` shows only as
+that mark: `FormControl` passes it on, and `CheckboxGroup` and `CheckboxCard`
+write it to no element — a `<fieldset>` takes no `required`, and a box with
+one would have to be checked itself — while the count rule does the checking.
+`FileField` takes `'group'` as well: what a person presses is its trigger, a
+button that reads its name from the heading and cannot take `required`, so
+the mark there is what says a file is required. `Autocomplete` keeps the
+default, a `<label>` for its text input.
 
 **Radios take the spread.** The advice under [Radio groups](#radio-groups) is
 about a hand-written `<input type="radio">`. `Radio` and `RadioCard` read an
 enum's `input` the other way round: `defaultValue` is the selected option and
 `required` reaches every radio.
 
-**A `z.stringbool()` box is the exception.** A spread `value` does not reach
-`Checkbox`'s input, so a `z.stringbool()` box drawn with it submits the
-browser's `on` — which the default `z.stringbool()` reads as `true`, but a
-custom `truthy`, and the URL state writes, do not share. Render a plain
-`<input {...field.input} />` there.
+**A single box draws its own message.** `Checkbox` and `Switch` carry their
+own label, so they are not wrapped in `FormControl`. `errorText` draws the
+field's error under the box and describes the input with it:
 
-**A `Select` needs a placeholder for `required` to mean anything.** Put
-`{ value: '', label: '…' }` first in `options`; a `<select>` without an empty
-option always has a choice selected.
+```tsx
+const agree = form.field('agree');
+
+<Checkbox {...agree.input} errorText={agree.error} label="規約に同意する" />;
+```
+
+The spread `value` of a `z.stringbool()` box lands on `Checkbox`'s and
+`Switch`'s `value`, the string a checked box submits, so the box submits the
+schema's own `true` ([Checkboxes that submit a string](#checkboxes-that-submit-a-string)).
+
+**A `Select` needs a `placeholder` for `required` to mean anything.** A
+`<select>` without an empty option always has a choice selected; `placeholder`
+puts one first, with the value `''`, which `parseForm` reads as no choice — a
+required enum reports it as missing, an optional one parses to `undefined`.
 
 **A checkbox group echoes as an array.** `input.defaultValue` is what was
 checked, so the group components take the spread with nothing added:
@@ -860,9 +879,8 @@ const tags = form.field('tags');
 
 <FormControl
   errorText={tags.error}
-  invalid={tags.invalid}
   label="タグ"
-  labelAs="legend"
+  labelAs="group"
   renderInput={(props) => (
     <CheckboxCard {...props} {...tags.input} options={options} />
   )}
@@ -874,18 +892,16 @@ through a hidden `<select multiple>` that is present even with nothing
 selected, so the rule has an element to mark, and focus sent to it after a
 failure goes on to the text input.
 
-**`NumberField` checks its own range.** It renders `type="text"` so it can
-format and step the value, and the browser does not check `min` and `max` on
-a text input. `NumberField` reports an out-of-range value with
-`setCustomValidity` instead, which `useForm` shows like any other message —
-but in `@k8ordo/ui`'s wording (`numberFieldRangeUnderflow` /
-`numberFieldRangeOverflow`), not zod's, the one place the client's text is not
-zod's own. Leaving the field clamps the value into range, so the message shows
-only while typing. `.int()` and `.multipleOf()` set the precision the field
-rounds to; a plain `z.coerce.number()` derives `step="any"`, which is not
-rounded. Without JavaScript nothing checks the range before the server does;
-a `TextField` given the derived `type="number"` keeps the browser's own
-check, and its wording.
+**`NumberField` keeps the value in range.** It renders `type="text"` so it
+can format and step the value, and the browser does not check `min` and `max`
+on a text input. `NumberField` clamps the value into range instead, when the
+field is left and when Enter is pressed in it, so a form submitted with Enter
+sends the clamped value and no range message is ever shown. `.int()` and
+`.multipleOf()` set the precision the field rounds to; a plain
+`z.coerce.number()` derives `step="any"`, which is not rounded. Without
+JavaScript nothing checks the range before the server does, and the server
+answers with zod's message; a `TextField` given the derived `type="number"`
+keeps the browser's own check, and its wording.
 
 **A `Textarea` has no `pattern`.** A regex on a field drawn as a `Textarea`
 reaches the markup, but a `<textarea>` ignores it: the check runs on the server

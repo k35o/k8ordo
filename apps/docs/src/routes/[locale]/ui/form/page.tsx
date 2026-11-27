@@ -1,4 +1,3 @@
-import { Pitfall } from '../../../../components/callout';
 import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
@@ -11,7 +10,6 @@ const BASIC = `const title = form.field('title');
 
 <FormControl
   errorText={title.error}
-  invalid={title.invalid}
   label="Title"
   required={title.required}
   renderInput={(props) => <TextField {...props} {...title.input} />}
@@ -21,9 +19,8 @@ const GROUP = `const tags = form.field('tags');
 
 <FormControl
   errorText={tags.error}
-  invalid={tags.invalid}
   label="Tags"
-  labelAs="legend"
+  labelAs="group"
   renderInput={(props) => (
     <CheckboxCard
       {...props}
@@ -48,7 +45,7 @@ export default function UiFormPage() {
         <CodeBlock
           code={BASIC}
           lang="tsx"
-          marks={{ 8: 'highlight' }}
+          marks={{ 7: 'highlight' }}
           title="talk-form.tsx"
         />
         <p>
@@ -91,7 +88,7 @@ export default function UiFormPage() {
         <CodeBlock
           code={GROUP}
           lang="tsx"
-          marks={{ 11: 'highlight' }}
+          marks={{ 10: 'highlight' }}
           title="tags-field.tsx"
         />
         <p>
@@ -106,11 +103,6 @@ export default function UiFormPage() {
       </DocSection>
 
       <DocSection id="exceptions" title={t.exceptionsTitle}>
-        <Pitfall>
-          <p>
-            <Rich>{t.exceptionStringbool()}</Rich>
-          </p>
-        </Pitfall>
         <p>
           <Rich>{t.exceptionNumber()}</Rich>
         </p>

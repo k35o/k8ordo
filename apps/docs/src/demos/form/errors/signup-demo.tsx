@@ -40,7 +40,6 @@ export function SignupDemo({ fields }: Props) {
     >
       <FormControl
         errorText={handle.error}
-        invalid={handle.invalid}
         label={m.formErrors.demoLabelHandle()}
         renderInput={(props) => (
           <TextField {...props} {...handle.input} autoComplete="off" />
@@ -49,7 +48,6 @@ export function SignupDemo({ fields }: Props) {
       />
       <FormControl
         errorText={password.error}
-        invalid={password.invalid}
         label={m.formErrors.demoLabelPassword()}
         renderInput={(props) => (
           <PasswordInput
@@ -62,7 +60,6 @@ export function SignupDemo({ fields }: Props) {
       />
       <FormControl
         errorText={confirm.error}
-        invalid={confirm.invalid}
         label={m.formErrors.demoLabelConfirm()}
         renderInput={(props) => (
           <PasswordInput

@@ -479,6 +479,7 @@ import {
   Button,
   FileField,
   FormControl,
+  RadioCard,
   Select,
   TextField,
 } from '@k8ordo/ui';
@@ -496,14 +497,24 @@ import {
   />
 )} />
 
-<FileField.Root accept="image/*" multiple>
-  <FileField.Trigger
-    renderItem={({ onClick, disabled }) => (
-      <Button disabled={disabled} onClick={onClick}>Choose files</Button>
-    )}
-  />
-  <FileField.ItemList />
-</FileField.Root>
+// A field that is a group itself (Radio, RadioCard, CheckboxGroup,
+// CheckboxCard, RangeSlider) takes its name from a heading, not a <label>
+<FormControl label="Plan" labelAs="group" renderInput={(props) => (
+  <RadioCard {...props} options={plans} />
+)} />
+
+// So does FileField: its trigger is a button, which cannot be required, so the
+// required mark has to be part of the name the trigger reads
+<FormControl label="Photos" labelAs="group" required renderInput={(props) => (
+  <FileField.Root {...props} accept="image/*" multiple>
+    <FileField.Trigger
+      renderItem={(wiring) => (
+        <Button {...wiring}>Choose files</Button>
+      )}
+    />
+    <FileField.ItemList />
+  </FileField.Root>
+)} />
 ```
 
 With `@k8ordo/form`, spread what `form.field(name).input` derives onto the
@@ -519,7 +530,6 @@ const title = form.field('title');
 
 <FormControl
   errorText={title.error}
-  invalid={title.invalid}
   label="Title"
   required={title.required}
   renderInput={(props) => <TextField {...props} {...title.input} />}
@@ -548,7 +558,7 @@ Avoid the traits that make a UI recognizably AI-generated at a glance.
 ## Implementation principles
 
 - **Use the existing components**: look for a @k8ordo/ui component before building custom UI
-- **Render from Server Components**: every component, compound ones included (`Tabs.Root`, `Accordion.Item`, …), can be placed in a Server Component; only the interactive parts are client modules
+- **Render from Server Components**: every component, compound ones included (`Tabs.Root`, `Accordion.Item`, …), can be placed in a Server Component; only the interactive parts are client modules. A Server Component cannot pass a client module a function other than a Server Action, so a part given one is rendered from a Client Component: `Popover.Trigger`, `Tooltip.Trigger`, `ContextMenu.Trigger`, `Toolbar.Item`, and `FileField.Trigger` (a required `renderItem`), `DataTable` (`getRowId`, a column's `cell`), and any part given `onChange` or another handler. `FormControl` and `Form` are not client modules, so `renderInput` runs where `FormControl` renders: a form of uncontrolled fields that submits to a Server Action is written in a Server Component (`useForm` needs a Client Component)
 - **Keep placed state in `@k8ordo/state`**: state that lives in the URL, a history entry, localStorage, or memory is `defineLocalState` and friends, not a hook from this package
 - **Browser-only rendering is React's**: a component that can only render in a browser calls `use(browser())` (`browser` from `react-dom`) under a `<Suspense>`; there is no `useClient` here and no "mounted" flag
 - **Use semantic tokens**: tokens (`--color-primary-bg`), never raw color values or the palette (`--teal-500`)
