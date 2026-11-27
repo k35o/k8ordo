@@ -590,8 +590,8 @@ script runs, and a visitor without JavaScript keeps the default.
   ```
 
   The definition stays at module scope; what has to happen per request is
-  calling it. Call `formFields` during the page's render, not at module
-  scope. A Server Action posted from a `[locale]` page runs in that page's
+  calling it, and `formFields` is called during the page's render, as
+  `@k8ordo/form`'s guide writes it. A Server Action posted from a `[locale]` page runs in that page's
   locale in server mode — the framework runs the page's params
   schemas for the action's request too — so `parseForm` in it needs nothing
   more. Anywhere else — an action run outside the framework, a job — call it

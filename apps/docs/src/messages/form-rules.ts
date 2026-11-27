@@ -21,8 +21,8 @@ export const declarePassCallout = message({
 });
 
 export const declareForm = message({
-  ja: '`defineForm`に、スキーマとルールの配列を渡します。できた定義は、スキーマの代わりに`formFields`と`parseForm`へ渡します。',
-  en: 'Pass `defineForm` the schema and an array of rules. The definition then goes to `formFields` and `parseForm` in place of the schema.',
+  ja: '`defineForm`に、スキーマとルールの配列を渡します。できた定義は、スキーマの代わりに、ページの描画の中で`formFields`へ、Server Actionで`parseForm`へ渡します。',
+  en: 'Pass `defineForm` the schema and an array of rules. The definition then goes in place of the schema to `formFields` in the page’s render, and to `parseForm` in the Server Action.',
 });
 
 export const declareData = message({

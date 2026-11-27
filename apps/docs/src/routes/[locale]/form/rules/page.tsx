@@ -18,10 +18,7 @@ const DECLARE = `export const signup = defineForm(
     confirm: z.string(),
   }),
   [sameAs('confirm', 'password', 'The passwords do not match')],
-);
-
-const signupFields = formFields(signup);
-const parsed = parseForm(signup, formData);`;
+);`;
 
 const KINDS = `defineForm(schema, [
   sameAs('confirm', 'password', 'The passwords do not match'),
@@ -57,7 +54,7 @@ export default function FormRulesPage() {
           callouts={{ 6: t.declareRuleCallout(), 9: t.declarePassCallout() }}
           code={DECLARE}
           lang="ts"
-          marks={{ 6: 'highlight', 9: 'highlight', 10: 'highlight' }}
+          marks={{ 6: 'highlight' }}
         />
         <p>
           <Rich>{t.declareForm()}</Rich>

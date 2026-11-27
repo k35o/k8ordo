@@ -834,7 +834,10 @@ are the same schema:
 ```tsx
 import { formFields } from '@k8ordo/form/server';
 
-const filterFields = formFields(listState.url); // one schema, both jobs
+export default function ListPage() {
+  // one schema, both jobs
+  return <FilterForm fields={formFields(listState.url)} />;
+}
 ```
 
 A `z.stringbool()` field derives a checkbox whose `value` is the same spelling
