@@ -661,6 +661,40 @@ export function DocumentLocale() {
   left without a message; a message per check is still how to word the ones
   a person reads.
 
+### Adding a locale
+
+Adding a locale is a handful of edits, and each one left out is a type error
+or names itself:
+
+1. Add it to the set in `src/i18n.ts`, with its time zone and direction:
+   `ar: { timeZone: 'Africa/Cairo', dir: 'rtl' }`. `RegisteredLocale` gains
+   it — through the generated `Register` under `@k8ordo/framework`, through
+   the hand-written one elsewhere.
+2. Every `message()` without an `ar` variant is now a type error; the
+   typecheck lists them.
+3. `@k8ordo/ui` ships text for `ja` and `en` only, and throws on a locale it
+   has none for, naming `registerMessages`. Register one next to the set.
+   Typed as `Messages`, a missing key is a type error; spreading `en` keeps
+   English for the keys not translated yet:
+
+   ```ts
+   // src/i18n.ts
+   import { en, registerMessages } from '@k8ordo/ui/i18n';
+   import type { Messages } from '@k8ordo/ui/i18n';
+
+   const ar: Messages = { ...en, close: 'إغلاق' };
+   registerMessages('ar', ar);
+   ```
+
+4. If the application words zod's default messages per locale (the
+   `zod-locale.ts` above), its table is a type error until it has an `ar`
+   entry.
+
+Nothing else is written per locale. The `[locale]` schema, negotiation,
+`localize`, the static build's `[locale]/paths.ts` (it returns
+`locales.all`) and `<html lang dir>` (it reads `definitions`) all follow the
+set.
+
 ## What it guarantees
 
 - A locale outside the list never reaches a page: the schema refuses it.
