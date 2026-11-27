@@ -99,9 +99,6 @@ export const renderers: { [N in CatalogName]: Renderer<N> } = {
   Table: ({ props }) => ui.renderTable(props),
   DataTable: ({ props }) => <ui.DataTableWidget props={props} />,
   Tree: ({ props }) => ui.renderTree(props),
-  Modal: ({ props, children }) => (
-    <ui.ModalWidget props={props}>{children}</ui.ModalWidget>
-  ),
   Dialog: ({ props, children }) => (
     <ui.DialogWidget props={props}>{children}</ui.DialogWidget>
   ),

@@ -22,7 +22,7 @@ export const jsonRenderSpec = {
     overlays: {
       type: 'Stack',
       props: { direction: 'row', gap: 'sm' },
-      children: ['tip', 'dropdown', 'toast', 'modalBtn', 'popBtn'],
+      children: ['tip', 'dropdown', 'toast', 'dialogBtn', 'popBtn'],
     },
     tip: {
       type: 'Tooltip',
@@ -53,14 +53,14 @@ export const jsonRenderSpec = {
       },
       children: [],
     },
-    modalBtn: {
-      type: 'Modal',
-      props: { triggerLabel: 'モーダルを開く', title: '確認' },
-      children: ['modalBody'],
+    dialogBtn: {
+      type: 'Dialog',
+      props: { triggerLabel: 'ダイアログを開く', title: '確認' },
+      children: ['dialogBody'],
     },
-    modalBody: {
+    dialogBody: {
       type: 'Alert',
-      props: { tone: 'info', message: 'モーダルの中身も生成 UI で記述' },
+      props: { tone: 'info', message: 'ダイアログの中身も生成 UI で記述' },
       children: [],
     },
     popBtn: {

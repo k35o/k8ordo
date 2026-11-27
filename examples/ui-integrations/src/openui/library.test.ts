@@ -7,7 +7,6 @@ const CONTAINERS = [
   'Grid',
   'Card',
   'Form',
-  'Modal',
   'Dialog',
   'Drawer',
   'Popover',

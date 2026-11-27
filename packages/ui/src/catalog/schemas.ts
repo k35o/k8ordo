@@ -28,7 +28,6 @@ import type { Stepper } from '../components/navigation/stepper';
 import type { Dialog } from '../components/overlays/dialog';
 import type { Drawer } from '../components/overlays/drawer';
 import type { ListBox } from '../components/overlays/list-box';
-import type { Modal } from '../components/overlays/modal';
 import { ICON_NAMES } from './icon-names';
 
 /**
@@ -1019,19 +1018,6 @@ export const formControlProps = z.object({
 
 export const formProps = z.object({});
 
-// 本体側は isOpen/onClose の命令的 API なので、ここでは triggerLabel +
-// children のみを zod に乗せる。
-type ModalIntegrationProps = {
-  triggerLabel: string;
-  title: string;
-  side?: ComponentProps<typeof Modal>['side'];
-};
-export const modalProps = z.object({
-  triggerLabel: z.string().describe('Text of the button that opens the modal'),
-  title: z.string(),
-  side: z.enum(['center', 'bottom', 'right', 'left']).optional(),
-}) satisfies z.ZodType<ModalIntegrationProps>;
-
 type DialogIntegrationProps = {
   triggerLabel: string;
   title: string;
@@ -1150,7 +1136,6 @@ export type GridProps = z.infer<typeof gridProps>;
 export type ChevronIconProps = z.infer<typeof chevronIconProps>;
 export type StatusIconProps = z.infer<typeof statusIconProps>;
 export type FormProps = z.infer<typeof formProps>;
-export type ModalProps = z.infer<typeof modalProps>;
 export type DialogProps = z.infer<typeof dialogProps>;
 export type DrawerProps = z.infer<typeof drawerProps>;
 export type PopoverProps = z.infer<typeof popoverProps>;
@@ -1233,9 +1218,6 @@ export type _EnumCoverage = [
       ComponentProps<typeof Separator>['color'],
       SeparatorProps['color']
     >
-  >,
-  AssertCovered<
-    CoversComponent<ComponentProps<typeof Modal>['side'], ModalProps['side']>
   >,
   AssertCovered<
     CoversComponent<ComponentProps<typeof Dialog>['side'], DialogProps['side']>

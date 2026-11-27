@@ -37,7 +37,7 @@ import { renderers } from '@k8ordo/ui/catalog/render';
 - `description`: what the component is, for the model.
 - `props`: a zod object of the props the model writes.
 - `children: true`: the component lays out children of its own (`Stack`,
-  `Card`, `Modal`, …). Absent for every other component.
+  `Card`, `Dialog`, …). Absent for every other component.
 - `value`: present on a field. `value.prop` is the prop that carries the value
   the field starts from (`defaultValue`, `defaultChecked`, or `defaultPage`), and
   `value.initial(props)` is what it starts from when nothing is bound to it.
@@ -241,9 +241,11 @@ model instead:
 - **Toasts** are a `Toast` entry, standing in for `useToast`: a widget whose
   `triggerLabel` button opens the toast through your application's
   `ToastProvider` (see [Drawing](#drawing)).
-- **Overlays** (`Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`,
-  `DropdownMenu`) are self-contained widgets. Each declares its own trigger
-  with `triggerLabel` and handles opening and closing itself. The items of a
+- **Overlays** (`Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`) are
+  self-contained widgets. Each declares its own trigger with `triggerLabel` and
+  handles opening and closing itself. `Dialog` opens in the center or along the
+  bottom edge and `Drawer` along the left or right one, each by its `side`, as
+  the components do. The items of a
   `DropdownMenu` are its children, each a `DropdownMenuItem` with its own
   `press`, so the menu needs no event of its own to say which item was chosen.
 - **Compound components** (`Tabs`, `Accordion`, `Table`, `Breadcrumb`, …) are

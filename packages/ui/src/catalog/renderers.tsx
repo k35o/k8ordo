@@ -1,7 +1,7 @@
 'use client';
 
 import { Fragment, useId, useMemo, useState } from 'react';
-import type { ComponentProps, FC, ReactNode, SubmitEvent } from 'react';
+import type { FC, ReactNode, SubmitEvent } from 'react';
 
 import { Button } from '../components/buttons/button';
 import { CopyButton } from '../components/buttons/copy-button';
@@ -105,7 +105,6 @@ import type {
   IconProps,
   KbdProps,
   ListBoxProps,
-  ModalProps,
   NumberFieldProps,
   PaginationProps,
   PasswordInputProps,
@@ -941,77 +940,33 @@ export function renderForm(_props: FormProps, children: ReactNode): ReactNode {
   return <Form onSubmit={submitNothing}>{children}</Form>;
 }
 
-const OverlayWidget: FC<{
-  triggerLabel: string;
-  title: string;
-  side: ModalProps['side'];
-  buttonProps?: Pick<ComponentProps<typeof Button>, 'size' | 'variant'>;
-  children: ReactNode;
-}> = ({ triggerLabel, title, side, buttonProps, children }) => {
+export const DialogWidget: FC<{ props: DialogProps; children: ReactNode }> = ({
+  props,
+  children,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <>
       <Button
-        {...buttonProps}
         onClick={() => {
           setIsOpen(true);
         }}
       >
-        {triggerLabel}
+        {props.triggerLabel}
       </Button>
-      {side === 'left' || side === 'right' ? (
-        <Drawer
-          isOpen={isOpen}
-          onClose={() => {
-            setIsOpen(false);
-          }}
-          side={side}
-          title={title}
-        >
-          {children}
-        </Drawer>
-      ) : (
-        <Dialog
-          isOpen={isOpen}
-          onClose={() => {
-            setIsOpen(false);
-          }}
-          side={side}
-          title={title}
-        >
-          {children}
-        </Dialog>
-      )}
+      <Dialog
+        isOpen={isOpen}
+        onClose={() => {
+          setIsOpen(false);
+        }}
+        side={props.side}
+        title={props.title}
+      >
+        {children}
+      </Dialog>
     </>
   );
 };
-
-export const ModalWidget: FC<{ props: ModalProps; children: ReactNode }> = ({
-  props,
-  children,
-}) => (
-  <OverlayWidget
-    buttonProps={{ size: 'md', variant: 'solid' }}
-    side={props.side}
-    title={props.title}
-    triggerLabel={props.triggerLabel}
-  >
-    {children}
-  </OverlayWidget>
-);
-
-export const DialogWidget: FC<{ props: DialogProps; children: ReactNode }> = ({
-  props,
-  children,
-}) => (
-  <OverlayWidget
-    side={props.side}
-    title={props.title}
-    triggerLabel={props.triggerLabel}
-  >
-    {children}
-  </OverlayWidget>
-);
 
 export const DrawerWidget: FC<{ props: DrawerProps; children: ReactNode }> = ({
   props,

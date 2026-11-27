@@ -19,7 +19,7 @@ export type CatalogEntry<P extends z.ZodObject = z.ZodObject, V = never> = {
   description: string;
   /** The props a model may write. The key order is part of the contract (see `schemas.ts`). */
   props: P;
-  /** Present when the component lays out children of its own (Stack, Card, Modal…). */
+  /** Present when the component lays out children of its own (Stack, Card, Dialog…). */
   children?: true;
   /** Present when the component is a field whose value a format can bind to its state. */
   value?: CatalogValue<z.infer<P>, V>;
@@ -212,11 +212,6 @@ export const catalog = {
     description:
       'Tree of nodes that open and close, such as files and folders, navigable with the arrow keys. List every node flat; a child names its parent by parentId.',
     props: s.treeProps,
-  }),
-  Modal: entry({
-    description: 'Modal dialog that opens from a button labeled triggerLabel.',
-    props: s.modalProps,
-    children: true,
   }),
   Dialog: entry({
     description:

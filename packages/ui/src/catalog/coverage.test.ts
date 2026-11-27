@@ -20,11 +20,10 @@ const RENAMED_IN_CATALOG: ReadonlyMap<string, string> = new Map([
   ['useToast', 'Toast'],
 ]);
 
-// 公開の部品の名前ではない項目と、それを描く部品。side で Dialog と Drawer を描き分ける
+// 公開の部品の名前ではない項目と、それを描く部品
 const COMPOSED_IN_CATALOG: ReadonlyMap<string, readonly string[]> = new Map([
   ['DateField', ['TextField']],
   ['DropdownMenuItem', ['DropdownMenu']],
-  ['Modal', ['Dialog', 'Drawer']],
 ]);
 
 const CHAT =
