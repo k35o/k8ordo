@@ -102,16 +102,16 @@ it('スキーマに合わない要素は、ほかを描いたまま何も描か�
   expect(consoleError).not.toHaveBeenCalled();
 });
 
-it('FormControl に入れた値も、フォームの状態に乗って届く', async () => {
+it('Form の中の欄の値も、フォームの状態に乗って届く', async () => {
   const { screen, onAction } = await mount(
     [
       'root = Form([name, send])',
-      'name = FormControl("お名前", "text", "name", "山田 太郎")',
+      'name = TextField("name", "お名前", "山田 太郎")',
       'send = Button("送信")',
     ].join('\n'),
   );
 
-  await screen.getByPlaceholder('山田 太郎').fill('テスト 花子');
+  await screen.getByLabelText('お名前').fill('テスト 花子');
   await screen.getByRole('button', { name: '送信' }).click();
 
   await expect.poll(() => onAction.mock.calls.length).toBe(1);

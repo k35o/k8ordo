@@ -402,15 +402,6 @@ export const catalog = {
       'File picker field. With dropzone, files can also be dropped onto it.',
     props: s.fileFieldProps,
   }),
-  FormControl: entry({
-    description:
-      'Field with a label and help or error text (text/textarea/password).',
-    props: s.formControlProps,
-    value: {
-      prop: 'defaultValue',
-      initial: (props) => props.defaultValue ?? '',
-    },
-  }),
 };
 
 /** The name of a component in the catalog. */

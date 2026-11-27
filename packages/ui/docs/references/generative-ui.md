@@ -306,6 +306,10 @@ These exports are left out on purpose, so a model cannot place them:
   lay a flow out with `Stack`.
 - `BaseIcon` — the base your own icons are drawn on. It has no glyph of its
   own, and a spec picks a glyph by `name`.
+- `FormControl` — every field in the catalog takes its own `label` and
+  `helpText` and is drawn through `FormControl` already (see
+  [What the catalog covers](#what-the-catalog-covers)). An entry for the frame
+  alone would be a second way to write the same field.
 - `TableOfContents` — it points at the ids of the document's headings and
   follows the scroll. The headings a spec places carry no id, so there would be
   nothing to point at.

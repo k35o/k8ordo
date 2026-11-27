@@ -64,6 +64,10 @@ const LEFT_OUT: ReadonlyMap<string, string> = new Map([
     'アイコンを自作するための土台で、自分の絵を持たない。spec は name で絵を選ぶので、選ぶものが無い',
   ],
   [
+    'FormControl',
+    'catalog の入力欄はどれも自分の label と helpText を持ち、描くときに FormControl で包む。枠だけの項目を置くと、同じ欄を 2 通りに書けてしまう',
+  ],
+  [
     'TableOfContents',
     '文書の見出しの id を指し、スクロールに合わせて今の見出しを示す部品。spec の見出しは id を持たないので、指す先が無い',
   ],

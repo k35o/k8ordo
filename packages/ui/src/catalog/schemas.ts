@@ -17,7 +17,6 @@ import type { Skeleton } from '../components/feedback/skeleton';
 import type { Spinner } from '../components/feedback/spinner';
 import type { Checkbox } from '../components/form/checkbox';
 import type { ColorPicker } from '../components/form/color-picker';
-import type { FormControl } from '../components/form/form-control';
 import type { Switch } from '../components/form/switch';
 import type { TextInputType } from '../components/form/text-field';
 import type { Textarea } from '../components/form/textarea';
@@ -1100,27 +1099,6 @@ export const fileFieldProps = z.object({
   helpText: fieldHelpText(),
 }) satisfies z.ZodType<FileFieldIntegrationProps>;
 
-type FormControlIntegrationProps = {
-  label: ComponentProps<typeof FormControl>['label'];
-  fieldType?: 'text' | 'textarea' | 'password';
-  name: string;
-  placeholder?: string;
-  defaultValue?: string;
-  helpText?: string;
-  errorText?: string;
-  required?: boolean;
-};
-export const formControlProps = z.object({
-  label: z.string(),
-  fieldType: z.enum(['text', 'textarea', 'password']).optional(),
-  name: z.string(),
-  placeholder: z.string().optional(),
-  defaultValue: z.string().optional(),
-  helpText: z.string().optional(),
-  errorText: z.string().optional(),
-  required: z.boolean().optional(),
-}) satisfies z.ZodType<FormControlIntegrationProps>;
-
 export const formProps = z.object({});
 
 type DialogIntegrationProps = {
@@ -1253,7 +1231,6 @@ export type CheckboxGroupProps = z.infer<typeof checkboxGroupProps>;
 export type AutocompleteProps = z.infer<typeof autocompleteProps>;
 export type ComboboxProps = z.infer<typeof comboboxProps>;
 export type FileFieldProps = z.infer<typeof fileFieldProps>;
-export type FormControlProps = z.infer<typeof formControlProps>;
 
 // satisfies は enum の narrowing しか検知しない。本体が値を追加したときの
 // 追従漏れを塞ぐため、本体ユニオンが schema の enum に被覆されているかを型で

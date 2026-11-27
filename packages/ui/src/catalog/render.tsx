@@ -149,6 +149,4 @@ export const renderers: { [N in CatalogName]: Renderer<N> } = {
   Autocomplete: ({ props, value, setValue }) =>
     ui.renderAutocomplete(props, value, setValue),
   FileField: ({ props }) => <ui.FileFieldWidget props={props} />,
-  FormControl: ({ props, value, setValue }) =>
-    ui.renderFormControl(props, value, setValue),
 };

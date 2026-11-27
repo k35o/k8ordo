@@ -102,7 +102,6 @@ import type {
   DropdownMenuProps,
   EmptyStateProps,
   FileFieldProps,
-  FormControlProps,
   FormProps,
   HeadingProps,
   IconButtonProps,
@@ -1187,52 +1186,3 @@ export const FileFieldWidget: FC<{ props: FileFieldProps }> = ({ props }) => {
     'group',
   );
 };
-
-export function renderFormControl(
-  props: FormControlProps,
-  value: string,
-  setValue: (next: string) => void,
-): ReactNode {
-  const fieldType = props.fieldType ?? 'text';
-  return (
-    <FormControl
-      errorText={props.errorText}
-      helpText={props.helpText}
-      label={props.label}
-      renderInput={(inputProps) =>
-        fieldType === 'textarea' ? (
-          <Textarea
-            {...inputProps}
-            name={props.name}
-            onChange={(event) => {
-              setValue(event.target.value);
-            }}
-            placeholder={props.placeholder}
-            value={value}
-          />
-        ) : fieldType === 'password' ? (
-          <PasswordInput
-            {...inputProps}
-            name={props.name}
-            onChange={(event) => {
-              setValue(event.target.value);
-            }}
-            placeholder={props.placeholder}
-            value={value}
-          />
-        ) : (
-          <TextField
-            {...inputProps}
-            name={props.name}
-            onChange={(event) => {
-              setValue(event.target.value);
-            }}
-            placeholder={props.placeholder}
-            value={value}
-          />
-        )
-      }
-      required={props.required}
-    />
-  );
-}
