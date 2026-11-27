@@ -78,8 +78,10 @@ export type Locales<
    * tag is tried in order — the exact tag, then the first supported locale
    * that speaks its language — and nothing matching is the default. A tag
    * that is not BCP 47 is skipped, not thrown on: the list is user input.
+   * So are `null` and `undefined`, a choice not made yet:
+   * `negotiate([saved?.value, ...navigator.languages])`.
    */
-  readonly negotiate: (requested: Iterable<string>) => L;
+  readonly negotiate: (requested: Iterable<string | null | undefined>) => L;
   /**
    * The locale a request asks for, for a server that answers before any
    * page renders — sending `/` to a locale. The cookie named in `options`
@@ -269,11 +271,12 @@ export const defineLocales = <
   const is = (value: unknown): value is L =>
     typeof value === 'string' && list.includes(value);
 
-  const negotiate = (requested: Iterable<string>): L => {
+  const negotiate = (requested: Iterable<string | null | undefined>): L => {
     // 要求の順に、完全一致 → 同じ言語を話す最初の対応ロケール、の順で見る
     // (RFC 4647 の lookup と同じ形)。全要求の完全一致を先に探すと、
     // ['en-US', 'ja'] に対して 'en' を持っていても 'ja' が勝ってしまう。
     for (const tag of requested) {
+      if (tag === null || tag === undefined) continue;
       const exact = byExactTag.get(tag.toLowerCase());
       if (exact !== undefined) return exact;
       const parsed = parseTag(tag);

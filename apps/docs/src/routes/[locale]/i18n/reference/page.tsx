@@ -122,7 +122,9 @@ export default function I18nReferencePage() {
     definitions: Readonly<Record<L, LocaleDefinition>>;
     default: D;
     is: (value: unknown) => value is L;
-    negotiate: (requested: Iterable<string>) => L;
+    negotiate: (
+      requested: Iterable<string | null | undefined>,
+    ) => L;
     negotiateRequest: (
       request: Request,
       options?: NegotiateRequestOptions,

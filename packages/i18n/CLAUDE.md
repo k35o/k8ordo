@@ -93,7 +93,10 @@ pnpm check         # check:write to auto-fix
   the whole reason the helper exists; do not add an escape hatch.
 - **Negotiation is per requested tag, in order** — exact, then the first
   supported locale speaking the same language, then the default (RFC 4647
-  lookup shape). The test `['en-US', 'ja']` → `'en'` is the guard.
+  lookup shape). The test `['en-US', 'ja']` → `'en'` is the guard. A tag
+  that is not BCP 47 is skipped, and so is a `null` or `undefined` entry —
+  a choice not made yet — so a caller puts a value it may not have in front
+  of the list as it is rather than filtering it out.
   `negotiateRequest` is the same `negotiate` over the named cookie's value
   followed by `parseAcceptLanguage`'s list — never a rule of its own. The
   cookie name is the caller's; the package does not pick one.

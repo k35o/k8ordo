@@ -109,6 +109,12 @@ describe('negotiate', () => {
   it('accepts any iterable, so navigator.languages passes as is', () => {
     expect(locales.negotiate(new Set(['en']))).toBe('en');
   });
+
+  it('skips null and undefined, so a choice not made yet goes in front as it is', () => {
+    expect(locales.negotiate([undefined, 'en'])).toBe('en');
+    expect(locales.negotiate([null, 'en'])).toBe('en');
+    expect(locales.negotiate([undefined])).toBe('ja');
+  });
 });
 
 describe('negotiateRequest', () => {

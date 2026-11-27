@@ -151,7 +151,9 @@ declared rather than derived.
 each requested tag in order — the exact tag, then the first supported locale
 that speaks its language — before falling back to the default. Nothing
 matching across the whole list is the default; a tag that is not BCP 47 is
-skipped, because the list is user input.
+skipped, because the list is user input, and so are `null` and `undefined`,
+so a choice that may not have been made goes in front as it is:
+`locales.negotiate([saved?.value, ...navigator.languages])`.
 
 ```ts
 locales.negotiate(navigator.languages); // in the browser
@@ -427,6 +429,23 @@ useEffect(() => {
     href('/:locale', { locale: locales.negotiate(navigator.languages) }),
     { history: 'replace' },
   );
+}, []);
+```
+
+Where the language switcher keeps the visitor's choice in a cookie, put it in
+front of the browser's list — the order `negotiateRequest` reads on a
+server. Without the cookie the value is `undefined`, which `negotiate` skips:
+
+```tsx
+useEffect(() => {
+  void cookieStore.get('locale').then((saved) => {
+    navigation.navigate(
+      href('/:locale', {
+        locale: locales.negotiate([saved?.value, ...navigator.languages]),
+      }),
+      { history: 'replace' },
+    );
+  });
 }, []);
 ```
 

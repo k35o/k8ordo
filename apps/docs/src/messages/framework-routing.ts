@@ -279,8 +279,8 @@ export const rootCookieTitle = message({
 });
 
 export const rootCookie = message({
-  ja: '言語の切り替えで選んだロケールをCookieに保存しているなら、その値を`navigator.languages`の前に並べて`negotiate`に渡します。serverモードの`negotiateRequest`が読むのと同じ順番です。',
-  en: 'When the locale chosen in a language switcher is saved in a cookie, put its value in front of `navigator.languages` and pass both to `negotiate`. That is the order `negotiateRequest` reads them in under server mode.',
+  ja: '言語の切り替えで選んだロケールをCookieに保存しているなら、その値を`navigator.languages`の前に並べて`negotiate`に渡します。serverモードの`negotiateRequest`が読むのと同じ順番です。Cookieが無いときの`undefined`は、`negotiate`が飛ばします。',
+  en: 'When the locale chosen in a language switcher is saved in a cookie, put its value in front of `navigator.languages` and pass both to `negotiate`. That is the order `negotiateRequest` reads them in under server mode. Without the cookie the value is `undefined`, which `negotiate` skips.',
 });
 
 export const htmlTitle = message({

@@ -136,7 +136,7 @@ const HOME_COOKIE = `useEffect(() => {
     navigation.navigate(
       href('/:locale', {
         locale: locales.negotiate([
-          ...(saved?.value === undefined ? [] : [saved.value]),
+          saved?.value,
           ...navigator.languages,
         ]),
       }),

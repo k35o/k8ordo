@@ -29,8 +29,8 @@ export const negotiateSteps = [
     en: 'Otherwise, return the locale of the same language that was defined first.',
   }),
   message({
-    ja: 'どちらも無ければ、次のタグへ進みます。BCP 47ではないタグはエラーにせず飛ばします。',
-    en: 'If neither exists, move on to the next tag. A tag that is not BCP 47 is skipped without an error.',
+    ja: 'どちらも無ければ、次のタグへ進みます。BCP 47ではないタグはエラーにせず飛ばします。`null`と`undefined`も飛ばします。',
+    en: 'If neither exists, move on to the next tag. A tag that is not BCP 47 is skipped without an error, and so are `null` and `undefined`.',
   }),
   message({
     ja: '最後まで一致しなければ、既定のロケールを返します。',
@@ -265,6 +265,6 @@ export const staticCookieTitle = message({
 });
 
 export const staticCookie = message({
-  ja: '選んだ言語をCookieに覚えているなら、その値を`navigator.languages`の前に並べて`negotiate`に渡します。サーバーの`negotiateRequest`が読むのと同じ順番です。',
-  en: 'If the chosen language is kept in a cookie, put its value in front of `navigator.languages` and hand both to `negotiate`. That is the order `negotiateRequest` reads them in on a server.',
+  ja: '選んだ言語をCookieに覚えているなら、その値を`navigator.languages`の前に並べて`negotiate`に渡します。サーバーの`negotiateRequest`が読むのと同じ順番です。Cookieが無いときの`undefined`は、`negotiate`が飛ばします。',
+  en: 'If the chosen language is kept in a cookie, put its value in front of `navigator.languages` and hand both to `negotiate`. That is the order `negotiateRequest` reads them in on a server. Without the cookie the value is `undefined`, which `negotiate` skips.',
 });

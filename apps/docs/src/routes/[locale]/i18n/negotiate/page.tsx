@@ -60,7 +60,7 @@ export function RootRedirect() {
 const ROOT_REDIRECT_COOKIE = `useEffect(() => {
   void cookieStore.get('locale').then((saved) => {
     const locale = locales.negotiate([
-      ...(saved?.value === undefined ? [] : [saved.value]),
+      saved?.value,
       ...navigator.languages,
     ]);
     location.replace(locales.localize('/', locale));

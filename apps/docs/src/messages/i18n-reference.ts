@@ -66,8 +66,8 @@ export const localesIs = message({
 });
 
 export const localesNegotiate = message({
-  ja: '希望のタグの並びから、集合のロケールを1つ選びます。タグごとに同じタグ、次に同じ言語のロケールを探します。最後まで無ければ既定のロケールを返します。',
-  en: 'Picks one locale of the set from a list of preferred tags. Each tag is tried as an exact match, then by language. When nothing matches, the default is returned.',
+  ja: '希望のタグの並びから、集合のロケールを1つ選びます。タグごとに同じタグ、次に同じ言語のロケールを探します。最後まで無ければ既定のロケールを返します。BCP 47ではないタグと`null`、`undefined`は読み飛ばします。',
+  en: 'Picks one locale of the set from a list of preferred tags. Each tag is tried as an exact match, then by language. When nothing matches, the default is returned. A tag that is not BCP 47, `null` and `undefined` are skipped.',
 });
 
 export const localesNegotiateRequest = message({
