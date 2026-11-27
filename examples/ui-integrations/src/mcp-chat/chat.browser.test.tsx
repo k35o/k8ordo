@@ -1,4 +1,4 @@
-import { UIProvider } from '@k8ordo/ui';
+import { ToastProvider } from '@k8ordo/ui';
 import { createUIMessageStreamResponse, simulateReadableStream } from 'ai';
 import type { UIMessage, UIMessageChunk } from 'ai';
 import { Suspense } from 'react';
@@ -90,11 +90,11 @@ const serve = (replies: UIMessageChunk[][]) => {
 
 const mount = async () => {
   const screen = await render(
-    <UIProvider>
+    <ToastProvider>
       <Suspense>
         <McpChat />
       </Suspense>
-    </UIProvider>,
+    </ToastProvider>,
   );
   await screen
     .getByPlaceholder('例: 会員登録のフォームを出して')

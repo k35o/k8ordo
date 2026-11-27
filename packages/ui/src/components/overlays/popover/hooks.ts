@@ -26,8 +26,6 @@ type PopoverContext = {
   // 要求された placement。位置決めは CSS Anchor Positioning が行うため、
   // flip 後の解決値ではなく利用側が指定した値をそのまま保持する。
   placement: Placement;
-  // この Popover インスタンス固有の anchor-name（trigger に付与し content から参照）。
-  anchorName: string;
   flipDisabled: boolean;
   triggerRef: RefObject<HTMLElement | null>;
   setTriggerRef: (node: HTMLElement | null) => void;
@@ -105,7 +103,6 @@ export const usePopoverContent = () => {
       ref,
       isOpen: popover.isOpen,
       trapFocus: popover.trapFocus,
-      anchorName: popover.anchorName,
       placement: popover.placement,
       flipDisabled: popover.flipDisabled,
       itemProps,
@@ -113,7 +110,6 @@ export const usePopoverContent = () => {
     [
       popover.rootId,
       popover.isOpen,
-      popover.anchorName,
       popover.placement,
       popover.flipDisabled,
       ref,

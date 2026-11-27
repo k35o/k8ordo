@@ -108,10 +108,10 @@ export const HoverForgivenessComparison: Story = {
 export const BridgeDebug: Story = {
   render: () => (
     <>
-      <style>{`[role='tooltip']::before {
+      <style>{`[popover]:has(> [role='tooltip'])::before {
         background: color-mix(in oklch, var(--color-primary-bg) 40%, transparent);
       }
-      [role='tooltip']::after {
+      [popover]:has(> [role='tooltip'])::after {
         background: color-mix(in oklch, var(--color-secondary-bg) 40%, transparent);
       }`}</style>
       <div className={styles.bridges}>

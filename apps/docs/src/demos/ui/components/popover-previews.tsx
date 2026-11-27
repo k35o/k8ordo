@@ -1,6 +1,7 @@
 'use client';
 
 import { Button, Popover } from '@k8ordo/ui';
+import type { Placement } from '@k8ordo/ui';
 
 import styles from './popover-previews.module.css';
 
@@ -14,84 +15,37 @@ export function PopoverBasicPreview() {
           </Button>
         )}
       />
-      <Popover.Content
-        renderItem={(props) => (
-          <div className={styles.panel} {...props}>
-            <div role="menuitem">Popover content goes here.</div>
-          </div>
-        )}
-      />
+      <Popover.Content label="Details">
+        <p className={styles.body}>Popover content goes here.</p>
+      </Popover.Content>
     </Popover.Root>
   );
 }
 
+const PLACEMENTS = [
+  ['top', 'Top'],
+  ['right', 'Right'],
+  ['bottom', 'Bottom'],
+  ['left', 'Left'],
+] as const satisfies ReadonlyArray<readonly [Placement, string]>;
+
 export function PopoverPlacementPreview() {
   return (
     <>
-      <Popover.Root placement="top">
-        <Popover.Trigger
-          renderItem={(props) => (
-            <Button {...props} size="md" type="button">
-              Top
-            </Button>
-          )}
-        />
-        <Popover.Content
-          renderItem={(props) => (
-            <div className={styles.panel} {...props}>
-              <div role="menuitem">Top placement</div>
-            </div>
-          )}
-        />
-      </Popover.Root>
-      <Popover.Root placement="right">
-        <Popover.Trigger
-          renderItem={(props) => (
-            <Button {...props} size="md" type="button">
-              Right
-            </Button>
-          )}
-        />
-        <Popover.Content
-          renderItem={(props) => (
-            <div className={styles.panel} {...props}>
-              <div role="menuitem">Right placement</div>
-            </div>
-          )}
-        />
-      </Popover.Root>
-      <Popover.Root placement="bottom">
-        <Popover.Trigger
-          renderItem={(props) => (
-            <Button {...props} size="md" type="button">
-              Bottom
-            </Button>
-          )}
-        />
-        <Popover.Content
-          renderItem={(props) => (
-            <div className={styles.panel} {...props}>
-              <div role="menuitem">Bottom placement</div>
-            </div>
-          )}
-        />
-      </Popover.Root>
-      <Popover.Root placement="left">
-        <Popover.Trigger
-          renderItem={(props) => (
-            <Button {...props} size="md" type="button">
-              Left
-            </Button>
-          )}
-        />
-        <Popover.Content
-          renderItem={(props) => (
-            <div className={styles.panel} {...props}>
-              <div role="menuitem">Left placement</div>
-            </div>
-          )}
-        />
-      </Popover.Root>
+      {PLACEMENTS.map(([placement, label]) => (
+        <Popover.Root key={placement} placement={placement}>
+          <Popover.Trigger
+            renderItem={(props) => (
+              <Button {...props} size="md" type="button">
+                {label}
+              </Button>
+            )}
+          />
+          <Popover.Content label={`${label} placement`}>
+            <p className={styles.body}>{label} placement</p>
+          </Popover.Content>
+        </Popover.Root>
+      ))}
     </>
   );
 }

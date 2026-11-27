@@ -5,7 +5,8 @@ tokens, built-in wording that follows `@k8ordo/i18n` (Japanese and English inclu
 that lets an LLM compose on-brand UIs through any generative-UI format.
 
 Like every k8ordo package it assumes React 19 and Server Components, uses only
-what has reached Baseline, and ships no polyfills or legacy fallbacks.
+what has reached Baseline newly available, and ships no polyfills or legacy
+fallbacks.
 
 - **Documentation**: https://ordo.k8o.me/ui
 - **Storybook**: https://main--687a213c85e2e4589d8db1bb.chromatic.com
@@ -43,14 +44,9 @@ it. Install one when you import the entry it belongs to.
 | `@types/react-dom` | ≥19.3.0 | optional | the shipped type declarations                     |
 | `zod`              | ^4.6.6  | optional | generative-UI schemas                             |
 | `streamdown`       | ≥2.5.0  | optional | `@k8ordo/ui/ai/response`                          |
+| `shiki`            | ≥4.6.0  | optional | `@k8ordo/ui/code-block`                           |
 
 <!-- /peers -->
-
-The generative-UI peers are 0.x, where a minor bump is a breaking release, so
-the declared range stops at the next minor: `@k8ordo/ui` only claims the line it
-is tested against. Resolve exactly **one copy** of each — the adapters read the
-framework's own React context, so two copies let every schema check and the
-build pass while the form views throw at render time.
 
 The components need no CSS tooling of their own: they are written in CSS Modules
 and ship compiled CSS, which each component imports. The package does not
@@ -88,14 +84,14 @@ and `i`/`em` style unset, `body` typography defaults). Adding it to an existing
 app restyles more than the library components.
 
 ```tsx
-// In your app entry point
-import { UIProvider } from '@k8ordo/ui';
+// In your app entry point, when the app opens toasts with useToast
+import { ToastProvider } from '@k8ordo/ui';
 
 function App() {
   return (
-    <UIProvider>
+    <ToastProvider>
       <YourApp />
-    </UIProvider>
+    </ToastProvider>
   );
 }
 ```
@@ -260,7 +256,6 @@ entry in [docs/references/components.md](docs/references/components.md).
 - [Drawer](docs/references/components.md#drawer)
 - [DropdownMenu](docs/references/components.md#dropdownmenu)
 - [ListBox](docs/references/components.md#listbox)
-- [Modal](docs/references/components.md#modal)
 - [Popover](docs/references/components.md#popover)
 - [Tooltip](docs/references/components.md#tooltip)
 
@@ -271,19 +266,9 @@ entry in [docs/references/components.md](docs/references/components.md).
 - [Separator](docs/references/components.md#separator)
 - [Stack](docs/references/components.md#stack)
 
-### Observers
-
-- [InView](docs/references/components.md#inview)
-- [Resize](docs/references/components.md#resize)
-
 ### Icons
 
 - [Icons](docs/references/components.md#icons) — decorative icons from `@k8ordo/ui/icons` (`XIcon`, `ChevronIcon`, …)
-
-### Providers
-
-- [PortalRootProvider](docs/references/components.md#portalrootprovider)
-- [UIProvider](docs/references/components.md#uiprovider)
 
 <!-- /generated:component-categories -->
 
@@ -338,8 +323,7 @@ import { Button } from '@k8ordo/ui';
 ### Dialog
 
 ```tsx
-import { Dialog } from '@k8ordo/ui';
-import { Button } from '@k8ordo/ui';
+import { Button, Dialog } from '@k8ordo/ui';
 import { useState } from 'react';
 
 function MyComponent() {
@@ -348,18 +332,14 @@ function MyComponent() {
   return (
     <>
       <Button onClick={() => setIsOpen(true)}>Open Dialog</Button>
-      {isOpen && (
-        <Dialog.Root>
-          <Dialog.Header
-            title="Confirm Action"
-            onClose={() => setIsOpen(false)}
-          />
-          <Dialog.Content>
-            <p>Are you sure you want to continue?</p>
-            <Button onClick={() => setIsOpen(false)}>Confirm</Button>
-          </Dialog.Content>
-        </Dialog.Root>
-      )}
+      <Dialog
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        title="Confirm Action"
+      >
+        <p>Are you sure you want to continue?</p>
+        <Button onClick={() => setIsOpen(false)}>Confirm</Button>
+      </Dialog>
     </>
   );
 }
@@ -376,21 +356,21 @@ import { Button, Card, Stack } from '@k8ordo/ui';
 
 Optional features live behind dedicated subpath exports:
 
-| Subpath                     | Contents                                                                                  |
-| --------------------------- | ----------------------------------------------------------------------------------------- |
-| `@k8ordo/ui`                | Core UI components, their types, and provider hooks                                       |
-| `@k8ordo/ui/icons`          | Line icons, one module each, and `BaseIcon` for drawing your own                          |
-| `@k8ordo/ui/tokens`         | Design tokens as a DTCG resolver document                                                 |
-| `@k8ordo/ui/props.json`     | Every component's props as JSON, generated from the types                                 |
-| `@k8ordo/ui/i18n`           | `ja` / `en`, `registerMessages`, `getMessages`, `messageUsage`, and the `Messages` type   |
-| `@k8ordo/ui/ai`             | AI chat components                                                                        |
-| `@k8ordo/ui/ai/response`    | `Response` Markdown renderer (needs optional peer `streamdown`)                           |
-| `@k8ordo/ui/code-block`     | `CodeBlock`, highlighted on the server with shiki (Server Component)                      |
-| `@k8ordo/ui/catalog`        | The generative-UI catalog: each component described for a model (server-safe)             |
-| `@k8ordo/ui/catalog/render` | How each catalog component is drawn (`'use client'`)                                      |
-| `@k8ordo/ui/styles.css`     | Layer order, tokens, reset and base (required)                                            |
-| `@k8ordo/ui/tokens.css`     | The tokens and the `color-scheme` rules of `styles.css` alone, with no reset and no base  |
-| `@k8ordo/ui/tailwind.css`   | Tailwind CSS 4 bridge, imported after Tailwind: `styles.css` and utilities for the tokens |
+| Subpath                     | Contents                                                                                          |
+| --------------------------- | ------------------------------------------------------------------------------------------------- |
+| `@k8ordo/ui`                | Core UI components, their types, and provider hooks                                               |
+| `@k8ordo/ui/icons`          | Line icons, one module each, and `BaseIcon` for drawing your own                                  |
+| `@k8ordo/ui/tokens`         | Design tokens as a DTCG resolver document                                                         |
+| `@k8ordo/ui/props.json`     | Every component's props, and the components each wording key is drawn by, as JSON                 |
+| `@k8ordo/ui/i18n`           | `ja` / `en`, `registerMessages`, `getMessages`, and the `Messages` type                           |
+| `@k8ordo/ui/ai`             | AI chat components                                                                                |
+| `@k8ordo/ui/ai/response`    | `Response` Markdown renderer (needs optional peer `streamdown`)                                   |
+| `@k8ordo/ui/code-block`     | `CodeBlock`, highlighted on the server with shiki (Server Component; needs optional peer `shiki`) |
+| `@k8ordo/ui/catalog`        | The generative-UI catalog: each component described for a model (server-safe)                     |
+| `@k8ordo/ui/catalog/render` | How each catalog component is drawn (`'use client'`)                                              |
+| `@k8ordo/ui/styles.css`     | Layer order, tokens, reset and base (required)                                                    |
+| `@k8ordo/ui/tokens.css`     | The tokens and the `color-scheme` rules of `styles.css` alone, with no reset and no base          |
+| `@k8ordo/ui/tailwind.css`   | Tailwind CSS 4 bridge, imported after Tailwind: `styles.css` and utilities for the tokens         |
 
 ## AI Chat Components
 
@@ -505,8 +485,8 @@ Components in the catalog:
 - **Overlays (self-contained widgets)**: `Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`, `DropdownMenuItem`, `Toast`
 - **Form**: `TextField`, `Textarea`, `PasswordInput`, `NumberField`, `Slider`, `RangeSlider`, `DateField`, `DatePicker`, `Calendar`, `ColorPicker`, `Combobox`, `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`, `ListBox`, `CheckboxGroup`, `Autocomplete`, `FileField`, `FormControl`
 
-The rest of the exports — `CommandPalette`, `ContextMenu`, `ResizablePanels`, the
-observers, the providers, and the AI chat components — are left out on purpose;
+The rest of the exports — `CommandPalette`, `ContextMenu`, `ResizablePanels`,
+and the AI chat components among them — are left out on purpose;
 [docs/references/generative-ui.md](docs/references/generative-ui.md#what-the-catalog-leaves-out)
 says why.
 
@@ -514,7 +494,7 @@ Overlays are **self-contained widgets**: a `Modal`/`Dialog`/`Drawer`/`Popover` d
 
 > **Notes**
 >
-> - Make sure `@k8ordo/ui/styles.css` (or `tailwind.css` in Tailwind CSS 4 projects) is loaded and the app is wrapped in `UIProvider`.
+> - Make sure `@k8ordo/ui/styles.css` (or `tailwind.css` in Tailwind CSS 4 projects) is loaded.
 > - `Tabs` panels are text content (`tabs: [{ label, content }]`); rich-component panels are a future enhancement.
 
 ## Accessibility
@@ -534,7 +514,7 @@ Components are written in CSS Modules and placed in the `components` cascade
 layer. Customize them through:
 
 - CSS custom properties (semantic design tokens), overridden after `styles.css`
-- `renderItem` / `renderAnchor`, which hand you the component's `className`
+- `renderAnchor`, which hands a link component of your own the component's `className`
 - Light / Dark mode via semantic color tokens (`light-dark()`, switched by the `dark` class)
 - Tailwind utility classes on your own markup, through `tailwind.css`
 
@@ -564,10 +544,9 @@ pnpm check:write
 
 ## Browser Support
 
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
+The browsers that ship what Baseline has newly available. The CSS is compiled
+for them, and [docs/GUIDE.md](docs/GUIDE.md) lists the versions to give your
+bundler as its CSS target.
 
 ## License
 

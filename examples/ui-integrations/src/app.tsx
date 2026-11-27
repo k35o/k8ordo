@@ -23,10 +23,7 @@ function App() {
           で起動したときだけ動きます。
         </p>
       </header>
-      <Tabs.Root
-        defaultSelectedId="generative"
-        ids={['generative', 'chat', 'mcp-apps']}
-      >
+      <Tabs.Root defaultSelectedId="generative">
         <Tabs.List label="試すもの">
           <Tabs.Tab id="generative">生成 UI</Tabs.Tab>
           <Tabs.Tab id="chat">チャット</Tabs.Tab>

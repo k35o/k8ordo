@@ -62,7 +62,7 @@ Vary the radius with the element's role.
 
 | Use                              | Token           |
 | -------------------------------- | --------------- |
-| Dialog, Modal                    | `--radius-lg`   |
+| Dialog, Drawer                   | `--radius-lg`   |
 | Avatar, IconButton, progress bar | `--radius-full` |
 
 With `tailwind.css` these are `rounded-full`, `rounded-xl`, … .
@@ -71,13 +71,13 @@ With `tailwind.css` these are `rounded-full`, `rounded-xl`, … .
 
 Express depth with a soft, gentle shadow.
 
-| Use                      | Style                                                    |
-| ------------------------ | -------------------------------------------------------- |
-| Card (default)           | `--shadow-sm` (with `variant="shadow"`)                  |
-| Card (outlined)          | a 1px `--color-border-mute` border (`variant="outline"`) |
-| Modal / Dialog / Tooltip | `--shadow-md`                                            |
-| Dropdown / ListBox       | `--shadow-md`                                            |
-| Button                   | None                                                     |
+| Use                       | Style                                                    |
+| ------------------------- | -------------------------------------------------------- |
+| Card (default)            | `--shadow-sm` (with `variant="shadow"`)                  |
+| Card (outlined)           | a 1px `--color-border-mute` border (`variant="outline"`) |
+| Dialog / Drawer / Tooltip | `--shadow-md`                                            |
+| Dropdown / ListBox        | `--shadow-md`                                            |
+| Button                    | None                                                     |
 
 Never use `--shadow-xl` or heavier. The focus ring is a shadow too,
 `--shadow-ring-info`; with a surface's own shadow, list the ring first:

@@ -54,7 +54,7 @@ export function RatingDemo({ fields }: Props) {
               aria-pressed={rating === star}
               color={star <= rating ? 'primary' : 'base'}
               key={star}
-              onAction={() => {
+              onClick={() => {
                 setRating(star);
               }}
               size="sm"
@@ -77,15 +77,7 @@ export function RatingDemo({ fields }: Props) {
         <Button type="submit" variant="solid">
           {m.formCustomInputs.demoSubmit()}
         </Button>
-        <Button
-          color="base"
-          renderItem={({ children, className }) => (
-            <button className={className} type="reset">
-              {children}
-            </button>
-          )}
-          variant="outline"
-        >
+        <Button color="base" type="reset" variant="outline">
           {m.formCustomInputs.demoReset()}
         </Button>
       </div>

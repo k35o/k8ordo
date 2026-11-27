@@ -113,7 +113,7 @@ const ColumnMenu = <Row,>({
     .map((column) => column.id);
 
   return (
-    <Popover.Root placement="bottom-end" role="dialog">
+    <Popover.Root placement="bottom-end">
       <Popover.Trigger
         renderItem={(props) => (
           <Button
@@ -127,39 +127,33 @@ const ColumnMenu = <Row,>({
           </Button>
         )}
       />
-      <Popover.Content
-        renderItem={(props) => (
-          <div
-            {...props}
+      <Popover.Content label={messages.dataTableColumns}>
+        <div className={styles.columnMenu}>
+          <p className={styles.columnMenuTitle} id={titleId}>
+            {messages.dataTableColumns}
+          </p>
+          <CheckboxGroup.Root
             aria-labelledby={titleId}
-            className={styles.columnMenu}
+            name={`${titleId}-columns`}
+            onChange={(next) => {
+              onHiddenColumnIdsChange(
+                hideable
+                  .map((column) => column.id)
+                  .filter((id) => !next.includes(id)),
+              );
+            }}
+            value={visible}
           >
-            <p className={styles.columnMenuTitle} id={titleId}>
-              {messages.dataTableColumns}
-            </p>
-            <CheckboxGroup.Root
-              aria-labelledby={titleId}
-              name={`${titleId}-columns`}
-              onChange={(next) => {
-                onHiddenColumnIdsChange(
-                  hideable
-                    .map((column) => column.id)
-                    .filter((id) => !next.includes(id)),
-                );
-              }}
-              value={visible}
-            >
-              {hideable.map((column) => (
-                <CheckboxGroup.Item
-                  itemValue={column.id}
-                  key={column.id}
-                  label={column.header}
-                />
-              ))}
-            </CheckboxGroup.Root>
-          </div>
-        )}
-      />
+            {hideable.map((column) => (
+              <CheckboxGroup.Item
+                itemValue={column.id}
+                key={column.id}
+                label={column.header}
+              />
+            ))}
+          </CheckboxGroup.Root>
+        </div>
+      </Popover.Content>
     </Popover.Root>
   );
 };

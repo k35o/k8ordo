@@ -31,7 +31,7 @@ export const useMenuItem = ({
   onAction,
   id,
 }: {
-  onAction: () => void;
+  onAction: (() => void) | undefined;
   id: string;
 }) => {
   const menu = useMenuContext();
@@ -40,7 +40,7 @@ export const useMenuItem = ({
       role: 'menuitem' as const,
       ...menu.getItemProps(id),
       onClick: () => {
-        onAction();
+        onAction?.();
         menu.closeRoot();
       },
     }),

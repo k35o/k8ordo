@@ -1,4 +1,4 @@
-import { UIProvider } from '@k8ordo/ui';
+import { ToastProvider } from '@k8ordo/ui';
 import { expect, it } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
 import { userEvent } from 'vitest/browser';
@@ -11,9 +11,9 @@ import { SEARCH_TOOL, SOURCES } from './scripted-transport';
 // sendAutomaticallyWhen が続きを取りに行くところまで通す。
 const renderDemo = () =>
   render(
-    <UIProvider>
+    <ToastProvider>
       <AiSdkChatDemo />
-    </UIProvider>,
+    </ToastProvider>,
   );
 
 const fileInputOf = (container: HTMLElement): HTMLInputElement => {

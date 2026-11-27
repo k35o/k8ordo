@@ -16,15 +16,11 @@ import highContrast from '../../_internal/high-contrast.module.css';
 import srOnly from '../../_internal/sr-only.module.css';
 import styles from './alert.module.css';
 
-export type AlertAction = {
-  label: string;
-  renderItem: (props: { children: ReactNode }) => ReactNode;
-};
-
 type Props = {
   tone: Status;
   message: string | string[];
-  action?: AlertAction;
+  /** A link or button, placed after a one-line message or below a list. */
+  action?: ReactNode;
   onClose?: () => void;
   closeLabel?: string;
 } & Omit<
@@ -41,11 +37,10 @@ export const Alert: FC<Props> = ({
   ...rest
 }) => {
   const messages = getMessages();
-  const actionNode = action
-    ? action.renderItem({ children: action.label })
-    : null;
-  const inlineAction = action ? (
-    <span className={styles.inlineAction}>{actionNode}</span>
+  const hasAction =
+    action !== undefined && action !== null && typeof action !== 'boolean';
+  const inlineAction = hasAction ? (
+    <span className={styles.inlineAction}>{action}</span>
   ) : null;
 
   let messageContent: ReactNode;
@@ -60,10 +55,10 @@ export const Alert: FC<Props> = ({
         ))}
       </ul>
     );
-    messageContent = action ? (
+    messageContent = hasAction ? (
       <div>
         {list}
-        <div className={styles.listAction}>{actionNode}</div>
+        <div className={styles.listAction}>{action}</div>
       </div>
     ) : (
       list

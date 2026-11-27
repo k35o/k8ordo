@@ -72,7 +72,7 @@ export function OrderDemo({ fields }: Props) {
               />
             </div>
             {items.canRemove && (
-              <Button color="base" onAction={row.remove} variant="outline">
+              <Button color="base" onClick={row.remove} variant="outline">
                 {m.formNested.demoRemove()}
               </Button>
             )}
@@ -81,7 +81,7 @@ export function OrderDemo({ fields }: Props) {
       })}
       <div className={styles.actions}>
         {items.canAdd && (
-          <Button color="base" onAction={items.add} variant="outline">
+          <Button color="base" onClick={items.add} variant="outline">
             {m.formNested.demoAdd()}
           </Button>
         )}

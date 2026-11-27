@@ -161,8 +161,8 @@ export const actionsRow = message({
 });
 
 export const actionsBehavior = message({
-  ja: '`onAction`がPromiseを返すと、終わるまでボタンは押せなくなります。`Feedback`は2つのトグルです。押したものをもう一度押すと解除され、`onChange`に`null`が渡ります。',
-  en: 'When `onAction` returns a promise, the button stays busy until it settles. `Feedback` is a pair of toggles. Pressing the pressed one again clears it, and `onChange` receives `null`.',
+  ja: '`action`がPromiseを返すと、終わるまでボタンは押せなくなります。`Feedback`は2つのトグルです。押したものをもう一度押すと解除され、`onChange`に`null`が渡ります。',
+  en: 'When `action` returns a promise, the button stays busy until it settles. `Feedback` is a pair of toggles. Pressing the pressed one again clears it, and `onChange` receives `null`.',
 });
 
 export const aiSdkTitle = message({

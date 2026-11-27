@@ -1,4 +1,4 @@
-import { UIProvider } from '@k8ordo/ui';
+import { ToastProvider } from '@k8ordo/ui';
 import { Noto_Sans_JP } from 'next/font/google';
 
 import './globals.css';
@@ -15,7 +15,7 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className={notoSansJP.className}>
-        <UIProvider>{children}</UIProvider>
+        <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
   );

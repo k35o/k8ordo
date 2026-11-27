@@ -38,9 +38,7 @@ const CATEGORIES = new Map([
   ['feedback', 'Feedback'],
   ['overlays', 'Overlays'],
   ['layout', 'Layout'],
-  ['observers', 'Observers'],
   ['icons', 'Icons'],
-  ['providers', 'Providers'],
 ]);
 // Documented in ai-chat.md and a hand-written README section, whose bullets
 // carry each component's parts.

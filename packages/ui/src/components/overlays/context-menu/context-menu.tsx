@@ -11,7 +11,7 @@ import type {
 import { createSafeContext } from '../../../helpers/create-safe-context';
 import { useListNavigation } from '../_internal';
 import { MenuContextProvider } from '../dropdown-menu/hooks';
-import { Popover, useOpenContext } from '../popover';
+import { PopoverBase, useOpenContext } from '../popover';
 import { usePopoverContext } from '../popover/hooks';
 
 type Point = { x: number; y: number };
@@ -27,7 +27,7 @@ export const Root: FC<
     onChange?: (isOpen: boolean) => void;
   }>
 > = ({ children, isOpen, defaultOpen, onChange }) => (
-  <Popover.Root
+  <PopoverBase.Root
     defaultOpen={defaultOpen}
     isOpen={isOpen}
     onChange={onChange}
@@ -35,7 +35,7 @@ export const Root: FC<
     role="menu"
   >
     <MenuRoot>{children}</MenuRoot>
-  </Popover.Root>
+  </PopoverBase.Root>
 );
 
 const MenuRoot: FC<PropsWithChildren> = ({ children }) => {

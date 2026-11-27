@@ -2,8 +2,7 @@
 
 import { clsx } from 'clsx';
 import {
-  startTransition,
-  useCallback,
+  useDeferredValue,
   useId,
   useMemo,
   useRef,
@@ -28,8 +27,8 @@ import styles from './tabs.module.css';
 
 type TabsContext = {
   rootId: string;
-  ids: [string, ...string[]];
   selectedId: string;
+  shownId: string;
   setSelectedId: (id: string) => void;
 };
 
@@ -41,43 +40,39 @@ const [TabsProvider, useTabsState] = createSafeContext<TabsContext>(
   'useTabsState must be used within a TabsProvider',
 );
 
-export const Root: FC<
-  PropsWithChildren<{
-    defaultSelectedId?: string | null;
-    selectedId?: string;
+type RootProps = PropsWithChildren<
+  {
     onChange?: (id: string) => void;
-    ids: [string, ...string[]];
-  }>
-> = ({ defaultSelectedId = null, selectedId, onChange, ids, children }) => {
-  const defaultIndex =
-    defaultSelectedId !== null && defaultSelectedId !== ''
-      ? ids.indexOf(defaultSelectedId)
-      : 0;
+  } & (
+    | { selectedId: string; defaultSelectedId?: never }
+    | { defaultSelectedId: string; selectedId?: never }
+  )
+>;
+
+export const Root: FC<RootProps> = ({
+  defaultSelectedId,
+  selectedId,
+  onChange,
+  children,
+}) => {
   const [currentId, setCurrentId] = useControllableState<string>({
     value: selectedId,
-    defaultValue: defaultSelectedId ?? ids[defaultIndex] ?? ids[0],
+    defaultValue: defaultSelectedId ?? '',
     onChange,
   });
-  // 選択は transition にする。パネルの入れ替わりを <ViewTransition> が
-  // クロスフェードできるのは transition の中の更新だけで、suspend する
-  // パネルは用意できるまで今のパネルを残せる
-  const setSelectedId = useCallback(
-    (id: string) => {
-      startTransition(() => {
-        setCurrentId(id);
-      });
-    },
-    [setCurrentId],
-  );
+  // パネルは選択の遅延値で描く。選択が同期の更新（外部ストアの値）で来ても、
+  // パネルの入れ替わりは後回しの描画になり、<ViewTransition> のクロスフェードと
+  // suspend 中の前のパネルの保持が効く
+  const shownId = useDeferredValue(currentId);
   const rootId = useId();
   const contextValue = useMemo<TabsContext>(
     () => ({
       rootId,
-      ids,
       selectedId: currentId,
-      setSelectedId,
+      shownId,
+      setSelectedId: setCurrentId,
     }),
-    [rootId, ids, currentId, setSelectedId],
+    [rootId, currentId, shownId, setCurrentId],
   );
 
   return (
@@ -133,16 +128,22 @@ export const List: FC<
   );
 };
 
+const inDocumentOrder = (
+  [, a]: [string, HTMLElement],
+  [, b]: [string, HTMLElement],
+): number =>
+  a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
+
 export const Tab: FC<PropsWithChildren<{ id: string }>> = ({
   id,
   children,
 }) => {
-  const { rootId, ids, selectedId, setSelectedId } = useTabsState();
+  const { rootId, selectedId, shownId, setSelectedId } = useTabsState();
   const { tabsRef, writingMode } = useTabsListState();
-  const activeIndex = ids.indexOf(selectedId);
-  const index = ids.indexOf(id);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const tabs = [...tabsRef.current].toSorted(inDocumentOrder);
+    const index = tabs.findIndex(([tabId]) => tabId === id);
     // 縦書きでは tablist の inline 軸が縦になるので、前後を上下キーに割り当てる
     const rtl = getComputedStyle(event.currentTarget).direction === 'rtl';
     const [previousKey, nextKey] =
@@ -152,29 +153,30 @@ export const Tab: FC<PropsWithChildren<{ id: string }>> = ({
           ? ['ArrowRight', 'ArrowLeft']
           : ['ArrowLeft', 'ArrowRight'];
     const target = {
-      [previousKey]: (index - 1 + ids.length) % ids.length,
-      [nextKey]: (index + 1) % ids.length,
+      [previousKey]: (index - 1 + tabs.length) % tabs.length,
+      [nextKey]: (index + 1) % tabs.length,
       Home: 0,
-      End: ids.length - 1,
+      End: tabs.length - 1,
     }[event.key];
-    const targetId = target === undefined ? undefined : ids[target];
-    if (targetId === undefined) {
+    const entry = target === undefined ? undefined : tabs[target];
+    if (entry === undefined) {
       return;
     }
     event.preventDefault();
+    const [targetId, targetElement] = entry;
     if (targetId === id) {
       return;
     }
-    // 選択を effect で追ってフォーカスを移すと遅れる。選択は transition で、React は
-    // <ViewTransition> の animate が終わるまで effect を走らせず、その間に押した
-    // キーが元のタブに届いて取りこぼす
-    tabsRef.current.get(targetId)?.focus();
+    // 選択を effect で追ってフォーカスを移すと遅れる。パネルの入れ替わりは
+    // <ViewTransition> で animate し、React はそれが終わるまで effect を走らせず、
+    // その間に押したキーが元のタブに届いて取りこぼす
+    targetElement.focus();
     setSelectedId(targetId);
   };
 
   return (
     <div
-      aria-controls={selectedId === id ? `${rootId}-panel-${id}` : undefined}
+      aria-controls={shownId === id ? `${rootId}-panel-${id}` : undefined}
       aria-selected={selectedId === id}
       className={clsx(
         styles.tab,
@@ -200,7 +202,7 @@ export const Tab: FC<PropsWithChildren<{ id: string }>> = ({
           ? { anchorName: toAnchorName(rootId) }
           : undefined) satisfies CSSProperties | undefined
       }
-      tabIndex={activeIndex === index ? 0 : -1}
+      tabIndex={selectedId === id ? 0 : -1}
     >
       {children}
     </div>
@@ -211,9 +213,9 @@ export const Panel: FC<PropsWithChildren<{ id: string }>> = ({
   id,
   children,
 }) => {
-  const { rootId, selectedId } = useTabsState();
+  const { rootId, shownId } = useTabsState();
 
-  if (selectedId !== id) {
+  if (shownId !== id) {
     return null;
   }
 

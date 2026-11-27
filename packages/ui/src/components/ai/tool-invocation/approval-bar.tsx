@@ -1,23 +1,13 @@
 'use client';
 
-import { useCallback, useTransition } from 'react';
+import { useCallback, useOptimistic } from 'react';
 import type { FC } from 'react';
 
 import { getMessages } from '../../../i18n/current';
 import { Button } from '../../buttons/button';
-import type { ButtonRenderItemProps } from '../../buttons/button';
 import type { ToolApproval, ToolApprovalResponse } from '../types';
 
 import styles from './approval-bar.module.css';
-
-// 答えている間も、押したボタンにフォーカスを残す。disabled にすると
-// Chromium は描画の更新のあとでフォーカスを body へ外し、バーが消えるときに
-// 見出しへ移せなくなる。無効は Button が添える aria-disabled で示し、
-// 二度目の答えは Button の onClick が止める
-const renderFocusable = ({
-  disabled: _disabled,
-  ...props
-}: ButtonRenderItemProps) => <button {...props} type="button" />;
 
 type Props = {
   approval: ToolApproval;
@@ -35,7 +25,13 @@ export const ApprovalBar: FC<Props> = ({
   onApprovalResponse,
 }) => {
   const messages = getMessages();
-  const [isResponding, startTransition] = useTransition();
+  // 答えている間、押していない方だけをネイティブの disabled にする。押した方を
+  // disabled にすると Chromium は描画の更新のあとでフォーカスを body へ外し、
+  // バーが消えるときに見出しへ移せなくなる。押した方は Button の action の保留で
+  // aria-disabled になり、二度目の答えは Button が止める
+  const [answering, setAnswering] = useOptimistic<boolean | undefined>(
+    undefined,
+  );
   // 答えると問いのバーごと消え、押したボタンにあったフォーカスが body に
   // 落ちる。消える直前（ref の解除は DOM から外すより先に走る）にまだ
   // フォーカスを持っていたら、同じツールの見出しへ移す。見出しは
@@ -51,10 +47,9 @@ export const ApprovalBar: FC<Props> = ({
     [triggerId],
   );
 
-  const respond = (approved: boolean) => {
-    startTransition(async () => {
-      await onApprovalResponse?.({ id: approval.id, approved });
-    });
+  const respond = (approved: boolean) => async () => {
+    setAnswering(approved);
+    await onApprovalResponse?.({ id: approval.id, approved });
   };
 
   return (
@@ -70,23 +65,17 @@ export const ApprovalBar: FC<Props> = ({
       {onApprovalResponse !== undefined && (
         <div className={styles.buttons}>
           <Button
+            action={respond(false)}
             color="base"
-            disabled={isResponding}
-            onClick={() => {
-              respond(false);
-            }}
-            renderItem={renderFocusable}
+            disabled={answering === true}
             size="sm"
             variant="outline"
           >
             {messages.toolDeny}
           </Button>
           <Button
-            disabled={isResponding}
-            onClick={() => {
-              respond(true);
-            }}
-            renderItem={renderFocusable}
+            action={respond(true)}
+            disabled={answering === false}
             size="sm"
           >
             {messages.toolApprove}

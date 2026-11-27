@@ -101,7 +101,7 @@ export function A2uiDemo() {
       <Stack align="center" direction="row" gap="sm">
         <Code>{profile}</Code>
         <Button
-          onAction={() => {
+          onClick={() => {
             setProcessor(replay());
           }}
           size="sm"

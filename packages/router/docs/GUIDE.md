@@ -332,7 +332,7 @@ startTransition(async () => {
 ```
 
 The page change does not join the action, so awaiting `finished` inside one —
-`useTransition`'s, `@k8ordo/ui`'s `Button` `onAction`, a `<form action>` —
+`useTransition`'s, `@k8ordo/ui`'s `Button` `action`, a `<form action>` —
 settles as soon as the page is on screen, and `isPending` covers exactly that
 wait. An event handler can await it the same way. A page change started while
 some unrelated action is still pending reaches the screen without waiting for

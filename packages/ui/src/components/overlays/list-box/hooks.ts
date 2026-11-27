@@ -15,7 +15,7 @@ type MenuContext = ListNavigation & {
 };
 
 const [MenuContextProvider, useMenuContext] = createSafeContext<MenuContext>(
-  'useMenuContext must be used within a ListBox.Root',
+  'useMenuContext must be used within a ListBox',
 );
 
 export { MenuContextProvider };

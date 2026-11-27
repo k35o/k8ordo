@@ -1,4 +1,4 @@
-import { UIProvider } from '@k8ordo/ui';
+import { ToastProvider } from '@k8ordo/ui';
 import { beforeEach, expect, it, vi } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
 
@@ -12,9 +12,9 @@ beforeEach(() => {
 
 it('データモデルの値で入力欄が描画される', async () => {
   const screen = await render(
-    <UIProvider>
+    <ToastProvider>
       <A2uiDemo />
-    </UIProvider>,
+    </ToastProvider>,
   );
 
   await expect
@@ -32,9 +32,9 @@ it('データモデルの値で入力欄が描画される', async () => {
 
 it('入力した値がデータモデルに書き込まれる', async () => {
   const screen = await render(
-    <UIProvider>
+    <ToastProvider>
       <A2uiDemo />
-    </UIProvider>,
+    </ToastProvider>,
   );
 
   const nickname = screen.getByPlaceholder('ニックネーム');

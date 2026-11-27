@@ -20,6 +20,7 @@
     "@k8ordo/router": "workspace:^",
     "@k8ordo/state": "workspace:^",
     "@k8ordo/ui": "workspace:^",
+    "shiki": "4.6.0",
     "zod": "catalog:"
   },
   "devDependencies": {

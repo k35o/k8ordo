@@ -60,14 +60,12 @@ export default function ListBoxPage() {
 
 const [selected, setSelected] = useState<string>();
 
-<ListBox.Root
+<ListBox
+  label="Fruit"
   onChange={(value) => setSelected(value)}
   options={OPTIONS}
   value={selected}
->
-  <ListBox.Trigger label="Fruit" />
-  <ListBox.Content />
-</ListBox.Root>`}
+/>`}
           >
             <ListBoxBasicPreview />
           </ComponentPreview>
@@ -78,20 +76,9 @@ const [selected, setSelected] = useState<string>();
             <Rich>{m.components.listBox.sizesTitle()}</Rich>
           </Heading>
           <ComponentPreview
-            code={`<ListBox.Root onChange={onChange} options={OPTIONS} value={value}>
-  <ListBox.Trigger label="Fruit (sm)" size="sm" />
-  <ListBox.Content />
-</ListBox.Root>
-
-<ListBox.Root onChange={onChange} options={OPTIONS} value={value}>
-  <ListBox.Trigger label="Fruit (md)" size="md" />
-  <ListBox.Content />
-</ListBox.Root>
-
-<ListBox.Root onChange={onChange} options={OPTIONS} value={value}>
-  <ListBox.Trigger label="Fruit (lg)" size="lg" />
-  <ListBox.Content />
-</ListBox.Root>`}
+            code={`<ListBox label="Fruit (sm)" options={OPTIONS} size="sm" />
+<ListBox label="Fruit (md)" options={OPTIONS} size="md" />
+<ListBox label="Fruit (lg)" options={OPTIONS} size="lg" />`}
           >
             <ListBoxSizesPreview />
           </ComponentPreview>
@@ -104,10 +91,7 @@ const [selected, setSelected] = useState<string>();
           <ComponentPreview
             code={`import { ListIcon } from '@k8ordo/ui/icons';
 
-<ListBox.Root onChange={onChange} options={OPTIONS} value={value}>
-  <ListBox.IconTrigger icon={<ListIcon />} label="Fruit" />
-  <ListBox.Content />
-</ListBox.Root>`}
+<ListBox icon={<ListIcon />} label="Fruit" options={OPTIONS} />`}
           >
             <ListBoxIconTriggerPreview />
           </ComponentPreview>
@@ -119,14 +103,7 @@ const [selected, setSelected] = useState<string>();
         <Heading level="h2">
           <Rich>{m.components.common.propsTitle()}</Rich>
         </Heading>
-        <Heading level="h3">ListBox.Root</Heading>
-        <PropsTable items={propsOf('ListBox.Root')} />
-        <Heading level="h3">ListBox.Trigger</Heading>
-        <PropsTable items={propsOf('ListBox.Trigger')} />
-        <Heading level="h3">ListBox.IconTrigger</Heading>
-        <PropsTable items={propsOf('ListBox.IconTrigger')} />
-        <Heading level="h3">ListBox.Content</Heading>
-        <PropsTable items={propsOf('ListBox.Content')} />
+        <PropsTable items={propsOf('ListBox')} />
       </section>
     </div>
   );

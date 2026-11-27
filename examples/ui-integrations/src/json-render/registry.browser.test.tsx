@@ -1,5 +1,5 @@
 import type { ActionBinding, Spec } from '@json-render/core';
-import { UIProvider } from '@k8ordo/ui';
+import { ToastProvider } from '@k8ordo/ui';
 import { expect, it, vi } from 'vite-plus/test';
 import { render } from 'vitest-browser-react';
 
@@ -23,9 +23,9 @@ const profileSpec = (state: Record<string, unknown>): Spec => ({
 
 it('spec の state を、結ばれた欄の最初の値にする', async () => {
   const screen = await render(
-    <UIProvider>
+    <ToastProvider>
       <JsonRenderUI spec={profileSpec({ profile: { nickname: 'k8o' } })} />
-    </UIProvider>,
+    </ToastProvider>,
   );
 
   await expect
@@ -35,19 +35,19 @@ it('spec の state を、結ばれた欄の最初の値にする', async () => {
 
 it('spec が書き足されても、spec が変えていない値は打ち込んだまま残る', async () => {
   const screen = await render(
-    <UIProvider>
+    <ToastProvider>
       <JsonRenderUI spec={profileSpec({ profile: { nickname: 'k8o' } })} />
-    </UIProvider>,
+    </ToastProvider>,
   );
   const nickname = screen.getByPlaceholder('ニックネーム');
   await nickname.fill('ordo');
 
   await screen.rerender(
-    <UIProvider>
+    <ToastProvider>
       <JsonRenderUI
         spec={profileSpec({ profile: { nickname: 'k8o', plan: 'pro' } })}
       />
-    </UIProvider>,
+    </ToastProvider>,
   );
 
   await expect.element(nickname).toHaveValue('ordo');
@@ -83,7 +83,7 @@ const withButton = (press: ActionBinding): Spec => ({
 it('press に結んだ toAssistant は、params の $state を今の値にして届く', async () => {
   const toAssistant = vi.fn();
   const screen = await render(
-    <UIProvider>
+    <ToastProvider>
       <JsonRenderUI
         onToAssistant={toAssistant}
         spec={withButton({
@@ -91,7 +91,7 @@ it('press に結んだ toAssistant は、params の $state を今の値にして
           params: { event: 'save', nickname: { $state: '/profile/nickname' } },
         })}
       />
-    </UIProvider>,
+    </ToastProvider>,
   );
 
   await screen.getByPlaceholder('ニックネーム').fill('ordo');
@@ -104,7 +104,7 @@ it('press に結んだ toAssistant は、params の $state を今の値にして
 it('json-render の組み込みの setState は、アプリを通らず画面の中で効く', async () => {
   const toAssistant = vi.fn();
   const screen = await render(
-    <UIProvider>
+    <ToastProvider>
       <JsonRenderUI
         onToAssistant={toAssistant}
         spec={withButton({
@@ -112,7 +112,7 @@ it('json-render の組み込みの setState は、アプリを通らず画面の
           params: { statePath: '/profile/nickname', value: '' },
         })}
       />
-    </UIProvider>,
+    </ToastProvider>,
   );
 
   await screen.getByRole('button', { name: '保存' }).click();
@@ -126,14 +126,14 @@ it('onToAssistant を描き直しで差し替えると、差し替えたほう�
   const second = vi.fn();
   const spec = withButton({ action: 'toAssistant', params: { event: 'save' } });
   const screen = await render(
-    <UIProvider>
+    <ToastProvider>
       <JsonRenderUI onToAssistant={first} spec={spec} />
-    </UIProvider>,
+    </ToastProvider>,
   );
   await screen.rerender(
-    <UIProvider>
+    <ToastProvider>
       <JsonRenderUI onToAssistant={second} spec={spec} />
-    </UIProvider>,
+    </ToastProvider>,
   );
 
   await screen.getByRole('button', { name: '保存' }).click();

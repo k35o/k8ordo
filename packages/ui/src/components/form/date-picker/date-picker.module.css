@@ -80,10 +80,5 @@
 }
 
 .dialog {
-  border-radius: var(--radius-xl);
-  border-width: 1px;
-  border-color: var(--color-border-subtle);
-  background-color: var(--color-bg-raised);
   padding: calc(var(--spacing) * 3);
-  box-shadow: var(--shadow-md);
 }

@@ -171,8 +171,8 @@ export const handleFail = message({
 });
 
 export const handleAction = message({
-  ja: '非同期のアクションの中でも同じように待てます。`startTransition(async …)`や`useTransition`、`@k8ordo/ui`の`Button`の`onAction`がそうです。ただし`@k8ordo/router`の下では、別のページを読み込んでいる最中の`url`の更新はページの切り替えになります。その`finished`は、アクションの終わりを待たずに、そのページが表示された時点で解決します。',
-  en: 'An async action can await it the same way: `startTransition(async …)`, `useTransition`, or `@k8ordo/ui`’s `Button` `onAction`. Under `@k8ordo/router`, though, a `url` update issued while another page is still loading is a page change. Its `finished` settles once that page is on screen, without waiting for the action to end.',
+  ja: '非同期のアクションの中でも同じように待てます。`startTransition(async …)`や`useTransition`、`@k8ordo/ui`の`Button`の`action`がそうです。ただし`@k8ordo/router`の下では、別のページを読み込んでいる最中の`url`の更新はページの切り替えになります。その`finished`は、アクションの終わりを待たずに、そのページが表示された時点で解決します。',
+  en: 'An async action can await it the same way: `startTransition(async …)`, `useTransition`, or `@k8ordo/ui`’s `Button` `action`. Under `@k8ordo/router`, though, a `url` update issued while another page is still loading is a page change. Its `finished` settles once that page is on screen, without waiting for the action to end.',
 });
 
 export const functionalTitle = message({

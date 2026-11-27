@@ -44,6 +44,24 @@ export const Medium: Story = {
   },
 };
 
+// Breadcrumb.Link は残りの <a> の属性をそのまま渡す
+export const LinkAttributes: Story = {
+  render: () => (
+    <Breadcrumb.List>
+      <Breadcrumb.Item>
+        <Breadcrumb.Link data-testid="home" href="/" hrefLang="ja">
+          Home
+        </Breadcrumb.Link>
+      </Breadcrumb.Item>
+    </Breadcrumb.List>
+  ),
+  play: async ({ canvas }) => {
+    const link = canvas.getByRole('link', { name: 'Home' });
+    await expect(link).toHaveAttribute('hreflang', 'ja');
+    await expect(link).toHaveAttribute('data-testid', 'home');
+  },
+};
+
 export const Large: Story = {
   render: () => (
     <Breadcrumb.List size="lg">

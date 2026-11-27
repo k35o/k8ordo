@@ -2,6 +2,10 @@ import { Anchor, Heading, Separator } from '@k8ordo/ui';
 
 import { CodeBlock } from '../../../../../components/code-block';
 import { ComponentPreview } from '../../../../../components/component-preview';
+import {
+  InstallCommand,
+  peerVersionOf,
+} from '../../../../../components/install';
 import { PageTitle } from '../../../../../components/page-title';
 import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
@@ -52,6 +56,14 @@ export default function CodeBlockPage() {
           code="import { CodeBlock } from '@k8ordo/ui/code-block';"
           lang="ts"
         />
+        <p className={page.mute}>
+          <Rich>
+            {m.components.codeBlock.install(
+              peerVersionOf('@k8ordo/ui', 'shiki'),
+            )}
+          </Rich>
+        </p>
+        <InstallCommand packages="shiki" />
       </section>
       <Separator color="mute" />
 

@@ -10,6 +10,7 @@ import { propsOf } from '../../../../../data/component-props';
 import {
   DrawerBasicPreview,
   DrawerCustomContentPreview,
+  DrawerLeftPreview,
 } from '../../../../../demos/ui/components/drawer-previews';
 import * as m from '../../../../../messages';
 
@@ -73,6 +74,28 @@ export default function DrawerPage() {
 </Drawer>`}
           >
             <DrawerBasicPreview />
+          </ComponentPreview>
+        </div>
+
+        <div className={page.stack}>
+          <Heading level="h3">
+            <Rich>{m.components.drawer.sideTitle()}</Rich>
+          </Heading>
+          <p className={page.mute}>
+            <Rich>{m.components.drawer.sideDescription()}</Rich>
+          </p>
+          <ComponentPreview
+            code={`<Drawer
+  description="Choose which items the list shows."
+  isOpen={isOpen}
+  onClose={() => setIsOpen(false)}
+  side="left"
+  title="Filters"
+>
+  …
+</Drawer>`}
+          >
+            <DrawerLeftPreview />
           </ComponentPreview>
         </div>
 

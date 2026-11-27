@@ -6,9 +6,9 @@ import type { FC, ReactNode } from 'react';
 
 import { createSafeContext } from '../../../helpers/create-safe-context';
 import { getMessages } from '../../../i18n/current';
+import { InView } from '../../_internal/in-view';
+import { Resize } from '../../_internal/resize';
 import { ChevronIcon } from '../../icons/chevron';
-import { InView } from '../../observers/in-view';
-import { Resize } from '../../observers/resize';
 
 import focusRing from '../../_internal/focus-ring.module.css';
 import styles from './conversation.module.css';

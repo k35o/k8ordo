@@ -6,7 +6,7 @@ import { MenuIcon } from '@k8ordo/ui/icons';
 
 import { PACKAGES } from '../data/packages';
 import type { PackageEntry } from '../data/packages';
-import { href, navigateTo } from '../links';
+import { href } from '../links';
 import type { SitePath } from '../links';
 import * as m from '../messages';
 import { FRAME } from './frame';
@@ -72,11 +72,9 @@ export function Navigation() {
               <DropdownMenu.Content>
                 {mobileEntries.map((entry) => (
                   <DropdownMenu.Item
+                    href={href(entry.path)}
                     key={entry.path}
                     label={entry.label}
-                    onAction={() => {
-                      navigateTo(entry.path);
-                    }}
                   />
                 ))}
               </DropdownMenu.Content>

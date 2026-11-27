@@ -1,4 +1,4 @@
-import { UIProvider } from '@k8ordo/ui';
+import { ToastProvider } from '@k8ordo/ui';
 import { App } from '@modelcontextprotocol/ext-apps';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -23,8 +23,8 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <UIProvider>
+    <ToastProvider>
       <McpAppView app={app} toolCall={toolCall} />
-    </UIProvider>
+    </ToastProvider>
   </StrictMode>,
 );

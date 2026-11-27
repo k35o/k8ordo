@@ -1,4 +1,4 @@
-import { UIProvider } from '@k8ordo/ui';
+import { ToastProvider } from '@k8ordo/ui';
 import { createUIMessageStreamResponse, simulateReadableStream } from 'ai';
 import type { UIMessage, UIMessageChunk } from 'ai';
 import { afterEach, expect, it, vi } from 'vite-plus/test';
@@ -108,9 +108,9 @@ const serve = (replies: Reply[]) => {
 
 const mount = async (prompt = 'フォームを出して') => {
   const screen = await render(
-    <UIProvider>
+    <ToastProvider>
       <UiChat />
-    </UIProvider>,
+    </ToastProvider>,
   );
   await screen.getByPlaceholder('例: 会員登録のフォームを出して').fill(prompt);
   await screen.getByRole('button', { name: /送信|Send/ }).click();

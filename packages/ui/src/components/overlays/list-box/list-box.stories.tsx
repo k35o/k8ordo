@@ -8,13 +8,13 @@ import type { Option } from './../../../types/variables';
 
 import styles from './list-box.stories.module.css';
 
-const meta: Meta<typeof ListBox.Root> = {
+const meta: Meta<typeof ListBox> = {
   title: 'components/overlays/list-box',
-  component: ListBox.Root,
+  component: ListBox,
 };
 
 export default meta;
-type Story = StoryObj<typeof ListBox.Root>;
+type Story = StoryObj<typeof ListBox>;
 
 const OPTIONS: readonly Option[] = [
   { value: '1', label: 'りんご' },
@@ -33,16 +33,13 @@ const DefaultRender = () => {
   const [selected, setSelected] = useState<string>();
   return (
     <div className={styles.field}>
-      <ListBox.Root
+      <ListBox
         onChange={(value: string) => {
           setSelected(value);
         }}
         options={OPTIONS}
         value={selected}
-      >
-        <ListBox.Trigger />
-        <ListBox.Content />
-      </ListBox.Root>
+      />
     </div>
   );
 };
@@ -62,16 +59,14 @@ const WithLabelRender = () => {
   const [selected, setSelected] = useState<string>();
   return (
     <div className={styles.field}>
-      <ListBox.Root
+      <ListBox
         onChange={(value: string) => {
           setSelected(value);
         }}
         options={OPTIONS}
         value={selected}
-      >
-        <ListBox.Trigger label="果物" />
-        <ListBox.Content />
-      </ListBox.Root>
+        label="果物"
+      />
     </div>
   );
 };
@@ -103,18 +98,15 @@ const WithHelpContentRender = () => {
   const [selected, setSelected] = useState<string>('1');
   return (
     <div className={styles.field}>
-      <ListBox.Root
+      <ListBox
         onChange={(value: string) => {
           setSelected(value);
         }}
         options={OPTIONS}
         value={selected}
-      >
-        <ListBox.Trigger label="果物" />
-        <ListBox.Content
-          helpContent={<p className={styles.help}>ひとつだけ選べます</p>}
-        />
-      </ListBox.Root>
+        label="果物"
+        helpContent={<p className={styles.help}>ひとつだけ選べます</p>}
+      />
     </div>
   );
 };
@@ -140,16 +132,15 @@ export const WithHelpContent: Story = {
 const IconTriggerRender = () => {
   const [selected, setSelected] = useState<string>('2');
   return (
-    <ListBox.Root
+    <ListBox
+      icon={<ListIcon />}
+      label="果物"
       onChange={(value: string) => {
         setSelected(value);
       }}
       options={OPTIONS}
       value={selected}
-    >
-      <ListBox.IconTrigger icon={<ListIcon />} label="果物" />
-      <ListBox.Content />
-    </ListBox.Root>
+    />
   );
 };
 
@@ -168,12 +159,7 @@ export const IconTrigger: Story = {
 // value / onChange を渡さない非制御利用。defaultValue が初期選択になり、
 // 選択状態はコンポーネント内部で保持される
 export const Uncontrolled: Story = {
-  render: () => (
-    <ListBox.Root defaultValue="2" options={OPTIONS}>
-      <ListBox.Trigger label="果物" />
-      <ListBox.Content />
-    </ListBox.Root>
-  ),
+  render: () => <ListBox defaultValue="2" label="果物" options={OPTIONS} />,
   play: async ({ canvas, userEvent }) => {
     const trigger = canvas.getByRole('combobox', { name: '果物 バナナ' });
     trigger.focus();

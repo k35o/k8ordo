@@ -8,7 +8,6 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
-import { IconButtonAsLinkPreview } from '../../../../../demos/ui/components/icon-button-previews';
 import * as m from '../../../../../messages';
 
 import page from '../../../../../styles/page.module.css';
@@ -91,29 +90,29 @@ export default function IconButtonPage() {
             <Rich>{m.components.iconButton.backgroundsTitle()}</Rich>
           </Heading>
           <ComponentPreview
-            code={`<IconButton color="transparent" label="Close">
+            code={`<IconButton label="Close">
   <XIcon size="sm" />
 </IconButton>
-<IconButton color="base" label="Close">
+<IconButton color="base" label="Close" variant="solid">
   <XIcon size="sm" />
 </IconButton>
-<IconButton color="primary" label="Close">
+<IconButton color="primary" label="Close" variant="solid">
   <XIcon size="sm" />
 </IconButton>
-<IconButton color="secondary" label="Close">
+<IconButton color="secondary" label="Close" variant="solid">
   <XIcon size="sm" />
 </IconButton>`}
           >
-            <IconButton color="transparent" label="Close">
+            <IconButton label="Close">
               <XIcon size="sm" />
             </IconButton>
-            <IconButton color="base" label="Close">
+            <IconButton color="base" label="Close" variant="solid">
               <XIcon size="sm" />
             </IconButton>
-            <IconButton color="primary" label="Close">
+            <IconButton color="primary" label="Close" variant="solid">
               <XIcon size="sm" />
             </IconButton>
-            <IconButton color="secondary" label="Close">
+            <IconButton color="secondary" label="Close" variant="solid">
               <XIcon size="sm" />
             </IconButton>
           </ComponentPreview>
@@ -136,27 +135,16 @@ export default function IconButtonPage() {
 
         <div className={page.stack}>
           <Heading level="h3">
-            <Rich>{m.components.iconButton.renderItemTitle()}</Rich>
+            <Rich>{m.components.iconButton.linkTitle()}</Rich>
           </Heading>
           <ComponentPreview
-            code={`<IconButton
-  label="Close"
-  renderItem={({
-    children,
-    disabled: _disabled,
-    triggerProps,
-    type: _type,
-    ...props
-  }) => (
-    <a href="https://example.com" {...props} {...triggerProps}>
-      {children}
-    </a>
-  )}
->
+            code={`<IconButton href="https://example.com" label="Close">
   <XIcon size="sm" />
 </IconButton>`}
           >
-            <IconButtonAsLinkPreview />
+            <IconButton href="https://example.com" label="Close">
+              <XIcon size="sm" />
+            </IconButton>
           </ComponentPreview>
         </div>
       </section>

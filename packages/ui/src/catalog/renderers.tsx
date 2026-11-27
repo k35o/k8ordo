@@ -64,7 +64,6 @@ import { Dialog } from '../components/overlays/dialog';
 import { Drawer } from '../components/overlays/drawer';
 import { DropdownMenu } from '../components/overlays/dropdown-menu';
 import { ListBox } from '../components/overlays/list-box';
-import { Modal } from '../components/overlays/modal';
 import { Popover } from '../components/overlays/popover';
 import { Tooltip } from '../components/overlays/tooltip';
 import { getMessages } from '../i18n/current';
@@ -158,24 +157,18 @@ type Press = (() => void | Promise<void>) | undefined;
 export function renderButton(props: ButtonProps, onPress: Press): ReactNode {
   const { label } = props;
   const href = u(props.href);
-  const isLink = href !== undefined && href !== '';
-  return (
-    <Button
-      color={u(props.color)}
-      fullWidth={u(props.fullWidth)}
-      onAction={isLink ? undefined : onPress}
-      renderItem={
-        isLink
-          ? ({ className, children }) => (
-              <a className={className} href={href}>
-                {children}
-              </a>
-            )
-          : undefined
-      }
-      size={u(props.size)}
-      variant={u(props.variant)}
-    >
+  const look = {
+    color: u(props.color),
+    fullWidth: u(props.fullWidth),
+    size: u(props.size),
+    variant: u(props.variant),
+  };
+  return href !== undefined && href !== '' ? (
+    <Button {...look} href={href}>
+      {label}
+    </Button>
+  ) : (
+    <Button {...look} action={onPress}>
       {label}
     </Button>
   );
@@ -236,8 +229,8 @@ export function renderCard(
   const href = u(props.href);
   return (
     <Card
+      action={onPress}
       href={href === '' ? undefined : href}
-      onAction={onPress}
       variant={u(props.variant)}
       width={u(props.width)}
     >
@@ -252,12 +245,9 @@ export function renderCard(
 export const TabsView: FC<{ props: TabsProps }> = ({ props }) => {
   const messages = getMessages();
   const baseId = useId();
-  const ids = props.tabs.map((_, index) => `${baseId}-tab-${index}`) as [
-    string,
-    ...string[],
-  ];
+  const ids = props.tabs.map((_, index) => `${baseId}-tab-${index}`);
   return (
-    <Tabs.Root ids={ids}>
+    <Tabs.Root defaultSelectedId={ids[0] ?? ''}>
       <Tabs.List label={u(props.label) ?? messages.tabList}>
         {props.tabs.map((tab, index) => (
           <Tabs.Tab id={ids[index] ?? ''} key={ids[index]}>
@@ -724,10 +714,11 @@ export function renderIconButton(
   const IconComponent = iconMap[props.icon];
   return (
     <IconButton
+      action={onPress}
       color={u(props.color)}
       label={props.label}
-      onAction={onPress}
       size={u(props.size)}
+      variant={u(props.variant)}
     >
       <IconComponent size={u(props.size) ?? 'md'} />
     </IconButton>
@@ -835,7 +826,7 @@ export function renderAccordion(props: AccordionProps): ReactNode {
     <Accordion.Root>
       {props.items.map((item) => (
         <Accordion.Item defaultOpen={u(item.defaultOpen)} key={item.title}>
-          <Accordion.Button>{item.title}</Accordion.Button>
+          <Accordion.Button level="h3">{item.title}</Accordion.Button>
           <Accordion.Panel>{item.content}</Accordion.Panel>
         </Accordion.Item>
       ))}
@@ -992,23 +983,29 @@ const OverlayWidget: FC<{
       >
         {triggerLabel}
       </Button>
-      <Modal
-        isOpen={isOpen}
-        onClose={() => {
-          setIsOpen(false);
-        }}
-        side={side}
-      >
-        <Dialog.Root>
-          <Dialog.Header
-            onClose={() => {
-              setIsOpen(false);
-            }}
-            title={title}
-          />
-          <Dialog.Content>{children}</Dialog.Content>
-        </Dialog.Root>
-      </Modal>
+      {side === 'left' || side === 'right' ? (
+        <Drawer
+          isOpen={isOpen}
+          onClose={() => {
+            setIsOpen(false);
+          }}
+          side={side}
+          title={title}
+        >
+          {children}
+        </Drawer>
+      ) : (
+        <Dialog
+          isOpen={isOpen}
+          onClose={() => {
+            setIsOpen(false);
+          }}
+          side={side}
+          title={title}
+        >
+          {children}
+        </Dialog>
+      )}
     </>
   );
 };
@@ -1082,13 +1079,9 @@ export function renderPopover(
           </Button>
         )}
       />
-      <Popover.Content
-        renderItem={({ id, ref }) => (
-          <div className={styles.popover} id={id} ref={ref}>
-            {children}
-          </div>
-        )}
-      />
+      <Popover.Content label={props.triggerLabel}>
+        <div className={styles.popover}>{children}</div>
+      </Popover.Content>
     </Popover.Root>
   );
 }
@@ -1229,14 +1222,12 @@ export function renderListBox(
   onChange: (next: string) => void,
 ): ReactNode {
   return (
-    <ListBox.Root
+    <ListBox
+      label={u(props.label)}
       onChange={onChange}
       options={props.options}
       value={value === '' ? undefined : value}
-    >
-      <ListBox.Trigger label={u(props.label)} />
-      <ListBox.Content />
-    </ListBox.Root>
+    />
   );
 }
 

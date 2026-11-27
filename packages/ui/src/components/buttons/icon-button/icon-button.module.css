@@ -9,7 +9,7 @@
   transition-timing-function: var(--easing-out);
 }
 
-.transparent {
+.skeleton {
   background-color: transparent;
 }
 
@@ -26,7 +26,7 @@
 }
 
 @media (hover: hover) {
-  .transparent:hover,
+  .skeleton:hover,
   .base:hover {
     background-color: var(--color-bg-subtle);
   }
@@ -45,7 +45,7 @@
   }
 }
 
-.transparent:active,
+.skeleton:active,
 .base:active {
   background-color: var(--color-bg-mute);
 }

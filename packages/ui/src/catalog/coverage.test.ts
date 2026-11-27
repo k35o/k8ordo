@@ -20,12 +20,12 @@ const RENAMED_IN_CATALOG: ReadonlyMap<string, string> = new Map([
   ['useToast', 'Toast'],
 ]);
 
-const PARTS_IN_CATALOG: ReadonlyMap<string, string> = new Map([
-  ['DropdownMenuItem', 'DropdownMenu'],
+// 公開の部品の名前ではない項目と、それを描く部品。side で Dialog と Drawer を描き分ける
+const COMPOSED_IN_CATALOG: ReadonlyMap<string, readonly string[]> = new Map([
+  ['DropdownMenuItem', ['DropdownMenu']],
+  ['Modal', ['Dialog', 'Drawer']],
 ]);
 
-const OBSERVER =
-  'コールバックに報告するだけで自分では何も描かない。spec には報告を受け取るコードが無い';
 const CHAT =
   '生成 UI を載せる側のチャット。アプリがメッセージの流れから組み立てるもので、spec が置くものではない';
 
@@ -34,14 +34,7 @@ const LEFT_OUT: ReadonlyMap<string, string> = new Map([
     'ContextMenu',
     '右クリックという見えない操作で開くので、生成 UI に置くと操作が見つけられなくなる。アプリが自分の中身（ファイルや行）に付けるもの',
   ],
-  ['InView', OBSERVER],
-  ['Resize', OBSERVER],
-  ['UIProvider', 'アプリが生成 UI も含めた全体の外側に 1 度だけ置く'],
-  [
-    'PortalRootProvider',
-    'アプリ自身の createPortal のための配線。生成 UI のオーバーレイは自分で面を開く',
-  ],
-  ['usePortalRoot', 'PortalRootProvider を読むだけの hook'],
+
   ['Conversation', CHAT],
   ['Message', CHAT],
   ['PromptInput', CHAT],
@@ -57,7 +50,7 @@ const LEFT_OUT: ReadonlyMap<string, string> = new Map([
   ],
   [
     'CommandPalette',
-    '項目ごとに onSelect の関数を持ち、アプリがショートカットで開く枠組み。spec は関数を書けず、会話の中に置くものでもない（その場の操作は Button や DropdownMenu）',
+    '項目ごとに onAction の関数を持ち、アプリがショートカットで開く枠組み。spec は関数を書けず、会話の中に置くものでもない（その場の操作は Button や DropdownMenu）',
   ],
   [
     'ResizablePanels',
@@ -115,7 +108,9 @@ const unreachedEntries = (): string[] => {
     .filter(
       (name) =>
         !reached.has(name) &&
-        !exported.includes(PARTS_IN_CATALOG.get(name) ?? ''),
+        !(COMPOSED_IN_CATALOG.get(name) ?? []).some((part) =>
+          reached.has(part),
+        ),
     )
     .toSorted();
 };
@@ -124,10 +119,16 @@ const staleTableEntries = (): string[] => [
   ...[...RENAMED_IN_CATALOG.keys(), ...LEFT_OUT.keys()].filter(
     (name) => !exported.includes(name),
   ),
-  ...[...RENAMED_IN_CATALOG.values(), ...PARTS_IN_CATALOG.keys()].filter(
+  ...[...RENAMED_IN_CATALOG.values()].filter(
     (name) => !catalogNames.includes(name),
   ),
   ...[...LEFT_OUT.keys()].filter((name) => catalogNames.includes(name)),
+  ...[...COMPOSED_IN_CATALOG.keys()].filter(
+    (name) => !catalogNames.includes(name),
+  ),
+  ...[...COMPOSED_IN_CATALOG.values()]
+    .flat()
+    .filter((part) => !exported.includes(part)),
 ];
 
 const readDoc = (path: string): string =>

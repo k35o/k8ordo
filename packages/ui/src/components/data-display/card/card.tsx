@@ -2,6 +2,7 @@ import { clsx } from 'clsx';
 import { useId } from 'react';
 import type { HTMLAttributes, ReactNode } from 'react';
 
+import { getMessages } from '../../../i18n/current';
 import { CardAction } from './card-action';
 
 import focusRing from '../../_internal/focus-ring.module.css';
@@ -11,7 +12,8 @@ import styles from './card.module.css';
 /**
  * What `renderAnchor` receives: everything the card would put on its own
  * `<a>`. The link has no text of its own; its name is the card's content,
- * through `aria-labelledby`.
+ * through `aria-labelledby`, followed with `openInNewTab` by the hidden
+ * new-tab wording (`opensInNewTab`).
  */
 export type CardRenderAnchorProps<T extends string> = {
   href: NoInfer<T>;
@@ -34,7 +36,7 @@ type CardProps<T extends string> = {
    * Makes the whole card a button, when there is no `href`. While a returned
    * promise is pending the card is busy and ignores presses.
    */
-  onAction?: () => void | Promise<void>;
+  action?: () => void | Promise<void>;
 } & Omit<HTMLAttributes<HTMLDivElement>, 'className' | 'style'>;
 
 const VARIANT = {
@@ -59,28 +61,32 @@ export const Card = <T extends string>({
   href,
   openInNewTab = false,
   renderAnchor = defaultRenderAnchor,
-  onAction,
+  action,
   ...rest
 }: CardProps<T>) => {
   const contentId = useId();
+  const newTabId = `${contentId}-new-tab`;
   const targetClassName = clsx(styles.target, focusRing.ringNoBorder);
   const target =
     href === undefined ? (
-      onAction === undefined ? null : (
+      action === undefined ? null : (
         <CardAction
+          action={action}
           className={targetClassName}
           labelledBy={contentId}
-          onAction={onAction}
         />
       )
     ) : (
       renderAnchor({
         href,
         className: targetClassName,
-        'aria-labelledby': contentId,
         ...(openInNewTab
-          ? { target: '_blank', rel: 'noopener noreferrer' }
-          : {}),
+          ? {
+              'aria-labelledby': `${contentId} ${newTabId}`,
+              target: '_blank',
+              rel: 'noopener noreferrer',
+            }
+          : { 'aria-labelledby': contentId }),
       })
     );
   const className = clsx(
@@ -101,6 +107,13 @@ export const Card = <T extends string>({
         {children}
       </div>
       {target}
+      {href !== undefined && openInNewTab && (
+        // リンクは中身を持たず名前を aria-labelledby で付けるので、読み上げ
+        // 専用の文言も hidden にして参照し、リンクの名前の一部にする
+        <span hidden id={newTabId}>
+          {getMessages().opensInNewTab}
+        </span>
+      )}
     </div>
   );
 };

@@ -100,7 +100,7 @@ function ChatMessage({ message, chat }: { message: UIMessage; chat: Chat }) {
           <Message.Copy value={text} />
           <Message.Regenerate
             disabled={isBusy}
-            onAction={() => chat.regenerate({ messageId: message.id })}
+            action={() => chat.regenerate({ messageId: message.id })}
           />
           <Message.Feedback />
         </Message.Actions>

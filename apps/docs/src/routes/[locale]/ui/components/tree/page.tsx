@@ -92,7 +92,7 @@ const [selectedId, setSelectedId] = useState<string | null>(null);
   items={files}
   label="Files"
   onChange={setSelectedId}
-  onExpandedChange={setExpandedIds}
+  onExpandedIdsChange={setExpandedIds}
   selectedId={selectedId}
 />`}
           >
