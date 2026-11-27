@@ -473,7 +473,7 @@ catalogPropIssues('Button', { label: 'OK', colour: 'primary' });
 'use client';
 import { renderers } from '@k8ordo/ui/catalog/render';
 
-renderers.Button({ props: { label: 'Save' }, children: [] });
+renderers.Button({ props: { label: 'Save' } });
 ```
 
 [docs/references/generative-ui.md](docs/references/generative-ui.md#what-the-catalog-covers)

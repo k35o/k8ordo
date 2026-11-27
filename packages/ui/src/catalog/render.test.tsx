@@ -1,8 +1,11 @@
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it } from 'vite-plus/test';
+import { describe, expect, expectTypeOf, it } from 'vite-plus/test';
 
 import { ToastProvider } from '../components/feedback/toast';
-import { renderers } from './render';
+import { catalog } from './index';
+import type { AnyCatalogEntry, CatalogName } from './index';
+import { rendererOf, renderers } from './render';
+import type { AnyRenderArgs } from './render';
 
 const press = (): void => {};
 
@@ -354,6 +357,38 @@ describe('Toast の描画', () => {
   it('ToastProvider の外では、useToast のエラーになる', () => {
     expect(() => renderToStaticMarkup(renderers.Toast(toast))).toThrow(
       'useToast must be used within a ToastProvider',
+    );
+  });
+});
+
+describe('名前を実行時にしか知らないつなぎ', () => {
+  it('子を持たない部品は、children を渡さずに描ける', () => {
+    const html = renderToStaticMarkup(
+      renderers.Button({ props: { label: '保存' } }),
+    );
+
+    expect(html).toMatch(/^<button[^>]*>.*保存/u);
+  });
+
+  it('どの項目も、キャストせずに AnyCatalogEntry として読める', () => {
+    expectTypeOf<(typeof catalog)[CatalogName]>().toExtend<AnyCatalogEntry>();
+  });
+
+  it('rendererOf は、その名前の renderer を返す', () => {
+    expect(rendererOf('Button')).toBe(renderers.Button);
+  });
+
+  it('型を消した項目の初期値で、rendererOf で引いた入力欄を描ける', () => {
+    const entry: AnyCatalogEntry = catalog.Slider;
+    const props = { name: 'volume', label: '音量', min: 10 };
+    const args: AnyRenderArgs = {
+      props,
+      value: entry.value?.initial(props),
+      setValue: ignore,
+    };
+
+    expect(renderToStaticMarkup(rendererOf('Slider')(args))).toMatch(
+      /<input [^>]*value="10"/u,
     );
   });
 });

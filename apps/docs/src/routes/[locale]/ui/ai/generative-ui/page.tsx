@@ -30,7 +30,6 @@ export function Title(field: {
 }) {
   return renderers.TextField({
     props: { name: 'title', label: 'Title' },
-    children: [],
     ...field,
   });
 }`;
@@ -166,6 +165,9 @@ export default function GenerativeUi() {
         </p>
         <p className={page.mute}>
           <Rich>{t.glueEvents()}</Rich>
+        </p>
+        <p className={page.mute}>
+          <Rich>{t.glueAnyTypes()}</Rich>
         </p>
         <p className={page.mute}>
           <Rich>{t.glueExample()}</Rich>

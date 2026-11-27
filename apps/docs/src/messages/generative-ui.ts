@@ -95,6 +95,11 @@ export const glueEvents = message({
   en: 'Each event is bound to the format’s own action: an `event` in `press` in A2UI, `on.press` in json-render, and the `press` argument in OpenUI.',
 });
 
+export const glueAnyTypes = message({
+  ja: 'つなぎは部品の名前を実行時にしか知らないので、部品ごとの型を使えません。`catalog`の項目は、型を消した`AnyCatalogEntry`として読めます。描画の関数は`rendererOf(name)`で引くと、型を消した`AnyRenderer`が返ります。どちらもキャストなしで書けます。',
+  en: 'The glue knows a component’s name only at run time, so each component’s own types are of no use there. Read an entry of `catalog` as an `AnyCatalogEntry`, and look its renderer up with `rendererOf(name)`, which returns an `AnyRenderer`. Both have the types erased, so the glue needs no cast.',
+});
+
 export const glueExample = message({
   ja: 'A2UI、json-render、OpenUI、AI SDKのつなぎは、リポジトリの`examples/ui-integrations`にあります。どれも変更のたびにブラウザで確かめています。',
   en: 'Working glue for A2UI, json-render, OpenUI and the AI SDK lives in `examples/ui-integrations` in the repository. Each runs in a real browser on every change.',

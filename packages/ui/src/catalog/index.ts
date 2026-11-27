@@ -429,6 +429,29 @@ export type CatalogValueOf<N extends CatalogName> =
     : never;
 
 /**
+ * An entry of `catalog` with the types of its component erased, for a glue
+ * that maps over the catalog and so knows a component's name only at run
+ * time. Every entry is assignable to it, with no cast.
+ *
+ * @example
+ * const entry: AnyCatalogEntry = catalog[name];
+ * const initial = entry.value?.initial(props);
+ */
+export type AnyCatalogEntry = {
+  description: string;
+  props: z.ZodObject;
+  children?: true;
+  value?: {
+    prop: string;
+    // メソッドで書くと引数が双変になり、props の型が項目ごとに違う initial を
+    // どれもそのまま代入できる。関数型のプロパティで書くと 1 つも代入できない
+    // oxlint-disable-next-line typescript/method-signature-style -- 上のとおり
+    initial(props: Record<string, unknown>): unknown;
+  };
+  events?: Readonly<Record<string, string>>;
+};
+
+/**
  * Cross-cutting constraints a model most often breaks, for the format's
  * system prompt (json-render's `customRules`, OpenUI's `additionalRules`).
  */

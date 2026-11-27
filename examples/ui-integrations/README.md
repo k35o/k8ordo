@@ -187,7 +187,12 @@ things: it registers every component with the format, by name, with its
 state (json-render's `$bindState`, OpenUI's form state by `name`), starting from
 `value.initial(props)`, and each of a component's `events` to the format's own
 action; and it draws every component through `renderers` from
-`@k8ordo/ui/catalog/render`, handing it the bound events as `on`. A renderer
+`@k8ordo/ui/catalog/render`, handing it the bound events as `on`. The glue
+knows a component's name only at run time, so it reads the entry as an
+`AnyCatalogEntry` (`const entry: AnyCatalogEntry = catalog[name]`) and looks
+the renderer up with `rendererOf(name)`, which returns an `AnyRenderer`: the
+views `@k8ordo/ui` exports with each component's types erased, so no piece of
+glue casts an entry or a renderer. A renderer
 takes props that fit the schema and hold no `null`, so every glue passes what
 the format resolved through `parseCatalogProps` (`src/catalog-props.ts`) first:
 it drops every `null` key, nested ones included (OpenUI Lang writes an omitted

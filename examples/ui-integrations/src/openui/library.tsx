@@ -1,8 +1,8 @@
 'use client';
 
 import { catalog } from '@k8ordo/ui/catalog';
-import type { CatalogName } from '@k8ordo/ui/catalog';
-import { renderers } from '@k8ordo/ui/catalog/render';
+import type { AnyCatalogEntry, CatalogName } from '@k8ordo/ui/catalog';
+import { rendererOf } from '@k8ordo/ui/catalog/render';
 import {
   useFormName,
   useStateField,
@@ -15,17 +15,8 @@ import type { FC, ReactNode } from 'react';
 import { parseCatalogProps, Unparsed } from '../catalog-props';
 import { buildLibrary } from './defs';
 
-// 部品ごとの型は catalog が持つので、ここでは名前で引いた 1 つの形として扱う
 type Handler = () => void | Promise<void>;
 type Field = { value: unknown; setValue: (next: unknown) => void };
-type AnyRenderer = (args: {
-  props: Record<string, unknown>;
-  children: readonly ReactNode[];
-  value?: unknown;
-  setValue?: (next: unknown) => void;
-  on?: Record<string, Handler>;
-}) => ReactNode;
-type AnyValue = { initial: (props: unknown) => unknown };
 type OpenUIProps = Record<string, unknown> & {
   name?: string;
   children?: ReadonlyArray<{ typeName: string }>;
@@ -35,11 +26,8 @@ const noField = (): Field | undefined => undefined;
 const noHandlers = (): Record<string, Handler> => ({});
 
 const componentOf = (name: CatalogName): ComponentRenderer<OpenUIProps> => {
-  const render = renderers[name] as AnyRenderer;
-  const { value, events = {} } = catalog[name] as {
-    value?: AnyValue;
-    events?: Readonly<Record<string, string>>;
-  };
+  const render = rendererOf(name);
+  const { value, events = {} }: AnyCatalogEntry = catalog[name];
   const eventNames = Object.keys(events);
 
   const useField =

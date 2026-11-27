@@ -9,24 +9,15 @@ import {
 } from '@json-render/react';
 import type { BaseComponentProps } from '@json-render/react';
 import { catalog as k8ordo } from '@k8ordo/ui/catalog';
-import type { CatalogName } from '@k8ordo/ui/catalog';
-import { renderers } from '@k8ordo/ui/catalog/render';
+import type { AnyCatalogEntry, CatalogName } from '@k8ordo/ui/catalog';
+import { rendererOf } from '@k8ordo/ui/catalog/render';
 import { Children, useEffect, useMemo, useRef, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 
 import { parseCatalogProps, Unparsed } from '../catalog-props';
 import { componentsCatalog, TO_ASSISTANT } from './catalog';
 
-// 部品ごとの型は catalog が持つので、ここでは名前で引いた 1 つの形として扱う
 type Handler = () => void;
-type AnyRenderer = (args: {
-  props: Record<string, unknown>;
-  children: readonly ReactNode[];
-  value?: unknown;
-  setValue?: (next: unknown) => void;
-  on?: Record<string, Handler>;
-}) => ReactNode;
-type AnyValue = { prop: string; initial: (props: unknown) => unknown };
 type ComponentFn = (context: BaseComponentProps) => ReactNode;
 
 const childrenOf = (children: ReactNode): ReactNode[] =>
@@ -45,11 +36,8 @@ const handlersOf = (
   );
 
 const componentOf = (name: CatalogName): ComponentFn => {
-  const render = renderers[name] as AnyRenderer;
-  const { value, events = {} } = k8ordo[name] as {
-    value?: AnyValue;
-    events?: Readonly<Record<string, string>>;
-  };
+  const render = rendererOf(name);
+  const { value, events = {} }: AnyCatalogEntry = k8ordo[name];
   const eventNames = Object.keys(events);
   if (value === undefined) {
     const Element: ComponentFn = ({ props, children, on }) => {

@@ -1,5 +1,5 @@
 import { catalog } from '@k8ordo/ui/catalog';
-import type { CatalogName } from '@k8ordo/ui/catalog';
+import type { AnyCatalogEntry, CatalogName } from '@k8ordo/ui/catalog';
 import { action, createLibrary, defineComponent } from '@openuidev/lang-core';
 import type { DefinedComponent, Library } from '@openuidev/lang-core';
 import { z } from 'zod';
@@ -7,10 +7,7 @@ import { z } from 'zod';
 // OpenUI は値を `name` で form の状態に結ぶ。モデルは説明文からそれを読むので、
 // 値を持つ部品にだけ書き足す
 const describe = (name: CatalogName): string => {
-  const { description, value } = catalog[name] as {
-    description: string;
-    value?: unknown;
-  };
+  const { description, value }: AnyCatalogEntry = catalog[name];
   return value === undefined
     ? description
     : `${description} Bound to form state by name.`;
@@ -44,11 +41,7 @@ export const buildLibrary = <C>(
       props,
       children: hasChildren,
       events = {},
-    } = catalog[name] as {
-      props: z.ZodObject;
-      children?: true;
-      events?: Readonly<Record<string, string>>;
-    };
+    }: AnyCatalogEntry = catalog[name];
     const actions = Object.fromEntries(
       Object.entries(events).map(([event, description]) => [
         event,

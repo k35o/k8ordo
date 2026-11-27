@@ -77,7 +77,8 @@ parse, or `catalogPropIssues`, applies them.
 
 `renderers` has the same names as `catalog`. Call one with props that fit the
 entry's schema (see below) and the children the format drew — one node per
-child, keyed; `Children.toArray` keys them. A field also takes its value and a setter, so the format decides
+child, keyed; `Children.toArray` keys them. A component without children takes
+none. A field also takes its value and a setter, so the format decides
 where the value lives: in its own state, or in the component's. A component
 with events takes `on`, the handler of each event the model bound. Leave an
 event out of `on` when the model bound nothing to it: an unbound `Card` is not
@@ -90,12 +91,10 @@ import { renderers } from '@k8ordo/ui/catalog/render';
 
 renderers.Button({
   props: { label: 'Save' },
-  children: [],
   on: { press: () => sendToAgent('save') },
 });
 renderers.TextField({
   props: { name: 'title', label: 'Title' },
-  children: [],
   value,
   setValue,
 });
@@ -145,6 +144,34 @@ The glue for a format does three things, each by mapping over `catalog`:
 Since no step names a component, a component added to `@k8ordo/ui` reaches
 every format without a change to the glue, and a new format is one new piece of
 glue.
+
+The glue knows a component's name only at run time, where each entry's own
+types are of no use. `@k8ordo/ui/catalog` and `@k8ordo/ui/catalog/render`
+each export a view with those types erased, so the glue needs no cast: every
+entry of `catalog` is assignable to `AnyCatalogEntry`, whose `value.initial`
+takes any props, and `rendererOf(name)` returns the renderer as an
+`AnyRenderer`, which takes `AnyRenderArgs` — the parsed props as
+`Record<string, unknown>`, and a field's value and setter as `unknown`.
+
+```tsx
+'use client';
+import { catalog } from '@k8ordo/ui/catalog';
+import type { AnyCatalogEntry, CatalogName } from '@k8ordo/ui/catalog';
+import { rendererOf } from '@k8ordo/ui/catalog/render';
+import type { AnyRenderArgs } from '@k8ordo/ui/catalog/render';
+
+// args.props: what the format resolved, its null keys dropped
+const draw = (name: CatalogName, args: AnyRenderArgs) => {
+  const entry: AnyCatalogEntry = catalog[name];
+  const parsed = entry.props.safeParse(args.props);
+  if (!parsed.success) return null;
+  return rendererOf(name)({
+    ...args,
+    props: parsed.data,
+    value: args.value ?? entry.value?.initial(parsed.data),
+  });
+};
+```
 
 The repository keeps working glue for A2UI 1.0, json-render, OpenUI, and the AI SDK in
 [`examples/ui-integrations`](https://github.com/k35o/k8ordo/tree/main/examples/ui-integrations),
@@ -379,10 +406,10 @@ These exports are left out on purpose, so a model cannot place them:
 
 ## Exports at a glance
 
-| Export                      | Kind           | Contents                                                                                                 |
-| --------------------------- | -------------- | -------------------------------------------------------------------------------------------------------- |
-| `@k8ordo/ui/catalog`        | server-safe    | `catalog`, `catalogRules`, `catalogPropIssues`, types (`CatalogName`, `CatalogProps`, `CatalogEntry`, …) |
-| `@k8ordo/ui/catalog/render` | `'use client'` | `renderers`, types (`RenderArgs`, `Renderer`)                                                            |
+| Export                      | Kind           | Contents                                                                                                                    |
+| --------------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `@k8ordo/ui/catalog`        | server-safe    | `catalog`, `catalogRules`, `catalogPropIssues`, types (`CatalogName`, `CatalogProps`, `CatalogEntry`, `AnyCatalogEntry`, …) |
+| `@k8ordo/ui/catalog/render` | `'use client'` | `renderers`, `rendererOf`, types (`RenderArgs`, `Renderer`, `AnyRenderArgs`, `AnyRenderer`)                                 |
 
 > The drawn components assume you have loaded `@k8ordo/ui/styles.css` (or
 > `@k8ordo/ui/tailwind.css` after Tailwind, in a Tailwind CSS 4 project).

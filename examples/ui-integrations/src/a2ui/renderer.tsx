@@ -9,29 +9,15 @@ import type {
   SurfaceModel,
 } from '@a2ui/web_core';
 import { catalog as k8ordo } from '@k8ordo/ui/catalog';
-import type { CatalogName } from '@k8ordo/ui/catalog';
-import { renderers } from '@k8ordo/ui/catalog/render';
+import type { AnyCatalogEntry, CatalogName } from '@k8ordo/ui/catalog';
+import { rendererOf } from '@k8ordo/ui/catalog/render';
 import { Fragment, useCallback, useSyncExternalStore } from 'react';
-import type { ComponentProps, FC, ReactNode } from 'react';
+import type { ComponentProps, FC } from 'react';
 
 import { parseCatalogProps, Unparsed } from '../catalog-props';
 import { catalogDocument } from './catalog';
 
-// 部品ごとの型は catalog が持つので、ここでは名前で引いた 1 つの形として扱う
 type Handler = () => void | Promise<void>;
-type AnyRenderer = (args: {
-  props: Record<string, unknown>;
-  children: readonly ReactNode[];
-  value?: unknown;
-  setValue?: (next: unknown) => void;
-  on?: Record<string, Handler>;
-}) => ReactNode;
-type Entry = {
-  props: { shape: Record<string, unknown> };
-  children?: true;
-  value?: { prop: string; initial: (props: unknown) => unknown };
-  events?: Readonly<Record<string, string>>;
-};
 type ChildRef = string | { id: string; basePath: string };
 type View = FC<ReactA2uiComponentProps<Record<string, unknown>>>;
 type Implementation = ReturnType<typeof createComponentImplementation>;
@@ -49,8 +35,8 @@ const setterOf = (prop: string): string =>
   `set${prop.charAt(0).toUpperCase()}${prop.slice(1)}`;
 
 const viewOf = (name: CatalogName): View => {
-  const render = renderers[name] as AnyRenderer;
-  const entry = k8ordo[name] as Entry;
+  const render = rendererOf(name);
+  const entry: AnyCatalogEntry = k8ordo[name];
   const keys = Object.keys(entry.props.shape);
   const events = Object.keys(entry.events ?? {});
 
@@ -87,12 +73,12 @@ const viewOf = (name: CatalogName): View => {
     if (entry.value === undefined) {
       return render({ props: own, children, on });
     }
-    const { prop, initial } = entry.value;
+    const { prop } = entry.value;
     return render({
       props: own,
       children,
       on,
-      value: props[prop] ?? initial(own),
+      value: props[prop] ?? entry.value.initial(own),
       setValue: props[setterOf(prop)] as (next: unknown) => void,
     });
   };

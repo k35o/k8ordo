@@ -8,7 +8,7 @@ import type { Spec, UIElement } from '@json-render/core';
 import { schema } from '@json-render/react/schema';
 import { catalog as k8ordo, catalogPropIssues } from '@k8ordo/ui/catalog';
 import type {
-  CatalogEntry,
+  AnyCatalogEntry,
   CatalogName,
   CatalogProps,
 } from '@k8ordo/ui/catalog';
@@ -25,9 +25,7 @@ type JsonRenderComponent<N extends CatalogName> = {
 
 // json-render は値を `$bindState` で状態に結ぶ。どの prop が結べるかは
 // モデルが説明文から読むので、ここで書き足す
-const describe = (
-  entry: Pick<CatalogEntry, 'description'> & { value?: { prop: string } },
-): string =>
+const describe = (entry: AnyCatalogEntry): string =>
   entry.value === undefined
     ? entry.description
     : `${entry.description} ${entry.value.prop} can be bound to state with $bindState.`;

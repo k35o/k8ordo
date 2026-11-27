@@ -95,8 +95,8 @@ export type RenderArgs<N extends CatalogName> = {
    * returns; it draws nothing for an element that fails.
    */
   props: CatalogProps<N>;
-  /** One node per child, keyed (`Children.toArray` keys them). Empty for a component without children. */
-  children: readonly ReactNode[];
+  /** One node per child, keyed (`Children.toArray` keys them). Left out for a component without children. */
+  children?: readonly ReactNode[];
 } & ([CatalogValueOf<N>] extends [never]
   ? unknown
   : {
@@ -118,6 +118,22 @@ export type RenderArgs<N extends CatalogName> = {
 export type Renderer<N extends CatalogName> = (
   args: RenderArgs<N>,
 ) => ReactNode;
+
+/**
+ * `RenderArgs` with the types of the component erased, for a glue that knows
+ * a component's name only at run time: the props it parsed with the entry's
+ * schema, and for a field its value and setter, typed as `unknown`.
+ */
+export type AnyRenderArgs = {
+  props: Record<string, unknown>;
+  children?: readonly ReactNode[];
+  value?: unknown;
+  setValue?: (next: unknown) => void;
+  on?: Record<string, () => void | Promise<void>>;
+};
+
+/** A renderer of `renderers` with the types of its component erased (see `rendererOf`). */
+export type AnyRenderer = (args: AnyRenderArgs) => ReactNode;
 
 // 部品は手を加えずに使い、関数を受ける prop（renderItem など）はここで組み立てる。
 // モデルが書けるのは平らなデータだけで、関数は書けないため。
@@ -354,7 +370,7 @@ const FileFieldWidget: FC<{ props: CatalogProps<'FileField'> }> = ({
  * 'use client';
  * import { renderers } from '@k8ordo/ui/catalog/render';
  *
- * renderers.Button({ props: { label: 'OK' }, children: [] });
+ * renderers.Button({ props: { label: 'OK' } });
  */
 export const renderers: { [N in CatalogName]: Renderer<N> } = {
   Stack: ({ props, children }) => (
@@ -385,7 +401,7 @@ export const renderers: { [N in CatalogName]: Renderer<N> } = {
   ),
   Form: ({ children }) => <Form onSubmit={submitNothing}>{children}</Form>,
   // 子の 1 つずつが 1 枚のスライドになる。位置で固定の列なので index キーでよい
-  Carousel: ({ props, children }) => (
+  Carousel: ({ props, children = [] }) => (
     <Carousel.Root label={props.label} slideSize={props.slideSize}>
       {children.map((slide, index) => (
         // eslint-disable-next-line react/no-array-index-key -- 静的な位置リスト
@@ -927,3 +943,18 @@ export const renderers: { [N in CatalogName]: Renderer<N> } = {
     )),
   FileField: ({ props }) => <FileFieldWidget props={props} />,
 };
+
+/**
+ * The renderer of `name` with the types of its component erased, for a glue
+ * that maps over the catalog and so knows the name only at run time. Parse
+ * the props with `catalog[name].props` before calling it, as for
+ * `renderers[name]`.
+ *
+ * @example
+ * const render = rendererOf(name);
+ * render({ props: parsed, children, value, setValue, on });
+ */
+export const rendererOf = (name: CatalogName): AnyRenderer =>
+  // 名前ごとに引数の型が違う関数の union は、そのままでは呼べない。名前を
+  // 実行時にしか知らないつなぎのために、型を消すのはここ 1 か所にする
+  renderers[name] as AnyRenderer;
