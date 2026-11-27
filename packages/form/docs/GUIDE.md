@@ -800,15 +800,14 @@ request — which is the correct behaviour, not a broken one.
 `@k8ordo/form` does not depend on `@k8ordo/ui`; the fields in `@k8ordo/ui`
 take what `formFields` derives as it is. Spread `input` onto the field after
 `FormControl`'s props. `FormControl` gets only what it uses — the label, the
-error, `invalid`, `required` — and generates the `id` and `aria-*` links
-itself.
+error, `required` — and generates the `id` and `aria-*` links itself. A
+non-empty `error` is what marks the field invalid, so `invalid` is not passed.
 
 ```tsx
 const title = form.field('title');
 
 <FormControl
   errorText={title.error}
-  invalid={title.invalid}
   label="タイトル"
   required={title.required}
   renderInput={(props) => <TextField {...props} {...title.input} />}
@@ -870,7 +869,6 @@ const tags = form.field('tags');
 
 <FormControl
   errorText={tags.error}
-  invalid={tags.invalid}
   label="タグ"
   labelAs="group"
   renderInput={(props) => (

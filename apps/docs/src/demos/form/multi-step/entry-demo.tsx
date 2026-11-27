@@ -67,7 +67,6 @@ export function EntryDemo({ fields }: Props) {
         </legend>
         <FormControl
           errorText={name.error}
-          invalid={name.invalid}
           label={m.formMultiStep.demoLabelName()}
           renderInput={(props) => (
             <TextField {...props} {...name.input} autoComplete="off" />
@@ -76,7 +75,6 @@ export function EntryDemo({ fields }: Props) {
         />
         <FormControl
           errorText={email.error}
-          invalid={email.invalid}
           label={m.formMultiStep.demoLabelEmail()}
           renderInput={(props) => (
             <TextField {...props} {...email.input} autoComplete="off" />
@@ -107,7 +105,6 @@ export function EntryDemo({ fields }: Props) {
         </legend>
         <FormControl
           errorText={title.error}
-          invalid={title.invalid}
           label={m.formMultiStep.demoLabelTitle()}
           renderInput={(props) => (
             <TextField {...props} {...title.input} autoComplete="off" />
@@ -116,7 +113,6 @@ export function EntryDemo({ fields }: Props) {
         />
         <FormControl
           errorText={minutes.error}
-          invalid={minutes.invalid}
           label={m.formMultiStep.demoLabelMinutes()}
           renderInput={(props) => <TextField {...props} {...minutes.input} />}
           required={minutes.required}

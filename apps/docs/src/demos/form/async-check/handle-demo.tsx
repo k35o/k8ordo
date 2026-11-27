@@ -51,7 +51,6 @@ export function HandleDemo({ fields }: Props) {
         helpText={
           taken.isChecking ? m.formAsyncCheck.demoChecking() : undefined
         }
-        invalid={handle.invalid}
         label={m.formAsyncCheck.demoLabelHandle()}
         renderInput={(props) => (
           <TextField

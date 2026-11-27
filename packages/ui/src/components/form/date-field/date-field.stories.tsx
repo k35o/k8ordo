@@ -97,7 +97,6 @@ const MeetingForm = () => (
       return (
         <FormControl
           errorText={eventDate.error}
-          invalid={eventDate.invalid}
           label="開催日"
           renderInput={(props) => <DateField {...props} {...eventDate.input} />}
           required={eventDate.required}

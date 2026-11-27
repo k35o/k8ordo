@@ -632,14 +632,12 @@ const OrderForm = () => (
         <>
           <FormControl
             errorText={count.error}
-            invalid={count.invalid}
             label="個数"
             renderInput={(props) => <NumberField {...props} {...count.input} />}
             required={count.required}
           />
           <FormControl
             errorText={ratio.error}
-            invalid={ratio.invalid}
             label="比率"
             renderInput={(props) => <NumberField {...props} {...ratio.input} />}
             required={ratio.required}

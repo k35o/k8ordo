@@ -2515,12 +2515,6 @@
           "required": false
         },
         {
-          "name": "invalid",
-          "types": ["boolean"],
-          "defaultValue": "false",
-          "required": false
-        },
-        {
           "name": "labelAs",
           "types": ["'label'", "'group'"],
           "defaultValue": "'label'",

@@ -159,21 +159,18 @@ const ProfileForm = () => (
         <>
           <FormControl
             errorText={title.error}
-            invalid={title.invalid}
             label="タイトル"
             renderInput={(props) => <TextField {...props} {...title.input} />}
             required={title.required}
           />
           <FormControl
             errorText={email.error}
-            invalid={email.invalid}
             label="メール"
             renderInput={(props) => <TextField {...props} {...email.input} />}
             required={email.required}
           />
           <FormControl
             errorText={birthday.error}
-            invalid={birthday.invalid}
             label="誕生日"
             renderInput={(props) => (
               <TextField {...props} {...birthday.input} />

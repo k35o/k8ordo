@@ -231,7 +231,6 @@ const PlanForm = () => (
         <>
           <FormControl
             errorText={plan.error}
-            invalid={plan.invalid}
             label="プラン"
             renderInput={(props) => (
               <Select {...props} {...plan.input} options={PLANS} />

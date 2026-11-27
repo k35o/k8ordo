@@ -21,7 +21,6 @@ const checkIn = form.field('checkIn');
 
 <FormControl
   errorText={checkIn.error}
-  invalid={checkIn.invalid}
   label="Check-in"
   required={checkIn.required}
   renderInput={(props) => <DatePicker {...props} {...checkIn.input} />}

@@ -526,7 +526,6 @@ const title = form.field('title');
 
 <FormControl
   errorText={title.error}
-  invalid={title.invalid}
   label="Title"
   required={title.required}
   renderInput={(props) => <TextField {...props} {...title.input} />}

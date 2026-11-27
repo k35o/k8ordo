@@ -640,7 +640,6 @@ const ReportForm = () => (
       return (
         <FormControl
           errorText={attachment.error}
-          invalid={attachment.invalid}
           label="添付ファイル"
           renderInput={(props) => (
             <FileField.Root {...props} {...attachment.input}>

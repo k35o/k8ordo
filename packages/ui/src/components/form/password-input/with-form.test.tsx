@@ -25,7 +25,6 @@ const LoginForm = () => {
     <form {...form.props}>
       <FormControl
         errorText={password.error}
-        invalid={password.invalid}
         label="パスワード"
         renderInput={(props) => (
           <PasswordInput {...props} {...password.input} />

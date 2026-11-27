@@ -199,7 +199,6 @@ const IntroductionForm = () => (
       return (
         <FormControl
           errorText={bio.error}
-          invalid={bio.invalid}
           label="自己紹介"
           renderInput={(props) => <Textarea {...props} {...bio.input} />}
           required={bio.required}

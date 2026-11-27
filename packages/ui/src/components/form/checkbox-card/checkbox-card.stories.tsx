@@ -208,7 +208,6 @@ const FavoritesForm = () => (
         <>
           <FormControl
             errorText={tags.error}
-            invalid={tags.invalid}
             label="好きなもの"
             labelAs="group"
             renderInput={(props) => (

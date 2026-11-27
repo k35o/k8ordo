@@ -190,7 +190,6 @@ const SoundForm = () => (
         <>
           <FormControl
             errorText={volume.error}
-            invalid={volume.invalid}
             label="音量"
             renderInput={(props) => <Slider {...props} {...volume.input} />}
             required={volume.required}

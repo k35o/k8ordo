@@ -45,7 +45,6 @@ export function ReviewDemo({ fields }: Props) {
     >
       <FormControl
         errorText={decision.error}
-        invalid={decision.invalid}
         label={m.formRules.demoLabelDecision()}
         renderInput={(props) => (
           <Select
@@ -62,13 +61,11 @@ export function ReviewDemo({ fields }: Props) {
       />
       <FormControl
         errorText={reason.error}
-        invalid={reason.invalid}
         label={m.formRules.demoLabelReason()}
         renderInput={(props) => <Textarea {...props} {...reason.input} />}
       />
       <FormControl
         errorText={aspects.error}
-        invalid={aspects.invalid}
         label={m.formRules.demoLabelAspects()}
         labelAs="group"
         renderInput={(props) => (

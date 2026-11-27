@@ -94,7 +94,6 @@ export default function FormControlPage() {
           <ComponentPreview
             code={`<FormControl
   errorText="This field is required."
-  invalid
   label="Email"
   renderInput={(props) => (
     <TextField {...props} />

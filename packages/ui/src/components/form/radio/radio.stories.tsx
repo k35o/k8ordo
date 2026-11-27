@@ -210,7 +210,6 @@ const PlanForm = () => (
         <>
           <FormControl
             errorText={plan.error}
-            invalid={plan.invalid}
             label="プラン"
             labelAs="group"
             renderInput={(props) => (

@@ -20,7 +20,6 @@ const eventDate = form.field('eventDate');
 
 <FormControl
   errorText={eventDate.error}
-  invalid={eventDate.invalid}
   label="Date"
   required={eventDate.required}
   renderInput={(props) => <DateField {...props} {...eventDate.input} />}

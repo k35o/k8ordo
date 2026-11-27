@@ -1346,7 +1346,6 @@ export function renderFormControl(
     <FormControl
       errorText={u(props.errorText)}
       helpText={u(props.helpText)}
-      invalid={u(props.invalid)}
       label={props.label}
       renderInput={(inputProps) =>
         fieldType === 'textarea' ? (

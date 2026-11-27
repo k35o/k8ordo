@@ -74,7 +74,6 @@ export const memo = z
 export const MemoField: FC<{ field: FieldView }> = ({ field }) => (
   <FormControl
     errorText={field.error}
-    invalid={field.invalid}
     label="メモ"
     renderInput={(props) => <TextField {...props} {...field.input} />}
     required={field.required}

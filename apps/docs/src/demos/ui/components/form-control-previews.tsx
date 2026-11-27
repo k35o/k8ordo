@@ -29,7 +29,6 @@ export function FormControlErrorTextPreview() {
   return (
     <FormControl
       errorText="This field is required."
-      invalid
       label="Email"
       renderInput={(props) => <TextField {...props} />}
     />

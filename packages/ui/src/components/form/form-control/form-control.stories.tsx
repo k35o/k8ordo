@@ -79,18 +79,35 @@ export const Error: Story = {
   args: {
     label: 'メールアドレス',
     helpText: 'RFCに準拠したメールアドレスを入力してください。',
-    invalid: true,
     errorText: 'メールアドレスが正しくありません。',
     required: true,
   },
+  play: async ({ canvas }) => {
+    const input = canvas.getByRole('textbox', { name: 'メールアドレス' });
+
+    await expect(input).toHaveAttribute('aria-invalid', 'true');
+    await expect(input).toHaveAccessibleDescription(
+      'メールアドレスが正しくありません。',
+    );
+    await expect(
+      canvas.queryByText('RFCに準拠したメールアドレスを入力してください。'),
+    ).not.toBeInTheDocument();
+  },
 };
 
-export const ErrorWithoutText: Story = {
+export const EmptyErrorText: Story = {
   args: {
     label: 'メールアドレス',
     helpText: 'RFCに準拠したメールアドレスを入力してください。',
-    invalid: true,
-    required: true,
+    errorText: '',
+  },
+  play: async ({ canvas }) => {
+    const input = canvas.getByRole('textbox', { name: 'メールアドレス' });
+
+    await expect(input).toHaveAttribute('aria-invalid', 'false');
+    await expect(input).toHaveAccessibleDescription(
+      'RFCに準拠したメールアドレスを入力してください。',
+    );
   },
 };
 

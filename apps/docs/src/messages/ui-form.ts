@@ -21,8 +21,8 @@ export const see = message({
 });
 
 export const basicSpread = message({
-  ja: '`FormControl`には`label`と`errorText`、`invalid`、`required`だけを渡します。`id`と`aria-*`の結び付けは`FormControl`が作ります。`input`は`FormControl`から受け取ったpropsのあとに展開します。取り除いておく属性はありません。`@k8ordo/form`はネイティブの要素が受け取る属性だけを出します。ただの文字列の欄には`type`を付けず、`min`と`max`は数で出します。`TextField`は日付や時刻の`type`でも、その`type`の入力欄として描画します。ただの文字列の欄は、そのまま`Textarea`に展開できます。',
-  en: 'Give `FormControl` only `label`, `errorText`, `invalid` and `required`; it creates the `id` and the `aria-*` links itself. Spread `input` after the props `FormControl` hands over, with nothing taken out first. `@k8ordo/form` writes only attributes the native element takes: no `type` on a plain string field, and `min` and `max` as numbers. `TextField` renders the date and time types as well, and a plain string field spreads onto `Textarea` as it is.',
+  ja: '`FormControl`には`label`と`errorText`、`required`だけを渡します。`errorText`が空でなければ、その欄を不正な値として扱います。`id`と`aria-*`の結び付けは`FormControl`が作ります。`input`は`FormControl`から受け取ったpropsのあとに展開します。取り除いておく属性はありません。`@k8ordo/form`はネイティブの要素が受け取る属性だけを出します。ただの文字列の欄には`type`を付けず、`min`と`max`は数で出します。`TextField`は日付や時刻の`type`でも、その`type`の入力欄として描画します。ただの文字列の欄は、そのまま`Textarea`に展開できます。',
+  en: 'Give `FormControl` only `label`, `errorText` and `required`. A non-empty `errorText` marks the field invalid, and `FormControl` creates the `id` and the `aria-*` links itself. Spread `input` after the props `FormControl` hands over, with nothing taken out first. `@k8ordo/form` writes only attributes the native element takes: no `type` on a plain string field, and `min` and `max` as numbers. `TextField` renders the date and time types as well, and a plain string field spreads onto `Textarea` as it is.',
 });
 
 export const basicDom = message({

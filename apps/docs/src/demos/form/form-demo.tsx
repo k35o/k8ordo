@@ -31,7 +31,6 @@ export function FormDemo({ fields }: Props) {
       <form className={styles.form} method="get" {...form.props}>
         <FormControl
           errorText={q.error}
-          invalid={q.invalid}
           label={m.form.demoLabelQ()}
           renderInput={(props) => (
             <TextField
@@ -47,7 +46,6 @@ export function FormDemo({ fields }: Props) {
           <div className={styles.min}>
             <FormControl
               errorText={min.error}
-              invalid={min.invalid}
               label={m.form.demoLabelMin()}
               renderInput={(props) => (
                 // NumberField は type="text" で描くので、JavaScript が無いと

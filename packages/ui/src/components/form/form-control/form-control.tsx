@@ -5,13 +5,13 @@ import { useId } from 'react';
 import type { FC, HTMLAttributes, ReactElement, Ref } from 'react';
 
 import { getMessages } from '../../../i18n/current';
+import { hasErrorText } from '../../_internal/field-message';
 
 import fieldMessage from '../../_internal/field-message.module.css';
 import styles from './form-control.module.css';
 
 type FormControlProps = {
   disabled?: boolean;
-  invalid?: boolean;
   required?: boolean;
   label: string;
   labelAs?: 'label' | 'group';
@@ -30,7 +30,6 @@ type FormControlProps = {
 
 export const FormControl: FC<FormControlProps> = ({
   disabled = false,
-  invalid = false,
   required = false,
   label,
   labelAs = 'label',
@@ -42,14 +41,13 @@ export const FormControl: FC<FormControlProps> = ({
 }) => {
   const messages = getMessages();
   const id = useId();
-  const hasErrorText = errorText !== undefined && errorText !== '';
+  const invalid = hasErrorText(errorText);
   const hasHelpText = helpText !== undefined && helpText !== '';
-  const describedbyId =
-    invalid && hasErrorText
-      ? `${id}-feedback`
-      : hasHelpText
-        ? `${id}-helptext`
-        : undefined;
+  const describedbyId = invalid
+    ? `${id}-feedback`
+    : hasHelpText
+      ? `${id}-helptext`
+      : undefined;
   const labelId = `${id}-label`;
 
   return (
@@ -82,7 +80,7 @@ export const FormControl: FC<FormControlProps> = ({
         invalid,
         required,
       })}
-      {invalid && hasErrorText ? (
+      {invalid ? (
         <p
           aria-live="polite"
           className={clsx(fieldMessage.message, fieldMessage.error)}

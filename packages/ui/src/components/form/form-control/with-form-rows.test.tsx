@@ -43,14 +43,12 @@ const TalkRows = ({ state }: { state: FormState }) => {
           <div key={row.key}>
             <FormControl
               errorText={title.error}
-              invalid={title.invalid}
               label="タイトル"
               renderInput={(props) => <TextField {...props} {...title.input} />}
               required={title.required}
             />
             <FormControl
               errorText={minutes.error}
-              invalid={minutes.invalid}
               label="時間"
               renderInput={(props) => (
                 <NumberField {...props} {...minutes.input} />
@@ -59,7 +57,6 @@ const TalkRows = ({ state }: { state: FormState }) => {
             />
             <FormControl
               errorText={topics.error}
-              invalid={topics.invalid}
               label="トピック"
               labelAs="group"
               renderInput={(props) => (

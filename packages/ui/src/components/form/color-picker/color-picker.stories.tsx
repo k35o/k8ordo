@@ -276,7 +276,6 @@ const ThemeForm = () => (
       return (
         <FormControl
           errorText={accent.error}
-          invalid={accent.invalid}
           label="テーマの色"
           renderInput={(props) => (
             <ColorPicker

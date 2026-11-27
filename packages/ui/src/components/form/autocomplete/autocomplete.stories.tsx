@@ -484,7 +484,6 @@ const FavoritesForm = () => (
         <>
           <FormControl
             errorText={tags.error}
-            invalid={tags.invalid}
             label="好きなもの"
             renderInput={(props) => (
               <Autocomplete {...props} {...tags.input} options={TAGS} />
