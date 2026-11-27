@@ -14,6 +14,7 @@ import { renderers } from '@k8ordo/ui/catalog/render';
 import { Fragment, useCallback, useSyncExternalStore } from 'react';
 import type { ComponentProps, FC, ReactNode } from 'react';
 
+import { parseCatalogProps, Unparsed } from '../catalog-props';
 import { catalogDocument } from './catalog';
 
 // 部品ごとの型は catalog が持つので、ここでは名前で引いた 1 つの形として扱う
@@ -54,9 +55,17 @@ const viewOf = (name: CatalogName): View => {
   const events = Object.keys(entry.events ?? {});
 
   const View: View = ({ props, buildChild }) => {
-    const own = Object.fromEntries(
-      keys.filter((key) => key in props).map((key) => [key, props[key]]),
+    const parsed = parseCatalogProps(
+      name,
+      Object.fromEntries(
+        keys.filter((key) => key in props).map((key) => [key, props[key]]),
+      ),
+      entry.value?.prop,
     );
+    if (!parsed.success) {
+      return <Unparsed issues={parsed.issues} />;
+    }
+    const own = parsed.props;
     const on = Object.fromEntries(
       events.flatMap((event) => {
         const action = props[event];
@@ -83,7 +92,7 @@ const viewOf = (name: CatalogName): View => {
       props: own,
       children,
       on,
-      value: own[prop] ?? initial(own),
+      value: props[prop] ?? initial(own),
       setValue: props[setterOf(prop)] as (next: unknown) => void,
     });
   };

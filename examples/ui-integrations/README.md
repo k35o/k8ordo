@@ -91,6 +91,7 @@ examples/ui-integrations/
 ├── src/
 │   ├── app.tsx                    # The page: the playground, the chat, and the MCP Apps chat, in three tabs
 │   ├── read-json.ts               # Reads a JSON request body on the dev server
+│   ├── catalog-props.ts           # Glue: what a format resolved, parsed into the props a renderer takes, or drawn as nothing
 │   ├── prompt-language.test.ts    # The prompts the glue builds are English and say how a field binds
 │   ├── a2ui/
 │   │   ├── catalog.ts             # Glue: the A2UI catalog document (server-safe)
@@ -110,7 +111,7 @@ examples/ui-integrations/
 │   │   ├── playground.tsx         # The form, the conversation, and an action sent back as the next turn
 │   │   ├── results.tsx            # Each format: what it draws, its state, its check, and the actions it hears
 │   │   ├── panes.tsx              # The drawing, the check, the state, and the conversation side by side
-│   │   └── playground.browser.test.tsx  # Each format renders, reports its check, and sends a press back for an answer laid over it
+│   │   └── playground.browser.test.tsx  # Each format renders, reports its check (an element it drew nothing for included), and sends a press back for an answer laid over it
 │   ├── ai-sdk/
 │   │   ├── map-parts.ts           # Glue: UIMessage.parts → parts for the chat components
 │   │   ├── map-parts.test.ts      # Every part kind maps, in order
@@ -151,7 +152,7 @@ examples/ui-integrations/
 │   │   ├── catalog.ts             # Glue: the json-render catalog, UISpec, validateGeneratedSpec (server-safe)
 │   │   ├── catalog.test.ts        # What validateGeneratedSpec accepts and reports
 │   │   ├── registry.tsx           # Glue: the registry, <JsonRenderProvider />, and <JsonRenderUI /> ('use client')
-│   │   ├── registry.browser.test.tsx  # The spec's state starts the bound fields; toAssistant reaches the app, setState does not
+│   │   ├── registry.browser.test.tsx  # The spec's state starts the bound fields; toAssistant reaches the app, setState does not; a null href is no link
 │   │   ├── demo.tsx               # Typed UISpec rendered with <JsonRenderUI />
 │   │   ├── demo.test.ts           # The spec passes validateGeneratedSpec with no fixes
 │   │   └── demo.browser.test.tsx  # The spec renders and keeps form state in a real browser
@@ -160,7 +161,7 @@ examples/ui-integrations/
 │   │   ├── library.tsx            # Glue: the library with renderers ('use client')
 │   │   ├── prompt.ts              # Glue: the system prompt, without React
 │   │   ├── library.test.ts        # Every container takes every container as a child
-│   │   ├── library.browser.test.tsx  # A press reaches onAction with the form state; a label-less Card stays unpressable
+│   │   ├── library.browser.test.tsx  # A press reaches onAction with the form state; a label-less Card stays unpressable; a null prop is drawn as absent; an element whose props do not parse is drawn as nothing
 │   │   ├── demo.tsx               # OpenUI-Lang DSL rendered with library + Renderer
 │   │   ├── demo.test.ts           # The DSL parses and every statement reaches the tree
 │   │   └── demo.browser.test.tsx  # The DSL renders and keeps form state in a real browser
@@ -186,7 +187,16 @@ things: it registers every component with the format, by name, with its
 state (json-render's `$bindState`, OpenUI's form state by `name`), starting from
 `value.initial(props)`, and each of a component's `events` to the format's own
 action; and it draws every component through `renderers` from
-`@k8ordo/ui/catalog/render`, handing it the bound events as `on`.
+`@k8ordo/ui/catalog/render`, handing it the bound events as `on`. A renderer
+takes props that fit the schema and hold no `null`, so every glue passes what
+the format resolved through `parseCatalogProps` (`src/catalog-props.ts`) first:
+it drops every `null` key, nested ones included (OpenUI Lang writes an omitted
+argument as `null`), and parses the rest with the entry's `props` schema,
+leaving out a field's value bound to the format's state. The format's own
+validation lets more through: JSON Schema carries none of zod's own checks, and
+OpenUI does not check `pattern`. An element whose props do not parse is drawn
+as nothing (`<Unparsed />`), and its issues reach an `UnparsedContext` if one
+is provided, which the playground shows beside the format's own.
 
 An event is `press` today (`Button`, `IconButton`, `Card`, `DropdownMenuItem`),
 and each format writes it its own way:

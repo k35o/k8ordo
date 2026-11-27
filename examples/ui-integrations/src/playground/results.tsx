@@ -21,6 +21,8 @@ import {
 import type { RefObject } from 'react';
 
 import { A2uiSurfaces, a2uiCatalog } from '../a2ui/renderer';
+import { UnparsedContext } from '../catalog-props';
+import type { UnparsedListener } from '../catalog-props';
 import { TO_ASSISTANT, validateGeneratedSpec } from '../json-render/catalog';
 import { JsonRenderProvider, registry } from '../json-render/registry';
 import { library } from '../openui/library';
@@ -117,6 +119,29 @@ const phaseOf = (session: Session): Phase =>
 
 const show = (value: unknown): string => JSON.stringify(value, null, 2);
 
+const useUnparsed = (): [readonly string[], UnparsedListener] => {
+  const [unparsed, setUnparsed] = useState<
+    ReadonlyMap<string, readonly string[]>
+  >(new Map());
+  const listen = useCallback<UnparsedListener>((key, issues) => {
+    setUnparsed((current) => {
+      if (
+        (current.get(key)?.join('\n') ?? null) === (issues?.join('\n') ?? null)
+      ) {
+        return current;
+      }
+      const next = new Map(current);
+      if (issues === null) {
+        next.delete(key);
+      } else {
+        next.set(key, issues);
+      }
+      return next;
+    });
+  }, []);
+  return [[...unparsed.values()].flat(), listen];
+};
+
 const dataModelsOf = (processor: MessageProcessor): Record<string, unknown> =>
   Object.fromEntries(
     [...processor.model.surfacesMap].map(([id, surface]) => [
@@ -166,6 +191,7 @@ function A2uiResult({
 }) {
   const { processor } = session;
   const state = useDataModels(processor);
+  const [unparsed, listen] = useUnparsed();
   const report = useEffectEvent((action: unknown) => {
     onReport(action, dataModelsOf(processor));
   });
@@ -185,11 +211,17 @@ function A2uiResult({
   return (
     <Panes
       format="a2ui"
-      issues={session.issues}
+      issues={
+        session.isStreaming ? session.issues : [...session.issues, ...unparsed]
+      }
       log={logOf(session)}
       phase={phaseOf(session)}
       state={state}
-      view={<A2uiSurfaces processor={processor} />}
+      view={
+        <UnparsedContext value={listen}>
+          <A2uiSurfaces processor={processor} />
+        </UnparsedContext>
+      }
     />
   );
 }
@@ -207,6 +239,7 @@ function JsonRenderPanes({
   useEffect(() => {
     stateRef.current = state;
   }, [state, stateRef]);
+  const [unparsed, listen] = useUnparsed();
   const issues = useMemo(() => {
     if (session.isStreaming) {
       return [];
@@ -215,14 +248,22 @@ function JsonRenderPanes({
       return ['spec を組み立てられる行がありません。'];
     }
     const result = validateGeneratedSpec(spec);
-    return result.ok
+    const checked = result.ok
       ? []
       : result.issues.map((issue) =>
           issue.elementKey === undefined
             ? issue.message
             : `[${issue.elementKey}] ${issue.message}`,
         );
-  }, [spec, session.isStreaming]);
+    // validateGeneratedSpec は $state などの式を描く前の形のまま通すので、
+    // 解いた値が合わずに描かなかった要素はこちらにしか出ない
+    return [
+      ...checked,
+      ...unparsed.filter(
+        (issue) => !checked.some((line) => line.endsWith(issue)),
+      ),
+    ];
+  }, [spec, session.isStreaming, unparsed]);
 
   return (
     <Panes
@@ -232,11 +273,13 @@ function JsonRenderPanes({
       phase={phaseOf(session)}
       state={show(state)}
       view={
-        <JsonRenderRenderer
-          loading={session.isStreaming}
-          registry={registry}
-          spec={spec}
-        />
+        <UnparsedContext value={listen}>
+          <JsonRenderRenderer
+            loading={session.isStreaming}
+            registry={registry}
+            spec={spec}
+          />
+        </UnparsedContext>
       }
     />
   );
@@ -290,14 +333,18 @@ function OpenUiResult({
 }) {
   const [state, setState] = useState<Record<string, unknown>>({});
   const [errors, setErrors] = useState<readonly OpenUIError[]>([]);
+  const [unparsed, listen] = useUnparsed();
   const program = mergedProgramOf(repliesOf(session));
   const issues = session.isStreaming
     ? []
-    : errors.map((error) =>
-        error.statementId === undefined
-          ? error.message
-          : `[${error.statementId}] ${error.message}`,
-      );
+    : [
+        ...errors.map((error) =>
+          error.statementId === undefined
+            ? error.message
+            : `[${error.statementId}] ${error.message}`,
+        ),
+        ...unparsed,
+      ];
 
   return (
     <Panes
@@ -307,23 +354,25 @@ function OpenUiResult({
       phase={phaseOf(session)}
       state={show(state)}
       view={
-        <OpenUiRenderer
-          isStreaming={session.isStreaming}
-          library={library}
-          onAction={(event) => {
-            onReport(
-              {
-                type: event.type,
-                params: event.params,
-                humanFriendlyMessage: event.humanFriendlyMessage,
-              },
-              event.formState ?? state,
-            );
-          }}
-          onError={setErrors}
-          onStateUpdate={setState}
-          response={program}
-        />
+        <UnparsedContext value={listen}>
+          <OpenUiRenderer
+            isStreaming={session.isStreaming}
+            library={library}
+            onAction={(event) => {
+              onReport(
+                {
+                  type: event.type,
+                  params: event.params,
+                  humanFriendlyMessage: event.humanFriendlyMessage,
+                },
+                event.formState ?? state,
+              );
+            }}
+            onError={setErrors}
+            onStateUpdate={setState}
+            response={program}
+          />
+        </UnparsedContext>
       }
     />
   );

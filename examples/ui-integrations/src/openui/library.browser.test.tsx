@@ -64,6 +64,44 @@ it('action の無い Card は押せない', async () => {
   expect(screen.getByRole('button').elements()).toHaveLength(0);
 });
 
+it('href を null で埋めて action を書いた Card は、リンクでなくボタンになる', async () => {
+  const { screen } = await mount(
+    [
+      'root = Card(null, null, null, null, [title], @ToAssistant("開いた"))',
+      'title = Heading("プラン", "h3")',
+    ].join('\n'),
+  );
+
+  await expect.element(screen.getByRole('button')).toBeInTheDocument();
+  expect(screen.container.querySelectorAll('a')).toHaveLength(0);
+});
+
+it('入れ子の項目で null にした href は、無いものとして描く', async () => {
+  const { screen } = await mount(
+    'root = Breadcrumb(null, [{label: "ホーム", href: null}, {label: "設定"}])',
+  );
+
+  await expect.element(screen.getByText('ホーム')).toBeInTheDocument();
+  expect(screen.container.querySelectorAll('a')).toHaveLength(0);
+});
+
+it('スキーマに合わない要素は、ほかを描いたまま何も描かない', async () => {
+  const consoleError = vi.spyOn(console, 'error');
+  const { screen } = await mount(
+    [
+      'root = Stack("column", "md", null, null, null, [title, tools])',
+      'title = Heading("編集", "h3")',
+      'tools = Toolbar("書式", [null])',
+    ].join('\n'),
+  );
+
+  await expect
+    .element(screen.getByRole('heading', { name: '編集' }))
+    .toBeInTheDocument();
+  expect(screen.getByRole('toolbar').elements()).toHaveLength(0);
+  expect(consoleError).not.toHaveBeenCalled();
+});
+
 it('FormControl に入れた値も、フォームの状態に乗って届く', async () => {
   const { screen, onAction } = await mount(
     [

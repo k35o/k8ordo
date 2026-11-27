@@ -31,11 +31,9 @@ import type { Modal } from '../components/overlays/modal';
 import { ICON_NAMES } from './icon-names';
 
 /**
- * Generative UI 統合の props スキーマ（純データ）。
- *
- * React に一切依存しない（`import type` のみ）ため **サーバー安全**。RSC の
- * サーバーコンポーネントから import して `catalog.prompt()` のプロンプト生成に
- * 使える。描画ロジックは ./renderers（'use client'）に分離している。
+ * React は `import type` でしか読まない。`@k8ordo/ui/catalog` はサーバーでも
+ * 読み込めることを約束していて、形式のつなぎはこのスキーマからプロンプトを作り、
+ * モデルの出力を確かめる。描き方は ./renderers（'use client'）に置く。
  *
  * ## 二重メンテ防止
  *
@@ -53,22 +51,23 @@ import { ICON_NAMES } from './icon-names';
  * enum 値はトークン由来の固定値に制約することで、生成 UI が崩れないように
  * している。
  *
- * ## キーの並び順は公開 ABI
+ * ## キーの並び順は契約
  *
- * OpenUI Lang は完全な位置引数（`Button("ヘルプ", "outline", "base", ...)`）で、
- * @openuidev/lang-core が `Object.keys(properties)` の順に params を作る。
- * そのため **各 schema のキーの並び順がそのまま公開 ABI** になる。
+ * 位置引数で props を書く形式（OpenUI Lang の `Button("ヘルプ", "outline", "base", ...)`）
+ * は、引数をキーの並び順で props に戻す。そのため **各 schema のキーの並び順は
+ * 契約**で、モデルが書いた文字列も保存された文字列もそれに頼っている。
  *
- * - 既存キーのリネーム: 位置が変わらないので安全。
- * - 既存キーの削除・並べ替え: 保存済みの OpenUI 文字列の引数が全部ずれる。
- * - 新しいキーの追加: **必ず末尾に足す**。途中に挿入すると以降の位置が 1 つずつ
- *   ずれ、既存の文字列が無言で誤描画される（型エラーにもならない）。
+ * - 新しいキーは **必ず末尾に足す**。途中に挿入すると以降の位置が 1 つずつずれ、
+ *   既存の文字列が無言で誤描画される（型エラーにもならない）。
+ * - 既存キーの削除・並べ替えも、後ろの引数を全部ずらす。
+ * - 既存キーのリネームは位置を変えないが、名前で props を書く形式（json-render、
+ *   A2UI）の保存済みの spec を壊す。
  *
  * ## スキーマの実体が同一性
  *
- * @openuidev/lang-core の `createLibrary` は `reg.add(comp.props, { id: name })`
- * と **zod インスタンスそのもの**をキーに登録する。そのため 2 つのコンポーネントに
- * 同じインスタンスを渡すと後勝ちで上書きされ、先に登録した方が JSON Schema の
+ * 形式によっては zod のインスタンスそのものを鍵に部品を登録する（OpenUI の
+ * `createLibrary` は `reg.add(comp.props, { id: name })`）。2 つの部品に同じ
+ * インスタンスを渡すと後勝ちで上書きされ、先に登録した方が JSON Schema の
  * `$defs` から丸ごと消える（型エラーにもならない）。キーが同じ schema を作る
  * ときは、プレーンな shape オブジェクトを spread して **別インスタンス**にする。
  */
@@ -900,7 +899,7 @@ export const checkboxCardProps = z.object({
   invalid: z.boolean().optional(),
   disabled: z.boolean().optional(),
   // RadioCard は label を 2 番目に持つが、こちらは後から足したので末尾に置く
-  // （冒頭「キーの並び順が公開 ABI」参照）
+  // （冒頭「キーの並び順は契約」参照）
   label: z.string(),
 }) satisfies z.ZodType<CheckboxCardIntegrationProps>;
 
@@ -928,7 +927,7 @@ export const checkboxGroupProps = z.object({
   options: z.array(selectOption).min(1),
   defaultValue: z.array(z.string()).optional(),
   // グループのアクセシブル名。後から足したので末尾に置く
-  // （冒頭「キーの並び順が公開 ABI」参照）
+  // （冒頭「キーの並び順は契約」参照）
   label: z.string(),
 }) satisfies z.ZodType<CheckboxGroupIntegrationProps>;
 
@@ -989,7 +988,7 @@ export const fileFieldProps = z.object({
   multiple: z.boolean().optional(),
   maxFiles: z.number().optional(),
   clearable: z.boolean().optional(),
-  // 後から足したので末尾に置く（冒頭「キーの並び順が公開 ABI」参照）
+  // 後から足したので末尾に置く（冒頭「キーの並び順は契約」参照）
   dropzone: z
     .boolean()
     .optional()

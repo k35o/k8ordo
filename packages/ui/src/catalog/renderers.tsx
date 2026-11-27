@@ -137,37 +137,31 @@ import type {
 import styles from './renderers.module.css';
 
 /**
- * Generative UI 統合の描画関数（'use client'）。
+ * 部品は手を加えずに使い、関数を受ける prop（renderItem など）はここで組み立てる。
+ * モデルが書けるのは平らなデータだけで、関数は書けないため。
  *
- * @k8ordo/ui のコンポーネントを無改造で使い、関数 prop（renderItem など）は
- * ここで内部的に組み立てる。json-render / OpenUI の両アダプタがこのモジュールを
- * 参照することで「見た目・橋渡しロジック」を 1 ソースに保つ。
- *
- * NOTE: OpenUI Lang は位置引数のため、省略された中間オプションが `null` で
- * 届きうる。@k8ordo/ui 側は `undefined` のみ想定するので `?? undefined` で正規化。
+ * props はスキーマに合う値（null を含まない）として受け、ここではそろえない。
+ * 形式ごとの書き方の違い（OpenUI Lang が省いた位置引数を null で渡すなど）は、
+ * その形式のつなぎがそろえてから渡す。ここで吸収すると、どの形式にも依らない
+ * 描画が 1 つの形式の都合を抱える。
  */
-
-// `null` (OpenUI の省略引数) と `undefined` を吸収する小ヘルパー。
-const u = <T,>(value: T | null | undefined): T | undefined =>
-  value ?? undefined;
 
 type Press = (() => void | Promise<void>) | undefined;
 
 export function renderButton(props: ButtonProps, onPress: Press): ReactNode {
-  const { label } = props;
-  const href = u(props.href);
+  const { label, href } = props;
   const look = {
-    color: u(props.color),
-    fullWidth: u(props.fullWidth),
-    size: u(props.size),
-    variant: u(props.variant),
+    color: props.color,
+    fullWidth: props.fullWidth,
+    size: props.size,
+    variant: props.variant,
   };
-  return href !== undefined && href !== '' ? (
-    <Button {...look} href={href}>
+  return href === undefined ? (
+    <Button {...look} action={onPress}>
       {label}
     </Button>
   ) : (
-    <Button {...look} action={onPress}>
+    <Button {...look} href={href}>
       {label}
     </Button>
   );
@@ -177,16 +171,16 @@ export function renderBadge(props: BadgeProps): ReactNode {
   return (
     <Badge
       label={props.label}
-      size={u(props.size)}
-      tone={u(props.tone)}
-      variant={u(props.variant)}
+      size={props.size}
+      tone={props.tone}
+      variant={props.variant}
     />
   );
 }
 
 export function renderHeading(props: HeadingProps): ReactNode {
   return (
-    <Heading lineClamp={u(props.lineClamp)} level={u(props.level) ?? 'h2'}>
+    <Heading lineClamp={props.lineClamp} level={props.level ?? 'h2'}>
       {props.label}
     </Heading>
   );
@@ -198,20 +192,18 @@ export function renderAlert(props: AlertProps): ReactNode {
 
 export function renderCallout(props: CalloutProps): ReactNode {
   return (
-    <Callout label={u(props.label)} tone={props.tone}>
+    <Callout label={props.label} tone={props.tone}>
       <p>{props.content}</p>
     </Callout>
   );
 }
 
 export function renderSpinner(props: SpinnerProps): ReactNode {
-  return <Spinner label={u(props.label)} size={u(props.size)} />;
+  return <Spinner label={props.label} size={props.size} />;
 }
 
 export function renderSeparator(props: SeparatorProps): ReactNode {
-  return (
-    <Separator color={u(props.color)} orientation={u(props.orientation)} />
-  );
+  return <Separator color={props.color} orientation={props.orientation} />;
 }
 
 const CARD_PADDING_CLASS = {
@@ -225,13 +217,12 @@ export function renderCard(
   children: ReactNode,
   onPress: Press,
 ): ReactNode {
-  const href = u(props.href);
   return (
     <Card
       action={onPress}
-      href={href === '' ? undefined : href}
-      variant={u(props.variant)}
-      width={u(props.width)}
+      href={props.href}
+      variant={props.variant}
+      width={props.width}
     >
       <div className={CARD_PADDING_CLASS[props.size ?? 'md']}>{children}</div>
     </Card>
@@ -247,7 +238,7 @@ export const TabsView: FC<{ props: TabsProps }> = ({ props }) => {
   const ids = props.tabs.map((_, index) => `${baseId}-tab-${index}`);
   return (
     <Tabs.Root defaultSelectedId={ids[0] ?? ''}>
-      <Tabs.List label={u(props.label) ?? messages.tabList}>
+      <Tabs.List label={props.label ?? messages.tabList}>
         {props.tabs.map((tab, index) => (
           <Tabs.Tab id={ids[index] ?? ''} key={ids[index]}>
             {tab.label}
@@ -270,11 +261,11 @@ export function renderTabs(props: TabsProps): ReactNode {
 export function renderStack(props: StackProps, children: ReactNode): ReactNode {
   return (
     <Stack
-      align={u(props.align)}
-      direction={u(props.direction)}
-      gap={u(props.gap)}
-      justify={u(props.justify)}
-      padding={u(props.padding)}
+      align={props.align}
+      direction={props.direction}
+      gap={props.gap}
+      justify={props.justify}
+      padding={props.padding}
     >
       {children}
     </Stack>
@@ -283,11 +274,7 @@ export function renderStack(props: StackProps, children: ReactNode): ReactNode {
 
 export function renderGrid(props: GridProps, children: ReactNode): ReactNode {
   return (
-    <Grid
-      cols={u(props.cols)}
-      gap={u(props.gap)}
-      minItemSize={u(props.minItemSize)}
-    >
+    <Grid cols={props.cols} gap={props.gap} minItemSize={props.minItemSize}>
       {children}
     </Grid>
   );
@@ -300,14 +287,14 @@ export function renderTextField(
 ): ReactNode {
   return (
     <TextField
-      disabled={u(props.disabled)}
-      invalid={u(props.invalid)}
+      disabled={props.disabled}
+      invalid={props.invalid}
       name={props.name}
       onChange={(event) => {
         onChange(event.target.value);
       }}
-      placeholder={u(props.placeholder)}
-      readOnly={u(props.readOnly)}
+      placeholder={props.placeholder}
+      readOnly={props.readOnly}
       value={value}
     />
   );
@@ -321,7 +308,7 @@ export function renderCheckbox(
   return (
     <Checkbox
       checked={checked}
-      disabled={u(props.disabled)}
+      disabled={props.disabled}
       label={props.label}
       name={props.name}
       onChange={onChange}
@@ -337,12 +324,12 @@ export function renderSwitch(
   return (
     <Switch
       checked={checked}
-      disabled={u(props.disabled)}
-      invalid={u(props.invalid)}
+      disabled={props.disabled}
+      invalid={props.invalid}
       label={props.label}
       name={props.name}
       onChange={onChange}
-      required={u(props.required)}
+      required={props.required}
     />
   );
 }
@@ -354,8 +341,8 @@ export function renderSelect(
 ): ReactNode {
   return (
     <Select
-      disabled={u(props.disabled)}
-      invalid={u(props.invalid)}
+      disabled={props.disabled}
+      invalid={props.invalid}
       name={props.name}
       onChange={(event) => {
         onChange(event.target.value);
@@ -373,16 +360,16 @@ export function renderTextarea(
 ): ReactNode {
   return (
     <Textarea
-      autoResize={u(props.autoResize)}
-      disabled={u(props.disabled)}
-      invalid={u(props.invalid)}
+      autoResize={props.autoResize}
+      disabled={props.disabled}
+      invalid={props.invalid}
       name={props.name}
       onChange={(event) => {
         onChange(event.target.value);
       }}
-      placeholder={u(props.placeholder)}
-      readOnly={u(props.readOnly)}
-      rows={u(props.rows)}
+      placeholder={props.placeholder}
+      readOnly={props.readOnly}
+      rows={props.rows}
       value={value}
     />
   );
@@ -395,13 +382,13 @@ export function renderPasswordInput(
 ): ReactNode {
   return (
     <PasswordInput
-      disabled={u(props.disabled)}
-      invalid={u(props.invalid)}
+      disabled={props.disabled}
+      invalid={props.invalid}
       name={props.name}
       onChange={(event) => {
         onChange(event.target.value);
       }}
-      placeholder={u(props.placeholder)}
+      placeholder={props.placeholder}
       value={value}
     />
   );
@@ -414,13 +401,13 @@ export function renderNumberField(
 ): ReactNode {
   return (
     <NumberField
-      disabled={u(props.disabled)}
-      invalid={u(props.invalid)}
-      max={u(props.max)}
-      min={u(props.min)}
+      disabled={props.disabled}
+      invalid={props.invalid}
+      max={props.max}
+      min={props.min}
       name={props.name}
       onChange={onChange}
-      step={u(props.step)}
+      step={props.step}
       value={value}
     />
   );
@@ -433,13 +420,13 @@ export function renderSlider(
 ): ReactNode {
   return (
     <Slider
-      disabled={u(props.disabled)}
-      invalid={u(props.invalid)}
-      max={u(props.max)}
-      min={u(props.min)}
+      disabled={props.disabled}
+      invalid={props.invalid}
+      max={props.max}
+      min={props.min}
       name={props.name}
       onChange={onChange}
-      step={u(props.step)}
+      step={props.step}
       value={value}
     />
   );
@@ -454,13 +441,13 @@ export function renderRangeSlider(
   return (
     <RangeSlider
       aria-label={props.label}
-      disabled={u(props.disabled)}
-      invalid={u(props.invalid)}
-      max={u(props.max)}
-      min={u(props.min)}
+      disabled={props.disabled}
+      invalid={props.invalid}
+      max={props.max}
+      min={props.min}
       name={[props.name, props.name]}
       onChange={onChange}
-      step={u(props.step)}
+      step={props.step}
       value={value}
     />
   );
@@ -493,12 +480,12 @@ const ColorPickerView: FC<{
     {(labelId) => (
       <ColorPicker
         aria-labelledby={labelId}
-        disabled={u(props.disabled)}
-        invalid={u(props.invalid)}
+        disabled={props.disabled}
+        invalid={props.invalid}
         name={props.name}
         onChange={onChange}
-        required={u(props.required)}
-        swatches={u(props.swatches)}
+        required={props.required}
+        swatches={props.swatches}
         value={value}
       />
     )}
@@ -522,15 +509,15 @@ const DateFieldView: FC<{
     {(labelId) => (
       <TextField
         aria-labelledby={labelId}
-        disabled={u(props.disabled)}
-        invalid={u(props.invalid)}
-        max={u(props.max)}
-        min={u(props.min)}
+        disabled={props.disabled}
+        invalid={props.invalid}
+        max={props.max}
+        min={props.min}
         name={props.name}
         onChange={(event) => {
           onChange(event.target.value);
         }}
-        required={u(props.required)}
+        required={props.required}
         type="date"
         value={value}
       />
@@ -555,13 +542,13 @@ const DatePickerView: FC<{
     {(labelId) => (
       <DatePicker
         aria-labelledby={labelId}
-        disabled={u(props.disabled)}
-        invalid={u(props.invalid)}
-        max={u(props.max)}
-        min={u(props.min)}
+        disabled={props.disabled}
+        invalid={props.invalid}
+        max={props.max}
+        min={props.min}
         name={props.name}
         onChange={onChange}
-        required={u(props.required)}
+        required={props.required}
         value={value}
       />
     )}
@@ -583,8 +570,8 @@ export function renderCalendar(
 ): ReactNode {
   return (
     <Calendar
-      max={u(props.max)}
-      min={u(props.min)}
+      max={props.max}
+      min={props.min}
       onChange={onChange}
       value={value === '' ? null : value}
     />
@@ -600,7 +587,7 @@ const RadioView: FC<{
     {(labelId) => (
       <Radio
         aria-labelledby={labelId}
-        disabled={u(props.disabled)}
+        disabled={props.disabled}
         name={props.name}
         onChange={onChange}
         options={props.options}
@@ -619,8 +606,8 @@ const RadioCardView: FC<{
     {(labelId) => (
       <RadioCard
         aria-labelledby={labelId}
-        disabled={u(props.disabled)}
-        invalid={u(props.invalid)}
+        disabled={props.disabled}
+        invalid={props.invalid}
         name={props.name}
         onChange={onChange}
         options={props.options}
@@ -655,8 +642,8 @@ const CheckboxCardView: FC<{
     {(labelId) => (
       <CheckboxCard
         aria-labelledby={labelId}
-        disabled={u(props.disabled)}
-        invalid={u(props.invalid)}
+        disabled={props.disabled}
+        invalid={props.invalid}
         name={props.name}
         onChange={onChange}
         options={props.options}
@@ -682,10 +669,10 @@ export function renderPagination(
   return (
     <Pagination
       currentPage={currentPage}
-      disabled={u(props.disabled)}
-      nextLabel={u(props.nextLabel)}
+      disabled={props.disabled}
+      nextLabel={props.nextLabel}
       onChange={onChange}
-      prevLabel={u(props.prevLabel)}
+      prevLabel={props.prevLabel}
       totalPages={props.totalPages}
     />
   );
@@ -693,18 +680,16 @@ export function renderPagination(
 
 export function renderIcon(props: IconProps): ReactNode {
   const IconComponent = iconMap[props.name];
-  return <IconComponent size={u(props.size) ?? 'md'} />;
+  return <IconComponent size={props.size ?? 'md'} />;
 }
 
 // 汎用 Icon に乗せられない、追加引数が必要なアイコンを独立コンポーネントとして公開する。
 export function renderChevronIcon(props: ChevronIconProps): ReactNode {
-  return (
-    <ChevronIcon direction={props.direction} size={u(props.size) ?? 'md'} />
-  );
+  return <ChevronIcon direction={props.direction} size={props.size ?? 'md'} />;
 }
 
 export function renderStatusIcon(props: StatusIconProps): ReactNode {
-  return <AlertIcon size={u(props.size) ?? 'md'} status={props.status} />;
+  return <AlertIcon size={props.size ?? 'md'} status={props.status} />;
 }
 
 export function renderIconButton(
@@ -715,12 +700,12 @@ export function renderIconButton(
   return (
     <IconButton
       action={onPress}
-      color={u(props.color)}
+      color={props.color}
       label={props.label}
-      size={u(props.size)}
-      variant={u(props.variant)}
+      size={props.size}
+      variant={props.variant}
     >
-      <IconComponent size={u(props.size) ?? 'md'} />
+      <IconComponent size={props.size ?? 'md'} />
     </IconButton>
   );
 }
@@ -728,9 +713,9 @@ export function renderIconButton(
 export function renderCopyButton(props: CopyButtonProps): ReactNode {
   return (
     <CopyButton
-      iconOnly={u(props.iconOnly)}
-      label={u(props.label)}
-      size={u(props.size)}
+      iconOnly={props.iconOnly}
+      label={props.label}
+      size={props.size}
       value={props.value}
     />
   );
@@ -738,7 +723,7 @@ export function renderCopyButton(props: CopyButtonProps): ReactNode {
 
 export function renderAnchor(props: AnchorProps): ReactNode {
   return (
-    <Anchor href={props.href} openInNewTab={u(props.openInNewTab)}>
+    <Anchor href={props.href} openInNewTab={props.openInNewTab}>
       {props.label}
     </Anchor>
   );
@@ -747,11 +732,11 @@ export function renderAnchor(props: AnchorProps): ReactNode {
 export function renderAvatar(props: AvatarProps): ReactNode {
   return (
     <Avatar
-      alt={u(props.alt)}
-      fallback={u(props.fallback)}
-      name={u(props.name)}
-      size={u(props.size)}
-      src={u(props.src)}
+      alt={props.alt}
+      fallback={props.fallback}
+      name={props.name}
+      size={props.size}
+      src={props.src}
     />
   );
 }
@@ -772,11 +757,11 @@ export function renderKbd(props: KbdProps): ReactNode {
 }
 
 export function renderEmptyState(props: EmptyStateProps): ReactNode {
-  const icon = u(props.icon);
+  const { icon } = props;
   const IconComponent = icon === undefined ? undefined : iconMap[icon];
   return (
     <EmptyState
-      description={u(props.description)}
+      description={props.description}
       icon={
         IconComponent === undefined ? undefined : <IconComponent size="lg" />
       }
@@ -791,7 +776,7 @@ export function renderCarousel(
   slides: readonly ReactNode[],
 ): ReactNode {
   return (
-    <Carousel.Root label={props.label} slideSize={u(props.slideSize)}>
+    <Carousel.Root label={props.label} slideSize={props.slideSize}>
       {slides.map((slide, index) => (
         // eslint-disable-next-line react/no-array-index-key -- 静的な位置リスト
         <Carousel.Slide key={index}>{slide}</Carousel.Slide>
@@ -803,21 +788,17 @@ export function renderCarousel(
 export function renderProgress(props: ProgressProps): ReactNode {
   return (
     <Progress
-      label={u(props.label)}
-      max={u(props.max)}
-      min={u(props.min)}
-      value={u(props.value)}
+      label={props.label}
+      max={props.max}
+      min={props.min}
+      value={props.value}
     />
   );
 }
 
 export function renderSkeleton(props: SkeletonProps): ReactNode {
   return (
-    <Skeleton
-      animate={u(props.animate)}
-      shape={u(props.shape)}
-      size={u(props.size)}
-    />
+    <Skeleton animate={props.animate} shape={props.shape} size={props.size} />
   );
 }
 
@@ -825,7 +806,7 @@ export function renderAccordion(props: AccordionProps): ReactNode {
   return (
     <Accordion.Root>
       {props.items.map((item) => (
-        <Accordion.Item defaultOpen={u(item.defaultOpen)} key={item.title}>
+        <Accordion.Item defaultOpen={item.defaultOpen} key={item.title}>
           <Accordion.Button level="h3">{item.title}</Accordion.Button>
           <Accordion.Panel>{item.content}</Accordion.Panel>
         </Accordion.Item>
@@ -836,17 +817,17 @@ export function renderAccordion(props: AccordionProps): ReactNode {
 
 export function renderBreadcrumb(props: BreadcrumbProps): ReactNode {
   return (
-    <Breadcrumb.List size={u(props.size)}>
+    <Breadcrumb.List size={props.size}>
       {props.items.map((item, index) => (
         <Fragment key={item.label}>
           {index > 0 && <Breadcrumb.Separator />}
           <Breadcrumb.Item>
-            {item.href !== undefined && item.href !== '' ? (
-              <Breadcrumb.Link current={u(item.current)} href={item.href}>
+            {item.href === undefined ? (
+              item.label
+            ) : (
+              <Breadcrumb.Link current={item.current} href={item.href}>
                 {item.label}
               </Breadcrumb.Link>
-            ) : (
-              item.label
             )}
           </Breadcrumb.Item>
         </Fragment>
@@ -859,11 +840,8 @@ export function renderStepper(props: StepperProps): ReactNode {
   return (
     <Stepper
       aria-label={props.label}
-      orientation={u(props.orientation)}
-      steps={props.steps.map((step) => ({
-        label: step.label,
-        description: u(step.description),
-      }))}
+      orientation={props.orientation}
+      steps={props.steps}
       value={props.current}
     />
   );
@@ -874,13 +852,11 @@ export const toTree = (items: TreeProps['items']): TreeItem[] => {
   const ids = new Set(items.map((item) => item.id));
   const build = (parentId: string | undefined): TreeItem[] =>
     items
-      .filter((item) => {
-        // OpenUI は省いた引数を null で渡すので、undefined にそろえてから見る
-        const parent = u(item.parentId);
-        return parentId === undefined
-          ? parent === undefined || !ids.has(parent)
-          : parent === parentId;
-      })
+      .filter((item) =>
+        parentId === undefined
+          ? item.parentId === undefined || !ids.has(item.parentId)
+          : item.parentId === parentId,
+      )
       .map((item): TreeItem => {
         const children = build(item.id);
         return children.length > 0
@@ -909,7 +885,7 @@ export function renderSideNav(props: SideNavProps): ReactNode {
         <SideNav.Group key={group.title} title={group.title}>
           {group.links.map((link) => (
             <SideNav.Link
-              current={u(link.current)}
+              current={link.current}
               href={link.href}
               key={link.href}
             >
@@ -931,7 +907,7 @@ export function renderTable(props: TableProps): ReactNode {
       <Table.Head>
         <Table.Row>
           {props.columns.map((column) => (
-            <Table.HeaderCell align={u(column.align)} key={column.label}>
+            <Table.HeaderCell align={column.align} key={column.label}>
               {column.label}
             </Table.HeaderCell>
           ))}
@@ -943,7 +919,7 @@ export function renderTable(props: TableProps): ReactNode {
           <Table.Row key={rowIndex}>
             {row.map((cell, cellIndex) => (
               <Table.Cell
-                align={u(props.columns[cellIndex]?.align)}
+                align={props.columns[cellIndex]?.align}
                 // eslint-disable-next-line react/no-array-index-key -- 静的なセル
                 key={cellIndex}
               >
@@ -1016,7 +992,7 @@ export const ModalWidget: FC<{ props: ModalProps; children: ReactNode }> = ({
 }) => (
   <OverlayWidget
     buttonProps={{ size: 'md', variant: 'solid' }}
-    side={u(props.side)}
+    side={props.side}
     title={props.title}
     triggerLabel={props.triggerLabel}
   >
@@ -1057,7 +1033,7 @@ export const DrawerWidget: FC<{ props: DrawerProps; children: ReactNode }> = ({
         onClose={() => {
           setIsOpen(false);
         }}
-        side={u(props.side)}
+        side={props.side}
         title={props.title}
       >
         {children}
@@ -1103,10 +1079,10 @@ export function renderTooltip(props: TooltipProps): ReactNode {
 
 export function renderToolbar(props: ToolbarProps): ReactNode {
   return (
-    <Toolbar.Root aria-label={props.label} orientation={u(props.orientation)}>
+    <Toolbar.Root aria-label={props.label} orientation={props.orientation}>
       {props.items.map((item, index) => {
-        const icon = u(item.icon);
-        const IconComponent = icon === undefined ? undefined : iconMap[icon];
+        const IconComponent =
+          item.icon === undefined ? undefined : iconMap[item.icon];
         return (
           <Toolbar.Item
             // eslint-disable-next-line react/no-array-index-key -- 生成された静的な並び
@@ -1194,8 +1170,8 @@ export const DataTableWidget: FC<{ props: DataTableProps }> = ({ props }) => {
         id: String(index),
         header: column.label,
         cell: (row: { cells: string[] }) => row.cells[index] ?? '',
-        align: u(column.align),
-        sortable: u(column.sortable),
+        align: column.align,
+        sortable: column.sortable,
       }))}
       getRowId={(row) => row.id}
       label={props.label}
@@ -1223,7 +1199,7 @@ export function renderListBox(
 ): ReactNode {
   return (
     <ListBox
-      label={u(props.label)}
+      label={props.label}
       onChange={onChange}
       options={props.options}
       value={value === '' ? undefined : value}
@@ -1261,9 +1237,9 @@ const AutocompleteView: FC<{
   const id = useId();
   return (
     <Autocomplete
-      disabled={u(props.disabled)}
+      disabled={props.disabled}
       id={id}
-      invalid={u(props.invalid)}
+      invalid={props.invalid}
       name={props.name}
       onChange={onChange}
       options={props.options}
@@ -1289,13 +1265,13 @@ const ComboboxView: FC<{
     {(labelId) => (
       <Combobox
         aria-labelledby={labelId}
-        disabled={u(props.disabled)}
-        invalid={u(props.invalid)}
+        disabled={props.disabled}
+        invalid={props.invalid}
         name={props.name}
         onChange={onChange}
         options={props.options}
-        placeholder={u(props.placeholder)}
-        required={u(props.required)}
+        placeholder={props.placeholder}
+        required={props.required}
         value={value}
       />
     )}
@@ -1316,14 +1292,14 @@ export const FileFieldWidget: FC<{ props: FileFieldProps }> = ({ props }) => {
     <FileField.Trigger
       renderItem={(wiring) => (
         <Button {...wiring} variant="outline">
-          {u(props.triggerLabel) ?? messages.fileFieldTrigger}
+          {props.triggerLabel ?? messages.fileFieldTrigger}
         </Button>
       )}
     />
   );
   return (
-    <FileField.Root maxFiles={u(props.maxFiles)} multiple={u(props.multiple)}>
-      {u(props.dropzone) === true ? (
+    <FileField.Root maxFiles={props.maxFiles} multiple={props.multiple}>
+      {props.dropzone === true ? (
         <FileField.Dropzone>
           <p className={styles.dropHint}>{messages.fileFieldDrop}</p>
           {trigger}
@@ -1331,7 +1307,7 @@ export const FileFieldWidget: FC<{ props: FileFieldProps }> = ({ props }) => {
       ) : (
         trigger
       )}
-      <FileField.ItemList clearable={u(props.clearable)} />
+      <FileField.ItemList clearable={props.clearable} />
     </FileField.Root>
   );
 };
@@ -1341,11 +1317,11 @@ export function renderFormControl(
   value: string,
   setValue: (next: string) => void,
 ): ReactNode {
-  const fieldType = u(props.fieldType) ?? 'text';
+  const fieldType = props.fieldType ?? 'text';
   return (
     <FormControl
-      errorText={u(props.errorText)}
-      helpText={u(props.helpText)}
+      errorText={props.errorText}
+      helpText={props.helpText}
       label={props.label}
       renderInput={(inputProps) =>
         fieldType === 'textarea' ? (
@@ -1355,7 +1331,7 @@ export function renderFormControl(
             onChange={(event) => {
               setValue(event.target.value);
             }}
-            placeholder={u(props.placeholder)}
+            placeholder={props.placeholder}
             value={value}
           />
         ) : fieldType === 'password' ? (
@@ -1365,7 +1341,7 @@ export function renderFormControl(
             onChange={(event) => {
               setValue(event.target.value);
             }}
-            placeholder={u(props.placeholder)}
+            placeholder={props.placeholder}
             value={value}
           />
         ) : (
@@ -1375,12 +1351,12 @@ export function renderFormControl(
             onChange={(event) => {
               setValue(event.target.value);
             }}
-            placeholder={u(props.placeholder)}
+            placeholder={props.placeholder}
             value={value}
           />
         )
       }
-      required={u(props.required)}
+      required={props.required}
     />
   );
 }

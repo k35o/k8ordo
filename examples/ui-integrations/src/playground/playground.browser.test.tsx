@@ -145,6 +145,30 @@ it('json-render: spec の state を最初の値にして描き、触った値を
     .toMatchTextContent(/"nickname": "ordo"/);
 });
 
+it('json-render: state から解いた値がスキーマに合わず描かなかった要素も、食い違いとして出す', async () => {
+  const patches = [
+    { op: 'add', path: '/root', value: 'title' },
+    { op: 'add', path: '/state/page', value: {} },
+    {
+      op: 'add',
+      path: '/elements/title',
+      value: {
+        type: 'Heading',
+        props: { label: { $state: '/page/title' }, level: 'h3' },
+        children: [],
+      },
+    },
+  ];
+  const screen = await generateIn(
+    'json-render',
+    patches.map((patch) => JSON.stringify(patch)).join('\n'),
+  );
+
+  await expect
+    .element(screen.getByRole('region', { name: '検査' }))
+    .toMatchTextContent(/食い違い.*Heading\.label/);
+});
+
 it('OpenUI: カタログに無い部品を食い違いとして出し、描けた欄の値はフォームの状態に出す', async () => {
   const screen = await generateIn(
     'openui',
@@ -165,6 +189,22 @@ it('OpenUI: カタログに無い部品を食い違いとして出し、描け�
   await expect
     .element(screen.getByRole('region', { name: '状態' }))
     .toMatchTextContent(/ordo/);
+});
+
+it('OpenUI: スキーマに合わず描かなかった要素も、食い違いとして出す', async () => {
+  const screen = await generateIn(
+    'openui',
+    [
+      'root = Stack("column", "md", null, null, null, [title, tools])',
+      'title = Heading("編集", "h3")',
+      'tools = Toolbar("書式", [null])',
+    ].join('\n'),
+  );
+
+  await expect
+    .element(screen.getByRole('region', { name: '検査' }))
+    .toMatchTextContent(/食い違い.*Toolbar\.items\.0/);
+  expect(screen.getByRole('toolbar').elements()).toHaveLength(0);
 });
 
 it('dev サーバーの外では口が無いことを伝える', async () => {

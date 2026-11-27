@@ -17,6 +17,13 @@ import * as ui from './renderers';
  * handlers of the ones the model bound.
  */
 export type RenderArgs<N extends CatalogName> = {
+  /**
+   * Values that fit the entry's `props` schema, with no `null`: a prop the
+   * model left out is absent or `undefined`. The glue drops the `null` keys a
+   * format wrote (OpenUI Lang writes an omitted value as `null`), nested ones
+   * included, parses the rest with the schema, and passes what the parse
+   * returns; it draws nothing for an element that fails.
+   */
   props: CatalogProps<N>;
   /** One node per child, keyed (`Children.toArray` keys them). Empty for a component without children. */
   children: readonly ReactNode[];

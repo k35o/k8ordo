@@ -65,9 +65,9 @@ order, so keys are only ever appended.
 
 ## Drawing
 
-`renderers` has the same names as `catalog`. Call one with the props the format
-resolved and the children it drew — one node per child, keyed; `Children.toArray`
-keys them. A field also takes its value and a setter, so the format decides
+`renderers` has the same names as `catalog`. Call one with props that fit the
+entry's schema (see below) and the children the format drew — one node per
+child, keyed; `Children.toArray` keys them. A field also takes its value and a setter, so the format decides
 where the value lives: in its own state, or in the component's. A component
 with events takes `on`, the handler of each event the model bound. Leave an
 event out of `on` when the model bound nothing to it: an unbound `Card` is not
@@ -91,6 +91,18 @@ renderers.TextField({
 });
 ```
 
+The props a renderer takes are values that fit the entry's `props` schema, with
+no `null`: a prop the model left out is absent or `undefined`. A renderer does
+not tidy up what a format wrote; the glue does, before it calls one. It drops
+every `null` key, nested ones included (OpenUI Lang, for one, writes an omitted
+positional argument as `null`), parses the rest with the entry's `props`
+schema, and hands the renderer what the parse returns. A format's own
+validation is not enough: JSON Schema leaves zod's own checks out, and OpenUI
+does not check `pattern`. An element whose props do not parse is drawn as
+nothing; while a spec streams in, it appears once they do. A field's value
+bound to the format's state is left out of the parse, since the user, not the
+model, wrote it.
+
 `Form` submits nothing, not even on Enter in a field: a submission is the press
 of a `Button` inside it. A `Button` or `Card` with `href` is a link and reports
 no press.
@@ -110,7 +122,10 @@ The glue for a format does three things, each by mapping over `catalog`:
    json-render's `on`, an OpenUI action prop — and hand the bound ones to the
    renderer as `on`. What an action does then (report to the agent, or change
    the format's own state) is the format's.
-3. **Draw** each component through `renderers`.
+3. **Draw** each component through `renderers`: drop the `null` keys, parse
+   the rest with the entry's `props` schema, and hand the renderer what the
+   parse returns. Draw nothing for an element that fails (see
+   [Drawing](#drawing)).
 
 Since no step names a component, a component added to `@k8ordo/ui` reaches
 every format without a change to the glue, and a new format is one new piece of

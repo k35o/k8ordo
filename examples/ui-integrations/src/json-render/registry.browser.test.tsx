@@ -121,6 +121,35 @@ it('json-render の組み込みの setState は、アプリを通らず画面の
   expect(toAssistant).not.toHaveBeenCalled();
 });
 
+it('href を null にして press を結んだ Button は、リンクでなくボタンになる', async () => {
+  const toAssistant = vi.fn();
+  const screen = await render(
+    <ToastProvider>
+      <JsonRenderUI
+        onToAssistant={toAssistant}
+        spec={{
+          root: 'save',
+          elements: {
+            save: {
+              type: 'Button',
+              props: { label: '保存', href: null },
+              on: {
+                press: { action: 'toAssistant', params: { event: 'save' } },
+              },
+              children: [],
+            },
+          },
+        }}
+      />
+    </ToastProvider>,
+  );
+
+  await screen.getByRole('button', { name: '保存' }).click();
+
+  await expect.poll(() => toAssistant.mock.calls.length).toBe(1);
+  expect(screen.container.querySelectorAll('a')).toHaveLength(0);
+});
+
 it('onToAssistant を描き直しで差し替えると、差し替えたほうが呼ばれる', async () => {
   const first = vi.fn();
   const second = vi.fn();

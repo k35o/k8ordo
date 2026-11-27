@@ -53,6 +53,18 @@ describe('validateGeneratedSpec', () => {
     expect(result).toMatchObject({ ok: true });
   });
 
+  it('null の prop は、描くときと同じく書かなかったものとして受け入れる', () => {
+    const result = validateGeneratedSpec(
+      specWithTarget({
+        type: 'Button',
+        props: { label: '保存', href: null },
+        children: [],
+      }),
+    );
+
+    expect(result).toMatchObject({ ok: true });
+  });
+
   it('日付を YYYY-MM-DD 以外の書式で書いた spec を弾く', () => {
     const result = validateGeneratedSpec(
       specWithTarget({

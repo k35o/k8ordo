@@ -10,8 +10,9 @@ import {
 } from '@openuidev/react-lang';
 import type { ActionPlan, ComponentRenderer } from '@openuidev/react-lang';
 import { Fragment } from 'react';
-import type { ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
 
+import { parseCatalogProps, Unparsed } from '../catalog-props';
 import { buildLibrary } from './defs';
 
 // 部品ごとの型は catalog が持つので、ここでは名前で引いた 1 つの形として扱う
@@ -71,23 +72,37 @@ const componentOf = (name: CatalogName): ComponentRenderer<OpenUIProps> => {
           );
         };
 
+  const Drawn: FC<{
+    own: OpenUIProps;
+    written: OpenUIProps;
+    children: readonly ReactNode[];
+  }> = ({ own, written, children }) => {
+    const field = useField(own);
+    const on = useHandlers(written);
+    return render({ props: own, children, ...field, on });
+  };
+
   const Component: ComponentRenderer<OpenUIProps> = ({ props, renderNode }) => {
-    const field = useField(props);
-    const on = useHandlers(props);
     const { children = [], ...rest } = props;
-    return render({
-      props: Object.fromEntries(
+    const parsed = parseCatalogProps(
+      name,
+      Object.fromEntries(
         Object.entries(rest).filter(([key]) => !eventNames.includes(key)),
       ),
-      children: children.map((child, index) => (
-        // oxlint-disable-next-line react/no-array-index-key -- 位置で決まる静的な子の並び
-        <Fragment key={`${child.typeName}-${index}`}>
-          {renderNode(child)}
-        </Fragment>
-      )),
-      ...field,
-      on,
-    });
+    );
+    if (!parsed.success) {
+      return <Unparsed issues={parsed.issues} />;
+    }
+    return (
+      <Drawn own={parsed.props} written={props}>
+        {children.map((child, index) => (
+          // oxlint-disable-next-line react/no-array-index-key -- 位置で決まる静的な子の並び
+          <Fragment key={`${child.typeName}-${index}`}>
+            {renderNode(child)}
+          </Fragment>
+        ))}
+      </Drawn>
+    );
   };
   return Component;
 };

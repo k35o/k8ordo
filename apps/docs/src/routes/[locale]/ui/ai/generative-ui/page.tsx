@@ -130,6 +130,9 @@ export default function GenerativeUi() {
           <Rich>{t.renderDescription()}</Rich>
         </p>
         <p className={page.mute}>
+          <Rich>{t.renderNull()}</Rich>
+        </p>
+        <p className={page.mute}>
           <Rich>{t.renderValue()}</Rich>
         </p>
         <p className={page.mute}>

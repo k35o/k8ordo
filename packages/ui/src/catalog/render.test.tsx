@@ -46,21 +46,4 @@ describe('操作を結んだ部品の描画', () => {
 
     expect(html).toMatch(/^<a [^>]*href="\/articles\/1"/u);
   });
-
-  // OpenUI Lang は、省いた位置引数を null で渡す
-  it.for(['Button', 'Card'] as const)(
-    'href が null の %s はリンクにならない',
-    (name) => {
-      const html = renderToStaticMarkup(
-        renderers[name]({
-          props: { label: '保存', href: null as unknown as undefined },
-          children: [],
-          on: { press },
-        }),
-      );
-
-      expect(html).not.toContain('<a');
-      expect(html).toContain('<button');
-    },
-  );
 });

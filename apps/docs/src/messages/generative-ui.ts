@@ -46,8 +46,13 @@ export const renderTitle = message({
 });
 
 export const renderDescription = message({
-  ja: '`renderers`は`catalog`と同じ名前で、コンポーネントの描き方を持ちます。形式が解決したpropsと、形式が描いた子を渡します。',
-  en: '`renderers` has the same names as `catalog` and draws each component. Pass the props the format resolved and the children it drew.',
+  ja: '`renderers`は`catalog`と同じ名前で、コンポーネントの描き方を持ちます。スキーマに合うpropsと、形式が描いた子を渡します。',
+  en: '`renderers` has the same names as `catalog` and draws each component. Pass props that fit the schema and the children the format drew.',
+});
+
+export const renderNull = message({
+  ja: 'propsに`null`は入れません。OpenUI Langのように省いた値を`null`で書く形式もあるので、つなぎは`null`のキーを取り除きます。そのうえで項目のスキーマで確かめ、確かめた値を渡します。スキーマに合わない要素は描きません。',
+  en: 'The props hold no `null`. Some formats, such as OpenUI Lang, write an omitted value as `null`, so the glue drops those keys. It then parses the rest with the entry’s schema and passes what the parse returns. An element that does not fit is not drawn.',
 });
 
 export const renderValue = message({

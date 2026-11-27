@@ -14,6 +14,8 @@ import type {
 } from '@k8ordo/ui/catalog';
 import { z } from 'zod';
 
+import { withoutNulls } from '../catalog-props';
+
 type JsonRenderComponent<N extends CatalogName> = {
   props: (typeof k8ordo)[N]['props'];
   description: string;
@@ -137,7 +139,7 @@ export const validateGeneratedSpec = (
       message: issue.message,
     })),
     ...Object.entries(spec.elements).flatMap(([elementKey, element]) =>
-      catalogPropIssues(element.type, element.props, {
+      catalogPropIssues(element.type, withoutNulls(element.props), {
         unresolved: Object.entries(element.props)
           .filter(([, value]) => isExpression(value))
           .map(([key]) => key),
