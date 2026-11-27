@@ -51,8 +51,8 @@ export const mapPassword = message({
 });
 
 export const mapNumber = message({
-  ja: '`z.coerce.number()`：`NumberField`か`Slider`。文字列の`min`、`max`、`step="any"`もそのまま受け取ります。',
-  en: '`z.coerce.number()`: `NumberField` or `Slider`. They accept string `min`, `max` and `step="any"`.',
+  ja: '`z.coerce.number()`：`NumberField`か`Slider`。`step="any"`と、文字列で戻る`defaultValue`もそのまま受け取ります。',
+  en: '`z.coerce.number()`: `NumberField` or `Slider`. They take `step="any"` and the `defaultValue` echoed as a string.',
 });
 
 export const mapEnum = message({

@@ -845,11 +845,11 @@ value. The field sets no validity message of its own, so whatever reports an
 out-of-range value — the server's schema, when JavaScript has not run — keeps
 its own wording.
 
-`min`, `max`, and an uncontrolled `defaultValue` also take strings, and `step`
-takes `'any'`. `@k8ordo/form` derives numeric `min` / `max`, a `step` of
-`'any'` unless the schema sets one, and echoes the submitted text as a string
-`defaultValue`. `precision` defaults to the
-number of decimals in `step`; with `step="any"` the value is not rounded.
+`min` and `max` are numbers. An uncontrolled `defaultValue` also takes a
+string, and `step` takes `'any'`: `@k8ordo/form` derives numeric `min` /
+`max`, a `step` of `'any'` unless the schema sets one, and echoes the
+submitted text as a string `defaultValue`. `precision` defaults to the number
+of decimals in `step`; with `step="any"` the value is not rounded.
 
 A value the field writes itself — an arrow key, a stepper press, formatting on
 blur or Enter — is announced with one `input` event, and `onChange` is still
@@ -864,8 +864,8 @@ Props:
 
 - `defaultValue`: `number` | `string`
 - `invalid`: `boolean` (default: `false`)
-- `max`: `number` | `string`
-- `min`: `number` | `string`
+- `max`: `number` (default: `Number.MAX_SAFE_INTEGER`)
+- `min`: `number` (default: `Number.MIN_SAFE_INTEGER`)
 - `onChange`: `(value: number | null) => void`
 - `precision`: `number`
 - `ref`: `Ref<HTMLInputElement>`
@@ -1361,8 +1361,9 @@ Props:
 ### Slider
 
 A range slider. Uncontrolled, the value lives in the input, so a form reset
-puts it back to `defaultValue` and the filled track follows. `min`, `max`, and
-an uncontrolled `defaultValue` also take strings, and `step` takes `'any'`.
+puts it back to `defaultValue` and the filled track follows. `min` and `max`
+are numbers; an uncontrolled `defaultValue` also takes a string, and `step`
+takes `'any'`, as `@k8ordo/form` derives them.
 
 ```tsx
 import { Slider } from '@k8ordo/ui';
@@ -1387,8 +1388,8 @@ Props:
 
 - `defaultValue`: `number` | `string`
 - `invalid`: `boolean` (default: `false`)
-- `max`: `number` | `string`
-- `min`: `number` | `string`
+- `max`: `number` (default: `100`)
+- `min`: `number` (default: `0`)
 - `onChange`: `(value: number) => void`
 - `ref`: `Ref<HTMLInputElement>`
 - `step`: `number` | `'any'` (default: `1`)

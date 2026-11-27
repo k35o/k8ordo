@@ -16,11 +16,9 @@ import styles from './slider.module.css';
 
 type BaseProps = {
   invalid?: boolean;
-  // @k8ordo/form の formFields は step に 'any' を、min / max に文字列を導く
-  // ことがあるので、広げたまま受けられる型にする
   step?: number | 'any';
-  max?: number | string;
-  min?: number | string;
+  max?: number;
+  min?: number;
   ref?: Ref<HTMLInputElement>;
 } & Omit<
   InputHTMLAttributes<HTMLInputElement>,
@@ -69,12 +67,10 @@ export const Slider: FC<Props> = ({
   onKeyDown,
   ref,
   step = 1,
-  max: maxProp,
-  min: minProp,
+  max = 100,
+  min = 0,
   ...rest
 }) => {
-  const max = toNumber(maxProp, 100);
-  const min = toNumber(minProp, 0);
   const initialValue = toNumber(defaultValue, min);
   const isControlled = value !== undefined;
   const inputRef = useRef<HTMLInputElement>(null);

@@ -36,11 +36,9 @@ type BaseProps = {
   | 'min'
   | 'max'
 > & {
-    // @k8ordo/form の formFields は step に 'any' を、min / max に文字列を導く
-    // ことがあるので、広げたまま受けられる型にする
     step?: number | 'any';
-    min?: number | string;
-    max?: number | string;
+    min?: number;
+    max?: number;
   };
 
 type ControlledProps = {
@@ -68,12 +66,6 @@ const format = (
   return precision === undefined ? String(value) : value.toFixed(precision);
 };
 
-const toBound = (value: number | string | undefined, fallback: number) => {
-  const bound =
-    value === undefined || value === '' ? Number.NaN : Number(value);
-  return Number.isFinite(bound) ? bound : fallback;
-};
-
 const decimalsOf = (step: number): number =>
   String(step).split('.')[1]?.length ?? 0;
 
@@ -90,8 +82,8 @@ export const NumberField: FC<Props> = ({
   ref,
   step = 1,
   precision: precisionProp,
-  max: maxProp,
-  min: minProp,
+  max = Number.MAX_SAFE_INTEGER,
+  min = Number.MIN_SAFE_INTEGER,
   ...rest
 }) => {
   const messages = getMessages();
@@ -100,8 +92,6 @@ export const NumberField: FC<Props> = ({
   // 利用者が副作用付きのコールバック ref を渡しても毎レンダー走らないようにする
   const mergedRef = useMemo(() => mergeRefs(inputRef, ref), [ref]);
   const isControlled = value !== undefined;
-  const max = toBound(maxProp, Number.MAX_SAFE_INTEGER);
-  const min = toBound(minProp, Number.MIN_SAFE_INTEGER);
   const stepSize = step === 'any' ? 1 : step;
   const precision =
     precisionProp ?? (step === 'any' ? undefined : decimalsOf(step));

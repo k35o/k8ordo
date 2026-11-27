@@ -3300,14 +3300,14 @@
         },
         {
           "name": "max",
-          "types": ["number", "string"],
-          "defaultValue": null,
+          "types": ["number"],
+          "defaultValue": "Number.MAX_SAFE_INTEGER",
           "required": false
         },
         {
           "name": "min",
-          "types": ["number", "string"],
-          "defaultValue": null,
+          "types": ["number"],
+          "defaultValue": "Number.MIN_SAFE_INTEGER",
           "required": false
         },
         {
@@ -4537,14 +4537,14 @@
         },
         {
           "name": "max",
-          "types": ["number", "string"],
-          "defaultValue": null,
+          "types": ["number"],
+          "defaultValue": "100",
           "required": false
         },
         {
           "name": "min",
-          "types": ["number", "string"],
-          "defaultValue": null,
+          "types": ["number"],
+          "defaultValue": "0",
           "required": false
         },
         {

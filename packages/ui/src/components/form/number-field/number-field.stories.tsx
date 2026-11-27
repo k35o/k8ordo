@@ -611,13 +611,11 @@ export const EnterWhileComposingKeepsTheText: Story = {
   },
 };
 
-// @k8ordo/form の formFields が導く属性（文字列の min / max / defaultValue、
-// step="any"）をそのまま受ける。step="any" なら小数を丸めない
 export const AcceptsDerivedAttributes: Story = {
   args: {
     defaultValue: '0.25',
-    max: '1',
-    min: '0',
+    max: 1,
+    min: 0,
     step: 'any',
   },
   render: InFormRender,
