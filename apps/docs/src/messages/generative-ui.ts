@@ -126,8 +126,8 @@ export const validateUnknown = message({
 });
 
 export const validateAcross = message({
-  ja: 'propどうしの関係も確かめ、ほかの誤りと一緒に返します。`Table`と`DataTable`にセルの数が列の数と違う行があれば、`Table.rows.1`のように行の位置を付けて返します。日付や時刻の`type`を持つ`TextField`では、`defaultValue`がその種類の書式に合うかを確かめます。',
-  en: 'Props are checked against each other too, and those issues come back with the rest. A row of a `Table` or `DataTable` whose number of cells differs from the number of columns comes back with its position, as `Table.rows.1`. A `TextField` with a date or time `type` must have a `defaultValue` in that kind’s format.',
+  ja: 'propどうしの関係も確かめ、ほかの誤りと一緒に返します。`Table`と`DataTable`にセルの数が列の数と違う行があれば、`Table.rows.1`のように行の位置を付けて返します。日付や時刻の`type`を持つ`TextField`では、`defaultValue`がその種類の書式に合うかを確かめます。`Select`や`Radio`のように選択肢を持つ入力欄では、`defaultValue`が`options`のどれかの`value`かを確かめます。',
+  en: 'Props are checked against each other too, and those issues come back with the rest. A row of a `Table` or `DataTable` whose number of cells differs from the number of columns comes back with its position, as `Table.rows.1`. A `TextField` with a date or time `type` must have a `defaultValue` in that kind’s format. On a field with `options`, such as `Select` or `Radio`, the `defaultValue` must be the `value` of one of them.',
 });
 
 export const validateRepair = message({

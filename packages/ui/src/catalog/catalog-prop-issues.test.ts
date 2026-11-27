@@ -248,6 +248,74 @@ describe('catalogPropIssues', () => {
     ).toStrictEqual([]);
   });
 
+  const SORT_OPTIONS = [
+    { value: 'new', label: '新しい順' },
+    { value: 'popular', label: '人気順' },
+  ];
+
+  it.each(['Select', 'Radio', 'RadioCard', 'ListBox'])(
+    '%s の defaultValue が選択肢の値に無ければ報告する',
+    (type) => {
+      expect(
+        catalogPropIssues(type, {
+          name: 'sort',
+          label: '並び順',
+          options: SORT_OPTIONS,
+          defaultValue: '人気順',
+        }),
+      ).toStrictEqual([
+        `${type}.defaultValue: Expected the value of an option ("new" | "popular"), received "人気順"`,
+      ]);
+    },
+  );
+
+  it.each(['CheckboxGroup', 'CheckboxCard'])(
+    '%s の defaultValue のうち、選択肢の値に無いものを位置付きで報告する',
+    (type) => {
+      expect(
+        catalogPropIssues(type, {
+          name: 'sort',
+          label: '並び順',
+          options: SORT_OPTIONS,
+          defaultValue: ['new', 'price'],
+        }),
+      ).toStrictEqual([
+        `${type}.defaultValue.1: Expected the value of an option ("new" | "popular"), received "price"`,
+      ]);
+    },
+  );
+
+  it('選択肢の値を defaultValue に書いた欄には何も返さない', () => {
+    expect([
+      ...catalogPropIssues('Select', {
+        name: 'sort',
+        label: '並び順',
+        options: SORT_OPTIONS,
+        defaultValue: 'popular',
+      }),
+      ...catalogPropIssues('CheckboxGroup', {
+        name: 'sort',
+        label: '並び順',
+        options: SORT_OPTIONS,
+        defaultValue: ['new', 'popular'],
+      }),
+    ]).toStrictEqual([]);
+  });
+
+  it('選択肢に無い defaultValue は、ほかの prop の誤りと一緒に報告する', () => {
+    expect(
+      catalogPropIssues('Select', {
+        name: 'sort',
+        label: 3,
+        options: SORT_OPTIONS,
+        defaultValue: '人気順',
+      }),
+    ).toStrictEqual([
+      expect.stringContaining('Select.label'),
+      'Select.defaultValue: Expected the value of an option ("new" | "popular"), received "人気順"',
+    ]);
+  });
+
   it('後で解決すると言われても、知らない prop は報告する', () => {
     expect(
       catalogPropIssues(

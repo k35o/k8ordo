@@ -465,8 +465,11 @@ export type CatalogPropIssuesOptions = {
  * Props are also checked against each other, each issue under the path it is
  * at and along with the other issues, once the props a check reads are valid:
  * every row of a `Table` or `DataTable` against the columns
- * (`Table.rows.2: …`), and the `defaultValue` of a `TextField` with a date or
- * time `type` against that kind's input format (`TextField.defaultValue: …`).
+ * (`Table.rows.2: …`), the `defaultValue` of a `TextField` with a date or
+ * time `type` against that kind's input format (`TextField.defaultValue: …`),
+ * and the `defaultValue` of `Select`, `Radio`, `RadioCard`, `ListBox`,
+ * `CheckboxGroup`, and `CheckboxCard` against the values of the options
+ * (`CheckboxGroup.defaultValue.1: …`).
  *
  * @example
  * catalogPropIssues('Button', { label: 'OK', colour: 'primary' });

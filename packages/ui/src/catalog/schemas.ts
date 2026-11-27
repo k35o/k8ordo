@@ -952,15 +952,57 @@ const radioCardOption = selectOption.extend({
   description: z.string().optional(),
   disabled: z.boolean().optional(),
 });
-export const selectProps = z.object({
-  name: z.string(),
-  label: fieldLabel(),
-  options: z.array(selectOption).min(1).describe('Choices (value / label)'),
-  defaultValue: z.string().optional(),
-  invalid: z.boolean().optional(),
-  disabled: z.boolean().optional(),
-  helpText: fieldHelpText(),
-}) satisfies z.ZodType<SelectIntegrationProps>;
+
+// rowsFitColumns と同じく、options が無いまま呼ばれることもある
+const defaultValueIsOption = (
+  props: { options?: unknown; defaultValue?: unknown },
+  ctx: z.RefinementCtx,
+): void => {
+  const { options, defaultValue } = props;
+  if (!Array.isArray(options)) {
+    return;
+  }
+  const values = (options as unknown[]).flatMap((option) =>
+    typeof option === 'object' &&
+    option !== null &&
+    'value' in option &&
+    typeof option.value === 'string'
+      ? [option.value]
+      : [],
+  );
+  const chosen: ReadonlyArray<readonly [Array<string | number>, unknown]> =
+    Array.isArray(defaultValue)
+      ? (defaultValue as unknown[]).map((value, index) => [
+          ['defaultValue', index],
+          value,
+        ])
+      : [[['defaultValue'], defaultValue]];
+  for (const [path, value] of chosen) {
+    if (typeof value === 'string' && !values.includes(value)) {
+      ctx.addIssue({
+        code: 'custom',
+        path,
+        message: `Expected the value of an option (${values.map((v) => `"${v}"`).join(' | ')}), received "${value}"`,
+      });
+    }
+  }
+};
+const whenOptionsParsed = { when: whenParsed('options', 'defaultValue') };
+
+export const selectProps = z
+  .object({
+    name: z.string(),
+    label: fieldLabel(),
+    options: z.array(selectOption).min(1).describe('Choices (value / label)'),
+    defaultValue: z.string().optional(),
+    invalid: z.boolean().optional(),
+    disabled: z.boolean().optional(),
+    helpText: fieldHelpText(),
+  })
+  .superRefine(
+    defaultValueIsOption,
+    whenOptionsParsed,
+  ) satisfies z.ZodType<SelectIntegrationProps>;
 
 type RadioIntegrationProps = LabelIntegrationProps & {
   name: string;
@@ -968,14 +1010,19 @@ type RadioIntegrationProps = LabelIntegrationProps & {
   defaultValue?: string;
   disabled?: boolean;
 };
-export const radioProps = z.object({
-  name: z.string(),
-  label: fieldLabel(),
-  options: z.array(selectOption).min(1),
-  defaultValue: z.string().optional(),
-  disabled: z.boolean().optional(),
-  helpText: fieldHelpText(),
-}) satisfies z.ZodType<RadioIntegrationProps>;
+export const radioProps = z
+  .object({
+    name: z.string(),
+    label: fieldLabel(),
+    options: z.array(selectOption).min(1),
+    defaultValue: z.string().optional(),
+    disabled: z.boolean().optional(),
+    helpText: fieldHelpText(),
+  })
+  .superRefine(
+    defaultValueIsOption,
+    whenOptionsParsed,
+  ) satisfies z.ZodType<RadioIntegrationProps>;
 
 type RadioCardOption = SelectOption & {
   description?: string;
@@ -988,15 +1035,20 @@ type RadioCardIntegrationProps = LabelIntegrationProps & {
   invalid?: boolean;
   disabled?: boolean;
 };
-export const radioCardProps = z.object({
-  name: z.string(),
-  label: fieldLabel(),
-  options: z.array(radioCardOption).min(1),
-  defaultValue: z.string().optional(),
-  invalid: z.boolean().optional(),
-  disabled: z.boolean().optional(),
-  helpText: fieldHelpText(),
-}) satisfies z.ZodType<RadioCardIntegrationProps>;
+export const radioCardProps = z
+  .object({
+    name: z.string(),
+    label: fieldLabel(),
+    options: z.array(radioCardOption).min(1),
+    defaultValue: z.string().optional(),
+    invalid: z.boolean().optional(),
+    disabled: z.boolean().optional(),
+    helpText: fieldHelpText(),
+  })
+  .superRefine(
+    defaultValueIsOption,
+    whenOptionsParsed,
+  ) satisfies z.ZodType<RadioCardIntegrationProps>;
 
 type CheckboxCardIntegrationProps = LabelIntegrationProps & {
   name: string;
@@ -1005,17 +1057,22 @@ type CheckboxCardIntegrationProps = LabelIntegrationProps & {
   invalid?: boolean;
   disabled?: boolean;
 };
-export const checkboxCardProps = z.object({
-  name: z.string(),
-  options: z.array(radioCardOption).min(1),
-  defaultValue: z.array(z.string()).optional(),
-  invalid: z.boolean().optional(),
-  disabled: z.boolean().optional(),
-  // RadioCard は label を 2 番目に持つが、こちらは後から足したので末尾に置く
-  // （冒頭「キーの並び順は契約」参照）
-  label: fieldLabel(),
-  helpText: fieldHelpText(),
-}) satisfies z.ZodType<CheckboxCardIntegrationProps>;
+export const checkboxCardProps = z
+  .object({
+    name: z.string(),
+    options: z.array(radioCardOption).min(1),
+    defaultValue: z.array(z.string()).optional(),
+    invalid: z.boolean().optional(),
+    disabled: z.boolean().optional(),
+    // RadioCard は label を 2 番目に持つが、こちらは後から足したので末尾に置く
+    // （冒頭「キーの並び順は契約」参照）
+    label: fieldLabel(),
+    helpText: fieldHelpText(),
+  })
+  .superRefine(
+    defaultValueIsOption,
+    whenOptionsParsed,
+  ) satisfies z.ZodType<CheckboxCardIntegrationProps>;
 
 type ListBoxIntegrationProps = {
   name: string;
@@ -1023,30 +1080,40 @@ type ListBoxIntegrationProps = {
   defaultValue?: string;
   label: NonNullable<ComponentProps<typeof ListBox>['label']>;
 };
-export const listBoxProps = z.object({
-  name: z.string().describe('State key the chosen value is stored under'),
-  label: z
-    .string()
-    .describe(
-      'Name of the button that opens the list, read out before the chosen option',
-    ),
-  options: z.array(selectOption).min(1),
-  defaultValue: z.string().optional(),
-}) satisfies z.ZodType<ListBoxIntegrationProps>;
+export const listBoxProps = z
+  .object({
+    name: z.string().describe('State key the chosen value is stored under'),
+    label: z
+      .string()
+      .describe(
+        'Name of the button that opens the list, read out before the chosen option',
+      ),
+    options: z.array(selectOption).min(1),
+    defaultValue: z.string().optional(),
+  })
+  .superRefine(
+    defaultValueIsOption,
+    whenOptionsParsed,
+  ) satisfies z.ZodType<ListBoxIntegrationProps>;
 
 type CheckboxGroupIntegrationProps = LabelIntegrationProps & {
   name: string;
   options: readonly SelectOption[];
   defaultValue?: readonly string[];
 };
-export const checkboxGroupProps = z.object({
-  name: z.string(),
-  options: z.array(selectOption).min(1),
-  defaultValue: z.array(z.string()).optional(),
-  // 後から足したので末尾に置く（冒頭「キーの並び順は契約」参照）
-  label: fieldLabel(),
-  helpText: fieldHelpText(),
-}) satisfies z.ZodType<CheckboxGroupIntegrationProps>;
+export const checkboxGroupProps = z
+  .object({
+    name: z.string(),
+    options: z.array(selectOption).min(1),
+    defaultValue: z.array(z.string()).optional(),
+    // 後から足したので末尾に置く（冒頭「キーの並び順は契約」参照）
+    label: fieldLabel(),
+    helpText: fieldHelpText(),
+  })
+  .superRefine(
+    defaultValueIsOption,
+    whenOptionsParsed,
+  ) satisfies z.ZodType<CheckboxGroupIntegrationProps>;
 
 type AutocompleteIntegrationProps = LabelIntegrationProps & {
   name: string;

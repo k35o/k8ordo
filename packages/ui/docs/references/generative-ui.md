@@ -204,11 +204,14 @@ structural check, and send the issues back as a repair prompt.
 Props are also checked against each other, each issue under the path it is at
 and in the same round as the other issues of the component, as long as the
 props the check reads are valid themselves. Every row of a `Table` or
-`DataTable` must have as many cells as there are columns, and a `TextField`
-whose `type` is a date or time kind takes a `defaultValue` in the input format
-of that kind, as `DatePicker` does: `YYYY-MM-DD` for `date`, `HH:MM` or
-`HH:MM:SS` for `time`, `YYYY-MM-DDTHH:MM` for `datetime-local`, `YYYY-MM` for
-`month`, and `YYYY-Www` for `week`:
+`DataTable` must have as many cells as there are columns. A `TextField` whose
+`type` is a date or time kind takes a `defaultValue` in the input format of
+that kind, as `DatePicker` does: a real calendar day as `YYYY-MM-DD` for
+`date`, `HH:MM` or `HH:MM:SS` for `time`, `YYYY-MM-DDTHH:MM` with optional
+seconds for `datetime-local`, `YYYY-MM` for `month`, and `YYYY-Www` for
+`week`. The `defaultValue` of `Select`, `Radio`,
+`RadioCard`, `ListBox`, `CheckboxGroup`, and `CheckboxCard` must be the `value`
+of one of its `options` (each entry of it, for the two that take an array):
 
 ```ts
 catalogPropIssues('Table', {
@@ -220,6 +223,17 @@ catalogPropIssues('Table', {
 //   'Table.caption: Invalid input: expected string, received number',
 //   'Table.rows.1: Expected 2 cells (one per column), received 1',
 // ]
+
+catalogPropIssues('CheckboxGroup', {
+  name: 'tags',
+  label: 'Tags',
+  options: [
+    { value: 'news', label: 'News' },
+    { value: 'blog', label: 'Blog' },
+  ],
+  defaultValue: ['news', 'Blog'],
+});
+// ['CheckboxGroup.defaultValue.1: Expected the value of an option ("news" | "blog"), received "Blog"']
 ```
 
 A prop the format resolves later, such as one a json-render spec binds with
