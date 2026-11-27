@@ -35,6 +35,10 @@ describe('LLM に渡す文言', () => {
         href: '//evil.example/docs',
       }),
       ...catalogPropIssues('Marquee', {}),
+      ...catalogPropIssues('Table', {
+        columns: [{ label: 'Name', width: 80 }],
+        rows: [],
+      }),
     ];
 
     expect(issues).toStrictEqual(
@@ -43,6 +47,7 @@ describe('LLM に渡す文言', () => {
         expect.stringContaining('Button.href'),
         expect.stringContaining('Unknown prop "rel"'),
         expect.stringContaining('Unknown component type "Marquee"'),
+        expect.stringContaining('Table.columns.0: Unknown prop "width"'),
       ]),
     );
     expect(japaneseLines(issues.join('\n'))).toStrictEqual([]);

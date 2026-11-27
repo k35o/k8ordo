@@ -161,7 +161,7 @@ examples/ui-integrations/
 │   │   ├── library.tsx            # Glue: the library with renderers ('use client')
 │   │   ├── prompt.ts              # Glue: the system prompt, without React
 │   │   ├── library.test.ts        # Every container takes every container as a child; a field's label follows its name
-│   │   ├── library.browser.test.tsx  # A press reaches onAction with the form state; a label-less Card stays unpressable; a null prop is drawn as absent; an element whose props do not parse is drawn as nothing
+│   │   ├── library.browser.test.tsx  # A press reaches onAction with the form state; a label-less Card stays unpressable; a null prop is drawn as absent; an element whose props do not parse (an unknown key in a nested object included) is drawn as nothing
 │   │   ├── demo.tsx               # OpenUI-Lang DSL rendered with library + Renderer
 │   │   ├── demo.test.ts           # The DSL parses and every statement reaches the tree
 │   │   └── demo.browser.test.tsx  # The DSL renders and keeps form state in a real browser
@@ -201,7 +201,10 @@ leaving out a field's value bound to the format's state. The format's own
 validation lets more through: JSON Schema carries none of zod's own checks, and
 OpenUI does not check `pattern`. An element whose props do not parse is drawn
 as nothing (`<Unparsed />`), and its issues reach an `UnparsedContext` if one
-is provided, which the playground shows beside the format's own. Every format
+is provided, which the playground shows beside the format's own. An unknown key
+inside an object nested in the props (a `Table` column, an option) fails the
+parse; an unknown prop at the top is dropped, and the element is drawn without
+it. Every format
 draws inside the application's `ToastProvider` (`src/main.tsx`, and
 `src/mcp-app/main.tsx` for the App), which the `Toast` component opens its
 toast through; an application that copies the glue draws inside its own.

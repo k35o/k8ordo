@@ -464,6 +464,37 @@ export const catalogRules: readonly string[] = [
 const isCatalogName = (type: string): type is CatalogName =>
   Object.hasOwn(catalog, type);
 
+const unknownProps = (
+  at: string,
+  given: readonly string[],
+  allowed: readonly string[],
+): string[] =>
+  given
+    .filter((key) => !allowed.includes(key))
+    .map(
+      (key) =>
+        `${at}: Unknown prop "${key}". Allowed props: ${allowed.join(', ')}.`,
+    );
+
+// zod の unrecognized_keys の issue は許すキーを持たないので、issue の位置まで
+// スキーマをたどり、そこにあるオブジェクトのキーを読む
+const keysAt = (schema: unknown, path: readonly PropertyKey[]): string[] => {
+  if (schema instanceof z.ZodOptional) {
+    return keysAt(schema.unwrap(), path);
+  }
+  const [key, ...rest] = path;
+  if (schema instanceof z.ZodArray && typeof key === 'number') {
+    return keysAt(schema.element, rest);
+  }
+  if (schema instanceof z.ZodObject) {
+    if (key === undefined) {
+      return Object.keys(schema.shape);
+    }
+    return typeof key === 'string' ? keysAt(schema.shape[key], rest) : [];
+  }
+  return [];
+};
+
 /** Options of `catalogPropIssues`. */
 export type CatalogPropIssuesOptions = {
   /**
@@ -483,7 +514,11 @@ export type CatalogPropIssuesOptions = {
  *
  * Unknown props are reported as well: zod drops a key the schema does not
  * know instead of failing, so a prop the model invented would otherwise pass
- * and render as if it were not there.
+ * and render as if it were not there. An unknown key inside an object nested
+ * in the props (a `Table` column, an `Accordion` item, an option) is reported
+ * the same way, under the path of that object
+ * (`Table.columns.0: Unknown prop "width". Allowed props: label, align.`).
+ * The schema refuses such a key, so a zod parse of the props fails on it too.
  *
  * Props are also checked against each other, each issue under the path it is
  * at and along with the other issues, once the props a check reads are valid:
@@ -525,20 +560,15 @@ export const catalogPropIssues = (
   const parsed = schema.safeParse(values);
   const issues = parsed.success
     ? []
-    : parsed.error.issues.map((issue) => {
-        const path = issue.path.join('.');
-        return `${type}${path === '' ? '' : `.${path}`}: ${issue.message}`;
+    : parsed.error.issues.flatMap((issue) => {
+        const at = `${type}${issue.path.map((key) => `.${String(key)}`).join('')}`;
+        return issue.code === 'unrecognized_keys'
+          ? unknownProps(at, issue.keys, keysAt(full, issue.path))
+          : [`${at}: ${issue.message}`];
       });
 
-  const allowed = Object.keys(full.shape);
   const given =
     typeof props === 'object' && props !== null ? Object.keys(props) : [];
-  for (const key of given) {
-    if (!allowed.includes(key)) {
-      issues.push(
-        `${type}: Unknown prop "${key}". Allowed props: ${allowed.join(', ')}.`,
-      );
-    }
-  }
+  issues.push(...unknownProps(type, given, Object.keys(full.shape)));
   return issues;
 };

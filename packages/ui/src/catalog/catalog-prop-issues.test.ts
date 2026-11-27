@@ -1,6 +1,73 @@
 import { describe, expect, it } from 'vite-plus/test';
+import { z } from 'zod';
 
-import { catalogPropIssues } from './index';
+import { catalog, catalogPropIssues } from './index';
+
+type NestedObject = {
+  path: ReadonlyArray<string | number>;
+  closed: boolean;
+  keys: string[];
+};
+
+const nestedObjectsIn = (
+  node: unknown,
+  path: ReadonlyArray<string | number>,
+): NestedObject[] => {
+  if (typeof node !== 'object' || node === null) {
+    return [];
+  }
+  const inside = Object.entries(node).flatMap(
+    ([keyword, child]: [string, unknown]) => {
+      if (
+        keyword === 'properties' &&
+        typeof child === 'object' &&
+        child !== null
+      ) {
+        return Object.entries(child).flatMap(
+          ([key, schema]: [string, unknown]) =>
+            nestedObjectsIn(schema, [...path, key]),
+        );
+      }
+      if (keyword === 'items') {
+        return nestedObjectsIn(child, [...path, 0]);
+      }
+      if (keyword === 'prefixItems' && Array.isArray(child)) {
+        return child.flatMap((schema: unknown, index) =>
+          nestedObjectsIn(schema, [...path, index]),
+        );
+      }
+      return nestedObjectsIn(child, path);
+    },
+  );
+  if (path.length === 0 || !('type' in node) || node.type !== 'object') {
+    return inside;
+  }
+  const properties =
+    'properties' in node &&
+    typeof node.properties === 'object' &&
+    node.properties !== null
+      ? node.properties
+      : {};
+  const here: NestedObject = {
+    path,
+    closed:
+      'additionalProperties' in node && node.additionalProperties === false,
+    keys: Object.keys(properties),
+  };
+  return [here, ...inside];
+};
+
+const propsWith = (
+  path: ReadonlyArray<string | number>,
+  value: unknown,
+): unknown =>
+  path.reduceRight<unknown>(
+    (inner, key) =>
+      typeof key === 'number'
+        ? Array.from({ length: key + 1 }, () => inner)
+        : { [key]: inner },
+    value,
+  );
 
 describe('catalogPropIssues', () => {
   it('正しい props には何も返さない', () => {
@@ -314,6 +381,128 @@ describe('catalogPropIssues', () => {
       expect.stringContaining('Select.label'),
       'Select.defaultValue: Expected the value of an option ("new" | "popular"), received "人気順"',
     ]);
+  });
+
+  it.each([
+    ['Table', {}, 'label, align'],
+    ['DataTable', { label: '在庫' }, 'label, align, sortable'],
+  ])(
+    '%s の列に書いた知らないキーを、列の位置と書けるキーを付けて報告する',
+    (type, own, allowed) => {
+      expect(
+        catalogPropIssues(type, {
+          ...own,
+          columns: [{ label: '品名' }, { label: '数', width: 80 }],
+          rows: [['りんご', '3']],
+        }),
+      ).toStrictEqual([
+        `${type}.columns.1: Unknown prop "width". Allowed props: ${allowed}.`,
+      ]);
+    },
+  );
+
+  it('入れ子のオブジェクトの知らないキーは、1 つずつ報告する', () => {
+    expect(
+      catalogPropIssues('Accordion', {
+        items: [{ title: 'Q', content: 'A', open: true, icon: 'plus' }],
+      }),
+    ).toStrictEqual([
+      'Accordion.items.0: Unknown prop "open". Allowed props: title, content, defaultOpen.',
+      'Accordion.items.0: Unknown prop "icon". Allowed props: title, content, defaultOpen.',
+    ]);
+  });
+
+  it('入れ子の中の入れ子の知らないキーも、位置を付けて報告する', () => {
+    expect(
+      catalogPropIssues('SideNav', {
+        label: 'ドキュメント',
+        groups: [
+          {
+            title: 'はじめに',
+            links: [
+              { label: '概要', href: '/' },
+              { label: '導入', href: '/install', target: '_blank' },
+            ],
+          },
+        ],
+      }),
+    ).toStrictEqual([
+      'SideNav.groups.0.links.1: Unknown prop "target". Allowed props: label, href, current.',
+    ]);
+  });
+
+  it('省ける配列の中のオブジェクトの知らないキーも報告する', () => {
+    expect(
+      catalogPropIssues('ColorPicker', {
+        name: 'brand',
+        label: 'ブランドの色',
+        swatches: [{ value: '#0ea5e9', label: '空', name: 'sky' }],
+      }),
+    ).toStrictEqual([
+      'ColorPicker.swatches.0: Unknown prop "name". Allowed props: value, label.',
+    ]);
+  });
+
+  it('RadioCard の選択肢では、説明と無効も書けるキーに挙げる', () => {
+    expect(
+      catalogPropIssues('RadioCard', {
+        name: 'plan',
+        label: 'プラン',
+        options: [{ value: 'free', label: 'Free', price: 0 }],
+      }),
+    ).toStrictEqual([
+      'RadioCard.options.0: Unknown prop "price". Allowed props: value, label, description, disabled.',
+    ]);
+  });
+
+  it('入れ子の知らないキーは、ほかの prop の誤りや最上位の知らない prop と一緒に報告する', () => {
+    expect(
+      catalogPropIssues('Tabs', {
+        label: 3,
+        tabs: [{ label: '概要', content: '...', icon: 'info' }],
+        variant: 'pill',
+      }),
+    ).toStrictEqual([
+      'Tabs.label: Invalid input: expected string, received number',
+      'Tabs.tabs.0: Unknown prop "icon". Allowed props: label, content.',
+      'Tabs: Unknown prop "variant". Allowed props: label, tabs.',
+    ]);
+  });
+
+  it('どの項目でも、props の中に置くオブジェクトは知らないキーを受け付けず、書けるキーを挙げて報告する', () => {
+    const nested = Object.entries(catalog).flatMap(([name, entry]) =>
+      nestedObjectsIn(z.toJSONSchema(entry.props, { io: 'input' }), []).map(
+        ({ path, closed, keys }) => ({
+          name,
+          path,
+          at: [name, ...path].join('.'),
+          closed,
+          keys,
+        }),
+      ),
+    );
+
+    expect(nested.map(({ at }) => at)).toStrictEqual(
+      expect.arrayContaining(['Table.columns.0', 'SideNav.groups.0.links.0']),
+    );
+    expect(
+      nested.map(({ name, path, at, closed }) => ({
+        at,
+        closed,
+        reported: catalogPropIssues(
+          name,
+          propsWith(path, { notAProp: true }),
+        ).filter((issue) => issue.startsWith(`${at}: Unknown prop`)),
+      })),
+    ).toStrictEqual(
+      nested.map(({ at, keys }) => ({
+        at,
+        closed: true,
+        reported: [
+          `${at}: Unknown prop "notAProp". Allowed props: ${keys.join(', ')}.`,
+        ],
+      })),
+    );
   });
 
   it('後で解決すると言われても、知らない prop は報告する', () => {

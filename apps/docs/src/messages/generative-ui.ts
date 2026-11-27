@@ -51,8 +51,8 @@ export const renderDescription = message({
 });
 
 export const renderNull = message({
-  ja: 'propsに`null`は入れません。OpenUI Langのように省いた値を`null`で書く形式もあるので、つなぎは`null`のキーを取り除きます。そのうえで項目のスキーマで確かめ、確かめた値を渡します。スキーマに合わない要素は描きません。',
-  en: 'The props hold no `null`. Some formats, such as OpenUI Lang, write an omitted value as `null`, so the glue drops those keys. It then parses the rest with the entry’s schema and passes what the parse returns. An element that does not fit is not drawn.',
+  ja: 'propsに`null`は入れません。OpenUI Langのように省いた値を`null`で書く形式もあるので、つなぎは`null`のキーを取り除きます。そのうえで項目のスキーマで確かめ、確かめた値を渡します。スキーマに合わない要素は描きません。`Table`の列のように、propsの中のオブジェクトに知らないキーがある要素も描きません。propsそのものに知らないキーがあれば、そのキーを取り除いて描きます。',
+  en: 'The props hold no `null`. Some formats, such as OpenUI Lang, write an omitted value as `null`, so the glue drops those keys. It then parses the rest with the entry’s schema and passes what the parse returns. An element that does not fit is not drawn. Neither is an element with an unknown key inside an object in its props, such as a `Table` column. An unknown prop at the top is dropped, and the element is drawn without it.',
 });
 
 export const renderValue = message({
@@ -126,8 +126,8 @@ export const validateDescription = message({
 });
 
 export const validateUnknown = message({
-  ja: 'zodは知らないキーを、エラーにせず取り除きます。そのため、スキーマにないpropも誤りとして返します。',
-  en: 'zod drops a key it does not know instead of failing, so a prop missing from the schema is reported as an issue too.',
+  ja: 'zodは知らないキーを、エラーにせず取り除きます。そのため、スキーマにないpropも誤りとして返します。`Table`の列のようにpropsの中に置くオブジェクトは、知らないキーを受け付けません。その誤りは`Table.columns.1`のように、オブジェクトの位置を付けて返します。',
+  en: 'zod drops a key it does not know instead of failing, so a prop missing from the schema is reported as an issue too. An object inside the props, such as a `Table` column, refuses a key it does not know. That issue comes back with the object’s position, as `Table.columns.1`.',
 });
 
 export const validateAcross = message({

@@ -1,4 +1,4 @@
-import { catalog } from '@k8ordo/ui/catalog';
+import { catalog, catalogPropIssues } from '@k8ordo/ui/catalog';
 import type { CatalogName } from '@k8ordo/ui/catalog';
 import { createContext, useContext, useEffect, useId } from 'react';
 import type { FC } from 'react';
@@ -47,21 +47,17 @@ export const parseCatalogProps = (
   bound?: string,
 ): ParsedProps => {
   const schema: z.ZodObject = catalog[name].props;
-  const parsed = schema.safeParse(
-    withoutNulls(
-      Object.fromEntries(
-        Object.entries(props).filter(([key]) => key !== bound),
-      ),
-    ),
+  const own = withoutNulls(
+    Object.fromEntries(Object.entries(props).filter(([key]) => key !== bound)),
   );
+  const parsed = schema.safeParse(own);
   return parsed.success
     ? { success: true, props: parsed.data }
     : {
         success: false,
-        issues: parsed.error.issues.map(
-          (issue) =>
-            `${name}${issue.path.length === 0 ? '' : `.${issue.path.join('.')}`}: ${issue.message}`,
-        ),
+        issues: catalogPropIssues(name, own, {
+          unresolved: bound === undefined ? [] : [bound],
+        }),
       };
 };
 

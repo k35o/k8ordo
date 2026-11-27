@@ -73,6 +73,13 @@ import { ICON_NAMES } from './icon-names';
  * インスタンスを渡すと後勝ちで上書きされ、先に登録した方が JSON Schema の
  * `$defs` から丸ごと消える（型エラーにもならない）。キーが同じ schema を作る
  * ときは、プレーンな shape オブジェクトを spread して **別インスタンス**にする。
+ *
+ * ## 入れ子のオブジェクトは strictObject
+ *
+ * zod の object は知らないキーを誤りにせず取り除く。props の知らないキーは
+ * catalogPropIssues が自分で数えて報告するが、その検査は入れ子に届かない。
+ * 列、項目、選択肢のように props の中に置くオブジェクトは z.strictObject で
+ * 書き、書き間違えたキー（`alig`）を誤りにする。
  */
 
 /**
@@ -246,7 +253,7 @@ type AccordionIntegrationProps = {
 export const accordionProps = z.object({
   items: z
     .array(
-      z.object({
+      z.strictObject({
         title: z.string(),
         content: z.string(),
         defaultOpen: z.boolean().optional(),
@@ -301,7 +308,7 @@ export const tableProps = z
     caption: z.string().optional(),
     columns: z
       .array(
-        z.object({
+        z.strictObject({
           label: z.string(),
           align: z.enum(['left', 'center', 'right']).optional(),
         }),
@@ -334,7 +341,7 @@ export const dataTableProps = z
     label: z.string().describe('Accessible name of the table'),
     columns: z
       .array(
-        z.object({
+        z.strictObject({
           label: z.string(),
           align: z.enum(['left', 'center', 'right']).optional(),
           sortable: z.boolean().optional(),
@@ -367,7 +374,7 @@ export const treeProps = z.object({
   label: z.string().describe('Accessible name of the tree'),
   items: z
     .array(
-      z.object({
+      z.strictObject({
         id: z.string(),
         label: z.string(),
         parentId: z.string().optional(),
@@ -542,7 +549,7 @@ export const breadcrumbProps = z.object({
   size: z.enum(['sm', 'md', 'lg']).optional(),
   items: z
     .array(
-      z.object({
+      z.strictObject({
         label: z.string(),
         href: safeUrl.optional(),
         current: z.boolean().optional(),
@@ -565,11 +572,11 @@ export const sideNavProps = z.object({
   label: z.string().describe('Accessible name of the navigation'),
   groups: z
     .array(
-      z.object({
+      z.strictObject({
         title: z.string(),
         links: z
           .array(
-            z.object({
+            z.strictObject({
               label: z.string(),
               href: safeUrl,
               current: z.boolean().optional(),
@@ -610,7 +617,12 @@ type StepperIntegrationProps = {
 export const stepperProps = z.object({
   label: z.string().describe('Accessible name of the list of steps'),
   steps: z
-    .array(z.object({ label: z.string(), description: z.string().optional() }))
+    .array(
+      z.strictObject({
+        label: z.string(),
+        description: z.string().optional(),
+      }),
+    )
     .min(1)
     .describe('Steps in order'),
   current: z
@@ -629,7 +641,7 @@ type TabsIntegrationProps = {
 export const tabsProps = z.object({
   label: z.string().optional().describe('Accessible name of the tab list'),
   tabs: z
-    .array(z.object({ label: z.string(), content: z.string() }))
+    .array(z.strictObject({ label: z.string(), content: z.string() }))
     .min(1)
     .describe('Label and text panel of each tab'),
 }) satisfies z.ZodType<TabsIntegrationProps>;
@@ -890,7 +902,7 @@ export const colorPickerProps = z.object({
   defaultValue: hexColor().optional().describe('#rrggbb'),
   swatches: z
     .array(
-      z.object({
+      z.strictObject({
         value: hexColor().describe('#rrggbb'),
         label: z
           .string()
@@ -947,7 +959,7 @@ type SelectIntegrationProps = LabelIntegrationProps & {
   invalid?: boolean;
   disabled?: boolean;
 };
-const selectOption = z.object({ value: z.string(), label: z.string() });
+const selectOption = z.strictObject({ value: z.string(), label: z.string() });
 const radioCardOption = selectOption.extend({
   description: z.string().optional(),
   disabled: z.boolean().optional(),
@@ -1228,7 +1240,7 @@ export const toolbarProps = z.object({
   label: z.string().describe('Accessible name of the toolbar'),
   items: z
     .array(
-      z.object({
+      z.strictObject({
         label: z.string(),
         icon: iconName
           .optional()

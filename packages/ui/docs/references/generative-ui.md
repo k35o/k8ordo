@@ -108,9 +108,12 @@ positional argument as `null`), parses the rest with the entry's `props`
 schema, and hands the renderer what the parse returns. A format's own
 validation is not enough: JSON Schema leaves zod's own checks out, and OpenUI
 does not check `pattern`. An element whose props do not parse is drawn as
-nothing; while a spec streams in, it appears once they do. A field's value
-bound to the format's state is left out of the parse, since the user, not the
-model, wrote it.
+nothing; while a spec streams in, it appears once they do. That includes an
+element with an unknown key inside an object nested in its props (a `Table`
+column, an `Accordion` item, an option): the schema refuses the key. An
+unknown prop at the top of the props is dropped instead, and the element is
+drawn without it. A field's value bound to the format's state is left out of
+the parse, since the user, not the model, wrote it.
 
 `Form` submits nothing, not even on Enter in a field: a submission is the press
 of a `Button` inside it. A `Button` or `Card` with `href` is a link and reports
@@ -225,8 +228,20 @@ catalogPropIssues('Anchor', {
 
 Unknown props are reported too. zod drops a key the schema does not know rather
 than failing, so a prop the model invented would otherwise pass and render as if
-it were not there. Run it on every element of a spec, after the format's own
-structural check, and send the issues back as a repair prompt.
+it were not there. An object nested in the props — a `Table` column, an
+`Accordion` item, an option — refuses a key it does not know, and the issue
+names the path of that object:
+
+```ts
+catalogPropIssues('Table', {
+  columns: [{ label: 'Name' }, { label: 'Qty', width: 80 }],
+  rows: [['Apple', '3']],
+});
+// ['Table.columns.1: Unknown prop "width". Allowed props: label, align.']
+```
+
+Run it on every element of a spec, after the format's own structural check,
+and send the issues back as a repair prompt.
 
 Props are also checked against each other, each issue under the path it is at
 and in the same round as the other issues of the component, as long as the

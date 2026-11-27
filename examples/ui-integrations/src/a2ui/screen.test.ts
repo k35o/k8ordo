@@ -131,6 +131,26 @@ describe('screenIssues', () => {
     expect(issues[0]).toMatch(/^VALIDATION_FAILED: .*Button/);
   });
 
+  it('入れ子のオブジェクトに書いた知らないキーも、A2UI の言葉で返す', () => {
+    const issues = screenIssues({
+      kind: 'show',
+      screen: 'table',
+      input: {
+        components: [
+          {
+            id: 'root',
+            component: 'Table',
+            columns: [{ label: '品目', width: 120 }],
+            rows: [['みかん']],
+          },
+        ],
+      },
+    });
+
+    expect(issues).toHaveLength(1);
+    expect(issues[0]).toMatch(/^VALIDATION_FAILED: .*columns\.0.*'width'/);
+  });
+
   it('JSON Schema が通しても、描くときに外す部品は catalog の検査で返す', () => {
     expect(
       screenIssues({
