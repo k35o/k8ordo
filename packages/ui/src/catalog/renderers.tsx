@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useId, useState } from 'react';
+import { Fragment, useId, useMemo, useState } from 'react';
 import type { ComponentProps, FC, ReactNode, SubmitEvent } from 'react';
 
 import { Button } from '../components/buttons/button';
@@ -65,7 +65,7 @@ import { DropdownMenu } from '../components/overlays/dropdown-menu';
 import { ListBox } from '../components/overlays/list-box';
 import { Popover } from '../components/overlays/popover';
 import { Tooltip } from '../components/overlays/tooltip';
-import { getMessages } from '../i18n/current';
+import { getLocale, getMessages } from '../i18n/current';
 import { iconMap } from './icon-map';
 import type {
   AccordionProps,
@@ -1146,9 +1146,12 @@ const ToastTriggerInner: FC<{ props: ToastProps }> = ({ props }) => {
   );
 };
 
-const collator = new Intl.Collator(undefined, { numeric: true });
-
 export const DataTableWidget: FC<{ props: DataTableProps }> = ({ props }) => {
+  const locale = getLocale();
+  const collator = useMemo(
+    () => new Intl.Collator(locale, { numeric: true }),
+    [locale],
+  );
   const [sort, setSort] = useState<DataTableSort | null>(null);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const rows = props.rows.map((cells, index) => ({ id: String(index), cells }));
