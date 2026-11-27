@@ -712,8 +712,8 @@ export const fileField = {
 
 export const formControl = {
   description: message({
-    ja: '入力欄にラベルとヘルプ、エラーの表示を付けるラッパーです。入力欄は`renderInput`で描きます。',
-    en: 'A wrapper that gives a field its label, help text and error text. The field itself is drawn in `renderInput`.',
+    ja: '入力欄にラベルとヘルプ、エラーの表示を付けるラッパーです。入力欄は`renderInput`で描きます。`Radio`のようなグループには`labelAs="group"`を付け、ラベルをグループの名前にします。',
+    en: 'A wrapper that gives a field its label, help text and error text. The field itself is drawn in `renderInput`. For a group such as `Radio`, `labelAs="group"` makes the label the group’s name.',
   }),
   helpTextTitle: message({
     ja: 'ヘルプテキスト',
@@ -726,6 +726,10 @@ export const formControl = {
   requiredTitle: message({
     ja: '必須',
     en: 'Required',
+  }),
+  groupTitle: message({
+    ja: 'グループ',
+    en: 'Group',
   }),
   disabledTitle: message({
     ja: '無効',

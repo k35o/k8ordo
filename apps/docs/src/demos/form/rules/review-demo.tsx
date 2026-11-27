@@ -70,7 +70,7 @@ export function ReviewDemo({ fields }: Props) {
         errorText={aspects.error}
         invalid={aspects.invalid}
         label={m.formRules.demoLabelAspects()}
-        labelAs="legend"
+        labelAs="group"
         renderInput={(props) => (
           <CheckboxCard
             {...props}

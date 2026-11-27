@@ -61,7 +61,7 @@ const TalkRows = ({ state }: { state: FormState }) => {
               errorText={topics.error}
               invalid={topics.invalid}
               label="トピック"
-              labelAs="legend"
+              labelAs="group"
               renderInput={(props) => (
                 <CheckboxCard {...props} {...topics.input} options={TOPICS} />
               )}

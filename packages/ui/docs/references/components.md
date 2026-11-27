@@ -606,7 +606,7 @@ Props:
 
 Form components are used together with `FormControl`'s `renderInput` pattern. Every form component except `FileField` supports both controlled and uncontrolled use; `FileField.Root` takes only `defaultValue` and keeps the selected files itself.
 
-`ref` reaches the real element (`input` / `textarea` / `select` / `fieldset`). `FileField` uses a ref internally but composes it with yours, so the `ref` you pass still reaches the element. `Radio` (a group that renders several inputs) puts its `ref` on the radiogroup `<div>`, and `FormControl` (a wrapper) on its wrapper element — a `<div>`, or a `<fieldset>` with `labelAs="legend"`.
+`ref` reaches the real element (`input` / `textarea` / `select` / `fieldset`). `FileField` uses a ref internally but composes it with yours, so the `ref` you pass still reaches the element. `Radio` (a group that renders several inputs) puts its `ref` on the radiogroup `<div>`, and `FormControl` (a wrapper) on its wrapper `<div>`.
 
 An uncontrolled field keeps its value in the DOM, so a form reset — `form.reset()`, a reset button, or React resetting the form after an action — puts it back to its `defaultValue`, and a `defaultValue` that changes after mount (the values a failed submission echoes back) is where the next reset goes. A value a component changes in code (a stepper, a chosen option, a removed file) is announced with an `input` event, so a form library listening on the `<form>` hears it like typing.
 
@@ -691,14 +691,23 @@ Props:
 - `errorText`: `string`
 - `helpText`: `string`
 - `invalid`: `boolean` (default: `false`)
-- `labelAs`: `'label'` | `'legend'` (default: `'label'`)
-- `ref`: `Ref<HTMLElement>`
+- `labelAs`: `'label'` | `'group'` (default: `'label'`)
+- `ref`: `Ref<HTMLDivElement>`
 - `required`: `boolean` (default: `false`)
-- Other props are forwarded to `HTMLAttributes<HTMLElement>`, except `className` / `style` / `children`.
+- Other props are forwarded to `HTMLAttributes<HTMLDivElement>`, except `className` / `style` / `children`.
 
 `renderInput` receives `{ id, 'aria-describedby', 'aria-labelledby', disabled, invalid, required }`.
 
-The wrapper element depends on `labelAs`. `'label'` (the default) gives `<div>` + `<label htmlFor>`; `'legend'` gives `<fieldset>` + `<legend>`. `<fieldset>` is used only for `legend`, so that a single field never becomes an unnamed group. Pass `labelAs="legend"` when wrapping a group input such as `Radio` or `CheckboxGroup`.
+The wrapper is a `<div>`, and `labelAs` picks the element that draws the label. `'label'` (the default) gives a `<label htmlFor>` pointing at the field. `'group'` gives a `<span id>` with the same look, the required mark included, for a component that is a group itself — `Radio`, `RadioCard`, `CheckboxGroup`, `CheckboxCard`, and `RangeSlider` — and names it through `aria-labelledby`. A `<label>` cannot label a group, and a `<fieldset>` around one would nest a second group with the same name, so `'group'` renders neither. `ColorPicker`, `DatePicker`, `Combobox`, and `Autocomplete` put the `id` on a text input, so they keep `'label'`.
+
+```tsx
+<FormControl
+  label="Plan"
+  labelAs="group"
+  required
+  renderInput={(props) => <RadioCard {...props} options={plans} />}
+/>
+```
 
 ### TextField
 
@@ -1197,7 +1206,7 @@ A group of checkboxes, one per entry in `options`: the multiple-choice counterpa
 
 The group's selection lives in `value` / `onChange`, or in `defaultValue` when uncontrolled: the values of the checked options. That is a different thing from a lone `Checkbox` holding a boolean in `checked` — do not conflate them. `value` and `defaultValue` take a readonly array, and `onChange` receives a new `string[]` of the checked values in option order, so a `useState<string[]>` setter can be passed as it is.
 
-It renders a `fieldset[role="group"]`, so `aria-labelledby` is required. Convey that the group is required through the referenced label element (for example `FormControl`'s required marker). `role="group"` does not allow `aria-required`, so do not put it on the group.
+It renders a `fieldset[role="group"]`, so `aria-labelledby` is required: `<FormControl labelAs="group">` draws the element it points at. Convey that the group is required through that element — `FormControl`'s required mark is part of the group's name in `'group'` mode. `role="group"` does not allow `aria-required`, so do not put it on the group.
 
 `name` goes on every box. It is optional and nothing fills it in: without a `name` the boxes submit nothing, which is what a group that only drives the page (`DataTable`'s column menu) wants even inside a form.
 
@@ -1385,8 +1394,9 @@ pair `[lower, upper]`.
 the thumbs keep their values in the DOM, so a form's reset and its dirty check
 (value against default value) work on them as on any input. The whole slider is
 a `role="group"`: name it with `aria-label` or `aria-labelledby`
-(`FormControl`'s `renderInput` props work), and each thumb is read as that name
-followed by the built-in `rangeSliderStart` / `rangeSliderEnd` wording.
+(`<FormControl labelAs="group">`'s `renderInput` props), and each thumb is read
+as that name followed by the built-in `rangeSliderStart` / `rangeSliderEnd`
+wording.
 
 ```tsx
 import { RangeSlider } from '@k8ordo/ui';

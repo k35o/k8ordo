@@ -14,7 +14,7 @@ type FormControlProps = {
   invalid?: boolean;
   required?: boolean;
   label: string;
-  labelAs?: 'label' | 'legend';
+  labelAs?: 'label' | 'group';
   helpText?: string;
   errorText?: string | undefined;
   renderInput: (props: {
@@ -25,8 +25,8 @@ type FormControlProps = {
     invalid: boolean;
     required: boolean;
   }) => ReactElement;
-  ref?: Ref<HTMLElement>;
-} & Omit<HTMLAttributes<HTMLElement>, 'className' | 'style' | 'children'>;
+  ref?: Ref<HTMLDivElement>;
+} & Omit<HTMLAttributes<HTMLDivElement>, 'className' | 'style' | 'children'>;
 
 export const FormControl: FC<FormControlProps> = ({
   disabled = false,
@@ -57,16 +57,19 @@ export const FormControl: FC<FormControlProps> = ({
       {required && <span className={styles.required}>{messages.required}</span>}
     </>
   );
-  const content = (
-    <>
+
+  return (
+    <div {...rest} className={styles.root} ref={ref}>
       {labelAs === 'label' ? (
         <label className={styles.label} htmlFor={id} id={labelId}>
           {labelContent}
         </label>
       ) : (
-        <legend className={styles.label} id={labelId}>
+        // label の for はグループを指せず、fieldset と legend で包むとグループの
+        // 中にもう 1 つグループができる。名前は中の部品が aria-labelledby で読む
+        <span className={styles.label} id={labelId}>
           {labelContent}
-        </legend>
+        </span>
       )}
       {renderInput({
         id,
@@ -92,29 +95,6 @@ export const FormControl: FC<FormControlProps> = ({
           {helpText}
         </p>
       ) : null}
-    </>
-  );
-
-  // 単一フィールドまで fieldset で包むと、名前の無いグループが全フィールドに増える。
-  // legend を置けるのは fieldset の中だけなので、legend のときだけ fieldset にする。
-  // ラッパー要素が labelAs で div / fieldset に分かれるため、ref は共通の
-  // HTMLElement で受けて要素側でキャストする
-  return labelAs === 'legend' ? (
-    <fieldset
-      {...rest}
-      className={styles.root}
-      ref={ref as Ref<HTMLFieldSetElement>}
-    >
-      {content}
-    </fieldset>
-  ) : (
-    <div
-      {...rest}
-      className={styles.root}
-
-      ref={ref as Ref<HTMLDivElement>}
-    >
-      {content}
     </div>
   );
 };

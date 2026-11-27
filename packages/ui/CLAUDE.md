@@ -349,6 +349,16 @@ unchanged (each field's `WithForm` story holds it to that). Five rules follow:
   rendered: adding it only when a message appears would remount the input
   and drop the focus the form just moved there after a failed submission.
 
+A field that is a group itself (`Radio`, `RadioCard`, `CheckboxGroup`,
+`CheckboxCard`, `RangeSlider`: a `radiogroup` or `group` element) is named,
+not labelled: through a required `aria-labelledby`, or on `RangeSlider`
+through `aria-label` or `aria-labelledby`. `FormControl`'s
+`labelAs="group"` draws the heading `aria-labelledby` points at as a
+`<span id>`: a `<label for>` cannot label a group, and a `<fieldset>` around
+one nests a second group with the same name. A field that puts the `id` on a
+text input (`ColorPicker`, `DatePicker`, `Combobox`, `Autocomplete`) keeps
+`'label'`.
+
 ### Built-in wording
 
 A component reads its own wording with `getMessages()` (`src/i18n/current.ts`),

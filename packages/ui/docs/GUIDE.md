@@ -479,6 +479,7 @@ import {
   Button,
   FileField,
   FormControl,
+  RadioCard,
   Select,
   TextField,
 } from '@k8ordo/ui';
@@ -494,6 +495,12 @@ import {
     value={value}
     onChange={onChange}
   />
+)} />
+
+// A field that is a group itself (Radio, RadioCard, CheckboxGroup,
+// CheckboxCard, RangeSlider) takes its name from a heading, not a <label>
+<FormControl label="Plan" labelAs="group" renderInput={(props) => (
+  <RadioCard {...props} options={plans} />
 )} />
 
 <FileField.Root accept="image/*" multiple>

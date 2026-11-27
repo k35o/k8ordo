@@ -22,7 +22,7 @@ const GROUP = `const tags = form.field('tags');
   errorText={tags.error}
   invalid={tags.invalid}
   label="Tags"
-  labelAs="legend"
+  labelAs="group"
   renderInput={(props) => (
     <CheckboxCard
       {...props}

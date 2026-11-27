@@ -268,7 +268,7 @@ const PlanForm = () => (
             errorText={plan.error}
             invalid={plan.invalid}
             label="プラン"
-            labelAs="legend"
+            labelAs="group"
             renderInput={(props) => (
               <RadioCard {...props} {...plan.input} options={PLANS} />
             )}

@@ -210,7 +210,7 @@ const FavoritesForm = () => (
             errorText={tags.error}
             invalid={tags.invalid}
             label="好きなもの"
-            labelAs="legend"
+            labelAs="group"
             renderInput={(props) => (
               <CheckboxCard {...props} {...tags.input} options={TAGS} />
             )}

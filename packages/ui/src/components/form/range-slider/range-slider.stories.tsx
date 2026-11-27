@@ -192,6 +192,7 @@ const PriceRangeForm = () => (
       return (
         <FormControl
           label="価格"
+          labelAs="group"
           renderInput={(props) => (
             <RangeSlider
               {...props}
@@ -227,7 +228,9 @@ export const WithForm: Story = {
     // FormControl の required は、グループではなく両方のつまみに届く。
     // jest-dom の toBeRequired は range を数えないので、プロパティで見る
     await expect([start.required, end.required]).toStrictEqual([true, true]);
-    await expect(canvas.getByRole('group')).not.toHaveAttribute('required');
+    await expect(
+      canvas.getByRole('group', { name: '価格 必須' }),
+    ).not.toHaveAttribute('required');
 
     // つまみを動かすと変更ありになり、reset で値も塗りも戻る
     slide(start, 21);

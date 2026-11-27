@@ -56,8 +56,8 @@ export const mapNumber = message({
 });
 
 export const mapEnum = message({
-  ja: '`z.enum([…])`：`Select`、`Radio`、`RadioCard`。`options`を渡し、ラジオボタンでは`FormControl`に`labelAs="legend"`を付けます。',
-  en: '`z.enum([…])`: `Select`, `Radio` or `RadioCard`. Pass `options`, and `labelAs="legend"` on `FormControl` for radios.',
+  ja: '`z.enum([…])`：`Select`、`Radio`、`RadioCard`。`options`を渡し、ラジオボタンでは`FormControl`に`labelAs="group"`を付けます。',
+  en: '`z.enum([…])`: `Select`, `Radio` or `RadioCard`. Pass `options`, and `labelAs="group"` on `FormControl` for radios.',
 });
 
 export const mapBoolean = message({
@@ -66,8 +66,8 @@ export const mapBoolean = message({
 });
 
 export const mapGroup = message({
-  ja: '`z.array(z.enum([…]))`：`CheckboxGroup`、`CheckboxCard`、`Autocomplete`。`options`を渡します。',
-  en: '`z.array(z.enum([…]))`: `CheckboxGroup`, `CheckboxCard` or `Autocomplete`. Pass `options`.',
+  ja: '`z.array(z.enum([…]))`：`CheckboxGroup`、`CheckboxCard`、`Autocomplete`。`options`を渡し、`CheckboxGroup`と`CheckboxCard`では`FormControl`に`labelAs="group"`を付けます。',
+  en: '`z.array(z.enum([…]))`: `CheckboxGroup`, `CheckboxCard` or `Autocomplete`. Pass `options`, and `labelAs="group"` on `FormControl` for `CheckboxGroup` and `CheckboxCard`.',
 });
 
 export const mapFile = message({

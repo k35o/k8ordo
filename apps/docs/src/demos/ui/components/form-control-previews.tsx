@@ -1,6 +1,6 @@
 'use client';
 
-import { FormControl, TextField } from '@k8ordo/ui';
+import { FormControl, Radio, TextField } from '@k8ordo/ui';
 
 export function FormControlBasicPreview() {
   return (
@@ -43,6 +43,24 @@ export function FormControlRequiredPreview() {
       label="Username"
       renderInput={(props) => (
         <TextField {...props} placeholder="Required field" />
+      )}
+    />
+  );
+}
+
+export function FormControlGroupPreview() {
+  return (
+    <FormControl
+      label="Plan"
+      labelAs="group"
+      renderInput={(props) => (
+        <Radio
+          {...props}
+          options={[
+            { value: 'free', label: 'Free' },
+            { value: 'pro', label: 'Pro' },
+          ]}
+        />
       )}
     />
   );

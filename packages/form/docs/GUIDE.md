@@ -832,10 +832,16 @@ arrives as an `input` event, the way typing does.
 | `z.string()`, `z.email()`, `z.url()`, `z.iso.*()`  | `TextField`, `Textarea`                         | —                                                             |
 | a password                                         | `PasswordInput`                                 | —                                                             |
 | `z.coerce.number()`                                | `NumberField`, `Slider`                         | —                                                             |
-| `z.enum([…])`                                      | `Select`, `Radio`, `RadioCard`                  | `options`; `labelAs="legend"` on `FormControl` for radios     |
+| `z.enum([…])`                                      | `Select`, `Radio`, `RadioCard`                  | `options`; `labelAs="group"` on `FormControl` for radios      |
 | `z.boolean()`, `z.literal(true)`, `z.stringbool()` | `Checkbox`, `Switch`                            | `label` and `errorText`; no `FormControl`, so no `{...props}` |
-| `z.array(z.enum([…]))`                             | `CheckboxGroup`, `CheckboxCard`, `Autocomplete` | `options`; `labelAs="legend"` on `FormControl` for boxes      |
+| `z.array(z.enum([…]))`                             | `CheckboxGroup`, `CheckboxCard`, `Autocomplete` | `options`; `labelAs="group"` on `FormControl` for boxes       |
 | `z.file()`                                         | `FileField.Root`                                | a `FileField.Trigger` and `FileField.ItemList`                |
+
+**A group takes its name from `FormControl`.** `Radio`, `RadioCard`,
+`CheckboxGroup` and `CheckboxCard` are a group each, so `labelAs="group"`
+draws the label as the heading the group reads its name from, the required
+mark included. `Autocomplete` keeps the default, a `<label>` for its text
+input.
 
 **Radios take the spread.** The advice under [Radio groups](#radio-groups) is
 about a hand-written `<input type="radio">`. `Radio` and `RadioCard` read an
@@ -866,7 +872,7 @@ const tags = form.field('tags');
   errorText={tags.error}
   invalid={tags.invalid}
   label="タグ"
-  labelAs="legend"
+  labelAs="group"
   renderInput={(props) => (
     <CheckboxCard {...props} {...tags.input} options={options} />
   )}

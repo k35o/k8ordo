@@ -2522,13 +2522,13 @@
         },
         {
           "name": "labelAs",
-          "types": ["'label'", "'legend'"],
+          "types": ["'label'", "'group'"],
           "defaultValue": "'label'",
           "required": false
         },
         {
           "name": "ref",
-          "types": ["Ref<HTMLElement>"],
+          "types": ["Ref<HTMLDivElement>"],
           "defaultValue": null,
           "required": false
         },
@@ -2539,7 +2539,7 @@
           "required": false
         }
       ],
-      "inherits": "HTMLAttributes<HTMLElement>",
+      "inherits": "HTMLAttributes<HTMLDivElement>",
       "omitted": ["className", "style", "children"]
     },
     {

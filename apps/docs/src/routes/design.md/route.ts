@@ -383,7 +383,7 @@ import { ToastProvider, Button, Card } from '@k8ordo/ui';
 
 ラベルは入力の上に配置。エラーは入力直下に \`--color-fg-error\`、\`--font-size-sm\` で。バリデーションは送信時が基本。
 
-- **FormControl** — フィールドのラッパー。\`label\`（必須）, \`helpText?\`, \`errorText?\`, \`required?\`, \`renderInput\`
+- **FormControl** — フィールドのラッパー。\`label\`（必須）, \`labelAs?: 'label'|'group'\`（Radio などのグループは \`'group'\`）, \`helpText?\`, \`errorText?\`, \`required?\`, \`renderInput\`
 - **TextField** / **Textarea** / **PasswordInput** / **NumberField** — テキスト系入力
 - **Select** / **Autocomplete** — \`options\` ベースの選択
 - **Checkbox** / **CheckboxGroup** / **CheckboxCard** — 複数選択
