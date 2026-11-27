@@ -1,19 +1,11 @@
 'use client';
 
 import { clsx } from 'clsx';
-import {
-  useEffect,
-  useEffectEvent,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import { useEffect, useEffectEvent, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent, FC, InputHTMLAttributes, Ref } from 'react';
 import { useFormStatus } from 'react-dom';
 
 import { getMessages } from '../../../i18n/current';
-import type { Messages } from '../../../i18n/messages';
 import { ChevronIcon } from '../../icons/chevron';
 import { chain, mergeRefs } from './../../../helpers';
 import { useControllableState } from './../../../hooks/controllable-state';
@@ -85,34 +77,6 @@ const toBound = (value: number | string | undefined, fallback: number) => {
 const decimalsOf = (step: number): number =>
   String(step).split('.')[1]?.length ?? 0;
 
-const rangeErrorOf = (
-  value: number | null,
-  min: number,
-  max: number,
-  messages: Messages,
-): string => {
-  if (value !== null && value < min) {
-    return messages.numberFieldRangeUnderflow.replace('{min}', String(min));
-  }
-  if (value !== null && value > max) {
-    return messages.numberFieldRangeOverflow.replace('{max}', String(max));
-  }
-  return '';
-};
-
-// customValidity の枠は @k8ordo/form のルールや非同期チェックと共有なので、
-// 自分で書いた文言だけを消す
-const ownRangeErrors = new WeakMap<HTMLInputElement, string>();
-
-const applyRangeError = (input: HTMLInputElement, error: string) => {
-  if (error !== '') {
-    input.setCustomValidity(error);
-  } else if (input.validationMessage === ownRangeErrors.get(input)) {
-    input.setCustomValidity('');
-  }
-  ownRangeErrors.set(input, error);
-};
-
 export const NumberField: FC<Props> = ({
   invalid = false,
   disabled = false,
@@ -128,7 +92,6 @@ export const NumberField: FC<Props> = ({
   precision: precisionProp,
   max: maxProp,
   min: minProp,
-  onInput,
   ...rest
 }) => {
   const messages = getMessages();
@@ -151,14 +114,6 @@ export const NumberField: FC<Props> = ({
     defaultValue: initialValue,
     onChange,
   });
-  // type="text" ではブラウザが min / max を検査しないので、範囲の違反は
-  // customValidity でブラウザの検証に載せる
-  const reportRange = (input: HTMLInputElement, text: string) => {
-    applyRangeError(
-      input,
-      rangeErrorOf(cast(text, precision), min, max, messages),
-    );
-  };
   // 入力途中の文字列を React が持つのは制御モードだけ。非制御では DOM に持たせる。
   // React の制御下に置くと value 属性が現在の文字列に同期され続け、form.reset() が
   // 戻る先（描画時の defaultValue）を失うため。
@@ -177,32 +132,9 @@ export const NumberField: FC<Props> = ({
     setShownValue(currentValue);
   }
 
-  useLayoutEffect(() => {
-    const input = inputRef.current;
-    if (input === null) {
-      return;
-    }
-    applyRangeError(
-      input,
-      rangeErrorOf(
-        cast(isControlled ? displayValue : input.value, precision),
-        min,
-        max,
-        messages,
-      ),
-    );
-  }, [isControlled, displayValue, precision, min, max, messages]);
-
   const handleReset = useEffectEvent(() => {
     if (!isControlled) {
       setCurrentValue(initialValue);
-    }
-  });
-  // reset はブラウザが値を戻す前に飛ぶので、戻り切った値で検査し直す
-  const handleRestored = useEffectEvent(() => {
-    const input = inputRef.current;
-    if (input !== null) {
-      reportRange(input, input.value);
     }
   });
 
@@ -213,9 +145,6 @@ export const NumberField: FC<Props> = ({
     }
     const listener = () => {
       handleReset();
-      setTimeout(() => {
-        handleRestored();
-      }, 0);
     };
     form.addEventListener('reset', listener);
     return () => {
@@ -235,10 +164,14 @@ export const NumberField: FC<Props> = ({
     }
     input.value = text;
     setCurrentValue(next);
-    reportRange(input, text);
     if (changed) {
       input.dispatchEvent(new Event('input', { bubbles: true }));
     }
+  };
+
+  const commitTyped = (input: HTMLInputElement) => {
+    const parsed = cast(input.value, precision);
+    commit(input, parsed === null ? null : clamp(parsed, min, max));
   };
 
   const stepBy = (input: HTMLInputElement, delta: number) => {
@@ -284,17 +217,13 @@ export const NumberField: FC<Props> = ({
         disabled={disabled}
         readOnly={readOnlyResolved}
         required={required}
-        onInput={chain(onInput, (e) => {
-          reportRange(e.currentTarget, e.currentTarget.value);
-        })}
         onBlur={chain(onBlur, (e) => {
-          const parsed = cast(e.currentTarget.value, precision);
-          commit(
-            e.currentTarget,
-            parsed === null ? null : clamp(parsed, min, max),
-          );
+          commitTyped(e.currentTarget);
         })}
         onKeyDown={chain(onKeyDown, (e) => {
+          if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+            commitTyped(e.currentTarget);
+          }
           if (e.key === 'ArrowUp') {
             stepBy(e.currentTarget, stepSize);
           }

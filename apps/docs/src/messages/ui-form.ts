@@ -101,8 +101,8 @@ export const exceptionsTitle = message({
 });
 
 export const exceptionNumber = message({
-  ja: '`NumberField`は値の整形と増減のために`type="text"`で描画します。そのためブラウザは`min`と`max`を確かめません。範囲の外の値は`NumberField`自身が`setCustomValidity`で知らせます。その文言は`@k8ordo/ui`の辞書のもので、zodの文言とは別です。クライアントの文言がzodとそろわないのは、ここだけです。',
-  en: '`NumberField` renders `type="text"` so it can format and step the value, and the browser does not check `min` and `max` on a text input. `NumberField` reports an out-of-range value itself with `setCustomValidity`. That message comes from `@k8ordo/ui`’s dictionary, not from zod. This is the only place the client’s text is not zod’s own.',
+  ja: '`NumberField`は値の整形と増減のために`type="text"`で描画します。そのためブラウザは`min`と`max`を確かめません。範囲の外の値は、フォーカスを外したときと`Enter`を押したときに`NumberField`が範囲に収めます。範囲の外の値がそのまま送られるのは、JavaScriptが無いときだけです。そのときはサーバーがzodの文言でエラーを返します。',
+  en: '`NumberField` renders `type="text"` so it can format and step the value, and the browser does not check `min` and `max` on a text input. Instead, `NumberField` clamps an out-of-range value into range when the field is left and when `Enter` is pressed in it. An out-of-range value is submitted only without JavaScript, and then the server returns zod’s message.',
 });
 
 export const exceptionTextarea = message({

@@ -5845,14 +5845,6 @@
       "usedBy": ["NumberField"]
     },
     {
-      "key": "numberFieldRangeUnderflow",
-      "usedBy": ["NumberField"]
-    },
-    {
-      "key": "numberFieldRangeOverflow",
-      "usedBy": ["NumberField"]
-    },
-    {
       "key": "rangeSliderStart",
       "usedBy": ["RangeSlider"]
     },

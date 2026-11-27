@@ -38,8 +38,6 @@ export const messageUsage: Readonly<Record<keyof Messages, readonly string[]>> =
 
     numberFieldIncrement: ['NumberField'],
     numberFieldDecrement: ['NumberField'],
-    numberFieldRangeUnderflow: ['NumberField'],
-    numberFieldRangeOverflow: ['NumberField'],
 
     rangeSliderStart: ['RangeSlider'],
     rangeSliderEnd: ['RangeSlider'],

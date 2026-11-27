@@ -1,7 +1,7 @@
 import { formFields, parseForm } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useRef, useState } from 'react';
-import { expect, fn, waitFor } from 'storybook/test';
+import { expect, fireEvent, fn, waitFor } from 'storybook/test';
 import { z } from 'zod';
 
 import {
@@ -539,8 +539,20 @@ export const RequiredIsInvalidWhileEmpty: Story = {
   },
 };
 
-// type="text" のままでも、範囲の違反はブラウザの検証に載る。確定（blur）すると範囲に収める
-export const ReportsOutOfRangeToTheBrowser: Story = {
+const onSubmitted = fn();
+
+const SubmitOnEnterRender: Story['render'] = (args) => (
+  <form
+    onSubmit={(event) => {
+      event.preventDefault();
+      onSubmitted(new FormData(event.currentTarget).get('quantity'));
+    }}
+  >
+    <NumberField {...args} name="quantity" />
+  </form>
+);
+
+export const OutOfRangeSetsNoMessage: Story = {
   args: {
     min: 1,
     max: 10,
@@ -550,13 +562,52 @@ export const ReportsOutOfRangeToTheBrowser: Story = {
     const input = canvas.getByRole<HTMLInputElement>('spinbutton');
     await userEvent.type(input, '15');
 
-    await expect(input).toBeInvalid();
-    await expect(input.validationMessage).toBe('10 以下で入力してください');
+    await expect(input).toBeValid();
+    await expect(input.validationMessage).toBe('');
 
     await userEvent.tab();
 
     await expect(input).toHaveValue('10');
-    await expect(input).toBeValid();
+  },
+};
+
+export const EnterClampsBeforeSubmitting: Story = {
+  args: {
+    min: 1,
+    max: 10,
+    onChange: fn(),
+  },
+  render: SubmitOnEnterRender,
+  play: async ({ args, canvas, userEvent }) => {
+    onSubmitted.mockClear();
+    const input = canvas.getByRole<HTMLInputElement>('spinbutton');
+    await userEvent.type(input, '15');
+    await userEvent.keyboard('{Enter}');
+
+    await expect(input).toHaveValue('10');
+    await expect(input).toHaveFocus();
+    await expect(args.onChange).toHaveBeenLastCalledWith(10);
+    await expect(onSubmitted).toHaveBeenCalledOnce();
+    await expect(onSubmitted).toHaveBeenCalledWith('10');
+  },
+};
+
+export const EnterWhileComposingKeepsTheText: Story = {
+  args: {
+    min: 1,
+    max: 10,
+  },
+  render: InFormRender,
+  play: async ({ canvas, userEvent }) => {
+    const input = canvas.getByRole<HTMLInputElement>('spinbutton');
+    await userEvent.type(input, '15');
+    fireEvent.keyDown(input, { key: 'Enter', isComposing: true });
+
+    await expect(input).toHaveValue('15');
+
+    await userEvent.tab();
+
+    await expect(input).toHaveValue('10');
   },
 };
 
@@ -658,24 +709,19 @@ export const WithForm: Story = {
     const submit = () =>
       userEvent.click(canvas.getByRole('button', { name: '送信' }));
 
-    // 範囲外の値をブラウザの検証に載せる
     await fill(userEvent, field('個数'), '15');
-    await expect(field('個数').validity.valid).toBe(false);
-    await expect(field('個数').validationMessage).toBe(
-      '10 以下で入力してください',
-    );
-    await expect(field('個数').form?.checkValidity()).toBe(false);
+    await expect(field('個数')).toBeValid();
 
-    // 範囲外の値は、エラーが出ているあいだ入力のたびにその文言へ変わる
     await userEvent.clear(field('個数'));
     await userEvent.tab();
     await expect(
       await canvas.findByText('数値を入力してください'),
     ).toBeVisible();
     await userEvent.type(field('個数'), '0');
-    await expect(
-      await canvas.findByText('1 以上で入力してください'),
-    ).toBeVisible();
+    await waitFor(() =>
+      expect(field('個数')).toHaveAttribute('aria-invalid', 'false'),
+    );
+    await expect(field('個数')).not.toHaveAccessibleDescription();
 
     // 矢印キーで変えた値を form が知り、reset で描画時の値に戻って isDirty も下りる
     await userEvent.click(canvas.getByRole('button', { name: 'リセット' }));
@@ -698,13 +744,13 @@ export const WithForm: Story = {
     await expect(field('比率')).toHaveValue('0.25');
 
     // step="any" の欄は小数を丸めずに送る
-    await fill(userEvent, field('個数'), '2');
     await fill(userEvent, field('比率'), '1.5');
     await fill(userEvent, field('メモ'), 'よろしく');
-    await submit();
+    await fill(userEvent, field('個数'), '20');
+    await userEvent.keyboard('{Enter}');
     await waitFor(() =>
       expect(received).toHaveBeenLastCalledWith({
-        count: 2,
+        count: 10,
         ratio: 1.5,
         memo: 'よろしく',
       }),

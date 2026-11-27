@@ -255,6 +255,10 @@ export const numberField = {
     ja: '最小値と最大値',
     en: 'Min and max',
   }),
+  minMaxDescription: message({
+    ja: '範囲の外の値は、フォーカスを外したときと`Enter`を押したときに範囲に収めます。`Enter`でフォームを送信するときも、範囲に収めた値が送られます。',
+    en: 'An out-of-range value is clamped into range when the field is left and when `Enter` is pressed in it, so a form submitted with `Enter` sends the clamped value.',
+  }),
   disabledTitle: message({
     ja: '無効',
     en: 'Disabled',

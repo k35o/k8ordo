@@ -837,11 +837,13 @@ range. `required` reaches the input itself, so an empty required field fails
 native validation.
 
 The input is `type="text"` (so it can format to `precision` and step with the
-arrow keys), which the browser does not range-check — so the field does it: a
-value below `min` or above `max` is reported with `setCustomValidity`, using
-the `numberFieldRangeUnderflow` / `numberFieldRangeOverflow` wording. Leaving the
-field clamps the value into range. A message set by someone else on the same
-input — a form library's cross-field rule — is left alone.
+arrow keys), which the browser does not range-check — so the field keeps the
+value in range itself: leaving the field, or pressing Enter in it (not while an
+IME is composing), clamps a value below `min` or above `max` into range, the
+same commit either way. A form submitted with Enter therefore sends the clamped
+value. The field sets no validity message of its own, so whatever reports an
+out-of-range value — the server's schema, when JavaScript has not run — keeps
+its own wording.
 
 `min`, `max`, and an uncontrolled `defaultValue` also take strings, and `step`
 takes `'any'`. `@k8ordo/form` derives numeric `min` / `max`, a `step` of
@@ -850,7 +852,8 @@ takes `'any'`. `@k8ordo/form` derives numeric `min` / `max`, a `step` of
 number of decimals in `step`; with `step="any"` the value is not rounded.
 
 A value the field writes itself — an arrow key, a stepper press, formatting on
-blur — is announced with one `input` event, and `onChange` is still called once.
+blur or Enter — is announced with one `input` event, and `onChange` is still
+called once.
 
 A form reset — `form.reset()`, a reset button, or React resetting the form after
 an action — puts an uncontrolled field back to `defaultValue` (or to empty) and
@@ -2950,7 +2953,7 @@ are `string`.
 - Combobox: `comboboxToggle`, `comboboxEmpty`, `comboboxFailed`
 - FileField: `fileFieldRemove`
 - FileField.Dropzone / FileField (generative UI): `fileFieldTrigger`, `fileFieldDrop`
-- NumberField: `numberFieldIncrement`, `numberFieldDecrement`, `numberFieldRangeUnderflow` (`{min}` is replaced), `numberFieldRangeOverflow` (`{max}` is replaced)
+- NumberField: `numberFieldIncrement`, `numberFieldDecrement`
 - RangeSlider: `rangeSliderStart`, `rangeSliderEnd`
 - Calendar / DatePicker: `calendarPreviousMonth`, `calendarNextMonth`
 - DatePicker: `datePickerOpen`, `datePickerDialog`

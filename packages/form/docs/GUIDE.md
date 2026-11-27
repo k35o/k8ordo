@@ -298,9 +298,7 @@ const [state, formAction] = useActionState(
 
 **The wording cannot drift.** Client messages are obtained by running the
 schema against a probe value, so the text shown next to the input is the text
-zod itself produces. A custom `min(1, '…')` reaches both sides. The one
-exception is a range message from `@k8ordo/ui`'s `NumberField` (see
-[Working with @k8ordo/ui](#working-with-k8ordoui)).
+zod itself produces. A custom `min(1, '…')` reaches both sides.
 
 **`required` means the same thing on both sides.** JSON Schema's `required`
 means "the key is present", but a form always submits something for every
@@ -889,18 +887,16 @@ through a hidden `<select multiple>` that is present even with nothing
 selected, so the rule has an element to mark, and focus sent to it after a
 failure goes on to the text input.
 
-**`NumberField` checks its own range.** It renders `type="text"` so it can
-format and step the value, and the browser does not check `min` and `max` on
-a text input. `NumberField` reports an out-of-range value with
-`setCustomValidity` instead, which `useForm` shows like any other message —
-but in `@k8ordo/ui`'s wording (`numberFieldRangeUnderflow` /
-`numberFieldRangeOverflow`), not zod's, the one place the client's text is not
-zod's own. Leaving the field clamps the value into range, so the message shows
-only while typing. `.int()` and `.multipleOf()` set the precision the field
-rounds to; a plain `z.coerce.number()` derives `step="any"`, which is not
-rounded. Without JavaScript nothing checks the range before the server does;
-a `TextField` given the derived `type="number"` keeps the browser's own
-check, and its wording.
+**`NumberField` keeps the value in range.** It renders `type="text"` so it
+can format and step the value, and the browser does not check `min` and `max`
+on a text input. `NumberField` clamps the value into range instead, when the
+field is left and when Enter is pressed in it, so a form submitted with Enter
+sends the clamped value and no range message is ever shown. `.int()` and
+`.multipleOf()` set the precision the field rounds to; a plain
+`z.coerce.number()` derives `step="any"`, which is not rounded. Without
+JavaScript nothing checks the range before the server does, and the server
+answers with zod's message; a `TextField` given the derived `type="number"`
+keeps the browser's own check, and its wording.
 
 **A `Textarea` has no `pattern`.** A regex on a field drawn as a `Textarea`
 reaches the markup, but a `<textarea>` ignores it: the check runs on the server
