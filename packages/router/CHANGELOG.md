@@ -1,5 +1,49 @@
 # @k8ordo/router
 
+## 4.0.0
+
+### Major Changes
+
+- `NavigablePath`をなくしました。手で書いたパスがルート表のどれかのパターンに合うかを型で確かめる型でしたが、使っていた`@k8ordo/state`の`Register`がなくなり、使うものがありませんでした。URLは表のパターンから`href()`で作る1通りなので、手で書いたパスを確かめる型は、その2つ目の書き方を認めることになります。
+
+  移行するには、`NavigablePath<typeof routes, Path>`で確かめていたパスを、`href()`で作るように書き換えます。たとえば`'/products/42'`は`href('/products/:id', { id: 42 })`にします。パターンとparamの型検査は`href()`が行います。
+
+- `navigateTo`をなくしました。コードからページを移るときは、`href`で作ったURLをNavigation APIの`navigation.navigate()`に渡します。リンクの`<a href>`と同じURLなので、ルーターも同じように扱い、`{ committed, finished }`も同じものが返ります。型の検査とViteの`base`は`href`がすでに受け持っていて、`navigateTo`はそれを`navigation.navigate()`に渡すだけでした。それなのに、paramとオプションがどちらも素のオブジェクトなので、パターンの文字列で見分ける分岐を抱え、すべてのparamを束ねたパターンでは`navigateTo('/:locale', undefined, { history: 'replace' })`と`undefined`の席を書かせていました。
+
+  `bindParams`は、束ねた`href`そのものを返すようになりました。`NavigateToOptions`と`BoundLinks`の型もなくなり、`@k8ordo/framework`からの再exportも消えました。
+
+  移行するには、次のように書き換えます。
+
+  - `navigateTo('/products/:id', { id })`は`navigation.navigate(href('/products/:id', { id }))`にします。
+  - `navigateTo('/products', { history: 'replace' })`は`navigation.navigate(href('/products'), { history: 'replace' })`にします。
+  - `export const { href, navigateTo } = bindParams(…)`は`export const href = bindParams(…)`にします。
+
+  `navigateTo`は既定で`push`でしたが、`navigation.navigate()`の既定の`'auto'`は、別のURLなら`push`、今と同じURLなら`replace`です。リンクのクリックと同じ振る舞いで、今のページを選び直しても同じエントリが2つ積まれることはありません。
+
+  この変更は、2026-09-03に決めた「ページを変えるのは`navigateTo`、状態を変えるのは`update`」を「ページを変えるのは`navigation.navigate(href(…))`、状態を変えるのは`update()`」に置き換えます。
+
+- `defineRoutes`が、文法の外のパターンを定義した時点で`TypeError`にするようにしました。認める区間は、`: * ? + { } ( ) \`を含まないリテラル、`:name`（JavaScriptの識別子）、パターン全体の最後に置いた`:name+`と`*`の4つと、`/(name)`のグループだけです。空の区間（`/a//b`、`/a/`）も拒みます。エラー文はパターンと規則を名指しします（`route pattern "/:id?" has the segment ":id?", which is not part of the grammar — …`）。
+
+  これまでは`URLPattern`が読める書き方なら通っていて、型と実行時で答えが食い違っていました。`/:id?`の型は`{ 'id?': string }`なのに、照合の結果は`{ id }`で、`href`は`'id?'`を探して失敗しました。`/foo-:bar`は型ではparamを持たないのに、照合では`bar`を取り、`href`は`/foo-:bar`という壊れたリンクを返しました。`:name+`の位置は、キーごとではなく子のキーまでつないだパターンで調べます。`'/files/:path+': { children: { '/edit': … } }`は`/files/:path+/edit`として拒みます。
+
+  移行するには、拒まれたパターンを文法の中の書き方に直します。`/:id?`は`/`と`/:id`の2つのパターンに、`/files/:path*`は`/files`と`/files/:path+`に分けます。`@k8ordo/framework`が`src/routes/`から作る表は、もともとこの文法の中にあるので影響しません。
+
+- パターンの最後に`:name+`を書けるようにしました。`/files/:path+`は`/files`より下の区間を1つ以上すべて受け取り、`/files`そのものには合いません。これまで複数の区間を受け取れるのは`/*`だけで、受け取った部分は`params`に入らず、リンク先にもできませんでした。`:name+`の値は区間の配列です。`match`、`matchPath`、`useMatch`、`useParams`は区間ごとにデコードした配列を返し、`/files/a%2Fb/c`は`{ path: ['a/b', 'c'] }`になります。`href`と`bindParams`が返す`href`は同じ配列を受け取り、区間ごとにエスケープして`/`でつなぎます。空の配列と空文字の区間は、パターンに合わないパスになるので`TypeError`にします。型も同じで、`ParamsOf<'/files/:path+'>`は`{ path: readonly string[] }`、`PathFor`は`` `/files/${string}` ``です。`Match['params']`の値の型は`string | readonly string[]`に広がります。
+
+  `Match['params']`の値を`string`として読んでいたコード（`match(pathname)?.params`や`useRoute().params`を文字列として渡す箇所）は、型エラーになります。そのパターンの型が分かる場所では`useParams(pattern)`や`ParamsOf<pattern>`で読み直します。表に`:name+`が無く、値がいつも1区間だと分かっている場所では、`typeof value === 'string'`で確かめてから使います。
+
+### Minor Changes
+
+- `LayoutProps<P>`が、ページの無いディレクトリのレイアウトのパターンも受け取るようにしました。`blog/[slug]/layout.tsx`の下に`comments/page.tsx`しか無いとき、これまでは`LayoutProps<'/blog/:slug'>`が型エラーになり、propsの型を手で書き、serverモードで`request`を読むなら`RouteRequest`を`@k8ordo/framework/server`から足す必要がありました。いまは`LayoutProps<'/blog/:slug'>`と書けます。パターンの書き間違いは、生成されるルート表がimportの位置でレイアウトのpropsと照らし合わせるので、そこで型エラーになります。手で書いていたpropsの型は、`LayoutProps`に置き換えられます。
+
+### Patch Changes
+
+- 2つの`paramsSchema`が同じparamを読むとき、`ParsedParams`（`PageProps`と`RouteContext`の`params`、`href`が受け取るparam）がそのparamを後のスキーマの出力で型付けするようにしました。フレームワークはスキーマを外側のレイアウトから順に走らせ、それぞれの出力を前の値に重ねるので、ページが受け取るのは後のスキーマの値です。これまでは型だけが外側のスキーマの出力を残していて、たとえばレイアウトが`year`を数値に、ページが`Date`に読むと、型は`number`なのに値は`Date`でした。外側のスキーマだけが読むparamの型はこれまでどおりです。
+
+- `matchPath`をServer Componentから呼べるようにしました。`matchPath`は純粋な関数ですが、`'use client'`のモジュールにあったので、RSCの環境ではクライアントの参照になり、Server Componentから呼ぶと例外になっていました。フレームワークのレイアウトは`pathname`を受け取るので、サーバーでリンクに印を付けられます。今のページへのリンクは`matchPath('/products', pathname)`で`aria-current="page"`に、今のページを含む区画へのリンクは`matchPath('/products/*', pathname, { inclusive: true })`で`aria-current="true"`にします。ナビゲーション全体をClient Componentにして`useMatch`を使う必要はありません。`useMatch`はこれまでどおりClient Componentで使います。
+
+  今のページを`pathname === href(…)`で比べていた場合は、`matchPath`に書き換えます。`pathname`はルート表の書き方で、`href`はViteの`base`を付けたURLなので、`base`の下では一致しません。
+
 ## 3.0.0
 
 ### Patch Changes

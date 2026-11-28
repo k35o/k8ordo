@@ -29,6 +29,11 @@
   dir: packages/color-scheme
   intents:
     - color-scheme-script-out-of-payload
+"@k8ordo/color-scheme@4.0.0":
+  dir: packages/color-scheme
+  intents:
+    - color-scheme-guide-high-contrast
+    - framework-guide-preferences
 "@k8ordo/form@0.1.1":
   dir: packages/form
   intents:
@@ -68,6 +73,19 @@
   dir: packages/form
   intents:
     - nice-pots-own
+"@k8ordo/form@4.0.0":
+  dir: packages/form
+  intents:
+    - form-checkbox-group-echo-in-input
+    - form-english-runtime-messages
+    - form-fields-in-render
+    - form-fields-typed-by-schema
+    - form-group-count-from-schema
+    - form-guide-success-feedback
+    - form-guide-ui-checkbox-value
+    - form-input-types-per-control
+    - form-native-attributes-only
+    - i18n-guide-zod-locale
 "@k8ordo/framework@1.0.0":
   dir: packages/framework
   intents:
@@ -143,6 +161,28 @@
     - framework-paths-files
     - framework-server-stylesheets-listed
     - framework-static-one-render
+"@k8ordo/framework@4.0.0":
+  dir: packages/framework
+  intents:
+    - framework-baseline-targets
+    - framework-csp-prepaint-script
+    - framework-docs-options-testing
+    - framework-guard-page-url
+    - framework-guard-route-redirect-not-found
+    - framework-guide-preferences
+    - framework-options-tighten
+    - framework-paths-typed-values
+    - framework-redirect-target-root
+    - framework-render-sees-request-jar
+    - framework-rest-directory
+    - framework-scan-routes-errors
+    - framework-server-loads-locales
+    - framework-shell-hidden-by-literal
+    - framework-static-site-required
+    - framework-vercel-function-settings
+    - framework-wait-until
+    - router-drop-navigate-to
+    - state-href-on-router-url
 "@k8ordo/i18n@1.0.0":
   dir: packages/i18n
   intents:
@@ -176,6 +216,19 @@
   dir: packages/i18n
   intents:
     - framework-paths-files
+"@k8ordo/i18n@4.0.0":
+  dir: packages/i18n
+  intents:
+    - form-fields-in-render
+    - framework-guide-preferences
+    - i18n-guide-adding-a-locale
+    - i18n-guide-home-guard-redirect
+    - i18n-guide-zod-locale
+    - i18n-html-lang-get-locale
+    - i18n-localize-replaces-locale
+    - i18n-message-throws-without-set
+    - i18n-negotiate-request-chosen
+    - i18n-negotiate-skips-nullish
 "@k8ordo/router@0.1.0":
   dir: packages/router
   intents:
@@ -243,6 +296,16 @@
   intents:
     - router-dropped-fragment
     - router-intercept-from-first-commit
+"@k8ordo/router@4.0.0":
+  dir: packages/router
+  intents:
+    - router-drop-navigable-path
+    - router-drop-navigate-to
+    - router-enforce-pattern-grammar
+    - router-later-schema-wins
+    - router-layout-props-any-pattern
+    - router-match-path-server-safe
+    - router-rest-params
 "@k8ordo/state@0.2.0":
   dir: packages/state
   intents:
@@ -291,6 +354,18 @@
     - state-hash-slot
     - state-testing-entry
     - state-thin-url-writes
+"@k8ordo/state@4.0.0":
+  dir: packages/state
+  intents:
+    - form-fields-in-render
+    - framework-csp-prepaint-script
+    - framework-guide-preferences
+    - state-cookie-write
+    - state-href-on-router-url
+    - state-initial-accepts-undefined
+    - state-parse-cookies-get
+    - state-report-failing-migrate
+    - state-reset-registry-to-testing
 "@k8ordo/ui@2.0.0":
   dir: packages/ui
   intents:
@@ -408,6 +483,89 @@
     - ui-drop-logo-tokens
     - ui-json-render-0-22
     - ui-own-icons
+"@k8ordo/ui@4.0.0":
+  dir: packages/ui
+  intents:
+    - ui-accordion-heading-level
+    - ui-ai-chat-generative-actions
+    - ui-ai-chat-mcp-apps
+    - ui-alert-duplicate-message-key
+    - ui-alert-toast-action-node
+    - ui-anchor-external-by-url-shape
+    - ui-anchor-kind-attribute
+    - ui-anchor-new-tab-announce
+    - ui-breadcrumb-link-attributes
+    - ui-button-action
+    - ui-button-href
+    - ui-button-pressed-look
+    - ui-card-href-action
+    - ui-cards-follow-form-status
+    - ui-catalog-checkbox-switch-help-text
+    - ui-catalog-data-table-locale-sort
+    - ui-catalog-default-value-among-options
+    - ui-catalog-dialog-side
+    - ui-catalog-entry-list-generated
+    - ui-catalog-events
+    - ui-catalog-fields-label
+    - ui-catalog-group-label-after-name
+    - ui-catalog-href-single-slash
+    - ui-catalog-list-box-label
+    - ui-catalog-names
+    - ui-catalog-nested-unknown-keys
+    - ui-catalog-prop-issues-unresolved
+    - ui-catalog-remove-composite-icons
+    - ui-catalog-remove-date-field
+    - ui-catalog-remove-form-control
+    - ui-catalog-remove-modal
+    - ui-catalog-renderers-take-schema-values
+    - ui-catalog-table-rows-fit-columns
+    - ui-catalog-text-field-type
+    - ui-catalog-toast-app-provider
+    - ui-catalog-types-for-glue
+    - ui-checkbox-group-options
+    - ui-checkbox-switch-error-text
+    - ui-checkbox-switch-value
+    - ui-choice-arrays-readonly
+    - ui-combobox-locale-filter
+    - ui-command-palette-locale-filter
+    - ui-date-time-focus-ring-webkit
+    - ui-dialog-drawer-flat
+    - ui-docs-entry-points
+    - ui-drop-form-only-props
+    - ui-dropdown-menu-links
+    - ui-file-field-trigger-wiring
+    - ui-forced-colors-own-colors
+    - ui-form-control-invalid-from-error-text
+    - ui-form-control-label-as-group
+    - ui-form-control-required-mark
+    - ui-form-control-server-component
+    - ui-groups-and-ranges-drop-required
+    - ui-guide-css-target
+    - ui-icon-button-submit-pending
+    - ui-icon-button-variant
+    - ui-icons-git-pull-request-clipboard-check
+    - ui-iso-date-error-english
+    - ui-list-box-flat
+    - ui-message-usage-in-props-json
+    - ui-neutral-catalog
+    - ui-number-field-clamp-on-enter
+    - ui-number-min-max-numbers
+    - ui-observers-internal
+    - ui-package-json-export
+    - ui-popover-dialog-surface
+    - ui-popover-implicit-anchor
+    - ui-prop-vocabulary
+    - ui-radio-name-from-use-id
+    - ui-remove-date-field
+    - ui-remove-ui-provider
+    - ui-select-chevron-opens-picker
+    - ui-select-placeholder
+    - ui-shiki-optional-peer
+    - ui-tabs-without-ids
+    - ui-toast-provider-children-only
+    - ui-tokens-css
+    - ui-tokens-light-dark
+    - ui-toolbar-pressed-ground-on-hover
 docs@0.0.11:
   dir: apps/docs
   intents:

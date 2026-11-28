@@ -1,5 +1,12 @@
 # example-ui-nextjs
 
+## 0.1.15
+
+### Patch Changes
+
+- Updated dependencies:
+  - @k8ordo/ui@4.0.0
+
 ## 0.1.14
 
 ### Patch Changes
