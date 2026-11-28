@@ -831,6 +831,9 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
     });
     origin = `http://127.0.0.1:${String((server.address() as AddressInfo).port)}`;
     browser = await type.launch();
+    // Playwright は Firefox をウィンドウ無しで起動し、立ち上げの残りは最初に
+    // 開くページが払う。それがどれかのテストの持ち時間に入らないよう、ここで開いて閉じる
+    await (await browser.newPage()).close();
   }, 60_000);
 
   afterEach(() => {
