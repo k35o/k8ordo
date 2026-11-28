@@ -341,9 +341,9 @@ export const staticMode = (
       throw new Error('the rsc environment cannot run a paths.ts');
     }
     const { runner } = environment as RunnableDevEnvironment;
-    const { pathValues } = (await runner.import(
+    const { pathValues } = await runner.import<{ pathValues: PathValues }>(
       path.join(host.runtimeDir, 'entry.rsc.mjs'),
-    )) as { pathValues: PathValues };
+    );
     return pathValues(file, above);
   };
 
