@@ -96,11 +96,11 @@ overrides:
   '@vitest/utils': 'catalog:'
 
 peerDependencyRules:
-  # storybook (10.6.3 時点の最新でも) の vite-plus の peer は ^0.1.15 || ^0.2.0 のまま。
-  # ここの Storybook (VRT・Chromatic) は 1.4 で動いているので 1.4 だけ足す。
+  # storybook (10.6.8 時点の最新でも) の vite-plus の peer は ^0.1.15 || ^0.2.0 のまま。
+  # ここの Storybook (VRT・Chromatic) は 1.7 で動いているので 1.7 だけ足す。
   # vite-plus を上げて警告が戻ったら、その版で Storybook が動くか確かめてから広げる。
   allowedVersions:
-    storybook>vite-plus: '1.4'
+    storybook>vite-plus: '1.7'
 
 minimumReleaseAgeExclude:
   # examples/ui-integrations だけが使う。A2UI 1.0 に対応した版がまだ 7 日を経ていない
