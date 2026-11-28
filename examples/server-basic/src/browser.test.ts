@@ -94,7 +94,7 @@ describe.each(browserTypes)('the built application in $name', ({ type }) => {
     expect(new URL(page.url()).pathname).toBe('/products');
     expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
     await page.close();
-  }, 30_000);
+  });
 
   it('keeps the cookie a Server Action set, so the guard lets a client navigation through', async () => {
     const context = await browser.newContext();
@@ -113,7 +113,7 @@ describe.each(browserTypes)('the built application in $name', ({ type }) => {
     await page.getByTestId('member').getByText('k8o').waitFor();
     expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
     await context.close();
-  }, 30_000);
+  });
 
   it('hands a client navigation to a page that said notFound() back to the server, which answers 404', async () => {
     const page = await browser.newPage();
@@ -139,7 +139,7 @@ describe.each(browserTypes)('the built application in $name', ({ type }) => {
         .map((response) => response.status),
     ).toStrictEqual([404]);
     await page.close();
-  }, 30_000);
+  });
 
   it('fetches the next page while the pointer rests on its link, and the click asks for nothing more', async () => {
     const page = await browser.newPage();
@@ -158,7 +158,7 @@ describe.each(browserTypes)('the built application in $name', ({ type }) => {
       .waitFor({ timeout: 5000 });
     expect(payloads).toStrictEqual(['/guide/index.rsc']);
     await page.close();
-  }, 30_000);
+  });
 
   it('shows loading.tsx and the pending pathname while a navigation into it loads', async () => {
     const page = await browser.newPage();
@@ -193,7 +193,7 @@ describe.each(browserTypes)('the built application in $name', ({ type }) => {
     expect(await page.getByTestId('loading').count()).toBe(0);
     expect(await page.getByTestId('pending').count()).toBe(0);
     await page.close();
-  }, 30_000);
+  });
 
   it('sends a page under loading.tsx in place, so a visitor without JavaScript reads it and filters it', async () => {
     const context = await browser.newContext({ javaScriptEnabled: false });
@@ -208,7 +208,7 @@ describe.each(browserTypes)('the built application in $name', ({ type }) => {
     await page.waitForURL((url) => url.search === '?q=second');
     expect(await page.getByTestId('list').textContent()).toBe('second product');
     await context.close();
-  }, 30_000);
+  });
 
   it('loads a page that reads the search again when a GET form moves it, in place', async () => {
     const page = await browser.newPage();
@@ -232,7 +232,7 @@ describe.each(browserTypes)('the built application in $name', ({ type }) => {
     // 文書の読み込みではなく、その場での取り直し
     expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
     await page.close();
-  }, 30_000);
+  });
 
   it('runs under the policy its guard wrote: nothing refused, through hydration and a navigation', async () => {
     const page = await browser.newPage();
@@ -245,7 +245,7 @@ describe.each(browserTypes)('the built application in $name', ({ type }) => {
 
     expect(await refused()).toStrictEqual([]);
     await page.close();
-  }, 30_000);
+  });
 
   it('is in force: an inline handler, which nothing signed, is refused', async () => {
     const page = await browser.newPage();
@@ -264,7 +264,7 @@ describe.each(browserTypes)('the built application in $name', ({ type }) => {
       expect(await refused()).toStrictEqual(['script-src-attr inline']);
     });
     await page.close();
-  }, 30_000);
+  });
 
   it('runs an action a [locale] page called in the locale its URL names', async () => {
     const page = await browser.newPage();
@@ -287,7 +287,7 @@ describe.each(browserTypes)('the built application in $name', ({ type }) => {
     // 文書の読み込みではなく、JavaScript が呼んだ action
     expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
     await page.close();
-  }, 30_000);
+  });
 
   it('keeps the scheme the toggle stores, and the next load starts from it before any module runs', async () => {
     const page = await browser.newPage();
@@ -307,7 +307,7 @@ describe.each(browserTypes)('the built application in $name', ({ type }) => {
       ),
     ).toBe(true);
     await page.close();
-  }, 30_000);
+  });
 
   it('hydrates the page where it streamed in, leaving no hidden copy and one <title>', async () => {
     // ダークの訪問者: ColorSchemeProvider の値が hydrate の直後に変わる

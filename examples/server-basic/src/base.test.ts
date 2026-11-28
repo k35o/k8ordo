@@ -119,6 +119,6 @@ describe.each(browserTypes)(
       expect(new URL(page.url()).pathname).toBe('/site/products');
       expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
       await page.close();
-    }, 30_000);
+    });
   },
 );
