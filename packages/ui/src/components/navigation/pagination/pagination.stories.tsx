@@ -65,3 +65,17 @@ export const OnChange: Story = {
     await expect(args.onChange).toHaveBeenLastCalledWith(4);
   },
 };
+
+export const Labelled: Story = {
+  args: {
+    currentPage: 1,
+    label: '検索結果のページ',
+    onChange: fn(),
+    totalPages: 3,
+  },
+  play: async ({ canvas }) => {
+    await expect(
+      canvas.getByRole('navigation', { name: '検索結果のページ' }),
+    ).toBeInTheDocument();
+  },
+};

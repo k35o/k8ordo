@@ -5,7 +5,7 @@ import { useCallback, useId, useMemo, useRef, useState } from 'react';
 import type { FC, KeyboardEvent, Ref } from 'react';
 
 import { mergeRefs } from '../../../helpers/merge-refs';
-import { getMessages } from '../../../i18n/current';
+import { getLocale, getMessages } from '../../../i18n/current';
 import { Kbd } from '../../data-display/kbd';
 import { Modal } from '../modal';
 
@@ -14,7 +14,7 @@ import styles from './command-palette.module.css';
 export type CommandPaletteItem = Readonly<{
   id: string;
   label: string;
-  onSelect: () => void;
+  onAction: () => void;
   /** 見出しの付いたまとまり。同じ `group` の項目は最初に現れた位置にまとめる */
   group?: string;
   /** 表示名のほかに、検索で当てる語 */
@@ -29,7 +29,7 @@ type Props = {
   defaultOpen?: boolean;
   onClose?: () => void;
   placeholder?: string;
-  'aria-label'?: string;
+  label?: string;
   ref?: Ref<HTMLDialogElement>;
 };
 
@@ -38,9 +38,9 @@ type Section = {
   entries: Array<{ item: CommandPaletteItem; index: number }>;
 };
 
-const matches = (item: CommandPaletteItem, needle: string) =>
+const matches = (item: CommandPaletteItem, needle: string, locale: string) =>
   [item.label, ...(item.keywords ?? [])].some((text) =>
-    text.toLocaleLowerCase().includes(needle),
+    text.toLocaleLowerCase(locale).includes(needle),
   );
 
 // 一致した順を保ったまま、まとまりごとに集める。まとめると並びが入れ替わる
@@ -68,10 +68,11 @@ export const CommandPalette: FC<Props> = ({
   defaultOpen,
   onClose,
   placeholder,
-  'aria-label': ariaLabel,
+  label,
   ref,
 }) => {
   const messages = getMessages();
+  const locale = getLocale();
   const baseId = useId();
   const listboxId = `${baseId}-listbox`;
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -79,9 +80,11 @@ export const CommandPalette: FC<Props> = ({
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const needle = query.trim().toLocaleLowerCase();
+  const needle = query.trim().toLocaleLowerCase(locale);
   const matched =
-    needle === '' ? items : items.filter((item) => matches(item, needle));
+    needle === ''
+      ? items
+      : items.filter((item) => matches(item, needle, locale));
   const sections = sectionsOf(matched);
   const ordered = sections.flatMap((section) =>
     section.entries.map(({ item }) => item),
@@ -99,7 +102,7 @@ export const CommandPalette: FC<Props> = ({
   // 閉じるのは dialog 自身に任せる。onClose は閉じたときに Modal から届く
   const run = (item: CommandPaletteItem) => {
     dialogRef.current?.close();
-    item.onSelect();
+    item.onAction();
   };
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
@@ -160,9 +163,9 @@ export const CommandPalette: FC<Props> = ({
 
   return (
     <Modal
-      aria-label={ariaLabel ?? messages.commandPalette}
       defaultOpen={defaultOpen}
       isOpen={isOpen}
+      label={label ?? messages.commandPalette}
       onClose={() => {
         // 次に開いたときは空の検索から始める
         setQuery('');
@@ -200,7 +203,7 @@ export const CommandPalette: FC<Props> = ({
             </p>
           ) : null}
           <div
-            aria-label={ariaLabel ?? messages.commandPalette}
+            aria-label={label ?? messages.commandPalette}
             // 項目の無い listbox は役割を満たさないので隠す。aria-controls の参照先は残す
             hidden={ordered.length === 0}
             id={listboxId}

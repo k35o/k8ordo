@@ -17,17 +17,18 @@ const HERO_FORM = `const title = form.field('title');
 
 <input {...title.input} />`;
 
-const HERO_HTML = `<input name="title" type="text" required
-  minlength="1" maxlength="120">`;
+const HERO_HTML = `<input name="title" required minlength="1" maxlength="120">`;
 
-const CLAIM_SCHEMA = `const fields = formFields(talkSchema);
+const CLAIM_SCHEMA = `export default function NewTalkPage() {
+  const { title } = formFields(talkSchema).fields;
 
-fields.fields.title.input;
-// { name: 'title', type: 'text', required: true,
-//   minLength: 1, maxLength: 120 }
+  title.input;
+  // { name: 'title', required: true, minLength: 1, maxLength: 120 }
 
-fields.fields.title.messages.tooLong;
-// 'Too big: expected string to have <=120 characters'`;
+  title.messages.tooLong;
+  // 'Too big: expected string to have <=120 characters'
+  …
+}`;
 
 const CLAIM_SERVER = `export async function createTalk(
   _prev: FormState,
@@ -39,11 +40,6 @@ const CLAIM_SERVER = `export async function createTalk(
   await insertTalk(parsed.data);
   redirect(href('/talks'));
 }`;
-
-// Server Component（このファイルにディレクティブは無い）。デモの制約属性は
-// ここで導き、JSON として props でクライアントに渡すので、zod はブラウザに
-// 届かない。URL 状態のスキーマ（@k8ordo/state）と同じ 1 つを渡す。
-const demoFields = formFields(demoState.url);
 
 export default function FormPage() {
   return (
@@ -74,7 +70,7 @@ export default function FormPage() {
           steps={m.form.demoSteps}
           title={m.form.demoTitle}
         >
-          <FormDemo fields={demoFields} />
+          <FormDemo fields={formFields(demoState.url)} />
         </Playground>
       </LandingClaim>
       <LandingClaim

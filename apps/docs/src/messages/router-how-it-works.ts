@@ -31,8 +31,8 @@ export const claimTitle = message({
 });
 
 export const claimEvent = message({
-  ja: 'リンクのクリックや`navigateTo`、戻る操作と進む操作は、どれも同じ`navigate`イベントを発火させます。`<Router>`はこのイベントを受け取り、行き先のパスがルート表にあるものだけをインターセプトします。',
-  en: 'A link click, `navigateTo`, and the browser’s back and forward all reach the page as the same `navigate` event. `<Router>` listens to it and intercepts only the navigations whose destination path is in the route table.',
+  ja: 'リンクのクリックや`navigation.navigate()`、戻る操作と進む操作は、どれも同じ`navigate`イベントを発火させます。`<Router>`はこのイベントを受け取り、行き先のパスがルート表にあるものだけをインターセプトします。',
+  en: 'A link click, `navigation.navigate()`, and the browser’s back and forward all reach the page as the same `navigate` event. `<Router>` listens to it and intercepts only the navigations whose destination path is in the route table.',
 });
 
 export const claimNever = message({
@@ -81,8 +81,8 @@ export const finishedTitle = message({
 });
 
 export const finishedScreen = message({
-  ja: '`navigateTo`が返す`finished`は、URLが書き換わったあと、新しいページが描画された時点で解決します。',
-  en: 'The `finished` promise that `navigateTo` returns resolves when the new page has rendered, not when the URL changed.',
+  ja: 'ページを移る`navigation.navigate()`が返す`finished`は、URLが書き換わったあと、新しいページが描画された時点で解決します。',
+  en: 'The `finished` promise a page change’s `navigation.navigate()` returns resolves when the new page has rendered, not when the URL changed.',
 });
 
 export const finishedPaint = message({

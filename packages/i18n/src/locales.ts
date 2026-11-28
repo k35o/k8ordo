@@ -1,5 +1,4 @@
 import { parseAcceptLanguage } from './accept-language';
-import { readCookie } from './cookie';
 import { browserPathname, inBrowser, localeStorage, register } from './current';
 import type { LocaleStorage } from './current';
 import { intlFormats } from './format';
@@ -78,25 +77,30 @@ export type Locales<
    * tag is tried in order — the exact tag, then the first supported locale
    * that speaks its language — and nothing matching is the default. A tag
    * that is not BCP 47 is skipped, not thrown on: the list is user input.
+   * So are `null` and `undefined`, a choice not made yet:
+   * `negotiate([saved?.value, ...navigator.languages])`.
    */
-  readonly negotiate: (requested: Iterable<string>) => L;
+  readonly negotiate: (requested: Iterable<string | null | undefined>) => L;
   /**
    * The locale a request asks for, for a server that answers before any
-   * page renders — sending `/` to a locale. The cookie named in `options`
-   * comes first, when the request carries it: it is the visitor's own choice,
-   * written where they switched language. Then the `Accept-Language` header,
-   * in its order of preference. Each goes through `negotiate`, so a cookie
-   * holding a locale the set no longer has falls through to the header, and
-   * nothing matching is the default.
+   * page renders — sending `/` to a locale. `options.chosen` comes first: the
+   * visitor's own choice, read from wherever the application keeps it. Then
+   * the `Accept-Language` header, in its order of preference. Both go
+   * through `negotiate`, so a choice holding a locale the set no longer has
+   * falls through to the header, and nothing matching is the default.
+   * `request` is anything with the request's `headers` — a `Request`, or
+   * `@k8ordo/framework`'s `request` prop.
    */
   readonly negotiateRequest: (
-    request: Request,
+    request: { readonly headers: Headers },
     options?: NegotiateRequestOptions,
   ) => L;
   /**
-   * `'/ui'` → `'/en/ui'`, `'/'` → `'/en'`. Hand it a pathname without a
-   * locale segment, as `delocalize` returns one: that is not checked, so
-   * `localize('/en/ui', 'ja')` is `'/ja/en/ui'`.
+   * The same pathname in `locale`: a leading segment that is one of the
+   * set's locales is replaced (`'/ja/ui'` → `'/en/ui'`), and one is put in
+   * front otherwise (`'/ui'` → `'/en/ui'`, `'/'` → `'/en'`, `'/fr/ui'` →
+   * `'/en/fr/ui'`). So the pathname `usePathname` returns takes the page on
+   * screen to another locale as it is.
    */
   readonly localize: (pathname: string, locale: L) => string;
   /** The inverse: `'/en/ui'` → `{ locale: 'en', pathname: '/ui' }`, `'/x'` → `{ locale: null, pathname: '/x' }`. */
@@ -128,12 +132,13 @@ export type Locales<
 
 export type NegotiateRequestOptions = {
   /**
-   * The cookie holding the visitor's choice (`'locale'`). The name is the
-   * application's: whatever writes it — a language switcher's
-   * `cookieStore.set` — uses the same one. Omitted, only `Accept-Language`
-   * is read.
+   * The locale the visitor chose before, as the application read it — a
+   * cookie its language switcher wrote (`cookies().get('locale')` under
+   * `@k8ordo/framework`), the language of a signed-in visitor's profile.
+   * `null` and `undefined` are no choice, and only `Accept-Language` is
+   * read.
    */
-  readonly cookie?: string;
+  readonly chosen?: string | null | undefined;
 };
 
 export type LocalesOptions<D extends string> = {
@@ -151,17 +156,6 @@ const parseTag = (tag: string): Intl.Locale | null => {
   } catch {
     return null;
   }
-};
-
-/** `'/ui'` → `'/en/ui'`; `'/'` and `''` → `'/en'`. Pure over strings, so it lives outside the set. */
-const localize = (pathname: string, locale: string): string => {
-  const rest = pathname === '/' || pathname === '' ? '' : pathname;
-  if (rest !== '' && !rest.startsWith('/')) {
-    throw new TypeError(
-      `localize: ${JSON.stringify(pathname)} is not a pathname — it does not start with "/"`,
-    );
-  }
-  return `/${locale}${rest}`;
 };
 
 /**
@@ -269,11 +263,12 @@ export const defineLocales = <
   const is = (value: unknown): value is L =>
     typeof value === 'string' && list.includes(value);
 
-  const negotiate = (requested: Iterable<string>): L => {
+  const negotiate = (requested: Iterable<string | null | undefined>): L => {
     // 要求の順に、完全一致 → 同じ言語を話す最初の対応ロケール、の順で見る
     // (RFC 4647 の lookup と同じ形)。全要求の完全一致を先に探すと、
     // ['en-US', 'ja'] に対して 'en' を持っていても 'ja' が勝ってしまう。
     for (const tag of requested) {
+      if (tag === null || tag === undefined) continue;
       const exact = byExactTag.get(tag.toLowerCase());
       if (exact !== undefined) return exact;
       const parsed = parseTag(tag);
@@ -285,24 +280,29 @@ export const defineLocales = <
   };
 
   const negotiateRequest = (
-    request: Request,
-    { cookie }: NegotiateRequestOptions = {},
-  ): L => {
-    const chosen =
-      cookie === undefined
-        ? null
-        : readCookie(request.headers.get('cookie'), cookie);
-    return negotiate([
-      ...(chosen === null ? [] : [chosen]),
+    request: { readonly headers: Headers },
+    { chosen }: NegotiateRequestOptions = {},
+  ): L =>
+    negotiate([
+      chosen,
       ...parseAcceptLanguage(request.headers.get('accept-language')),
     ]);
-  };
 
   const delocalize = (pathname: string): Delocalized<L> => {
     const first = pathname.split('/')[1] ?? '';
     if (!is(first)) return { locale: null, pathname };
     const rest = pathname.slice(first.length + 1);
     return { locale: first, pathname: rest === '' ? '/' : rest };
+  };
+
+  const localize = (pathname: string, locale: L): string => {
+    if (pathname !== '' && !pathname.startsWith('/')) {
+      throw new TypeError(
+        `localize: ${JSON.stringify(pathname)} is not a pathname — it does not start with "/"`,
+      );
+    }
+    const rest = delocalize(pathname === '' ? '/' : pathname).pathname;
+    return rest === '/' ? `/${locale}` : `/${locale}${rest}`;
   };
 
   const getLocale = (): L => {

@@ -1,105 +1,88 @@
 'use client';
 
-import { clsx } from 'clsx';
-import { useEffect, useId, useMemo } from 'react';
-import type { FC, PropsWithChildren, Ref, ReactNode } from 'react';
+import { useId, useMemo, useRef } from 'react';
+import type { FC, PropsWithChildren, ReactNode, Ref } from 'react';
 
-import { getMessages } from '../../../i18n/current';
-import { IconButton } from '../../buttons/icon-button';
-import { Heading } from '../../data-display/heading';
-import { XIcon } from '../../icons/x';
-import { useModalDialogContext } from '../_internal/modal-dialog-context';
-import { createSafeContext } from './../../../helpers/create-safe-context';
+import { mergeRefs } from '../../../helpers/merge-refs';
+import type { DialogSide } from '../../../types/variables';
+import { ModalHeader } from '../_internal/modal-header';
+import { Modal } from '../modal';
 
-import highContrast from '../../_internal/high-contrast.module.css';
 import styles from './dialog.module.css';
 
-const [DialogContext, useDialogContext] = createSafeContext<{
-  rootId: string;
-}>('useDialogContext must be used within a DialogProvider');
+type Props = PropsWithChildren<
+  (
+    | {
+        /** The heading (`h2`) drawn with a close button. It names the dialog. */
+        title: ReactNode;
+        label?: never;
+      }
+    | {
+        /** The dialog's name when it draws no heading. */
+        label: string;
+        title?: never;
+      }
+  ) & {
+    side?: DialogSide;
+    role?: 'dialog' | 'alertdialog';
+    /** Drawn above the children; the only text the dialog is described by. */
+    description?: ReactNode;
+    isOpen?: boolean;
+    defaultOpen?: boolean;
+    /** Called when the dialog closes while it is meant to be open, never when `isOpen` turns false. */
+    onClose?: () => void;
+    ref?: Ref<HTMLDialogElement>;
+  }
+>;
 
-export const Root: FC<
-  PropsWithChildren<{
-    ref?: Ref<HTMLElement> | undefined;
-    id?: string | undefined;
-    tabIndex?: number | undefined;
-    role?: 'dialog' | 'alertdialog' | undefined;
-  }>
-> = ({ ref, id, children, tabIndex, role }) => {
-  const fallbackId = useId();
-  const rootId = id ?? fallbackId;
-  const contextValue = useMemo(() => ({ rootId }), [rootId]);
-  const modal = useModalDialogContext();
-
-  // Modal 配下では外側の <dialog> が dialog ロールを持つため、ここでは role を出さない。
-  // 名前を持つ role なし section は region ランドマークになるので、
-  // aria-labelledby / aria-describedby も role とセットで出す。
-  const resolvedRole = role ?? (modal === null ? 'dialog' : undefined);
-  const labelledBy = resolvedRole === undefined ? undefined : `${rootId}-title`;
-  const describedBy =
-    resolvedRole === undefined ? undefined : `${rootId}-content`;
-
-  // 自分の role を外した場合だけ、名前付けの責務を祖先の Modal へ委譲する。
-  // 参照 id を持つのは子（Header / Content）を描画するこの階層なので、
-  // 祖先の state へは effect でしか渡せない。
-  useEffect(() => {
-    if (modal === null || resolvedRole !== undefined) {
-      return undefined;
-    }
-    modal.registerLabelledBy(`${rootId}-title`);
-    modal.registerDescribedBy(`${rootId}-content`);
-    return () => {
-      modal.registerLabelledBy(undefined);
-      modal.registerDescribedBy(undefined);
-    };
-  }, [modal, resolvedRole, rootId]);
+export const Dialog: FC<Props> = ({
+  title,
+  label,
+  side = 'center',
+  role,
+  description,
+  isOpen,
+  defaultOpen,
+  onClose,
+  ref,
+  children,
+}) => {
+  const id = useId();
+  const titleId = `${id}-title`;
+  const descriptionId = `${id}-description`;
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const mergedRef = useMemo(() => mergeRefs(dialogRef, ref), [ref]);
 
   return (
-    <section
-      aria-describedby={describedBy}
-      aria-labelledby={labelledBy}
-      className={clsx(styles.root, highContrast.edge)}
-      id={id}
-      ref={ref}
-      role={resolvedRole}
-      tabIndex={tabIndex}
+    <Modal
+      aria-describedby={description === undefined ? undefined : descriptionId}
+      aria-labelledby={title === undefined ? undefined : titleId}
+      defaultOpen={defaultOpen}
+      isOpen={isOpen}
+      label={label}
+      onClose={onClose}
+      ref={mergedRef}
+      role={role}
+      side={side}
     >
-      <DialogContext value={contextValue}>{children}</DialogContext>
-    </section>
-  );
-};
-
-export const Header: FC<{
-  title: ReactNode;
-  onClose: () => void;
-}> = ({ title, onClose }) => {
-  const messages = getMessages();
-  const { rootId } = useDialogContext();
-  return (
-    <div className={styles.header}>
-      <Heading id={`${rootId}-title`} level="h3">
-        {title}
-      </Heading>
-      <div className={styles.close}>
-        <IconButton
-          label={messages.close}
-          onClick={() => {
-            onClose();
+      {title === undefined ? null : (
+        <ModalHeader
+          closeSide="right"
+          onClose={() => {
+            dialogRef.current?.close();
           }}
-          tooltipDisabled
-        >
-          <XIcon size="sm" />
-        </IconButton>
+          title={title}
+          titleId={titleId}
+        />
+      )}
+      <div className={styles.content}>
+        {description === undefined ? null : (
+          <div className={styles.description} id={descriptionId}>
+            {description}
+          </div>
+        )}
+        {children}
       </div>
-    </div>
-  );
-};
-
-export const Content: FC<PropsWithChildren> = ({ children }) => {
-  const { rootId } = useDialogContext();
-  return (
-    <div className={styles.content} id={`${rootId}-content`}>
-      {children}
-    </div>
+    </Modal>
   );
 };

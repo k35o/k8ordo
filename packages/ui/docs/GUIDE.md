@@ -2,6 +2,10 @@
 
 How to build UI with the `@k8ordo/ui` design system.
 
+Like every k8ordo package it assumes React 19 and Server Components, uses only
+what has reached Baseline newly available, and ships no polyfills or legacy
+fallbacks.
+
 ## Setup
 
 ```bash
@@ -11,14 +15,14 @@ npm install @k8ordo/ui
 ```tsx
 // 1. Load the stylesheet (once, at your entry point)
 import '@k8ordo/ui/styles.css';
-// 2. Wrap the app in the provider
-import { UIProvider } from '@k8ordo/ui';
+// 2. Wrap the app in ToastProvider if it opens toasts with useToast
+import { ToastProvider } from '@k8ordo/ui';
 
 function App() {
   return (
-    <UIProvider>
+    <ToastProvider>
       <YourApp />
-    </UIProvider>
+    </ToastProvider>
   );
 }
 
@@ -103,9 +107,9 @@ A k8ordo application sets neither: `@k8ordo/framework` aims its build at the
 browsers Baseline has newly available unless the config sets its own
 targets.
 
-Components take no `className`. To change how one looks, change the tokens, or
-render your own element through its `renderItem` / `renderAnchor`, which hands
-you the component's `className` to keep or to add to.
+Components take no `className`. To change how one looks, change the tokens. A
+link component of your own (a framework's `<Link>`) goes in through
+`renderAnchor`, which hands you the component's `className` to keep.
 
 ### Tokens
 
@@ -252,8 +256,8 @@ dictionary**. For a component with a wording prop of its own, such as
 `getMessages()` from `@k8ordo/ui/i18n` returns the wording in effect for your
 own elements (a `renderItem`, a component beside the library). It is not a
 hook, so it works in a Server Component — which is also why `Spinner`,
-`Breadcrumb`, `Code`, `Alert`, `Callout`, `Reasoning`, and `ToolInvocation`
-are Server Components.
+`Anchor`, `Card`, `Breadcrumb`, `Code`, `Alert`, `Callout`, `Reasoning`, and
+`ToolInvocation` are Server Components.
 
 > [Full key list and details](references/components.md) (the "i18n (message dictionary)" section)
 
@@ -384,42 +388,44 @@ import { Button } from '@k8ordo/ui';
 // Text only
 <Button variant="skeleton">View details</Button>
 
-// Render as a link (renderItem prop). The bag holds everything the <button>
-// would have received, so drop the two <button>-only members and spread the
-// rest: className, children, ref, onClick, aria-disabled, aria-busy, and any
-// attribute passed to Button all ride along.
-<Button
-  color="base"
-  renderItem={({ children, disabled: _disabled, type: _type, ...props }) => (
-    <a href="/settings" {...props}>{children}</a>
-  )}
->
+// Work that runs on a press: a transition, with a spinner until it settles
+<Button action={save}>Save</Button>
+
+// A link with the same look: href renders an <a>
+<Button color="base" href="/settings" variant="outline">Settings</Button>
+
+// A framework's link component, through renderAnchor
+<Button href="/settings" renderAnchor={(props) => <Link {...props} />}>
   Settings
 </Button>
+
+// Reset the form it belongs to
+<Button color="base" type="reset" variant="outline">Reset</Button>
 ```
+
+Put a synchronous update a user may press again at once (a counter, a slide
+change) in `onClick`: `action` ignores presses while its transition is pending.
+A skeleton toggle passes `aria-pressed`, and a skeleton link to the current
+page `aria-current`; the text then takes the info color. A solid or outline
+toggle switches its `variant` or `color` with the state instead. Inside a
+`Toolbar`, the toolbar shows a pressed item by its ground, with `fg-base` text.
 
 ### IconButton
 
-Styling is controlled by `color` (not `variant`). `label` is required.
+`variant` picks the ground: `skeleton` (the default) has none, and `solid`
+fills it with the `color` family, as `Button` does. `label` is required; it is
+the accessible name and the tooltip, and the tooltip is not read again as a
+description.
 
 ```tsx
 import { IconButton } from '@k8ordo/ui';
 import { CopyIcon, HomeIcon, SendIcon } from '@k8ordo/ui/icons';
 
-<IconButton color="transparent" label="Copy"><CopyIcon /></IconButton>
-<IconButton color="primary" label="Send"><SendIcon /></IconButton>
+<IconButton label="Copy"><CopyIcon /></IconButton>
+<IconButton color="primary" label="Send" variant="solid"><SendIcon /></IconButton>
 
-// Render as a link (renderItem prop). triggerProps holds the tooltip wiring
-// and the merged ref; spread it alongside the rest.
-<IconButton
-  color="base"
-  label="Home"
-  renderItem={({ children, disabled: _disabled, triggerProps, type: _type, ...props }) => (
-    <a href="/home" {...props} {...triggerProps}>
-      {children}
-    </a>
-  )}
->
+// A link: href renders an <a>, named by label and with the same tooltip
+<IconButton href="/home" label="Home">
   <HomeIcon />
 </IconButton>
 ```
@@ -457,8 +463,9 @@ import { Card } from '@k8ordo/ui';
   <div className={styles.body}>Card content</div>
 </Card>
 
-// Clickable card (interactive scales it up on hover)
-<Card variant="shadow" interactive>
+// The whole card is a link (href) or a button (action); links and
+// buttons inside it stay pressable on their own
+<Card href="/articles/1">
   <div className={styles.body}>Content</div>
 </Card>
 ```
@@ -472,6 +479,7 @@ import {
   Button,
   FileField,
   FormControl,
+  RadioCard,
   Select,
   TextField,
 } from '@k8ordo/ui';
@@ -489,14 +497,24 @@ import {
   />
 )} />
 
-<FileField.Root accept="image/*" multiple>
-  <FileField.Trigger
-    renderItem={({ onClick, disabled }) => (
-      <Button disabled={disabled} onClick={onClick}>Choose files</Button>
-    )}
-  />
-  <FileField.ItemList />
-</FileField.Root>
+// A field that is a group itself (Radio, RadioCard, CheckboxGroup,
+// CheckboxCard, RangeSlider) takes its name from a heading, not a <label>
+<FormControl label="Plan" labelAs="group" renderInput={(props) => (
+  <RadioCard {...props} options={plans} />
+)} />
+
+// So does FileField: its trigger is a button, which cannot be required, so the
+// required mark has to be part of the name the trigger reads
+<FormControl label="Photos" labelAs="group" required renderInput={(props) => (
+  <FileField.Root {...props} accept="image/*" multiple>
+    <FileField.Trigger
+      renderItem={(wiring) => (
+        <Button {...wiring}>Choose files</Button>
+      )}
+    />
+    <FileField.ItemList />
+  </FileField.Root>
+)} />
 ```
 
 With `@k8ordo/form`, spread what `form.field(name).input` derives onto the
@@ -512,7 +530,6 @@ const title = form.field('title');
 
 <FormControl
   errorText={title.error}
-  invalid={title.invalid}
   label="Title"
   required={title.required}
   renderInput={(props) => <TextField {...props} {...title.input} />}
@@ -541,7 +558,7 @@ Avoid the traits that make a UI recognizably AI-generated at a glance.
 ## Implementation principles
 
 - **Use the existing components**: look for a @k8ordo/ui component before building custom UI
-- **Render from Server Components**: every component, compound ones included (`Dialog.Root`, `Tabs.Root`, …), can be placed in a Server Component; only the interactive parts are client modules
+- **Render from Server Components**: every component, compound ones included (`Tabs.Root`, `Accordion.Item`, …), can be placed in a Server Component; only the interactive parts are client modules. A Server Component cannot pass a client module a function other than a Server Action, so a part given one is rendered from a Client Component: `Popover.Trigger`, `Tooltip.Trigger`, `ContextMenu.Trigger`, `Toolbar.Item`, and `FileField.Trigger` (a required `renderItem`), `DataTable` (`getRowId`, a column's `cell`), and any part given `onChange` or another handler. `FormControl` and `Form` are not client modules, so `renderInput` runs where `FormControl` renders: a form of uncontrolled fields that submits to a Server Action is written in a Server Component (`useForm` needs a Client Component)
 - **Keep placed state in `@k8ordo/state`**: state that lives in the URL, a history entry, localStorage, or memory is `defineLocalState` and friends, not a hook from this package
 - **Browser-only rendering is React's**: a component that can only render in a browser calls `use(browser())` (`browser` from `react-dom`) under a `<Suspense>`; there is no `useClient` here and no "mounted" flag
 - **Use semantic tokens**: tokens (`--color-primary-bg`), never raw color values or the palette (`--teal-500`)
@@ -558,8 +575,8 @@ directly on APIs a browser has and jsdom does not: `ResizeObserver`,
 `IntersectionObserver`, `matchMedia`, `HTMLDialogElement`'s `showModal` /
 `close`, and the Popover API. None of them is called through a support check,
 so under jsdom `Tooltip`, `IconButton` (unless `tooltipDisabled`), `Tabs`,
-`Autocomplete`, `Combobox`, `Toolbar`, `ResizablePanels`, `InView`, `Resize`,
-and `Conversation` throw as soon as they mount; `Modal`, `CommandPalette`,
+`Autocomplete`, `Combobox`, `Toolbar`, `ResizablePanels`, and `Conversation`
+throw as soon as they mount; `Dialog`, `CommandPalette`,
 `Drawer`, `Popover`, `DropdownMenu`, `ContextMenu`, `ListBox`, and `DatePicker`
 throw the moment they open (a `DropdownMenu` holding a `SubMenu` already at
 mount); and a `clearable` `FileField.ItemList` throws once it lists a file.

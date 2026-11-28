@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import { expect, screen, waitFor } from 'storybook/test';
+import { expect, fn, screen, waitFor } from 'storybook/test';
 
 import { DropdownMenu } from '.';
+import { tokenColor } from '../../../../.storybook/tokens';
 import { MoonIcon } from '../../icons/moon';
 
 const meta: Meta<typeof DropdownMenu.Root> = {
@@ -124,6 +125,128 @@ const menuWithSubMenu = (
     </DropdownMenu.Content>
   </DropdownMenu.Root>
 );
+
+const visit = fn();
+
+const linkMenu = (
+  <DropdownMenu.Root>
+    <DropdownMenu.Trigger label="パッケージ" />
+    <DropdownMenu.Content>
+      <DropdownMenu.Item href="#ui" label="ui" />
+      <DropdownMenu.Item
+        href="#form"
+        label="form"
+        renderAnchor={({ children, href, onClick, ...props }) => (
+          <a
+            {...props}
+            data-rendered=""
+            href={href}
+            onClick={(event) => {
+              onClick();
+              visit(href);
+              event.preventDefault();
+            }}
+          >
+            {children}
+          </a>
+        )}
+      />
+    </DropdownMenu.Content>
+  </DropdownMenu.Root>
+);
+
+/**
+ * `href` を渡した項目は `<a role="menuitem">` になる。矢印キーで移れて、押すと
+ * メニューを閉じ、遷移はブラウザに任せる。
+ */
+export const LinkItems: Story = {
+  render: () => linkMenu,
+  play: async ({ canvas, userEvent }) => {
+    visit.mockClear();
+    const trigger = canvas.getByRole('button', { name: 'パッケージ' });
+    await userEvent.click(trigger);
+
+    const ui = await screen.findByRole('menuitem', { name: 'ui' });
+    await expect(ui.tagName).toBe('A');
+    await expect(ui).toHaveAttribute('href', '#ui');
+    await waitFor(() => {
+      expect(ui).toHaveFocus();
+    });
+
+    await userEvent.keyboard('{ArrowDown}');
+    const form = screen.getByRole('menuitem', { name: 'form' });
+    await expect(form).toHaveFocus();
+    await expect(form).toHaveAttribute('data-rendered');
+
+    await userEvent.keyboard('{Enter}');
+    await expect(visit).toHaveBeenCalledWith('#form');
+    await waitFor(() => {
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    });
+  },
+};
+
+export const LinkItemSpace: Story = {
+  render: () => linkMenu,
+  play: async ({ canvas, userEvent }) => {
+    visit.mockClear();
+    const trigger = canvas.getByRole('button', { name: 'パッケージ' });
+    await userEvent.click(trigger);
+
+    const ui = await screen.findByRole('menuitem', { name: 'ui' });
+    await waitFor(() => {
+      expect(ui).toHaveFocus();
+    });
+    await userEvent.keyboard('{ArrowDown}');
+    await expect(screen.getByRole('menuitem', { name: 'form' })).toHaveFocus();
+
+    await userEvent.keyboard(' ');
+    await expect(visit).toHaveBeenCalledOnce();
+    await expect(visit).toHaveBeenCalledWith('#form');
+    await waitFor(() => {
+      expect(trigger).toHaveAttribute('aria-expanded', 'false');
+    });
+  },
+};
+
+export const TriggerProps: Story = {
+  render: () => (
+    <>
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger
+          color="primary"
+          label="操作"
+          size="sm"
+          variant="outline"
+        />
+        <DropdownMenu.Content>
+          <DropdownMenu.Item label="編集" onAction={() => undefined} />
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
+      <DropdownMenu.Root>
+        <DropdownMenu.IconTrigger
+          icon={<MoonIcon size="sm" />}
+          label="テーマ切替"
+          size="sm"
+          variant="skeleton"
+        />
+        <DropdownMenu.Content>
+          <DropdownMenu.Item label="ライト" onAction={() => undefined} />
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
+    </>
+  ),
+  play: async ({ canvas }) => {
+    await expect(
+      getComputedStyle(canvas.getByRole('button', { name: '操作' }))
+        .borderColor,
+    ).toBe(tokenColor('--color-primary-border'));
+    await expect(
+      getComputedStyle(canvas.getByRole('button', { name: 'テーマ切替' }))
+        .backgroundColor,
+    ).toBe('rgba(0, 0, 0, 0)');
+  },
+};
 
 export const WithSubMenu: Story = {
   render: () => menuWithSubMenu,

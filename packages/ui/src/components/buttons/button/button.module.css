@@ -53,7 +53,7 @@
   color: var(--color-fg-mute);
 }
 
-/* 押せないスケルトンは、選ばれていても（.active）地の文字色に戻す。ホバーと
+/* 押せないスケルトンは、押された状態や今のページでも地の文字色に戻す。ホバーと
    押下の色には負けるよう、それらより前に書く */
 .skeleton.disabled {
   color: var(--color-fg-mute);
@@ -151,7 +151,12 @@
   justify-content: space-between;
 }
 
-.active {
+/* 属性の部分を :where() に入れるのは、詳細度を 1 クラス分にとどめ、押せない
+   スケルトン（.skeleton.disabled）とホバーの色に負けさせるため */
+.skeleton:where(
+  [aria-pressed='true'],
+  [aria-current]:not([aria-current='false'])
+) {
   color: var(--color-fg-info);
 }
 

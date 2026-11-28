@@ -66,12 +66,18 @@ pnpm check         # check:write to auto-fix
   so `message()` can tell an unknown segment (`/fr/…` on a 404 page) from a
   locale, and can render the default when nothing names one. An application
   has one set; a test that defines others re-defines the one its messages
-  read. Before any set registers, no segment is a locale and a message
-  renders its first variant: there is nothing to tell a locale from a path
-  by. `@k8ordo/framework`'s browser entry imports `src/i18n.ts`
-  (`virtual:k8ordo/locales`) so the set is there before anything renders.
-- **Refuse where it is read, name what is missing.** A message lacking the
-  named locale throws from the call, listing the variants present. An empty
+  read. Before any set registers, a message throws, naming the module that
+  has to run: there is nothing to tell a locale from a path by and no
+  default to fall back on, and picking a variant would be a wrong language
+  rendered without a word. `currentLocale()` answers `null` there instead,
+  for a library such as `@k8ordo/ui` that renders in applications with no
+  set at all. `@k8ordo/framework`'s three entries (browser, RSC, SSR)
+  import `src/i18n.ts` (`virtual:k8ordo/locales`) before any route file, so
+  under the framework the throw means there is no `src/i18n.ts`; a test or
+  a Storybook preview imports it itself.
+- **Refuse where it is read, name what is missing.** A message read where
+  no set is defined throws, and so does one lacking the named locale,
+  listing the variants present. An empty
   set, a tag that is not BCP 47, a default outside the list, a time zone
   `Intl.DateTimeFormat` refuses (or a missing one, which it would quietly
   replace with the runtime's own), and a `dir` other than `ltr` / `rtl`
@@ -93,12 +99,31 @@ pnpm check         # check:write to auto-fix
   the whole reason the helper exists; do not add an escape hatch.
 - **Negotiation is per requested tag, in order** — exact, then the first
   supported locale speaking the same language, then the default (RFC 4647
-  lookup shape). The test `['en-US', 'ja']` → `'en'` is the guard.
-  `negotiateRequest` is the same `negotiate` over the named cookie's value
-  followed by `parseAcceptLanguage`'s list — never a rule of its own. The
-  cookie name is the caller's; the package does not pick one.
-- **`delocalize` says `null`, never the default.** The root layout and the
-  404 page choose the fallback visibly.
+  lookup shape). The test `['en-US', 'ja']` → `'en'` is the guard. A tag
+  that is not BCP 47 is skipped, and so is a `null` or `undefined` entry —
+  a choice not made yet — so a caller puts a value it may not have in front
+  of the list as it is rather than filtering it out.
+  `negotiateRequest` is the same `negotiate` over `chosen` followed by
+  `parseAcceptLanguage`'s list — never a rule of its own.
+- **The package reads no cookie.** Where the visitor's choice is kept — a
+  cookie of whatever name and encoding, a `@k8ordo/state` cookie state, a
+  profile — is the application's; `negotiateRequest` takes the value it read
+  as `chosen` and the browser puts the same value in front of
+  `navigator.languages`, so both sides order the list one way. Do not bring
+  back a cookie name option or a `Cookie` header parser: it fixed the
+  cookie's format (a raw tag), which no other tool of the family writes.
+  `negotiateRequest` reads only `request.headers`, so a `Request` and the
+  framework's `request` prop both fit.
+- **`delocalize` says `null`, never the default.** It reports what a
+  pathname spells and nothing else. The fallback is `getLocale()`'s, and
+  that is what the docs have the root layout's `<html lang dir>` read: the
+  locale the schemas accepted, which is the one every message under it
+  renders in, a 404 included. Do not document a second way to write
+  `<html lang>` from the pathname; on a 404 whose `not-found.tsx` sits above
+  `[locale]` the two disagree.
+- **`localize` replaces a leading locale segment, and only one of the
+  set's.** The pathname `usePathname` returns goes in as it is; a first
+  segment the set does not have (`/fr/…`) is kept, since it may be a page.
 
 ## Layout
 
@@ -112,7 +137,6 @@ src/
   register.ts         Register (the one interface) and RegisteredLocale
   format.ts           the set's Intl members (dateTimeFormat, …), cached
   accept-language.ts  parseAcceptLanguage(): header → preference list
-  cookie.ts           readCookie(): one value out of a Cookie header (internal)
   index.ts
 ```
 

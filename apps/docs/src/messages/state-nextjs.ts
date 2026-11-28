@@ -45,24 +45,29 @@ export const serverInitial = message({
   en: 'Pass the values read to the Client Component as `initialUrl`. The server render and the hydration render then show the URL’s values, not the defaults.',
 });
 
+export const cookieTitle = message({
+  ja: 'Cookieの状態',
+  en: 'Cookie state',
+});
+
+export const cookieRead = message({
+  ja: 'Next.jsの`cookies()`の`get`は、`{ name, value }`のオブジェクトを返します。`parseCookies`には、値だけを返す`get`で包んで渡します。',
+  en: 'The `get` of Next.js’s `cookies()` returns a `{ name, value }` object. Wrap it in a `get` that returns the value alone, and pass that to `parseCookies`.',
+});
+
+export const cookieWrite = message({
+  ja: 'Server Actionで同じCookieを書くときは、`cookie()`の2つ目の引数にも同じ`get`を渡します。返る名前と値と属性を`set`に展開します。Next.jsの`set`も値をパーセントエンコードするので、ブラウザの`useAppState`がそのまま読めます。',
+  en: 'To write the same cookie from a Server Action, pass the same `get` as `cookie()`’s second argument, and spread the name, value and attributes it returns into `set`. Next.js’s `set` percent-encodes the value too, so `useAppState` in the browser reads it as it is.',
+});
+
 export const typedTitle = message({
   ja: 'パスの型検査',
   en: 'Typed paths',
 });
 
-export const typedRegister = message({
-  ja: 'Next.jsにはルート表が無いので、`next`の`Route`を`path`に登録します。アプリの中のすべての`href`が、Next.jsの知らないパスを型エラーにします。',
-  en: 'Next.js has no route table to hand over, so register `Route` from `next` under `path`. Every `href` in the application then turns a path Next.js does not know into a type error.',
-});
-
 export const typedRoute = message({
-  ja: '`typedRoutes`を有効にすると、`Route`はアプリのパスのunionになります。`href`の返り値の型はパスをリテラルのまま残すので、Next.jsの`<Link>`の型検査も通ります。',
-  en: 'With `typedRoutes` enabled, `Route` is the union of the application’s paths. The return type of `href` keeps the path as a literal, so it passes the typed check of Next.js’s `<Link>` too.',
-});
-
-export const typedApplication = message({
-  ja: '`Register`の拡張はアプリの中でだけ行ってください。共有のライブラリで拡張すると、その制約が使う側のすべてに及びます。',
-  en: 'Augment `Register` only in an application. A shared library that augments it imposes the constraint on every consumer.',
+  ja: '`typedRoutes`を有効にすると、Next.jsの`<Link>`はアプリのパスだけを受け付けます。`href`の第1引数にそのパスを渡すと、返り値の型はパスをリテラルのまま残すので、`<Link>`の型検査がそのまま効きます。このパッケージに登録するものはありません。',
+  en: 'With `typedRoutes` enabled, Next.js’s `<Link>` takes only the application’s paths. Pass such a path as `href`’s first argument, and the return type keeps it as a literal, so `<Link>`’s typed check still applies. There is nothing to register with this package.',
 });
 
 export const updateTitle = message({

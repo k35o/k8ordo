@@ -22,9 +22,7 @@ import {
   ContextMenu,
   CopyButton,
   DataTable,
-  DateField,
   DatePicker,
-  Dialog,
   DropdownMenu,
   EmptyState,
   FileField,
@@ -33,7 +31,6 @@ import {
   Grid,
   Heading,
   IconButton,
-  InView,
   Kbd,
   ListBox,
   NumberField,
@@ -46,7 +43,6 @@ import {
   RadioCard,
   RangeSlider,
   Select,
-  Resize,
   ResizablePanels,
   Separator,
   SideNav,
@@ -75,7 +71,7 @@ import {
   TableIcon,
 } from '@k8ordo/ui/icons';
 import type { ReactNode } from 'react';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 
 import type { ComponentNavName } from '../data/components-nav';
 
@@ -109,6 +105,11 @@ const checkboxCardOptions = [
   { value: 'comments', label: 'Inline comments' },
 ] as const;
 
+const checkboxGroupOptions = [
+  { value: 'react', label: 'React' },
+  { value: 'vue', label: 'Vue' },
+] as const;
+
 const listBoxOptions = [
   { value: 'apple', label: 'Apple' },
   { value: 'banana', label: 'Banana' },
@@ -127,7 +128,7 @@ export type ServerPreviewName = 'CodeBlock';
  *
  * Most entries render the real component in a representative static state.
  * Transient/overlay components that would otherwise cover the page or require
- * open state (Drawer, Modal, Toast, Popover, DropdownMenu, ...) are shown via
+ * open state (Dialog, Drawer, Toast, Popover, DropdownMenu, ...) are shown via
  * their closed trigger instead.
  */
 export const componentPreviews = {
@@ -171,7 +172,7 @@ export const componentPreviews = {
   ),
   Tabs: (
     <div className={styles.tabs}>
-      <Tabs.Root ids={['overview', 'settings']}>
+      <Tabs.Root defaultSelectedId="overview">
         <Tabs.List label="Navigation">
           <Tabs.Tab id="overview">Overview</Tabs.Tab>
           <Tabs.Tab id="settings">Settings</Tabs.Tab>
@@ -233,11 +234,6 @@ export const componentPreviews = {
   TextField: <TextField placeholder="Enter your name" />,
   Textarea: <Textarea placeholder="Enter text" rows={3} />,
   NumberField: <NumberField placeholder="0" />,
-  DateField: (
-    <div className={styles.dateField}>
-      <DateField aria-label="Date" defaultValue="2026-09-30" />
-    </div>
-  ),
   DatePicker: (
     <div className={styles.datePicker}>
       <DatePicker aria-label="Check-in" defaultValue="2026-09-30" />
@@ -273,14 +269,11 @@ export const componentPreviews = {
       <p className={styles.groupLabel} id="preview-checkbox-group">
         Frameworks
       </p>
-      <CheckboxGroup.Root
+      <CheckboxGroup
         aria-labelledby="preview-checkbox-group"
         defaultValue={['react']}
-        name="preview-frameworks"
-      >
-        <CheckboxGroup.Item itemValue="react" label="React" />
-        <CheckboxGroup.Item itemValue="vue" label="Vue" />
-      </CheckboxGroup.Root>
+        options={checkboxGroupOptions}
+      />
     </div>
   ),
   Switch: <Switch defaultChecked label="Switch" />,
@@ -332,11 +325,7 @@ export const componentPreviews = {
   FileField: (
     <FileField.Root accept="image/*" multiple={false}>
       <FileField.Trigger
-        renderItem={({ disabled, onClick }) => (
-          <Button disabled={disabled} onClick={onClick}>
-            Select File
-          </Button>
-        )}
+        renderItem={(wiring) => <Button {...wiring}>Select File</Button>}
       />
     </FileField.Root>
   ),
@@ -363,9 +352,7 @@ export const componentPreviews = {
     <div className={styles.accordion}>
       <Accordion.Root>
         <Accordion.Item>
-          <h3>
-            <Accordion.Button>What is k8ordo UI?</Accordion.Button>
-          </h3>
+          <Accordion.Button level="h3">What is k8ordo UI?</Accordion.Button>
           <Accordion.Panel>
             <p>A React UI component library.</p>
           </Accordion.Panel>
@@ -492,16 +479,8 @@ export const componentPreviews = {
       <Progress max={100} value={60} />
     </div>
   ),
-  Dialog: (
-    <div className={styles.dialog}>
-      <Dialog.Root>
-        <Dialog.Header onClose={() => undefined} title="Dialog Title" />
-        <Dialog.Content>Dialog content here</Dialog.Content>
-      </Dialog.Root>
-    </div>
-  ),
+  Dialog: <Button>Open Dialog</Button>,
   Drawer: <Button>Open Drawer</Button>,
-  Modal: <Button>Open Modal</Button>,
   Popover: (
     <Popover.Root>
       <Popover.Trigger
@@ -545,13 +524,11 @@ export const componentPreviews = {
   ),
   ListBox: (
     <div className={styles.listBox}>
-      <ListBox.Root
+      <ListBox
         onChange={() => undefined}
         options={listBoxOptions}
         value="apple"
-      >
-        <ListBox.Trigger />
-      </ListBox.Root>
+      />
     </div>
   ),
   ColorPicker: (
@@ -613,8 +590,6 @@ export const componentPreviews = {
       </ResizablePanels.Root>
     </div>
   ),
-  InView: <InViewPreview />,
-  Resize: <ResizePreview />,
   Icons: (
     <div className={styles.icons}>
       <SparklesIcon size="lg" />
@@ -641,34 +616,4 @@ function PaginationPreview(): ReactNode {
 
 function PasswordInputPreview(): ReactNode {
   return <PasswordInput defaultValue="password" />;
-}
-
-function InViewPreview(): ReactNode {
-  const [isInView, setIsInView] = useState(false);
-  return (
-    <InView onChange={setIsInView}>
-      <Badge
-        label={isInView ? 'In view' : 'Out of view'}
-        tone={isInView ? 'success' : 'neutral'}
-      />
-    </InView>
-  );
-}
-
-function ResizePreview(): ReactNode {
-  const box = useRef<HTMLDivElement>(null);
-  const [width, setWidth] = useState<number | null>(null);
-  return (
-    <div className={styles.resize}>
-      <Resize
-        onChange={() => {
-          setWidth(box.current?.offsetWidth ?? null);
-        }}
-      >
-        <div className={styles.resizeBox} ref={box}>
-          {width === null ? '—' : `${String(width)}px wide`}
-        </div>
-      </Resize>
-    </div>
-  );
 }

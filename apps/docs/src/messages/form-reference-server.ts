@@ -22,16 +22,16 @@ export const formFieldsReturns = message({
 
 export const formFieldsCaveats = [
   message({
-    ja: 'Server Componentの中か、モジュールのトップレベルで呼びます。戻り値はJSONなので、propsでClient Componentに渡せます。',
-    en: 'Call it in a Server Component or at module scope. The result is JSON, so it can be passed to a Client Component as props.',
+    ja: 'Server Componentの描画の中で呼びます。戻り値はJSONなので、propsでClient Componentに渡せます。',
+    en: 'Call it in a Server Component’s render. The result is JSON, so it can be passed to a Client Component as props.',
   }),
   message({
-    ja: '文言は呼んだ時点で決まります。リクエストの言語に合わせるなら、描画の中で呼びます。',
-    en: 'Messages are fixed when it runs. To follow the request’s locale, call it during the render.',
+    ja: '文言は呼んだ時点で決まります。モジュールのトップレベルで呼ぶと、どのリクエストにも読み込んだときのロケールの文言が出ます。',
+    en: 'Messages are fixed when it runs. Called at module scope, every request gets them in the locale current when the module loaded.',
   }),
   message({
-    ja: "フォームで表せないスキーマ（`z.record`やタプル、`z.number()`など）を渡すと、`[@k8ordo/form] 'フィールド名': 理由`のエラーになります。",
-    en: "A schema a form cannot express (`z.record`, tuples, `z.number()` and so on) fails with `[@k8ordo/form] 'field': reason`.",
+    ja: "フォームで表せないスキーマ（`z.record`やタプル、`z.number()`など）を渡すと、`formFields: 'フィールド名': 理由`のエラーになります（`parseForm`では頭が`parseForm:`です）。",
+    en: "A schema a form cannot express (`z.record`, tuples, `z.number()` and so on) fails with `formFields: 'field': reason` (`parseForm:` when `parseForm` finds it).",
   }),
   message({
     ja: 'HTMLの属性で表せない検証は`dropped`に入り、サーバーだけで行われます。本番環境以外では`console.warn`でも知らせます。',
@@ -69,8 +69,8 @@ export const parseFormCaveats = [
     en: 'Before the schema runs, `parseForm` turns an unchecked checkbox into `false` and the values sent under one name into an array.',
   }),
   message({
-    ja: 'スキーマにあるフィールドが`FormData`に無いと、`[@k8ordo/form] スキーマにあるフィールドが送信されていません: フィールド名`のエラーになります。`input`を入力欄に渡し忘れたときに出ます。ラジオボタンと`<select>`、チェックボックスは、何も選ばなければ値を送らないので対象外です。',
-    en: 'A field in the schema that is missing from the `FormData` fails with `[@k8ordo/form] スキーマにあるフィールドが送信されていません: field`. It appears when `input` was never passed to the control. Radio buttons, `<select>` and checkboxes are exempt, since they send nothing when nothing is chosen.',
+    ja: 'スキーマにあるフィールドが`FormData`に無いと、`parseForm: the submission has no entry for these fields of the schema: フィールド名`のエラーになります。`input`を入力欄に渡し忘れたときに出ます。ラジオボタンと`<select>`、チェックボックスは、何も選ばなければ値を送らないので対象外です。',
+    en: 'A field in the schema that is missing from the `FormData` fails with `parseForm: the submission has no entry for these fields of the schema: field`. It appears when `input` was never passed to the control. Radio buttons, `<select>` and checkboxes are exempt, since they send nothing when nothing is chosen.',
   }),
   message({
     ja: 'パスワードとファイルの値は、`state.values`に入りません。',
@@ -89,8 +89,8 @@ export const defineFormSchema = message({
 });
 
 export const defineFormRules = message({
-  ja: '`sameAs`、`minChecked`、`requiredWhen`で作ったルール。入力欄のパスは型で確かめられます。',
-  en: 'Rules made with `sameAs`, `minChecked` and `requiredWhen`. Field paths are type-checked.',
+  ja: '`sameAs`と`requiredWhen`で作ったルール。入力欄のパスは型で確かめられます。',
+  en: 'Rules made with `sameAs` and `requiredWhen`. Field paths are type-checked.',
 });
 
 export const defineFormReturns = message({
@@ -110,11 +110,6 @@ export const sameAsSummary = message({
   en: 'Requires `field` to equal `other`. Use it to confirm a password.',
 });
 
-export const minCheckedSummary = message({
-  ja: '同じ名前のチェックボックスのうち、`min`個以上がチェックされていることを求めます。',
-  en: 'Requires at least `min` of the checkboxes sharing a name to be checked.',
-});
-
 export const requiredWhenSummary = message({
   ja: '`when`の値が`equals`であるあいだだけ、`field`を必須にします。',
   en: 'Makes `field` required only while the value of `when` is `equals`.',
@@ -128,11 +123,6 @@ export const ruleField = message({
 export const ruleOther = message({
   ja: '比べる相手の入力欄のパス。',
   en: 'The path of the field to compare with.',
-});
-
-export const ruleMin = message({
-  ja: 'チェックが必要な最小の数。',
-  en: 'The fewest boxes that must be checked.',
 });
 
 export const ruleWhen = message({

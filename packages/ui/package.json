@@ -71,7 +71,8 @@
     },
     "./styles.css": "./dist/styles/index.css",
     "./tokens.css": "./dist/styles/tokens.css",
-    "./tailwind.css": "./dist/styles/tailwind.css"
+    "./tailwind.css": "./dist/styles/tailwind.css",
+    "./package.json": "./package.json"
   },
   "publishConfig": {
     "access": "public",
@@ -95,8 +96,7 @@
   },
   "dependencies": {
     "clsx": "2.1.1",
-    "server-only": "catalog:",
-    "shiki": "4.6.0"
+    "server-only": "catalog:"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "catalog:",
@@ -106,11 +106,11 @@
     "@chromatic-com/storybook": "5.6.0",
     "@k8ordo/form": "workspace:^",
     "@k8ordo/i18n": "workspace:^",
-    "@storybook/addon-a11y": "10.6.7",
-    "@storybook/addon-docs": "10.6.7",
-    "@storybook/addon-mcp": "10.6.7",
-    "@storybook/addon-vitest": "10.6.7",
-    "@storybook/react-vite": "10.6.7",
+    "@storybook/addon-a11y": "10.6.8",
+    "@storybook/addon-docs": "10.6.8",
+    "@storybook/addon-mcp": "10.6.8",
+    "@storybook/addon-vitest": "10.6.8",
+    "@storybook/react-vite": "10.6.8",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
@@ -121,7 +121,8 @@
     "publint": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",
-    "storybook": "10.6.7",
+    "shiki": "4.6.0",
+    "storybook": "10.6.8",
     "storybook-addon-determinism": "0.2.1",
     "storybook-addon-mock-date": "3.2.1",
     "storybook-addon-vrt": "0.4.2",
@@ -139,6 +140,7 @@
     "@types/react-dom": ">=19.3.0",
     "react": ">=19.3.0",
     "react-dom": ">=19.3.0",
+    "shiki": ">=4.6.0",
     "streamdown": ">=2.5.0",
     "typescript": ">=7.0.0",
     "zod": "^4.6.6"
@@ -148,6 +150,9 @@
       "optional": true
     },
     "@types/react-dom": {
+      "optional": true
+    },
+    "shiki": {
       "optional": true
     },
     "streamdown": {

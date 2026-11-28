@@ -34,6 +34,7 @@ type Scope = {
   readonly host: HandlerContext;
   readonly phase: Phase;
   readonly cookies: Cookies;
+  readonly currentCookies: () => ReadonlyMap<string, string>;
   readonly outgoing: Outgoing;
   /** What this answer's inline scripts are signed with. */
   readonly nonce: string;
@@ -66,12 +67,30 @@ export const withRequest = <T>(
       host,
       phase: 'render',
       cookies: jar.cookies,
+      currentCookies: jar.current,
       outgoing: { headers: new Headers(), cookies: jar.lines },
       nonce: freshNonce(),
     },
     fn,
   );
 };
+
+/**
+ * The cookies of the request in progress as the render reads them: what it
+ * carried, with what a guard or a Server Action set or deleted before.
+ */
+export const currentCookies = (): ReadonlyMap<string, string> => {
+  const scope = storage.getStore();
+  if (scope === undefined) {
+    throw new Error(
+      'currentCookies() needs a request — the handler reads it while one is answered, before the render',
+    );
+  }
+  return scope.currentCookies();
+};
+
+/** The phase of the request in progress; `undefined` outside one. */
+export const currentPhase = (): Phase | undefined => storage.getStore()?.phase;
 
 /** Runs `fn` as `phase` of the request in progress. */
 export const inPhase = <T>(phase: Phase, fn: () => T): T => {

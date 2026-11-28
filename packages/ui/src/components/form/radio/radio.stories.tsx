@@ -2,7 +2,7 @@ import { formFields, parseForm } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import type { ComponentProps } from 'react';
-import { expect, fn, waitFor } from 'storybook/test';
+import { expect, fn, waitFor, within } from 'storybook/test';
 import { z } from 'zod';
 
 import {
@@ -138,6 +138,33 @@ export const RequiredUntilSelected: Story = {
   },
 };
 
+export const GroupsWithoutNameStayApart: Story = {
+  render: (props) => (
+    <div className={styles.frame}>
+      <p id={props['aria-labelledby']}>Framework</p>
+      <div data-testid="first">
+        <Radio aria-labelledby={props['aria-labelledby']} options={options} />
+      </div>
+      <div data-testid="second">
+        <Radio aria-labelledby={props['aria-labelledby']} options={options} />
+      </div>
+    </div>
+  ),
+  play: async ({ args, canvas, userEvent }) => {
+    const first = within(canvas.getByTestId('first'));
+    const second = within(canvas.getByTestId('second'));
+
+    await userEvent.click(first.getByRole('radio', { name: 'React' }));
+    await userEvent.click(second.getByRole('radio', { name: 'Vue' }));
+
+    await expect(first.getByRole('radio', { name: 'React' })).toBeChecked();
+    await expect(second.getByRole('radio', { name: 'Vue' })).toBeChecked();
+    await expect(
+      first.getByRole('radio', { name: 'React' }),
+    ).not.toHaveAttribute('name', args['aria-labelledby']);
+  },
+};
+
 const selectionDotOf = (radio: HTMLElement) =>
   radio.closest('label')?.querySelector('[aria-hidden] > span');
 
@@ -210,9 +237,8 @@ const PlanForm = () => (
         <>
           <FormControl
             errorText={plan.error}
-            invalid={plan.invalid}
             label="プラン"
-            labelAs="legend"
+            labelAs="group"
             renderInput={(props) => (
               <Radio {...props} {...plan.input} options={PLANS} />
             )}

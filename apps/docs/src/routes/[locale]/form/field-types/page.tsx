@@ -11,7 +11,7 @@ import * as m from '../../../../messages';
 
 const t = m.formFieldTypes;
 
-const OVERVIEW = `z.string()                        → type="text"
+const OVERVIEW = `z.string()                        → no type (a text input)
 z.email() / z.url()               → type="email" / type="url"
 z.iso.date() / z.iso.time()       → type="date" / type="time"
 z.iso.datetime({ local: true })   → type="datetime-local"
@@ -21,14 +21,14 @@ z.stringbool()                    → type="checkbox" value="true"
 z.file()                          → type="file"
 z.enum([…])                       → <select>
 z.array(z.enum([…]))              → type="checkbox"
-z.uuid()                          → type="text"`;
+z.uuid()                          → no type (a text input)`;
 
 const TEXT = `z.object({
   handle: z.string().min(3).max(20).regex(/^[a-z0-9_]+$/),
 });
 
 // handle.input
-// { name: 'handle', type: 'text', required: true,
+// { name: 'handle', required: true,
 //   minLength: 3, maxLength: 20, pattern: '^[a-z0-9_]+$' }`;
 
 const TEXT_BLANK = `bio: z.string().min(1).optional(),
@@ -83,12 +83,11 @@ const STRINGBOOL = `z.object({
 // inStock.input → { name: 'inStock', type: 'checkbox', value: 'true' }`;
 
 const GROUP = `const tags = form.field('tags');
-const checked = state.values?.tags;
 
 {['react', 'css', 'a11y'].map((option) => (
   <label key={option}>
     <input
-      defaultChecked={Array.isArray(checked) && checked.includes(option)}
+      defaultChecked={tags.input.defaultValue?.includes(option)}
       name={tags.input.name}
       type="checkbox"
       value={option}
@@ -228,16 +227,12 @@ export default function FormFieldTypesPage() {
       </DocSection>
 
       <DocSection id="checkbox-group" title={t.groupTitle}>
-        <CodeBlock code={GROUP} lang="tsx" marks={{ 7: 'highlight' }} />
+        <CodeBlock code={GROUP} lang="tsx" marks={{ 6: 'highlight' }} />
         <p>
           <Rich>{t.group()}</Rich>
         </p>
         <p>
-          <Rich>{t.groupMinBefore()}</Rich>
-          <LocaleAnchor path="/:locale/form/rules">
-            {m.form.navRules()}
-          </LocaleAnchor>
-          <Rich>{t.groupMinAfter()}</Rich>
+          <Rich>{t.groupMin()}</Rich>
         </p>
       </DocSection>
 

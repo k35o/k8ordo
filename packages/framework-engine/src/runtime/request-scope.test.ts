@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vite-plus/test';
 import {
   answer,
   cookies,
+  currentCookies,
   inPhase,
   nonce,
   requestHeaders,
@@ -78,6 +79,24 @@ describe('cookies()', () => {
         expect(cookies().get('visitor')).toBe('someone');
       });
     });
+  });
+
+  it('hands the render the cookies as the guards and the action left them', () => {
+    withRequest(withCookie, () => {
+      inPhase('guard', () => {
+        cookies().delete('theme');
+      });
+      inPhase('action', () => {
+        cookies().set('visitor', 'someone');
+      });
+      expect([...currentCookies()]).toStrictEqual([['visitor', 'someone']]);
+    });
+  });
+
+  it('refuses to read them outside a request, rather than rendering with none', () => {
+    expect(() => currentCookies()).toThrow(
+      'currentCookies() needs a request — the handler reads it while one is answered, before the render',
+    );
   });
 
   it('says every write as a Set-Cookie on the answer', () => {

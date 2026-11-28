@@ -85,11 +85,11 @@ export default function LocaleLayout({
 
 const SHELL = `'use client';
 
-import { UIProvider } from '@k8ordo/ui';
+import { ToastProvider } from '@k8ordo/ui';
 import type { ReactNode } from 'react';
 
 export function LocaleShell({ children }: { children: ReactNode }) {
-  return <UIProvider>{children}</UIProvider>;
+  return <ToastProvider>{children}</ToastProvider>;
 }`;
 
 const BROWSER = `'use client';

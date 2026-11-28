@@ -32,8 +32,6 @@ export const ja: Messages = {
 
   numberFieldIncrement: '増やす',
   numberFieldDecrement: '減らす',
-  numberFieldRangeUnderflow: '{min} 以上で入力してください',
-  numberFieldRangeOverflow: '{max} 以下で入力してください',
 
   rangeSliderStart: '最小',
   rangeSliderEnd: '最大',
@@ -52,6 +50,8 @@ export const ja: Messages = {
   passwordHide: 'パスワードを非表示',
 
   listBoxPlaceholder: '選択してください',
+
+  opensInNewTab: '新しいタブで開きます',
 
   breadcrumb: 'パンくずリスト',
   tabList: 'タブ',

@@ -1,7 +1,7 @@
 'use client';
 
 import { matchPath, usePathname } from '@k8ordo/framework';
-import { UIProvider, Drawer, Heading, IconButton } from '@k8ordo/ui';
+import { Drawer, Heading, IconButton, ToastProvider } from '@k8ordo/ui';
 import { ListIcon } from '@k8ordo/ui/icons';
 import { useEffect, useRef, useState, ViewTransition } from 'react';
 import type { CSSProperties, FC, ReactNode } from 'react';
@@ -182,17 +182,18 @@ export function LocaleShell({
     ? param
     : (locales.delocalize(pathname).locale ?? locales.default);
 
-  // 実ページの lang はルートレイアウトがサーバーで書く。ここで直すのは
+  // 実ページの lang と dir はルートレイアウトがサーバーで書く。ここで直すのは
   // 404.html の 1 枚だけで、あれは番兵の URL で描かれているので、読んでいる
   // 人の URL が分かるのはブラウザで描いた後になる。
   useEffect(() => {
     document.documentElement.lang = locale;
+    document.documentElement.dir = locales.definitions[locale].dir;
   }, [locale]);
 
   // 遷移後にトップ（または #fragment）へ戻すのはルーターの仕事になったので、
   // ここにスクロールの処理は無い。
   return (
-    <UIProvider>
+    <ToastProvider>
       <WritingModeProvider>
         <div className={styles.shell}>
           <LayoutContent componentGroups={componentGroups}>
@@ -200,6 +201,6 @@ export function LocaleShell({
           </LayoutContent>
         </div>
       </WritingModeProvider>
-    </UIProvider>
+    </ToastProvider>
   );
 }

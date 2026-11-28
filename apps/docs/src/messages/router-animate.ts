@@ -61,8 +61,8 @@ export const directionTitle = message({
 });
 
 export const directionKinds = message({
-  ja: "ルーターは`navigation`に加えて`navigation-push`、`navigation-replace`、`navigation-traverse`のどれかも付けます。リンクのクリックと`navigateTo`は`push`です。`navigateTo`に`{ history: 'replace' }`を渡すと`replace`になります。ブラウザの戻る、進むは`traverse`です。",
-  en: "Besides `navigation`, the router adds one of `navigation-push`, `navigation-replace` and `navigation-traverse`. A link click and `navigateTo` are `push`. Passing `{ history: 'replace' }` to `navigateTo` makes it `replace`. The browser’s back and forward are `traverse`.",
+  ja: "ルーターは`navigation`に加えて`navigation-push`、`navigation-replace`、`navigation-traverse`のどれかも付けます。別のURLへのリンクのクリックと`navigation.navigate()`は`push`です。`navigation.navigate()`に`{ history: 'replace' }`を渡すと`replace`になります。ブラウザの戻る、進むは`traverse`です。",
+  en: "Besides `navigation`, the router adds one of `navigation-push`, `navigation-replace` and `navigation-traverse`. A click on a link to another URL and `navigation.navigate()` are `push`. Passing `{ history: 'replace' }` to `navigation.navigate()` makes it `replace`. The browser’s back and forward are `traverse`.",
 });
 
 export const directionCss = message({

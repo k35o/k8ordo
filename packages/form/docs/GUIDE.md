@@ -33,12 +33,16 @@ client    useForm(fields, state)  →  attributes to spread, message to show
 server    parseForm(schema, formData)  →  typed data, or per-field errors
 ```
 
-`formFields` runs on the server — in a Server Component or at module scope. Its
-result is JSON, so it crosses the RSC boundary as props and zod never enters the
-client bundle. The messages are read when it runs — zod's, and a rule's
-[function message](#a-message-that-follows-the-request) — and module scope runs
-once, before any request: when a message follows the request (its locale, say,
-with `@k8ordo/i18n`), call `formFields` during the render instead.
+`formFields` runs on the server, in the render of the Server Component that
+hands its result to the form. Its result is JSON, so it crosses the RSC
+boundary as props and zod never enters the client bundle. The messages are
+read when it runs — zod's, and a rule's
+[function message](#a-message-that-follows-the-request) — so a call in the
+render words them for the request being answered (its locale, say, with
+`@k8ordo/i18n`). Do not hoist it to module scope: that runs once, before any
+request, and every visitor would get the messages of whichever locale was
+current then. Deriving is a walk over the schema, cheap enough to repeat on
+every render.
 
 ## Writing a form
 
@@ -74,7 +78,7 @@ Each leaf derives the control that submits what it validates:
 
 | Schema                                           | `input`                                                                                                |
 | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| `z.string()`                                     | `type="text"`                                                                                          |
+| `z.string()`                                     | no `type`: a plain text input, the browser's default                                                   |
 | `z.email()` / `z.url()`                          | `type="email"` / `type="url"`                                                                          |
 | `z.iso.date()` / `z.iso.time()`                  | `type="date"` / `type="time"`                                                                          |
 | `z.iso.datetime({ local: true })`                | `type="datetime-local"`                                                                                |
@@ -85,14 +89,31 @@ Each leaf derives the control that submits what it validates:
 | a password ([below](#what-it-guarantees))        | `type="password"`                                                                                      |
 | `z.enum([…])`                                    | no `type`: spread it onto a `<select>`, not a radio ([Radio groups](#radio-groups))                    |
 | `z.array(z.enum([…]))`                           | no `type`: one checkbox per option ([Checkbox groups](#checkbox-groups))                               |
-| anything else (`z.uuid()`, `z.coerce.date()`, …) | `type="text"`                                                                                          |
+| anything else (`z.uuid()`, `z.coerce.date()`, …) | no `type`                                                                                              |
+
+`form.field()` types each `input` by the control its schema derives, so a
+spread reaches a component that takes only what that control has:
+
+| Schema                                                                      | `input` type          |
+| --------------------------------------------------------------------------- | --------------------- |
+| `z.coerce.number()`                                                         | `NumberInput`         |
+| `z.boolean()`                                                               | `CheckboxInput`       |
+| `z.stringbool()`                                                            | `StringCheckboxInput` |
+| `z.file()`                                                                  | `FileInput`           |
+| `z.array(z.enum([…]))`                                                      | `CheckboxGroupInput`  |
+| a string, `z.enum([…])`, and anything behind `.nullable()`, a union, a pipe | `FieldInput`          |
+
+`NumberInput` has numeric `min` and `max` and always a `step`; `FileInput` has
+no `defaultValue`, since no browser lets a value be put back into a file
+control. `.optional()`, `.default()` and the other wrappers keep the leaf's
+control and its type; `.nullable()` does not — it turns the leaf into a union,
+which derives a bare text input — so it falls to `FieldInput`, the type that
+covers every control.
 
 ```tsx
 // src/routes/talks/new/page.tsx — Server Component
-const talkFields = formFields(talkSchema); // module scope: derived once
-
 export default function Page() {
-  return <TalkForm action={createTalk} fields={talkFields} />;
+  return <TalkForm action={createTalk} fields={formFields(talkSchema)} />;
 }
 ```
 
@@ -102,6 +123,15 @@ report travel together.
 ```tsx
 // src/components/talk-form.tsx
 'use client';
+
+import type { FormFields, FormState } from '@k8ordo/form';
+
+import type { talkSchema } from '../lib/schema';
+
+type TalkFormProps = {
+  action: (state: FormState, formData: FormData) => Promise<FormState>;
+  fields: FormFields<typeof talkSchema>;
+};
 
 export const TalkForm = ({ action, fields }: TalkFormProps) => {
   const [state, formAction] = useActionState(action, {});
@@ -116,6 +146,27 @@ export const TalkForm = ({ action, fields }: TalkFormProps) => {
   );
 };
 ```
+
+`FormFields<typeof talkSchema>` is the type `formFields(talkSchema)` returns,
+so the prop is typed from the schema itself: the paths `form.field()` accepts
+and the type of each field's `input` follow it. The import is type-only, so
+zod stays out of the client bundle. A `defineForm` definition is named the
+same way — `FormFields<typeof signup>` — and `UseFormReturn<typeof
+talkSchema>` names what `useForm` returns, for a hook that takes the whole
+form. A component that draws one field takes that field's `FieldView`:
+
+```tsx
+const TitleInput = ({ field }: { field: FieldView }) => (
+  <input {...field.input} />
+);
+
+<TitleInput field={form.field('title')} />;
+```
+
+Code generic over the form — a wrapper that owns the `<form>` element, say —
+takes the schema as a type parameter: `<Source extends ObjectSchema |
+FormDefinition>`, then `FormFields<Source>` and `UseFormReturn<Source>`. Both
+constraint types are exported from either entry.
 
 `form.props` attaches to the `<form>` and nowhere else. There is no per-field
 registration to forget. Its `onSubmit` checks the form
@@ -182,13 +233,74 @@ Focus carries the message rather than a live region because focus moves on
 every response: a live region already holding the same text announces nothing
 when the same failure comes back.
 
+## Telling the person it worked
+
+When the action does not redirect, say so on the page, from the state the
+action returns. `FormState` has no success flag of its own; extend it with
+one, and keep handing the Server Action to `useActionState` as it is:
+
+```ts
+// src/lib/actions.ts
+'use server';
+
+export type ContactState = FormState & { accepted?: true };
+
+export async function sendContact(
+  _prev: ContactState,
+  formData: FormData,
+): Promise<ContactState> {
+  const parsed = parseForm(contactSchema, formData);
+  if (!parsed.success) return parsed.state;
+
+  const delivered = await deliver(parsed.data);
+  if (!delivered) {
+    return { ...parsed.state, formError: '送信できませんでした' };
+  }
+  return { accepted: true };
+}
+```
+
+```tsx
+const [state, formAction] = useActionState(sendContact, {});
+const form = useForm(fields, state);
+
+<form {...form.props} action={formAction}>
+  {state.accepted === true && <p role="status">送信しました</p>}
+  {/* … */}
+</form>;
+```
+
+The message is part of the page the action's result renders, so it shows
+without JavaScript too, and React's reset after the action empties the
+fields. A failure found after the schema passed — the mail server is down,
+the slot was taken — goes back as `{ ...parsed.state, formError }`: the
+submitted values and the `token` stay, so the fields keep what was typed and
+focus moves to the form-level message. With `@k8ordo/ui`, an inline
+`<Alert message="…" tone="success" />` draws the success the same way.
+
+A toast is the other choice, and it needs JavaScript: it is opened from a
+client function that wraps the action and reads its result. Handing that
+wrapper to `useActionState` makes the form's action a client function, so
+without JavaScript the form has nothing to submit to. Choose it only when the
+page already needs JavaScript to work.
+
+```tsx
+const { open } = useToast(); // @k8ordo/ui
+const [state, formAction] = useActionState(
+  async (previous: ContactState, formData: FormData) => {
+    const next = await sendContact(previous, formData);
+    if (next.accepted === true) open('success', '送信しました');
+    return next;
+  },
+  {},
+);
+```
+
 ## What it guarantees
 
 **The wording cannot drift.** Client messages are obtained by running the
 schema against a probe value, so the text shown next to the input is the text
-zod itself produces. A custom `min(1, '…')` reaches both sides. The one
-exception is a range message from `@k8ordo/ui`'s `NumberField` (see
-[Working with @k8ordo/ui](#working-with-k8ordoui)).
+zod itself produces. A custom `min(1, '…')` reaches both sides.
 
 **`required` means the same thing on both sides.** JSON Schema's `required`
 means "the key is present", but a form always submits something for every
@@ -211,8 +323,8 @@ float, a regex whose flags or anchoring the `pattern` attribute would silently
 reinterpret, several regexes on one string (the attribute holds one), a regex on
 a control that ignores `pattern` such as `type="date"`, a `.mime()` that
 `accept` only suggests to the file picker, a `z.iso.datetime()` no
-`datetime-local` control can ever satisfy,
-a leaf whose constraints could not be read at all because a `.transform()` or a
+`datetime-local` control can ever satisfy, the count of a checkbox group inside
+repeated rows, a leaf whose constraints could not be read at all because a `.transform()` or a
 `z.custom()` left nothing to read — are returned in `dropped`. They still run
 on the server; you are told they do not run on the client. Outside production
 `formFields` also logs the list once per schema with `console.warn`, so it is
@@ -403,15 +515,12 @@ accepts it, and a bare `z.stringbool()` makes the box `required`.
 `.default(true)` is refused at derive time — nothing would read as `true`, so
 unchecking the box could never submit `false`.
 
-Only these fields carry `value` in their type. `formFields` names their paths
-in the third type argument of `FormFields` (`FormFields<FieldPath, ArrayPath,
-StringCheckboxPath>`), and `field()` types `input` as `StringCheckboxInput` for
-them and as `FieldInput`, with no `value`, for every other field — so the other
-fields spread onto a component that takes `value` only when it is controlled.
-A `FormFields` type written by hand can leave the third argument out: it still
-takes the derived fields, and the box still submits its `value`, but
-`input.value` no longer compiles. The same holds for a box inside repeated
-rows, which `row.field()` never types with `value`.
+Only these fields carry `value` in their type. `field()` reads which ones they
+are from the schema's type, and types `input` by the control each field
+derives ([the table above](#writing-a-form)): `StringCheckboxInput` is the one
+input type with a `value`, so every other field spreads onto a component that
+takes `value` only when it is controlled. A box inside repeated rows is typed
+the same way by `row.field(key)`.
 
 ## Checkbox groups
 
@@ -426,9 +535,7 @@ const tags = form.field('tags');
 {
   ['a', 'b', 'c'].map((option) => (
     <input
-      defaultChecked={
-        Array.isArray(state.values?.tags) && state.values.tags.includes(option)
-      }
+      defaultChecked={tags.input.defaultValue?.includes(option)}
       key={option}
       name={tags.input.name}
       type="checkbox"
@@ -440,11 +547,27 @@ const tags = form.field('tags');
 
 `parseForm` reads every checked box under the shared name — none checked is
 `[]`, never a wiring error. The `.min(2)` cannot become an HTML attribute (on
-a group, `required` would mean "check every box"), so it is reported in
-`dropped`; declare `minChecked('tags', 2, '…')` to run the same bound in the
-browser. After a submission `state.values.tags` holds what was checked as an
-array — `['a']` for one box, `[]` for none — and `tags.input` carries only the
-`name`, so each box restores itself from that array.
+a group, `required` would mean "check every box"), so `formFields` derives
+the array's `.min()` and `.max()` as [rules](#checks-html-has-no-attribute-for)
+the browser runs on the group, worded by zod — read on every call, so the
+wording follows the locale like the rest of zod's. A bound zod gives no
+message for (a `.refine()` with `abort` ahead of it, say) is listed in
+`dropped` instead, and a `.max()` no selection can exceed derives no rule.
+`tags.required` is `true`
+while `.min()` asks for at least one box, for the label's required marker;
+`tags.input` carries no `required`. Inside repeated rows a group has no
+fixed name for a rule to target, so its count runs on the server only and is
+listed in `dropped`.
+
+After a submission `tags.input.defaultValue` holds what was checked as an
+array — `['a']` for one box, `[]` for none — typed `string[]`
+(`CheckboxGroupInput`). A component that takes the checked options as its
+`defaultValue` — a `<select multiple>`, or `@k8ordo/ui`'s `CheckboxGroup`,
+`CheckboxCard` and `Autocomplete` — takes the spread as it is. A hand-written
+box takes the `name` and reads `defaultChecked` from the array, as above: a
+spread would put the whole array on every box. The same holds for a group
+inside repeated rows, which `row.field(key)` types as `CheckboxGroupInput`
+too.
 
 ## Files
 
@@ -471,16 +594,40 @@ form.field('titel'); // error: not a field in the schema
 form.field('items'); // error: an array of objects, reached through array()
 form.array('user'); // error: an object, not an array
 form.array('tags'); // error: a checkbox group is a field
+row.field('nmae'); // error: not a field of the row
 defineForm(schema, [sameAs('confrim', 'password', '…')]); // error: typo
 ```
 
-A row's `row.field(key)` is the exception: the key is a plain string, and a
-typo in it throws when the row renders.
+A row's `row.field(key)` takes the path within one item and types its `input`
+by that key, the way `form.field()` does by path: in a row of a string and a
+number, `row.field('name').input` is a `FieldInput` and
+`row.field('quantity').input` a `NumberInput`. The row of an array of scalars
+is a single field under `''`, so its key is left out: `row.field()`.
+
+A component that draws a whole row takes its `RowView`, named by the schema
+(or the `defineForm` definition) and the array's path, the way `FormFields`
+is named by the schema. The keys `row.field()` accepts follow from those two,
+so `RowView` without them is a type error. `ArrayView` and `DerivedArray`
+are named the same way.
+
+```tsx
+import type { RowView } from '@k8ordo/form';
+
+import type { orderSchema } from '../lib/schema';
+
+const ItemRow = ({ row }: { row: RowView<typeof orderSchema, 'items'> }) => (
+  <input {...row.field('quantity').input} />
+);
+
+{
+  form.array('items').rows.map((row) => <ItemRow key={row.key} row={row} />);
+}
+```
 
 ## Checks HTML has no attribute for
 
-Password confirmation, "tick at least two", "required only when rejected" —
-none of these map to a constraint attribute, and a `.refine()` cannot cross to
+Password confirmation, "required only when rejected" — neither maps to a
+constraint attribute, and a `.refine()` cannot cross to
 the client because it is a function. Declare them next to the schema instead:
 
 ```ts
@@ -504,10 +651,13 @@ indistinguishable from a built-in check — `:user-invalid` matches and the
 message arrives through the same path as every other one. When several rules
 break the same field, both sides show the one declared first.
 
-Available: `sameAs(field, other, message)`, `minChecked(field, min, message)`,
-and `requiredWhen(field, when, equals, message)` —
+Available: `sameAs(field, other, message)` and
+`requiredWhen(field, when, equals, message)` —
 `requiredWhen('reason', 'status', 'rejected', '…')` requires `reason` while
-`status` is `'rejected'`. Anything else stays a `.refine()` and runs on the
+`status` is `'rejected'`. How many boxes of a checkbox group may be checked
+is not a rule to declare: it is the array's `.min()` / `.max()`, which
+`formFields` turns into rules of its own, after the declared ones
+([Checkbox groups](#checkbox-groups)). Anything else stays a `.refine()` and runs on the
 server only. A `refine` on the schema as a whole is listed in `dropped`; one on
 a single field, a nested object, or a row is not yet.
 
@@ -523,16 +673,20 @@ reads it:
 
 ```ts
 // src/lib/signup-form.ts
-import { mismatch, pickAtLeast } from '../messages/signup'; // @k8ordo/i18n
+import { companyRequired, mismatch } from '../messages/signup'; // @k8ordo/i18n
 
 export const signup = defineForm(schema, [
   sameAs('confirm', 'password', mismatch),
-  minChecked('topics', 2, () => pickAtLeast(2)),
+  requiredWhen('company', 'plan', 'business', companyRequired),
 ]);
 ```
 
-Call `formFields` during the render for this, the same as for zod's function
-messages.
+The definition stays at module scope; `formFields(signup)` is called in the
+render, as everywhere, so the rules come out worded for that request. zod's
+own wording, for a check written without a message, follows the request once
+its configuration reads the locale; `@k8ordo/i18n`'s guide
+(`node_modules/@k8ordo/i18n/docs/GUIDE.md`, the `@k8ordo/form` item of
+"Alongside the rest of k8ordo") shows the module that does it.
 
 ## Asking the server about one field
 
@@ -650,96 +804,110 @@ request — which is the correct behaviour, not a broken one.
 `@k8ordo/form` does not depend on `@k8ordo/ui`; the fields in `@k8ordo/ui`
 take what `formFields` derives as it is. Spread `input` onto the field after
 `FormControl`'s props. `FormControl` gets only what it uses — the label, the
-error, `invalid`, `required` — and generates the `id` and `aria-*` links
-itself.
+error, `required` — and generates the `id` and `aria-*` links itself. A
+non-empty `error` is what marks the field invalid, so `invalid` is not passed.
 
 ```tsx
 const title = form.field('title');
 
 <FormControl
   errorText={title.error}
-  invalid={title.invalid}
   label="タイトル"
   required={title.required}
   renderInput={(props) => <TextField {...props} {...title.input} />}
 />;
 ```
 
-Nothing in `input` has to be taken out first: `TextField` renders the date and
-time types as well as the text ones, `PasswordInput` keeps its show/hide toggle
-under a spread `type`, `Textarea` drops the `type` a `<textarea>` does not
-have, and `NumberField` and `Slider` take string bounds, `step="any"`, and the
-echoed `defaultValue`, which is a string whichever field it belongs to.
+Nothing in `input` has to be taken out first. `formFields` writes only
+attributes the native element takes — no `type` for a plain text input, `min`
+and `max` as numbers — so `TextField` renders the date and time types as well
+as the text ones, `PasswordInput` keeps its show/hide toggle under a spread
+`type`, a plain string spreads onto `Textarea` as it is, and `NumberField` and
+`Slider` take `step="any"` and the echoed `defaultValue`, which is a string
+whichever field it belongs to.
 Uncontrolled fields keep their value in the DOM, so a reset — React's after
 each action included — restores the echo, `isDirty` reads them, and a value a
 component changes in code — a stepper, a chosen option, a removed file —
 arrives as an `input` event, the way typing does.
 
-| Schema                                            | Component                                            | What to pass besides `{...props} {...input}`              |
-| ------------------------------------------------- | ---------------------------------------------------- | --------------------------------------------------------- |
-| `z.string()`, `z.email()`, `z.url()`, `z.iso.*()` | `TextField`, `Textarea`                              | —                                                         |
-| a password                                        | `PasswordInput`                                      | —                                                         |
-| `z.coerce.number()`                               | `NumberField`, `Slider`                              | —                                                         |
-| `z.enum([…])`                                     | `Select`, `Radio`, `RadioCard`                       | `options`; `labelAs="legend"` on `FormControl` for radios |
-| `z.boolean()`, `z.literal(true)`                  | `Checkbox`, `Switch`                                 | `label`, and no `{...props}`: they need no `FormControl`  |
-| `z.array(z.enum([…]))`                            | `CheckboxGroup.Root`, `CheckboxCard`, `Autocomplete` | `defaultValue` from `state.values`                        |
-| `z.file()`                                        | `FileField.Root`                                     | a `FileField.Trigger` and `FileField.ItemList`            |
+| Schema                                             | Component                                       | What to pass besides `{...props} {...input}`                                       |
+| -------------------------------------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `z.string()`                                       | `TextField`, `Textarea`                         | —                                                                                  |
+| `z.email()`, `z.url()`, `z.iso.*()`                | `TextField`                                     | —                                                                                  |
+| a password                                         | `PasswordInput`                                 | —                                                                                  |
+| `z.coerce.number()`                                | `NumberField`, `Slider`                         | —                                                                                  |
+| `z.enum([…])`                                      | `Select`, `Radio`, `RadioCard`                  | `options`; `labelAs="group"` on `FormControl` for radios                           |
+| `z.boolean()`, `z.literal(true)`, `z.stringbool()` | `Checkbox`, `Switch`                            | `label` and `errorText`; no `FormControl`, so no `{...props}`                      |
+| `z.array(z.enum([…]))`                             | `CheckboxGroup`, `CheckboxCard`, `Autocomplete` | `options`; `labelAs="group"` on `FormControl` for boxes                            |
+| `z.file()`                                         | `FileField.Root`                                | a `FileField.Trigger` and `FileField.ItemList`; `labelAs="group"` on `FormControl` |
+
+**A group takes its name from `FormControl`.** `Radio`, `RadioCard`,
+`CheckboxGroup` and `CheckboxCard` are a group each, so `labelAs="group"`
+draws the label as the heading the group reads its name from, the required
+mark included. On a checkbox group, `required={tags.required}` shows only as
+that mark: `FormControl` passes it on, and `CheckboxGroup` and `CheckboxCard`
+write it to no element — a `<fieldset>` takes no `required`, and a box with
+one would have to be checked itself — while the count rule does the checking.
+`FileField` takes `'group'` as well: what a person presses is its trigger, a
+button that reads its name from the heading and cannot take `required`, so
+the mark there is what says a file is required. `Autocomplete` keeps the
+default, a `<label>` for its text input.
 
 **Radios take the spread.** The advice under [Radio groups](#radio-groups) is
 about a hand-written `<input type="radio">`. `Radio` and `RadioCard` read an
 enum's `input` the other way round: `defaultValue` is the selected option and
 `required` reaches every radio.
 
-**A `z.stringbool()` box is the exception.** A spread `value` does not reach
-`Checkbox`'s input, so a `z.stringbool()` box drawn with it submits the
-browser's `on` — which the default `z.stringbool()` reads as `true`, but a
-custom `truthy`, and the URL state writes, do not share. Render a plain
-`<input {...field.input} />` there.
+**A single box draws its own message.** `Checkbox` and `Switch` carry their
+own label, so they are not wrapped in `FormControl`. `errorText` draws the
+field's error under the box and describes the input with it:
 
-**A `Select` needs a placeholder for `required` to mean anything.** Put
-`{ value: '', label: '…' }` first in `options`; a `<select>` without an empty
-option always has a choice selected.
+```tsx
+const agree = form.field('agree');
 
-**A checkbox group echoes as an array.** `input` carries only the `name`, so
-pass what was checked back as `defaultValue`:
+<Checkbox {...agree.input} errorText={agree.error} label="規約に同意する" />;
+```
+
+The spread `value` of a `z.stringbool()` box lands on `Checkbox`'s and
+`Switch`'s `value`, the string a checked box submits, so the box submits the
+schema's own `true` ([Checkboxes that submit a string](#checkboxes-that-submit-a-string)).
+
+**A `Select` needs a `placeholder` for `required` to mean anything.** A
+`<select>` without an empty option always has a choice selected; `placeholder`
+puts one first, with the value `''`, which `parseForm` reads as no choice — a
+required enum reports it as missing, an optional one parses to `undefined`.
+
+**A checkbox group echoes as an array.** `input.defaultValue` is what was
+checked, so the group components take the spread with nothing added:
 
 ```tsx
 const tags = form.field('tags');
-const checked = state.values?.tags;
 
 <FormControl
   errorText={tags.error}
-  invalid={tags.invalid}
   label="タグ"
-  labelAs="legend"
+  labelAs="group"
   renderInput={(props) => (
-    <CheckboxCard
-      {...props}
-      {...tags.input}
-      defaultValue={Array.isArray(checked) ? checked : []}
-      options={options}
-    />
+    <CheckboxCard {...props} {...tags.input} options={options} />
   )}
 />;
 ```
 
-`minChecked` reaches `Autocomplete` as well as the checkboxes: it submits
+A group's count reaches `Autocomplete` as well as the checkboxes: it submits
 through a hidden `<select multiple>` that is present even with nothing
 selected, so the rule has an element to mark, and focus sent to it after a
 failure goes on to the text input.
 
-**`NumberField` checks its own range.** It renders `type="text"` so it can
-format and step the value, and the browser does not check `min` and `max` on
-a text input. `NumberField` reports an out-of-range value with
-`setCustomValidity` instead, which `useForm` shows like any other message —
-but in `@k8ordo/ui`'s wording (`numberFieldRangeUnderflow` /
-`numberFieldRangeOverflow`), not zod's, the one place the client's text is not
-zod's own. Leaving the field clamps the value into range, so the message shows
-only while typing. `.int()` and `.multipleOf()` set the precision the field
-rounds to; a plain `z.coerce.number()` derives `step="any"`, which is not
-rounded. Without JavaScript nothing checks the range before the server does;
-a `TextField` given the derived `type="number"` keeps the browser's own
-check, and its wording.
+**`NumberField` keeps the value in range.** It renders `type="text"` so it
+can format and step the value, and the browser does not check `min` and `max`
+on a text input. `NumberField` clamps the value into range instead, when the
+field is left and when Enter is pressed in it, so a form submitted with Enter
+sends the clamped value and no range message is ever shown. `.int()` and
+`.multipleOf()` set the precision the field rounds to; a plain
+`z.coerce.number()` derives `step="any"`, which is not rounded. Without
+JavaScript nothing checks the range before the server does, and the server
+answers with zod's message; a `TextField` given the derived `type="number"`
+keeps the browser's own check, and its wording.
 
 **A `Textarea` has no `pattern`.** A regex on a field drawn as a `Textarea`
 reaches the markup, but a `<textarea>` ignores it: the check runs on the server

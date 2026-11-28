@@ -15,21 +15,17 @@ run outer first, one at a time:
 ```ts
 // src/routes/admin/guard.ts
 import { href } from '@k8ordo/framework';
-import { cookies } from '@k8ordo/framework/server';
+import { cookies, redirect } from '@k8ordo/framework/server';
 import type { Guard } from '@k8ordo/framework/server';
 
 const guard: Guard<'/admin'> = () => {
-  if (cookies().has('session')) return;
-  return new Response(null, {
-    status: 303,
-    headers: { location: href('/login') },
-  });
+  if (!cookies().has('session')) redirect(href('/login'));
 };
 
 export default guard;
 ```
 
-It receives `{ request, params }` — the `Request` as it arrived, and the
+It receives `{ request, params }` — the `Request` for the page, and the
 params of the pattern its directory puts it under, as the strings the URL
 carried (a `[...name]` directory's as an array of them): a guard runs above
 every layout, where no schema has typed them.
@@ -37,15 +33,24 @@ every layout, where no schema has typed them.
 argument's), and the generated table checks each `guard.ts` against its
 directory's pattern either way.
 
-**A `Response` ends the request; nothing lets it through.** A redirect, a
-`401`, a `403` — whatever it returns is the answer, and the guards inside it
-and the page below never run. Returning nothing hands the request on to the
-next guard, and the last one to what answers the URL.
+**A guard ends the request three ways; returning nothing lets it through.**
+`redirect(url)` answers with a `303` to `url`; `notFound()` answers with
+the nearest `not-found.tsx` under a 404, as for a URL nothing answers; and
+a `Response` it returns — a `401`, a `403` — is the answer as it is. Both
+functions throw, so the lines after them never run, and the guards inside it
+and the page below never run either. What the guard wrote before it ended
+the request — a cookie deleted, a header — goes out on the answer. Returning
+nothing hands the request on to the next guard, and the last one to what
+answers the URL. A redirect is `redirect()`, never a `Response` with a
+`location` of your own: the one way an action ends with one too.
 
-A redirect's `location` goes out as the guard wrote it. It is a URL, not a
-pattern in the table's terms like a `redirect.ts` target, so build it with
-`href()`, which carries Vite's `base` when the application is served under
-one. A pathname built some other way gets its base from `withBase()`.
+`redirect()` takes a URL, not a pattern in the table's terms like a
+`redirect.ts` target, so build it with `href()`, which carries Vite's
+`base` when the application is served under one. A pathname built some
+other way gets its base from `withBase()`. A `303` is what a form posted
+without JavaScript needs — the browser follows it with a `GET`, and a
+guard runs before the Server Action a `POST` carries — and for a `GET` it
+is the same as a `307`.
 
 Letting a request through can still add to its answer. `responseHeaders()`
 is the `Headers` the final response will carry, whatever answers — the page,
@@ -69,8 +74,9 @@ rewritten: a page streams, and its headers are on the wire before its body is
 written, so a guard decides before the page starts, never after.
 
 **What a guard covers.** A guard runs before every URL below its directory —
-each page, its payload for a client navigation, a `HEAD`, a Server Action
-posted to it, a `route.ts`, and a `not-found.tsx` below it; the root's also
+each page, its payload for a client navigation (handed to the guard under
+the page's URL, search included, so `new URL(request.url).pathname` is the
+page's either way), a `HEAD`, a Server Action posted to it, a `route.ts`, and a `not-found.tsx` below it; the root's also
 runs for a URL nothing answers. A `redirect.ts` is answered before any guard
 runs: the URL it answers has no page to guard, and the pages below its
 directory are guarded as usual. A guard does not protect a Server Action as
@@ -114,8 +120,10 @@ RFC 6265's token characters throws.
 `delete` takes the `path` and `domain` the cookie was set with
 (`CookieScope`), since those are what a browser keys it by.
 
-A page never writes a cookie: it reads `request.cookies` from its props, the
-cookies the request carried.
+A page never writes a cookie: it reads `request.cookies` from its props —
+the cookies the request carried, with what the guards and a Server Action
+wrote earlier in the same request, so a write is seen by the render that
+answers it.
 
 ## Work after the answer
 
@@ -169,18 +177,28 @@ hands it its own `waitUntil`: [Running the build](deploy.md#running-the-build),
 ## Reading the request
 
 A page and a layout receive `request` beside `params` and `pathname`: the
-headers, and the cookies parsed by name, both read-only.
+headers as they arrived, and the cookies by name — what the request carried,
+with what a guard or a Server Action wrote earlier in the same request —
+both read-only.
 
 ```tsx
 // src/routes/layout.tsx
 import type { LayoutProps } from '@k8ordo/framework';
 
+import { Analytics } from '../components/analytics';
+import { Shell } from '../components/shell';
+import { density } from '../state';
+
 export default function RootLayout({ children, request }: LayoutProps<'/'>) {
-  const theme = request.cookies.get('theme') ?? 'light';
-  const language = request.headers.get('accept-language') ?? 'en';
+  const optedOut = request.headers.get('sec-gpc') === '1';
   return (
-    <html data-theme={theme} lang={language.split(',')[0]}>
-      <body>{children}</body>
+    <html lang="en">
+      <body>
+        <Shell initialCookie={density.parseCookies(request.cookies)}>
+          {children}
+        </Shell>
+        {optedOut ? null : <Analytics />}
+      </body>
     </html>
   );
 }
@@ -192,9 +210,12 @@ export default function RootLayout({ children, request }: LayoutProps<'/'>) {
 takes it as a prop.
 
 A preference kept in a `@k8ordo/state` cookie state renders without a flash
-of the default this way: the layout reads it with
-`parseCookies(request.cookies)` and hands the result to the client component
-as `initialCookie`.
+of the default this way: the layout above reads it with
+`density.parseCookies(request.cookies)` and hands the result to the client
+component as `initialCookie`. A guard, a `route.ts` or a Server Action reads
+it with `density.parseCookies(cookies())`. The header the layout reads is
+Global Privacy Control's `Sec-GPC`, which decides whether the page carries
+an analytics script at all.
 
 Nothing lets a page write to the response — no status, no `Set-Cookie` —
 because a page is a render, and a render that answered the request would be

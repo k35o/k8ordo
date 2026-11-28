@@ -62,13 +62,13 @@ type BaseProps = {
 >;
 
 type ControlledProps = {
-  value: string[];
+  value: readonly string[];
   onChange: (value: string[]) => void;
   defaultValue?: never;
 };
 
 type UncontrolledProps = {
-  defaultValue?: string[];
+  defaultValue?: readonly string[];
   value?: never;
   onChange?: (value: string[]) => void;
 };
@@ -94,11 +94,13 @@ export const Autocomplete: FC<Props> = ({
   ...rest
 }) => {
   const messages = getMessages();
-  const [currentValue, handleChange] = useControllableState({
-    value,
-    defaultValue: defaultValue ?? [],
-    onChange,
-  });
+  const [currentValue, setCurrentValue] = useControllableState<
+    readonly string[]
+  >({ value, defaultValue: defaultValue ?? [] });
+  const handleChange = (next: string[]) => {
+    setCurrentValue(next);
+    onChange?.(next);
+  };
   const baseId = useId();
   const listboxId = `${baseId}-listbox`;
   const optionId = (index: number) => `${baseId}-option-${String(index)}`;
@@ -261,7 +263,7 @@ export const Autocomplete: FC<Props> = ({
         onReset={() => {
           reset();
           if (value === undefined) {
-            handleChange(defaultValue ?? []);
+            handleChange([...(defaultValue ?? [])]);
           }
         }}
         required={required}

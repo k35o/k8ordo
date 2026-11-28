@@ -12,12 +12,13 @@ import {
 import { useState } from 'react';
 
 import * as m from '../../../messages';
+import type { reviewDefinition } from './review-definition';
 
 import styles from './review-demo.module.css';
 
 type Props = {
   /** ページの Server Component が `formFields(reviewDefinition)` で導いたもの。 */
-  fields: FormFields<'decision' | 'reason' | 'aspects', never>;
+  fields: FormFields<typeof reviewDefinition>;
 };
 
 // 静的なサイトで送信先が無いので、送れる値になったところで止めて知らせる
@@ -44,37 +45,33 @@ export function ReviewDemo({ fields }: Props) {
     >
       <FormControl
         errorText={decision.error}
-        invalid={decision.invalid}
         label={m.formRules.demoLabelDecision()}
         renderInput={(props) => (
           <Select
             {...props}
             {...decision.input}
             options={[
-              { value: '', label: m.formRules.demoChoose() },
               { value: 'accept', label: m.formRules.demoAccept() },
               { value: 'reject', label: m.formRules.demoReject() },
             ]}
+            placeholder={m.formRules.demoChoose()}
           />
         )}
         required={decision.required}
       />
       <FormControl
         errorText={reason.error}
-        invalid={reason.invalid}
         label={m.formRules.demoLabelReason()}
         renderInput={(props) => <Textarea {...props} {...reason.input} />}
       />
       <FormControl
         errorText={aspects.error}
-        invalid={aspects.invalid}
         label={m.formRules.demoLabelAspects()}
-        labelAs="legend"
+        labelAs="group"
         renderInput={(props) => (
           <CheckboxCard
             {...props}
             {...aspects.input}
-            defaultValue={[]}
             options={[
               { value: 'content', label: m.formRules.demoAspectContent() },
               { value: 'structure', label: m.formRules.demoAspectStructure() },
@@ -82,6 +79,7 @@ export function ReviewDemo({ fields }: Props) {
             ]}
           />
         )}
+        required={aspects.required}
       />
       <div className={styles.actions}>
         <Button type="submit" variant="solid">

@@ -6,12 +6,13 @@ import { Button, FormControl, TextField } from '@k8ordo/ui';
 import { useState } from 'react';
 
 import * as m from '../../../messages';
+import type { talkSchema } from './talk-schema';
 
 import styles from './talk-demo.module.css';
 
 type Props = {
   /** ページの Server Component が `formFields(talkSchema)` で導いたもの。 */
-  fields: FormFields<'title' | 'eventUrl' | 'minutes', never>;
+  fields: FormFields<typeof talkSchema>;
 };
 
 export function TalkDemo({ fields }: Props) {
@@ -38,7 +39,6 @@ export function TalkDemo({ fields }: Props) {
     >
       <FormControl
         errorText={title.error}
-        invalid={title.invalid}
         label={m.formGetStarted.tryLabelTitle()}
         renderInput={(props) => (
           <TextField {...props} {...title.input} autoComplete="off" />
@@ -47,7 +47,6 @@ export function TalkDemo({ fields }: Props) {
       />
       <FormControl
         errorText={eventUrl.error}
-        invalid={eventUrl.invalid}
         label={m.formGetStarted.tryLabelEventUrl()}
         renderInput={(props) => (
           <TextField {...props} {...eventUrl.input} autoComplete="off" />
@@ -56,7 +55,6 @@ export function TalkDemo({ fields }: Props) {
       />
       <FormControl
         errorText={minutes.error}
-        invalid={minutes.invalid}
         label={m.formGetStarted.tryLabelMinutes()}
         renderInput={(props) => <TextField {...props} {...minutes.input} />}
         required={minutes.required}

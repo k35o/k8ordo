@@ -7,7 +7,7 @@ import type { FC, KeyboardEvent, PropsWithChildren } from 'react';
 import { mergeRefs } from '../../../helpers';
 import { ChevronIcon } from '../../icons/chevron';
 import { useCanHover, useHoverIntent, useListNavigation } from '../_internal';
-import { Popover } from '../popover';
+import { PopoverBase } from '../popover';
 import { useOpenContext, usePopoverContext } from '../popover/hooks';
 import { MenuContextProvider, useMenuContext } from './hooks';
 import { itemClass, panelClass } from './shared';
@@ -32,11 +32,11 @@ export type SubMenuProps = PropsWithChildren<{
 export const SubMenu: FC<SubMenuProps> = ({ label, children }) => {
   const { isOpen: isParentOpen } = useOpenContext();
   return (
-    <Popover.Root placement="right-start" trapFocus={false} role="menu">
+    <PopoverBase.Root placement="right-start" trapFocus={false} role="menu">
       <SubMenuInner isParentOpen={isParentOpen} label={label}>
         {children}
       </SubMenuInner>
-    </Popover.Root>
+    </PopoverBase.Root>
   );
 };
 
@@ -176,7 +176,7 @@ const SubMenuInner: FC<
         <ChevronIcon direction="right" size="sm" />
       </button>
       <MenuContextProvider value={{ ...nav, closeRoot: parentMenu.closeRoot }}>
-        <Popover.Content
+        <PopoverBase.Content
           renderItem={(props) => (
             <div
               {...props}

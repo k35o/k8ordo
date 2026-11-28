@@ -11,6 +11,19 @@ import * as m from '../../../../../messages';
 
 import page from '../../../../../styles/page.module.css';
 
+const FORM_EXAMPLE = `// schema.ts
+export const eventSchema = z.object({ eventDate: z.iso.date() });
+
+// event-form.tsx
+const eventDate = form.field('eventDate');
+
+<FormControl
+  errorText={eventDate.error}
+  label="Date"
+  required={eventDate.required}
+  renderInput={(props) => <TextField {...props} {...eventDate.input} />}
+/>`;
+
 export default function TextFieldPage() {
   return (
     <div className={page.page}>
@@ -85,6 +98,44 @@ export default function TextFieldPage() {
             <TextField placeholder="you@example.com" type="email" />
             <TextField placeholder="090-0000-0000" type="tel" />
           </ComponentPreview>
+        </div>
+
+        <div className={page.stack}>
+          <Heading level="h3">
+            <Rich>{m.components.textField.dateTimeTitle()}</Rich>
+          </Heading>
+          <p className={page.mute}>
+            <Rich>{m.components.textField.dateTimeDescription()}</Rich>
+          </p>
+          <ComponentPreview
+            code={`<TextField
+  aria-label="Date"
+  defaultValue="2026-09-25"
+  max="2026-12-31"
+  min="2026-09-01"
+  type="date"
+/>
+<TextField aria-label="Time" defaultValue="09:30" type="time" />`}
+          >
+            <TextField
+              aria-label="Date"
+              defaultValue="2026-09-25"
+              max="2026-12-31"
+              min="2026-09-01"
+              type="date"
+            />
+            <TextField aria-label="Time" defaultValue="09:30" type="time" />
+          </ComponentPreview>
+        </div>
+
+        <div className={page.stack}>
+          <Heading level="h3">
+            <Rich>{m.components.textField.formTitle()}</Rich>
+          </Heading>
+          <p className={page.mute}>
+            <Rich>{m.components.textField.formDescription()}</Rich>
+          </p>
+          <CodeBlock code={FORM_EXAMPLE} lang="tsx" />
         </div>
 
         <div className={page.stack}>

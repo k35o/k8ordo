@@ -25,6 +25,11 @@ export const configPlugins = message({
   en: 'The plugins `framework()` returns include React’s plugin and the RSC pipeline. You don’t need to add `@vitejs/plugin-react` yourself.',
 });
 
+export const configSite = message({
+  ja: '`site`には、サイトを配信するoriginをパスなしで渡します。staticモードでは必須で、ビルドはこのoriginでページを頼み、`sitemap.xml`も書きます。',
+  en: '`site` is the origin the site is served from, with no path. Static mode requires it: the build asks for the pages under this origin and writes `sitemap.xml` too.',
+});
+
 export const configMode = message({
   ja: "`mode`は省略できません。ここでは`'static'`モードから始めます。サーバーありで動かす`'server'`モードとの違いと選び方は",
   en: "`mode` is required. This guide starts with `'static'`. How it differs from `'server'`, which runs with a server, and how to choose is covered in ",

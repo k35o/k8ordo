@@ -1,6 +1,5 @@
 'use client';
 
-import { clsx } from 'clsx';
 import { useMemo } from 'react';
 import type {
   FC,
@@ -16,7 +15,7 @@ import { createSafeContext } from '../../../helpers';
 import type { Placement } from '../../../types/variables';
 import { useCanHover, useHoverIntent } from '../_internal';
 import type { HoverIntent } from '../_internal';
-import { Popover } from '../popover';
+import { PopoverBase } from '../popover';
 import { usePopoverContext } from '../popover/hooks';
 import { bridgeClass } from './bridge';
 
@@ -101,7 +100,7 @@ export const Root: FC<
   openDelay = 0,
   closeDelay = 150,
 }) => (
-  <Popover.Root
+  <PopoverBase.Root
     closeOnClickAway={false}
     defaultOpen={defaultOpen}
     isOpen={isOpen}
@@ -113,7 +112,7 @@ export const Root: FC<
     <IntentProvider closeDelay={closeDelay} openDelay={openDelay}>
       {children}
     </IntentProvider>
-  </Popover.Root>
+  </PopoverBase.Root>
 );
 
 export const Trigger: FC<{
@@ -125,12 +124,13 @@ export const Content: FC<PropsWithChildren> = ({ children }) => {
   const intent = useTooltipIntent();
 
   return (
-    <Popover.Content
+    <PopoverBase.Content
+      anchoredClassName={bridgeClass(popover.placement)}
       animation="fade"
       renderItem={({ id, ref }) => (
         // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- WCAG 1.4.13 のため tooltip 自身へのホバー/フォーカス中は表示を維持する
         <div
-          className={clsx(styles.content, bridgeClass(popover.placement))}
+          className={styles.content}
           id={id}
           onBlur={popover.onClose}
           onFocus={popover.onOpen}

@@ -11,13 +11,13 @@ export const pureTitle = message({
 });
 
 export const pureRuns = message({
-  ja: '`parseUrl`、`href`、`search`はブラウザのAPIを使いません。Cookieの`parseCookies`と`cookieValue`も同じです。Nodeで動くふつうのテストで確かめられます。',
-  en: '`parseUrl`, `href`, `search`, and a cookie state’s `parseCookies` and `cookieValue` use no browser API. An ordinary test under Node checks them.',
+  ja: '`parseUrl`と`href`はブラウザのAPIを使いません。Cookieの`parseCookies`と`cookie`も同じです。Nodeで動くふつうのテストで確かめられます。',
+  en: '`parseUrl`, `href`, and a cookie state’s `parseCookies` and `cookie` use no browser API. An ordinary test under Node checks them.',
 });
 
 export const pureInput = message({
-  ja: '`parseUrl`には`URLSearchParams`か、フレームワークがページに渡す形のオブジェクトを渡します。`parseCookies`には`Map`で作ったCookieを渡します。',
-  en: '`parseUrl` takes a `URLSearchParams` or a plain object shaped like what a framework hands a page. `parseCookies` takes cookies built as a `Map`.',
+  ja: '`parseUrl`には`URLSearchParams`か、フレームワークがページに渡す形のオブジェクトを渡します。`parseCookies`と`cookie`の2つ目の引数には、`Map`で作ったCookieを渡します。空の`Map`なら、何も保存していない訪問者です。',
+  en: '`parseUrl` takes a `URLSearchParams` or a plain object shaped like what a framework hands a page. `parseCookies`, and `cookie` as its second argument, take cookies built as a `Map`; an empty one is a visitor with nothing saved.',
 });
 
 export const browserTitle = message({
@@ -46,8 +46,8 @@ export const resetTitle = message({
 });
 
 export const resetRegistry = message({
-  ja: 'ストアはProviderの下にはなく、モジュールの中の登録表に残ります。`resetStateRegistry()`で登録表を空にしないと、前のテストの状態が次のテストに持ち越されます。',
-  en: 'Stores live in a registry inside the module, not under a Provider. Unless `resetStateRegistry()` empties it, one test’s state carries into the next.',
+  ja: 'ストアはProviderの下にはなく、モジュールの中の登録表に残ります。`resetStateRegistry()`で登録表を空にしないと、前のテストの状態が次のテストに持ち越されます。`resetStateRegistry()`はテスト用の入り口`@k8ordo/state/testing`から読むので、アプリのバンドルには入りません。',
+  en: 'Stores live in a registry inside the module, not under a Provider. Unless `resetStateRegistry()` empties it, one test’s state carries into the next. It comes from `@k8ordo/state/testing`, the entry for tests, so nothing of it reaches the application’s bundle.',
 });
 
 export const resetStored = message({

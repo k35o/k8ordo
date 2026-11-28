@@ -12,13 +12,21 @@ import {
 } from 'react';
 import type { FocusEvent, Ref, SubmitEvent, SyntheticEvent } from 'react';
 
+import type { ArrayInputsOf, FieldInputsOf } from './paths';
+import type { FormDefinition } from './rules/define-form';
 import { breachOf } from './rules/rules';
+import type { DerivedRule } from './rules/rules';
+import type { ObjectSchema } from './schema/object-schema';
 import type {
+  AnyDerivedArray,
+  AnyFieldInput,
+  ArrayPathOf,
   DerivedField,
   FieldInput,
-  FormFields,
+  FieldsBy,
   FormState,
-  StringCheckboxInput,
+  ItemInputsOf,
+  SchemaOf,
   ValidityFlag,
 } from './types';
 
@@ -37,6 +45,12 @@ const FLAGS: ValidityFlag[] = [
 ];
 
 type Control = HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement;
+
+type Fields = {
+  fields: Record<string, DerivedField<AnyFieldInput>>;
+  arrays: Record<string, AnyDerivedArray>;
+  rules: DerivedRule[];
+};
 
 const isControl = (target: unknown): target is Control =>
   target instanceof HTMLInputElement ||
@@ -73,7 +87,7 @@ const controlNamed = (
  */
 const messageFor = (
   control: Control,
-  field: DerivedField,
+  field: DerivedField<AnyFieldInput>,
 ): string | undefined => {
   const { validity } = control;
   if (validity.valid) {
@@ -90,28 +104,68 @@ const messageFor = (
   return undefined;
 };
 
-export type FieldView<Input extends FieldInput = FieldInput> = {
+export type FieldView<Input = FieldInput> = {
   input: Input;
   error: string | undefined;
   invalid: boolean;
   required: boolean;
 };
 
-export type RowView = {
+/**
+ * One repeated row, named by the schema (or `defineForm` definition) and the
+ * array's path, for a component that takes a whole row:
+ * `{ row: RowView<typeof orderSchema, 'items'> }`.
+ */
+export type RowView<
+  Source extends ObjectSchema | FormDefinition,
+  Path extends ArrayPathOf<Source>,
+> = RowViewBy<ItemInputsOf<Source, Path>>;
+
+type RowViewBy<ItemInputs> = {
   key: string;
   index: number;
-  field: (itemKey?: string) => FieldView;
+  /**
+   * One field of the row, by its path within the item. A row of an array of
+   * scalars is a single field, under `''`, so its key can be left out.
+   */
+  field: [keyof ItemInputs] extends ['']
+    ? (itemKey?: '') => FieldView<ItemInputs[keyof ItemInputs]>
+    : <Key extends keyof ItemInputs & string>(
+        itemKey: Key,
+      ) => FieldView<ItemInputs[Key]>;
   remove: () => void;
 };
 
-export type ArrayView = {
-  rows: RowView[];
+/**
+ * What `form.array()` returns, named by the schema (or `defineForm`
+ * definition) and the array's path: `ArrayView<typeof orderSchema, 'items'>`.
+ */
+export type ArrayView<
+  Source extends ObjectSchema | FormDefinition,
+  Path extends ArrayPathOf<Source>,
+> = ArrayViewBy<ItemInputsOf<Source, Path>>;
+
+type ArrayViewBy<ItemInputs> = {
+  rows: Array<RowViewBy<ItemInputs>>;
   add: () => void;
   canAdd: boolean;
   canRemove: boolean;
   error: string | undefined;
   /** Spread onto the element that shows `error`, so focus can land on it. */
   errorProps: { id: string; tabIndex: -1 };
+};
+
+// ArrayViewBy<Record<string, AnyFieldInput>> では row.field の条件型と比べられず、
+// 返すときの型の付け替え（as）が通らない。キーを文字列で受ける形を別に置く
+type UntypedArrayView = Omit<
+  ArrayViewBy<Record<string, AnyFieldInput>>,
+  'rows'
+> & {
+  rows: Array<
+    Omit<RowViewBy<Record<string, AnyFieldInput>>, 'field'> & {
+      field: (itemKey?: string) => FieldView<AnyFieldInput>;
+    }
+  >;
 };
 
 export type FormErrorView = {
@@ -121,11 +175,17 @@ export type FormErrorView = {
   props: { id: string; tabIndex: -1 };
 };
 
-export type UseFormReturn<
-  FieldPath extends string = string,
-  ArrayPath extends string = string,
-  StringCheckboxPath extends string = never,
-> = {
+/**
+ * What `useForm` returns for the fields `formFields` derived from a schema or
+ * a `defineForm` definition: `UseFormReturn<typeof talkSchema>`.
+ */
+export type UseFormReturn<Source extends ObjectSchema | FormDefinition> =
+  UseFormReturnBy<
+    FieldInputsOf<SchemaOf<Source>>,
+    ArrayInputsOf<SchemaOf<Source>>
+  >;
+
+type UseFormReturnBy<Inputs, Arrays> = {
   props: {
     onBlur: (event: FocusEvent<HTMLFormElement>) => void;
     onInput: (event: SyntheticEvent<HTMLFormElement>) => void;
@@ -133,11 +193,12 @@ export type UseFormReturn<
     onSubmit: (event: SubmitEvent<HTMLFormElement>) => void;
     ref: Ref<HTMLFormElement>;
   };
-  field: {
-    (path: StringCheckboxPath): FieldView<StringCheckboxInput>;
-    (path: FieldPath): FieldView;
-  };
-  array: (path: ArrayPath) => ArrayView;
+  field: <Path extends keyof Inputs & string>(
+    path: Path,
+  ) => FieldView<Inputs[Path]>;
+  array: <Path extends keyof Arrays & string>(
+    path: Path,
+  ) => ArrayViewBy<Arrays[Path]>;
   formError: FormErrorView;
   /** True once any field differs from the value it was rendered with. */
   isDirty: boolean;
@@ -150,7 +211,7 @@ export type UseFormReturn<
 };
 
 const rowCountsFor = (
-  fields: FormFields,
+  fields: Fields,
   state: FormState,
 ): Record<string, number> => {
   const counts: Record<string, number> = {};
@@ -206,7 +267,7 @@ type Notes = {
 const blankNotes = (
   result: string,
   arrived: boolean,
-  fields: FormFields,
+  fields: Fields,
   state: FormState,
   rowKeys?: Record<string, string[]>,
 ): Notes => {
@@ -290,15 +351,11 @@ const shiftSet = (
  * identity of each repeated row, one dirty flag, and the row counts adding or
  * removing a row is measured against.
  */
-export const useForm = <
-  FieldPath extends string,
-  ArrayPath extends string,
-  StringCheckboxPath extends string = never,
->(
-  fields: FormFields<FieldPath, ArrayPath, StringCheckboxPath>,
+export const useForm = <Inputs, Arrays>(
+  fields: FieldsBy<Inputs, Arrays>,
   state: FormState = {},
-): UseFormReturn<FieldPath, ArrayPath, StringCheckboxPath> => {
-  const lookup = fields as FormFields<string, string, string>;
+): UseFormReturnBy<Inputs, Arrays> => {
+  const lookup = fields as Fields;
   const formRef = useRef<HTMLFormElement>(null);
   const nextKey = useRef(0);
   // Messages applyRules wrote, so it never erases one it does not own — an
@@ -526,15 +583,19 @@ export const useForm = <
 
   const viewOf = useCallback(
     (
-      field: DerivedField<StringCheckboxInput>,
+      field: DerivedField<AnyFieldInput>,
       name: string,
-    ): FieldView<StringCheckboxInput> => {
+    ): FieldView<AnyFieldInput> => {
       const serverError = edited.has(name) ? undefined : state.errors?.[name];
       const error = clientErrors[name] ?? serverError;
       const value = state.values?.[name];
-      const input: StringCheckboxInput = { ...field.input, name };
+      const input: AnyFieldInput = { ...field.input, name };
 
-      if (field.input.type === 'checkbox') {
+      if (field.group !== undefined) {
+        if (value !== undefined) {
+          input.defaultValue = [value].flat();
+        }
+      } else if (field.input.type === 'checkbox') {
         // An unchecked box is simply absent from the echo, so presence is the
         // whole answer — defaultValue would only set the value attribute.
         if (state.values !== undefined) {
@@ -543,25 +604,26 @@ export const useForm = <
       } else if (typeof value === 'string') {
         input.defaultValue = value;
       }
-      // An array echo (a checkbox group) has no single defaultValue; the
-      // caller restores it per option from state.values.
 
       return {
         input,
         error,
         invalid: error !== undefined,
-        required: field.input.required ?? false,
+        required:
+          field.group === undefined
+            ? (field.input.required ?? false)
+            : (field.group.minItems ?? 0) >= 1,
       };
     },
     [clientErrors, edited, state],
   );
 
   const field = useCallback(
-    (path: string): FieldView<StringCheckboxInput> => {
+    (path: string): FieldView<AnyFieldInput> => {
       const derived = lookup.fields[path];
       if (derived === undefined) {
         throw new Error(
-          `[@k8ordo/form] スキーマに '${path}' がありません。繰り返しの中の欄なら array('...') を使ってください。`,
+          `useForm: the schema has no field '${path}'; reach a field inside repeated rows through array()`,
         );
       }
       return viewOf(derived, derived.input.name);
@@ -570,12 +632,10 @@ export const useForm = <
   );
 
   const array = useCallback(
-    (path: ArrayPath): ArrayView => {
+    (path: string): UntypedArrayView => {
       const derived = lookup.arrays[path];
       if (derived === undefined) {
-        throw new Error(
-          `[@k8ordo/form] スキーマに配列 '${path}' がありません。`,
-        );
+        throw new Error(`useForm: the schema has no array '${path}'`);
       }
       const keys = rowKeys[path] ?? [];
 
@@ -607,7 +667,7 @@ export const useForm = <
             const item = derived.item[itemKey];
             if (item === undefined) {
               throw new Error(
-                `[@k8ordo/form] 配列 '${path}' に '${itemKey}' がありません。`,
+                `useForm: array '${path}' has no field '${itemKey}' in its rows`,
               );
             }
             return viewOf(item, item.input.name.replace(INDEX, String(index)));
@@ -666,8 +726,10 @@ export const useForm = <
 
   return {
     props,
-    field,
-    array,
+    // 欄ごとの input の型はスキーマの型から決まり、実行時の表からは導けない。
+    // formFields が同じスキーマから両方を作っているので、ここで型を付け替える
+    field: field as UseFormReturnBy<Inputs, Arrays>['field'],
+    array: array as UseFormReturnBy<Inputs, Arrays>['array'],
     formError,
     isDirty: domDirty || structuralDirty,
     revalidate,
@@ -727,7 +789,7 @@ const firstFailed = (
  */
 const messagesIn = (
   form: HTMLFormElement,
-  fields: FormFields,
+  fields: Fields,
 ): Record<string, string> => {
   const messages: Record<string, string> = {};
   for (const element of form.elements) {
@@ -750,9 +812,9 @@ const messagesIn = (
 
 /** Look up the derived field for a submitted name, row index included. */
 const fieldFor = (
-  fields: FormFields,
+  fields: Fields,
   name: string,
-): DerivedField | undefined => {
+): DerivedField<AnyFieldInput> | undefined => {
   const direct = fields.fields[name];
   if (direct !== undefined) {
     return direct;
@@ -779,7 +841,7 @@ const fieldFor = (
  */
 const applyRules = (
   form: HTMLFormElement | null,
-  rules: FormFields['rules'],
+  rules: Fields['rules'],
   owned: Map<string, string>,
 ): void => {
   if (form === null) {
@@ -821,7 +883,7 @@ const applyRules = (
 
 const writeEchoToSelects = (
   form: HTMLFormElement | null,
-  fields: FormFields,
+  fields: Fields,
   values: FormState['values'],
 ): void => {
   if (form === null || values === undefined) {

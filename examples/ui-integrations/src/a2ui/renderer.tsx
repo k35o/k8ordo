@@ -8,26 +8,16 @@ import type {
   MessageProcessor,
   SurfaceModel,
 } from '@a2ui/web_core';
-import { catalog as k8ordo } from '@k8ordo/ui/catalog';
-import type { CatalogName } from '@k8ordo/ui/catalog';
-import { renderers } from '@k8ordo/ui/catalog/render';
+import { catalog as k8ordo, isCatalogName } from '@k8ordo/ui/catalog';
+import type { AnyCatalogEntry, CatalogName } from '@k8ordo/ui/catalog';
+import { rendererOf } from '@k8ordo/ui/catalog/render';
 import { Fragment, useCallback, useSyncExternalStore } from 'react';
-import type { ComponentProps, FC, ReactNode } from 'react';
+import type { ComponentProps, FC } from 'react';
 
+import { parseCatalogProps, Unparsed } from '../catalog-props';
 import { catalogDocument } from './catalog';
 
-// 部品ごとの型は catalog が持つので、ここでは名前で引いた 1 つの形として扱う
-type AnyRenderer = (args: {
-  props: Record<string, unknown>;
-  children: readonly ReactNode[];
-  value?: unknown;
-  setValue?: (next: unknown) => void;
-}) => ReactNode;
-type Entry = {
-  props: { shape: Record<string, unknown> };
-  children?: true;
-  value?: { prop: string; initial: (props: unknown) => unknown };
-};
+type Handler = () => void | Promise<void>;
 type ChildRef = string | { id: string; basePath: string };
 type View = FC<ReactA2uiComponentProps<Record<string, unknown>>>;
 type Implementation = ReturnType<typeof createComponentImplementation>;
@@ -45,13 +35,28 @@ const setterOf = (prop: string): string =>
   `set${prop.charAt(0).toUpperCase()}${prop.slice(1)}`;
 
 const viewOf = (name: CatalogName): View => {
-  const render = renderers[name] as AnyRenderer;
-  const entry = k8ordo[name] as Entry;
+  const render = rendererOf(name);
+  const entry: AnyCatalogEntry = k8ordo[name];
   const keys = Object.keys(entry.props.shape);
+  const events = Object.keys(entry.events ?? {});
 
   const View: View = ({ props, buildChild }) => {
-    const own = Object.fromEntries(
-      keys.filter((key) => key in props).map((key) => [key, props[key]]),
+    const parsed = parseCatalogProps(
+      name,
+      Object.fromEntries(
+        keys.filter((key) => key in props).map((key) => [key, props[key]]),
+      ),
+      entry.value?.prop,
+    );
+    if (!parsed.success) {
+      return <Unparsed issues={parsed.issues} />;
+    }
+    const own = parsed.props;
+    const on = Object.fromEntries(
+      events.flatMap((event) => {
+        const action = props[event];
+        return typeof action === 'function' ? [[event, action as Handler]] : [];
+      }),
     );
     const children =
       entry.children === true
@@ -66,13 +71,14 @@ const viewOf = (name: CatalogName): View => {
           )
         : [];
     if (entry.value === undefined) {
-      return render({ props: own, children });
+      return render({ props: own, children, on });
     }
-    const { prop, initial } = entry.value;
+    const { prop } = entry.value;
     return render({
       props: own,
       children,
-      value: own[prop] ?? initial(own),
+      on,
+      value: props[prop] ?? entry.value.initial(own),
       setValue: props[setterOf(prop)] as (next: unknown) => void,
     });
   };
@@ -87,18 +93,17 @@ const schemas = Catalog.fromJson(catalogDocument);
  */
 export const a2uiCatalog = schemas.withEntries(
   toWebCore(
-    [...schemas.components.values()].map((api) =>
-      createComponentImplementation(api, viewOf(api.name as CatalogName)),
+    [...schemas.components.values()].flatMap((api) =>
+      isCatalogName(api.name)
+        ? [createComponentImplementation(api, viewOf(api.name))]
+        : [],
     ),
   ),
   [],
 );
 
-/** Draws every surface the processor holds, as the agent creates and deletes them. */
-export const A2uiSurfaces: FC<{ processor: MessageProcessor }> = ({
-  processor,
-}) => {
-  const subscribe = useCallback(
+const useSurfaceChanges = (processor: MessageProcessor) =>
+  useCallback(
     (onChange: () => void) => {
       const created = processor.onSurfaceCreated(onChange);
       const deleted = processor.onSurfaceDeleted(onChange);
@@ -109,7 +114,28 @@ export const A2uiSurfaces: FC<{ processor: MessageProcessor }> = ({
     },
     [processor],
   );
-  const surfaces = useSyncExternalStore(subscribe, () => surfacesOf(processor));
+
+/** Draws the surface `surfaceId` of the processor, from when the agent creates it until it deletes it. */
+export const A2uiSurfaceOf: FC<{
+  processor: MessageProcessor;
+  surfaceId: string;
+}> = ({ processor, surfaceId }) => {
+  const surface = useSyncExternalStore(
+    useSurfaceChanges(processor),
+    () => processor.model.surfacesMap.get(surfaceId) ?? null,
+  );
+  return surface === null ? null : (
+    <A2uiSurface surface={toReactSurface(surface)} />
+  );
+};
+
+/** Draws every surface the processor holds, as the agent creates and deletes them. */
+export const A2uiSurfaces: FC<{ processor: MessageProcessor }> = ({
+  processor,
+}) => {
+  const surfaces = useSyncExternalStore(useSurfaceChanges(processor), () =>
+    surfacesOf(processor),
+  );
   return surfaces.map((surface) => (
     <A2uiSurface
       key={`${String(idOf(processor))}:${surface.id}`}

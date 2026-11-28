@@ -100,21 +100,6 @@ export const pathnameFix = message({
   en: 'Use it under `<Router>` or in a page the framework renders. In a host of your own built on `useInterceptedNavigation`, provide the pathname being rendered through `<PathnameProvider>`.',
 });
 
-export const optionsTitle = message({
-  ja: '`bindParams`の`navigateTo`で効かない`history`',
-  en: '`history` ignored on a bound `navigateTo`',
-});
-
-export const optionsCause = message({
-  ja: 'パターンにparamがあると、2つ目の引数はいつも`params`として読まれます。`bindParams`がすべてのparamを渡していても同じなので、2つ目に渡した`history`は無視されます。',
-  en: 'When the pattern has a parameter, the second argument is always read as `params`. This holds even when `bindParams` supplies every parameter, so a `history` passed second is ignored.',
-});
-
-export const optionsFix = message({
-  ja: '2つ目に`undefined`を渡し、オプションは3つ目に渡します。TypeScriptでは、2つ目に書いたオプションは型エラーになります。',
-  en: 'Pass `undefined` second and the options third. In TypeScript, options in second place are a type error.',
-});
-
 export const earlyTitle = message({
   ja: 'ページより先に変わるアクティブなリンク',
   en: 'Active link that changes before the page',
@@ -126,8 +111,8 @@ export const earlyCause = message({
 });
 
 export const earlyFix = message({
-  ja: '読み込み中を見せたいときは、`usePendingPathname`で読み込み中のパスを読みます。自分で始めたナビゲーションなら、`navigateTo`の`finished`を待ちます。',
-  en: 'To show that a page is loading, read the pending pathname with `usePendingPathname`. For a navigation you started, await `navigateTo`’s `finished`.',
+  ja: '読み込み中を見せたいときは、`usePendingPathname`で読み込み中のパスを読みます。自分で始めたナビゲーションなら、`navigation.navigate()`が返した`finished`を待ちます。',
+  en: 'To show that a page is loading, read the pending pathname with `usePendingPathname`. For a navigation you started, await the `finished` that `navigation.navigate()` returned.',
 });
 
 export const lazyTitle = message({

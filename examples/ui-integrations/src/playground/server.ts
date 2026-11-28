@@ -6,12 +6,13 @@ import { catalogRules } from '@k8ordo/ui/catalog';
 import { prompt as a2uiPrompt } from '../a2ui/prompt';
 import { catalog as jsonRenderCatalog } from '../json-render/catalog';
 import { prompt as openuiPrompt } from '../openui/prompt';
+import { readJson } from '../read-json';
 import { parseGenerateRequest } from './request';
 import type { Format, GenerateEvent } from './request';
 
 const MODEL = 'claude-opus-5-5';
 
-const systemPromptOf = (format: Format): string => {
+const formatPromptOf = (format: Format): string => {
   switch (format) {
     case 'a2ui':
       return a2uiPrompt();
@@ -22,17 +23,22 @@ const systemPromptOf = (format: Format): string => {
   }
 };
 
-const readJson = async (request: IncomingMessage): Promise<unknown> => {
-  const chunks: Buffer[] = [];
-  for await (const chunk of request) {
-    chunks.push(chunk as Buffer);
-  }
-  try {
-    return JSON.parse(Buffer.concat(chunks).toString('utf8'));
-  } catch {
-    return undefined;
-  }
-};
+const UPDATE_RULES = {
+  a2ui: 'answer with updateDataModel and updateComponents messages for the surface you already created; do not send createSurface again. A component sent again with the same id replaces it.',
+  'json-render':
+    'answer with JSON Patch lines applied on top of the spec you already wrote: add or replace only the elements and state that change.',
+  openui:
+    'answer with only the statements to add or replace; a statement with the name of an existing one replaces it.',
+} as const satisfies Record<Format, string>;
+
+const systemPromptOf = (format: Format): string =>
+  [
+    formatPromptOf(format),
+    '',
+    `Later user messages report what the user did on the UI you wrote: the action, and the state of every field. To change the UI in response, ${
+      UPDATE_RULES[format]
+    }`,
+  ].join('\n');
 
 const messageOf = (error: unknown): string => {
   if (error instanceof Anthropic.AuthenticationError) {
@@ -85,7 +91,7 @@ export const handleGenerate = async (
           cache_control: { type: 'ephemeral' },
         },
       ],
-      messages: [{ role: 'user', content: parsed.prompt }],
+      messages: parsed.messages,
     });
     for await (const event of stream) {
       if (

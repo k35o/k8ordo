@@ -106,7 +106,7 @@ const browserSegment = (): string => browserPathname().split('/')[1] ?? '';
  * segment in the URL, no request in progress, a segment that is not one of
  * the set's (`/fr/…`), or no set defined in this environment to tell.
  */
-export const namedLocale = (): string | null => {
+const namedLocale = (): string | null => {
   const set = global[SET_KEY];
   if (set === undefined) return null;
   const named = inBrowser ? browserSegment() : localeStorage()?.getStore();
@@ -114,17 +114,14 @@ export const namedLocale = (): string | null => {
   return named;
 };
 
-/** The registered default, when a set registered in this environment. */
-export const registeredDefault = (): string | null =>
-  global[SET_KEY]?.default ?? null;
-
 /**
  * The current locale as the application's set resolves it — the one named,
  * else the set's default — or `null` when no set is defined in this
- * environment. For a library rendering inside an application it does not
- * know (`@k8ordo/ui`'s built-in text): an application that never defined a
- * set has no locale, whatever its URL happens to start with, so the server
- * and the browser both answer `null` and agree.
+ * environment. A message refuses the `null`; a library rendering inside an
+ * application it does not know (`@k8ordo/ui`'s built-in text) takes it as
+ * no locale: an application that never defined a set has none, whatever its
+ * URL happens to start with, so the server and the browser both answer
+ * `null` and agree.
  */
 export const currentLocale = (): RegisteredLocale | null => {
   const set = global[SET_KEY];

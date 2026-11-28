@@ -37,47 +37,92 @@ import { renderers } from '@k8ordo/ui/catalog/render';
 - `description`: what the component is, for the model.
 - `props`: a zod object of the props the model writes.
 - `children: true`: the component lays out children of its own (`Stack`,
-  `Card`, `Modal`, …). Absent for every other component.
+  `Card`, `Dialog`, …). Absent for every other component.
 - `value`: present on a field. `value.prop` is the prop that carries the value
   the field starts from (`defaultValue`, `defaultChecked`, or `defaultPage`), and
   `value.initial(props)` is what it starts from when nothing is bound to it.
+- `events`: present on a component the user acts on in a way the application
+  should hear about. It maps each event's name to a description for the model.
+  `Button`, `IconButton`, `Card`, and `DropdownMenuItem` have one, `press`.
 
 ```ts
 catalog.TextField;
 // {
-//   description: 'Single-line text input.',
-//   props: z.object({ name, placeholder, defaultValue, … }),
+//   description: 'Single-line text input. type picks the kind of value: …',
+//   props: z.object({ name, label, placeholder, … }),
 //   value: { prop: 'defaultValue', initial: (props) => props.defaultValue ?? '' },
 // }
 ```
 
 The types follow the table: `CatalogName` is the union of the names,
-`CatalogProps<'Button'>` the props of one component, and `CatalogValueOf<'Slider'>`
-the value of one field (`never` for a component that is not a field).
+`CatalogProps<'Button'>` the props of one component, `CatalogValueOf<'Slider'>`
+the value of one field (`never` for a component that is not a field), and
+`CatalogEventOf<'Card'>` the events of one component (`never` for none).
 
 The key order of every `props` schema is part of the contract. A format with
 positional arguments (OpenUI Lang) maps the arguments back to props by that
-order, so keys are only ever appended.
+order, so an optional key is only ever appended. A new required key breaks every
+saved string of its entry anyway, so it goes where it reads best: a field's
+`label` comes right after its `name`.
+
+Some entries' `props` also check props against each other (see
+[Checking what a model wrote](#checking-what-a-model-wrote)). zod keeps such a
+check only on the schema it was written on: `.omit()`, `.pick()`, and
+`.partial()` throw on these entries, and `.extend()` throws when it replaces a
+key, so a glue that derives a schema from one uses `.safeExtend()`. The checks
+do not reach JSON Schema either (`z.toJSONSchema` leaves them out): only a zod
+parse, or `catalogPropIssues`, applies them.
 
 ## Drawing
 
-`renderers` has the same names as `catalog`. Call one with the props the format
-resolved and the children it drew — one node per child, keyed; `Children.toArray`
-keys them. A field also takes its value and a setter, so the format decides
-where the value lives: in its own state, or in the component's.
+`renderers` has the same names as `catalog`. Call one with props that fit the
+entry's schema (see below) and the children the format drew — one node per
+child, keyed; `Children.toArray` keys them. A component without children takes
+none. A field also takes its value and a setter, so the format decides
+where the value lives: in its own state, or in the component's. A component
+with events takes `on`, the handler of each event the model bound. Leave an
+event out of `on` when the model bound nothing to it: an unbound `Card` is not
+pressable, and an unbound button presses to no effect. A handler may return a
+promise; the button or card is busy until it settles.
 
 ```tsx
 'use client';
 import { renderers } from '@k8ordo/ui/catalog/render';
 
-renderers.Button({ props: { label: 'Save' }, children: [] });
+renderers.Button({
+  props: { label: 'Save' },
+  on: { press: () => sendToAgent('save') },
+});
 renderers.TextField({
-  props: { name: 'title' },
-  children: [],
+  props: { name: 'title', label: 'Title' },
   value,
   setValue,
 });
 ```
+
+The props a renderer takes are values that fit the entry's `props` schema, with
+no `null`: a prop the model left out is absent or `undefined`. A renderer does
+not tidy up what a format wrote; the glue does, before it calls one. It drops
+every `null` key, nested ones included (OpenUI Lang, for one, writes an omitted
+positional argument as `null`), parses the rest with the entry's `props`
+schema, and hands the renderer what the parse returns. A format's own
+validation is not enough: JSON Schema leaves zod's own checks out, and OpenUI
+does not check `pattern`. An element whose props do not parse is drawn as
+nothing; while a spec streams in, it appears once they do. That includes an
+element with an unknown key inside an object nested in its props (a `Table`
+column, an `Accordion` item, an option): the schema refuses the key. An
+unknown prop at the top of the props is dropped instead, and the element is
+drawn without it. A field's value bound to the format's state is left out of
+the parse, since the user, not the model, wrote it.
+
+`Form` submits nothing, not even on Enter in a field: a submission is the press
+of a `Button` inside it. A `Button` or `Card` with `href` is a link and reports
+no press.
+
+Draw the generated UI inside your application's `ToastProvider`, the one its own
+`useToast` reads. A `Toast` opens its toast there, in the same region, under the
+same limit, as the application's own. Outside one, drawing a `Toast` fails with
+`useToast`'s error.
 
 ## Connecting a format
 
@@ -90,11 +135,49 @@ The glue for a format does three things, each by mapping over `catalog`:
 2. **Bind** each field: read the format's state at `value.prop` (json-render's
    `$bindState`, OpenUI's form state by `name`, A2UI's `{"@path": ...}` into
    the data model), starting from `value.initial(props)` when nothing is bound.
-3. **Draw** each component through `renderers`.
+   Bind each of `events` to the format's own action — A2UI's `action` prop,
+   json-render's `on`, an OpenUI action prop — and hand the bound ones to the
+   renderer as `on`. What an action does then (report to the agent, or change
+   the format's own state) is the format's.
+3. **Draw** each component through `renderers`: drop the `null` keys, parse
+   the rest with the entry's `props` schema, and hand the renderer what the
+   parse returns. Draw nothing for an element that fails (see
+   [Drawing](#drawing)).
 
 Since no step names a component, a component added to `@k8ordo/ui` reaches
 every format without a change to the glue, and a new format is one new piece of
 glue.
+
+The glue knows a component's name only at run time, where each entry's own
+types are of no use. `@k8ordo/ui/catalog` and `@k8ordo/ui/catalog/render`
+each export a view with those types erased, so the glue needs no cast: every
+entry of `catalog` is assignable to `AnyCatalogEntry`, whose `value.initial`
+takes any props, and `rendererOf(name)` returns the renderer as an
+`AnyRenderer`, which takes `AnyRenderArgs` — the parsed props as
+`Record<string, unknown>`, and a field's value and setter as `unknown`. A name
+the format hands over as a string becomes a `CatalogName` through
+`isCatalogName(name)`, and `catalogNames` lists every entry's name, so building
+a format's registry needs no cast either.
+
+```tsx
+'use client';
+import { catalog } from '@k8ordo/ui/catalog';
+import type { AnyCatalogEntry, CatalogName } from '@k8ordo/ui/catalog';
+import { rendererOf } from '@k8ordo/ui/catalog/render';
+import type { AnyRenderArgs } from '@k8ordo/ui/catalog/render';
+
+// args.props: what the format resolved, its null keys dropped
+const draw = (name: CatalogName, args: AnyRenderArgs) => {
+  const entry: AnyCatalogEntry = catalog[name];
+  const parsed = entry.props.safeParse(args.props);
+  if (!parsed.success) return null;
+  return rendererOf(name)({
+    ...args,
+    props: parsed.data,
+    value: args.value ?? entry.value?.initial(parsed.data),
+  });
+};
+```
 
 The repository keeps working glue for A2UI 1.0, json-render, OpenUI, and the AI SDK in
 [`examples/ui-integrations`](https://github.com/k35o/k8ordo/tree/main/examples/ui-integrations),
@@ -148,18 +231,69 @@ catalogPropIssues('Anchor', {
 
 Unknown props are reported too. zod drops a key the schema does not know rather
 than failing, so a prop the model invented would otherwise pass and render as if
-it were not there. Run it on every element of a spec, after the format's own
-structural check, and send the issues back as a repair prompt.
+it were not there. An object nested in the props — a `Table` column, an
+`Accordion` item, an option — refuses a key it does not know, and the issue
+names the path of that object:
+
+```ts
+catalogPropIssues('Table', {
+  columns: [{ label: 'Name' }, { label: 'Qty', width: 80 }],
+  rows: [['Apple', '3']],
+});
+// ['Table.columns.1: Unknown prop "width". Allowed props: label, align.']
+```
+
+Run it on every element of a spec, after the format's own structural check,
+and send the issues back as a repair prompt.
+
+Props are also checked against each other, each issue under the path it is at
+and in the same round as the other issues of the component, as long as the
+props the check reads are valid themselves. Every row of a `Table` or
+`DataTable` must have as many cells as there are columns. A `TextField` whose
+`type` is a date or time kind takes a `defaultValue` in the input format of
+that kind, as `DatePicker` does: a real calendar day as `YYYY-MM-DD` for
+`date`, `HH:MM` or `HH:MM:SS` for `time`, `YYYY-MM-DDTHH:MM` with optional
+seconds for `datetime-local`, `YYYY-MM` for `month`, and `YYYY-Www` for
+`week`. The `defaultValue` of `Select`, `Radio`,
+`RadioCard`, `ListBox`, `CheckboxGroup`, and `CheckboxCard` must be the `value`
+of one of its `options` (each entry of it, for the two that take an array):
+
+```ts
+catalogPropIssues('Table', {
+  caption: 3,
+  columns: [{ label: 'Name' }, { label: 'Qty' }],
+  rows: [['Apple', '3'], ['Orange']],
+});
+// [
+//   'Table.caption: Invalid input: expected string, received number',
+//   'Table.rows.1: Expected 2 cells (one per column), received 1',
+// ]
+
+catalogPropIssues('CheckboxGroup', {
+  name: 'tags',
+  label: 'Tags',
+  options: [
+    { value: 'news', label: 'News' },
+    { value: 'blog', label: 'Blog' },
+  ],
+  defaultValue: ['news', 'Blog'],
+});
+// ['CheckboxGroup.defaultValue.1: Expected the value of an option ("news" | "blog"), received "Blog"']
+```
 
 A prop the format resolves later, such as one a json-render spec binds with
 `{ "$bindState": "/form/name" }`, cannot be checked as a value yet. Name it in
 `unresolved`: its name is still checked, its value is not, and a required one
-is not reported missing.
+is not reported missing. A check across props that needs it is not made.
 
 ```ts
 catalogPropIssues(
   'TextField',
-  { name: 'nickname', defaultValue: { $bindState: '/form/nickname' } },
+  {
+    name: 'nickname',
+    label: 'Nickname',
+    defaultValue: { $bindState: '/form/nickname' },
+  },
   { unresolved: ['defaultValue'] },
 );
 // []
@@ -191,19 +325,56 @@ prompt({
 
 ## What the catalog covers
 
+The entries, under the category of the component each one draws. An entry that
+is no exported component of its own is under Catalog only.
+
+<!-- generated:catalog-entries -->
+
+- **Buttons**: `Button`, `IconButton`, `CopyButton`, `Toolbar`
+- **Navigation**: `Anchor`, `Breadcrumb`, `Pagination`, `Stepper`, `SideNav`,
+  `Tabs`
+- **Forms**: `Form`, `TextField`, `Textarea`, `PasswordInput`, `NumberField`,
+  `Slider`, `RangeSlider`, `DatePicker`, `Calendar`, `ColorPicker`, `Combobox`,
+  `Checkbox`, `Switch`, `Select`, `Radio`, `RadioCard`, `CheckboxCard`,
+  `CheckboxGroup`, `Autocomplete`, `FileField`
+- **Data display**: `Card`, `Carousel`, `Badge`, `Heading`, `Avatar`, `Code`,
+  `Kbd`, `Accordion`, `Table`, `DataTable`, `Tree`
+- **Feedback**: `EmptyState`, `Alert`, `Callout`, `Spinner`, `Progress`,
+  `Skeleton`
+- **Overlays**: `Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`,
+  `ListBox`
+- **Layout**: `Stack`, `Grid`, `Separator`
+- **Catalog only**: `Icon`, `DropdownMenuItem`, `Toast`
+
+<!-- /generated:catalog-entries -->
+
 Most entries are the exported component of the same name. A few are shaped for a
 model instead:
 
 - **Icons** are one `Icon` entry whose `name` picks the glyph. Every icon in
   `@k8ordo/ui/icons` that needs nothing but a size is there, under its name in
   kebab-case without the suffix: `eye-closed` is `EyeClosedIcon`. `ChevronIcon`
-  has an entry of its own, and `AlertIcon` is the `StatusIcon` entry.
-- **Toasts** are a `Toast` entry, standing in for `ToastProvider` and
-  `useToast`: a self-contained widget whose `triggerLabel` button shows the
-  toast.
-- **Overlays** (`Modal`, `Dialog`, `Drawer`, `Popover`, `Tooltip`,
-  `DropdownMenu`) are self-contained widgets too. Each declares its own trigger
-  with `triggerLabel` and handles opening and closing itself.
+  and `AlertIcon` are not there by name: each draws one of the icons above,
+  picked by `direction` or `status`, so a spec names that icon instead
+  (`chevron-down`, `circle-check`).
+- **Fields** each take a required `label` and an optional `helpText`, and are
+  drawn through `FormControl`'s `renderInput`. The label is a `<label for>`
+  tied to the input, or, for a group (`Radio`, `RadioCard`, `CheckboxGroup`,
+  `CheckboxCard`, `RangeSlider`, `FileField`), the heading the group is named
+  by (`labelAs="group"`). The help text sits under the field and describes it.
+  `Checkbox` and `Switch` are not wrapped in `FormControl`: their `label` is
+  their own, and they draw `helpText` themselves. `ListBox` is a button that
+  opens a list, and its required `label` names the button.
+- **Toasts** are a `Toast` entry, standing in for `useToast`: a widget whose
+  `triggerLabel` button opens the toast through your application's
+  `ToastProvider` (see [Drawing](#drawing)).
+- **Overlays** (`Dialog`, `Drawer`, `Popover`, `Tooltip`, `DropdownMenu`) are
+  self-contained widgets. Each declares its own trigger with `triggerLabel` and
+  handles opening and closing itself. `Dialog` opens in the center or along the
+  bottom edge and `Drawer` along the left or right one, each by its `side`, as
+  the components do. The items of a `DropdownMenu` are its children, each a
+  `DropdownMenuItem` with its own `press`, so the menu needs no event of its
+  own to say which item was chosen.
 - **Compound components** (`Tabs`, `Accordion`, `Table`, `Breadcrumb`, …) are
   one entry each, with their parts flattened into data such as
   `tabs: [{ label, content }]`. `Carousel` is one container entry whose
@@ -221,12 +392,6 @@ These exports are left out on purpose, so a model cannot place them:
 - `ContextMenu` — it opens on a right-click, which nothing on screen invites,
   so actions put in it would be hidden in a generated UI. It belongs on your
   application's own content (a file, a row).
-- `InView`, `Resize` — they report to a callback and draw nothing of their own,
-  and a spec has no code to receive the report.
-- `UIProvider` — your application mounts it once, around the generated UI as
-  well.
-- `PortalRootProvider`, `usePortalRoot` — wiring for your own `createPortal`
-  calls. The generated overlays open their own surfaces.
 - `Conversation`, `Message`, `PromptInput`, `Reasoning`, `Suggestion`,
   `ToolInvocation`, `Attachment`, and `Source` from `@k8ordo/ui/ai`, and
   `Response` from
@@ -249,17 +414,20 @@ These exports are left out on purpose, so a model cannot place them:
   lay a flow out with `Stack`.
 - `BaseIcon` — the base your own icons are drawn on. It has no glyph of its
   own, and a spec picks a glyph by `name`.
+- `FormControl` — every field in the catalog takes its own `label` and
+  `helpText` and is drawn through `FormControl` already (see
+  [What the catalog covers](#what-the-catalog-covers)). An entry for the frame
+  alone would be a second way to write the same field.
 - `TableOfContents` — it points at the ids of the document's headings and
   follows the scroll. The headings a spec places carry no id, so there would be
   nothing to point at.
 
 ## Exports at a glance
 
-| Export                      | Kind           | Contents                                                                                                 |
-| --------------------------- | -------------- | -------------------------------------------------------------------------------------------------------- |
-| `@k8ordo/ui/catalog`        | server-safe    | `catalog`, `catalogRules`, `catalogPropIssues`, types (`CatalogName`, `CatalogProps`, `CatalogEntry`, …) |
-| `@k8ordo/ui/catalog/render` | `'use client'` | `renderers`, types (`RenderArgs`, `Renderer`)                                                            |
+| Export                      | Kind           | Contents                                                                                                                                                     |
+| --------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `@k8ordo/ui/catalog`        | server-safe    | `catalog`, `catalogNames`, `isCatalogName`, `catalogRules`, `catalogPropIssues`, types (`CatalogName`, `CatalogProps`, `CatalogEntry`, `AnyCatalogEntry`, …) |
+| `@k8ordo/ui/catalog/render` | `'use client'` | `renderers`, `rendererOf`, types (`RenderArgs`, `Renderer`, `AnyRenderArgs`, `AnyRenderer`)                                                                  |
 
 > The drawn components assume you have loaded `@k8ordo/ui/styles.css` (or
-> `@k8ordo/ui/tailwind.css` after Tailwind, in a Tailwind CSS 4 project) and
-> wrapped the tree in `UIProvider`.
+> `@k8ordo/ui/tailwind.css` after Tailwind, in a Tailwind CSS 4 project).

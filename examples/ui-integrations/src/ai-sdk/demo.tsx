@@ -13,8 +13,6 @@ import { BotMessageIcon } from '@k8ordo/ui/icons';
 import { lastAssistantMessageIsCompleteWithApprovalResponses } from 'ai';
 import type { UIMessage } from 'ai';
 
-import { validateGeneratedSpec } from '../json-render/catalog';
-import { JsonRenderUI } from '../json-render/registry';
 import { mapMessageParts } from './map-parts';
 import { scriptedTransport } from './scripted-transport';
 
@@ -83,13 +81,6 @@ function ChatMessage({ message, chat }: { message: UIMessage; chat: Chat }) {
             />
           );
         }
-        if (part.kind === 'data' && part.name === 'ui') {
-          // data パーツの中身はモデルが作ったもの。描く前に検証する
-          const result = validateGeneratedSpec(part.data);
-          return result.ok ? (
-            <JsonRenderUI key={key} spec={result.spec} />
-          ) : null;
-        }
         // 添付と出典は、それぞれ 1 つのリストにまとめて上下に置く
         return null;
       })}
@@ -109,7 +100,7 @@ function ChatMessage({ message, chat }: { message: UIMessage; chat: Chat }) {
           <Message.Copy value={text} />
           <Message.Regenerate
             disabled={isBusy}
-            onAction={() => chat.regenerate({ messageId: message.id })}
+            action={() => chat.regenerate({ messageId: message.id })}
           />
           <Message.Feedback />
         </Message.Actions>

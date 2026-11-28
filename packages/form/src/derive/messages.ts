@@ -1,7 +1,7 @@
+import { safeParse } from 'zod/v4/core';
 import type { $ZodType } from 'zod/v4/core';
 
-import { asProbe } from '../schema/object-schema';
-import type { FieldInput, ValidityFlag } from '../types';
+import type { AnyFieldInput, ValidityFlag } from '../types';
 
 /**
  * A value chosen to make one specific check fail, paired with the zod issue
@@ -18,7 +18,7 @@ type Probe = {
 const repeat = (length: number): string => 'a'.repeat(Math.max(length, 0));
 
 const probesFor = (
-  input: FieldInput,
+  input: AnyFieldInput,
   required: boolean,
   emptySubmission: unknown,
 ): Probe[] => {
@@ -115,14 +115,14 @@ const probesFor = (
  */
 export const messagesFor = (
   schema: $ZodType,
-  input: FieldInput,
+  input: AnyFieldInput,
   required: boolean,
   emptySubmission: unknown,
 ): Partial<Record<ValidityFlag, string>> => {
   const messages: Partial<Record<ValidityFlag, string>> = {};
 
   for (const probe of probesFor(input, required, emptySubmission)) {
-    const result = asProbe(schema).safeParse(probe.value);
+    const result = safeParse(schema, probe.value);
     if (result.success) {
       continue;
     }

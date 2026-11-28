@@ -250,11 +250,6 @@ export const nonGuaranteeRefine = message({
   en: 'A `.refine()` on a single field, a nested object or a row is not listed in `dropped`.',
 });
 
-export const nonGuaranteeNumberField = message({
-  ja: '`@k8ordo/ui`の`NumberField`が出す範囲のエラーは、zodの文言ではありません。',
-  en: 'The range message from `@k8ordo/ui`’s `NumberField` is not zod’s wording.',
-});
-
 export const nonGuaranteeFile = message({
   ja: '選んだファイルは、送信に失敗すると入力欄に戻りません。',
   en: 'A chosen file does not come back into its control after a failed submission.',

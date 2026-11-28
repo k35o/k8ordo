@@ -106,6 +106,9 @@ export default function RouterLocationPage() {
         <p>
           <Rich>{t.sectionMatchPath()}</Rich>
         </p>
+        <p>
+          <Rich>{t.sectionServer()}</Rich>
+        </p>
       </DocSection>
 
       <Playground

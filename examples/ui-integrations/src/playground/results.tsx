@@ -6,56 +6,72 @@ import {
   Renderer as JsonRenderRenderer,
   useStateStore,
 } from '@json-render/react';
+import { mergeStatements } from '@openuidev/lang-core';
 import { Renderer as OpenUiRenderer } from '@openuidev/react-lang';
 import type { OpenUIError } from '@openuidev/react-lang';
-import { useCallback, useMemo, useState, useSyncExternalStore } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useEffectEvent,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
+import type { RefObject } from 'react';
 
 import { A2uiSurfaces, a2uiCatalog } from '../a2ui/renderer';
-import { validateGeneratedSpec } from '../json-render/catalog';
+import { UnparsedContext } from '../catalog-props';
+import type { UnparsedListener } from '../catalog-props';
+import { TO_ASSISTANT, validateGeneratedSpec } from '../json-render/catalog';
 import { JsonRenderProvider, registry } from '../json-render/registry';
 import { library } from '../openui/library';
 import { Panes } from './panes';
-import type { Phase } from './panes';
-import type { Format } from './request';
+import type { LogEntry, Phase } from './panes';
+import type { Format, Turn } from './request';
 
-type Stream = {
+type Base = {
   id: number;
-  text: string;
+  turns: readonly Turn[];
+  reply: string;
   isStreaming: boolean;
   error: string | null;
   notice: string | null;
 };
 
-export type Output = Stream &
+export type Session = Base &
   (
     | { format: 'a2ui'; processor: MessageProcessor; issues: readonly string[] }
     | { format: 'json-render' | 'openui' }
   );
 
-let generations = 0;
+export type Report = (action: unknown, state: unknown) => void;
 
-export const startOutput = (format: Format, notice: string | null): Output => {
-  generations += 1;
-  const stream = {
-    id: generations,
-    text: '',
+let sessions = 0;
+
+export const startSession = (format: Format, prompt: string): Session => {
+  sessions += 1;
+  const base: Base = {
+    id: sessions,
+    turns: [{ role: 'user', content: prompt }],
+    reply: '',
     isStreaming: true,
     error: null,
-    notice,
+    notice: null,
   };
   return format === 'a2ui'
     ? {
-        ...stream,
+        ...base,
         format,
         processor: new MessageProcessor([a2uiCatalog]),
         issues: [],
       }
-    : { ...stream, format };
+    : { ...base, format };
 };
 
-export const withA2uiLines = (output: Output, lines: string[]): Output => {
-  if (output.format !== 'a2ui' || lines.length === 0) {
-    return output;
+export const withA2uiLines = (session: Session, lines: string[]): Session => {
+  if (session.format !== 'a2ui' || lines.length === 0) {
+    return session;
   }
   const issues = lines.flatMap((line) => {
     let message: unknown;
@@ -64,17 +80,75 @@ export const withA2uiLines = (output: Output, lines: string[]): Output => {
     } catch {
       return [`JSON として読めない行: ${line.slice(0, 80)}`];
     }
-    return output.processor
+    return session.processor
       .processMessagesWithErrors(message)
       .map(({ error }) => `${error.code}: ${error.message}`);
   });
-  return { ...output, issues: [...output.issues, ...issues] };
+  return { ...session, issues: [...session.issues, ...issues] };
 };
 
-const phaseOf = (output: Output): Phase =>
-  output.isStreaming ? 'streaming' : 'done';
+const repliesOf = (session: Session): string[] => [
+  ...session.turns
+    .filter((turn) => turn.role === 'assistant')
+    .map((turn) => turn.content),
+  session.reply,
+];
+
+const logOf = (session: Session): LogEntry[] => [
+  ...session.turns.map((turn, index) => ({
+    label:
+      turn.role === 'assistant'
+        ? 'Claude'
+        : index === 0
+          ? '頼みごと'
+          : '返した操作',
+    text: turn.content,
+  })),
+  ...(session.reply === ''
+    ? []
+    : [
+        {
+          label: session.isStreaming ? 'Claude（書いています）' : 'Claude',
+          text: session.reply,
+        },
+      ]),
+];
+
+const phaseOf = (session: Session): Phase =>
+  session.isStreaming ? 'streaming' : 'done';
 
 const show = (value: unknown): string => JSON.stringify(value, null, 2);
+
+const useUnparsed = (): [readonly string[], UnparsedListener] => {
+  const [unparsed, setUnparsed] = useState<
+    ReadonlyMap<string, readonly string[]>
+  >(new Map());
+  const listen = useCallback<UnparsedListener>((key, issues) => {
+    setUnparsed((current) => {
+      if (
+        (current.get(key)?.join('\n') ?? null) === (issues?.join('\n') ?? null)
+      ) {
+        return current;
+      }
+      const next = new Map(current);
+      if (issues === null) {
+        next.delete(key);
+      } else {
+        next.set(key, issues);
+      }
+      return next;
+    });
+  }, []);
+  return [[...unparsed.values()].flat(), listen];
+};
+
+const dataModelsOf = (processor: MessageProcessor): Record<string, unknown> =>
+  Object.fromEntries(
+    [...processor.model.surfacesMap].map(([id, surface]) => [
+      id,
+      surface.dataModel.get('/') ?? {},
+    ]),
+  );
 
 const useDataModels = (processor: MessageProcessor): string => {
   const subscribe = useCallback(
@@ -105,132 +179,218 @@ const useDataModels = (processor: MessageProcessor): string => {
     },
     [processor],
   );
-  return useSyncExternalStore(subscribe, () =>
-    show(
-      Object.fromEntries(
-        [...processor.model.surfacesMap].map(([id, surface]) => [
-          id,
-          surface.dataModel.get('/') ?? {},
-        ]),
-      ),
-    ),
-  );
+  return useSyncExternalStore(subscribe, () => show(dataModelsOf(processor)));
 };
 
 function A2uiResult({
-  output,
+  session,
+  onReport,
 }: {
-  output: Extract<Output, { format: 'a2ui' }>;
+  session: Extract<Session, { format: 'a2ui' }>;
+  onReport: Report;
 }) {
-  const state = useDataModels(output.processor);
+  const { processor } = session;
+  const state = useDataModels(processor);
+  const [unparsed, listen] = useUnparsed();
+  const report = useEffectEvent((action: unknown) => {
+    onReport(action, dataModelsOf(processor));
+  });
+  useEffect(() => {
+    const subscription = processor.model.onAction.subscribe((payload) => {
+      report({
+        name: payload.name,
+        sourceComponentId: payload.sourceComponentId,
+        context: payload.context,
+      });
+    });
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [processor]);
+
   return (
     <Panes
       format="a2ui"
-      issues={output.issues}
-      phase={phaseOf(output)}
+      issues={
+        session.isStreaming ? session.issues : [...session.issues, ...unparsed]
+      }
+      log={logOf(session)}
+      phase={phaseOf(session)}
       state={state}
-      text={output.text}
-      view={<A2uiSurfaces processor={output.processor} />}
+      view={
+        <UnparsedContext value={listen}>
+          <A2uiSurfaces processor={processor} />
+        </UnparsedContext>
+      }
     />
   );
 }
 
 function JsonRenderPanes({
-  output,
+  session,
   spec,
+  stateRef,
 }: {
-  output: Output;
+  session: Session;
   spec: Spec | null;
+  stateRef: RefObject<unknown>;
 }) {
   const { state } = useStateStore();
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state, stateRef]);
+  const [unparsed, listen] = useUnparsed();
   const issues = useMemo(() => {
-    if (output.isStreaming) {
+    if (session.isStreaming) {
       return [];
     }
     if (spec === null) {
       return ['spec を組み立てられる行がありません。'];
     }
     const result = validateGeneratedSpec(spec);
-    return result.ok
+    const checked = result.ok
       ? []
       : result.issues.map((issue) =>
           issue.elementKey === undefined
             ? issue.message
             : `[${issue.elementKey}] ${issue.message}`,
         );
-  }, [spec, output.isStreaming]);
+    // validateGeneratedSpec は $state などの式を描く前の形のまま通すので、
+    // 解いた値が合わずに描かなかった要素はこちらにしか出ない
+    return [
+      ...checked,
+      ...unparsed.filter(
+        (issue) => !checked.some((line) => line.endsWith(issue)),
+      ),
+    ];
+  }, [spec, session.isStreaming, unparsed]);
 
   return (
     <Panes
       format="json-render"
       issues={issues}
-      phase={phaseOf(output)}
+      log={logOf(session)}
+      phase={phaseOf(session)}
       state={show(state)}
-      text={output.text}
       view={
-        <JsonRenderRenderer
-          loading={output.isStreaming}
-          registry={registry}
-          spec={spec}
-        />
+        <UnparsedContext value={listen}>
+          <JsonRenderRenderer
+            loading={session.isStreaming}
+            registry={registry}
+            spec={spec}
+          />
+        </UnparsedContext>
       }
     />
   );
 }
 
-function JsonRenderResult({ output }: { output: Output }) {
+function JsonRenderResult({
+  session,
+  onReport,
+}: {
+  session: Session;
+  onReport: Report;
+}) {
+  const source = repliesOf(session).join('\n');
   const spec = useMemo(() => {
     const compiler = createSpecStreamCompiler<Spec>();
-    compiler.push(output.text);
+    compiler.push(source);
     const result = compiler.getResult();
     return isNonEmptySpec(result) ? result : null;
-  }, [output.text]);
+  }, [source]);
+  const stateRef = useRef<unknown>({});
 
   return (
-    <JsonRenderProvider spec={spec}>
-      <JsonRenderPanes output={output} spec={spec} />
+    <JsonRenderProvider
+      onToAssistant={(params) => {
+        onReport({ action: TO_ASSISTANT, params }, stateRef.current);
+      }}
+      spec={spec}
+    >
+      <JsonRenderPanes session={session} spec={spec} stateRef={stateRef} />
     </JsonRenderProvider>
   );
 }
 
-function OpenUiResult({ output }: { output: Output }) {
+const mergedProgramOf = (replies: readonly string[]): string =>
+  replies.reduce(
+    (program, reply) =>
+      reply.trim() === ''
+        ? program
+        : program === ''
+          ? reply
+          : mergeStatements(program, reply),
+    '',
+  );
+
+function OpenUiResult({
+  session,
+  onReport,
+}: {
+  session: Session;
+  onReport: Report;
+}) {
   const [state, setState] = useState<Record<string, unknown>>({});
   const [errors, setErrors] = useState<readonly OpenUIError[]>([]);
-  const issues = output.isStreaming
+  const [unparsed, listen] = useUnparsed();
+  const program = mergedProgramOf(repliesOf(session));
+  const issues = session.isStreaming
     ? []
-    : errors.map((error) =>
-        error.statementId === undefined
-          ? error.message
-          : `[${error.statementId}] ${error.message}`,
-      );
+    : [
+        ...errors.map((error) =>
+          error.statementId === undefined
+            ? error.message
+            : `[${error.statementId}] ${error.message}`,
+        ),
+        ...unparsed,
+      ];
 
   return (
     <Panes
       format="openui"
       issues={issues}
-      phase={phaseOf(output)}
+      log={logOf(session)}
+      phase={phaseOf(session)}
       state={show(state)}
-      text={output.text}
       view={
-        <OpenUiRenderer
-          isStreaming={output.isStreaming}
-          library={library}
-          onError={setErrors}
-          onStateUpdate={setState}
-          response={output.text}
-        />
+        <UnparsedContext value={listen}>
+          <OpenUiRenderer
+            isStreaming={session.isStreaming}
+            library={library}
+            onAction={(event) => {
+              onReport(
+                {
+                  type: event.type,
+                  params: event.params,
+                  humanFriendlyMessage: event.humanFriendlyMessage,
+                },
+                event.formState ?? state,
+              );
+            }}
+            onError={setErrors}
+            onStateUpdate={setState}
+            response={program}
+          />
+        </UnparsedContext>
       }
     />
   );
 }
 
-export function Result({ output }: { output: Output }) {
-  switch (output.format) {
+export function Result({
+  session,
+  onReport,
+}: {
+  session: Session;
+  onReport: Report;
+}) {
+  switch (session.format) {
     case 'a2ui':
-      return <A2uiResult output={output} />;
+      return <A2uiResult onReport={onReport} session={session} />;
     case 'json-render':
-      return <JsonRenderResult output={output} />;
+      return <JsonRenderResult onReport={onReport} session={session} />;
     case 'openui':
-      return <OpenUiResult output={output} />;
+      return <OpenUiResult onReport={onReport} session={session} />;
   }
 }

@@ -21,8 +21,8 @@ export const see = message({
 });
 
 export const basicSpread = message({
-  ja: '`FormControl`には`label`と`errorText`、`invalid`、`required`だけを渡します。`id`と`aria-*`の結び付けは`FormControl`が作ります。`input`は`FormControl`から受け取ったpropsのあとに展開します。取り除いておく属性はありません。`TextField`は日付や時刻の`type`でも、その`type`の入力欄として描画します。`Textarea`は`<textarea>`に無い`type`を捨てます。',
-  en: 'Give `FormControl` only `label`, `errorText`, `invalid` and `required`; it creates the `id` and the `aria-*` links itself. Spread `input` after the props `FormControl` hands over, with nothing taken out first. `TextField` renders the date and time types as well, and `Textarea` drops the `type` a `<textarea>` does not have.',
+  ja: '`FormControl`には`label`と`errorText`、`required`だけを渡します。`errorText`が空でなければ、その欄を不正な値として扱います。`id`と`aria-*`の結び付けは`FormControl`が作ります。`input`は`FormControl`から受け取ったpropsのあとに展開します。取り除いておく属性はありません。`@k8ordo/form`はネイティブの要素が受け取る属性だけを出します。ただの文字列の欄には`type`を付けず、`min`と`max`は数で出します。`TextField`は日付や時刻の`type`でも、その`type`の入力欄として描画します。ただの文字列の欄は、そのまま`Textarea`に展開できます。',
+  en: 'Give `FormControl` only `label`, `errorText` and `required`. A non-empty `errorText` marks the field invalid, and `FormControl` creates the `id` and the `aria-*` links itself. Spread `input` after the props `FormControl` hands over, with nothing taken out first. `@k8ordo/form` writes only attributes the native element takes: no `type` on a plain string field, and `min` and `max` as numbers. `TextField` renders the date and time types as well, and a plain string field spreads onto `Textarea` as it is.',
 });
 
 export const basicDom = message({
@@ -41,8 +41,8 @@ export const mapLead = message({
 });
 
 export const mapText = message({
-  ja: '`z.string()`と`z.email()`、`z.url()`、`z.iso.*()`：`TextField`か`Textarea`。ほかに渡すものはありません。',
-  en: '`z.string()`, `z.email()`, `z.url()`, `z.iso.*()`: `TextField` or `Textarea`, with nothing else to pass.',
+  ja: '`z.string()`と`z.email()`、`z.url()`、`z.iso.*()`：`TextField`。ほかに渡すものはありません。`Textarea`に展開できるのは、`type`の付かない`z.string()`だけです。',
+  en: '`z.string()`, `z.email()`, `z.url()`, `z.iso.*()`: `TextField`, with nothing else to pass. Only `z.string()`, which derives no `type`, spreads onto `Textarea` too.',
 });
 
 export const mapPassword = message({
@@ -51,28 +51,28 @@ export const mapPassword = message({
 });
 
 export const mapNumber = message({
-  ja: '`z.coerce.number()`：`NumberField`か`Slider`。文字列の`min`、`max`、`step="any"`もそのまま受け取ります。',
-  en: '`z.coerce.number()`: `NumberField` or `Slider`. They accept string `min`, `max` and `step="any"`.',
+  ja: '`z.coerce.number()`：`NumberField`か`Slider`。`step="any"`と、文字列で戻る`defaultValue`もそのまま受け取ります。',
+  en: '`z.coerce.number()`: `NumberField` or `Slider`. They take `step="any"` and the `defaultValue` echoed as a string.',
 });
 
 export const mapEnum = message({
-  ja: '`z.enum([…])`：`Select`、`Radio`、`RadioCard`。`options`を渡し、ラジオボタンでは`FormControl`に`labelAs="legend"`を付けます。',
-  en: '`z.enum([…])`: `Select`, `Radio` or `RadioCard`. Pass `options`, and `labelAs="legend"` on `FormControl` for radios.',
+  ja: '`z.enum([…])`：`Select`、`Radio`、`RadioCard`。`options`を渡し、ラジオボタンでは`FormControl`に`labelAs="group"`を付けます。',
+  en: '`z.enum([…])`: `Select`, `Radio` or `RadioCard`. Pass `options`, and `labelAs="group"` on `FormControl` for radios.',
 });
 
 export const mapBoolean = message({
-  ja: '`z.boolean()`、`z.literal(true)`：`Checkbox`か`Switch`。`label`を渡し、`FormControl`は使いません。',
-  en: '`z.boolean()`, `z.literal(true)`: `Checkbox` or `Switch`. Pass a `label`; they need no `FormControl`.',
+  ja: '`z.boolean()`、`z.literal(true)`、`z.stringbool()`：`Checkbox`か`Switch`。`label`と`errorText`を渡し、`FormControl`は使いません。エラーの文は`Checkbox`と`Switch`が自分で表示します。`z.stringbool()`の`input`に入る`value`も、そのまま`<input>`に渡ります。',
+  en: '`z.boolean()`, `z.literal(true)`, `z.stringbool()`: `Checkbox` or `Switch`. Pass `label` and `errorText`; they need no `FormControl` and draw the error text themselves. The `value` in a `z.stringbool()` field’s `input` reaches the `<input>` as well.',
 });
 
 export const mapGroup = message({
-  ja: '`z.array(z.enum([…]))`：`CheckboxGroup.Root`、`CheckboxCard`、`Autocomplete`。`defaultValue`を渡します。',
-  en: '`z.array(z.enum([…]))`: `CheckboxGroup.Root`, `CheckboxCard` or `Autocomplete`. Pass `defaultValue`.',
+  ja: '`z.array(z.enum([…]))`：`CheckboxGroup`、`CheckboxCard`、`Autocomplete`。`options`を渡し、`CheckboxGroup`と`CheckboxCard`では`FormControl`に`labelAs="group"`を付けます。',
+  en: '`z.array(z.enum([…]))`: `CheckboxGroup`, `CheckboxCard` or `Autocomplete`. Pass `options`, and `labelAs="group"` on `FormControl` for `CheckboxGroup` and `CheckboxCard`.',
 });
 
 export const mapFile = message({
-  ja: '`z.file()`：`FileField.Root`。`FileField.Trigger`と`FileField.ItemList`を中に置きます。',
-  en: '`z.file()`: `FileField.Root`, with a `FileField.Trigger` and a `FileField.ItemList` inside.',
+  ja: '`z.file()`：`FileField.Root`。`FileField.Trigger`と`FileField.ItemList`を中に置き、`FormControl`には`labelAs="group"`を付けます。',
+  en: '`z.file()`: `FileField.Root`, with a `FileField.Trigger` and a `FileField.ItemList` inside, and `labelAs="group"` on `FormControl`.',
 });
 
 export const choiceTitle = message({
@@ -81,8 +81,8 @@ export const choiceTitle = message({
 });
 
 export const choiceGroup = message({
-  ja: 'チェックボックスの集まりの値は、送信後に`state.values`へ配列で入ります。`input`には`name`しか入っていないので、この配列を`defaultValue`で渡します。`minChecked`は`Autocomplete`にも効きます。`Autocomplete`は、何も選んでいなくても残る隠れた`<select multiple>`で値を送り、エラーはこの要素に付きます。失敗したあとのフォーカスは、この要素から入力欄へ移ります。',
-  en: 'A checkbox group’s value comes back in `state.values` as an array. `input` carries only the `name`, so pass that array as `defaultValue`. `minChecked` applies to `Autocomplete` too. It submits through a hidden `<select multiple>` that stays even with nothing selected, and the error is attached to that element. Focus sent there after a failure moves on to the text input.',
+  ja: 'チェックボックスの集まりでは、送信後にチェックされていた値が`input.defaultValue`へ配列で入ります。`CheckboxGroup`、`CheckboxCard`、`Autocomplete`は`defaultValue`に配列を受け取るので、`input`を展開するだけで戻ります。スキーマの`.min()`と`.max()`から導く個数のルールは、`Autocomplete`にも効きます。`Autocomplete`は、何も選んでいなくても残る隠れた`<select multiple>`で値を送り、エラーはこの要素に付きます。失敗したあとのフォーカスは、この要素から入力欄へ移ります。',
+  en: 'For a checkbox group, what was checked comes back on `input.defaultValue` as an array after a submission. `CheckboxGroup`, `CheckboxCard` and `Autocomplete` take an array as `defaultValue`, so spreading `input` restores it. The count rule derived from the schema’s `.min()` and `.max()` applies to `Autocomplete` too. It submits through a hidden `<select multiple>` that stays even with nothing selected, and the error is attached to that element. Focus sent there after a failure moves on to the text input.',
 });
 
 export const choiceRadio = message({
@@ -91,8 +91,8 @@ export const choiceRadio = message({
 });
 
 export const choiceSelect = message({
-  ja: "`Select`で`required`を効かせるには、`options`の先頭に`{ value: '', label: '…' }`を置きます。空の選択肢が無い`<select>`は、いつもどれかが選ばれています。",
-  en: "For `required` to take effect on a `Select`, put `{ value: '', label: '…' }` first in `options`. A `<select>` without an empty option always has a choice selected.",
+  ja: '`Select`で`required`を効かせるには、`placeholder`を渡します。空の選択肢が無い`<select>`は、いつもどれかが選ばれているからです。`placeholder`は値が空文字の選択肢を先頭に置きます。`parseForm`はこの値を未選択として読むので、必須のenumではエラーになり、任意のenumでは`undefined`になります。',
+  en: 'For `required` to take effect on a `Select`, pass `placeholder`: a `<select>` without an empty option always has a choice selected. `placeholder` puts an option whose value is the empty string first, and `parseForm` reads that as no choice, so a required enum reports it and an optional one parses to `undefined`.',
 });
 
 export const exceptionsTitle = message({
@@ -100,14 +100,9 @@ export const exceptionsTitle = message({
   en: 'Caveats',
 });
 
-export const exceptionStringbool = message({
-  ja: '`z.stringbool()`のフィールドに`Checkbox`を使うと、展開した`value`が`<input>`に渡らず、ブラウザの既定の`on`が送られます。`z.stringbool()`は初期設定のままなら`on`を`true`と読みます。`truthy`を変えると、送られた`on`はスキーマに合わない値になります。`@k8ordo/state`がURLに書く値とも一致しません。このフィールドは`<input {...field.input} />`で直接描画してください。',
-  en: 'A spread `value` does not reach the `<input>` inside `Checkbox`, so a `z.stringbool()` field drawn with it submits the browser’s `on`. An unconfigured `z.stringbool()` reads `on` as `true`. With a custom `truthy`, the submitted `on` no longer fits the schema, and it differs from the value `@k8ordo/state` writes to the URL. Render that field as a plain `<input {...field.input} />`.',
-});
-
 export const exceptionNumber = message({
-  ja: '`NumberField`は値の整形と増減のために`type="text"`で描画します。そのためブラウザは`min`と`max`を確かめません。範囲の外の値は`NumberField`自身が`setCustomValidity`で知らせます。その文言は`@k8ordo/ui`の辞書のもので、zodの文言とは別です。クライアントの文言がzodとそろわないのは、ここだけです。',
-  en: '`NumberField` renders `type="text"` so it can format and step the value, and the browser does not check `min` and `max` on a text input. `NumberField` reports an out-of-range value itself with `setCustomValidity`. That message comes from `@k8ordo/ui`’s dictionary, not from zod. This is the only place the client’s text is not zod’s own.',
+  ja: '`NumberField`は値の整形と増減のために`type="text"`で描画します。そのためブラウザは`min`と`max`を確かめません。範囲の外の値は、フォーカスを外したときと`Enter`を押したときに`NumberField`が範囲に収めます。範囲の外の値がそのまま送られるのは、JavaScriptが無いときだけです。そのときはサーバーがzodの文言でエラーを返します。',
+  en: '`NumberField` renders `type="text"` so it can format and step the value, and the browser does not check `min` and `max` on a text input. Instead, `NumberField` clamps an out-of-range value into range when the field is left and when `Enter` is pressed in it. An out-of-range value is submitted only without JavaScript, and then the server returns zod’s message.',
 });
 
 export const exceptionTextarea = message({

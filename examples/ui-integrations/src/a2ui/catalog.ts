@@ -1,5 +1,9 @@
-import { catalog as k8ordo, catalogRules } from '@k8ordo/ui/catalog';
-import type { CatalogName } from '@k8ordo/ui/catalog';
+import {
+  catalog as k8ordo,
+  catalogNames,
+  catalogRules,
+} from '@k8ordo/ui/catalog';
+import type { AnyCatalogEntry, CatalogName } from '@k8ordo/ui/catalog';
 import { z } from 'zod';
 
 /** The A2UI catalog ID of `@k8ordo/ui`. A2UI needs it to be unique, not to resolve. */
@@ -34,12 +38,7 @@ const dynamicTypeOf = (field: JsonSchema | undefined): string => {
 };
 
 const componentOf = (name: CatalogName) => {
-  const entry = k8ordo[name] as {
-    description: string;
-    props: z.ZodObject;
-    children?: true;
-    value?: { prop: string };
-  };
+  const entry: AnyCatalogEntry = k8ordo[name];
   const json = z.toJSONSchema(entry.props, { io: 'input' }) as JsonSchema;
   const properties: Record<string, unknown> = {
     component: { const: name },
@@ -65,6 +64,12 @@ const componentOf = (name: CatalogName) => {
     };
     required.add('children');
   }
+  for (const [event, description] of Object.entries(entry.events ?? {})) {
+    properties[event] = {
+      $ref: `${COMMON_TYPES}/Action`,
+      description: `${description} To report it to the assistant, set it to {"event": {"name": "...", "context": {...}}}.`,
+    };
+  }
 
   return {
     type: 'object',
@@ -73,8 +78,6 @@ const componentOf = (name: CatalogName) => {
     required: [...required],
   };
 };
-
-const NAMES = Object.keys(k8ordo) as CatalogName[];
 
 /**
  * The A2UI 1.0 catalog document of `@k8ordo/ui`, built from
@@ -92,15 +95,16 @@ export const catalogDocument = {
   instructions: [
     'Build the surface from these components only. Lay them out with Stack and Grid.',
     'Bind the value of every field to the data model with {"@path": "/..."}, and give the values it starts from with updateDataModel.',
+    'A component that the user acts on has a property per event (press). Leave it out when nothing should happen; set it to an event to report what the user did, with context values read from the data model by {"@path": "/..."}.',
     ...catalogRules,
   ].join('\n'),
   components: Object.fromEntries(
-    NAMES.map((name) => [name, componentOf(name)]),
+    catalogNames.map((name) => [name, componentOf(name)]),
   ),
   functions: {},
   $defs: {
     anyComponent: {
-      oneOf: NAMES.map((name) => ({ $ref: `#/components/${name}` })),
+      oneOf: catalogNames.map((name) => ({ $ref: `#/components/${name}` })),
     },
   },
 };

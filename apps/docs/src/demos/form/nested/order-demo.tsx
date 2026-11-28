@@ -6,12 +6,13 @@ import { Button, Code, FormControl, TextField } from '@k8ordo/ui';
 import { useState } from 'react';
 
 import * as m from '../../../messages';
+import type { orderSchema } from './order-schema';
 
 import styles from './order-demo.module.css';
 
 type Props = {
   /** ページの Server Component が `formFields(orderSchema)` で導いたもの。 */
-  fields: FormFields<never, 'items'>;
+  fields: FormFields<typeof orderSchema>;
 };
 
 // 静的なサイトで送信先が無いので、送れる値になったところで止め、送られる
@@ -51,7 +52,6 @@ export function OrderDemo({ fields }: Props) {
             <div className={styles.name}>
               <FormControl
                 errorText={name.error}
-                invalid={name.invalid}
                 label={m.formNested.demoLabelName()}
                 renderInput={(props) => (
                   <TextField {...props} {...name.input} autoComplete="off" />
@@ -62,7 +62,6 @@ export function OrderDemo({ fields }: Props) {
             <div className={styles.quantity}>
               <FormControl
                 errorText={quantity.error}
-                invalid={quantity.invalid}
                 label={m.formNested.demoLabelQuantity()}
                 renderInput={(props) => (
                   <TextField {...props} {...quantity.input} />
@@ -71,7 +70,7 @@ export function OrderDemo({ fields }: Props) {
               />
             </div>
             {items.canRemove && (
-              <Button color="base" onAction={row.remove} variant="outline">
+              <Button color="base" onClick={row.remove} variant="outline">
                 {m.formNested.demoRemove()}
               </Button>
             )}
@@ -80,7 +79,7 @@ export function OrderDemo({ fields }: Props) {
       })}
       <div className={styles.actions}>
         {items.canAdd && (
-          <Button color="base" onAction={items.add} variant="outline">
+          <Button color="base" onClick={items.add} variant="outline">
             {m.formNested.demoAdd()}
           </Button>
         )}

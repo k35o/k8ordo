@@ -1,8 +1,10 @@
 import { useForm } from '@k8ordo/form';
 import type {
   FieldView,
+  FormDefinition,
   FormFields,
   FormState,
+  ObjectSchema,
   UseFormReturn,
 } from '@k8ordo/form';
 import type { ParseResult } from '@k8ordo/form/server';
@@ -23,24 +25,17 @@ import { Stack } from '../src/components/layout/stack';
  * の送信後の自動リセットも本物と同じ順序で起きる。送信・リセットのボタンと、
  * isDirty を「変更あり」「変更なし」で出す行を持つ。
  */
-export function ActionForm<
-  FieldPath extends string,
-  ArrayPath extends string,
-  StringCheckboxPath extends string = never,
->({
+export function ActionForm<Source extends ObjectSchema | FormDefinition>({
   fields,
   serve,
   onReceive,
   children,
 }: {
-  fields: FormFields<FieldPath, ArrayPath, StringCheckboxPath>;
+  fields: FormFields<Source>;
   serve: (formData: FormData) => ParseResult<unknown>;
   /** サーバーが受け取った値。parseForm が通ったときだけ呼ぶ */
   onReceive?: (data: unknown) => void;
-  children: (
-    form: UseFormReturn<FieldPath, ArrayPath, StringCheckboxPath>,
-    state: FormState,
-  ) => ReactNode;
+  children: (form: UseFormReturn<Source>, state: FormState) => ReactNode;
 }) {
   const [state, action] = useActionState(
     (_previous: FormState, formData: FormData): Promise<FormState> => {
@@ -59,12 +54,7 @@ export function ActionForm<
       {children(form, state)}
       <Stack direction="row" gap="sm">
         <Button type="submit">送信</Button>
-        <Button
-          onClick={(event) => {
-            event.currentTarget.form?.reset();
-          }}
-          variant="outline"
-        >
+        <Button type="reset" variant="outline">
           リセット
         </Button>
       </Stack>
@@ -84,19 +74,11 @@ export const memo = z
 export const MemoField: FC<{ field: FieldView }> = ({ field }) => (
   <FormControl
     errorText={field.error}
-    invalid={field.invalid}
     label="メモ"
     renderInput={(props) => <TextField {...props} {...field.input} />}
     required={field.required}
   />
 );
-
-/**
- * 送信に失敗した echo を配列で受ける部品に渡す。チェックボックスの組は、
- * 何個チェックしても配列で返ってくる。
- */
-export const listOf = (value: string | string[] | undefined): string[] =>
-  Array.isArray(value) ? value : [];
 
 /**
  * 欄の値を打ち直す。storybook/test の userEvent は打った値を要素の側にも覚えて

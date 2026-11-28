@@ -68,12 +68,35 @@ export function Filters({ initialUrl }: FiltersProps) {
   );
 }`;
 
-const REGISTER_PATH = `import type { Route } from 'next';
+const COOKIE_LAYOUT = `import { cookies } from 'next/headers';
 
-declare module '@k8ordo/state' {
-  interface Register {
-    path: Route;
-  }
+import { Shell } from './shell';
+import { density } from './state';
+
+export default async function Layout({
+  children,
+}: LayoutProps<'/'>) {
+  const store = await cookies();
+  const initialCookie = density.parseCookies({
+    get: (name) => store.get(name)?.value,
+  });
+  return <Shell initialCookie={initialCookie}>{children}</Shell>;
+}`;
+
+const COOKIE_ACTION = `'use server';
+
+import { cookies } from 'next/headers';
+
+import { density } from './state';
+
+export async function compact() {
+  const store = await cookies();
+  store.set(
+    ...density.cookie(
+      { density: 'compact' },
+      { get: (name) => store.get(name)?.value },
+    ),
+  );
 }`;
 
 export default function StateNextjsPage() {
@@ -116,21 +139,30 @@ export default function StateNextjsPage() {
         </p>
       </DocSection>
 
-      <DocSection id="typed" title={t.typedTitle}>
+      <DocSection id="cookie" title={t.cookieTitle}>
         <CodeBlock
-          code={REGISTER_PATH}
-          lang="ts"
-          marks={{ 5: 'highlight' }}
-          title="types/k8ordo-state.d.ts"
+          code={COOKIE_LAYOUT}
+          lang="tsx"
+          marks={{ 10: 'highlight', 11: 'highlight', 12: 'highlight' }}
+          title="app/layout.tsx"
         />
         <p>
-          <Rich>{t.typedRegister()}</Rich>
+          <Rich>{t.cookieRead()}</Rich>
         </p>
+        <CodeBlock
+          code={COOKIE_ACTION}
+          lang="ts"
+          marks={{ 10: 'highlight', 11: 'highlight', 12: 'highlight' }}
+          title="app/actions.ts"
+        />
+        <p>
+          <Rich>{t.cookieWrite()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection id="typed" title={t.typedTitle}>
         <p>
           <Rich>{t.typedRoute()}</Rich>
-        </p>
-        <p>
-          <Rich>{t.typedApplication()}</Rich>
         </p>
       </DocSection>
 

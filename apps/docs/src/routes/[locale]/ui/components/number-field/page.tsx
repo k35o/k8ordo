@@ -82,6 +82,9 @@ export default function NumberFieldPage() {
           <Heading level="h3">
             <Rich>{m.components.numberField.minMaxTitle()}</Rich>
           </Heading>
+          <p className={page.mute}>
+            <Rich>{m.components.numberField.minMaxDescription()}</Rich>
+          </p>
           <ComponentPreview
             code={`<NumberField
   disabled={false}

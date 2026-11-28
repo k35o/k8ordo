@@ -85,9 +85,14 @@ export const htmlServer = message({
   en: '`lang` and `dir` have to be right in the HTML the server writes, because crawlers and screen readers read it without waiting for hydration.',
 });
 
-export const htmlNull = message({
-  ja: 'ロケールが設定されていない描画で使うときは、`locales.delocalize(pathname).locale ?? locales.default`でpathnameから読みます。`delocalize`は先頭の区間がロケールでないときに`null`を返すので、既定のロケールは呼ぶ側で補います。',
-  en: 'In a render where no locale is set, read it from the pathname instead: `locales.delocalize(pathname).locale ?? locales.default`. `delocalize` returns `null` when the first segment is not a locale, so the caller supplies the default.',
+export const htmlDefault = message({
+  ja: 'ロケールが設定されていない描画では、`getLocale()`は既定のロケールを返します。そのページの文言も既定のロケールで描かれるので、`<html>`と文言の言語はそろいます。',
+  en: 'In a render where no locale is set, `getLocale()` returns the default locale. The page’s messages render in the default locale too, so `<html>` and the text agree.',
+});
+
+export const htmlStatic404 = message({
+  ja: '静的なホストの`404.html`は、既定のロケールで1回だけ描いたHTMLです。訪問者のロケールに合わせるには、`not-found.tsx`が描くClient Componentのeffectで、`lang`と`dir`を書き直します。',
+  en: 'A static host’s `404.html` is drawn once, in the default locale. To match the visitor’s locale, rewrite `lang` and `dir` from an effect in a Client Component that `not-found.tsx` renders.',
 });
 
 export const baseTitle = message({

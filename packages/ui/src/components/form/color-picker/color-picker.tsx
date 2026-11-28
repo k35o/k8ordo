@@ -39,9 +39,6 @@ export type ColorPickerSwatch = Readonly<{
 type BaseProps = {
   invalid?: boolean;
   swatches?: readonly ColorPickerSwatch[];
-  // @k8ordo/form の formFields は type を導くので受けて捨てる。値を運ぶ欄は
-  // 常に 16 進のテキスト
-  type?: string;
   ref?: Ref<HTMLInputElement>;
 } & Omit<
   InputHTMLAttributes<HTMLInputElement>,
@@ -121,7 +118,6 @@ const Channel: FC<{
 export const ColorPicker: FC<Props> = ({
   invalid = false,
   swatches,
-  type: _type,
   value,
   defaultValue,
   onChange,

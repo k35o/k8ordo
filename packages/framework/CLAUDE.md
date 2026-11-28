@@ -84,14 +84,28 @@ pnpm check         # check:write to auto-fix
   and `serve` loads the same handler compiled for `mode: 'server'`. If a page
   renders differently under the two modes, something has leaked.
 - **`site` and `csp` are static mode's options, in the type and when the
-  config loads.** `FrameworkOptions` is
+  config loads, and `site` is required there.** `FrameworkOptions` is
   `StaticOptions | ServerOptions`, discriminated by `mode`, which has no
   default. `framework()` checks the same at run time, because a
-  `vite.config.js` is never type-checked and neither mistake fails on its
-  own: a mode other than `'static'` would build no files, and a `csp` under
-  `mode: 'server'` would be a policy nobody serves. A `paths` passed in
-  either mode throws too, naming the `paths.ts` that replaced the option: a
-  config left over from it would otherwise build with its values ignored.
+  `vite.config.js` is never type-checked and none of the mistakes fails on
+  its own: a mode other than `'static'` would build no files, a `csp` under
+  `mode: 'server'` would be a policy nobody serves, and a static build
+  with no `site`, or one with a path or no scheme, would ask for its pages
+  under an origin nobody serves them from. `site` has to be an origin, read
+  as a URL rather than compared as text (`notAnOrigin`: `http:` or
+  `https:`, pathname `/`, no query, fragment or credentials, and the error
+  names which one fails — never quoting a value with an `@`, nor any part
+  of it, since a username or a password comes before one and `URL` does
+  not read every such spelling as one (`user:secret@example.com` is a
+  `user:` scheme); that is checked first, on the string itself, and the
+  kind of a value that is not a string is named), so `https://Example.com:443` is taken; past the check,
+  everything uses `new URL(site).origin`.
+  Any other key the mode
+  does not take throws too, naming the keys it does — a key spelt wrong, or
+  one left over from an option that is gone, would otherwise build with it
+  ignored — so no option is removed with a migration message of its own.
+  The route files have no option: they live in `src/routes/` (the engine's
+  `ROUTES_DIR`), as `src/i18n.ts` is where the locale set is.
   `vite.test.ts` holds each case as both a `@ts-expect-error` and the error
   it throws.
 - **A parameter's values come from its own directory.** Under
@@ -100,14 +114,35 @@ pnpm check         # check:write to auto-fix
   that parameter takes, given the params of the directories above it.
   `suppliedFrom` walks the tree and asks each file once per combination of
   the values above, and the values multiply down to every page, `route.ts`
-  and `redirect.ts` below. A value is the segment as a visitor reads it;
-  `segmentOf` escapes it. A file that returns anything but non-empty
-  strings, or that sits below a parameter left open, is a problem the build
-  names with the plan's refusals. The values are data of the application,
+  and `redirect.ts` below. A value is what a link to the page takes —
+  `Paths` types it with the router's `RegisteredParams`, the schemas'
+  output where they declare one — and is spelled as `href` does
+  (`String(value)`), which `segmentOf` escapes. The params above are what
+  the layouts above the file's directory read — the shells' rule: their
+  `paramsSchema` exports, outer first, never the page beside the file or a
+  layout in its own directory, which may read the parameter being asked
+  for — and `Paths` types them as exactly that, from the generated
+  `pathsParams` the router's `Register` carries (`PathsSchemas`), with the
+  string for a parameter none of them reads. Two `paths.ts` in sibling
+  route groups share a pattern and so one type: the union of what each
+  receives, never narrower than one of them. `suppliedFrom` hands
+  `valuesOf` the spellings, and the engine's `pathValues` runs them through
+  those schemas (`paths[file].schemas`) with `parseParams`; when one
+  refuses it answers `null` instead of asking the file, and `suppliedFrom`
+  names every such place in one problem, as the build names the shells
+  standing under a refused value. `paths-above.test.ts` holds a `[year]`
+  read as a number with no page at `[year]/` and a page schema at
+  `[year]/[slug]/` that rewrites `year` and needs `slug`, built and under
+  `vite dev`, a refused `[year]` the file below is never asked under
+  (`fixtures/paths-above-refused`), and the type. A file that returns
+  anything but strings that are not empty, numbers, bigints and booleans,
+  or that sits below a parameter left open, is a problem the build names
+  with the plan's refusals. The values are data of the application,
   so the file runs where the pages do: the build asks through
   `pathValues`, exported by the built `dist/rsc/index.js`, and `vite dev`
-  through the RSC environment's module runner — never from the config,
-  where the application's aliases and `server-only` modules do not load.
+  through the same export of the handler's entry in the RSC environment's
+  module runner — never from the config, where the application's aliases
+  and `server-only` modules do not load.
   `mode: 'server'` reads no paths.ts and compiles none in.
 - **React's plugin is the framework's, and `reactCompiler` is all of it an
   application sets.** The engine returns `@vitejs/plugin-react`, and
@@ -118,14 +153,16 @@ pnpm check         # check:write to auto-fix
   the plugin is bumped. Without it the plugin fails while Vite resolves the
   config, with its own error, which names `react({ compiler: true })`; the
   framework does not restate it, and the guide quotes it.
-- **The root re-exports the router by name, plus one type of its own.**
+- **The root re-exports the router by name, plus two types of its own.**
   `src/index.ts` lists what an application's code imports and never
   `export *`: the router also exports what only a hand-written table or the
   framework's own runtime uses. `index.test.ts` keeps `WITHHELD` beside it,
   so a new router export fails the test until it is put in one list or the
-  other. The one name that is not the router's is `Paths`, the type a
-  `paths.ts` is written against, and the same test holds that it is the
-  only one. `useParams` and
+  other. The names that are not the router's are `Paths` and
+  `RedirectTarget`, the types a `paths.ts` and a `redirect.ts` are written
+  against — route files of either mode, so neither type is on `./server`,
+  which static mode refuses — and the same test holds that they are the
+  only ones. `useParams` and
   `useRoute` are withheld because the framework never renders a `<Router>`.
   The router stays a peer and is never bundled, so a page and the framework
   share its one copy.
@@ -134,18 +171,18 @@ pnpm check         # check:write to auto-fix
   `register.gen.ts` augments `Register` there; the re-export carries the
   merge to the router's. `Register` is not on the root because nothing an
   application writes by hand augments it. `register.gen.ts` also augments
-  `@k8ordo/state`'s `Register` (the table) and `@k8ordo/i18n`'s (the
-  `locales` that `src/i18n.ts` exports) by those packages' own names, when
-  the application has them: they are the application's dependencies, not
-  this package's, and the application would otherwise write both by hand.
+  `@k8ordo/i18n`'s `Register` (the `locales` that `src/i18n.ts` exports) by
+  that package's own name, when the application has it: it is the
+  application's dependency, not this package's, and the application would
+  otherwise write it by hand. `@k8ordo/state` has no `Register`: a page
+  state's link is built on the URL the router's `href()` returns.
 - **`k8ordo generate` is the build's first step and nothing after it.** The
   package's one `bin` (`src/cli.ts`) resolves the Vite config in the working
   directory as `vite build` does (`resolveConfig`, `'build'`,
   `'production'`), finds the engine's plugin by name and calls its
   `api.generate()` — the same function its `buildStart` awaits — because
-  `routesDir` and the mode exist only in the application's `framework()`
-  call, and reading them again from flags would be a second place for them
-  to disagree. No environment is built, so no `paths.ts` is read and the
+  the mode exists only in the application's `framework()` call, and
+  reading it again from a flag would be a second place for it to disagree. No environment is built, so no `paths.ts` is read and the
   data a page reads is never touched: a CI job with no database writes `.k8ordo/` for
   `tsc`. A config without `framework()` and a `routes/` with the problems
   the build names under `routes/ is not a valid pathname space:` both exit
@@ -173,7 +210,7 @@ pnpm check         # check:write to auto-fix
   Node instead, with a copy of its own that no request reaches.
   `./serve` (`src/serve.ts`) is the Node server, and
   `./vercel` the Vercel plugin. The root and `./generated` are the router's
-  names and the `Paths` type, nothing else. `examples/server-basic`'s handler test runs
+  names and the `Paths` and `RedirectTarget` types, nothing else. `examples/server-basic`'s handler test runs
   `./serve` with Vite unresolvable, as a server of your own would, to hold
   the split. The types are split too:
   every server-mode `register.gen.ts` imports `./server`, so its `.d.mts`
@@ -242,10 +279,14 @@ pnpm check         # check:write to auto-fix
   shells stand at `/ja/posts/:id` and `/en/posts/:id`, and with no
   parameter above, at the bare pattern. A directory with both a paths.ts
   and a fallback.tsx writes its values as pages and keeps the shell for the
-  rest. `planPaths` takes those locations as it took the option's: a
-  location goes to the first pattern in table order it fits, and may leave
-  open only the params no layout above the fallback.tsx receives — one a
-  layout receives means that parameter's directory needs a paths.ts.
+  rest. Each location comes with the pattern of the directory the walk
+  reached it at (`ShellLocation`), so `planPaths` matches nothing to place
+  it: it takes the pathnames to write apart from the shells, gives a shell
+  to its own pattern, and lets it leave open only the params no layout above
+  the fallback.tsx receives — one a layout receives means that parameter's
+  directory needs a paths.ts. A shell a literal directory declared first
+  would hide (`ja/posts/[id]/` beside `[locale]/posts/[id]/` with a
+  fallback.tsx) is still made, and `shadowedShells` names the literal.
   Shell pathnames replace the left-open segments with `!fallback`, which a
   returned value may not be, escaped or not. `shadowedShells` refuses a
   shell whose host rule would answer URLs a pattern declared first is given
@@ -298,7 +339,7 @@ pnpm check         # check:write to auto-fix
   page saying `notFound()`; the handler marks the second with
   `NOT_FOUND_HEADER`, and the build names each kind in its own message.
 - **Under static mode a route.ts is a file.** The build calls its `GET` once
-  per pathname (with `site`'s origin in the URL when given) and writes the
+  per pathname (under `site`'s origin, as every page) and writes the
   body at the pathname — `answersOf` asks the declared patterns once, in the
   matcher's order, which of them answers each pathname. Anything but a
   `200` stops the build. It is not a page: no `index.rsc`, not in the
@@ -359,17 +400,22 @@ pnpm check         # check:write to auto-fix
   computation, `src/static.test.ts` the wiring and the refusal, and
   `examples/static-basic`'s `build.test.ts` the built list and the site
   that reads it.
-- **`site` is the only reason the build writes a sitemap, and a `route.ts`
-  at `sitemap.xml` is the reason it does not.** Without the origin a
-  sitemap would list relative URLs, which is not a sitemap; with it every
-  page the build wrote is listed, redirects and the not-found excluded.
+- **One origin for every request the build makes and for the sitemap, and
+  a `route.ts` at `sitemap.xml` is the reason the build writes none.**
+  `staticMode` reads `new URL(site).origin` once: `Render.urlFor` puts it
+  in front of every pathname the handler is asked for, so a `route.ts`
+  building absolute URLs from `request.url` builds them at `site`, and the
+  sitemap lists every page the build wrote at the same origin, redirects
+  and the not-found excluded. There is no origin of the framework's own: a
+  sentinel would land unseen in every file that writes an absolute URL.
   Where a `route.ts` answers `/sitemap.xml` (`SITEMAP_PATHNAME`, asked of
   `answersOf`, so one a `[file]/route.ts` writes counts too) the file is the
   application's — its own `lastmod`, its own order — and the build writes
   none over it. It is the one file of the build's a `route.ts` may take;
   the others are refused (`routeFileRefusals`).
-- **The pattern walk is the engine's.** `patternsOf` is
-  `declaredPatterns(tree)` from the engine, in the matcher's order, so the
+- **The pattern walk is the engine's.** `answeringPatterns` is
+  `declaredPatterns(tree)` from the engine without the catch-alls, told apart
+  by `kind` and never by spelling, in the matcher's order, so the
   build, the shadow check and the prerenderer never disagree; the trailing
   slash is the router's `normalizePathname`, and decoding a pathname for the
   filesystem is the engine's `decodePathname`, which `serve` uses too.
@@ -525,14 +571,14 @@ pnpm check         # check:write to auto-fix
 ```
 src/
   index.ts          the root: the router's application-facing names, re-exported,
-                    and the Paths type
+                    and the Paths and RedirectTarget types
   generated.ts      ./generated: what .k8ordo/ imports (defineRoutes, Register, …)
   vite.ts           ./vite: framework() — the engine, plus static mode or server mode
   static.ts         staticMode: the refusals (dev in resolveId / transform, the
                     build's in buildApp), prerendering into files, vite dev
                     answering as the build's host will (devPlan,
                     answerUnbuilt) and vite preview's static host
-  paths.ts          patternsOf / patternsNeedingPaths / suppliedFrom (what
+  paths.ts          answeringPatterns / patternsNeedingPaths / suppliedFrom (what
                     the paths.ts files say the site holds) / planPaths /
                     catchAllPatterns / catchAllPath / dirFor / isConcrete /
                     fileAt / answersOf / shellPathname / shadowedShells /
@@ -572,8 +618,9 @@ src/
   cli.ts            bin k8ordo: `k8ordo generate`, .k8ordo/ from the resolved
                     config through the engine plugin's api, building nothing
 fixtures/
-  build.ts          failedBuild / compiledBuild / devServer — a fixture built or
-                    served with the built dist/vite.mjs, in this process
+  build.ts          failedBuild / staticBuild / compiledBuild / devServer — a
+                    fixture built or served with the built dist/vite.mjs, in
+                    this process
   <name>/           one application each, src/routes/ and what it imports
 ```
 

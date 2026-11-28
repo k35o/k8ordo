@@ -103,10 +103,7 @@ export const buildFixture = async (
         warnings.push(message);
       },
     },
-    plugins: [
-      ...plugins,
-      engine({ routesDir: 'routes' }, { mode, runtimeDir }),
-    ],
+    plugins: [...plugins, engine({}, { mode, runtimeDir })],
     build: {
       // テストの下（NODE_ENV=test）では React の開発版を束ねるので、ブラウザの
       // 入口のチャンクは本番の出力よりずっと大きい。大きさの警告は数えない
@@ -299,10 +296,7 @@ export const serveFixture = async (
     root,
     configFile: false,
     logLevel: 'error',
-    plugins: [
-      engine({ routesDir: 'routes' }, { mode, runtimeDir }),
-      ...plugins,
-    ],
+    plugins: [engine({}, { mode, runtimeDir }), ...plugins],
     resolve: { alias },
     server: { port: 0 },
   });

@@ -1,6 +1,9 @@
-import { Code, Heading } from '@k8ordo/ui';
+import { Code, Heading, Spinner, Tabs } from '@k8ordo/ui';
+import { Suspense } from 'react';
 
+import { McpChat } from './mcp-chat/chat';
 import { Playground } from './playground/playground';
+import { UiChat } from './ui-chat/chat';
 
 function App() {
   return (
@@ -8,8 +11,11 @@ function App() {
       <header className="flex max-w-2xl flex-col gap-3">
         <Heading level="h1">生成 UI の試し打ち</Heading>
         <p className="text-fg-mute">
-          Claude に頼むと、選んだ形式で @k8ordo/ui
-          の部品だけを使った画面を書きます。書かれた分から描き、その横に、入力欄を触ったときに値が入る先と、部品の書き方がカタログに合っているかを並べます。
+          Claude に頼むと、@k8ordo/ui の部品だけを使った画面を書きます。「生成
+          UI」では、選んだ形式で書かれた分から描き、その横に、入力欄を触ったときに値が入る先と、部品の書き方がカタログに合っているかを並べます。「チャット」では、Claude
+          がツールで出した画面を、チャットの中に直に描きます。「MCP
+          Apps」では、Claude が MCP のツールで画面を出し、チャットの中に MCP App
+          として描きます。
         </p>
         <p className="text-fg-mute text-sm">
           本物の Claude を呼ぶので、
@@ -17,7 +23,42 @@ function App() {
           で起動したときだけ動きます。
         </p>
       </header>
-      <Playground />
+      <Tabs.Root defaultSelectedId="generative">
+        <Tabs.List label="試すもの">
+          <Tabs.Tab id="generative">生成 UI</Tabs.Tab>
+          <Tabs.Tab id="chat">チャット</Tabs.Tab>
+          <Tabs.Tab id="mcp-apps">MCP Apps</Tabs.Tab>
+        </Tabs.List>
+        <Tabs.Panel id="generative">
+          <Playground />
+        </Tabs.Panel>
+        <Tabs.Panel id="chat">
+          <div className="flex flex-col gap-6">
+            <p className="text-fg-mute max-w-2xl">
+              チャットで頼むと、Claude が <Code>show_ui</Code>{' '}
+              ツールを呼び、A2UI
+              で書いた画面を、チャットの中に書かれた分から描きます。画面のボタンを押すと、押したことが利用者の発言になり、何をしたかと画面の状態が
+              Claude に届きます。Claude は <Code>update_ui</Code>{' '}
+              で、押された画面をその場で書き換えて答えます。
+            </p>
+            <UiChat />
+          </div>
+        </Tabs.Panel>
+        <Tabs.Panel id="mcp-apps">
+          <div className="flex flex-col gap-6">
+            <p className="text-fg-mute max-w-2xl">
+              チャットで頼むと、Claude が <Code>show_ui</Code>{' '}
+              ツールを呼び、A2UI で書いた画面を、ツールの MCP App
+              として描きます。画面のボタンを押すと、何をしたかと画面の状態が
+              Claude に届きます。同じ MCP サーバーは Claude Desktop
+              にもつなげます。
+            </p>
+            <Suspense fallback={<Spinner label="準備しています" />}>
+              <McpChat />
+            </Suspense>
+          </div>
+        </Tabs.Panel>
+      </Tabs.Root>
     </main>
   );
 }

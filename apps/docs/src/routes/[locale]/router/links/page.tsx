@@ -20,12 +20,10 @@ export function ProductCard({ id, name }: Props) {
   return <a href={href('/products/:id', { id })}>{name}</a>;
 }`;
 
-const NAVIGATE = `navigateTo('/products/:id', { id: '42' });
-navigateTo('/products/:id', { id: '42' }, { history: 'replace' });
-navigateTo('/products');
-navigateTo('/products', { history: 'replace' });`;
+const NAVIGATE = `navigation.navigate(href('/products/:id', { id: '42' }));
+navigation.navigate(href('/products'), { history: 'replace' });`;
 
-const FINISHED = `import { navigateTo } from '@k8ordo/router';
+const FINISHED = `import { href } from '@k8ordo/router';
 import { useTransition } from 'react';
 
 const isAbort = (error: unknown) =>
@@ -36,7 +34,7 @@ export function OpenButton({ id }: { id: string }) {
   const open = () => {
     startTransition(async () => {
       try {
-        await navigateTo('/products/:id', { id }).finished;
+        await navigation.navigate(href('/products/:id', { id })).finished;
       } catch (error) {
         if (!isAbort(error)) throw error;
       }
@@ -124,6 +122,42 @@ export default function RouterLinksPage() {
           <Rich>{t.navigateSplit()}</Rich>
           <LocaleAnchor path="/:locale/state/url">
             {m.state.navUrl()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection id="one-way" title={t.oneWayTitle}>
+        <p>
+          <Rich>{t.oneWayLead()}</Rich>
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>{t.oneWayToColumn()}</th>
+              <th>{t.oneWayWriteColumn()}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {t.oneWayRows.map(({ to, write }) => (
+              <tr key={to()}>
+                <td>
+                  <Rich>{to()}</Rich>
+                </td>
+                <td>
+                  <Rich>{write()}</Rich>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p>
+          <Rich>{t.oneWayPathname()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.oneWayBound()}</Rich>
+          <LocaleAnchor path="/:locale/router/bind-params">
+            {m.router.navBindParams()}
           </LocaleAnchor>
           <Rich>{t.see()}</Rich>
         </p>

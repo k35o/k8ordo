@@ -9,7 +9,10 @@ import type {
   Ref,
 } from 'react';
 import { useId } from 'react';
+import { useFormStatus } from 'react-dom';
 
+import { checkedValuesAround } from '../../_internal/checked-values';
+import { ignoreClick } from '../../_internal/ignore-changes';
 import { CheckIcon } from '../../icons/check';
 
 import srOnly from '../../_internal/sr-only.module.css';
@@ -28,6 +31,9 @@ type BaseProps = {
   invalid?: boolean;
   options: readonly CheckboxCardOption[];
   ref?: Ref<HTMLFieldSetElement>;
+  // fieldset にも、1 つのチェックボックスにも「1 つ以上」を求める required は無い。
+  // FormControl の束を広げても属性として描かないように受けて捨てる
+  required?: boolean;
 } & Omit<
   FieldsetHTMLAttributes<HTMLFieldSetElement>,
   | 'className'
@@ -40,13 +46,13 @@ type BaseProps = {
 >;
 
 type ControlledProps = {
-  value: string[];
+  value: readonly string[];
   onChange: (value: string[]) => void;
   defaultValue?: never;
 };
 
 type UncontrolledProps = {
-  defaultValue?: string[];
+  defaultValue?: readonly string[];
   value?: never;
   onChange?: (value: string[]) => void;
 };
@@ -63,29 +69,23 @@ export const CheckboxCard: FC<Props> = ({
   defaultValue,
   onChange,
   ref,
+  required: _required,
   ...rest
 }) => {
   const groupId = useId();
   const isControlled = value !== undefined;
+  const { pending } = useFormStatus();
+  const disabledResolved = disabled || pending;
 
-  // 非制御のときは値を state に写さず DOM に持たせる。form の reset は change を
-  // 飛ばさずに checked を戻すので、写した state は取り残される。通知する値も、
-  // 変更を受けた時点の各 input の checked から読む
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const inputs =
-      event.currentTarget
-        .closest('fieldset')
-        ?.querySelectorAll<HTMLInputElement>('input[type="checkbox"]') ?? [];
-    onChange?.(
-      [...inputs].filter((input) => input.checked).map((input) => input.value),
-    );
+    onChange?.(checkedValuesAround(event.currentTarget));
   };
 
   return (
     <fieldset
       {...rest}
       aria-labelledby={labelledbyId}
-      className={clsx(styles.root, disabled && styles.rootDisabled)}
+      className={clsx(styles.root, disabledResolved && styles.rootDisabled)}
       ref={ref}
       role="group"
     >
@@ -101,15 +101,19 @@ export const CheckboxCard: FC<Props> = ({
             className={clsx(
               styles.card,
               invalid && styles.invalid,
-              optionDisabled && styles.disabled,
+              (optionDisabled || pending) && styles.disabled,
             )}
             id={optionId}
             key={option.value}
+            onClickCapture={pending ? ignoreClick : undefined}
           >
             <input
               aria-describedby={
                 hasDescription ? `${optionId}-description` : undefined
               }
+              aria-disabled={pending || undefined}
+              // role="group" は aria-invalid を持てないので、ボックスごとに付ける
+              aria-invalid={invalid}
               aria-labelledby={`${optionId}-label`}
               {...(isControlled
                 ? { checked: value.includes(option.value) }

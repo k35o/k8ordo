@@ -21,13 +21,16 @@ export type Placement =
   | 'right-end';
 
 /**
- * ビューポートのどこに貼り付くかで決まるオーバーレイ（Modal / Drawer）の配置。
+ * ビューポートのどこに貼り付くかで決まるオーバーレイ（Dialog / Drawer）の配置。
  * アンカー要素からの相対配置である `Placement` とは別概念なので、prop 名も
  * `placement` ではなく `side` で分ける。
  */
 export type ModalSide = 'center' | 'bottom' | 'left' | 'right';
 
-/** Drawer は必ず縁から出るため、`center` を除いた `ModalSide` の部分集合。 */
+/** Dialog は画面の中央か下から出る。 */
+export type DialogSide = Extract<ModalSide, 'center' | 'bottom'>;
+
+/** Drawer は左右の縁から出る。 */
 export type DrawerSide = Extract<ModalSide, 'left' | 'right'>;
 
 export type Option = Readonly<{

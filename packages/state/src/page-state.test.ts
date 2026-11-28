@@ -1,4 +1,4 @@
-import type { RouteComponent, Routes } from '@k8ordo/router';
+import { href } from '@k8ordo/router';
 import {
   afterEach,
   beforeEach,
@@ -14,27 +14,8 @@ import * as zm from 'zod/mini';
 import { defineCookieState } from './cookie-state';
 import { defineMemoryState } from './memory-state';
 import { definePageState, urlReader } from './page-state';
-import type { AcceptedPath, RegisteredPath } from './register';
 import { defineLocalState, defineSessionState } from './storage-state';
 import { useAppState } from './use-app-state';
-
-// アプリが `.k8ordo/register.gen.ts` に書く（生成される）行そのもの。この
-// テストプログラム全体の `Register` を拡張するので、以下の href は全てこの
-// 表に載った path で書く。
-type AppRoutes = Routes<{
-  '/products': RouteComponent;
-  '/items': RouteComponent;
-  '/signup': RouteComponent;
-  '/posts/:slug': RouteComponent;
-  '/files/*': RouteComponent;
-}>;
-
-declare module './register' {
-  // oxlint-disable-next-line typescript/consistent-type-definitions -- augmentation needs a merge-open interface
-  interface Register {
-    routes: AppRoutes;
-  }
-}
 
 const listState = definePageState('list', {
   url: z.object({
@@ -155,7 +136,7 @@ describe('definePageState', () => {
   });
 
   it('round-trips an empty array field through the URL', () => {
-    expect(listState.search({ tags: [] })).toBe('');
+    expect(listState.href('', { tags: [] })).toBe('');
     expect(listState.parseUrl(new URLSearchParams()).tags).toStrictEqual([]);
   });
 
@@ -176,7 +157,7 @@ describe('definePageState', () => {
     const flags = definePageState('flags', {
       url: z.object({ open: z.stringbool().default(true) }),
     });
-    expect(flags.search({ open: false })).toBe('open=false');
+    expect(flags.href('', { open: false })).toBe('?open=false');
     expect(flags.parseUrl(new URLSearchParams('open=false')).open).toBe(false);
     expect(flags.parseUrl(new URLSearchParams()).open).toBe(true);
   });
@@ -187,7 +168,7 @@ describe('definePageState', () => {
         gift: z.stringbool({ truthy: ['yes'], falsy: ['no'] }).default(false),
       }),
     });
-    expect(flags.search({ gift: true })).toBe('gift=yes');
+    expect(flags.href('', { gift: true })).toBe('?gift=yes');
     expect(flags.parseUrl(new URLSearchParams('gift=yes')).gift).toBe(true);
   });
 
@@ -214,8 +195,8 @@ describe('definePageState', () => {
           .default([]),
       }),
     });
-    expect(answers.search({ answers: [true, false] })).toBe(
-      'answers=yes&answers=no',
+    expect(answers.href('', { answers: [true, false] })).toBe(
+      '?answers=yes&answers=no',
     );
     expect(
       answers.parseUrl(new URLSearchParams('answers=yes&answers=no')).answers,
@@ -257,7 +238,7 @@ describe('definePageState', () => {
   });
 });
 
-describe('href and search', () => {
+describe('href', () => {
   it('omits every field that sits at its default', () => {
     expect(listState.href('/products', { page: 2 })).toBe('/products?page=2');
     expect(listState.href('/products', { page: 1 })).toBe('/products');
@@ -265,12 +246,12 @@ describe('href and search', () => {
   });
 
   it('serializes an array field as repeated params', () => {
-    expect(listState.search({ tags: ['a', 'b'] })).toBe('tags=a&tags=b');
+    expect(listState.href('', { tags: ['a', 'b'] })).toBe('?tags=a&tags=b');
   });
 
   it('round-trips through parseUrl', () => {
-    const query = listState.search({ q: 'x', page: 3 });
-    const parsed = listState.parseUrl(new URLSearchParams(query));
+    const link = listState.href('', { q: 'x', page: 3 });
+    const parsed = listState.parseUrl(new URLSearchParams(link));
     expect(parsed.q).toBe('x');
     expect(parsed.page).toBe(3);
   });
@@ -279,100 +260,62 @@ describe('href and search', () => {
     const dated = definePageState('dated', {
       url: z.object({ since: z.date().optional() }),
     });
-    expect(() => dated.search({ since: new Date(0) })).toThrow(
+    expect(() => dated.href('', { since: new Date(0) })).toThrow(
       /no URL serialization/u,
     );
   });
 
-  it('keeps the path literal in the type for typed-route checks', () => {
+  it('puts the state on the URL the router built, the route table checking the pattern there', () => {
+    expect(
+      listState.href(href('/posts/:slug', { slug: 'a b' }), { page: 2 }),
+    ).toBe('/posts/a%20b?page=2');
+  });
+
+  it('takes the empty URL for the page itself, as a link relative to it', () => {
+    expect(listState.href('', { page: 2 })).toBe('?page=2');
+    expect(listState.href('')).toBe('');
+  });
+
+  it('rewrites only its own params, keeping the others where they were', () => {
+    expect(
+      listState.href('/products?ref=mail&page=5&tags=x&tags=y&utm=a', {
+        page: 2,
+      }),
+    ).toBe('/products?ref=mail&utm=a&page=2');
+    expect(listState.href('/products?page=5&q=old')).toBe('/products');
+  });
+
+  it('keeps the spelling of the params it does not own', () => {
+    expect(listState.href('/products?name=a%20b&x=c+d', { q: 'é' })).toBe(
+      '/products?name=a%20b&x=c+d&q=%C3%A9',
+    );
+  });
+
+  it('keeps the fragment of the URL it is given, having no hash slot', () => {
+    expect(listState.href('/products#reviews', { page: 2 })).toBe(
+      '/products?page=2#reviews',
+    );
+    expect(listState.href('/products?page=5#reviews')).toBe(
+      '/products#reviews',
+    );
+  });
+
+  it('takes an absolute URL as well', () => {
+    expect(
+      listState.href('https://example.com/products?x=1', { page: 2 }),
+    ).toBe('https://example.com/products?x=1&page=2');
+  });
+
+  it('keeps the URL literal in the type, so a typed route survives', () => {
     expectTypeOf(listState.href('/products', { page: 2 })).toEqualTypeOf<
       '/products' | `/products?${string}`
     >();
-    // @ts-expect-error a path must start with '/'
-    listState.href('products');
-  });
-
-  it('checks href against the linkable patterns of a registered route table', () => {
-    expectTypeOf<
-      RegisteredPath<'/posts/hello'>
-    >().toEqualTypeOf<'/posts/hello'>();
-    expect(listState.href('/posts/hello', { page: 2 })).toBe(
-      '/posts/hello?page=2',
-    );
-    // @ts-expect-error the table has no such route
-    listState.href('/nowhere');
-    // @ts-expect-error a wildcard pattern is matched, never linked
-    listState.href('/files/a.txt');
-    // @ts-expect-error a param takes one segment, not two
-    listState.href('/posts/hello/comments');
-  });
-
-  it('takes a param spelled by a template literal', () => {
-    const postHref = (slug: string) => listState.href(`/posts/${slug}`);
-    expect(postHref('hello')).toBe('/posts/hello');
-  });
-
-  it('refuses what a leading param does not match, instead of taking every path', () => {
-    // [locale] の下の表。和集合だった頃は `/${string}` が混ざり、どのパスも通した
-    type LocaleRoutes = Routes<{
-      '/:locale': RouteComponent;
-      '/:locale/products': RouteComponent;
-    }>;
-    type LocalePatterns = '/:locale' | '/:locale/products';
-    expectTypeOf<
-      AcceptedPath<{ routes: LocaleRoutes }, '/ja/products'>
-    >().toEqualTypeOf<'/ja/products'>();
-    expectTypeOf<
-      AcceptedPath<{ routes: LocaleRoutes }, '/ja/nowhere'>
-    >().toEqualTypeOf<LocalePatterns>();
-    expectTypeOf<
-      AcceptedPath<{ routes: LocaleRoutes }, '/ja/products/42'>
-    >().toEqualTypeOf<LocalePatterns>();
-  });
-
-  it('checks the path against whichever form Register was given, refusing with what that form accepts', () => {
-    type AppPatterns = '/products' | '/items' | '/signup' | '/posts/:slug';
-    // `routes` — the same line the router's augmentation uses
-    expectTypeOf<
-      AcceptedPath<{ routes: AppRoutes }, '/signup'>
-    >().toEqualTypeOf<'/signup'>();
-    expectTypeOf<
-      AcceptedPath<{ routes: AppRoutes }, '/a'>
-    >().toEqualTypeOf<AppPatterns>();
-    // `path` — another router's own union, e.g. `Route` from next
-    type NextRoute = '/a' | `/b/${string}`;
-    expectTypeOf<
-      AcceptedPath<{ path: NextRoute }, '/b/1'>
-    >().toEqualTypeOf<'/b/1'>();
-    expectTypeOf<
-      AcceptedPath<{ path: NextRoute }, '/c'>
-    >().toEqualTypeOf<NextRoute>();
-    // `routes` wins when both are present
-    expectTypeOf<
-      AcceptedPath<{ routes: AppRoutes; path: '/a' }, '/a'>
-    >().toEqualTypeOf<AppPatterns>();
-    // neither — any `/`-path
-    expectTypeOf<
-      AcceptedPath<object, '/anything'>
-    >().toEqualTypeOf<'/anything'>();
-    expectTypeOf<
-      AcceptedPath<object, 'anything'>
-    >().toEqualTypeOf<`/${string}`>();
-  });
-
-  it('refuses with paths it accepts, so a refused path never fits what it is refused with', () => {
-    type AppPatterns = '/products' | '/items' | '/signup' | '/posts/:slug';
-    expectTypeOf<
-      AcceptedPath<{ routes: AppRoutes }, AppPatterns>
-    >().toEqualTypeOf<AppPatterns>();
-    // 1 つでも外れるメンバーがあれば、和集合ごと拒む
-    expectTypeOf<
-      AcceptedPath<{ routes: AppRoutes }, '/signup' | '/nowhere'>
-    >().toEqualTypeOf<AppPatterns>();
-    // ワイルドカードのパターンの綴りはリンクできるパスではない
-    expectTypeOf<
-      AcceptedPath<{ routes: AppRoutes }, '/files/*'>
-    >().toEqualTypeOf<AppPatterns>();
+    expectTypeOf(listState.href('', { page: 2 })).toEqualTypeOf<
+      '' | `?${string}`
+    >();
+    expectTypeOf(
+      listState.href(href('/products'), { page: 2 }),
+    ).toEqualTypeOf<string>();
   });
 });
 
@@ -392,6 +335,11 @@ describe('the hash slot', () => {
   it('writes no fragment for the default', () => {
     expect(deckState.href('/items', { hash: 1 })).toBe('/items');
     expect(deckState.href('/items')).toBe('/items');
+  });
+
+  it('replaces the fragment of the URL it is given, and drops it at the default', () => {
+    expect(deckState.href('/items#old', { hash: 3 })).toBe('/items#3');
+    expect(deckState.href('/items?ref=x#old')).toBe('/items?ref=x');
   });
 
   it('percent-encodes a fragment, so any string is one value', () => {
@@ -475,7 +423,7 @@ describe('the entry slot', () => {
       entry: z.object({ step: z.number().default(1) }),
     });
     expect(wizard.href('/signup')).toBe('/signup');
-    expect(wizard.search()).toBe('');
+    expect(wizard.href('/signup?step=2#top')).toBe('/signup?step=2#top');
   });
 });
 
@@ -598,10 +546,10 @@ describe('href under a base', () => {
     vi.unstubAllEnvs();
   });
 
-  it('puts the base Vite serves the application under in front of the path', () => {
-    expect(listState.href('/products', { page: 2 })).toBe(
+  it('adds no base of its own, keeping the one the router put on the URL', () => {
+    expect(listState.href('/products', { page: 2 })).toBe('/products?page=2');
+    expect(listState.href(href('/products'), { page: 2 })).toBe(
       '/docs/products?page=2',
     );
-    expect(listState.href('/products')).toBe('/docs/products');
   });
 });

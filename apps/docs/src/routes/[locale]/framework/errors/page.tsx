@@ -209,6 +209,9 @@ export default function FrameworkErrorsPage() {
         <p>
           <Rich>{t.pageNotFoundServer()}</Rich>
         </p>
+        <p>
+          <Rich>{t.pageNotFoundGuard()}</Rich>
+        </p>
         <Pitfall>
           <p>
             <Rich>{t.pageNotFoundDeep()}</Rich>
@@ -241,6 +244,9 @@ export default function FrameworkErrorsPage() {
             {m.framework.navActions()}
           </LocaleAnchor>
           <Rich>{t.see()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.redirectUrl()}</Rich>
         </p>
         <Note>
           <p>

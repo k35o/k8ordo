@@ -49,12 +49,6 @@ const SYMPTOMS: readonly Symptom[] = [
     cause: t.pathnameCause,
     fix: t.pathnameFix,
   },
-  {
-    id: 'bound-options',
-    title: t.optionsTitle,
-    cause: t.optionsCause,
-    fix: t.optionsFix,
-  },
   { id: 'early', title: t.earlyTitle, cause: t.earlyCause, fix: t.earlyFix },
   { id: 'lazy', title: t.lazyTitle, cause: t.lazyCause, fix: t.lazyFix },
   { id: 'abort', title: t.abortTitle, cause: t.abortCause, fix: t.abortFix },

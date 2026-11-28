@@ -1,21 +1,13 @@
 import { ColorSchemeProvider, ColorSchemeScript } from '@k8ordo/color-scheme';
 import type { ReactNode } from 'react';
 
-import { locales } from '../i18n';
+import { getLocale, locales } from '../i18n';
 
 import '../styles/globals.css';
 import styles from '../styles/pages/layout.module.css';
 
-export default function Root({
-  children,
-  pathname,
-}: {
-  children: ReactNode;
-  pathname: string;
-}) {
-  // lang はサーバーが書いた HTML の時点で正しくないと、クローラも読み上げも
-  // 間違ったまま読む。ロケールは URL の先頭区間にしか無い。
-  const locale = locales.delocalize(pathname).locale ?? locales.default;
+export default function Root({ children }: { children: ReactNode }) {
+  const locale = getLocale();
   return (
     // head のスクリプトが hydrate 前に dark クラスを付けるので、html の
     // 属性だけはサーバーの出力と一致しない。それが目的の差分なので警告を抑える。

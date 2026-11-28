@@ -10,8 +10,6 @@ export { useAppState } from './use-app-state';
 export type { AnyState } from './use-app-state';
 export type { UpdateHandle } from './store/core';
 export type { UpdateOptions } from './store/page-store';
-export { resetStateRegistry } from './store/registry';
-export type { Register, RegisteredPath } from './register';
 export type { StateSchema } from './schema/object';
 export type { Versioning } from './row/codec';
 export type { UrlInput } from './url/codec';

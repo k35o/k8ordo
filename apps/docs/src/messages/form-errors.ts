@@ -70,6 +70,16 @@ export const translationTop = message({
   en: 'Call `formFields` during the render. Called at module scope, the messages stay in whatever locale was active when the module first loaded.',
 });
 
+export const translationZod = message({
+  ja: '文言を書いていない検証には、zodの既定の文言が出ます。zodの設定はプロセスに1つなので、`z.config(z.locales.ja())`のように固定すると、どのリクエストにも同じ言語の文言が出ます。リクエストのロケールに合わせるには、文言を作るたびにロケールを読む設定を、専用のモジュールに書きます。',
+  en: 'A check written without a message gets zod’s default wording. zod keeps one configuration per process, so a fixed `z.config(z.locales.ja())` gives every request the same language. To follow the request’s locale, write a configuration that reads the locale each time it words an error, in a module of its own.',
+});
+
+export const translationZodImport = message({
+  ja: 'スキーマを書くモジュールの先頭で、このモジュールをimportします。`src/i18n.ts`には書きません。ブラウザでも読み込まれるので、zodがバンドルに入ります。ロケールを足して表に書き忘れると、`satisfies`で型エラーになります。',
+  en: 'Import it at the top of every module that declares a schema. Keep it out of `src/i18n.ts`, which the browser loads too, so zod would land in the bundle. A locale added to the set and missing from the table fails `satisfies`.',
+});
+
 export const translationAction = message({
   ja: 'Server Actionで`parseForm`を呼ぶときのロケールの決まり方は',
   en: 'How the locale is set when a Server Action calls `parseForm` is covered in ',

@@ -111,7 +111,7 @@ const PATHS = `import type { Paths } from '@k8ordo/framework';
 import { listProducts } from '../../../lib/catalog.server';
 
 const paths: Paths<'/products/:id'> = async () =>
-  (await listProducts()).map((product) => String(product.id));
+  (await listProducts()).map((product) => product.id);
 
 export default paths;`;
 
@@ -128,7 +128,7 @@ const ABOVE = `import type { Paths } from '@k8ordo/framework';
 import { listPosts } from '../../../../lib/posts.server';
 
 const paths: Paths<'/:locale/posts/:id'> = async ({ locale }) =>
-  (await listPosts(locale)).map((post) => String(post.id));
+  (await listPosts(locale)).map((post) => post.id);
 
 export default paths;`;
 

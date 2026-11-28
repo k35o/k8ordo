@@ -17,11 +17,12 @@ const HERO_LINK = `<a href={href('/products/:id', { id: product.id })}>
 </a>`;
 
 const CLAIM_ANCHOR = `export function ProductsLink({ children }: PropsWithChildren) {
-  const current = useMatch('/products/*', { inclusive: true });
+  const onProducts = useMatch('/products');
+  const inProducts = useMatch('/products/*', { inclusive: true });
 
   return (
     <a
-      aria-current={current ? 'page' : undefined}
+      aria-current={onProducts ? 'page' : inProducts ? 'true' : undefined}
       href={href('/products')}
     >
       {children}
@@ -44,7 +45,7 @@ href('/products/:id');`;
 const CLAIM_NAVIGATION_WAIT = `const [isPending, startTransition] = useTransition();
 
 startTransition(async () => {
-  await navigateTo('/products/:id', { id }).finished;
+  await navigation.navigate(href('/products/:id', { id })).finished;
 });`;
 
 const CLAIM_NAVIGATION_ANIMATE = `<ViewTransition

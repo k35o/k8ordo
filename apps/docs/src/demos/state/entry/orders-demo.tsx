@@ -42,7 +42,7 @@ const ordersState = definePageState('state-entry-demo', {
 export function OrdersDemo() {
   const [{ status, expanded }, update] = useAppState(ordersState);
   const filterLabel = useId();
-  const search = ordersState.search({ status });
+  const search = ordersState.href('', { status });
   const visible = ORDERS.filter(
     (order) => status === 'all' || order.status === status,
   );
@@ -105,7 +105,7 @@ export function OrdersDemo() {
       <dl className={styles.values}>
         <dt className={styles.term}>url</dt>
         <dd className={styles.value}>
-          <Code>{search === '' ? t.demoQueryEmpty() : `?${search}`}</Code>
+          <Code>{search === '' ? t.demoQueryEmpty() : search}</Code>
         </dd>
         <dt className={styles.term}>entry</dt>
         <dd className={styles.value}>

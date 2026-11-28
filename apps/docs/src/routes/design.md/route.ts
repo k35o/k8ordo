@@ -283,7 +283,7 @@ font-family: 'Noto Sans JP', 'M PLUS 2', sans-serif;
 | --- | --- |
 | Button / Avatar / IconButton / Badge / Progress | \`--radius-full\`（ピル型） |
 | Input / Textarea / Select / Card / CheckboxCard / RadioCard | \`--radius-xl\` |
-| Alert / Dialog / Modal | \`--radius-lg\` |
+| Alert / Dialog / Drawer | \`--radius-lg\` |
 | Checkbox | \`--radius-md\` |`,
 
     `## エレベーション（シャドウ）
@@ -297,7 +297,7 @@ font-family: 'Noto Sans JP', 'M PLUS 2', sans-serif;
       `\`--shadow-inset-${n}\``,
       `\`${v}\``,
     ]),
-    `利用指針: Card（\`variant="shadow"\`）= \`--shadow-sm\` / Modal・Dialog・Tooltip・Dropdown・ListBox = \`--shadow-md\` / Button = なし / Card（\`variant="outline"\`）= 1px の \`--color-border-mute\` の線。フォーカスの輪も影のトークン（\`--shadow-ring-info\`）で、面の影と重ねるときは輪を先に書く。`,
+    `利用指針: Card（\`variant="shadow"\`）= \`--shadow-sm\` / Dialog・Drawer・Tooltip・Dropdown・ListBox = \`--shadow-md\` / Button = なし / Card（\`variant="outline"\`）= 1px の \`--color-border-mute\` の線。フォーカスの輪も影のトークン（\`--shadow-ring-info\`）で、面の影と重ねるときは輪を先に書く。`,
 
     `## モーション
 
@@ -334,31 +334,33 @@ OS の \`prefers-contrast: more\` と \`forced-colors: active\` にはライブ�
 
     `## コンポーネント
 
-\`@k8ordo/ui\` から名前付きエクスポート。スタイルシートとプロバイダーが必要。
+\`@k8ordo/ui\` から名前付きエクスポート。スタイルシートが必要で、\`useToast\` を使うならルートに \`ToastProvider\` を置く。
 \`styles.css\` を 1 回読み込む（部品の CSS は部品が自分で読み込む）。Tailwind CSS 4 のプロジェクトは代わりに \`tailwindcss\` の後に \`tailwind.css\` を読み込むと、トークンを自分のマークアップのクラスとしても使える（\`@k8ordo/ui\` は Tailwind に依存しない）:
 
 \`\`\`tsx
 import '@k8ordo/ui/styles.css';
-import { UIProvider, Button, Card } from '@k8ordo/ui';
+import { ToastProvider, Button, Card } from '@k8ordo/ui';
 
-<UIProvider>
+<ToastProvider>
   <App />
-</UIProvider>;
+</ToastProvider>;
 \`\`\`
 
 ### Buttons
 
 - **Button** — \`size: 'sm'|'md'|'lg'\`, \`color: 'primary'|'secondary'|'base'\`, \`variant: 'solid'|'outline'|'skeleton'\`, \`fullWidth\`, \`startIcon\`, \`endIcon\`, \`disabled\`
-- **IconButton** — \`label\`（必須・aria-label）, \`color: 'transparent'|'base'|'primary'|'secondary'\`, \`size\`
+- **IconButton** — \`label\`（必須・aria-label。ツールチップにもなる）, \`variant: 'skeleton'|'solid'\`（既定は skeleton。地を塗らない）, \`color: 'primary'|'secondary'|'base'\`（solid の地の色）, \`size\`
 - **CopyButton** — \`value\`（文字列、または押したときに呼ぶ関数。Promise も可）, \`label\`, \`iconOnly\`, \`size\`。押すとアイコンがチェックに変わり、結果を読み上げる。コピーは IconButton と自前のクリップボード処理ではなくこれを使う
-- リンクとして描画するときは Button / IconButton に \`renderItem\` を渡す（\`<button>\` 専用の \`disabled\` / \`type\` を外し、残りの props を \`<a>\` などへ展開する。IconButton は tooltip の配線と ref を持つ \`triggerProps\` も展開する）
+- リンクとして描画するときは Button / IconButton に \`href\` を渡すと \`<a>\` を描く。Next.js の \`Link\` などのリンク部品は \`renderAnchor\` で受け取った props を展開して描く
+- 押したときの非同期処理は \`action\`（transition の中で走り、終わるまで保留を表示する）。続けて押す同期の更新は \`onClick\`
+- スケルトンの Button は、押された状態・今のページを \`aria-pressed\` / \`aria-current\` で渡すと文字色が変わる。塗りと枠線のトグルは \`variant\` や \`color\` を状態で切り替える。Toolbar の中では、押した項目を Toolbar が濃い地で示し、文字は fg-base になる
 
 ### Data display
 
-- **Accordion**（compound: \`Root\` / \`Item\`(\`defaultOpen?\`) / \`Button\` / \`Panel\`）
+- **Accordion**（compound: \`Root\` / \`Item\`(\`defaultOpen?\`) / \`Button\`(\`level\`。その見出しの中にボタンを描く) / \`Panel\`）
 - **Avatar** — \`src\` / \`name\`（イニシャル）/ \`fallback\`, \`size\`
 - **Badge** — \`label\`, \`tone: 'neutral'|'info'|'success'|'warning'|'error'\`, \`variant: 'solid'|'outline'\`, \`size\`, \`interactive\`
-- **Card** — \`width: 'full'|'fit'\`, \`variant: 'shadow'|'outline'\`, \`interactive\`
+- **Card** — \`width: 'full'|'fit'\`, \`variant: 'shadow'|'outline'\`, \`href\` / \`renderAnchor\` / \`openInNewTab\`（カード全体がリンク）, \`action\`（カード全体がボタン）, \`interactive\`（見た目だけ）
 - **Carousel**（compound: \`Root\`(\`label\`, \`slideSize: 'full'|'lg'|'md'|'sm'\`) / \`Slide\`(\`label?\`)）— スクロールスナップと前後ボタン。自動再生なし
 - **Code** — \`children: string\`（インラインコード。色文字列には色見本が付く）
 - **Heading** — \`level: 'h1'..'h6'\`（必須）, \`id?\`, \`lineClamp?\`
@@ -381,7 +383,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 
 ラベルは入力の上に配置。エラーは入力直下に \`--color-fg-error\`、\`--font-size-sm\` で。バリデーションは送信時が基本。
 
-- **FormControl** — フィールドのラッパー。\`label\`（必須）, \`helpText?\`, \`errorText?\`, \`required?\`, \`renderInput\`
+- **FormControl** — フィールドのラッパー。\`label\`（必須）, \`labelAs?: 'label'|'group'\`（Radio などのグループは \`'group'\`）, \`helpText?\`, \`errorText?\`, \`required?\`, \`renderInput\`
 - **TextField** / **Textarea** / **PasswordInput** / **NumberField** — テキスト系入力
 - **Select** / **Autocomplete** — \`options\` ベースの選択
 - **Checkbox** / **CheckboxGroup** / **CheckboxCard** — 複数選択
@@ -399,29 +401,23 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 - **Grid** — グリッドレイアウト
 - **Separator** — \`color: 'base'|'mute'|'subtle'\`, \`orientation: 'horizontal'|'vertical'\`
 
-### Observers
-
-- **InView** — 子要素が見えているかを知らせる。\`onChange(isInView)\`, \`root?\`, \`rootMargin?\`, \`threshold?\`, \`once?\`
-- **Resize** — 子要素の大きさが変わると知らせる。\`onChange()\`
-
 ### Navigation
 
-- **Anchor** — テキストリンク。外部リンクに自動で新規タブアイコン。\`href\`, \`openInNewTab?\`, \`renderAnchor?\`
-- **Breadcrumb**（compound: \`List\` / \`Item\` / \`Link\`(\`current?\`) / \`Separator\`）
+- **Anchor** — テキストリンク。http(s) の絶対 URL と \`//\` で始まる URL は外部リンクとして新しいタブで開き、アイコンと読み上げ専用の「新しいタブで開きます」を添える。\`href\`, \`openInNewTab?\`, \`renderAnchor?\`
+- **Breadcrumb**（compound: \`List\` / \`Item\` / \`Link\`(\`current?\`、ほかの \`<a>\` の属性も渡る) / \`Separator\`）
 - **Pagination** — ページネーション
 - **SideNav**（compound: \`Root\`(\`label\`) / \`Group\`(\`title\`) / \`Link\`(\`href\`, \`current?\`, \`renderAnchor?\`)）— 今のページを傍線で示す
 - **TableOfContents** — \`items\`（\`{ id, label, children? }\` の木）, \`label?\`。見出しの scroll-margin を読み取り位置にして今の見出しを示す
-- **Tabs**（compound: \`Root\`(\`ids\` / \`defaultSelectedId?\`) / \`List\` / \`Tab\` / \`Panel\`）
+- **Tabs**（compound: \`Root\`(\`defaultSelectedId\`、制御するなら \`selectedId\` と \`onChange\`) / \`List\` / \`Tab\` / \`Panel\`）。パネルは選択の遅延値で入れ替わる
 
 ### Overlays
 
-- **Modal** — \`isOpen?\`/\`onClose?\`/\`defaultOpen?\`, \`side: 'center'|'bottom'|'right'|'left'\`（\`ModalSide\`）
-- **Dialog**（compound: \`Root\` / \`Header\` / \`Content\`）
-- **Drawer** — \`title\`, \`isOpen\`, \`onClose\`, \`side: 'left'|'right'\`（\`DrawerSide\`。Modal の \`side\` の部分集合）
-- **Popover**（compound: \`Root\` / \`Trigger\` / \`Content\`、\`placement\`, \`role\`）
+- **Dialog** — \`title\`（h2 の見出しと閉じるボタン）か \`label\`, \`description?\`, \`role?: 'dialog'|'alertdialog'\`, \`isOpen?\`/\`defaultOpen?\`/\`onClose?\`, \`side: 'center'|'bottom'\`（\`DialogSide\`）。onClose は閉じる操作のときだけ呼ばれ、閉じても子は残る
+- **Drawer** — \`title\`, \`description?\`, \`isOpen?\`/\`defaultOpen?\`/\`onClose?\`, \`side: 'left'|'right'\`（\`DrawerSide\`）
+- **Popover**（compound: \`Root\` / \`Trigger\` / \`Content\`、\`placement\`。いつも dialog で、\`Content\` は \`label\` を名前にして面（地・角丸・影）を描く。余白は中身で作る）
 - **Tooltip**（compound: \`Root\` / \`Trigger\` / \`Content\`、\`placement\`）
-- **DropdownMenu**（compound: \`Root\`(\`placement\`) / \`Trigger\`(\`label\`) / \`IconTrigger\`(\`icon\`, \`label\`) / \`Content\` / \`Item\`(\`label\`)）
-- **ListBox**（compound: \`Root\` / \`Trigger\` / \`IconTrigger\` / \`Content\`、\`options\` / \`value\` / \`onChange\`）
+- **DropdownMenu**（compound: \`Root\`(\`placement\`) / \`Trigger\`(\`label\`, \`size\`, \`variant\`, \`color\`) / \`IconTrigger\`(\`icon\`, \`label\`, \`size\`, \`variant\`, \`color\`) / \`Content\` / \`Item\`(\`label\` と \`onAction\`、またはリンクなら \`href\`)）
+- **ListBox** — \`options\`, \`value\` / \`defaultValue\`, \`onChange\`, \`label\`, \`size\`, \`icon\`（あればアイコンのボタン）, \`helpContent\`, \`placement\`
 
 ### Icons
 
@@ -429,8 +425,7 @@ import { UIProvider, Button, Card } from '@k8ordo/ui';
 
 ### Providers
 
-- **UIProvider** — アプリルートで 1 回
-- **PortalRootProvider** / **usePortalRoot** — ポータルのルート指定`,
+- **ToastProvider** — \`useToast\` を使うアプリのルートで 1 回。Dialog と Drawer の中の \`useToast\` は、その \`<dialog>\` の中にトーストを出す`,
 
     `## ボイス
 
@@ -449,7 +444,7 @@ npm install @k8ordo/ui
 import '@k8ordo/ui/styles.css';
 // Tailwind CSS 4 のプロジェクトは代わりに、CSS で @import 'tailwindcss'; の後に
 // @import '@k8ordo/ui/tailwind.css'; を書く（トークンを自分のマークアップのクラスとしても使える）
-import { UIProvider } from '@k8ordo/ui';
+import { ToastProvider } from '@k8ordo/ui';
 \`\`\`
 
 - Docs: <https://ordo.k8o.me>

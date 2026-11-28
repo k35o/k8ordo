@@ -12,7 +12,7 @@ import styles from './state-demo.module.css';
 
 export function StateDemo() {
   const [current, update] = useAppState(demoState);
-  const search = demoState.search(current);
+  const search = demoState.href('', current);
 
   return (
     <div className={styles.root}>
@@ -25,7 +25,7 @@ export function StateDemo() {
             <Button
               color={value === current.tab ? 'primary' : 'base'}
               key={value}
-              onAction={() => {
+              onClick={() => {
                 update({ tab: value });
               }}
               size="sm"
@@ -41,8 +41,9 @@ export function StateDemo() {
           </span>
           <IconButton
             color="base"
+            variant="solid"
             label={m.state.demoPrevious()}
-            onAction={() => {
+            onClick={() => {
               update({ page: current.page - 1 }, { history: 'push' });
             }}
             size="sm"
@@ -52,8 +53,9 @@ export function StateDemo() {
           <span className={styles.page}>{current.page}</span>
           <IconButton
             color="base"
+            variant="solid"
             label={m.state.demoNext()}
-            onAction={() => {
+            onClick={() => {
               update({ page: current.page + 1 }, { history: 'push' });
             }}
             size="sm"
@@ -65,7 +67,7 @@ export function StateDemo() {
       <dl className={styles.values}>
         <dt className={styles.term}>URL</dt>
         <dd className={styles.value}>
-          <Code>{search === '' ? m.state.demoUrlEmpty() : `?${search}`}</Code>
+          <Code>{search === '' ? m.state.demoUrlEmpty() : search}</Code>
         </dd>
         <dt className={styles.term}>state</dt>
         <dd className={styles.value}>

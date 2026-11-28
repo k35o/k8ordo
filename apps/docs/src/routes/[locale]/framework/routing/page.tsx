@@ -57,9 +57,13 @@ const ROUTER_API = `'use client';
 import { href, useMatch } from '@k8ordo/framework';
 
 export function ProductsLink() {
-  const showing = useMatch('/products/*', { inclusive: true }) !== null;
+  const onProducts = useMatch('/products') !== null;
+  const inProducts = useMatch('/products/*', { inclusive: true }) !== null;
   return (
-    <a aria-current={showing ? 'page' : undefined} href={href('/products')}>
+    <a
+      aria-current={onProducts ? 'page' : inProducts ? 'true' : undefined}
+      href={href('/products')}
+    >
       Products
     </a>
   );
@@ -88,19 +92,17 @@ const HOME_TREE = `src/routes/
     layout.tsx
     page.tsx`;
 
-const HOME_GUARD = `import { withBase } from '@k8ordo/framework';
+const HOME_GUARD = `import { href } from '@k8ordo/framework';
+import { cookies, redirect } from '@k8ordo/framework/server';
 import type { Guard } from '@k8ordo/framework/server';
 
 import { locales } from '../../i18n';
 
 const guard: Guard<'/'> = ({ request }) => {
   const locale = locales.negotiateRequest(request, {
-    cookie: 'locale',
+    chosen: cookies().get('locale'),
   });
-  return new Response(null, {
-    status: 307,
-    headers: { location: withBase(locales.localize('/', locale)) },
-  });
+  redirect(href('/:locale', { locale }));
 };
 
 export default guard;`;
@@ -111,16 +113,17 @@ const HOME_PAGE = `export default function HomePage() {
 
 const HOME_STATIC = `'use client';
 
-import { navigateTo } from '@k8ordo/framework';
+import { href } from '@k8ordo/framework';
 import { useEffect } from 'react';
 
 import { locales } from '../i18n';
 
 export default function HomePage() {
   useEffect(() => {
-    navigateTo(
-      '/:locale',
-      { locale: locales.negotiate(navigator.languages) },
+    navigation.navigate(
+      href('/:locale', {
+        locale: locales.negotiate(navigator.languages),
+      }),
       { history: 'replace' },
     );
   }, []);
@@ -130,14 +133,13 @@ export default function HomePage() {
 
 const HOME_COOKIE = `useEffect(() => {
   void cookieStore.get('locale').then((saved) => {
-    navigateTo(
-      '/:locale',
-      {
+    navigation.navigate(
+      href('/:locale', {
         locale: locales.negotiate([
-          ...(saved?.value === undefined ? [] : [saved.value]),
+          saved?.value,
           ...navigator.languages,
         ]),
-      },
+      }),
       { history: 'replace' },
     );
   });
@@ -147,12 +149,8 @@ const HTML_LANG = `import type { LayoutProps } from '@k8ordo/framework';
 
 import { locales } from '../i18n';
 
-export default function RootLayout({
-  children,
-  pathname,
-}: LayoutProps<'/'>) {
-  const locale =
-    locales.delocalize(pathname).locale ?? locales.default;
+export default function RootLayout({ children }: LayoutProps<'/'>) {
+  const locale = locales.getLocale();
 
   return (
     <html dir={locales.definitions[locale].dir} lang={locale}>
@@ -260,7 +258,10 @@ import mdx from '@mdx-js/rollup';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [{ enforce: 'pre', ...mdx() }, framework({ mode: 'static' })],
+  plugins: [
+    { enforce: 'pre', ...mdx() },
+    framework({ mode: 'static', site: 'https://example.com' }),
+  ],
 });`;
 
 const MDX_PAGE = `import { notFound } from '@k8ordo/framework';
@@ -391,7 +392,12 @@ export default function FrameworkRoutingPage() {
         <CodeBlock
           code={ROUTER_API}
           lang="tsx"
-          marks={{ 3: 'highlight', 6: 'highlight', 8: 'highlight' }}
+          marks={{
+            3: 'highlight',
+            6: 'highlight',
+            7: 'highlight',
+            11: 'highlight',
+          }}
           title="src/components/products-link.tsx"
         />
         <p>
@@ -440,12 +446,12 @@ export default function FrameworkRoutingPage() {
         <CodeBlock code={HOME_TREE} lang="text" />
         <CodeBlock
           callouts={{
-            7: t.rootServerChooseCallout(),
+            8: t.rootServerChooseCallout(),
             11: t.rootServerStatusCallout(),
           }}
           code={HOME_GUARD}
           lang="ts"
-          marks={{ 7: 'highlight', 11: 'highlight', 12: 'highlight' }}
+          marks={{ 8: 'highlight', 11: 'highlight' }}
           title="src/routes/(home)/guard.ts"
         />
         <CodeBlock
@@ -468,7 +474,7 @@ export default function FrameworkRoutingPage() {
         <CodeBlock
           code={HOME_STATIC}
           lang="tsx"
-          marks={{ 12: 'highlight', 13: 'highlight' }}
+          marks={{ 12: 'highlight', 14: 'highlight' }}
           title="src/routes/page.tsx"
         />
         <p>
@@ -486,7 +492,7 @@ export default function FrameworkRoutingPage() {
           <CodeBlock
             code={HOME_COOKIE}
             lang="tsx"
-            marks={{ 2: 'highlight', 6: 'highlight', 7: 'highlight' }}
+            marks={{ 2: 'highlight', 5: 'highlight', 6: 'highlight' }}
             title="src/routes/page.tsx"
           />
           <p>
@@ -499,14 +505,14 @@ export default function FrameworkRoutingPage() {
         <CodeBlock
           code={HTML_LANG}
           lang="tsx"
-          marks={{ 7: 'highlight', 10: 'highlight', 13: 'highlight' }}
+          marks={{ 6: 'highlight', 9: 'highlight' }}
           title="src/routes/layout.tsx"
         />
         <p>
-          <Rich>{t.htmlPathname()}</Rich>
+          <Rich>{t.htmlGetLocale()}</Rich>
         </p>
         <p>
-          <Rich>{t.htmlGetLocale()}</Rich>
+          <Rich>{t.htmlDefault()}</Rich>
         </p>
       </DocSection>
 
@@ -673,7 +679,7 @@ export default function FrameworkRoutingPage() {
         <CodeBlock
           code={MDX_CONFIG}
           lang="ts"
-          marks={{ 6: 'highlight' }}
+          marks={{ 7: 'highlight' }}
           title="vite.config.ts"
         />
         <p>

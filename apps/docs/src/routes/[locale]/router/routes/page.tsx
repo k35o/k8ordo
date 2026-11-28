@@ -74,7 +74,7 @@ const ORDER_RIGHT = `defineRoutes({
   '/products/:id': ProductPage,
 });`;
 
-type Refused = { label: Message; error?: string };
+type Refused = { label: Message; error: string };
 
 const REFUSED: readonly Refused[] = [
   {
@@ -91,7 +91,20 @@ const REFUSED: readonly Refused[] = [
     error: 'route group "/(oops)" must have children',
   },
   { label: t.refusedTwice, error: 'route pattern "/x" is declared twice' },
-  { label: t.refusedUnparsable },
+  {
+    label: t.refusedGrammar,
+    error:
+      'route pattern "/:id?" has the segment ":id?", which is not part of the grammar — a segment is a literal holding none of : * ? + { } ( ) \\, a ":name", or — last — a ":name+" or a "*"',
+  },
+  {
+    label: t.refusedPosition,
+    error:
+      'route pattern "/files/:path+/edit" puts ":path+" before the end — a rest param must be the last segment',
+  },
+  {
+    label: t.refusedEmpty,
+    error: 'route pattern "/a/" has an empty segment — …',
+  },
 ];
 
 export default function RouterRoutesPage() {
@@ -223,11 +236,9 @@ export default function RouterRoutesPage() {
           {REFUSED.map((item) => (
             <li key={item.label()}>
               <Rich>{item.label()}</Rich>
-              {item.error !== undefined && (
-                <span className={styles.error}>
-                  <Code>{item.error}</Code>
-                </span>
-              )}
+              <span className={styles.error}>
+                <Code>{item.error}</Code>
+              </span>
             </li>
           ))}
         </ul>

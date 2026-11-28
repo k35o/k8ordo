@@ -2,12 +2,16 @@
 
 > Turns `src/routes/` into an application of React Server Components, built
 > with Vite, in one of two modes chosen in `vite.config.ts`:
-> `framework({ mode: 'static' })` renders every route at build time into
+> `framework({ mode: 'static', site })` renders every route at build time into
 > files a static host serves, with no server, and
 > `framework({ mode: 'server' })` renders per request on a server. Switching
-> is changing `mode` (and dropping `site` and `csp`, which server mode
-> refuses); nothing else in the application
-> changes. Pick `server` when the application needs the request — Server
+> takes more than `mode`: towards server, drop `site` and `csp` (refused
+> there; the policy becomes a header a `guard.ts` writes) and run
+> `dist/server.js` or hand the handler to a host; towards static, add
+> `site`, give every parameter's directory a `paths.ts` (or its page a
+> `fallback.tsx`), and remove what static mode refuses and every read of the
+> `request` prop — a layout's `nonce()` from `/server` included. The
+> route grammar, the boundaries and the handler stay the same. Pick `server` when the application needs the request — Server
 > Actions, `guard.ts`, the `request` prop, cookies, a page that exports
 > `search`, parameter values with no list rendered on the server (static
 > mode has only a `fallback.tsx`'s shell for those, drawn in the browser), a
@@ -30,8 +34,9 @@
 > answers 307/308 (server) or is written as a page that sends the visitor on
 > (static), and a `route.ts` answers its URL with a `Response` (server: every
 > method it exports; static: written as the file its `GET` answers). Under
-> server mode a Server Action ends with `redirect()`, a `guard.ts` runs before
-> whatever answers below it, `cookies()` reads and writes cookies, and a page
+> server mode a Server Action, a `guard.ts` and a `route.ts` end the request
+> with `redirect(href(…))` (a `303` from a guard or a `route.ts`) or, the
+> last two, `notFound()`, a `guard.ts` runs before whatever answers below it, `cookies()` reads and writes cookies, and a page
 > receives `request`. Under static mode a parameter's values come from a
 > `paths.ts` in its directory (a function returning them, typed `Paths`,
 > run with the pages' own modules, applied to every route below it) —
@@ -58,10 +63,15 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   setup (install, `vite.config.ts`, `tsconfig.json`, the root layout as the
   document), `vite dev` and `vite preview` against a static build, the
   browsers a build is aimed at (Baseline newly available, unless the config
-  sets its own targets), the entries, and the plugin's options —
-  `reactCompiler` among them, React
-  Compiler on the client components, which needs `oxc-transform-react`
-  installed.
+  sets its own targets), the entries, the plugin's options —
+  `reactCompiler` (React Compiler on the client components, which needs
+  `oxc-transform-react` installed), `headers` on every answer, and
+  static mode's `site` and `csp` — where a visitor's preference is kept
+  (look-only: `defineLocalState` and `inlineRead()`; one the server answers
+  by: `defineCookieState` under server mode; the language: a plain cookie
+  passed to `negotiateRequest` as `chosen`) — and testing: what answers a request
+  through the built handler or `serve({ port: 0 })`, since the request API
+  throws outside a request.
 
 ## References
 
@@ -70,7 +80,10 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   pattern `/files/:path+`, an array of decoded segments for the page, layout,
   `route.ts` and `guard.ts`, never zero segments, always the last directory,
   tried after a literal and a `[name]` beside it and before the
-  `not-found.tsx`), where a `fallback.tsx` may sit, how a page is sent in
+  `not-found.tsx`), where a `fallback.tsx` may sit, a layout's current link
+  (`matchPath(pattern, pathname)` on the server, `useMatch` in a client) and
+  the one way to write each URL (a table shared with `@k8ordo/router` and
+  `@k8ordo/state`), how a page is sent in
   each mode (each page loads only its own client components and CSS, what
   every page loads comes in at most two files — the entry's and the frame's,
   which sets the client build's `codeSplitting` — and the browser renders
@@ -92,8 +105,11 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 - [Parameters](references/params.md): `paramsSchema` — a refused value is a
   pathname the pattern does not answer; a `[...name]` directory's receives
   the array of segments — and, under static mode, `paths.ts`:
-  the values of its directory's parameter (`Paths<Pattern>`), given the
-  params above it, for every page, `route.ts` and `redirect.ts` below it,
+  the values of its directory's parameter (`Paths<Pattern>`, typed as a
+  link takes them, spelled as `href` spells them), given the params above
+  it as the layouts above its directory read them (their `paramsSchema`
+  exports; values one of them refuses fail the build), for every page,
+  `route.ts` and `redirect.ts` below it,
   and what fails the build; and `fallback.tsx` for the values it does not
   return — the shell it renders (no props, the layouts' schemas only, the
   shell's `pathname`), where a shell stands (below the values of the
@@ -105,8 +121,10 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   from it (what no `error.tsx` catches — the root layout's own components —
   and why there is no `global-error.tsx`), a Server Component that throws
   stopping a static build, `notFound()` and `not-found.tsx` (a document
-  waits for its page under server mode; under a `fallback.tsx`, shown in
-  place), and `redirect.ts` in each mode.
+  waits for its page under server mode; from a `guard.ts` or a `route.ts`,
+  the same 404; under a `fallback.tsx`, shown in place), and `redirect.ts`
+  in each mode — its `to` a pattern in the table's terms, where
+  `redirect()` takes a URL.
 - [Execution boundaries](references/boundaries.md): `'use client'`,
   `use(browser())` for a component that needs a browser (and `useMatch` /
   `usePathname` waiting for it on their own under a `fallback.tsx`),
@@ -117,7 +135,9 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   `requestHeaders()` / `waitUntil()` in an action, the page context an
   action runs in, forms before JavaScript, and ending with `redirect()`.
 - [Guards, cookies and the request](references/guards.md): server mode only.
-  `guard.ts` (outer first; a `Response` ends the request),
+  `guard.ts` (outer first; `redirect(href(…))` ends the request with a
+  `303`, `notFound()` with the nearest `not-found.tsx` under 404, a returned
+  `Response` — a `401` — as it is),
   `responseHeaders()`, `cookies()` and its defaults, `waitUntil(promise)`
   for work that goes on after the answer (what it means, where it may be
   called, a rejection logged once), and the read-only `request` a page
@@ -125,7 +145,9 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 - [Content Security Policy](references/csp.md): `nonce()` in a header a
   guard writes under server mode, in `style-src` too for the framework's
   one `<style>`; the `csp` option and `colorSchemeScriptHash()` under static
-  mode, and `connect-src` for the data a `fallback.tsx`'s shell fetches.
+  mode, and `connect-src` for the data a `fallback.tsx`'s shell fetches; an
+  application's own pre-paint script (`inlineRead()`) as a `'use client'`
+  component taking the nonce, its text hashed for static mode.
 - [Running and deploying](references/deploy.md): a static build's
   `dist/client/` (HTML, `index.rsc` payloads, shells, `404.html`,
   `client-files.json`, `sitemap.xml`, `_redirects`), the rewrites that reach a shell on Netlify,
@@ -149,19 +171,22 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
 ## Entry points
 
 - `@k8ordo/framework` — what application code imports, re-exported from
-  `@k8ordo/router` (which stays a peer, one copy): `href`, `navigateTo`,
+  `@k8ordo/router` (which stays a peer, one copy): `href`,
   `bindParams`, `notFound`, `isNotFound`, `usePathname`,
   `usePendingPathname`, `useMatch`, `matchPath`, `normalizePathname`,
   `withBase`, and the types `PageProps`, `LayoutProps`, `RouteContext`,
-  `ErrorProps`, `BoundLinks`, `BoundParams`, `MatchablePattern`,
-  `MatchOptions`, `NavigateToOptions` and the `Registered*` types; and one
-  type of its own, `Paths<Pattern>`, what a `paths.ts` exports by default.
+  `ErrorProps`, `BoundParams`, `MatchablePattern`,
+  `MatchOptions` and the `Registered*` types; and two
+  types of its own, `Paths<Pattern>`, what a `paths.ts` exports by default,
+  and `RedirectTarget`, what a `redirect.ts` does.
   Not `useParams` or `useRoute`: a page receives `params` as a prop.
 - `@k8ordo/framework/vite` — `framework(options)` returns the Vite plugins;
-  `options.mode` (`'static' | 'server'`) is required, `options.routesDir`
-  moves the route directory (default `src/routes`). Only with
-  `mode: 'static'`: `options.site` (the origin) makes the build also write
-  `sitemap.xml`, and
+  `options.mode` (`'static' | 'server'`) is required; the route files
+  always live in `src/routes/`, and a key the mode does not take throws
+  as the config loads. Only with
+  `mode: 'static'`: `options.site`, required, the origin the site is
+  served from (no path) — the origin of every request the build makes, a
+  `route.ts`'s included, and of `sitemap.xml` — and
   `options.csp` (directives → sources, `ContentSecurityPolicy`) is the
   Content-Security-Policy written into each page's `<meta>`, first in
   `<head>` after the `<meta charSet>`, with the hashes of the framework's own inline scripts on that
@@ -172,8 +197,10 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   `vite.config.ts` only.
 - `@k8ordo/framework/server` — server mode only; a static build refuses any
   module that imports a value from it. What code inside the request handler
-  imports, needing nothing from Node but `AsyncLocalStorage`: `redirect(to)`
-  ends a Server Action by sending the visitor to `to`; `responseHeaders()`
+  imports, needing nothing from Node but `AsyncLocalStorage`: `redirect(url)`
+  ends what answers the request — a Server Action, a `guard.ts` or a
+  `route.ts` (the last two with a `303`) — by sending the visitor to the URL
+  `href()` built, and throws by name while a page renders; `responseHeaders()`
   is the `Headers` the final response carries, `cookies()` the request's
   cookies to read and write (`get`, `has`, `set(name, value,
   CookieOptions)`, `delete(name, CookieScope)`; defaults `path: '/'`,
@@ -191,8 +218,7 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   the second argument the built handler takes from a runtime that calls it;
   `Guard<P>` is the type of what a `guard.ts` default-exports
   (`({ request, params }) => Response | void`) and `GuardContext<P>` its
-  argument; `RedirectTarget` is the type of what a `redirect.ts`
-  default-exports, and `RouteRequest` the type of the `request` prop.
+  argument; `RouteRequest` is the type of the `request` prop.
 - `@k8ordo/framework/serve` — the Node.js server for a build.
   `serve({ dist?, port?, host? })` (`ServeOptions`: `dist` defaults to
   `dist` under the working directory, `port` to `3000`, `host` to
@@ -215,7 +241,8 @@ Start with GUIDE.md, then follow the reference most relevant to the task.
   `dist/` runs with nothing installed and the framework is a dev
   dependency.
 - `dist/rsc/index.js` — under server mode, the built request handler, a
-  plain `(request: Request) => Promise<Response>` default export with every
+  `(request: Request, context?: HandlerContext) => Promise<Response>`
+  default export (`context.waitUntil` is the host's own) with every
   dependency bundled in, that needs nothing from its runtime but
   `AsyncLocalStorage` (`node:async_hooks`), so Node.js, Bun, Deno and
   Cloudflare Workers with `nodejs_compat` run it directly; the host serves

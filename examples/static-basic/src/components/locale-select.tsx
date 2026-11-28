@@ -1,6 +1,6 @@
 'use client';
 
-import { navigateTo } from '@k8ordo/framework';
+import { href } from '@k8ordo/framework';
 
 import { locales } from '../i18n';
 import { language } from '../messages/about';
@@ -16,7 +16,9 @@ export function LocaleSelect() {
       <select
         onChange={(event) => {
           const locale = event.currentTarget.value;
-          if (locales.is(locale)) navigateTo('/:locale/about', { locale });
+          if (locales.is(locale)) {
+            navigation.navigate(href('/:locale/about', { locale }));
+          }
         }}
         value={locales.getLocale()}
       >

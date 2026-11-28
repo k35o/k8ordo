@@ -25,6 +25,21 @@ export const missingFix = message({
   en: 'The error names the missing locale and the ones the message has. Add the missing text. With the locale type in `Register`, this is a type error at the declaration.',
 });
 
+export const noSetTitle = message({
+  ja: '`message: no locale set is defined here`',
+  en: '`message: no locale set is defined here`',
+});
+
+export const noSetCause = message({
+  ja: '集合を定義するモジュールが読み込まれる前に、文言を呼んでいます。`@k8ordo/framework`のアプリでは、`src/i18n.ts`が無いか、集合を別のモジュールで定義しています。テストやStorybookでは、`src/i18n.ts`を読み込んでいません。',
+  en: 'A message is called before the module defining the set has loaded. In an `@k8ordo/framework` app, there is no `src/i18n.ts`, or the set is defined in another module. In a test or in Storybook, `src/i18n.ts` was never imported.',
+});
+
+export const noSetFix = message({
+  ja: '`@k8ordo/framework`のアプリでは、集合を`src/i18n.ts`から`locales`という名前でexportします。テストとStorybookでは、セットアップファイルと`.storybook/preview.tsx`で`src/i18n.ts`をimportします。書き方は',
+  en: 'In an `@k8ordo/framework` app, export the set from `src/i18n.ts` as `locales`. In tests and Storybook, import `src/i18n.ts` from a setup file and from `.storybook/preview.tsx`. For how, see ',
+});
+
 export const untypedTitle = message({
   ja: '型エラーにならない文の不足',
   en: 'A missing locale that is not a type error',
@@ -143,21 +158,6 @@ export const uiMissingCause = message({
 export const uiMissingFix = message({
   ja: "ロケールの一覧を定義するモジュールで、`@k8ordo/ui/i18n`の`registerMessages('fr', fr)`を呼びます。登録の仕方は`@k8ordo/ui`の",
   en: "Call `registerMessages('fr', fr)` from `@k8ordo/ui/i18n` in the module that defines the locale set. See the `@k8ordo/ui` guide to ",
-});
-
-export const doubleTitle = message({
-  ja: 'ロケールが2つ並ぶ切り替え先のURL',
-  en: 'A switcher URL with two locales',
-});
-
-export const doubleCause = message({
-  ja: 'ロケールの区間が付いたままのpathnameを`localize`に渡しています。`localize`は、区間がすでにあるかを確かめません。',
-  en: 'A pathname that still has its locale segment was passed to `localize`. `localize` does not check whether one is already there.',
-});
-
-export const doubleFix = message({
-  ja: '先に`delocalize`で区間を外し、その`pathname`を`localize`に渡します。',
-  en: 'Take the segment off with `delocalize` first, and pass its `pathname` to `localize`.',
 });
 
 export const notFoundTitle = message({

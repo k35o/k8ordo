@@ -16,8 +16,8 @@ export const typesLead = message({
 });
 
 export const typeString = message({
-  ja: '`z.string()`：`type="text"`',
-  en: '`z.string()`: `type="text"`',
+  ja: '`z.string()`：`type`なし（テキストの入力欄）',
+  en: '`z.string()`: no `type` (a text input)',
 });
 
 export const typeEmailUrl = message({
@@ -71,8 +71,8 @@ export const typeEnumArray = message({
 });
 
 export const typeOther = message({
-  ja: 'それ以外（`z.uuid()`や`z.coerce.date()`など）：`type="text"`',
-  en: 'Anything else (`z.uuid()`, `z.coerce.date()`, …): `type="text"`',
+  ja: 'それ以外（`z.uuid()`や`z.coerce.date()`など）：`type`なし（テキストの入力欄）',
+  en: 'Anything else (`z.uuid()`, `z.coerce.date()`, …): no `type` (a text input)',
 });
 
 export const typesFormat = message({
@@ -206,8 +206,8 @@ export const droppedDatetime = message({
 });
 
 export const droppedGroupMin = message({
-  ja: 'チェックボックスの集まりの`.min()`。`minChecked`を宣言するとブラウザでも確かめます',
-  en: '`.min()` on a checkbox group; declare `minChecked` to run it in the browser too',
+  ja: '繰り返し行の中のチェックボックスの集まりの`.min()`と`.max()`。行ごとの名前を指すルールが無いので、サーバーだけで確かめます',
+  en: '`.min()` and `.max()` on a checkbox group inside repeated rows, which no rule can target; they run on the server only',
 });
 
 export const droppedTransform = message({
@@ -226,8 +226,8 @@ export const refusedTitle = message({
 });
 
 export const refusedLead = message({
-  ja: "次のスキーマを渡すと、`formFields`と`parseForm`はエラーになります。エラー文には場所と理由が入ります（例：`[@k8ordo/form] 'rows.tags': 繰り返しの中の繰り返しは name の添字が一意に決まらないため表現できません`）。",
-  en: "`formFields` and `parseForm` throw on these schemas. The message names the path and the reason, for example `[@k8ordo/form] 'rows.tags': 繰り返しの中の繰り返しは name の添字が一意に決まらないため表現できません`.",
+  ja: "次のスキーマを渡すと、`formFields`と`parseForm`はエラーになります。エラー文には場所と理由が入ります（例：`formFields: 'rows.tags': a repeat inside a repeat has no unambiguous index in an input's name`）。",
+  en: "`formFields` and `parseForm` throw on these schemas. The message names the path and the reason, for example `formFields: 'rows.tags': a repeat inside a repeat has no unambiguous index in an input's name`.",
 });
 
 export const refusedNumber = message({

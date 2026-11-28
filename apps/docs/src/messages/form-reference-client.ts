@@ -120,6 +120,10 @@ export const fieldViewCaveats = [
     en: 'A server error stays until the control is edited. An error from the browser’s check takes precedence over it.',
   }),
   message({
+    ja: '`input`の型は、スキーマから導く入力欄の種類で決まります。`z.coerce.number()`は`NumberInput`（`min`と`max`は数）、`z.boolean()`は`CheckboxInput`、`z.stringbool()`は`StringCheckboxInput`、`z.file()`は`FileInput`（`defaultValue`は無い）、`z.array(z.enum())`は`CheckboxGroupInput`（`defaultValue`は選ばれていた値の配列）です。文字列や`z.enum()`、`.nullable()`や`z.union()`を通した欄は`FieldInput`です。',
+    en: 'The type of `input` follows the control the schema derives: `NumberInput` for `z.coerce.number()` (numeric `min` and `max`), `CheckboxInput` for `z.boolean()`, `StringCheckboxInput` for `z.stringbool()`, `FileInput` for `z.file()` (no `defaultValue`), and `CheckboxGroupInput` for `z.array(z.enum())` (`defaultValue` is the array of checked options). A string, a `z.enum()`, and anything read through `.nullable()` or `z.union()` get `FieldInput`.',
+  }),
+  message({
     ja: '`z.stringbool()`の入力欄だけは、`input`に`value`が入ります。チェックしたときに送る文字列です。',
     en: 'Only a `z.stringbool()` field has `value` in its `input`: the string a checked box submits.',
   }),
@@ -176,8 +180,8 @@ export const rowViewIndex = message({
 });
 
 export const rowViewField = message({
-  ja: '行の中の入力欄のキーを渡すと、その`FieldView`を返します。`name`は`items[0].name`の形になります。文字列などの配列では引数を省きます。',
-  en: 'Returns the `FieldView` for a key within the row. Its `name` has the form `items[0].name`. For an array of scalars, call it with no argument.',
+  ja: '行の中の入力欄のキーを渡すと、その`FieldView`を返します。`input`の型は、`form.field()`と同じくキーごとに入力欄の種類で決まります。`name`は`items[0].name`の形になります。文字列などの配列では引数を省きます。',
+  en: 'Returns the `FieldView` for a key within the row. Its `input` is typed per key by the control, as `form.field()` types a path. Its `name` has the form `items[0].name`. For an array of scalars, call it with no argument.',
 });
 
 export const rowViewRemove = message({
@@ -187,8 +191,12 @@ export const rowViewRemove = message({
 
 export const rowViewCaveats = [
   message({
-    ja: "行の中のキーは、パスと違って型で確かめません。書き間違えると、描画したときにエラー`[@k8ordo/form] 配列 'items' に 'nmae' がありません。`になります。",
-    en: "Unlike a path, a key within a row is not checked by the types. A typo fails when the row renders, with the error `[@k8ordo/form] 配列 'items' に 'nmae' がありません。`.",
+    ja: "行の中のキーも、パスと同じく型で確かめます。`row.field('nmae')`のような書き間違いは、ビルドのエラーになります。",
+    en: "A key within a row is checked by the types, like a path: a typo such as `row.field('nmae')` fails the build.",
+  }),
+  message({
+    ja: "行全体を子のコンポーネントに渡すときは、propsの型を`RowView<typeof orderSchema, 'items'>`と書きます。型引数はスキーマか`defineForm`の定義と、配列のパスです。省くと型のエラーになります。`ArrayView`と`DerivedArray`も同じ型引数を取ります。",
+    en: "A child component that takes a whole row types its prop as `RowView<typeof orderSchema, 'items'>`: the schema or the `defineForm` definition, then the array’s path. Leaving them out is a type error. `ArrayView` and `DerivedArray` take the same type arguments.",
   }),
 ] as const;
 
@@ -294,8 +302,8 @@ export const formFieldsTypeArrays = message({
 });
 
 export const formFieldsTypeRules = message({
-  ja: '`defineForm`で宣言した、複数の入力欄にまたがるルール。文言は`formFields`を呼んだ時点で決まっています。',
-  en: 'The cross-field rules declared with `defineForm`. Their messages are fixed when `formFields` runs.',
+  ja: '`defineForm`で宣言した、複数の入力欄にまたがるルールと、チェックボックスの集まりの`.min()`と`.max()`から作るルール。文言は`formFields`を呼んだ時点で決まっています。',
+  en: 'The cross-field rules declared with `defineForm`, and the rules derived from a checkbox group’s `.min()` and `.max()`. Their messages are fixed when `formFields` runs.',
 });
 
 export const formFieldsTypeDropped = message({
@@ -305,8 +313,8 @@ export const formFieldsTypeDropped = message({
 
 export const formFieldsTypeCaveats = [
   message({
-    ja: '型引数は3つです。フィールドのパスと配列のパス、`z.stringbool()`のフィールドのパスです。`formFields`の戻り値から推論されるので、ふつうは書きません。',
-    en: 'It has three type arguments: the field paths, the array paths and the `z.stringbool()` field paths. They are inferred from what `formFields` returns, so you rarely write them.',
+    ja: '型引数は、スキーマか`defineForm`の定義を1つ取ります。propsの型は`FormFields<typeof talkSchema>`と書き、パスと各欄の`input`の型はスキーマから決まります。`useForm`の戻り値の型も、同じく`UseFormReturn<typeof talkSchema>`と書きます。',
+    en: 'Its one type argument is the schema or the `defineForm` definition. Type a prop as `FormFields<typeof talkSchema>`, and the paths and each field’s `input` type follow the schema. `useForm`’s return type is written the same way: `UseFormReturn<typeof talkSchema>`.',
   }),
   message({
     ja: '`@k8ordo/form`と`@k8ordo/form/server`のどちらからもimportできます。',

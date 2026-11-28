@@ -45,7 +45,7 @@ src/
     parse-form.ts     FormData → structure → safeParse → typed errors
     paths.ts          `items[1].name` ↔ nested value / zod issue path
   rules/
-    rules.ts          sameAs / minChecked / requiredWhen and the one evaluator
+    rules.ts          sameAs / requiredWhen, a group's derived count, and the one evaluator
     define-form.ts    defineForm(): a schema plus rules typed against its paths
   schema/
     walk.ts           pair the zod tree with its JSON Schema (derive and parse)
@@ -53,7 +53,7 @@ src/
   use-form.ts         useForm(): the client hook
   async-check.ts      useAsyncCheck(): a per-field check the server answers
   hidden-value.tsx    HiddenValue: a value from a component with no input
-  paths.ts            FieldPathsOf / ArrayPathsOf: paths from the schema type
+  paths.ts            FieldInputsOf / ArrayInputsOf: paths and input types from the schema type
   types.ts            the serializable shapes that cross to the client
   index.ts            client entry
   server.ts           server entry
@@ -69,7 +69,9 @@ checks (`refine`) vanish from its output without a trace.
   is what the parse would hand the schema for an empty control: `''` for text,
   `false` for a checkbox, `undefined` for a number, a file, a choice, or a
   checkbox whose schema reads its string. Public API, and it guarantees the
-  client shows the text zod itself would produce.
+  client shows the text zod itself would produce. A checkbox group's count is
+  worded the same way, by running the array schema against the group's own
+  options, one box short of `.min()` or one past `.max()`.
 - **A `z.stringbool()` checkbox's `value`** is the schema's own `safeEncode`
   of `true` — public API, and the same call `@k8ordo/state` spells a url
   boolean with, so the box submits the string state writes. A schema that
@@ -88,7 +90,8 @@ checks (`refine`) vanish from its output without a trace.
   `instanceof` by the traits a schema was built with, so a `zod/mini` schema
   matches the same classes; `zod-mini.test.ts` holds each of these for it.
   At the type level, `paths.ts` reads the same `_zod.def` shapes
-  (`innerType`, `element`, `entries` for an enum) off the schema's type.
+  (`innerType`, `element`, `entries` for an enum, and `type`, which picks a
+  leaf's input type) off the schema's type.
 - **A pairing the walk cannot make is a throw, not a skip.** A JSON node with
   no matching zod node (records, tuples, nullable objects, nested repeats,
   dotted keys) would parse to silently discarded input, which is the one
@@ -101,6 +104,9 @@ checks (`refine`) vanish from its output without a trace.
   the hook through `revalidate(control)`, never a dispatched event: a
   synthetic `focusout` re-enters the control's own `onBlur` and tells every
   blur listener of a blur that never happened.
+- A throw or a `console.warn` starts with the API it comes from
+  (`formFields: …`, `parseForm: …`, `useForm: …`); the walk is shared by
+  `formFields` and `parseForm`, so `schemaMap` takes the caller's name.
 - Comments explain why the straightforward version was not used — not what the
   code does.
 - Tests state a guarantee in their name ("marks a field required only when the

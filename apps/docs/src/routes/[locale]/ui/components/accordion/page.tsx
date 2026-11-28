@@ -48,25 +48,19 @@ export default function AccordionPage() {
           <ComponentPreview
             code={`<Accordion.Root>
   <Accordion.Item>
-    <h3>
-      <Accordion.Button>What is k8ordo UI?</Accordion.Button>
-    </h3>
+    <Accordion.Button level="h3">What is k8ordo UI?</Accordion.Button>
     <Accordion.Panel>
       <p>k8ordo UI is a React UI component library.</p>
     </Accordion.Panel>
   </Accordion.Item>
   <Accordion.Item>
-    <h3>
-      <Accordion.Button>How do I install it?</Accordion.Button>
-    </h3>
+    <Accordion.Button level="h3">How do I install it?</Accordion.Button>
     <Accordion.Panel>
       <p>Install via npm, yarn, or pnpm.</p>
     </Accordion.Panel>
   </Accordion.Item>
   <Accordion.Item>
-    <h3>
-      <Accordion.Button>Is it accessible?</Accordion.Button>
-    </h3>
+    <Accordion.Button level="h3">Is it accessible?</Accordion.Button>
     <Accordion.Panel>
       <p>Yes, it follows WAI-ARIA accordion patterns.</p>
     </Accordion.Panel>
@@ -76,25 +70,25 @@ export default function AccordionPage() {
             <div className={styles.frame}>
               <Accordion.Root>
                 <Accordion.Item>
-                  <h3>
-                    <Accordion.Button>What is k8ordo UI?</Accordion.Button>
-                  </h3>
+                  <Accordion.Button level="h3">
+                    What is k8ordo UI?
+                  </Accordion.Button>
                   <Accordion.Panel>
                     <p>k8ordo UI is a React UI component library.</p>
                   </Accordion.Panel>
                 </Accordion.Item>
                 <Accordion.Item>
-                  <h3>
-                    <Accordion.Button>How do I install it?</Accordion.Button>
-                  </h3>
+                  <Accordion.Button level="h3">
+                    How do I install it?
+                  </Accordion.Button>
                   <Accordion.Panel>
                     <p>Install via npm, yarn, or pnpm.</p>
                   </Accordion.Panel>
                 </Accordion.Item>
                 <Accordion.Item>
-                  <h3>
-                    <Accordion.Button>Is it accessible?</Accordion.Button>
-                  </h3>
+                  <Accordion.Button level="h3">
+                    Is it accessible?
+                  </Accordion.Button>
                   <Accordion.Panel>
                     <p>Yes, it follows WAI-ARIA accordion patterns.</p>
                   </Accordion.Panel>
@@ -111,17 +105,13 @@ export default function AccordionPage() {
           <ComponentPreview
             code={`<Accordion.Root>
   <Accordion.Item defaultOpen>
-    <h3>
-      <Accordion.Button>Open by default</Accordion.Button>
-    </h3>
+    <Accordion.Button level="h3">Open by default</Accordion.Button>
     <Accordion.Panel>
       <p>This panel is open on initial render.</p>
     </Accordion.Panel>
   </Accordion.Item>
   <Accordion.Item>
-    <h3>
-      <Accordion.Button>Closed by default</Accordion.Button>
-    </h3>
+    <Accordion.Button level="h3">Closed by default</Accordion.Button>
     <Accordion.Panel>
       <p>This panel is closed on initial render.</p>
     </Accordion.Panel>
@@ -131,17 +121,17 @@ export default function AccordionPage() {
             <div className={styles.frame}>
               <Accordion.Root>
                 <Accordion.Item defaultOpen>
-                  <h3>
-                    <Accordion.Button>Open by default</Accordion.Button>
-                  </h3>
+                  <Accordion.Button level="h3">
+                    Open by default
+                  </Accordion.Button>
                   <Accordion.Panel>
                     <p>This panel is open on initial render.</p>
                   </Accordion.Panel>
                 </Accordion.Item>
                 <Accordion.Item>
-                  <h3>
-                    <Accordion.Button>Closed by default</Accordion.Button>
-                  </h3>
+                  <Accordion.Button level="h3">
+                    Closed by default
+                  </Accordion.Button>
                   <Accordion.Panel>
                     <p>This panel is closed on initial render.</p>
                   </Accordion.Panel>
@@ -158,25 +148,19 @@ export default function AccordionPage() {
           <ComponentPreview
             code={`<Accordion.Root>
   <Accordion.Item defaultOpen>
-    <h3>
-      <Accordion.Button>Section A</Accordion.Button>
-    </h3>
+    <Accordion.Button level="h3">Section A</Accordion.Button>
     <Accordion.Panel>
       <p>This panel is open by default.</p>
     </Accordion.Panel>
   </Accordion.Item>
   <Accordion.Item defaultOpen>
-    <h3>
-      <Accordion.Button>Section B</Accordion.Button>
-    </h3>
+    <Accordion.Button level="h3">Section B</Accordion.Button>
     <Accordion.Panel>
       <p>This panel is also open by default.</p>
     </Accordion.Panel>
   </Accordion.Item>
   <Accordion.Item>
-    <h3>
-      <Accordion.Button>Section C</Accordion.Button>
-    </h3>
+    <Accordion.Button level="h3">Section C</Accordion.Button>
     <Accordion.Panel>
       <p>This panel is closed by default.</p>
     </Accordion.Panel>
@@ -186,25 +170,19 @@ export default function AccordionPage() {
             <div className={styles.frame}>
               <Accordion.Root>
                 <Accordion.Item defaultOpen>
-                  <h3>
-                    <Accordion.Button>Section A</Accordion.Button>
-                  </h3>
+                  <Accordion.Button level="h3">Section A</Accordion.Button>
                   <Accordion.Panel>
                     <p>This panel is open by default.</p>
                   </Accordion.Panel>
                 </Accordion.Item>
                 <Accordion.Item defaultOpen>
-                  <h3>
-                    <Accordion.Button>Section B</Accordion.Button>
-                  </h3>
+                  <Accordion.Button level="h3">Section B</Accordion.Button>
                   <Accordion.Panel>
                     <p>This panel is also open by default.</p>
                   </Accordion.Panel>
                 </Accordion.Item>
                 <Accordion.Item>
-                  <h3>
-                    <Accordion.Button>Section C</Accordion.Button>
-                  </h3>
+                  <Accordion.Button level="h3">Section C</Accordion.Button>
                   <Accordion.Panel>
                     <p>This panel is closed by default.</p>
                   </Accordion.Panel>

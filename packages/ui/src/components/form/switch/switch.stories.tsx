@@ -209,6 +209,40 @@ export const ForwardsRef: Story = {
   },
 };
 
+export const ErrorText: Story = {
+  args: {
+    errorText: '管理者の承認が必要です',
+    helpText: 'オフにすると、すぐに止まります',
+    label: '外部への共有',
+  },
+  play: async ({ canvas }) => {
+    const switchElement = canvas.getByRole('switch', { name: '外部への共有' });
+
+    await expect(switchElement).toHaveAttribute('aria-invalid', 'true');
+    await expect(switchElement).toHaveAccessibleDescription(
+      '管理者の承認が必要です',
+    );
+    await expect(
+      canvas.queryByText('オフにすると、すぐに止まります'),
+    ).not.toBeInTheDocument();
+  },
+};
+
+export const HelpText: Story = {
+  args: {
+    helpText: 'オフにすると、すぐに止まります',
+    label: '外部への共有',
+  },
+  play: async ({ canvas }) => {
+    const switchElement = canvas.getByRole('switch', { name: '外部への共有' });
+
+    await expect(switchElement).toHaveAttribute('aria-invalid', 'false');
+    await expect(switchElement).toHaveAccessibleDescription(
+      'オフにすると、すぐに止まります',
+    );
+  },
+};
+
 const notification = z.object({ notify: z.boolean(), memo });
 const notificationFields = formFields(notification);
 const received = fn();
@@ -225,7 +259,7 @@ const NotificationForm = () => (
         <>
           <Switch
             {...notify.input}
-            invalid={notify.invalid}
+            errorText={notify.error}
             label="通知を受け取る"
           />
           <MemoField field={form.field('memo')} />
@@ -265,6 +299,41 @@ export const WithForm: Story = {
         notify: true,
         memo: 'よろしく',
       }),
+    );
+  },
+};
+
+const digest = z.object({
+  weekly: z.stringbool({ truthy: ['yes'] }).default(false),
+});
+const digestFields = formFields(digest);
+const receivedDigest = fn();
+
+const DigestForm = () => (
+  <ActionForm
+    fields={digestFields}
+    onReceive={receivedDigest}
+    serve={(data) => parseForm(digest, data)}
+  >
+    {(form) => (
+      <Switch {...form.field('weekly').input} label="週ごとにまとめる" />
+    )}
+  </ActionForm>
+);
+
+export const WithStringboolForm: Story = {
+  render: () => <DigestForm />,
+  play: async ({ canvas, userEvent }) => {
+    const switchElement = canvas.getByRole<HTMLInputElement>('switch', {
+      name: '週ごとにまとめる',
+    });
+
+    await expect(switchElement).toHaveAttribute('value', 'yes');
+
+    await userEvent.click(switchElement);
+    await userEvent.click(canvas.getByRole('button', { name: '送信' }));
+    await waitFor(() =>
+      expect(receivedDigest).toHaveBeenLastCalledWith({ weekly: true }),
     );
   },
 };

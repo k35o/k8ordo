@@ -113,7 +113,7 @@ const ColumnMenu = <Row,>({
     .map((column) => column.id);
 
   return (
-    <Popover.Root placement="bottom-end" role="dialog">
+    <Popover.Root placement="bottom-end">
       <Popover.Trigger
         renderItem={(props) => (
           <Button
@@ -127,39 +127,28 @@ const ColumnMenu = <Row,>({
           </Button>
         )}
       />
-      <Popover.Content
-        renderItem={(props) => (
-          <div
-            {...props}
+      <Popover.Content label={messages.dataTableColumns}>
+        <div className={styles.columnMenu}>
+          <p className={styles.columnMenuTitle} id={titleId}>
+            {messages.dataTableColumns}
+          </p>
+          <CheckboxGroup
             aria-labelledby={titleId}
-            className={styles.columnMenu}
-          >
-            <p className={styles.columnMenuTitle} id={titleId}>
-              {messages.dataTableColumns}
-            </p>
-            <CheckboxGroup.Root
-              aria-labelledby={titleId}
-              name={`${titleId}-columns`}
-              onChange={(next) => {
-                onHiddenColumnIdsChange(
-                  hideable
-                    .map((column) => column.id)
-                    .filter((id) => !next.includes(id)),
-                );
-              }}
-              value={visible}
-            >
-              {hideable.map((column) => (
-                <CheckboxGroup.Item
-                  itemValue={column.id}
-                  key={column.id}
-                  label={column.header}
-                />
-              ))}
-            </CheckboxGroup.Root>
-          </div>
-        )}
-      />
+            onChange={(next) => {
+              onHiddenColumnIdsChange(
+                hideable
+                  .map((column) => column.id)
+                  .filter((id) => !next.includes(id)),
+              );
+            }}
+            options={hideable.map((column) => ({
+              value: column.id,
+              label: column.header,
+            }))}
+            value={visible}
+          />
+        </div>
+      </Popover.Content>
     </Popover.Root>
   );
 };

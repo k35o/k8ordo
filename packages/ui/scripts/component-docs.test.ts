@@ -236,6 +236,14 @@ describe('wrap', () => {
       `${'x'.repeat(40)} ${'y'.repeat(39)}\n`,
     );
   });
+
+  it('2 行目からは indent を前に付け、それも含めて 80 桁に収める', () => {
+    const word = 'x'.repeat(39);
+
+    expect(wrap(['-', word, word, word], '  ')).toBe(
+      `- ${word}\n  ${word}\n  ${word}\n`,
+    );
+  });
 });
 
 describe('fillGenerated', () => {

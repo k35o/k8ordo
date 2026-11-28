@@ -6,8 +6,6 @@ export type Mode = 'static' | 'server';
 // vite（とその Node の型）を読み込む
 /** What `framework()` takes whatever the mode. */
 export type EngineOptions = {
-  /** Where the route files live, relative to the project root. */
-  readonly routesDir?: string;
   /**
    * Compiles the client components with React Compiler — the Rust one,
    * through `@vitejs/plugin-react`'s `compiler`, which needs

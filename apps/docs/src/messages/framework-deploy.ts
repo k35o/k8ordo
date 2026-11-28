@@ -47,8 +47,8 @@ export const outputList = [
     en: '`client-files.json`: the files each page loads beyond its payload, which a client navigation starts fetching beside the payload.',
   }),
   message({
-    ja: '`sitemap.xml`：`site`を渡したときだけ書かれます。',
-    en: '`sitemap.xml`: written only when `site` is given.',
+    ja: '`sitemap.xml`：書き出したページを`site`のoriginで並べたものです。',
+    en: '`sitemap.xml`: every page written, listed at the origin of `site`.',
   }),
   message({
     ja: '`assets/`：クライアントのスクリプトとスタイルです。',
@@ -142,13 +142,13 @@ export const sitemapTitle = message({
 });
 
 export const sitemapWrite = message({
-  ja: '`framework()`の`site`にサイトの配信元を渡すと、ビルドは書いたページをすべて並べた`sitemap.xml`も書きます。リダイレクトと`route.ts`の応答、`404.html`はページではないので載りません。`sitemap.xml`を自分の`route.ts`で書くと、ビルドは`sitemap.xml`を書かず、そのファイルを使います。`site`は渡したままで構いません。',
-  en: 'Give `site` the origin the site is served from, and the build also writes `sitemap.xml`, listing every page it wrote. Redirects, `route.ts` responses and `404.html` are not pages, and are left out. Write `sitemap.xml` from a `route.ts` of your own, and the build writes none and uses that file. `site` can stay.',
+  ja: 'ビルドは、書いたページをすべて`framework()`の`site`のoriginで並べた`sitemap.xml`も書きます。リダイレクトと`route.ts`の応答、`404.html`はページではないので載りません。`sitemap.xml`を自分の`route.ts`で書くと、ビルドは`sitemap.xml`を書かず、そのファイルを使います。',
+  en: 'The build also writes `sitemap.xml`, listing every page it wrote at the origin of the `site` given to `framework()`. Redirects, `route.ts` responses and `404.html` are not pages, and are left out. Write `sitemap.xml` from a `route.ts` of your own, and the build writes none and uses that file.',
 });
 
-export const sitemapNone = message({
-  ja: '`site`を渡さなければ、`sitemap.xml`は書かれません。',
-  en: 'Without `site`, no `sitemap.xml` is written.',
+export const sitemapSite = message({
+  ja: "`site`はstaticモードでは必須で、パスを含まないoriginを渡します（`https://example.com`）。ビルドがページと`route.ts`に頼むリクエストのoriginにもなります。無いときや、パスを含むときは、設定を読んだ時点で`mode: 'static' needs site, …`のエラーになります。",
+  en: "`site` is required under static mode, and is an origin with no path (`https://example.com`). It is also the origin of every request the build makes to the pages and to a `route.ts`. Without it, or with a path in it, the config fails as it loads with `mode: 'static' needs site, …`.",
 });
 
 export const redirectsTitle = message({
@@ -635,6 +635,26 @@ export const headersNot = message({
   en: 'Leave `Cache-Control` out: it would reach the files under `assets/` and every page. A header for some paths only goes where the host reads it, a route of `vercel()`’s or a rule in `public/_headers`. For a value that differs between `vite dev` and the build, branch on `defineConfig(({ command }) => …)`.',
 });
 
+export const testingTitle = message({
+  ja: 'テスト',
+  en: 'Testing',
+});
+
+export const testingPlain = message({
+  ja: '`paramsSchema`や`src/lib/`のモジュール、クライアントコンポーネントのように、リクエストの要らないものは普通のモジュールとしてテストします。リクエストに答えるものは、ビルドが書いたハンドラを呼んでテストします。ホストが呼ぶのと同じ関数です。',
+  en: 'What needs no request, such as a `paramsSchema`, a module under `src/lib/` or a client component, is an ordinary module and is tested as one. What answers a request is tested by calling the handler the build wrote, the same function a host calls.',
+});
+
+export const testingHandler = message({
+  ja: '`guard.ts`と`route.ts`、Server Actionは、直接呼ばずにハンドラを通してテストします。`cookies()`、`responseHeaders()`、`requestHeaders()`、`nonce()`、`waitUntil()`は処理中のリクエストに属するので、リクエストの外で呼ぶと`… needs a request`のエラーになります。',
+  en: 'Test a `guard.ts`, a `route.ts` and a Server Action through the handler rather than calling them directly. `cookies()`, `responseHeaders()`, `requestHeaders()`, `nonce()` and `waitUntil()` belong to a request in progress, and outside one they fail with `… needs a request`.',
+});
+
+export const testingServe = message({
+  ja: 'ブラウザが受け取る`Set-Cookie`や圧縮のように、HTTPのやり取りまで確かめたいときは、`@k8ordo/framework/serve`の`serve()`に`port: 0`を渡し、空いているポートでビルドを動かします。`close()`で止めます。staticモードのビルドは、`dist/client/`に書かれたファイルを読むか、同じように`serve()`で配ってテストします。',
+  en: 'For a real HTTP round trip, such as the `Set-Cookie` a browser would store or a compressed answer, pass `port: 0` to `serve()` from `@k8ordo/framework/serve` to run the build on a free port, and stop it with `close()`. A static build is tested by reading the files it wrote under `dist/client/`, or by serving them the same way.',
+});
+
 export const tabsTitle = message({
   ja: 'デプロイ前に開いたタブ',
   en: 'Tabs opened before a deploy',
@@ -667,8 +687,8 @@ export const baseConfig = message({
 
 export const baseList = [
   message({
-    ja: '`href()`と`navigateTo()`：`href()`が返すURLと、`navigateTo()`の遷移先には`base`が付きます。',
-    en: '`href()` and `navigateTo()`: `href()` returns the URL with the base, and `navigateTo()` navigates to it with the base.',
+    ja: '`href()`：返すURLには`base`が付きます。コードからの遷移も、このURLを`navigation.navigate()`に渡すので`base`の下へ移ります。',
+    en: '`href()`: the URL it returns carries the base. A navigation from code hands that URL to `navigation.navigate()`, so it lands under the base too.',
   }),
   message({
     ja: '`pathname`と`usePathname()`：`base`を外した値です。',
@@ -689,8 +709,8 @@ export const baseList = [
 ] as const;
 
 export const baseRedirect = message({
-  ja: 'serverモードでServer Actionから呼ぶ`redirect()`と、`guard.ts`が返す`Response`の`location`：`base`を付けずにそのまま送ります。どちらもURLなので`href()`で作ります。ほかの方法で作ったパスには、`@k8ordo/framework`の`withBase()`で`base`を付けます。',
-  en: 'In server mode, `redirect()` from a Server Action and the `location` of a `Response` a `guard.ts` returns: sent as written, without the base. Both are URLs, so build them with `href()`. Give a path built some other way its base with `withBase()` from `@k8ordo/framework`.',
+  ja: 'serverモードでServer Actionや`guard.ts`、`route.ts`から呼ぶ`redirect()`：`base`を付けずにそのまま送ります。URLなので`href()`で作ります。ほかの方法で作ったパスには、`@k8ordo/framework`の`withBase()`で`base`を付けます。',
+  en: 'In server mode, `redirect()` from a Server Action, a `guard.ts` or a `route.ts`: sent as written, without the base. It takes a URL, so build it with `href()`. Give a path built some other way its base with `withBase()` from `@k8ordo/framework`.',
 });
 
 export const baseStatic = message({

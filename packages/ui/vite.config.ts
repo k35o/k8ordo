@@ -282,6 +282,7 @@ export default defineConfig({
           include: [
             'src/components/form/**/*.test.tsx',
             'src/components/_internal/**/*.test.tsx',
+            'src/components/buttons/**/*.test.tsx',
           ],
           // ストーリーの play では確かめられないものだけを、Playwright の本物の
           // 入力で操作する。Firefox はファイルごとのページを並べると、押された
@@ -302,7 +303,24 @@ export default defineConfig({
       {
         extends: true,
         test: {
+          name: { label: 'catalog', color: 'green' },
+          include: ['src/catalog/**/*.browser.test.tsx'],
+          browser: {
+            enabled: true,
+            instances: browsers.map((browser) => ({ browser })),
+            provider: playwright({
+              contextOptions: { reducedMotion: 'reduce', locale: 'en-US' },
+            }),
+            headless: true,
+            screenshotFailures: false,
+          },
+        },
+      },
+      {
+        extends: true,
+        test: {
           name: { label: 'helpers', color: 'blue' },
+          exclude: ['src/catalog/**/*.browser.test.tsx'],
           include: [
             'src/helpers/**/*.test.{ts,tsx}',
             'src/internal/**/*.test.ts',

@@ -12,12 +12,6 @@ import type { Placement } from '../../../types/variables';
  * 縦書き / RTL のインライン軸補正にエンジン差（既知の interop バグ）がある。
  */
 
-type AnchorCSSProperties = CSSProperties & {
-  // position-anchor は継承されないため、content 内の疑似要素（Tooltip のブリッジなど)
-  // が同じ anchor を参照できるよう、名前を CSS 変数としても配る。
-  '--ao-anchor'?: string;
-};
-
 // 物理 Placement を position-area へ写像する。
 // `span-*` は anchor 中央から該当方向へ伸びる領域を指し、その先頭辺に揃うため、
 // `-start` は開始辺揃え（span を反対側へ）、`-end` は終了辺揃えになる。
@@ -53,19 +47,15 @@ const sideGap = (side: string): CSSProperties => {
   }
 };
 
-// useId() の戻り値（`:r1:` など）は CSS の dashed-ident として無効なので無害化する。
-export const toAnchorName = (id: string): string =>
-  `--ao-popover-${id.replaceAll(/[^a-zA-Z0-9_-]/gu, '')}`;
-
 /**
- * Popover content（位置決め対象）に適用する style。
+ * Popover content（位置決め対象）に適用する style。アンカーは
+ * `showPopover({ source })` で渡した trigger（暗黙のアンカー）。
  * `flipDisabled` のときは position-try-fallbacks を付けず、はみ出しても反転しない。
  */
 export const getContentAnchorStyle = (
-  anchorName: string,
   placement: Placement,
   flipDisabled: boolean,
-): AnchorCSSProperties => {
+): CSSProperties => {
   const side = placement.split('-')[0] ?? 'bottom';
   return {
     position: 'fixed',
@@ -82,8 +72,9 @@ export const getContentAnchorStyle = (
     border: 0,
     padding: 0,
     ...sideGap(side),
-    positionAnchor: anchorName,
-    '--ao-anchor': anchorName,
+    // 初期値（normal）に頼らず auto と書く。初期値を none として扱う
+    // Chromium（144〜150）は、暗黙のアンカーを使わずに配置するため。
+    positionAnchor: 'auto',
     positionArea: POSITION_AREA[placement],
     ...(flipDisabled
       ? {}

@@ -32,8 +32,6 @@ export const en: Messages = {
 
   numberFieldIncrement: 'Increase',
   numberFieldDecrement: 'Decrease',
-  numberFieldRangeUnderflow: 'Enter {min} or more',
-  numberFieldRangeOverflow: 'Enter {max} or less',
 
   rangeSliderStart: 'minimum',
   rangeSliderEnd: 'maximum',
@@ -52,6 +50,8 @@ export const en: Messages = {
   passwordHide: 'Hide password',
 
   listBoxPlaceholder: 'Select an option',
+
+  opensInNewTab: 'opens in a new tab',
 
   breadcrumb: 'Breadcrumb',
   tabList: 'Tabs',

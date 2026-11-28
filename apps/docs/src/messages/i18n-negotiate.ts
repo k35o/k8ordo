@@ -29,8 +29,8 @@ export const negotiateSteps = [
     en: 'Otherwise, return the locale of the same language that was defined first.',
   }),
   message({
-    ja: 'どちらも無ければ、次のタグへ進みます。BCP 47ではないタグはエラーにせず飛ばします。',
-    en: 'If neither exists, move on to the next tag. A tag that is not BCP 47 is skipped without an error.',
+    ja: 'どちらも無ければ、次のタグへ進みます。BCP 47ではないタグはエラーにせず飛ばします。`null`と`undefined`も飛ばします。',
+    en: 'If neither exists, move on to the next tag. A tag that is not BCP 47 is skipped without an error, and so are `null` and `undefined`.',
   }),
   message({
     ja: '最後まで一致しなければ、既定のロケールを返します。',
@@ -180,13 +180,18 @@ export const requestTitle = message({
 });
 
 export const requestIntro = message({
-  ja: '`negotiateRequest`は、`Request`からロケールを選びます。`cookie`にCookieの名前を渡すと、訪問者が前に選んだ言語をCookieから先に読み、次に`Accept-Language`を読みます。',
-  en: '`negotiateRequest` picks a locale from a `Request`. Give it a cookie name in `cookie`, and the language the visitor chose before is read from that cookie first, then `Accept-Language`.',
+  ja: '`negotiateRequest`は、リクエストのヘッダーからロケールを選びます。`chosen`に訪問者が前に選んだ言語を渡すと、それを先に使い、次に`Accept-Language`を読みます。',
+  en: '`negotiateRequest` picks a locale from a request’s headers. Hand it the language the visitor chose before as `chosen`, and that comes first, then `Accept-Language`.',
 });
 
 export const requestCookie = message({
-  ja: 'Cookieの値もヘッダーのリストも、同じ`negotiate`の規則で選びます。定義から消したロケールがCookieに残っていても、続くヘッダーで選び直します。`cookie`を省くと、ヘッダーだけを読みます。',
-  en: 'The cookie’s value and the header’s list go through the same `negotiate` rules. A cookie still holding a locale that is no longer defined falls through to the header. Without `cookie`, only the header is read.',
+  ja: '前の選択もヘッダーのリストも、同じ`negotiate`の規則で選びます。定義から消したロケールが選択に残っていても、続くヘッダーで選び直します。`chosen`が`null`か`undefined`なら、ヘッダーだけを読みます。',
+  en: 'The earlier choice and the header’s list go through the same `negotiate` rules. A choice still holding a locale that is no longer defined falls through to the header. With `chosen` `null` or `undefined`, only the header is read.',
+});
+
+export const requestSource = message({
+  ja: "前の選択をどこに保存するかは、アプリが決めます。`@k8ordo/framework`なら、`cookies().get('locale')`でCookieを読みます。ログインした訪問者なら、プロフィールの言語を渡してもかまいません。このパッケージはCookieを読みません。",
+  en: "Where the earlier choice is kept is up to the app. Under `@k8ordo/framework`, read the cookie with `cookies().get('locale')`. For a signed-in visitor, the profile’s language works as well. The package itself reads no cookie.",
 });
 
 export const requestWriterBefore = message({
@@ -205,8 +210,8 @@ export const serverTitle = message({
 });
 
 export const serverGuardCallout = message({
-  ja: 'Cookie、次にAccept-Languageの順で選ぶ',
-  en: 'The cookie first, then Accept-Language',
+  ja: '前の選択、次にAccept-Languageの順で選ぶ',
+  en: 'The earlier choice first, then Accept-Language',
 });
 
 export const serverStatusCallout = message({
@@ -215,8 +220,8 @@ export const serverStatusCallout = message({
 });
 
 export const serverIntro = message({
-  ja: 'サーバーが`/`へのリクエストに応答できるなら、ページを描画せずにリダイレクトします。`negotiateRequest`でロケールを選び、そのロケールのURLへの`307`を返します。',
-  en: 'When a server answers requests for `/`, it can redirect without rendering a page. Pick a locale with `negotiateRequest` and return a `307` to that locale’s URL.',
+  ja: 'サーバーが`/`へのリクエストに応答できるなら、ページを描画せずにリダイレクトします。`negotiateRequest`でロケールを選び、そのロケールのURLへの`307`を返します。前の選択は、呼び出す側がCookieなどから読んで渡します。',
+  en: 'When a server answers requests for `/`, it can redirect without rendering a page. Pick a locale with `negotiateRequest` and return a `307` to that locale’s URL. The caller reads the earlier choice, from a cookie or elsewhere, and passes it in.',
 });
 
 export const serverBase = message({
@@ -225,8 +230,8 @@ export const serverBase = message({
 });
 
 export const serverFramework = message({
-  ja: '`@k8ordo/framework`では、serverモードならこの処理を`/`だけに答える`guard.ts`に、staticモードなら次の節の処理を`/`のページに書きます。詳しくは`@k8ordo/framework`の',
-  en: 'In `@k8ordo/framework`, this goes in a `guard.ts` that answers `/` alone under server mode, and the next section’s code goes in the `/` page under static mode. See `@k8ordo/framework`’s ',
+  ja: '`@k8ordo/framework`のserverモードでは、`/`だけに答える`guard.ts`で`Response`の代わりに`redirect()`を使います。staticモードでは、次の節の処理を`/`のページに書きます。詳しくは`@k8ordo/framework`の',
+  en: 'Under `@k8ordo/framework`’s server mode, a `guard.ts` that answers `/` alone does this with `redirect()` instead of a `Response`. Under static mode, the next section’s code goes in the `/` page. See `@k8ordo/framework`’s ',
 });
 
 export const see = message({
@@ -265,6 +270,6 @@ export const staticCookieTitle = message({
 });
 
 export const staticCookie = message({
-  ja: '選んだ言語をCookieに覚えているなら、その値を`navigator.languages`の前に並べて`negotiate`に渡します。サーバーの`negotiateRequest`が読むのと同じ順番です。',
-  en: 'If the chosen language is kept in a cookie, put its value in front of `navigator.languages` and hand both to `negotiate`. That is the order `negotiateRequest` reads them in on a server.',
+  ja: '選んだ言語をCookieに覚えているなら、その値を`navigator.languages`の前に並べて`negotiate`に渡します。サーバーの`negotiateRequest`が読むのと同じ順番です。Cookieが無いときの`undefined`は、`negotiate`が飛ばします。',
+  en: 'If the chosen language is kept in a cookie, put its value in front of `navigator.languages` and hand both to `negotiate`. That is the order `negotiateRequest` reads them in on a server. Without the cookie the value is `undefined`, which `negotiate` skips.',
 });

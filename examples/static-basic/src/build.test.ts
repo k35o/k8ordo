@@ -153,6 +153,38 @@ describe('the static build', () => {
     expect(read('products', '1', 'index.html')).toContain('number:1');
   });
 
+  it('marks the link to the page on screen as the page from the layout, a Server Component', () => {
+    expect(read('index.html')).toContain(
+      '<a aria-current="page" href="/">home</a>',
+    );
+    expect(read('products', 'index.html')).toContain(
+      '<a aria-current="page" href="/products">products</a>',
+    );
+    expect(read('products', '1', 'index.html')).toContain(
+      '<a aria-current="page" href="/products/1">product 1</a>',
+    );
+    expect(read('products', '2', 'index.html')).toContain(
+      '<a href="/products/1">product 1</a>',
+    );
+    const guide = read('guide', 'index.html');
+    expect(guide).toContain(
+      '<a href="/">home</a> <a href="/products">products</a>',
+    );
+    expect(guide).toContain('<a aria-current="page" href="/guide">guide</a>');
+    expect(read('en', 'about', 'index.html')).toContain(
+      '<a aria-current="page" href="/en/about">about</a>',
+    );
+    expect(read('ja', 'about', 'index.html')).toContain(
+      '<a href="/en/about">about</a>',
+    );
+  });
+
+  it('marks the link to a section the page is inside as current, not as the page', () => {
+    expect(read('products', '1', 'index.html')).toContain(
+      '<a aria-current="true" href="/products">products</a>',
+    );
+  });
+
   it('gives a route group its layout without a URL segment', () => {
     const html = read('guide', 'index.html');
     expect(html).toContain('docs-shell');
@@ -445,6 +477,24 @@ describe('the static build under a base', () => {
     expect(existsSync(path.join(underBase, 'index.rsc'))).toBe(true);
     expect(existsSync(path.join(underBase, 'products', '1', 'index.rsc'))).toBe(
       true,
+    );
+  });
+
+  it('marks the link to the page on screen though its href carries the base', () => {
+    const html = readUnderBase('products', 'index.html');
+    expect(html).toContain(
+      '<a aria-current="page" href="/site/products">products</a>',
+    );
+    expect(html).toContain('<a href="/site/">home</a>');
+  });
+
+  it('marks the link to a section the page is inside though its href carries the base', () => {
+    const html = readUnderBase('products', '1', 'index.html');
+    expect(html).toContain(
+      '<a aria-current="true" href="/site/products">products</a>',
+    );
+    expect(html).toContain(
+      '<a aria-current="page" href="/site/products/1">product 1</a>',
     );
   });
 
@@ -781,6 +831,9 @@ describe.each(browserTypes)('a written page in $name', ({ type }) => {
     });
     origin = `http://127.0.0.1:${String((server.address() as AddressInfo).port)}`;
     browser = await type.launch();
+    // Playwright は Firefox をウィンドウ無しで起動し、立ち上げの残りは最初に
+    // 開くページが払う。それがどれかのテストの持ち時間に入らないよう、ここで開いて閉じる
+    await (await browser.newPage()).close();
   }, 60_000);
 
   afterEach(() => {

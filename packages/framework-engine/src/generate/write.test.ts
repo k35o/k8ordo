@@ -10,7 +10,9 @@ import {
   generate,
   localeSetOf,
   pagesReadingSearch,
+  readExports,
   REEXPORTS_ALL,
+  scanRoutes,
   silentRoutes,
 } from './write';
 
@@ -125,7 +127,7 @@ describe('exportsOf', () => {
 // search は @k8ordo/state の urlReader で読むので、アプリの依存が要る
 const generateWith = async (
   dependencies: Record<string, string>,
-): Promise<readonly Problem[]> => {
+): Promise<{ problems: readonly Problem[]; register: string | null }> => {
   const root = await mkdtemp(path.join(tmpdir(), 'k8ordo-search-'));
   try {
     const routesDir = path.join(root, 'src/routes');
@@ -138,13 +140,20 @@ const generateWith = async (
       path.join(routesDir, 'products/page.tsx'),
       'export const search = listState.url;\nexport default function Page() { return null; }\n',
     );
+    const outDir = path.join(root, '.k8ordo');
     const { problems } = await generate({
       root,
       routesDir,
-      outDir: path.join(root, '.k8ordo'),
+      outDir,
       mode: 'server',
     });
-    return problems;
+    return {
+      problems,
+      register:
+        problems.length > 0
+          ? null
+          : await readFile(path.join(outDir, 'register.gen.ts'), 'utf8'),
+    };
   } finally {
     await rm(root, { recursive: true, force: true });
   }
@@ -152,7 +161,8 @@ const generateWith = async (
 
 describe('generate, for a page that exports search', () => {
   it('refuses it by name in an application that does not depend on @k8ordo/state', async () => {
-    expect(await generateWith({ '@k8ordo/framework': '*' })).toStrictEqual([
+    const { problems } = await generateWith({ '@k8ordo/framework': '*' });
+    expect(problems).toStrictEqual([
       {
         path: 'products/page.tsx',
         message:
@@ -162,9 +172,24 @@ describe('generate, for a page that exports search', () => {
   });
 
   it('accepts it once the application depends on @k8ordo/state', async () => {
-    expect(
-      await generateWith({ '@k8ordo/framework': '*', '@k8ordo/state': '*' }),
-    ).toStrictEqual([]);
+    const { problems } = await generateWith({
+      '@k8ordo/framework': '*',
+      '@k8ordo/state': '*',
+    });
+    expect(problems).toStrictEqual([]);
+  });
+});
+
+describe('generate, for an application that depends on @k8ordo/state', () => {
+  it('registers nothing with it, since its links take the URL the router built', async () => {
+    const { register } = await generateWith({
+      '@k8ordo/framework': '*',
+      '@k8ordo/state': '*',
+    });
+    expect(register).toContain(
+      "declare module '@k8ordo/framework/generated' {",
+    );
+    expect(register).not.toContain('@k8ordo/state');
   });
 });
 
@@ -413,5 +438,52 @@ describe('generate, for an application with a locale set', () => {
     expect(warnings).toStrictEqual([
       "src/i18n.ts does not export `locales` by name (`export *` and a type-only export do not count), so @k8ordo/i18n's Register is not generated and a message missing a locale compiles — export the locale set from it as `locales`",
     ]);
+  });
+});
+
+describe('reading the application', () => {
+  it('refuses a missing routes directory by name, rather than building an empty site', async () => {
+    const root = await mkdtemp(path.join(tmpdir(), 'k8ordo-no-routes-'));
+    try {
+      const routesDir = path.join(root, 'src/routes');
+      await expect(scanRoutes(routesDir)).rejects.toThrow(
+        `the route files live in src/routes/, and ${routesDir} does not exist`,
+      );
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('throws on a route file it cannot read, rather than taking it for one that exports nothing', async () => {
+    const root = await mkdtemp(path.join(tmpdir(), 'k8ordo-unread-'));
+    try {
+      await expect(readExports(root, ['page.tsx'])).rejects.toThrow(/ENOENT/u);
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses a package.json that is not JSON, rather than taking it for one that lists nothing', async () => {
+    const root = await mkdtemp(path.join(tmpdir(), 'k8ordo-broken-manifest-'));
+    try {
+      await mkdir(path.join(root, 'src/routes'), { recursive: true });
+      await writeFile(path.join(root, 'package.json'), '{ "dependencies": ');
+      await writeFile(
+        path.join(root, 'src/routes/page.tsx'),
+        'export default function Page() { return null; }\n',
+      );
+      await expect(
+        generate({
+          root,
+          routesDir: path.join(root, 'src/routes'),
+          outDir: path.join(root, '.k8ordo'),
+          mode: 'server',
+        }),
+      ).rejects.toThrow(
+        `${path.join(root, 'package.json')} is not JSON, so which packages the application depends on cannot be read`,
+      );
+    } finally {
+      await rm(root, { recursive: true, force: true });
+    }
   });
 });

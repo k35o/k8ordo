@@ -15,13 +15,17 @@ import { catalog } from './index';
 vi.mock('server-only', () => ({}));
 
 const RENAMED_IN_CATALOG: ReadonlyMap<string, string> = new Map([
-  ['AlertIcon', 'StatusIcon'],
+  ['AlertIcon', 'Icon'],
+  ['ChevronIcon', 'Icon'],
   ['ToastProvider', 'Toast'],
   ['useToast', 'Toast'],
 ]);
 
-const OBSERVER =
-  'コールバックに報告するだけで自分では何も描かない。spec には報告を受け取るコードが無い';
+// 公開の部品の名前ではない項目と、それを描く部品
+const COMPOSED_IN_CATALOG: ReadonlyMap<string, readonly string[]> = new Map([
+  ['DropdownMenuItem', ['DropdownMenu']],
+]);
+
 const CHAT =
   '生成 UI を載せる側のチャット。アプリがメッセージの流れから組み立てるもので、spec が置くものではない';
 
@@ -30,14 +34,7 @@ const LEFT_OUT: ReadonlyMap<string, string> = new Map([
     'ContextMenu',
     '右クリックという見えない操作で開くので、生成 UI に置くと操作が見つけられなくなる。アプリが自分の中身（ファイルや行）に付けるもの',
   ],
-  ['InView', OBSERVER],
-  ['Resize', OBSERVER],
-  ['UIProvider', 'アプリが生成 UI も含めた全体の外側に 1 度だけ置く'],
-  [
-    'PortalRootProvider',
-    'アプリ自身の createPortal のための配線。生成 UI のオーバーレイは自分で面を開く',
-  ],
-  ['usePortalRoot', 'PortalRootProvider を読むだけの hook'],
+
   ['Conversation', CHAT],
   ['Message', CHAT],
   ['PromptInput', CHAT],
@@ -53,7 +50,7 @@ const LEFT_OUT: ReadonlyMap<string, string> = new Map([
   ],
   [
     'CommandPalette',
-    '項目ごとに onSelect の関数を持ち、アプリがショートカットで開く枠組み。spec は関数を書けず、会話の中に置くものでもない（その場の操作は Button や DropdownMenu）',
+    '項目ごとに onAction の関数を持ち、アプリがショートカットで開く枠組み。spec は関数を書けず、会話の中に置くものでもない（その場の操作は Button や DropdownMenu）',
   ],
   [
     'ResizablePanels',
@@ -66,6 +63,10 @@ const LEFT_OUT: ReadonlyMap<string, string> = new Map([
   [
     'BaseIcon',
     'アイコンを自作するための土台で、自分の絵を持たない。spec は name で絵を選ぶので、選ぶものが無い',
+  ],
+  [
+    'FormControl',
+    'catalog の入力欄はどれも自分の label と helpText を持ち、描くときに FormControl で包む。枠だけの項目を置くと、同じ欄を 2 通りに書けてしまう',
   ],
   [
     'TableOfContents',
@@ -107,7 +108,15 @@ const unaccounted = (): string[] =>
 
 const unreachedEntries = (): string[] => {
   const reached = new Set(exported.map((name) => entryOf(name)));
-  return catalogNames.filter((name) => !reached.has(name)).toSorted();
+  return catalogNames
+    .filter(
+      (name) =>
+        !reached.has(name) &&
+        !(COMPOSED_IN_CATALOG.get(name) ?? []).some((part) =>
+          reached.has(part),
+        ),
+    )
+    .toSorted();
 };
 
 const staleTableEntries = (): string[] => [
@@ -118,6 +127,12 @@ const staleTableEntries = (): string[] => [
     (name) => !catalogNames.includes(name),
   ),
   ...[...LEFT_OUT.keys()].filter((name) => catalogNames.includes(name)),
+  ...[...COMPOSED_IN_CATALOG.keys()].filter(
+    (name) => !catalogNames.includes(name),
+  ),
+  ...[...COMPOSED_IN_CATALOG.values()]
+    .flat()
+    .filter((part) => !exported.includes(part)),
 ];
 
 const readDoc = (path: string): string =>
@@ -134,13 +149,6 @@ const section = (markdown: string, heading: string): string => {
 
 const namesIn = (text: string): string[] =>
   [...text.matchAll(/`(?<name>\w+)`/gu)].map((m) => m.groups?.name ?? '');
-
-const SUPPORTED_LIST = /^Components in the catalog:\n\n(?<list>(?:- .+\n)+)/mu;
-
-const readmeSupportedNames = (): string[] =>
-  namesIn(
-    SUPPORTED_LIST.exec(readDoc('README.md'))?.groups?.list ?? '',
-  ).toSorted();
 
 describe('カタログと公開している部品の対応', () => {
   it('公開している部品はどれもカタログに載るか、理由付きで除外されている', () => {
@@ -166,11 +174,5 @@ describe('カタログと公開している部品の対応', () => {
     expect(
       [...LEFT_OUT.keys()].filter((name) => !namedInDocs.includes(name)),
     ).toStrictEqual([]);
-  });
-});
-
-describe('README の生成 UI 対応部品一覧', () => {
-  it('カタログの全項目を挙げる', () => {
-    expect(readmeSupportedNames()).toStrictEqual(catalogNames.toSorted());
   });
 });

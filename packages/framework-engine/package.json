@@ -20,6 +20,10 @@
       "types": "./dist/runtime/server.d.mts",
       "default": "./dist/runtime/server.mjs"
     },
+    "./redirect": {
+      "types": "./dist/runtime/redirect.d.mts",
+      "default": "./dist/runtime/redirect.mjs"
+    },
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -32,7 +36,7 @@
   "dependencies": {
     "@vitejs/plugin-react": "catalog:",
     "@vitejs/plugin-rsc": "0.5.39",
-    "baseline-browser-mapping": "2.11.38",
+    "baseline-browser-mapping": "2.11.39",
     "rsc-html-stream": "0.0.8"
   },
   "devDependencies": {

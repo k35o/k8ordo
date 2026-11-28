@@ -40,11 +40,6 @@ export const categoryLayout = message({
   en: 'Layout',
 });
 
-export const categoryObservers = message({
-  ja: 'Observers',
-  en: 'Observers',
-});
-
 export const categoryIcons = message({
   ja: 'Icons',
   en: 'Icons',
@@ -110,9 +105,13 @@ export const button = {
     ja: '無効',
     en: 'Disabled',
   }),
-  renderItemTitle: message({
-    ja: 'リンクへの差し替え',
-    en: 'Rendering as a link',
+  linkTitle: message({
+    ja: 'リンク',
+    en: 'As a link',
+  }),
+  linkDescription: message({
+    ja: '`href`を渡すと`<a>`を描きます。見た目はボタンと同じで、`target`などの属性は`<a>`に渡ります。Next.jsの`Link`のようなリンク部品は、`renderAnchor`で受け取ったpropsを展開して描きます。',
+    en: 'With `href`, it renders an `<a>` that looks the same, and attributes such as `target` go to the `<a>`. A link component such as Next.js’s `Link` is drawn through `renderAnchor`, spreading the props it receives.',
   }),
 };
 
@@ -126,16 +125,16 @@ export const iconButton = {
     en: 'Sizes',
   }),
   backgroundsTitle: message({
-    ja: '色',
-    en: 'Colors',
+    ja: 'バリアントと色',
+    en: 'Variants and colors',
   }),
   disabledTitle: message({
     ja: '無効',
     en: 'Disabled',
   }),
-  renderItemTitle: message({
-    ja: 'リンクへの差し替え',
-    en: 'Rendering as a link',
+  linkTitle: message({
+    ja: 'リンク',
+    en: 'As a link',
   }),
 };
 
@@ -153,8 +152,8 @@ export const copyButton = {
     en: 'Icon only',
   }),
   iconOnlyDescription: message({
-    ja: '`iconOnly`を付けると透明な`IconButton`になります。`label`はツールチップと読み上げの名前になります。',
-    en: 'With `iconOnly` it becomes a transparent `IconButton`. `label` becomes its tooltip and accessible name.',
+    ja: '`iconOnly`を付けるとスケルトンの`IconButton`になります。`label`はツールチップと読み上げの名前になります。',
+    en: 'With `iconOnly` it becomes a skeleton `IconButton`. `label` becomes its tooltip and accessible name.',
   }),
   lazyValueTitle: message({
     ja: '押したときに作るテキスト',
@@ -168,8 +167,8 @@ export const copyButton = {
 
 export const anchor = {
   description: message({
-    ja: 'テキストのリンクです。外部のリンクには新しいタブのアイコンが付きます。',
-    en: 'A text link. An external link gets a new-tab icon.',
+    ja: 'テキストのリンクです。`https://`や`//`で始まる外部のリンクは新しいタブで開き、アイコンと読み上げ専用の「新しいタブで開きます」が付きます。',
+    en: 'A text link. An external link, one starting with `https://` or `//`, opens in a new tab with an icon and visually hidden “opens in a new tab” wording.',
   }),
   openInNewTabTitle: message({
     ja: '新しいタブで開くリンク',
@@ -193,6 +192,22 @@ export const textField = {
   placeholderTitle: message({
     ja: 'プレースホルダー',
     en: 'Placeholder',
+  }),
+  dateTimeTitle: message({
+    ja: '日付と時刻',
+    en: 'Date and time',
+  }),
+  dateTimeDescription: message({
+    ja: '`type`が`date`や`time`のときは、ブラウザの日付や時刻の入力欄になります。値はネイティブの文字列で、日付なら`YYYY-MM-DD`です。範囲はブラウザが検証します。数字の幅をそろえるので、値が変わっても桁は横にずれません。',
+    en: 'With a `type` of `date`, `time` and the like, it is the browser’s own date or time input. The value is the native string, `YYYY-MM-DD` for a date, and the browser checks the range. The digits are tabular, so they do not shift sideways as the value changes.',
+  }),
+  formTitle: message({
+    ja: '`@k8ordo/form`との組み合わせ',
+    en: 'With `@k8ordo/form`',
+  }),
+  formDescription: message({
+    ja: '`z.iso.date()`から作った`input`をそのまま展開できます。導いた`type`も、取り除かずに渡せます。',
+    en: 'Spread the `input` derived from `z.iso.date()` as it is. The derived `type` goes with it.',
   }),
   disabledTitle: message({
     ja: '無効',
@@ -240,6 +255,10 @@ export const numberField = {
     ja: '最小値と最大値',
     en: 'Min and max',
   }),
+  minMaxDescription: message({
+    ja: '範囲の外の値は、フォーカスを外したときと`Enter`を押したときに範囲に収めます。`Enter`でフォームを送信するときも、範囲に収めた値が送られます。',
+    en: 'An out-of-range value is clamped into range when the field is left and when `Enter` is pressed in it, so a form submitted with `Enter` sends the clamped value.',
+  }),
   disabledTitle: message({
     ja: '無効',
     en: 'Disabled',
@@ -267,6 +286,10 @@ export const select = {
     ja: '必須',
     en: 'Required',
   }),
+  requiredDescription: message({
+    ja: '`placeholder`を渡すと、値が空文字の選択肢を先頭に置きます。空の選択肢が無い`<select>`はいつもどれかが選ばれているので、`required`はこの選択肢があるときだけ働きます。この選択肢も選べるので、任意の欄は未選択に戻せます。',
+    en: '`placeholder` puts an option whose value is the empty string first. A `<select>` without one always has a choice selected, so `required` takes effect only with it. The option stays selectable, so an optional field can go back to no choice.',
+  }),
   defaultValueTitle: message({
     ja: '既定値',
     en: 'Default value',
@@ -289,6 +312,14 @@ export const checkbox = {
   controlledTitle: message({
     ja: '制御モード',
     en: 'Controlled',
+  }),
+  helpTextTitle: message({
+    ja: 'ヘルプテキスト',
+    en: 'Help text',
+  }),
+  errorTextTitle: message({
+    ja: 'エラーテキスト',
+    en: 'Error text',
   }),
 };
 
@@ -335,6 +366,14 @@ export const switchInput = {
   controlledTitle: message({
     ja: '制御モード',
     en: 'Controlled',
+  }),
+  helpTextTitle: message({
+    ja: 'ヘルプテキスト',
+    en: 'Help text',
+  }),
+  errorTextTitle: message({
+    ja: 'エラーテキスト',
+    en: 'Error text',
   }),
 };
 
@@ -494,37 +533,6 @@ export const rangeSlider = {
   }),
 };
 
-export const dateField = {
-  description: message({
-    ja: 'ブラウザの日付の入力欄（`type="date"`）です。値は`YYYY-MM-DD`の文字列です。',
-    en: 'The browser’s own date input (`type="date"`). The value is a `YYYY-MM-DD` string.',
-  }),
-  minMaxTitle: message({
-    ja: '最小値と最大値',
-    en: 'Min and max',
-  }),
-  minMaxDescription: message({
-    ja: '範囲はブラウザが検証します。範囲の外の日付は`rangeUnderflow`か`rangeOverflow`になります。',
-    en: 'The browser checks the range. A date outside it reports `rangeUnderflow` or `rangeOverflow`.',
-  }),
-  disabledTitle: message({
-    ja: '無効',
-    en: 'Disabled',
-  }),
-  invalidTitle: message({
-    ja: 'エラー',
-    en: 'Invalid',
-  }),
-  formTitle: message({
-    ja: '`@k8ordo/form`との組み合わせ',
-    en: 'With `@k8ordo/form`',
-  }),
-  formDescription: message({
-    ja: '`z.iso.date()`から作った`input`をそのまま展開できます。`type`を取り除く必要はありません。',
-    en: 'Spread the `input` derived from `z.iso.date()` as it is. There is no need to take `type` out.',
-  }),
-};
-
 export const colorPicker = {
   description: message({
     ja: '色を`#rrggbb`で選ぶ入力欄です。色相と彩度、明度のつまみと、見本から選べます。',
@@ -669,6 +677,14 @@ export const fileField = {
     ja: 'ファイルを選ぶ入力欄です。選ぶボタンとドロップ領域、選んだファイルの一覧を組み合わせて作ります。',
     en: 'A file field, composed from a trigger, a dropzone and the list of chosen files.',
   }),
+  triggerTitle: message({
+    ja: '選ぶボタンとラベル',
+    en: 'The trigger and the label',
+  }),
+  triggerDescription: message({
+    ja: '送信する`<input type="file">`は見えず、Tabでも止まりません。操作するのは`FileField.Trigger`のボタンです。`renderItem`が受け取る`id`、`aria-labelledby`、`aria-describedby`、`ref`、`onClick`、`disabled`をボタンに展開します。`FormControl`には`labelAs="group"`を付けて包みます。ボタンの名前は欄のラベルとボタンの文字になり、ヘルプやエラーの文がボタンの説明になります。ボタンは`required`を持てないので、必須の印もボタンの名前に入れて伝えます。送信に失敗してフォーカスが欄へ移るときも、ボタンにフォーカスが移ります。',
+    en: 'The `<input type="file">` that submits is hidden and out of the Tab order; what a person operates is the `FileField.Trigger` button. Spread the `id`, `aria-labelledby`, `aria-describedby`, `ref`, `onClick` and `disabled` that `renderItem` receives onto the button. Wrap it in `FormControl` with `labelAs="group"`: the button is named by the field’s label followed by its own text, and the help or error text describes it. A button cannot take `required`, so the required mark goes into its name as well. When a failed submission moves focus to the field, focus lands on the button.',
+  }),
   dropzoneTitle: message({
     ja: 'ドロップでの追加',
     en: 'Adding files by drop',
@@ -697,8 +713,8 @@ export const fileField = {
 
 export const formControl = {
   description: message({
-    ja: '入力欄にラベルとヘルプ、エラーの表示を付けるラッパーです。入力欄は`renderInput`で描きます。',
-    en: 'A wrapper that gives a field its label, help text and error text. The field itself is drawn in `renderInput`.',
+    ja: '入力欄にラベルとヘルプ、エラーの表示を付けるラッパーです。入力欄は`renderInput`で描きます。`Radio`のようなグループには`labelAs="group"`を付け、ラベルをグループの名前にします。Client Componentではないので、Server Componentからも`renderInput`を渡せます。',
+    en: 'A wrapper that gives a field its label, help text and error text. The field itself is drawn in `renderInput`. For a group such as `Radio`, `labelAs="group"` makes the label the group’s name. It is not a Client Component, so a Server Component can pass it `renderInput` too.',
   }),
   helpTextTitle: message({
     ja: 'ヘルプテキスト',
@@ -711,6 +727,10 @@ export const formControl = {
   requiredTitle: message({
     ja: '必須',
     en: 'Required',
+  }),
+  groupTitle: message({
+    ja: 'グループ',
+    en: 'Group',
   }),
   disabledTitle: message({
     ja: '無効',
@@ -731,8 +751,8 @@ export const form = {
 
 export const accordion = {
   description: message({
-    ja: '開閉できる節です。見出しを押すと本文が開きます。',
-    en: 'A collapsible section. Pressing its heading opens the body.',
+    ja: '開閉できる節です。見出しを押すと本文が開きます。`Accordion.Button`は`level`の見出しの中にボタンを描きます。',
+    en: 'A collapsible section. Pressing its heading opens the body. `Accordion.Button` draws its button inside a heading of the given `level`.',
   }),
   defaultOpenTitle: message({
     ja: '既定で開く',
@@ -787,9 +807,17 @@ export const card = {
     ja: '幅',
     en: 'Width',
   }),
+  wholeTitle: message({
+    ja: 'リンクとボタン',
+    en: 'Link and button',
+  }),
+  wholeDescription: message({
+    ja: '`href`を渡すとカード全体が1つのリンクに、`action`を渡すと1つのボタンになります。キーボードでも押せて、読み上げではカードの中の文字が名前になります。中のリンクやボタンは、その上で別に押せます。',
+    en: 'With `href` the whole card is one link, and with `action` one button. A keyboard reaches it, and a screen reader names it by the text in the card. Links and buttons inside the card stay pressable on their own.',
+  }),
   interactiveDescription: message({
-    ja: '`interactive`を付けると、ホバーで少し大きく、押すと少し小さくなります。カード全体をリンクやボタンにするときに使います。',
-    en: 'With `interactive`, the card grows a little on hover and shrinks a little when pressed. Use it to make the whole card a link or a button.',
+    ja: '`interactive`は見た目だけを付けます。ホバーで少し大きく、押すと少し小さくなります。中身を自分のリンクで包むときに使います。',
+    en: '`interactive` gives the look alone: the card grows a little on hover and shrinks a little when pressed. Use it when you wrap the content in a link of your own.',
   }),
 };
 
@@ -812,6 +840,12 @@ export const codeBlock = {
   importDescription: message({
     ja: 'ハイライトはサーバーで済ませるので、shikiはブラウザに送られません。`server-only`をimportしているので、Client Componentから読み込むとビルドがエラーになります。',
     en: 'Highlighting happens on the server, so shiki never reaches the browser. It imports `server-only`, so importing it from a Client Component fails the build.',
+  }),
+  install: message({
+    ja: (version: string) =>
+      `shikiは任意のpeerなので、\`@k8ordo/ui/code-block\`を使うアプリが\`shiki\`の${version}以上を入れます。`,
+    en: (version) =>
+      `shiki is an optional peer: the application that uses \`@k8ordo/ui/code-block\` installs \`shiki\` ${version} or later.`,
   }),
   titleTitle: message({
     ja: 'ファイル名',
@@ -1153,12 +1187,48 @@ export const tooltip = {
 
 export const dialog = {
   description: message({
-    ja: '`Modal`の中に置く見出しと本文、閉じるボタンの組です。',
-    en: 'A heading, a body and a close button, placed inside `Modal`.',
+    ja: '画面の中央か下から開くモーダルのダイアログです。`title`は閉じるボタンの付いた見出しになり、ダイアログの名前になります。',
+    en: 'A modal dialog that opens in the center or from the bottom of the screen. `title` becomes a heading with a close button, and names the dialog.',
   }),
   alertDialogTitle: message({
     ja: 'アラートダイアログ',
     en: 'Alert dialog',
+  }),
+  alertDialogDescription: message({
+    ja: '`role="alertdialog"`は`<dialog>`自身に付きます。`description`は子の上に描かれ、ダイアログの説明として読み上げられるのはこの文だけです。ボタンやフォームの入った本文は説明になりません。',
+    en: '`role="alertdialog"` goes on the `<dialog>` itself. `description` is drawn above the children, and it is the only text read out as the dialog’s description; a body that holds buttons or a form never is.',
+  }),
+  sideTitle: message({
+    ja: '下から開く',
+    en: 'From the bottom',
+  }),
+  sideDescription: message({
+    ja: '`side="bottom"`で、画面の下から出るシートになります。左右から出すパネルには`Drawer`を使います。',
+    en: '`side="bottom"` makes it a sheet that slides up from the bottom of the screen. For a panel from the left or the right, use `Drawer`.',
+  }),
+  labelTitle: message({
+    ja: '見出しのないダイアログ',
+    en: 'Without a heading',
+  }),
+  labelDescription: message({
+    ja: '見出しを描かないときは、`title`の代わりに`label`で名前を付けます。閉じるボタンも描かないので、閉じる操作を中に置くか、Escapeと枠外のクリックに任せます。',
+    en: 'A dialog that draws no heading is named by `label` instead of `title`. It draws no close button either, so put a way to close it inside, or leave it to Escape and a click outside.',
+  }),
+  closingTitle: message({
+    ja: '閉じたときの動き',
+    en: 'Closing',
+  }),
+  closingDescription: message({
+    ja: '`onClose`は、開いているはずのダイアログが閉じたときに呼ばれます。Escape、枠外のクリック、閉じるボタン、`<form method="dialog">`、`<Activity>`で隠れたときです。`isOpen`を`false`にして自分で閉じたときは呼ばれないので、`onClose`で前のページへ戻るダイアログが2回戻ることはありません。閉じている間も子は外れず、制御していない入力欄は次に開くまで値を保ちます。開くたびに初めからにしたいときは、`isOpen`を条件にして子を描きます。',
+    en: '`onClose` is called when the dialog closes while it is meant to be open: Escape, a click outside, the close button, a `<form method="dialog">`, or `<Activity>` hiding it. It is not called when you set `isOpen` to `false` yourself, so a dialog that goes back a page in `onClose` never goes back twice. The children stay mounted while the dialog is closed, and an uncontrolled field keeps its value until the next opening. To start over on every opening, render the children under `isOpen`.',
+  }),
+  portalRootTitle: message({
+    ja: 'トップレイヤーとポータル',
+    en: 'Top layer and portals',
+  }),
+  portalRootDescription: message({
+    ja: '`Dialog`と`Drawer`はブラウザのトップレイヤーの`<dialog>`に表示され、後ろのページは操作できなくなります。そのため、`document.body`にポータルした要素はダイアログの後ろに隠れ、押せません。自分で浮かせるUIは、`popover`属性を付けてその場に描けばトップレイヤーに出ます。ポータルするライブラリには、`ref`で受け取った`<dialog>`をポータル先として渡します。奥の部品で要るときは、子の中に自分のContextを置きます。ダイアログの中の`useToast`は、トーストをその`<dialog>`の中に出し、閉じると一緒に消えます。',
+    en: '`Dialog` and `Drawer` render in a `<dialog>` in the browser’s top layer, and the page behind them goes inert, so anything portaled to `document.body` ends up behind them, out of reach. Floating UI of your own opens in place with the `popover` attribute, which reaches the top layer from where it is. Hand a library that portals the `<dialog>` you get from `ref` as its container; if a part deep inside needs it, put your own Context in the children. `useToast` inside a dialog opens the toast in that `<dialog>`, and it goes away when the dialog closes.',
   }),
 };
 
@@ -1171,6 +1241,14 @@ export const drawer = {
     ja: '独自の中身',
     en: 'Custom content',
   }),
+  sideTitle: message({
+    ja: '左から出す',
+    en: 'From the left',
+  }),
+  sideDescription: message({
+    ja: '`side="left"`で左の端から出ます。`title`は閉じるボタンの付いた見出しになり、`description`は子の上に描かれて説明として読み上げられます。',
+    en: '`side="left"` slides it in from the left edge. `title` becomes a heading with a close button, and `description` is drawn above the children and read out as the description.',
+  }),
 };
 
 export const commandPalette = {
@@ -1179,46 +1257,23 @@ export const commandPalette = {
     en: 'A palette that filters commands as you type and runs them from the keyboard.',
   }),
   usageDescription: message({
-    ja: '`label`と`keywords`を、大文字と小文字を区別せずに絞り込みます。`↓`と`↑`で移動し、端では反対側へ回ります。`Enter`かクリックでパレットを閉じてから`onSelect`を呼びます。フォーカスは検索欄に置いたままです。同じ`group`の項目は見出しの下にまとまり、`shortcut`のキーは`Kbd`で添えます。',
-    en: 'It filters on `label` and `keywords`, ignoring case. `↓` and `↑` move through the matches and wrap around. `Enter` or a click closes the palette and then calls `onSelect`. Focus stays in the search field. Items that share a `group` gather under its heading, and `shortcut` keys are drawn with `Kbd`.',
+    ja: '`label`と`keywords`を、アプリの言語の規則で大文字と小文字を区別せずに絞り込みます。`↓`と`↑`で移動し、端では反対側へ回ります。`Enter`かクリックでパレットを閉じてから`onAction`を呼びます。フォーカスは検索欄に置いたままです。同じ`group`の項目は見出しの下にまとまり、`shortcut`のキーは`Kbd`で添えます。',
+    en: 'It filters on `label` and `keywords`, ignoring case by the rules of the app’s language. `↓` and `↑` move through the matches and wrap around. `Enter` or a click closes the palette and then calls `onAction`. Focus stays in the search field. Items that share a `group` gather under its heading, and `shortcut` keys are drawn with `Kbd`.',
   }),
   shortcutTitle: message({
     ja: 'キーでの開閉',
     en: 'Opening and closing from a key',
   }),
   shortcutDescription: message({
-    ja: '開閉は`Modal`と同じく`isOpen`と`onClose`で行います。⌘KやCtrl+Kのようなキーは、アプリ側で割り当てます。閉じるとフォーカスは開く前の場所へ戻り、次に開いたときは空の検索から始まります。',
-    en: 'Open and close it like `Modal`, with `isOpen` and `onClose`. A key such as ⌘K or Ctrl+K is the application’s to wire. Closing returns focus to where it was, and the next opening starts from an empty search.',
-  }),
-};
-
-export const modal = {
-  description: message({
-    ja: '`<dialog>`で画面の前面に開くオーバーレイです。`Dialog`と`Drawer`の土台で、中身を自由に置くときは直接使います。',
-    en: 'An overlay opened in a `<dialog>`. `Dialog` and `Drawer` build on it; use it directly for content of your own.',
-  }),
-  sideTitle: message({
-    ja: '出る位置',
-    en: 'Side',
-  }),
-  defaultOpenTitle: message({
-    ja: '既定で開く',
-    en: 'Open by default',
-  }),
-  portalRootTitle: message({
-    ja: 'トップレイヤーとポータル',
-    en: 'Top layer and portals',
-  }),
-  portalRootDescription: message({
-    ja: '`Modal`はブラウザのトップレイヤーの`<dialog>`に表示されます。そのため、`document.body`にポータルした要素は`Modal`の後ろに隠れます。`Modal`は自分の`<dialog>`をポータルのルートとしてコンテキストで渡しています。`usePortalRoot`で取り出してポータル先にすれば、`Modal`の中でも前面に出ます。`Modal`の中の`useToast`はこの仕組みを使うので、対応が要るのは自前のポータルだけです。',
-    en: '`Modal` renders in a `<dialog>` in the browser’s top layer, so anything portaled to `document.body` ends up behind it. `Modal` provides its own `<dialog>` as the portal root through context. Read it with `usePortalRoot` and portal there, and floating UI stays on top inside the `Modal`. `useToast` inside a `Modal` already uses this, so only portals of your own need it.',
+    ja: '開閉は`Dialog`と同じく`isOpen`と`onClose`で行います。⌘KやCtrl+Kのようなキーは、アプリ側で割り当てます。閉じるとフォーカスは開く前の場所へ戻り、次に開いたときは空の検索から始まります。',
+    en: 'Open and close it like `Dialog`, with `isOpen` and `onClose`. A key such as ⌘K or Ctrl+K is the application’s to wire. Closing returns focus to where it was, and the next opening starts from an empty search.',
   }),
 };
 
 export const popover = {
   description: message({
-    ja: 'トリガーの要素の近くに開くポップオーバーです。位置はCSS Anchor Positioningで決めます。',
-    en: 'A popover that opens next to its trigger. CSS Anchor Positioning places it.',
+    ja: 'トリガーの要素の近くに開くパネルです。いつも`role="dialog"`で開き、`label`が名前になります。地と角丸と影は`Popover.Content`が描くので、中身の余白は中に置く要素で作ります。位置はCSS Anchor Positioningで決めます。',
+    en: 'A panel that opens next to its trigger. It always opens as `role="dialog"`, named by `label`. `Popover.Content` draws the ground, the corners and the shadow, so the padding comes from what you put inside. CSS Anchor Positioning places it.',
   }),
   placementTitle: message({
     ja: '配置',
@@ -1228,12 +1283,20 @@ export const popover = {
 
 export const dropdownMenu = {
   description: message({
-    ja: 'ボタンから開くメニューです。項目は`label`と`onAction`で作り、`SubMenu`で入れ子にできます。',
-    en: 'A menu that opens from a button. Each item has a `label` and an `onAction`, and `SubMenu` nests one.',
+    ja: 'ボタンから開くメニューです。項目は`label`と`onAction`で作り、`href`を渡すとリンクになります。`SubMenu`で入れ子にできます。',
+    en: 'A menu that opens from a button. Each item has a `label` and an `onAction`, or an `href` to make it a link. `SubMenu` nests one.',
   }),
   iconTriggerTitle: message({
     ja: 'アイコンのトリガー',
     en: 'Icon trigger',
+  }),
+  linksTitle: message({
+    ja: 'リンクの項目',
+    en: 'Link items',
+  }),
+  linksDescription: message({
+    ja: '`href`を渡した項目は`<a role="menuitem">`になります。選ぶとメニューを閉じ、遷移はブラウザに任せます。中クリックや新しいタブで開くこともできます。ボタンの項目と同じく、Spaceでも選べます。',
+    en: 'An item with `href` renders an `<a role="menuitem">`. Choosing it closes the menu and leaves the navigation to the browser, so a middle click or opening in a new tab works too. Like a button item, it can be chosen with Space.',
   }),
   sizesTitle: message({
     ja: 'サイズ',
@@ -1338,9 +1401,13 @@ export const tabs = {
     ja: 'タブで内容を切り替えます。パネルはクロスフェードで切り替わり、キーボード操作はWAI-ARIAのtabsに従います。',
     en: 'Switches content with tabs. Panels cross-fade, and the keyboard follows the WAI-ARIA tabs pattern.',
   }),
-  defaultSelectedTitle: message({
-    ja: '既定の選択',
-    en: 'Default selection',
+  controlledTitle: message({
+    ja: '選択を制御する',
+    en: 'Controlling the selection',
+  }),
+  controlledDescription: message({
+    ja: '`selectedId`と`onChange`で選択を持ちます。制御しないときは`defaultSelectedId`が要ります。タブの印はすぐに切り替わり、パネルは選択の遅延値で入れ替わります。そのため、`useState`で持っても`@k8ordo/state`のような同期で更新するストアで持っても、クロスフェードし、suspendするパネルは用意できるまで前のパネルを残します。',
+    en: '`selectedId` and `onChange` hold the selection; without them, `defaultSelectedId` is required. The selected tab is marked at once, and the panels follow a deferred copy of the selection, so they cross-fade and a suspending panel keeps the previous one on screen whether the selection lives in `useState` or in a store that updates synchronously, such as `@k8ordo/state`.',
   }),
 };
 
@@ -1405,40 +1472,6 @@ export const tableOfContents = {
   activeDescription: message({
     ja: '見出しの`scroll-margin-block-start`の位置を基準に、そこを最後に越えた見出しを現在の見出しとします。固定ヘッダーの高さを見出しの`scroll-margin`に指定しておけば、目次から飛んだ見出しがそのまま選ばれます。文書の終わりまで来たときは、最後の節が短くても最後の見出しを選びます。縦書きの文書では読む向きで決めます。`vertical-rl`なら右から左、`vertical-lr`なら左から右です。',
     en: 'The current heading is the last one whose `scroll-margin-block-start` position has scrolled past the top. Give the headings the scroll margin your sticky header needs, and a heading reached from the contents becomes current. At the end of the document the last heading is current even if its section is short. A vertical document is read in its own direction: right to left for `vertical-rl`, left to right for `vertical-lr`.',
-  }),
-};
-
-export const inView = {
-  description: message({
-    ja: '子要素が画面やスクロール領域に入っているかを知らせます。遅延読み込みや、スクロールに合わせた表示に使います。',
-    en: 'Reports whether its children are in the viewport or a scroll container. Use it for lazy loading or scroll-triggered reveals.',
-  }),
-  onceTitle: message({
-    ja: '`once`',
-    en: '`once`',
-  }),
-  onceDescription: message({
-    ja: '`once`を付けると、最初に見えた時点で観測をやめます。その後に外れても`false`を知らせません。',
-    en: 'With `once`, observation stops the first time the children are in view. Leaving afterwards reports nothing.',
-  }),
-  multipleTitle: message({
-    ja: '複数の子要素',
-    en: 'Multiple children',
-  }),
-  multipleDescription: message({
-    ja: '要素が複数あるときは、どれか1つでも見えていれば`true`になります。後から増えたり外れたりした要素にも追従します。見えていた要素が外れて見えているものが無くなれば、`false`を知らせます。観測する要素がまだ1つも無い間は`onChange`を呼びません。',
-    en: 'With several elements, it is `true` while any of them is in view. It follows elements that mount or unmount later: when a visible element unmounts and nothing else is in view, it reports `false`. Until there is an element to observe, `onChange` is not called.',
-  }),
-};
-
-export const resize = {
-  description: message({
-    ja: '子要素の大きさが変わったときに`onChange`を呼びます。',
-    en: 'Calls `onChange` when the size of its children changes.',
-  }),
-  initialNotice: message({
-    ja: '`onChange`は観測を始めた時点でも1回呼ばれます。引数は無いので、必要な値はハンドラの中でDOMから読んでください。',
-    en: '`onChange` is also called once when observation starts. It takes no argument; read what you need from the DOM in the handler.',
   }),
 };
 

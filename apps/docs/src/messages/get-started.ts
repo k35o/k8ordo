@@ -66,8 +66,8 @@ export const providerTitle = message({
 });
 
 export const providerRoot = message({
-  ja: 'アプリのルートを`UIProvider`で1回だけ囲みます。トーストを表示するには、このプロバイダが必要です。',
-  en: 'Wrap the application root in `UIProvider`, once. Toasts need it in order to show.',
+  ja: '`useToast`でトーストを出すなら、アプリのルートを`ToastProvider`で1回だけ囲みます。トーストを出さないアプリには、プロバイダは要りません。',
+  en: 'If the application opens toasts with `useToast`, wrap its root in `ToastProvider`, once. An application that opens no toasts needs no provider.',
 });
 
 export const providerWordingBefore = message({
@@ -91,8 +91,8 @@ export const componentImport = message({
 });
 
 export const componentProps = message({
-  ja: 'どのコンポーネントも`className`と`style`を受け取りません。見た目は`variant`や`size`などのpropsで選びます。それでも足りないときは、`Button`の`renderItem`のようなrender propで要素を差し替えます。',
-  en: 'No component takes `className` or `style`. Choose the look with props such as `variant` and `size`. When that is not enough, replace the element through a render prop such as `Button`’s `renderItem`.',
+  ja: 'どのコンポーネントも`className`と`style`を受け取りません。見た目は`variant`や`size`などのpropsで選びます。それでも足りないときは、`Anchor`の`renderAnchor`のようなrender propで要素を差し替えます。',
+  en: 'No component takes `className` or `style`. Choose the look with props such as `variant` and `size`. When that is not enough, replace the element through a render prop such as `Anchor`’s `renderAnchor`.',
 });
 
 export const packageManagerLabel = message({

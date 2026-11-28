@@ -1,4 +1,4 @@
-import type { $ZodObject, $ZodShape, $ZodType } from 'zod/v4/core';
+import type { $ZodObject, $ZodShape } from 'zod/v4/core';
 
 /**
  * The common ground between `zod` and `zod/mini`: both build on the shared core
@@ -8,24 +8,3 @@ import type { $ZodObject, $ZodShape, $ZodType } from 'zod/v4/core';
  */
 export type ObjectSchema<Shape extends $ZodShape = $ZodShape> =
   $ZodObject<Shape> & { shape: Shape };
-
-export type ProbeIssue = {
-  code: string;
-  /** Which string format rejected the value, on an `invalid_format` issue. */
-  format?: string;
-  message: string;
-  path: readonly PropertyKey[];
-};
-
-/** What probing needs, present on both entries but not on the core type. */
-export type ProbeSchema = $ZodType & {
-  safeParse: (value: unknown) =>
-    | { success: true; data: unknown; error?: undefined }
-    | {
-        success: false;
-        data?: undefined;
-        error: { issues: readonly ProbeIssue[] };
-      };
-};
-
-export const asProbe = (schema: $ZodType): ProbeSchema => schema as ProbeSchema;

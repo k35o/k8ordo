@@ -17,28 +17,28 @@ const ITEMS: readonly CommandPaletteItem[] = [
     group: 'ファイル',
     keywords: ['create'],
     shortcut: ['⌘', 'N'],
-    onSelect: newFile,
+    onAction: newFile,
   },
   {
     id: 'open-file',
     label: 'ファイルを開く',
     group: 'ファイル',
     shortcut: ['⌘', 'O'],
-    onSelect: openFile,
+    onAction: openFile,
   },
   {
     id: 'toggle-theme',
     label: 'テーマを切り替える',
     group: '表示',
     keywords: ['dark', 'light'],
-    onSelect: toggleTheme,
+    onAction: toggleTheme,
   },
   {
     id: 'zoom-in',
     label: '拡大する',
     group: '表示',
     shortcut: ['⌘', '+'],
-    onSelect: fn(),
+    onAction: fn(),
   },
 ];
 
@@ -46,7 +46,7 @@ const meta: Meta<typeof CommandPalette> = {
   title: 'components/overlays/command-palette',
   component: CommandPalette,
   parameters: {
-    // Modal と同じく、開くときの透明度の変化を axe がコントラスト不足と読み違える
+    // Dialog と同じく、開くときの透明度の変化を axe がコントラスト不足と読み違える
     a11y: {
       options: {
         rules: {
@@ -146,10 +146,10 @@ export const Mouse: Story = {
 export const SplitGroups: Story = {
   args: {
     items: [
-      { id: 'a', label: '保存する', onSelect: fn() },
-      { id: 'b', label: '拡大する', group: '表示', onSelect: fn() },
-      { id: 'c', label: '閉じる', onSelect: fn() },
-      { id: 'd', label: '縮小する', group: '表示', onSelect: fn() },
+      { id: 'a', label: '保存する', onAction: fn() },
+      { id: 'b', label: '拡大する', group: '表示', onAction: fn() },
+      { id: 'c', label: '閉じる', onAction: fn() },
+      { id: 'd', label: '縮小する', group: '表示', onAction: fn() },
     ],
   },
   play: async ({ canvas, userEvent }) => {
@@ -243,5 +243,17 @@ export const Shortcut: Story = {
         canvas.getByRole('combobox', { name: 'コマンドを検索' }),
       ).toHaveValue('');
     });
+  },
+};
+
+export const Labelled: Story = {
+  args: { label: 'ページへ移動' },
+  play: async ({ canvas }) => {
+    await expect(
+      await waitFor(() => canvas.getByRole('dialog', { name: 'ページへ移動' })),
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByRole('listbox', { name: 'ページへ移動' }),
+    ).toBeInTheDocument();
   },
 };

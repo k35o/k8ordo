@@ -6,12 +6,13 @@ import { Button, FormControl, TextField } from '@k8ordo/ui';
 import { useRef, useState, useSyncExternalStore } from 'react';
 
 import * as m from '../../../messages';
+import type { entrySchema } from './entry-schema';
 
 import styles from './entry-demo.module.css';
 
 type Props = {
   /** ページの Server Component が `formFields(entrySchema)` で導いたもの。 */
-  fields: FormFields<'name' | 'email' | 'title' | 'minutes', never>;
+  fields: FormFields<typeof entrySchema>;
 };
 
 const subscribe = () => () => {};
@@ -66,7 +67,6 @@ export function EntryDemo({ fields }: Props) {
         </legend>
         <FormControl
           errorText={name.error}
-          invalid={name.invalid}
           label={m.formMultiStep.demoLabelName()}
           renderInput={(props) => (
             <TextField {...props} {...name.input} autoComplete="off" />
@@ -75,7 +75,6 @@ export function EntryDemo({ fields }: Props) {
         />
         <FormControl
           errorText={email.error}
-          invalid={email.invalid}
           label={m.formMultiStep.demoLabelEmail()}
           renderInput={(props) => (
             <TextField {...props} {...email.input} autoComplete="off" />
@@ -85,7 +84,7 @@ export function EntryDemo({ fields }: Props) {
         {hydrated && (
           <div>
             <Button
-              onAction={() => {
+              onClick={() => {
                 const invalid = firstInvalidIn(stepOne.current);
                 if (invalid === undefined) {
                   setStep(1);
@@ -106,7 +105,6 @@ export function EntryDemo({ fields }: Props) {
         </legend>
         <FormControl
           errorText={title.error}
-          invalid={title.invalid}
           label={m.formMultiStep.demoLabelTitle()}
           renderInput={(props) => (
             <TextField {...props} {...title.input} autoComplete="off" />
@@ -115,7 +113,6 @@ export function EntryDemo({ fields }: Props) {
         />
         <FormControl
           errorText={minutes.error}
-          invalid={minutes.invalid}
           label={m.formMultiStep.demoLabelMinutes()}
           renderInput={(props) => <TextField {...props} {...minutes.input} />}
           required={minutes.required}
@@ -124,7 +121,7 @@ export function EntryDemo({ fields }: Props) {
           {hydrated && (
             <Button
               color="base"
-              onAction={() => {
+              onClick={() => {
                 setStep(0);
               }}
               variant="outline"

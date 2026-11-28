@@ -6,12 +6,13 @@ import { Badge, Button, Checkbox, FormControl, TextField } from '@k8ordo/ui';
 import { useState } from 'react';
 
 import * as m from '../../../messages';
+import type { talkSchema } from './talk-schema';
 
 import styles from './edit-demo.module.css';
 
 type Props = {
   /** ページの Server Component が `formFields(talkSchema)` で導いたもの。 */
-  fields: FormFields<'title' | 'public', never>;
+  fields: FormFields<typeof talkSchema>;
 };
 
 // 編集する前の値。実際のアプリならデータベースから読んだ 1 件にあたる
@@ -47,7 +48,6 @@ export function EditDemo({ fields }: Props) {
       </div>
       <FormControl
         errorText={title.error}
-        invalid={title.invalid}
         label={m.formEdit.demoLabelTitle()}
         renderInput={(props) => (
           <TextField {...props} defaultValue={TALK.title} {...title.input} />
@@ -63,16 +63,7 @@ export function EditDemo({ fields }: Props) {
         <Button type="submit" variant="solid">
           {m.formEdit.demoSave()}
         </Button>
-        {/* Button の type は button と submit だけなので、reset は要素ごと差し替える */}
-        <Button
-          color="base"
-          renderItem={({ children, className }) => (
-            <button className={className} type="reset">
-              {children}
-            </button>
-          )}
-          variant="outline"
-        >
+        <Button color="base" type="reset" variant="outline">
           {m.formEdit.demoReset()}
         </Button>
         <p aria-live="polite" className={styles.saved}>

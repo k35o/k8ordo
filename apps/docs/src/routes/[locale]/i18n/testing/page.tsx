@@ -5,6 +5,14 @@ import * as m from '../../../../messages';
 
 const t = m.i18nTesting;
 
+const LOAD = `// vite.config.ts
+export default defineConfig({
+  test: { setupFiles: ['./vitest.setup.ts'] },
+});
+
+// vitest.setup.ts
+import './src/i18n';`;
+
 const NODE = `import { expect, it } from 'vitest';
 
 import { locales } from '../i18n';
@@ -85,6 +93,16 @@ it('refuses a message without every locale', () => {
 export default function I18nTestingPage() {
   return (
     <DocPage introduction={t.introduction} path="/:locale/i18n/testing">
+      <DocSection id="load-set" title={t.loadTitle}>
+        <CodeBlock code={LOAD} lang="ts" marks={{ 7: 'highlight' }} />
+        <p>
+          <Rich>{t.loadNoEntry()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.loadWhere()}</Rich>
+        </p>
+      </DocSection>
+
       <DocSection id="node" title={t.nodeTitle}>
         <CodeBlock
           code={NODE}

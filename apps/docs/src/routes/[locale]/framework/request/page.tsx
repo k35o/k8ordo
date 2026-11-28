@@ -1,4 +1,4 @@
-import { Note, Pitfall } from '../../../../components/callout';
+import { Note } from '../../../../components/callout';
 import { CodeBlock } from '../../../../components/code-block';
 import { DocPage, DocSection } from '../../../../components/doc-page';
 import { LocaleAnchor } from '../../../../components/locale-anchor';
@@ -9,14 +9,19 @@ const t = m.frameworkRequest;
 
 const LAYOUT = `import type { LayoutProps } from '@k8ordo/framework';
 
+import { Header } from '../components/header';
+
 export default function RootLayout({
   children,
   request,
 }: LayoutProps<'/'>) {
-  const theme = request.cookies.get('theme') ?? 'light';
+  const session = request.cookies.get('session');
   return (
-    <html data-theme={theme} lang="en">
-      <body>{children}</body>
+    <html lang="en">
+      <body>
+        <Header signedIn={session !== undefined} />
+        {children}
+      </body>
     </html>
   );
 }`;
@@ -98,9 +103,7 @@ import { density } from '../state';
 
 export async function compact() {
   cookies().set(
-    density.cookieName,
-    density.cookieValue({ density: 'compact' }),
-    { httpOnly: false, maxAge: 34_560_000 },
+    ...density.cookie({ density: 'compact' }, cookies()),
   );
 }`;
 
@@ -119,10 +122,10 @@ export default function FrameworkRequestPage() {
     <DocPage introduction={t.introduction} path="/:locale/framework/request">
       <DocSection id="read" title={t.readTitle}>
         <CodeBlock
-          callouts={{ 7: t.readCookieCallout() }}
+          callouts={{ 9: t.readCookieCallout() }}
           code={LAYOUT}
           lang="tsx"
-          marks={{ 5: 'highlight', 7: 'highlight' }}
+          marks={{ 7: 'highlight', 9: 'highlight' }}
           title="src/routes/layout.tsx"
         />
         <p>
@@ -187,6 +190,33 @@ export default function FrameworkRequestPage() {
         </p>
       </DocSection>
 
+      <DocSection id="preferences" title={t.prefsTitle}>
+        <p>
+          <Rich>{t.prefsLead()}</Rich>
+        </p>
+        <ul>
+          {t.prefsList.map((item) => (
+            <li key={item()}>
+              <Rich>{item()}</Rich>
+            </li>
+          ))}
+        </ul>
+        <p>
+          <Rich>{t.prefsScript()}</Rich>
+          <LocaleAnchor path="/:locale/framework/csp">
+            {m.framework.navCsp()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.prefsLanguage()}</Rich>
+          <LocaleAnchor path="/:locale/i18n/negotiate">
+            {m.i18n.navNegotiate()}
+          </LocaleAnchor>
+          <Rich>{t.see()}</Rich>
+        </p>
+      </DocSection>
+
       <DocSection id="state" title={t.stateTitle}>
         <CodeBlock
           callouts={{ 11: t.stateReadCallout() }}
@@ -206,20 +236,21 @@ export default function FrameworkRequestPage() {
           <Rich>{t.see()}</Rich>
         </p>
         <CodeBlock
-          callouts={{ 11: t.stateWriteCallout() }}
+          callouts={{ 9: t.stateWriteCallout() }}
           code={STATE_ACTION}
           lang="ts"
-          marks={{ 9: 'highlight', 10: 'highlight', 11: 'highlight' }}
+          marks={{ 9: 'highlight' }}
           title="src/lib/compact.ts"
         />
         <p>
           <Rich>{t.stateWrite()}</Rich>
         </p>
-        <Pitfall>
-          <p>
-            <Rich>{t.stateHttpOnly()}</Rich>
-          </p>
-        </Pitfall>
+        <p>
+          <Rich>{t.stateAttributes()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.stateReset()}</Rich>
+        </p>
       </DocSection>
 
       <DocSection id="headers" title={t.headersTitle}>

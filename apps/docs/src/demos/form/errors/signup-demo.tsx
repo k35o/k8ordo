@@ -6,12 +6,13 @@ import { Button, FormControl, PasswordInput, TextField } from '@k8ordo/ui';
 import { useState } from 'react';
 
 import * as m from '../../../messages';
+import type { signupDefinition } from './signup-definition';
 
 import styles from './signup-demo.module.css';
 
 type Props = {
   /** ページの Server Component が `formFields(signupDefinition)` で導いたもの。 */
-  fields: FormFields<'handle' | 'password' | 'confirm', never>;
+  fields: FormFields<typeof signupDefinition>;
 };
 
 // 静的なサイトで送信先が無いので、送れる値になったところで止めて知らせる。
@@ -39,7 +40,6 @@ export function SignupDemo({ fields }: Props) {
     >
       <FormControl
         errorText={handle.error}
-        invalid={handle.invalid}
         label={m.formErrors.demoLabelHandle()}
         renderInput={(props) => (
           <TextField {...props} {...handle.input} autoComplete="off" />
@@ -48,7 +48,6 @@ export function SignupDemo({ fields }: Props) {
       />
       <FormControl
         errorText={password.error}
-        invalid={password.invalid}
         label={m.formErrors.demoLabelPassword()}
         renderInput={(props) => (
           <PasswordInput
@@ -61,7 +60,6 @@ export function SignupDemo({ fields }: Props) {
       />
       <FormControl
         errorText={confirm.error}
-        invalid={confirm.invalid}
         label={m.formErrors.demoLabelConfirm()}
         renderInput={(props) => (
           <PasswordInput

@@ -16,11 +16,9 @@ import styles from './slider.module.css';
 
 type BaseProps = {
   invalid?: boolean;
-  // @k8ordo/form の formFields は step に 'any' を、min / max に文字列を導く
-  // ことがあるので、広げたまま受けられる型にする
   step?: number | 'any';
-  max?: number | string;
-  min?: number | string;
+  max?: number;
+  min?: number;
   ref?: Ref<HTMLInputElement>;
 } & Omit<
   InputHTMLAttributes<HTMLInputElement>,
@@ -60,19 +58,19 @@ const toNumber = (value: number | string | undefined, fallback: number) => {
 export const Slider: FC<Props> = ({
   invalid = false,
   disabled = false,
-  required = false,
+  // HTML は range に required を許さず、range は常に値を持つ。FormControl の束や
+  // formFields を広げても属性として描かないように受けて捨てる
+  required: _required,
   value,
   defaultValue,
   onChange,
   onKeyDown,
   ref,
   step = 1,
-  max: maxProp,
-  min: minProp,
+  max = 100,
+  min = 0,
   ...rest
 }) => {
-  const max = toNumber(maxProp, 100);
-  const min = toNumber(minProp, 0);
   const initialValue = toNumber(defaultValue, min);
   const isControlled = value !== undefined;
   const inputRef = useRef<HTMLInputElement>(null);
@@ -145,7 +143,6 @@ export const Slider: FC<Props> = ({
         }}
         onKeyDown={chain(onKeyDown, pending ? ignoreStepKeys : undefined)}
         ref={mergedRef}
-        required={required}
         step={step}
         type="range"
       />

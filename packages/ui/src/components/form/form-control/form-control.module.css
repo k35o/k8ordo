@@ -20,18 +20,3 @@
   font-weight: var(--font-weight-medium);
   color: var(--color-fg-error);
 }
-
-.message {
-  margin-top: calc(var(--spacing) * 1);
-  padding-left: calc(var(--spacing) * 0.5);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-sm);
-}
-
-.error {
-  color: var(--color-fg-error);
-}
-
-.help {
-  color: var(--color-fg-mute);
-}

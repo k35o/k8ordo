@@ -8,51 +8,46 @@ import {
 } from 'vite-plus/test';
 
 import { bindParams, href } from './links';
-import type { NavigateToOptions } from './links';
 
 describe('bindParams', () => {
-  const links = bindParams(() => ({ locale: 'ja' }));
+  const bound = bindParams(() => ({ locale: 'ja' }));
 
   it('fills the bound param from the source and takes the rest as before', () => {
-    expect(links.href('/:locale/products/:id', { id: 42 })).toBe(
-      '/ja/products/42',
-    );
-    expect(links.href('/:locale')).toBe('/ja');
-    expect(links.href('/about')).toBe('/about');
+    expect(bound('/:locale/products/:id', { id: 42 })).toBe('/ja/products/42');
+    expect(bound('/:locale')).toBe('/ja');
+    expect(bound('/about')).toBe('/about');
   });
 
   it('reads the source at each call, not once', () => {
     let locale = 'ja';
     const live = bindParams(() => ({ locale }));
-    expect(live.href('/:locale/about')).toBe('/ja/about');
+    expect(live('/:locale/about')).toBe('/ja/about');
     locale = 'en';
-    expect(live.href('/:locale/about')).toBe('/en/about');
+    expect(live('/:locale/about')).toBe('/en/about');
   });
 
   it('lets a call override what the source supplies', () => {
-    expect(links.href('/:locale/about', { locale: 'en' })).toBe('/en/about');
+    expect(bound('/:locale/about', { locale: 'en' })).toBe('/en/about');
   });
 
-  it('takes options after the params, even when every param is bound', () => {
-    const options: NavigateToOptions = { history: 'replace' };
-    const call = (): void => {
-      // @ts-expect-error -- options are not params: a pattern whose params are all bound still takes them second
-      links.navigateTo('/:locale', options);
-    };
+  it('still requires the params the source does not supply', () => {
+    const call = (): string =>
+      // @ts-expect-error -- ":id" is not bound, so a link to the page names it
+      bound('/:locale/products/:id');
     expect(call).toBeTypeOf('function');
   });
 
   it('takes a rest param beside the bound one', () => {
-    expect(links.href('/:locale/files/:path+', { path: ['a b', 'c'] })).toBe(
+    expect(bound('/:locale/files/:path+', { path: ['a b', 'c'] })).toBe(
       '/ja/files/a%20b/c',
     );
-    expect(() => links.href('/:locale/files/:path+', { path: [] })).toThrow(
+    expect(() => bound('/:locale/files/:path+', { path: [] })).toThrow(
       '"/:locale/files/:path+" needs at least one segment for ":path+"',
     );
   });
 
   it('builds the same path the unbound href would', () => {
-    expect(links.href('/:locale/products/:id', { id: 'a b' })).toBe(
+    expect(bound('/:locale/products/:id', { id: 'a b' })).toBe(
       href('/:locale/products/:id', { locale: 'ja', id: 'a b' }),
     );
   });
@@ -75,7 +70,7 @@ describe('links under a base', () => {
   });
 
   it('puts it in front of a bound href too', () => {
-    const links = bindParams(() => ({ locale: 'ja' }));
-    expect(links.href('/:locale/about')).toBe('/docs/ja/about');
+    const bound = bindParams(() => ({ locale: 'ja' }));
+    expect(bound('/:locale/about')).toBe('/docs/ja/about');
   });
 });

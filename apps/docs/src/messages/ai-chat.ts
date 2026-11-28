@@ -161,8 +161,8 @@ export const actionsRow = message({
 });
 
 export const actionsBehavior = message({
-  ja: '`onAction`がPromiseを返すと、終わるまでボタンは押せなくなります。`Feedback`は2つのトグルです。押したものをもう一度押すと解除され、`onChange`に`null`が渡ります。',
-  en: 'When `onAction` returns a promise, the button stays busy until it settles. `Feedback` is a pair of toggles. Pressing the pressed one again clears it, and `onChange` receives `null`.',
+  ja: '`action`がPromiseを返すと、終わるまでボタンは押せなくなります。`Feedback`は2つのトグルです。押したものをもう一度押すと解除され、`onChange`に`null`が渡ります。',
+  en: 'When `action` returns a promise, the button stays busy until it settles. `Feedback` is a pair of toggles. Pressing the pressed one again clears it, and `onChange` receives `null`.',
 });
 
 export const aiSdkTitle = message({
@@ -181,21 +181,36 @@ export const aiSdkMap = message({
 });
 
 export const aiSdkRender = message({
-  ja: 'ツールのパートは`approval`も含むので、`ToolInvocation`にそのまま渡せます。ファイルと出典は`filter`で先に取り出し、それぞれ1つの一覧にまとめます。`data`のパートは`name`で選び、中身を検証してから表示します。',
-  en: 'A tool part carries its `approval`, so it can be handed to `ToolInvocation` as it is. Pull the files and sources out with `filter` first and show each as one list. Pick `data` parts by `name` and validate their contents before rendering them.',
+  ja: 'ツールのパートは`approval`も含むので、`ToolInvocation`にそのまま渡せます。ファイルと出典は`filter`で先に取り出し、それぞれ1つの一覧にまとめます。',
+  en: 'A tool part carries its `approval`, so it can be handed to `ToolInvocation` as it is. Pull the files and sources out with `filter` first and show each as one list.',
 });
 
-export const jsonRenderTitle = message({
-  ja: '吹き出しの中の生成UI',
-  en: 'Generative UI in a bubble',
+export const generativeTitle = message({
+  ja: 'チャットの中の生成UI',
+  en: 'Generative UI in a chat',
 });
 
-export const jsonRenderDescription = message({
-  ja: '`Message.Content`の子要素は自由です。LLMがツールの結果として返したUIのspecを、json-renderのつなぎで吹き出しの中に表示できます。',
-  en: '`Message.Content` takes any children. A UI spec the model returned as a tool result can be rendered inside the bubble with the json-render glue.',
+export const generativeTool = message({
+  ja: 'AI SDKでは、モデルが画面の中身を入力にしてツールを呼び、チャットがそのツールのパートを描きます。描くのは、使う形式のつなぎです。パートの`input`は呼び出しが流れてくる間にも増えるので、届いた分から描けます。`output-error`のパートは、サーバーが退けた呼び出しです。',
+  en: 'With the AI SDK, the model calls a tool with the screen as its input, and the chat draws the tool part with the glue of the format you use. The part’s `input` grows while the call streams in, so the screen can appear as it arrives. A part in `output-error` is a call the server refused.',
 });
 
-export const jsonRenderAdapter = message({
+export const generativeAction = message({
+  ja: '画面で押した操作は、利用者の次の発言として送ります。`data`のパートにすると、チャットには短い文を出し、モデルには操作と画面の状態を渡せます。',
+  en: 'What the user presses on the screen goes back as their next message. As a `data` part, it shows a short line in the chat, and the model reads the action and the state of the screen.',
+});
+
+export const generativeServer = message({
+  ja: 'サーバーでは、`convertToModelMessages`の`convertDataPart`で、パートをモデルが読む文に変えます。',
+  en: 'On the server, `convertDataPart` of `convertToModelMessages` turns the part into text for the model.',
+});
+
+export const generativeExample = message({
+  ja: 'リポジトリの`examples/ui-integrations`に、この形のチャットがあります。ClaudeがA2UIで書いた画面を描き、押された画面をその場で書き換えて答えます。',
+  en: '`examples/ui-integrations` in the repository keeps a chat built this way: Claude writes screens in A2UI and answers a press by changing the screen in place. ',
+});
+
+export const generativeAdapter = message({
   ja: 'つなぎの作り方は',
   en: 'For how to connect a format, see ',
 });

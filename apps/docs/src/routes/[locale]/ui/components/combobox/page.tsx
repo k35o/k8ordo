@@ -45,7 +45,6 @@ const prefecture = form.field('prefecture');
 
 <FormControl
   errorText={prefecture.error}
-  invalid={prefecture.invalid}
   label="Prefecture"
   required={prefecture.required}
   renderInput={(props) => (

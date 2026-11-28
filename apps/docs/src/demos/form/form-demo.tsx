@@ -3,7 +3,7 @@
 import { useForm } from '@k8ordo/form';
 import type { FormFields } from '@k8ordo/form';
 import { useAppState } from '@k8ordo/state';
-import { Button, Code, FormControl, TextField } from '@k8ordo/ui';
+import { Button, Checkbox, Code, FormControl, TextField } from '@k8ordo/ui';
 
 import { jsLiteral } from '../../components/js-literal';
 import * as m from '../../messages';
@@ -13,7 +13,7 @@ import styles from './form-demo.module.css';
 
 type Props = {
   /** `formFields(demoState.url)` の結果。Server Component で導かれ、props で渡る。 */
-  fields: FormFields<'q' | 'min' | 'inStock', never>;
+  fields: FormFields<typeof demoState.url>;
 };
 
 export function FormDemo({ fields }: Props) {
@@ -24,14 +24,13 @@ export function FormDemo({ fields }: Props) {
   const inStock = form.field('inStock');
   // フォームが GET で書いた URL を、同じスキーマの state が読み返す
   const [current] = useAppState(demoState);
-  const search = demoState.search(current);
+  const search = demoState.href('', current);
 
   return (
     <div className={styles.root}>
       <form className={styles.form} method="get" {...form.props}>
         <FormControl
           errorText={q.error}
-          invalid={q.invalid}
           label={m.form.demoLabelQ()}
           renderInput={(props) => (
             <TextField
@@ -47,7 +46,6 @@ export function FormDemo({ fields }: Props) {
           <div className={styles.min}>
             <FormControl
               errorText={min.error}
-              invalid={min.invalid}
               label={m.form.demoLabelMin()}
               renderInput={(props) => (
                 // NumberField は type="text" で描くので、JavaScript が無いと
@@ -61,26 +59,22 @@ export function FormDemo({ fields }: Props) {
               required={min.required}
             />
           </div>
-          {/* @k8ordo/ui の Checkbox はグループの外では value 属性を出さず、
-            ブラウザ既定の on を送る。state が書く "true" と同じ文字列を
-            送るため、value まで広げられる素の <input> にする */}
-          <label className={styles.inStock}>
-            <input
+          <div className={styles.inStock}>
+            <Checkbox
               {...inStock.input}
-              className={styles.checkbox}
               defaultChecked={current.inStock}
+              label={m.form.demoLabelInStock()}
             />
-            {m.form.demoLabelInStock()}
-          </label>
+          </div>
           <Button type="submit" variant="solid">
             {m.form.demoSubmit()}
           </Button>
         </div>
       </form>
       <dl className={styles.values}>
-        <dt className={styles.term}>URL</dt>
+        <dt className={styles.term}>{m.form.demoUrlTerm()}</dt>
         <dd className={styles.value}>
-          <Code>{search === '' ? m.form.demoUrlEmpty() : `?${search}`}</Code>
+          <Code>{search === '' ? m.form.demoUrlEmpty() : search}</Code>
         </dd>
         <dt className={styles.term}>state</dt>
         <dd className={styles.value}>

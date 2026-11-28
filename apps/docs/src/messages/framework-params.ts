@@ -186,8 +186,8 @@ export const pathsFunction = message({
 });
 
 export const pathsForm = message({
-  ja: '値は、エスケープする前の文字列で返します。`café`や`a b`もそのまま返せば、URLにするときにビルドがエスケープします。空文字列と文字列でない値は返せないので、数値のidは`String()`で文字列にします。',
-  en: 'Return each value as the unescaped string: `café` or `a b` as it is, and the build escapes it for the URL. An empty string or a value that is not a string is refused, so turn a numeric id into a string with `String()`.',
+  ja: '値は、リンクの`href()`に渡すのと同じ型で返します。ページのスキーマが数値に変えるなら数値のまま返し、スキーマが無ければ文字列、数値、bigint、真偽値のどれでも返せます。ビルドは`href()`と同じく`String()`で文字列にしてからURLのためにエスケープするので、`café`や`a b`もそのまま返します。空文字列は返せません。',
+  en: 'Return each value as a link’s `href()` takes it. When the page’s schema turns the parameter into a number, return the number; without a schema, any string, number, bigint or boolean works. The build spells it as `href()` does, with `String()`, and escapes it for the URL, so return `café` or `a b` as it is. An empty string is refused.',
 });
 
 export const pathsBelow = message({
@@ -221,8 +221,8 @@ export const aboveTitle = message({
 });
 
 export const aboveParams = message({
-  ja: '`paths.ts`の関数は、上のディレクトリのパラメータを引数として受け取ります。ビルドは、上の値の組み合わせごとに関数を1回呼びます。この例では、`ja`と`en`のそれぞれについて記事のidを返します。',
-  en: 'The function receives the parameters of the directories above it, and the build calls it once per combination of their values. Here it returns the post ids for `ja`, and again for `en`.',
+  ja: "`paths.ts`の関数は、上のディレクトリのパラメータを、上のディレクトリのレイアウトが読んだ形で受け取ります。上の`paths.ts`が返した値をURLの綴りにしてから、このディレクトリより上にあるレイアウトの`paramsSchema`で外側から順に読み直したものです。隣のページのスキーマと、同じディレクトリのレイアウトのスキーマは、まだ値の無いこのディレクトリのパラメータを読むことがあるので使いません。`[locale]/layout.tsx`のスキーマがロケールを読むなら、`locale`はそのロケールです。`[year]`のレイアウトが`z.coerce.number()`で読むなら、上の`paths.ts`が`'2024'`を返しても、`year`は数値の`2024`で届きます。どのスキーマも読まないパラメータは文字列のままです。ビルドは、上の値の組み合わせごとに関数を1回呼びます。この例では、`ja`と`en`のそれぞれについて記事のidを返します。",
+  en: "The function receives the parameters of the directories above it as the layouts above read them: each value the `paths.ts` above returned, spelled as the URL carries it, then read again by the `paramsSchema` exports of the layouts in the directories above this one, outer first. The page beside it and a layout in its own directory take no part, since they may read this directory’s parameter, which has no value yet. When `[locale]/layout.tsx`’s schema reads the locale, `locale` is that locale. When `[year]`’s layout reads it with `z.coerce.number()`, `year` arrives as the number `2024` even if the `paths.ts` above returned `'2024'`. A parameter no such schema reads stays a string. The build calls it once per combination of their values. Here it returns the post ids for `ja`, and again for `en`.",
 });
 
 export const aboveMissing = message({
@@ -246,12 +246,16 @@ export const stopsList = [
     en: "A parameter no `paths.ts` returns values for: `static build needs the values of /tags/:tag — a paths.ts in each parameter's directory returns them, …`",
   }),
   message({
-    ja: '空でない文字列の配列でない戻り値：`tags/[tag]/paths.ts has to return an array of non-empty strings, the values of :tag`',
-    en: 'A return value that is not an array of non-empty strings: `tags/[tag]/paths.ts has to return an array of non-empty strings, the values of :tag`',
+    ja: 'URLに綴れない値を含む戻り値：`tags/[tag]/paths.ts has to return an array of the values of :tag, each a non-empty string, a number, a bigint or a boolean`',
+    en: 'A return value holding something with no URL spelling: `tags/[tag]/paths.ts has to return an array of the values of :tag, each a non-empty string, a number, a bigint or a boolean`',
   }),
   message({
     ja: '`paths.ts`の無いパラメータの下にある`paths.ts`：`[locale]/posts/[id]/paths.ts is asked for its values once per value of the parameters above it, and /:locale/posts still holds one — …`',
     en: 'A `paths.ts` below a parameter that has none: `[locale]/posts/[id]/paths.ts is asked for its values once per value of the parameters above it, and /:locale/posts still holds one — …`',
+  }),
+  message({
+    ja: 'レイアウトのスキーマが拒んだ値の下の`paths.ts`：`the paths.ts files stand where a params schema refuses the values above them, so they were not asked: /last/:slug ([year]/[slug]/paths.ts)`',
+    en: 'A `paths.ts` below a value a layout’s schema rejects: `the paths.ts files stand where a params schema refuses the values above them, so they were not asked: /last/:slug ([year]/[slug]/paths.ts)`',
   }),
   message({
     ja: 'スキーマに合わない値：`a paths.ts returned values a params schema refused: /products/shoes`',
@@ -272,10 +276,6 @@ export const stopsList = [
   message({
     ja: '`[param]`でないディレクトリに置いた`paths.ts`：`paths.ts gives the values of its directory\'s parameter, and "posts" is not a [param] directory — …`',
     en: 'A `paths.ts` in a directory that is not a `[param]` one: `paths.ts gives the values of its directory\'s parameter, and "posts" is not a [param] directory — …`',
-  }),
-  message({
-    ja: "`framework()`に渡した`paths`：`framework() takes no paths — a parameter's values come from a paths.ts in its directory under routes/`",
-    en: "A `paths` passed to `framework()`: `framework() takes no paths — a parameter's values come from a paths.ts in its directory under routes/`",
   }),
 ] as const;
 

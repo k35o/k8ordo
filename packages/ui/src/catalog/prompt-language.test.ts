@@ -30,14 +30,24 @@ describe('LLM に渡す文言', () => {
         href: 'ftp://example.com/docs',
         rel: 'x',
       }),
+      ...catalogPropIssues('Button', {
+        label: 'Docs',
+        href: '//evil.example/docs',
+      }),
       ...catalogPropIssues('Marquee', {}),
+      ...catalogPropIssues('Table', {
+        columns: [{ label: 'Name', width: 80 }],
+        rows: [],
+      }),
     ];
 
     expect(issues).toStrictEqual(
       expect.arrayContaining([
         expect.stringContaining('Anchor.href'),
+        expect.stringContaining('Button.href'),
         expect.stringContaining('Unknown prop "rel"'),
         expect.stringContaining('Unknown component type "Marquee"'),
+        expect.stringContaining('Table.columns.0: Unknown prop "width"'),
       ]),
     );
     expect(japaneseLines(issues.join('\n'))).toStrictEqual([]);

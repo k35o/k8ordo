@@ -115,8 +115,8 @@ the definition, not later.
 | `default`             | The tag used when nothing names one.                                              |
 | `is(value)`           | Membership as a type guard.                                                       |
 | `negotiate(…)`        | The best supported tag for a preference list.                                     |
-| `negotiateRequest(…)` | The best supported tag for a `Request`: a cookie, then `Accept-Language`.         |
-| `localize`            | `'/ui'` → `'/en/ui'`; `'/'` → `'/en'`.                                            |
+| `negotiateRequest(…)` | The best supported tag for a request: the choice given, then `Accept-Language`.   |
+| `localize`            | `'/ui'` → `'/en/ui'`; `'/'` → `'/en'`; `'/ja/ui'` → `'/en/ui'`.                   |
 | `delocalize`          | `'/en/ui'` → `{ locale: 'en', pathname: '/ui' }`; `'/x'` → `{ locale: null, … }`. |
 | `paramsSchema`        | The `[locale]` segment's schema (Standard Schema; no schema library).             |
 | `getLocale()`         | The locale of the render in progress. Not a hook.                                 |
@@ -151,21 +151,25 @@ declared rather than derived.
 each requested tag in order — the exact tag, then the first supported locale
 that speaks its language — before falling back to the default. Nothing
 matching across the whole list is the default; a tag that is not BCP 47 is
-skipped, because the list is user input.
+skipped, because the list is user input, and so are `null` and `undefined`,
+so a choice that may not have been made goes in front as it is:
+`locales.negotiate([saved?.value, ...navigator.languages])`.
 
 ```ts
 locales.negotiate(navigator.languages); // in the browser
-locales.negotiateRequest(request, { cookie: 'locale' }); // on a server
+locales.negotiateRequest(request, { chosen: cookies().get('locale') }); // on a server
 ```
 
-`negotiateRequest(request, { cookie? })` is the server's form. The cookie
-named by `cookie` comes first when the request carries it — the locale the
-visitor chose before, written where they switched language — then the
-`Accept-Language` header in its order of preference. Both go through
-`negotiate`, so a cookie still holding a locale the set no longer lists falls
-through to the header. The name is the application's: a language switcher
-that writes it and the server that reads it agree on one. Without `cookie`,
-only the header is read.
+`negotiateRequest(request, { chosen? })` is the server's form. `chosen` comes
+first — the locale the visitor chose before — then the `Accept-Language`
+header in its order of preference. Both go through `negotiate`, so a choice
+still holding a locale the set no longer lists falls through to the header,
+and a `chosen` of `null` or `undefined` — no choice yet — leaves only the
+header. Where the choice comes from is the application's: a cookie the
+language switcher wrote, read with `@k8ordo/framework`'s `cookies().get()`,
+or the language of a signed-in visitor's profile. The package reads no
+cookie itself. `request` is anything with the request's `headers`: a
+`Request`, or the `request` prop a page receives.
 
 ```ts
 // the language switcher, in the browser
@@ -182,7 +186,10 @@ cookie under `SameSite=Strict`: the choice is gone once the browser closes,
 and the first request arriving from a link on another site goes without it,
 so that page is chosen by the header instead. `sameSite: 'lax'` and a far
 `expires` — 400 days is the longest a browser keeps a cookie — are what make
-the choice stick.
+the choice stick. Why the choice is a plain cookie rather than a
+`@k8ordo/state` cookie state, beside the application's other preferences, is
+in `@k8ordo/framework`'s guide
+(`node_modules/@k8ordo/framework/docs/GUIDE.md`, "Preferences").
 
 `parseAcceptLanguage(header)` is the header half on its own: it turns an
 `Accept-Language` header into a preference list for `negotiate`: `q` weights decide the order (a `q` that is not a number is ignored),
@@ -349,9 +356,17 @@ the page in the default.
 
 **In the browser**, the URL is the locale: the first segment of
 `location.pathname`, read when a message is called. Changing locale is a
-navigation to the same pathname under the other segment
-(`locales.localize(locales.delocalize(pathname).pathname, 'en')`), which
-re-renders the page; there is no state to keep in sync.
+navigation to the same pathname under the other segment, which re-renders
+the page; there is no state to keep in sync. `localize` replaces the
+pathname's locale segment with the one it is given, so the pathname the page
+is on goes in as it is:
+
+```tsx
+function ToEnglish() {
+  const pathname = usePathname();
+  return <a href={withBase(locales.localize(pathname, 'en'))}>English</a>;
+}
+```
 
 Under Vite's `base` (`base: '/docs/'`), the segment read is the first one
 below it — `/docs/en/ui` is in `en` — as the route table's `[locale]` sits
@@ -361,11 +376,17 @@ base back from the router's `withBase` (imported from `@k8ordo/framework` in
 a framework application).
 
 A first segment that is not one of the set's locales is no locale, and the
-default applies, so a 404 page never throws on `/fr/…`. Until the set is
-defined in the browser, no segment is a locale and every message is in its
-first variant: the module that defines it has to run there too.
-`@k8ordo/framework` loads `src/i18n.ts` in the browser before anything
-renders; anywhere else, import it from a client module that runs first.
+default applies, so a 404 page never throws on `/fr/…`.
+
+**On either side, the set has to be defined before a message is called.**
+The set is what tells a locale from a path and gives the default, so a
+message called where no set is defined throws, naming the module that has to
+run first, rather than rendering some variant. `@k8ordo/framework` runs
+`src/i18n.ts` before any route file, in the browser and on the server, so
+nothing is left to wire there. Anywhere else, import the module that
+defines the set from code that runs first on each side — in the browser, a
+client module the root renders. A test or a Storybook preview does the same
+(see [Testing](#testing)).
 
 `locales.getLocale()` reads the same source for code that needs the tag
 itself: `<html lang>`, a language switcher, an `Intl` API the set does not
@@ -377,21 +398,24 @@ draw.
 
 In server mode a `guard.ts` answers it before anything renders. It
 chooses from the request — the cookie holding the locale the visitor chose
-before, then `Accept-Language` — and ends the request with a `307`:
+before, then `Accept-Language` — and ends the request with `redirect()`:
 
 ```ts
 // src/routes/(home)/guard.ts
-import { withBase } from '@k8ordo/framework';
+import { href } from '@k8ordo/framework';
+import { cookies, redirect } from '@k8ordo/framework/server';
 import type { Guard } from '@k8ordo/framework/server';
 
 import { locales } from '../../i18n';
 
 const guard: Guard<'/'> = ({ request }) => {
-  const locale = locales.negotiateRequest(request, { cookie: 'locale' });
-  return new Response(null, {
-    status: 307,
-    headers: { location: withBase(locales.localize('/', locale)) },
-  });
+  redirect(
+    href('/:locale', {
+      locale: locales.negotiateRequest(request, {
+        chosen: cookies().get('locale'),
+      }),
+    }),
+  );
 };
 
 export default guard;
@@ -410,38 +434,52 @@ The route group is what keeps the guard to `/`: a `guard.ts` runs before
 every URL below its directory, so one directly in `src/routes/` would send
 `/en/…` away as well. The page still has to exist — a guard runs before a
 URL a page declares, and without one `/` is a 404 — and it can return
-`null`. The status is `307`, not `308`, because the answer depends on who
-asks; `withBase` puts back the Vite `base` that `localize` leaves out. A
-visitor without JavaScript is redirected all the same, and so is a client
-navigation to `/`, whose payload request the guard answers too.
+`null`. The URL is built by `href`, as a link's is, so it carries the Vite
+`base`. A visitor without JavaScript is redirected all the same, and so is a
+client navigation to `/`, whose payload request the guard answers too.
 
 Static mode refuses a `guard.ts` — a file has no request to guard — so
-there the page renders nothing and redirects from an effect: through the
-bound `navigateTo` where the router is `@k8ordo/router`'s (below), or
+there the page renders nothing and redirects from an effect: to the bound
+`href` where the router is `@k8ordo/router`'s (below), or to
 `locales.localize` otherwise:
 
 ```tsx
 'use client';
 useEffect(() => {
-  navigateTo(
-    '/:locale',
-    { locale: locales.negotiate(navigator.languages) },
+  navigation.navigate(
+    href('/:locale', { locale: locales.negotiate(navigator.languages) }),
     { history: 'replace' },
   );
 }, []);
 ```
 
-### `<html lang>` and `dir`
-
-The root layout sits above `[locale]` and receives `pathname`. On a page the
-schema has already run for that page, so `locales.getLocale()` is right, and
-`locales.delocalize(pathname).locale ?? locales.default` says the same thing
-in terms of the URL alone. On a 404 they agree too: the schema runs over the
-catch-all's params, so `getLocale()` is the URL's locale where it names one
-and the default where it does not, as `delocalize` reads it.
+Where the language switcher keeps the visitor's choice in a cookie, put it in
+front of the browser's list — the order `negotiateRequest` reads on a
+server. Without the cookie the value is `undefined`, which `negotiate` skips:
 
 ```tsx
-const locale = locales.delocalize(pathname).locale ?? locales.default;
+useEffect(() => {
+  void cookieStore.get('locale').then((saved) => {
+    navigation.navigate(
+      href('/:locale', {
+        locale: locales.negotiate([saved?.value, ...navigator.languages]),
+      }),
+      { history: 'replace' },
+    );
+  });
+}, []);
+```
+
+### `<html lang>` and `dir`
+
+The root layout sits above `[locale]` and reads the locale the way a message
+does, with `locales.getLocale()`. On a page the schema has already run for
+that page, and a 404 runs the schemas of the layouts above its
+`not-found.tsx`, so it is the locale the page's own messages render in — the
+URL's where a schema accepted it, the default where none did:
+
+```tsx
+const locale = locales.getLocale();
 
 <html dir={locales.definitions[locale].dir} lang={locale}>
 ```
@@ -505,6 +543,30 @@ there. Once it is hydrated, `@k8ordo/framework` renders it again where the
 visitor is, so its client components come out in their locale once the
 script runs, and a visitor without JavaScript keeps the default.
 
+The root layout is a Server Component, so the `404.html`'s `<html lang>` and
+`dir` stay the default's as well. A client component the not-found page
+renders puts the visitor's on once the page is rendered where they are —
+`getLocale()` reads the pathname the HTML was rendered for while it
+hydrates, and the URL after, so the effect runs again then:
+
+```tsx
+'use client';
+
+import { useEffect } from 'react';
+
+import { locales } from '../i18n';
+
+// rendered by not-found.tsx
+export function DocumentLocale() {
+  const locale = locales.getLocale();
+  useEffect(() => {
+    document.documentElement.lang = locale;
+    document.documentElement.dir = locales.definitions[locale].dir;
+  }, [locale]);
+  return null;
+}
+```
+
 ## Alongside the rest of k8ordo
 
 - **`@k8ordo/router`**: the locale is a param of every pattern
@@ -516,16 +578,18 @@ script runs, and a visitor without JavaScript keeps the default.
   // src/lib/links.ts
   import { bindParams } from '@k8ordo/framework'; // '@k8ordo/router' without the framework
 
-  export const { href, navigateTo } = bindParams(() => ({
+  export const href = bindParams(() => ({
     locale: locales.getLocale(),
   }));
   ```
 
   `href('/:locale/products/:id', { id })` then reads the current locale;
-  `navigateTo('/:locale', { locale: 'en' }, { history: 'replace' })`
-  overrides it. Neither package imports the other: the line above is the
-  application's. `localize` / `delocalize` remain for a pathname in hand —
-  the language switcher, which takes the page it is on to another locale.
+  `href('/:locale', { locale: 'en' })` overrides it, and
+  `navigation.navigate(href(…))` goes there from code. Neither package
+  imports the other: the line above is the application's. `localize`
+  remains for a pathname in hand — the language switcher, which reads the
+  page it is on with `const pathname = usePathname()` and takes it to
+  another locale with `withBase(locales.localize(pathname, locale))`.
 
 - **`@k8ordo/ui`**: its built-in strings read `currentLocale()` from this
   package — the locale messages render in, or `null` (English there) when no
@@ -562,12 +626,77 @@ script runs, and a visitor without JavaScript keeps the default.
   ```
 
   The definition stays at module scope; what has to happen per request is
-  calling it. Call `formFields` during the page's render, not at module
-  scope. A Server Action posted from a `[locale]` page runs in that page's
+  calling it, and `formFields` is called during the page's render, as
+  `@k8ordo/form`'s guide writes it. A Server Action posted from a `[locale]` page runs in that page's
   locale in server mode — the framework runs the page's params
   schemas for the action's request too — so `parseForm` in it needs nothing
   more. Anywhere else — an action run outside the framework, a job — call it
   inside `locales.run`.
+
+  A check written without `{ error }` speaks zod's own wording, and zod
+  keeps one configuration for the whole process (`z.config`), so a fixed
+  `z.config(z.locales.en())` answers every request in English. To word
+  those checks in the request's locale as well, make the configuration read
+  the locale each time zod reports, from a module of its own:
+
+  ```ts
+  // src/lib/zod-locale.ts
+  import type { Variants } from '@k8ordo/i18n';
+  import * as z from 'zod'; // or 'zod/mini'
+
+  import { locales } from '../i18n';
+
+  const zodLocales = {
+    ja: z.locales.ja(),
+    en: z.locales.en(),
+  } satisfies Variants<{ localeError: z.core.$ZodErrorMap }>;
+
+  z.config({
+    localeError: (issue) => zodLocales[locales.getLocale()].localeError(issue),
+  });
+  ```
+
+  Import it first in every module that declares a schema
+  (`import './zod-locale';` at the top of `src/lib/talk-form.ts`). Keep it
+  out of `src/i18n.ts`: the framework loads that file in the browser too, and
+  zod would come with it. `satisfies Variants<…>` makes a locale added to the
+  set and missing here a type error. This is the fallback for the checks
+  left without a message; a message per check is still how to word the ones
+  a person reads.
+
+### Adding a locale
+
+Adding a locale is a handful of edits, and each one left out is a type error
+or names itself:
+
+1. Add it to the set in `src/i18n.ts`, with its time zone and direction:
+   `ar: { timeZone: 'Africa/Cairo', dir: 'rtl' }`. `RegisteredLocale` gains
+   it — through the generated `Register` under `@k8ordo/framework`, through
+   the hand-written one elsewhere.
+2. Every `message()` without an `ar` variant is now a type error; the
+   typecheck lists them.
+3. `@k8ordo/ui` ships text for `ja` and `en` only, and throws on a locale it
+   has none for, naming `registerMessages`. Register one next to the set.
+   Typed as `Messages`, a missing key is a type error; spreading `en` keeps
+   English for the keys not translated yet:
+
+   ```ts
+   // src/i18n.ts
+   import { en, registerMessages } from '@k8ordo/ui/i18n';
+   import type { Messages } from '@k8ordo/ui/i18n';
+
+   const ar: Messages = { ...en, close: 'إغلاق' };
+   registerMessages('ar', ar);
+   ```
+
+4. If the application words zod's default messages per locale (the
+   `zod-locale.ts` above), its table is a type error until it has an `ar`
+   entry.
+
+Nothing else is written per locale. The `[locale]` schema, negotiation,
+`localize`, the static build's `[locale]/paths.ts` (it returns
+`locales.all`) and `<html lang dir>` (it reads `definitions`) all follow the
+set.
 
 ## What it guarantees
 
@@ -576,6 +705,8 @@ script runs, and a visitor without JavaScript keeps the default.
   by `@k8ordo/framework`'s generated files, or by hand.
   From JavaScript, or through `as`, it throws where it is read, naming the
   locale and the variants present — never `undefined`.
+- A message never guesses a language: read where no set is defined, it
+  throws, naming the module that has to run first.
 - Arguments to a function message are typed by the function.
 - A page under `[locale]` never renders in a locale its URL does not spell:
   on the server its schema accepted that locale, and in the browser the URL
@@ -598,3 +729,19 @@ itself replaces the set messages read: the last one defined wins. In a
 browser environment, `history.replaceState(null, '', '/en/…')` is the locale
 and `run` throws; an environment that defines `document`, such as jsdom or
 happy-dom, counts as one.
+
+A test runner and Storybook run none of the framework's entries, so nothing
+there has defined the set: a message called directly, or by a component a
+test or a story renders, throws. Import `src/i18n.ts` once before them — in
+a file the Vitest config lists in `setupFiles`, and at the top of
+`.storybook/preview.tsx`:
+
+```ts
+// vitest.setup.ts, listed in test.setupFiles
+import './src/i18n';
+```
+
+```ts
+// .storybook/preview.tsx
+import '../src/i18n';
+```

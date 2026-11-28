@@ -33,6 +33,21 @@ export default function NewTalkPage() {
   return <TalkForm action={createTalk} fields={talkFields} />;
 }`;
 
+const ZOD_LOCALE = `import type { Variants } from '@k8ordo/i18n';
+import * as z from 'zod';
+
+import { locales } from '../i18n';
+
+const zodLocales = {
+  ja: z.locales.ja(),
+  en: z.locales.en(),
+} satisfies Variants<{ localeError: z.core.$ZodErrorMap }>;
+
+z.config({
+  localeError: (issue) =>
+    zodLocales[locales.getLocale()].localeError(issue),
+});`;
+
 const FORM_ERROR = `<form {...form.props} action={formAction}>
   {form.formError.message !== undefined && (
     <p {...form.formError.props}>{form.formError.message}</p>
@@ -114,6 +129,18 @@ export default function FormErrorsPage() {
             <Rich>{t.translationTop()}</Rich>
           </p>
         </Pitfall>
+        <p>
+          <Rich>{t.translationZod()}</Rich>
+        </p>
+        <CodeBlock
+          code={ZOD_LOCALE}
+          lang="ts"
+          marks={{ 9: 'highlight', 12: 'highlight', 13: 'highlight' }}
+          title="src/lib/zod-locale.ts"
+        />
+        <p>
+          <Rich>{t.translationZodImport()}</Rich>
+        </p>
         <p>
           <Rich>{t.translationAction()}</Rich>
           <LocaleAnchor path="/:locale/i18n/routing">

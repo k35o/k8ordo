@@ -2,7 +2,7 @@ import { formFields, parseForm } from '@k8ordo/form/server';
 import type { Meta, StoryObj } from '@storybook/react-vite';
 import { useState } from 'react';
 import type { ComponentProps } from 'react';
-import { expect, waitFor } from 'storybook/test';
+import { expect, fn, waitFor } from 'storybook/test';
 import { z } from 'zod';
 
 import {
@@ -11,6 +11,11 @@ import {
   memo,
   MemoField,
 } from '../../../../.storybook/action-form';
+import {
+  finishPending,
+  PendingForm,
+} from '../../../../.storybook/pending-form';
+import { afterRenderingUpdate } from '../../../../.storybook/rendering';
 import { FormControl } from '../form-control';
 import { RadioCard } from './radio-card';
 
@@ -205,6 +210,65 @@ export const Disabled: Story = {
   },
 };
 
+export const Invalid: Story = {
+  args: {
+    invalid: true,
+  },
+  render: (props) => <DefaultRender {...props} />,
+  play: async ({ canvas }) => {
+    await expect(
+      canvas.getByRole('radiogroup', { name: 'Choose a plan' }),
+    ).toHaveAttribute('aria-invalid', 'true');
+  },
+};
+
+export const PendingKeepsFocus: Story = {
+  args: { onChange: fn() },
+  render: (props) => (
+    <PendingForm>
+      <p id={props['aria-labelledby']}>Choose a plan</p>
+      <RadioCard
+        aria-labelledby={props['aria-labelledby']}
+        defaultValue="pro"
+        name="plan"
+        onChange={props.onChange}
+        options={props.options}
+      />
+    </PendingForm>
+  ),
+  play: async ({ args, canvas, userEvent }) => {
+    const pro = canvas.getByRole<HTMLInputElement>('radio', { name: 'Pro' });
+
+    try {
+      pro.focus();
+      pro.form?.requestSubmit();
+      await canvas.findByText('送信中');
+      await afterRenderingUpdate();
+
+      await expect(pro).toHaveFocus();
+      await Promise.all(
+        canvas.getAllByRole('radio').map(async (radio) => {
+          await expect(radio).toHaveAttribute('aria-disabled', 'true');
+        }),
+      );
+
+      await userEvent.keyboard('{ArrowDown}');
+      await userEvent.click(canvas.getByText('Team'));
+      await expect(pro).toBeChecked();
+    } finally {
+      finishPending();
+    }
+    await waitFor(async () => {
+      await expect(pro).not.toHaveAttribute('aria-disabled');
+    });
+    await expect(args.onChange).not.toHaveBeenCalled();
+
+    await userEvent.click(canvas.getByText('Starter'));
+    await expect(args.onChange).toHaveBeenCalledOnce();
+    await expect(args.onChange).toHaveBeenCalledWith('starter');
+  },
+};
+
 const selectionDotOf = (radio: HTMLElement) =>
   radio.closest('label')?.querySelector('[aria-hidden] > span');
 
@@ -266,9 +330,8 @@ const PlanForm = () => (
         <>
           <FormControl
             errorText={plan.error}
-            invalid={plan.invalid}
             label="プラン"
-            labelAs="legend"
+            labelAs="group"
             renderInput={(props) => (
               <RadioCard {...props} {...plan.input} options={PLANS} />
             )}

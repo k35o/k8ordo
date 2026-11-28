@@ -41,13 +41,13 @@ export const deriveTitle = message({
 });
 
 export const deriveCallout = message({
-  ja: 'モジュールスコープで1回だけ作る',
-  en: 'Built once, at module scope',
+  ja: 'リクエストごとに描画の中で作る',
+  en: 'Built in the render, per request',
 });
 
 export const deriveFields = message({
-  ja: 'Server Componentで`formFields`にスキーマを渡します。入力欄に付ける`required`や`maxlength`などの属性と、エラーの文言が作られます。',
-  en: 'Hand the schema to `formFields` in a Server Component. It builds the attributes for each input, such as `required` and `maxlength`, along with the error messages.',
+  ja: 'Server Componentの描画の中で、`formFields`にスキーマを渡します。入力欄に付ける`required`や`maxlength`などの属性と、エラーの文言が作られます。',
+  en: 'Hand the schema to `formFields` in a Server Component’s render. It builds the attributes for each input, such as `required` and `maxlength`, along with the error messages.',
 });
 
 export const deriveJson = message({
@@ -85,6 +85,11 @@ export const formTitle = message({
   en: 'Rendering the form',
 });
 
+export const formTypeCallout = message({
+  ja: 'スキーマの型から、パスと入力欄の型が決まる',
+  en: 'The paths and input types follow the schema’s type',
+});
+
 export const formHookCallout = message({
   ja: '入力欄の属性と、Server Actionが返したstate',
   en: 'The derived fields and the state the Server Action returned',
@@ -93,6 +98,11 @@ export const formHookCallout = message({
 export const formPropsCallout = message({
   ja: '`<form>`にだけ展開する',
   en: 'Spread onto the `<form>` only',
+});
+
+export const formType = message({
+  ja: 'propsの型は`FormFields<typeof talkSchema>`と書きます。`formFields(talkSchema)`が返す型と同じなので、`form.field()`に渡せるパスも、各欄の`input`の型も、スキーマから決まります。スキーマは`import type`で読むので、zodはバンドルに入りません。`defineForm`の定義を渡すときも、`FormFields<typeof signup>`のように定義の型を書きます。',
+  en: 'Type the prop as `FormFields<typeof talkSchema>`. It is the type `formFields(talkSchema)` returns, so the paths `form.field()` accepts and each field’s `input` type follow the schema. The schema is read with `import type`, so zod stays out of the bundle. For a `defineForm` definition, write its type the same way: `FormFields<typeof signup>`.',
 });
 
 export const formHook = message({

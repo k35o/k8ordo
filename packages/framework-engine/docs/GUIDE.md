@@ -8,7 +8,7 @@ everything:
 - **The `routes/` grammar.** A directory tree is the application's pathname
   space, parsed and checked as a pure function of the file list.
 - **The generator.** The route table (`.k8ordo/routes.gen.ts`) and the type
-  wiring for `@k8ordo/router` and `@k8ordo/state` (`.k8ordo/register.gen.ts`)
+  wiring for `@k8ordo/router` and `@k8ordo/i18n` (`.k8ordo/register.gen.ts`)
   are written rather than hand-maintained.
 - **The RSC pipeline**, and the configuration it needs to be correct — the
   client dependencies the optimizer cannot discover on its own, and a single

@@ -212,7 +212,6 @@ const BookingForm = () => (
       return (
         <FormControl
           errorText={checkIn.error}
-          invalid={checkIn.invalid}
           label="チェックイン"
           renderInput={(props) => <DatePicker {...props} {...checkIn.input} />}
           required={checkIn.required}

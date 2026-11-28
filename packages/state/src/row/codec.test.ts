@@ -65,19 +65,41 @@ describe('version and migrate', () => {
     expect(values).toStrictEqual({ view: 'table', pageSize: 20 });
   });
 
-  it('reads a row a failing migrate cannot turn as nothing stored', () => {
+  it('reads a row a failing migrate cannot turn as nothing stored, and says so with the key', () => {
+    const thrown = new Error('unexpected shape');
     const failing = defineCookieState('failing', viewSchema, {
       version: 2,
       migrate: () => {
-        throw new Error('unexpected shape');
+        throw thrown;
       },
     });
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    const values = failing.parseCookies(
-      new Map([[failing.cookieName, '[1,{"layout":"list"}]']]),
-    );
+    try {
+      const values = failing.parseCookies(
+        new Map([[failing.cookieName, '[1,{"layout":"list"}]']]),
+      );
 
-    expect(values).toStrictEqual({ view: 'grid', pageSize: 20 });
+      expect(values).toStrictEqual({ view: 'grid', pageSize: 20 });
+      expect(logged).toHaveBeenCalledExactlyOnceWith(
+        expect.stringContaining('"failing"'),
+        thrown,
+      );
+    } finally {
+      logged.mockRestore();
+    }
+  });
+
+  it('says nothing of a row migrate turns', () => {
+    const logged = vi.spyOn(console, 'error').mockImplementation(() => {});
+
+    try {
+      viewCookie.parseCookies(cookiesWith([1, { layout: 'list' }]));
+
+      expect(logged).not.toHaveBeenCalled();
+    } finally {
+      logged.mockRestore();
+    }
   });
 
   it('salvages a row a newer version wrote without migrating it', () => {
@@ -90,8 +112,39 @@ describe('version and migrate', () => {
   });
 
   it('writes the version together with the values', () => {
-    expect(viewCookie.cookieValue({ view: 'table' })).toBe(
+    expect(viewCookie.cookie({ view: 'table' }, new Map())[1]).toBe(
       '[2,{"view":"table","pageSize":20}]',
+    );
+  });
+
+  it('writes a cookie an older version wrote back in the current one, the patch over it', () => {
+    const [, value] = viewCookie.cookie(
+      { view: 'grid' },
+      cookiesWith([1, { layout: 'list', pageSize: 50 }]),
+    );
+
+    expect(value).toBe('[2,{"view":"grid","pageSize":50}]');
+  });
+
+  it('refuses to write over a cookie a failing migrate cannot turn', () => {
+    const thrown = new Error('unexpected shape');
+    const failing = defineCookieState('failing', viewSchema, {
+      version: 2,
+      migrate: () => {
+        throw thrown;
+      },
+    });
+
+    expect(() =>
+      failing.cookie(
+        { view: 'table' },
+        new Map([[failing.cookieName, '[1,{"layout":"list"}]']]),
+      ),
+    ).toThrow(
+      expect.objectContaining({
+        message: expect.stringContaining('"failing"'),
+        cause: thrown,
+      }),
     );
   });
 

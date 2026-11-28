@@ -6,12 +6,13 @@ import { Badge, Button, Code } from '@k8ordo/ui';
 import { useState } from 'react';
 
 import * as m from '../../../messages';
+import type { ratingSchema } from './rating-schema';
 
 import styles from './rating-demo.module.css';
 
 type Props = {
   /** ページの Server Component が `formFields(ratingSchema)` で導いたもの。 */
-  fields: FormFields<'rating', never>;
+  fields: FormFields<typeof ratingSchema>;
 };
 
 const STARS = [1, 2, 3, 4, 5] as const;
@@ -53,7 +54,7 @@ export function RatingDemo({ fields }: Props) {
               aria-pressed={rating === star}
               color={star <= rating ? 'primary' : 'base'}
               key={star}
-              onAction={() => {
+              onClick={() => {
                 setRating(star);
               }}
               size="sm"
@@ -76,15 +77,7 @@ export function RatingDemo({ fields }: Props) {
         <Button type="submit" variant="solid">
           {m.formCustomInputs.demoSubmit()}
         </Button>
-        <Button
-          color="base"
-          renderItem={({ children, className }) => (
-            <button className={className} type="reset">
-              {children}
-            </button>
-          )}
-          variant="outline"
-        >
+        <Button color="base" type="reset" variant="outline">
           {m.formCustomInputs.demoReset()}
         </Button>
       </div>

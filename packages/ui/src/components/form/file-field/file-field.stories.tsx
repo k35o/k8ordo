@@ -625,6 +625,36 @@ const pickInForm = (input: HTMLInputElement, file: File) => {
   input.dispatchEvent(new Event('change', { bubbles: true }));
 };
 
+export const TabSkipsTheHiddenInput: Story = {
+  render: () => (
+    <FormControl
+      helpText="PDF を 1 つ"
+      label="添付ファイル"
+      labelAs="group"
+      renderInput={(props) => (
+        <FileField.Root {...props} name="attachment">
+          <FileField.Trigger
+            renderItem={(wiring) => <Button {...wiring}>ファイルを選択</Button>}
+          />
+        </FileField.Root>
+      )}
+    />
+  ),
+  play: async ({ canvas, canvasElement, userEvent }) => {
+    const input = fileInputOf(canvasElement);
+    const trigger = canvas.getByRole('button', {
+      name: '添付ファイル ファイルを選択',
+    });
+
+    await expect(input).toHaveAttribute('tabindex', '-1');
+    await expect(input).toHaveAttribute('aria-hidden', 'true');
+    await expect(trigger).toHaveAccessibleDescription('PDF を 1 つ');
+
+    await userEvent.tab();
+    await expect(trigger).toHaveFocus();
+  },
+};
+
 const report = z.object({ attachment: z.file('ファイルを選んでください') });
 const reportFields = formFields(report);
 const received = fn();
@@ -640,8 +670,8 @@ const ReportForm = () => (
       return (
         <FormControl
           errorText={attachment.error}
-          invalid={attachment.invalid}
           label="添付ファイル"
+          labelAs="group"
           renderInput={(props) => (
             <FileField.Root {...props} {...attachment.input}>
               <FileField.Dropzone />
@@ -660,6 +690,10 @@ export const WithForm: Story = {
   render: () => <ReportForm />,
   play: async ({ canvas, canvasElement, userEvent }) => {
     const input = fileInputOf(canvasElement);
+    // ボタンは required を持てないので、必須は見出しの印から名前で伝える
+    const trigger = canvas.getByRole('button', {
+      name: '添付ファイル 必須 ファイルを選択',
+    });
     const submit = () =>
       userEvent.click(canvas.getByRole('button', { name: '送信' }));
 
@@ -667,12 +701,16 @@ export const WithForm: Story = {
     await expect(input).toHaveAttribute('name', 'attachment');
     await expect(input).toBeRequired();
 
-    // ドロップしたファイルも、選んだときと同じくエラーを消し、変更ありにする
     input.focus();
-    await userEvent.tab();
+    await expect(trigger).toHaveFocus();
     await expect(
       await canvas.findByText('ファイルを選んでください'),
     ).toBeVisible();
+    await expect(trigger).toHaveAccessibleDescription(
+      'ファイルを選んでください',
+    );
+
+    // ドロップしたファイルも、選んだときと同じくエラーを消し、変更ありにする
     drag(dropzoneOf(canvasElement), [textFile('report.txt')]).drop();
     await expect(await canvas.findByText('report.txt')).toBeVisible();
     await expect(input.files).toHaveLength(1);
@@ -701,6 +739,7 @@ export const WithForm: Story = {
     await expect(
       await canvas.findByText('ファイルを選んでください'),
     ).toBeVisible();
+    await expect(trigger).toHaveFocus();
 
     // 選んだファイルを送る
     pickInForm(input, textFile('notes.txt'));

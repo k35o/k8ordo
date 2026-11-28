@@ -29,8 +29,10 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   server, cookie state the server renders (and how it relates to cookies the
   server writes), updating on the client,
   batching and update handles, subscription granularity, router
-  requirements, typed routes via `Register`, reading local state before
-  hydration, and pairing with `@k8ordo/form` for GET forms.
+  requirements and turning a page, links on the URL the router built, the
+  one way to write each URL (a table shared with `@k8ordo/router` and
+  `@k8ordo/framework`), reading local state before hydration, and pairing
+  with `@k8ordo/form` for GET forms (whose URL is not the canonical one).
 
 ## Entry point
 
@@ -45,10 +47,20 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   page never sees the search, and the url slot is read in the browser);
   `urlReader(schema)` is that reading for a url schema alone, the codec
   built once (what the framework's generated table calls);
-  `href(path, values?)` builds a canonical link keeping the path literal in
-  the type — the path written from the app's root, the link carrying Vite's
-  `base` (`import.meta.env.BASE_URL`) in front; `search(values?)` returns the
-  query string alone.
+  `href(url, values?)` puts the state on the URL the router built —
+  `@k8ordo/router`'s `href()` (`listState.href(href('/products'), { page: 2 })`),
+  a Next.js `Route`, or `''` for the page itself (`?page=2`) — rewriting only
+  this definition's url params in canonical form (defaults omitted) and
+  keeping the URL's other params; with a hash slot it sets the fragment from
+  `values.hash` (none at the default), without one it keeps the URL's own;
+  it adds no base (the router's `href()` has) and keeps the URL literal in
+  the type, so the pattern is checked by the router — a rest param too,
+  `href('/files/:path+', { path })` — and a typed route by `<Link>`. There
+  is no `search()` and no `Register` here. Only `href` and `update()` write
+  the canonical URL; a GET form submits every named field (`q=`, `min=0`).
+  A same-pathname navigation keeps the scroll and the focus (a fragment
+  too), so a pager moves focus to the results heading (`tabIndex={-1}`)
+  after `update(…).finished`.
   `defineLocalState(key, schema, versioning?)`,
   `defineSessionState(key, schema)`,
   `defineCookieState(key, schema, versioning?)` and
@@ -59,7 +71,9 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   the schema's field-by-field salvage and is written back in the current
   version by the browser store (`parseCookies` migrates but never writes), a
   newer row is salvaged and left alone, and a throwing `migrate` reads as
-  nothing stored without touching the row; where the browser blocks site
+  nothing stored, is reported (`reportError` in the browser, `console.error`
+  with the key from `parseCookies`) and leaves the row alone — an `update()`
+  writes nothing over it and rejects its handle with the error; where the browser blocks site
   data, local and session state render their defaults and keep updates in
   memory until the next load; a local or session definition also exposes
   `storageKey` (the key in its storage area, `k8ordo-state:<key>`) and
@@ -68,12 +82,21 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   (also `null` for a row of another version, when versioned) —
   unvalidated, so read only what you need with a fallback. A
   cookie definition exposes `cookieName` (`k8ordo-state.<key>`),
-  `parseCookies(cookies)` — reads the values out of a request's
-  percent-decoded cookies (`request.cookies` in `@k8ordo/framework`'s server mode), salvaged
-  like any read — and `cookieValue(values?)`, the unencoded JSON a server
-  hands its cookie API (`cookies().set`, which percent-encodes it) when it
-  sets the same cookie (`Path=/`, `SameSite=Lax`, `Max-Age=34560000`, never
-  `HttpOnly`). `useAppState(definition, keys?, { initialUrl? } |
+  `parseCookies(cookies)` — reads the values out of anything whose
+  `get(name)` returns a request's cookie percent-decoded (`request.cookies`
+  in a page and `cookies()` in a guard, a route.ts or a Server Action under
+  `@k8ordo/framework`'s server mode, `{ get: (name) => store.get(name)?.value }`
+  over Next.js's `cookies()`), salvaged like any read — and
+  `cookie(patch, current)`, which writes the same cookie from a server as
+  `readonly [name, value, options]` to spread into its cookie API
+  (`cookies().set(...density.cookie({ density: 'compact' }, cookies()))`):
+  `patch` goes over the values `current` holds, read as `parseCookies` reads
+  them, as `update()` lays it over the cookie in the browser, the result
+  passes the schema, the value is the unencoded JSON (`cookies().set`
+  percent-encodes it), the options are `{ path: '/', sameSite: 'lax',
+  maxAge: 34560000, httpOnly: false }`, and a cookie whose `migrate` throws
+  makes it throw rather than be written over.
+  `useAppState(definition, keys?, { initialUrl? } |
   { initialCookie? })` (client) works on any kind and returns
   `[state, update]` — state is the flat merge of a page definition's slots;
   `initialUrl` / `initialCookie` seed the server and hydration renders with
@@ -89,10 +112,6 @@ When installed via npm, these docs live under `node_modules/@k8ordo/state/docs/`
   it — rejects them with its error;
   `{ history: 'push' }` exists only on page state and takes effect only when
   a url value changes).
+  `@k8ordo/state/testing` is the entry for tests, kept out of the main one:
   `resetStateRegistry()` clears stores between tests, and `mountPageUrl()`
-  from `@k8ordo/state/testing` stands in for a router there. Augment
-  `interface Register { routes: typeof routes }` — the same line as for
-  `@k8ordo/router` — to check each `href` path against the route table's
-  linkable patterns segment by segment (`NavigablePath`, so a `/:locale`
-  table no longer takes every path); a router without a table registers its own path union as
-  `interface Register { path }` instead.
+  stands in for a router there.

@@ -4,6 +4,7 @@ import path from 'node:path';
 
 import {
   clientDepsHeader,
+  NONCE_HEADER,
   serverStylesheetsHeader,
 } from '@k8ordo/framework-engine';
 import type { ClientDeps } from '@k8ordo/framework-engine';
@@ -73,6 +74,8 @@ type Previewed =
       };
     }
   | { readonly passed: string };
+
+const RUNTIME_DIR = '/k8ordo-runtime';
 
 let root: string;
 
@@ -150,12 +153,13 @@ const recordingLogger = () => {
 };
 
 const hooks = (
-  options: Omit<StaticOptions, 'mode'> = {},
+  options: Partial<Omit<StaticOptions, 'mode'>> = {},
   resolvedBase = '/',
 ) => {
-  const plugin = staticMode({ mode: 'static', ...options }).find(
-    ({ name }) => name === 'k8ordo:static',
-  );
+  const plugin = staticMode(
+    { mode: 'static', site: 'https://example.com', ...options },
+    { runtimeDir: RUNTIME_DIR },
+  ).find(({ name }) => name === 'k8ordo:static');
   if (plugin === undefined) throw new Error('no k8ordo:static plugin');
   const { logger, said } = recordingLogger();
   (
@@ -221,23 +225,21 @@ const hooks = (
             installed = middleware;
           },
         },
-        // RSC の環境の runner の代わり。paths.ts を読むと、テストが決めた値を返す
+        // RSC の環境の runner の代わり。ハンドラの入口の pathValues は、
+        // テストが決めた値を返す
         environments: {
           rsc: {
             runner: {
-              import: (file) => {
-                const values =
-                  listed[
-                    path
-                      .relative(path.join(root, 'src', 'routes'), file)
-                      .split(path.sep)
-                      .join('/')
-                  ];
+              import: (id) => {
+                if (id !== path.join(RUNTIME_DIR, 'entry.rsc.mjs')) {
+                  return Promise.reject(new Error(`no module ${id} here`));
+                }
                 return Promise.resolve({
-                  default: () => {
+                  pathValues: (file: string) => {
                     asked += 1;
+                    const values = listed[file];
                     if (values instanceof Error) throw values;
-                    return values;
+                    return { values };
                   },
                 });
               },
@@ -359,15 +361,16 @@ const handlerAnswering = async (
     path.join(dir, 'index.js'),
     `import { appendFileSync } from 'node:fs';
 const answers = ${JSON.stringify(answers)};
-export const pathValues = async (file) =>
-  JSON.parse(
+export const pathValues = async (file) => ({
+  values: JSON.parse(
     await (await import('node:fs/promises')).readFile(
       new URL('../../listed.json', import.meta.url),
       'utf8',
     ),
-  )[file];
-// 本物のハンドラは、文書を描いたペイロードを答えに持たせる。ここでは
-// <pathname>/index.rsc と書かれた答えの本文がそれ
+  )[file],
+});
+// 本物のハンドラは、文書を描いたペイロードを答えに持たせ、署名した nonce を
+// ヘッダーで言う。ここでは <pathname>/index.rsc と書かれた答えの本文がペイロード
 const payloads = new WeakMap();
 export const payloadOf = (response) => payloads.get(response);
 export default async function handler(request) {
@@ -377,7 +380,7 @@ export default async function handler(request) {
   if (answer === undefined) return new Response('not found', { status: 404 });
   const response = new Response(answer.body ?? null, {
     status: answer.status ?? 200,
-    headers: answer.headers ?? {},
+    headers: { ${JSON.stringify(NONCE_HEADER)}: 'bm9uY2U=', ...answer.headers },
   });
   const payload = answers[pathname.replace(/\\/$/u, '') + '/index.rsc'];
   if (payload !== undefined) {
@@ -470,7 +473,7 @@ describe('the shells a build writes', () => {
       'static build could not render /posts/:id — see the error above',
     );
     expect(logged).toHaveBeenCalledWith(
-      'k8ordo: http://k8ordo.localhost/posts/!fallback — the shell threw',
+      'k8ordo: https://example.com/posts/!fallback — the shell threw',
     );
     await expect(clientFile('posts/!fallback/index.html')).rejects.toThrow(
       /ENOENT/u,
@@ -678,20 +681,7 @@ describe('a route.ts at a file the build writes itself', () => {
   });
 
   describe('正常系', () => {
-    it('leaves sitemap.xml to a route.ts that writes it, "site" given or not: the application’s own list is the site’s', async () => {
-      await routeFiles(['sitemap.xml/route.ts']);
-      await handlerAnswering(
-        home({ '/sitemap.xml': { body: '<urlset>own</urlset>' } }),
-      );
-      const { build, said } = hooks({ site: 'https://example.com' });
-
-      await build();
-
-      expect(await clientFile('sitemap.xml')).toBe('<urlset>own</urlset>');
-      expect(said.info).toStrictEqual(['k8ordo: wrote 2 routes']);
-    });
-
-    it('writes a route.ts at sitemap.xml as its own file when no "site" is given', async () => {
+    it('leaves sitemap.xml to a route.ts that writes it: the application’s own list is the site’s', async () => {
       await routeFiles(['sitemap.xml/route.ts']);
       await handlerAnswering(
         home({ '/sitemap.xml': { body: '<urlset>own</urlset>' } }),
@@ -702,6 +692,18 @@ describe('a route.ts at a file the build writes itself', () => {
 
       expect(await clientFile('sitemap.xml')).toBe('<urlset>own</urlset>');
       expect(said.info).toStrictEqual(['k8ordo: wrote 2 routes']);
+    });
+
+    it('lists the pages at the origin of site, as URL spells it', async () => {
+      await routeFiles([]);
+      await handlerAnswering(home());
+      const { build } = hooks({ site: 'https://Example.org:443/' });
+
+      await build();
+
+      expect(await clientFile('sitemap.xml')).toContain(
+        '<url><loc>https://example.org/</loc></url>',
+      );
     });
 
     it('writes its sitemap beside a route.ts that writes another file', async () => {
@@ -996,7 +998,7 @@ describe('the _redirects a build writes', () => {
     await build();
 
     await expect(clientFile('_redirects')).rejects.toThrow(/ENOENT/u);
-    expect(said.info).toStrictEqual(['k8ordo: wrote 2 routes']);
+    expect(said.info).toStrictEqual(['k8ordo: wrote 2 routes and sitemap.xml']);
   });
 });
 

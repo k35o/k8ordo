@@ -21,9 +21,6 @@ const DEFINE_ROUTES_EXAMPLE = `export const routes = defineRoutes({
 const HREF_EXAMPLE = `href('/products'); // '/products'
 href('/products/:id', { id: 42 }); // '/products/42'`;
 
-const NAVIGATE_TO_EXAMPLE = `await navigateTo('/products/:id', { id: '42' }).finished;
-navigateTo('/products', { history: 'replace' });`;
-
 const MATCH_PATH_EXAMPLE = `matchPath('/products/:id', '/products/42'); // { id: '42' }
 matchPath('/products/*', '/products'); // null
 matchPath('/products/*', '/products', { inclusive: true }); // {}`;
@@ -40,11 +37,6 @@ const PARAMS_OF_EXAMPLE = `type Params = ParamsOf<'/:locale/products/:id'>;
 
 const PATH_FOR_EXAMPLE = `type Path = PathFor<'/:locale/products/:id'>;
 // \`/\${string}/products/\${string}\``;
-
-const NAVIGABLE_PATH_EXAMPLE = `type A = NavigablePath<typeof routes, '/products/42'>;
-// '/products/42'
-type B = NavigablePath<typeof routes, '/products/42/reviews'>;
-// never`;
 
 const HOST_EXAMPLE = `'use client';
 
@@ -143,38 +135,6 @@ export default function RouterReferencePage() {
       </ApiEntry>
 
       <ApiEntry
-        caveats={t.navigateToCaveats}
-        from={FROM}
-        id="navigate-to"
-        name="navigateTo"
-        params={[
-          { name: 'pattern', type: 'P', description: t.hrefPattern },
-          {
-            name: 'params',
-            type: 'RegisteredParams<P>',
-            description: t.hrefParams,
-          },
-          {
-            name: 'options',
-            type: 'NavigateToOptions',
-            description: t.navigateToOptions,
-          },
-        ]}
-        returns={{
-          type: 'NavigationResult',
-          description: t.navigateToReturns,
-        }}
-        signature={`navigateTo<P extends RegisteredNavigablePattern>(
-  pattern: P,
-  params?: RegisteredParams<P>,
-  options?: NavigateToOptions,
-): NavigationResult`}
-        summary={t.navigateToSummary}
-      >
-        <CodeBlock code={NAVIGATE_TO_EXAMPLE} lang="ts" />
-      </ApiEntry>
-
-      <ApiEntry
         caveats={t.bindParamsCaveats}
         from={FROM}
         id="bind-params"
@@ -187,12 +147,15 @@ export default function RouterReferencePage() {
           },
         ]}
         returns={{
-          type: 'BoundLinks<Bound>',
+          type: '(pattern, params?) => string',
           description: t.bindParamsReturns,
         }}
         signature={`bindParams<const Bound extends BoundParams>(
   source: () => Bound,
-): BoundLinks<Bound>`}
+): <P extends RegisteredNavigablePattern>(
+  pattern: P,
+  params?: Partial<RegisteredParams<P>>,
+) => string`}
         summary={t.bindParamsSummary}
       />
 
@@ -583,23 +546,6 @@ export default function RouterReferencePage() {
       <ApiEntry
         fields={[
           {
-            name: 'history',
-            type: "'push' | 'replace'",
-            description: t.navigateToOptionsHistory,
-          },
-        ]}
-        from={FROM}
-        id="navigate-to-options"
-        name="NavigateToOptions"
-        signature={`type NavigateToOptions = {
-  history?: 'push' | 'replace';
-};`}
-        summary={t.navigateToOptionsSummary}
-      />
-
-      <ApiEntry
-        fields={[
-          {
             name: 'inclusive',
             type: 'boolean',
             description: t.matchOptionsInclusive,
@@ -630,33 +576,6 @@ export default function RouterReferencePage() {
         name="BoundParams"
         signature="type BoundParams = Readonly<Record<string, ParamValue>>;"
         summary={t.boundParamsSummary}
-      />
-
-      <ApiEntry
-        fields={[
-          {
-            name: 'href',
-            type: '(pattern, params?) => string',
-            description: t.boundLinksHref,
-          },
-          {
-            name: 'navigateTo',
-            type: '(pattern, params?, options?) => NavigationResult',
-            description: t.boundLinksNavigateTo,
-          },
-        ]}
-        from={FROM}
-        id="bound-links"
-        name="BoundLinks"
-        signature={`type BoundLinks<Bound extends BoundParams> = {
-  readonly href: (pattern, params?) => string;
-  readonly navigateTo: (
-    pattern,
-    params?,
-    options?: NavigateToOptions,
-  ) => NavigationResult;
-};`}
-        summary={t.boundLinksSummary}
       />
 
       <ApiEntry
@@ -795,7 +714,7 @@ export default function RouterReferencePage() {
         from={FROM}
         id="layout-props"
         name="LayoutProps"
-        signature={`type LayoutProps<P extends RegisteredPattern> = {
+        signature={`type LayoutProps<P extends string> = {
   readonly params: ParamsOf<P>;
   readonly pathname: string;
   readonly children: ReactNode;
@@ -841,17 +760,6 @@ export default function RouterReferencePage() {
         signature="type NavigablePatternOf<R extends RoutesRecord>"
         summary={t.navigablePatternOfSummary}
       />
-
-      <ApiEntry
-        caveats={t.navigablePathCaveats}
-        from={FROM}
-        id="navigable-path"
-        name="NavigablePath"
-        signature="type NavigablePath<D, Path extends string>"
-        summary={t.navigablePathSummary}
-      >
-        <CodeBlock code={NAVIGABLE_PATH_EXAMPLE} lang="ts" />
-      </ApiEntry>
 
       <ApiEntry
         from={FROM}

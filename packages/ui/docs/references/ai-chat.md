@@ -175,10 +175,10 @@ Props (Message.Content):
     <Message.Copy value={text} />
     <Message.Regenerate
       disabled={status === 'submitted' || status === 'streaming'}
-      onAction={() => regenerate({ messageId: message.id })}
+      action={() => regenerate({ messageId: message.id })}
     />
     <Message.Feedback onChange={(value) => saveFeedback(message.id, value)} />
-    <Message.Action label="Share" onAction={() => share(message.id)}>
+    <Message.Action action={() => share(message.id)} label="Share">
       <LinkIcon size="sm" />
     </Message.Action>
   </Message.Actions>
@@ -186,7 +186,7 @@ Props (Message.Content):
 ```
 
 - `Copy` is an icon-only, `sm` [`CopyButton`](components.md#copybutton): it writes `value` to the clipboard, shows a check icon — or an error icon when the clipboard refuses — for two seconds, and announces 「コピーしました」 or 「コピーできませんでした」 through a `status` region. Nothing is thrown either way.
-- `Regenerate` and `Action` take `onAction`; a returned promise keeps the button busy (`aria-busy`, `aria-disabled`, presses ignored) until it settles, so `() => regenerate(...)` does not need its own pending state. The button keeps focus meanwhile.
+- `Regenerate` and `Action` take `action`, which runs in a transition: a returned promise keeps the button busy (`aria-busy`, `aria-disabled`, presses ignored) until it settles, so `() => regenerate(...)` does not need its own pending state. The button keeps focus meanwhile.
 - `Feedback` is a pair of toggle buttons (`aria-pressed`). Pressing the pressed one again clears it, so `onChange` receives `null`.
 
 Props (Message.Actions):
@@ -196,7 +196,7 @@ Props (Message.Actions):
 Props (Message.Action):
 
 - `label`: string (required; the accessible name and the tooltip)
-- `onAction`: `() => void | Promise<void>`
+- `action`: `() => void | Promise<void>`
 - `disabled`: boolean
 - `children`: ReactNode (the icon, `size="sm"`)
 
@@ -207,7 +207,7 @@ Props (Message.Copy):
 
 Props (Message.Regenerate):
 
-- `onAction`: `() => void | Promise<void>` (required)
+- `action`: `() => void | Promise<void>` (required)
 - `label`: string (default: `'再生成'`)
 - `disabled`: boolean
 
@@ -470,6 +470,7 @@ type MappedPart =
       output?: unknown;
       errorText?: string;
       approval?: ToolApproval; // the part's own approval object, id included
+      part: ToolUIPart | DynamicToolUIPart; // the AI SDK part itself, for MCPAppRenderer
     }
   | { kind: 'file'; url: string; mediaType: string; filename?: string }
   | {
@@ -485,7 +486,7 @@ type MappedPart =
 
 Order is preserved. `step-start`, `custom`, and `reasoning-file` parts are skipped.
 
-Render each part as its own row under `Message.Root` — the children stack in a column. Files and sources read better as one list each, so pull them out with `filter` and skip them in the loop. A `data` part is yours: pick the ones you know by `name`, and validate what the model put in them before drawing it.
+Render each part as its own row under `Message.Root` — the children stack in a column. Files and sources read better as one list each, so pull them out with `filter` and skip them in the loop.
 
 ```tsx
 'use client';
@@ -503,10 +504,8 @@ import { BotMessageIcon } from '@k8ordo/ui/icons';
 import { lastAssistantMessageIsCompleteWithApprovalResponses } from 'ai';
 import type { UIMessage } from 'ai';
 
-// copied from examples/ui-integrations: the AI SDK glue and the json-render glue
+// copied from examples/ui-integrations: the AI SDK glue
 import { mapMessageParts } from './ai-sdk/map-parts';
-import { validateGeneratedSpec } from './json-render/catalog';
-import { JsonRenderUI } from './json-render/registry';
 
 type Chat = ReturnType<typeof useChat>;
 
@@ -571,12 +570,6 @@ function ChatMessage({ message, chat }: { message: UIMessage; chat: Chat }) {
             />
           );
         }
-        if (part.kind === 'data' && part.name === 'ui') {
-          const result = validateGeneratedSpec(part.data);
-          return result.ok ? (
-            <JsonRenderUI key={key} spec={result.spec} />
-          ) : null;
-        }
         return null;
       })}
       {sources.length > 0 && (
@@ -597,7 +590,7 @@ function ChatMessage({ message, chat }: { message: UIMessage; chat: Chat }) {
             disabled={
               chat.status === 'submitted' || chat.status === 'streaming'
             }
-            onAction={() => chat.regenerate({ messageId: message.id })}
+            action={() => chat.regenerate({ messageId: message.id })}
           />
           <Message.Feedback />
         </Message.Actions>
@@ -617,19 +610,73 @@ export function Chat() {
 
 `examples/ui-integrations` in the repository runs this against the real `useChat`, with a scripted transport in place of a model.
 
+### MCP Apps
+
+A tool from an MCP server can come with an App ([MCP Apps](https://github.com/modelcontextprotocol/ext-apps)): a `ui://` HTML resource the host draws in a sandboxed iframe. The AI SDK puts it in the tool part's `toolMetadata.app` when the tools come from `@ai-sdk/mcp`'s `createMCPClient` with `mcpAppClientCapabilities`, and draws it with `MCPAppRenderer` from `@ai-sdk/react`. Hand it `part.part` from `mapMessageParts`, in place of `ToolInvocation`, inside `Message.Root`:
+
+```tsx
+import { MCPAppRenderer } from '@ai-sdk/react';
+
+if (part.kind === 'tool' && part.part.toolMetadata?.app !== undefined) {
+  return (
+    <MCPAppRenderer
+      key={part.toolCallId}
+      part={part.part}
+      sandbox={{ url: sandboxUrl }} // a page of yours, on another origin
+      loadResource={loadResource} // reads the ui:// resource on your server
+      hostContext={{ theme: 'light' }}
+      handlers={{
+        sendMessage: (params) => {
+          /* chat.sendMessage(...) */
+        },
+      }}
+    />
+  );
+}
+```
+
+`examples/ui-integrations` keeps the whole of it under test: the sandbox page, the chat that sizes the App and opens it fullscreen, and an MCP server whose App draws A2UI screens with `@k8ordo/ui`, following the host's light or dark.
+
 ## Combining with generative UI
 
-A UI spec returned by an LLM as a tool result can be rendered inside a chat bubble, with the glue of the format you use (here json-render's, copied from `examples/ui-integrations`). See the [generative UI reference](generative-ui.md) for details.
+With the AI SDK, generative UI in a chat is a tool whose part you draw: the model calls a tool such as `show_ui` with the screen as its input, and the chat draws the tool part with the glue of the format you use, copied from `examples/ui-integrations` (see the [generative UI reference](generative-ui.md)). The part's `input` grows while the call streams in (`state: 'input-streaming'`), so the screen can appear as it arrives. A part in `output-error` is a call your server refused: take its screen away.
+
+What the user does on the screen goes back as their next message. Send it as a `data` part, so that the chat shows a short line while the model reads the whole action:
 
 ```tsx
 'use client';
 import { Message } from '@k8ordo/ui/ai';
 
-import { JsonRenderUI } from './json-render/registry';
+// in the loop over mapMessageParts(message)
+if (part.kind === 'tool' && part.name === 'show_ui') {
+  return part.state === 'output-error' ? null : (
+    <Screen input={part.input} key={part.toolCallId} /> // your format's glue
+  );
+}
+if (part.kind === 'data' && part.name === 'action') {
+  return (
+    <Message.Content key={key}>{(part.data as Action).text}</Message.Content>
+  );
+}
 
-<Message.Root from="assistant">
-  <Message.Content>
-    <JsonRenderUI spec={spec} />
-  </Message.Content>
-</Message.Root>;
+// when the user presses something on a screen
+void chat.sendMessage({ parts: [{ type: 'data-action', data: action }] });
 ```
+
+On the server, `convertToModelMessages` turns the part into text for the model through `convertDataPart`, with the action and the state of the screen:
+
+```ts
+const result = streamText({
+  model,
+  tools,
+  messages: await convertToModelMessages(messages, {
+    tools,
+    convertDataPart: (part) =>
+      part.type === 'data-action'
+        ? { type: 'text', text: `The user acted: ${JSON.stringify(part.data)}` }
+        : undefined,
+  }),
+});
+```
+
+`examples/ui-integrations` keeps such a chat under test: Claude shows screens written in A2UI with `show_ui`, answers a press by changing the screen in place with `update_ui`, and receives what every screen holds with each request.

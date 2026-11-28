@@ -75,7 +75,7 @@ type Props = {
   items: readonly TreeItem[];
   expandedIds?: readonly string[];
   defaultExpandedIds?: readonly string[];
-  onExpandedChange?: (ids: readonly string[]) => void;
+  onExpandedIdsChange?: (ids: string[]) => void;
   selectedId?: string | null;
   defaultSelectedId?: string | null;
   onChange?: (id: string) => void;
@@ -89,7 +89,7 @@ export const Tree: FC<Props> = ({
   items,
   expandedIds,
   defaultExpandedIds,
-  onExpandedChange,
+  onExpandedIdsChange,
   selectedId,
   defaultSelectedId = null,
   onChange,
@@ -98,7 +98,6 @@ export const Tree: FC<Props> = ({
   const [expanded, setExpanded] = useControllableState<readonly string[]>({
     value: expandedIds,
     defaultValue: defaultExpandedIds ?? NONE,
-    onChange: onExpandedChange,
   });
   const [selected, setSelected] = useControllableState<string | null>({
     value: selectedId,
@@ -124,11 +123,11 @@ export const Tree: FC<Props> = ({
   };
 
   const toggle = (id: string) => {
-    setExpanded((previous) =>
-      previous.includes(id)
-        ? previous.filter((value) => value !== id)
-        : [...previous, id],
-    );
+    const next = expanded.includes(id)
+      ? expanded.filter((value) => value !== id)
+      : [...expanded, id];
+    setExpanded(next);
+    onExpandedIdsChange?.(next);
   };
 
   const typeahead = (from: number, character: string) => {

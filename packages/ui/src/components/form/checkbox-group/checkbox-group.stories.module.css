@@ -4,18 +4,6 @@
   font-weight: var(--font-weight-medium);
 }
 
-.requiredGroupLabel {
-  display: flex;
-  gap: calc(var(--spacing) * 2);
-  color: var(--color-fg-base);
-  margin-bottom: calc(var(--spacing) * 2);
-  font-weight: var(--font-weight-medium);
-}
-
-.requiredMark {
-  color: var(--color-fg-error);
-}
-
 .column {
   display: flex;
   flex-direction: column;

@@ -42,6 +42,9 @@ type AcceptedFile = {
 type FileFieldContext = {
   disabled: boolean;
   invalid: boolean;
+  labelledBy: string | undefined;
+  describedBy: string | undefined;
+  setTrigger: (node: HTMLElement | null) => void;
   acceptedFiles: AcceptedFile[];
   onFileDelete: (id: string) => void;
   onFilesDrop: (files: File[]) => void;
@@ -82,9 +85,7 @@ type RootProps = PropsWithChildren<
   {
     invalid?: boolean;
     maxFiles?: number;
-    // 文字列は @k8ordo/form の formFields が導く input の defaultValue の型。
-    // ファイルの欄に値が入ることはないが、広げたまま受けられるように型だけ受ける
-    defaultValue?: File[] | string;
+    defaultValue?: File[];
     // event はファイル選択（input の change）時に渡る。ドロップや一覧からの
     // 削除では change イベントが存在しないため undefined になる。
     onChange?: (
@@ -117,17 +118,19 @@ export const Root = ({
   onChange,
   webkitDirectory = false,
   ref,
+  onFocus,
   ...rest
 }: RootProps) => {
   const generatedId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
+  const triggerRef = useRef<HTMLElement>(null);
   // 参照が変わるたびに React が ref の解除と再設定を行うため、
   // 利用者が副作用付きのコールバック ref を渡しても毎レンダー走らないようにする
   const mergedRef = useMemo(() => mergeRefs(inputRef, ref), [ref]);
   const { pending } = useFormStatus();
   const disabledResolved = disabled || pending;
 
-  const defaultFiles = Array.isArray(defaultValue) ? defaultValue : [];
+  const defaultFiles = defaultValue ?? [];
   const [acceptedFiles, setAcceptedFiles] = useState(() =>
     toAccepted(defaultFiles),
   );
@@ -235,10 +238,19 @@ export const Root = ({
     inputRef.current?.click();
   }, []);
 
+  const setTrigger = useCallback((node: HTMLElement | null) => {
+    triggerRef.current = node;
+  }, []);
+
+  const labelledBy = rest['aria-labelledby'];
+  const describedBy = rest['aria-describedby'];
   const contextValue = useMemo(
     () => ({
       disabled: disabledResolved,
       invalid,
+      labelledBy,
+      describedBy,
+      setTrigger,
       acceptedFiles,
       onFileDelete,
       onFilesDrop,
@@ -247,6 +259,9 @@ export const Root = ({
     [
       disabledResolved,
       invalid,
+      labelledBy,
+      describedBy,
+      setTrigger,
       acceptedFiles,
       onFileDelete,
       onFilesDrop,
@@ -260,14 +275,22 @@ export const Root = ({
         <input
           {...rest}
           accept={accept}
+          aria-hidden
           aria-invalid={invalid}
           className={srOnly.srOnly}
           disabled={disabledResolved}
           id={rest.id ?? generatedId}
           multiple={multiple}
           onChange={onFilesChange}
+          // フォーカスを受けられるまま残すのは、form が送信に失敗した欄へ移す
+          // フォーカスを、押す Trigger へ送るため
+          onFocus={(event) => {
+            onFocus?.(event);
+            triggerRef.current?.focus();
+          }}
           ref={mergedRef}
           required={required}
+          tabIndex={-1}
           type="file"
           // @ts-expect-error -- webkitdirectoryがReactのHTMLInputElementのPropsに存在しないため
           // Baseline 2025の機能なので、利用に問題はない
@@ -279,25 +302,36 @@ export const Root = ({
   );
 };
 
+const useTriggerWiring = () => {
+  const id = useId();
+  const { labelledBy, describedBy, setTrigger, openFilePicker, disabled } =
+    useFileFieldContext();
+  return {
+    id,
+    'aria-labelledby':
+      labelledBy === undefined ? undefined : `${labelledBy} ${id}`,
+    'aria-describedby': describedBy,
+    ref: setTrigger,
+    onClick: openFilePicker,
+    disabled,
+  };
+};
+
 export const Trigger: FC<{
   renderItem: (props: {
+    id: string;
+    'aria-labelledby': string | undefined;
+    'aria-describedby': string | undefined;
+    ref: (node: HTMLElement | null) => void;
     onClick: () => void;
     disabled: boolean;
-    invalid: boolean;
   }) => ReactElement;
-}> = ({ renderItem }) => {
-  const context = useFileFieldContext();
-  return renderItem({
-    onClick: context.openFilePicker,
-    disabled: context.disabled,
-    invalid: context.invalid,
-  });
-};
+}> = ({ renderItem }) => renderItem(useTriggerWiring());
 
 export const Dropzone: FC<{ children?: ReactNode }> = ({ children }) => {
   const messages = getMessages();
-  const { disabled, invalid, onFilesDrop, openFilePicker } =
-    useFileFieldContext();
+  const wiring = useTriggerWiring();
+  const { disabled, invalid, onFilesDrop } = useFileFieldContext();
   // 子要素の上を通るたびに dragleave / dragenter が対で届くので、入った深さで数える
   const [depth, setDepth] = useState(0);
   const isDragging = depth > 0 && !disabled;
@@ -346,12 +380,7 @@ export const Dropzone: FC<{ children?: ReactNode }> = ({ children }) => {
       {children ?? (
         <>
           <p className={styles.hint}>{messages.fileFieldDrop}</p>
-          <Button
-            disabled={disabled}
-            onClick={openFilePicker}
-            size="sm"
-            variant="outline"
-          >
+          <Button {...wiring} size="sm" variant="outline">
             {messages.fileFieldTrigger}
           </Button>
         </>

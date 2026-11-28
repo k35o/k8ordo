@@ -10,7 +10,7 @@ import {
   normalizePathname,
   readParams,
 } from './paths';
-import type { Join, PathMatching } from './paths';
+import type { Join } from './paths';
 
 /**
  * Any component, whatever props it declares. The table is written once and
@@ -61,19 +61,6 @@ export type NavigablePatternOf<R extends RoutesRecord> = Exclude<
   `${string}*${string}`
 >;
 
-/**
- * `Path` when one of the table's navigable patterns matches it, segment by
- * segment — a literal spelled as the pattern spells it, a `:param` taking any
- * one non-empty segment, a rest param (`:name+`) one or more — and `never`
- * when none does. What `@k8ordo/state`
- * checks a path against with the `routes` its `Register` is given, and what
- * any other typed-path consumer takes.
- */
-export type NavigablePath<D, Path extends string> =
-  D extends Routes<infer R extends RoutesRecord>
-    ? PathMatching<Path, NavigablePatternOf<R>>
-    : never;
-
 export type Match = {
   /** The full pattern that won, as written in the table. */
   pattern: string;
@@ -91,7 +78,7 @@ export type Routes<R extends RoutesRecord = RoutesRecord> = {
    * Matches a pathname in declaration order, first match wins — precedence
    * is what you wrote, not a specificity ranking to second-guess. The one
    * operation that needs the table's value: links and navigation build from
-   * the pattern string alone (`href` / `navigateTo`), so only `<Router>`
+   * the pattern string alone (`href`), so only `<Router>`
    * ever holds this object.
    */
   match: (pathname: string) => Match | null;
@@ -155,6 +142,39 @@ const loadingFor = (
   return Loading;
 };
 
+const PARAM_NAME = /^[\p{ID_Start}$_][\p{ID_Continue}$\u200C\u200D]*$/u;
+
+const SYNTAX = /[:*?+{}()\\]/u;
+
+const GRAMMAR =
+  'a segment is a literal holding none of : * ? + { } ( ) \\, a ":name", or — last — a ":name+" or a "*"';
+
+// キーごとではなく結合した葉のパターンで読む。枝のキーに書いた rest や
+// wildcard の後ろには、子のキーが続く
+const grammarProblem = (pattern: string): string | null => {
+  if (pattern === '/') return null;
+  const segments = pattern.slice(1).split('/');
+  const last = segments.length - 1;
+  for (const [index, segment] of segments.entries()) {
+    if (segment === '') {
+      return `route pattern "${pattern}" has an empty segment — ${GRAMMAR}`;
+    }
+    const isParam = segment.startsWith(':');
+    const isRest = isParam && segment.endsWith('+');
+    const isWildcard = segment === '*';
+    const fits = isParam
+      ? PARAM_NAME.test(segment.slice(1, isRest ? -1 : undefined))
+      : isWildcard || !SYNTAX.test(segment);
+    if (!fits) {
+      return `route pattern "${pattern}" has the segment "${segment}", which is not part of the grammar — ${GRAMMAR}`;
+    }
+    if ((isRest || isWildcard) && index !== last) {
+      return `route pattern "${pattern}" puts "${segment}" before the end — ${isRest ? 'a rest param' : 'a wildcard'} must be the last segment`;
+    }
+  }
+  return null;
+};
+
 export function defineRoutes<R extends RoutesRecord>(record: R): Routes<R> {
   const entries: Entry[] = [];
   const seen = new Set<string>();
@@ -196,6 +216,8 @@ export function defineRoutes<R extends RoutesRecord>(record: R): Routes<R> {
         ];
         walk(node.children, pattern === '/' ? '' : pattern, below);
       } else {
+        const problem = grammarProblem(pattern);
+        if (problem !== null) throw new TypeError(problem);
         if (seen.has(pattern)) {
           throw new TypeError(`route pattern "${pattern}" is declared twice`);
         }

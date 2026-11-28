@@ -20,8 +20,8 @@ catalog:
   '@better-css-modules/cli': 0.5.0
   '@better-css-modules/core': 0.5.0
   '@better-css-modules/vite': 0.5.0
-  '@json-render/core': 0.23.1
-  '@json-render/react': 0.23.1
+  '@json-render/core': 0.23.2
+  '@json-render/react': 0.23.2
   '@openuidev/lang-core': 1.1.1
   '@openuidev/react-lang': 1.1.1
   '@tailwindcss/postcss': 4.3.5
@@ -31,20 +31,20 @@ catalog:
   '@types/react-dom': 19.3.0
   '@vitejs/plugin-basic-ssl': 2.3.0
   '@vitejs/plugin-react': 6.3.0
-  '@vitest/browser': 5.1.0
-  '@vitest/browser-playwright': 5.1.0
-  '@vitest/browser-preview': 5.1.0
-  '@vitest/coverage-v8': 5.1.0
-  '@vitest/expect': 5.1.0
-  '@vitest/mocker': 5.1.0
-  '@vitest/pretty-format': 5.1.0
-  '@vitest/snapshot': 5.1.0
-  '@vitest/spy': 5.1.0
-  '@vitest/ui': 5.1.0
-  '@vitest/utils': 5.1.0
+  '@vitest/browser': 5.1.1
+  '@vitest/browser-playwright': 5.1.1
+  '@vitest/browser-preview': 5.1.1
+  '@vitest/coverage-v8': 5.1.1
+  '@vitest/expect': 5.1.1
+  '@vitest/mocker': 5.1.1
+  '@vitest/pretty-format': 5.1.1
+  '@vitest/snapshot': 5.1.1
+  '@vitest/spy': 5.1.1
+  '@vitest/ui': 5.1.1
+  '@vitest/utils': 5.1.1
   # @ai-sdk/react は ai を exact で持つので、上げるときは同じ ai を持つ
   # @ai-sdk/react と揃えて 1 コピーに保つ。
-  ai: 7.0.176
+  ai: 7.0.179
   # @k8ordo/framework の reactCompiler が使う、@vitejs/plugin-react の任意の peer。
   # 版は plugin-react の peer の範囲から選ぶので、plugin-react と揃えて手で上げる (renovate.json)
   oxc-transform-react: 0.156.0
@@ -64,7 +64,7 @@ catalog:
   # expect.element の型が消えるため。
   vite: npm:@voidzero-dev/vite-plus-core@1.6.0
   vite-plus: 1.6.0
-  vitest: 5.1.0
+  vitest: 5.1.1
   vitest-browser-react: 2.3.0
   zod: 4.6.7
 

@@ -1,0 +1,24 @@
+/*
+ * 文が無くても外枠を描く。文の有無で外枠を出し入れすると、文が出たときに
+ * input が作り直されてフォーカスを失う。inline-flex なので、中の label は
+ * 直に置いたときと同じ幅と基線になる
+ */
+.field {
+  display: inline-flex;
+  flex-direction: column;
+}
+
+.message {
+  margin-top: calc(var(--spacing) * 1);
+  padding-left: calc(var(--spacing) * 0.5);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-sm);
+}
+
+.error {
+  color: var(--color-fg-error);
+}
+
+.help {
+  color: var(--color-fg-mute);
+}

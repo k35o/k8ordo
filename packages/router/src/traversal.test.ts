@@ -109,7 +109,7 @@ describe.each(browserTypes)(
       await page.goBack();
     };
 
-    const navigateTo = (url: string): Promise<void> =>
+    const navigate = (url: string): Promise<void> =>
       page.evaluate(async (to) => {
         await navigation.navigate(to).finished;
       }, url);
@@ -197,7 +197,7 @@ describe.each(browserTypes)(
       async (_, to, at, from, fromAt) => {
         await open(to);
         const left = await scrollTo(at);
-        await navigateTo(from);
+        await navigate(from);
         await scrollTo(fromAt);
 
         await traverse('back');
@@ -213,7 +213,7 @@ describe.each(browserTypes)(
       'restores the position a page was left at when the visitor goes forward to it%s',
       async (_, to, at, from, fromAt) => {
         await open(from);
-        await navigateTo(to);
+        await navigate(to);
         const left = await scrollTo(at);
         await traverse('back');
         await heading(from.slice(1));
@@ -230,7 +230,7 @@ describe.each(browserTypes)(
     it('restores the position a page was left at when the visitor goes back to it after reloading the next one', async () => {
       await open('/short');
       const left = await scrollTo(300);
-      await navigateTo('/tall');
+      await navigate('/tall');
       await scrollTo(3000);
       await page.reload();
       await heading('tall');
@@ -247,7 +247,7 @@ describe.each(browserTypes)(
     it('restores the position a page was left at when the visitor goes back to it past another origin', async () => {
       await open('/tall');
       const left = await scrollTo(3000);
-      await navigateTo('/about');
+      await navigate('/about');
       await cameBackFrom(outsideOrigin);
       await heading('about');
 
@@ -262,7 +262,7 @@ describe.each(browserTypes)(
     it('restores the position a page was left at when the visitor goes back past another origin and then forward to it', async () => {
       await open('/tall');
       await scrollTo(3000);
-      await navigateTo('/short');
+      await navigate('/short');
       await cameBackFrom(outsideOrigin);
       await heading('short');
       await scrollTo(500);
@@ -279,12 +279,12 @@ describe.each(browserTypes)(
     it('restores the position a page was left at when the visitor goes back past another origin, follows a link from there, goes back and then forward to it', async () => {
       await open('/tall');
       await scrollTo(3000);
-      await navigateTo('/about');
+      await navigate('/about');
       await cameBackFrom(outsideOrigin);
       await heading('about');
       await page.goBack();
       await heading('tall');
-      await navigateTo('/short');
+      await navigate('/short');
       await scrollTo(700);
       await page.goBack();
       await heading('tall');
@@ -300,7 +300,7 @@ describe.each(browserTypes)(
     // popstate だけ
     it('keeps usePathname on the URL when the visitor goes back past another origin', async () => {
       await open('/tall');
-      await navigateTo('/about');
+      await navigate('/about');
       await cameBackFrom(outsideOrigin);
       await heading('about');
       expect(await page.getByTestId('pathname').textContent()).toBe('/about');
@@ -317,9 +317,9 @@ describe.each(browserTypes)(
       await open('/list?q=few');
       await expect.poll(listCount).toBe('30');
       await scrollTo(1500);
-      await navigateTo('/list');
+      await navigate('/list');
       await expect.poll(listCount).toBe('90');
-      await navigateTo('/about');
+      await navigate('/about');
       await cameBackFrom(outsideOrigin);
       await heading('about');
       await page.goBack();
@@ -335,7 +335,7 @@ describe.each(browserTypes)(
     it('restores the position and what an entry of the same page renders when the visitor goes back past another origin and then forward to it', async () => {
       await open('/list?q=few');
       await expect.poll(listCount).toBe('30');
-      await navigateTo('/list');
+      await navigate('/list');
       await expect.poll(listCount).toBe('90');
       await cameBackFrom(outsideOrigin);
       await expect.poll(listCount).toBe('90');
@@ -354,11 +354,11 @@ describe.each(browserTypes)(
     it('restores the position a page was left at when the visitor goes back to it past another origin they came back in from and moved on', async () => {
       await open('/tall');
       const left = await scrollTo(3000);
-      await navigateTo('/about');
+      await navigate('/about');
       await page.goto(outsideOrigin);
       await page.goto(`${origin}/short`);
       await heading('short');
-      await navigateTo('/about');
+      await navigate('/about');
       await traverse('back');
       await page.goBack();
       await heading('outside');
@@ -377,7 +377,7 @@ describe.each(browserTypes)(
     // フィクスチャはクライアントで描くので、読み直した文書の位置は確かめない
     it('shows the page the URL names, and keeps following links, when the visitor goes back past another site', async () => {
       await open('/tall');
-      await navigateTo('/about');
+      await navigate('/about');
       await cameBackFrom(outsideSite);
       await heading('about');
 
@@ -386,14 +386,14 @@ describe.each(browserTypes)(
       await page.waitForFunction(() => navigation.currentEntry !== null);
       await heading('tall');
       expect(new URL(page.url()).pathname).toBe('/tall');
-      await navigateTo('/short');
+      await navigate('/short');
       await heading('short');
     }, 30_000);
 
     it('shows what the URL holds, and keeps following links, when the visitor goes back past another site within a page', async () => {
       await open('/list?q=few');
       await expect.poll(listCount).toBe('30');
-      await navigateTo('/list');
+      await navigate('/list');
       await expect.poll(listCount).toBe('90');
       await cameBackFrom(outsideSite);
       await expect.poll(listCount).toBe('90');
@@ -404,7 +404,7 @@ describe.each(browserTypes)(
       await page.waitForFunction(() => navigation.currentEntry !== null);
       await expect.poll(listCount).toBe('30');
       expect(new URL(page.url()).search).toBe('?q=few');
-      await navigateTo('/short');
+      await navigate('/short');
       await heading('short');
     }, 30_000);
 
@@ -414,14 +414,14 @@ describe.each(browserTypes)(
       await open('/tall');
       await cameBackFrom(outsideSite);
       await heading('tall');
-      await navigateTo('/about');
+      await navigate('/about');
       await heading('about');
 
       await page.goBack();
 
       await heading('tall', 10_000);
       expect(new URL(page.url()).pathname).toBe('/tall');
-      await navigateTo('/short');
+      await navigate('/short');
       await heading('short');
     }, 30_000);
 
@@ -460,7 +460,7 @@ describe.each(browserTypes)(
       await expect.poll(listCount).toBe('30');
       await cameBackFrom(outsideSite);
       await expect.poll(listCount).toBe('30');
-      await navigateTo('/host.html?reload');
+      await navigate('/host.html?reload');
       await expect.poll(listCount).toBe('90');
 
       await page.goBack();
@@ -476,7 +476,7 @@ describe.each(browserTypes)(
       await expect.poll(listCount).toBe('30');
       await cameBackFrom(outsideSite);
       await expect.poll(listCount).toBe('30');
-      await navigateTo('/list');
+      await navigate('/list');
       await expect.poll(listCount).toBe('90');
       // 読み直しを頼むと、その文書に reload の navigate が出る
       await page.evaluate(() => {
@@ -501,7 +501,7 @@ describe.each(browserTypes)(
     // トップレベルの文書ではどのエンジンも 1 回なので、2 回目を同じタスクで出す
     it('keeps the document when the browser dispatches popstate twice for a traversal it announced', async () => {
       await open('/tall');
-      await navigateTo('/about');
+      await navigate('/about');
       await heading('about');
       await page.evaluate(() => {
         Object.assign(globalThis, { kept: true });
@@ -526,7 +526,7 @@ describe.each(browserTypes)(
     // 戻れる。WebKit は popstate を誰も聞いていないうちに currentEntry を null にする
     it('shows the page the URL names, and keeps following links, when the visitor goes back past another site twice before the page has loaded its script', async () => {
       await open('/tall');
-      await navigateTo('/about');
+      await navigate('/about');
       await page.goto(outsideSite);
       const script = Promise.withResolvers<undefined>();
       const entry = (url: URL): boolean => url.pathname === '/main.tsx';
@@ -556,7 +556,7 @@ describe.each(browserTypes)(
       });
       await heading('tall');
       expect(new URL(page.url()).pathname).toBe('/tall');
-      await navigateTo('/short');
+      await navigate('/short');
       await heading('short');
       await page.unroute(entry);
     }, 30_000);
@@ -594,7 +594,7 @@ describe.each(browserTypes)(
     // currentEntry が null の文書ではその遷移も AbortError になる
     it('follows a link the visitor clicks as soon as they go back past another site', async () => {
       await open('/tall');
-      await navigateTo('/about');
+      await navigate('/about');
       await cameBackFrom(outsideSite);
       await heading('about');
       const reload = await holdDocument('/tall');
@@ -618,8 +618,8 @@ describe.each(browserTypes)(
       await open('/tall');
       await cameBackFrom(outsideSite);
       await heading('tall');
-      await navigateTo('/about');
-      await navigateTo('/short');
+      await navigate('/about');
+      await navigate('/short');
       await heading('short');
       const reload = await holdDocument('/tall');
       await page.evaluate(() => {
@@ -642,7 +642,7 @@ describe.each(browserTypes)(
     it('restores the position a page was left at when the visitor goes back to it after leaving more than 100 entries that are gone', async () => {
       await open('/tall');
       const left = await scrollTo(3000);
-      await navigateTo('/about');
+      await navigate('/about');
       await page.evaluate(async (ms) => {
         const move = async (go: () => NavigationResult): Promise<void> => {
           await go().finished;
@@ -687,7 +687,7 @@ describe.each(browserTypes)(
         await open(few);
         await expect.poll(listCount).toBe('30');
         const left = await scrollTo(at);
-        await navigateTo(all);
+        await navigate(all);
         await expect.poll(listCount).toBe('90');
         await scrollTo(otherAt);
 
@@ -700,7 +700,7 @@ describe.each(browserTypes)(
     it('restores the position an entry of the same page was left at, onto what that entry renders, when the visitor goes forward to it', async () => {
       await open('/list?q=few');
       await expect.poll(listCount).toBe('30');
-      await navigateTo('/list');
+      await navigate('/list');
       await expect.poll(listCount).toBe('90');
       const left = await scrollTo(300);
       await traverse('back');
@@ -815,7 +815,7 @@ describe.each(browserTypes)(
     it('restores the position a page was left at when the visitor goes back to it, even if they scroll the page still on screen while it loads', async () => {
       await open('/host.html');
       const left = await scrollTo(1500);
-      await navigateTo('/p1');
+      await navigate('/p1');
       await scrollTo(300);
       await hold();
       await commit('back');
@@ -857,9 +857,9 @@ describe.each(browserTypes)(
     // 残る。そこで離れるのは画面のページで、位置もそのページのもの
     it('restores the position a page was left at when the visitor goes back past it while it loads, and then forward to it', async () => {
       await open('/host.html');
-      await navigateTo('/p1');
+      await navigate('/p1');
       const left = await scrollTo(1000);
-      await navigateTo('/p2');
+      await navigate('/p2');
       await scrollTo(300);
       await hold();
       await commit('back');
@@ -876,7 +876,7 @@ describe.each(browserTypes)(
     it('restores the position a page was left at when the visitor follows a link while going back to another, and then comes back', async () => {
       await open('/host.html');
       const left = await scrollTo(1500);
-      await navigateTo('/p1');
+      await navigate('/p1');
       await scrollTo(700);
       await hold();
       await commit('back');

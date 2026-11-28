@@ -77,7 +77,7 @@ The catalog's prop schemas (`packages/ui/src/catalog/schemas.ts`) are not just v
 - **Deleting or reordering keys is breaking** — every stored positional spec shifts by one.
 - **New keys must be appended at the end**, never inserted in the middle.
 
-`catalogPropIssues()` reports keys it does not recognize, so specs saved against an older schema surface as explicit unknown-key findings rather than silently dropped props.
+`catalogPropIssues()` reports keys it does not recognize, so specs saved against an older schema surface as explicit unknown-key findings rather than silently dropped props. An object nested in a schema (a `Table` column, an option) is a `z.strictObject`: every format writes its keys by name, so renaming or removing one is breaking for all of them, and an element that still has the old key fails the parse and is not drawn.
 
 ### Documentation ships with the package
 

@@ -87,7 +87,7 @@ export const Invalid: Story = {
 // キー入力を止めないので、Popover の中でも Escape で Popover が閉じる
 export const EscapeInPopover: Story = {
   render: (args) => (
-    <Popover.Root role="dialog">
+    <Popover.Root>
       <Popover.Trigger
         renderItem={(props) => (
           <Button {...props} size="md" type="button">
@@ -95,13 +95,11 @@ export const EscapeInPopover: Story = {
           </Button>
         )}
       />
-      <Popover.Content
-        renderItem={(props) => (
-          <div aria-label="メモ" className={styles.panel} {...props}>
-            <Textarea {...args} />
-          </div>
-        )}
-      />
+      <Popover.Content label="メモ">
+        <div className={styles.panel}>
+          <Textarea {...args} />
+        </div>
+      </Popover.Content>
     </Popover.Root>
   ),
   play: async ({ canvas, userEvent }) => {
@@ -201,7 +199,6 @@ const IntroductionForm = () => (
       return (
         <FormControl
           errorText={bio.error}
-          invalid={bio.invalid}
           label="自己紹介"
           renderInput={(props) => <Textarea {...props} {...bio.input} />}
           required={bio.required}

@@ -25,12 +25,27 @@ const BATCH = `const clear = () => {
 
 const HANDLE = `const { committed, finished } = update({ page: 2 });`;
 
-const FOCUS = `const heading = useRef<HTMLHeadingElement>(null);
+const PAGE_TURN = `export function Results() {
+  const [{ page }, update] = useAppState(listState, ['page']);
+  const heading = useRef<HTMLHeadingElement>(null);
 
-const onNext = async () => {
-  await update({ page: page + 1 }, { history: 'push' }).finished;
-  heading.current?.focus();
-};`;
+  const turn = async (next: number) => {
+    await update({ page: next }, { history: 'push' }).finished;
+    heading.current?.focus();
+  };
+
+  return (
+    <section>
+      <h2 ref={heading} tabIndex={-1}>
+        Results
+      </h2>
+      <ProductList page={page} />
+      <button onClick={() => void turn(page + 1)} type="button">
+        Next page
+      </button>
+    </section>
+  );
+}`;
 
 const FUNCTIONAL = `update((current) => ({ page: current.page + 1 }));`;
 
@@ -105,7 +120,7 @@ export default function StateUpdatesPage() {
           <Rich>{t.historyPageOnly()}</Rich>
         </p>
         <p>
-          <Rich>{t.historyNavigateTo()}</Rich>
+          <Rich>{t.historyPageChange()}</Rich>
         </p>
       </DocSection>
 
@@ -157,12 +172,6 @@ export default function StateUpdatesPage() {
         <p>
           <Rich>{t.handleWait()}</Rich>
         </p>
-        <CodeBlock
-          code={FOCUS}
-          lang="tsx"
-          marks={{ 4: 'highlight' }}
-          title="pager.tsx"
-        />
         <p>
           <Rich>{t.handleSettle()}</Rich>
         </p>
@@ -178,6 +187,21 @@ export default function StateUpdatesPage() {
             <Rich>{t.handleAction()}</Rich>
           </p>
         </Note>
+      </DocSection>
+
+      <DocSection id="page-turn" title={t.pageTurnTitle}>
+        <CodeBlock
+          code={PAGE_TURN}
+          lang="tsx"
+          marks={{ 6: 'highlight', 7: 'highlight', 12: 'highlight' }}
+          title="results.tsx"
+        />
+        <p>
+          <Rich>{t.pageTurnKeep()}</Rich>
+        </p>
+        <p>
+          <Rich>{t.pageTurnFocus()}</Rich>
+        </p>
       </DocSection>
 
       <DocSection id="functional" title={t.functionalTitle}>

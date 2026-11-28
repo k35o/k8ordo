@@ -77,18 +77,13 @@ export const CopyButton: FC<{
   return (
     <>
       {iconOnly ? (
-        <IconButton
-          disabled={disabled}
-          label={name}
-          onAction={copy}
-          size={size}
-        >
+        <IconButton disabled={disabled} label={name} action={copy} size={size}>
           {icon}
         </IconButton>
       ) : (
         <Button
           disabled={disabled}
-          onAction={copy}
+          action={copy}
           size={size}
           startIcon={icon}
           variant="outline"

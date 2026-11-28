@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from '@storybook/react-vite';
-import type { MouseEvent, MouseEventHandler } from 'react';
+import type { FC, MouseEvent, MouseEventHandler } from 'react';
 import { useRef, useState } from 'react';
 import { expect, fn, screen, waitFor } from 'storybook/test';
 
 import { afterRenderingUpdate } from '../../../../.storybook/rendering';
+import { tokenColor } from '../../../../.storybook/tokens';
 import { CopyIcon } from '../../icons/copy';
 import { IconButton } from './icon-button';
 
@@ -56,12 +57,12 @@ const actionUntilFinished = (): Promise<void> =>
   });
 
 /**
- * `onAction` の保留中も、押したボタンはフォーカスを持ち続ける。押せないことは
- * `aria-disabled` で伝え、もう一度押しても `onAction` は走らない。
+ * `action` の保留中も、押したボタンはフォーカスを持ち続ける。押せないことは
+ * `aria-disabled` で伝え、もう一度押しても `action` は走らない。
  */
 export const PendingKeepsFocus: Story = {
   args: {
-    onAction: fn(actionUntilFinished),
+    action: fn(actionUntilFinished),
   },
   play: async ({ args, canvas, userEvent }) => {
     const button = canvas.getByRole('button', { name: 'コピー' });
@@ -79,7 +80,7 @@ export const PendingKeepsFocus: Story = {
 
       await userEvent.keyboard('{Enter}');
       await userEvent.click(button);
-      await expect(args.onAction).toHaveBeenCalledOnce();
+      await expect(args.action).toHaveBeenCalledOnce();
     } finally {
       // 終わらない非同期の transition は、同じ React の後続の transition を
       // すべて待たせる。途中で落ちても後のストーリーを巻き込まないよう片付ける
@@ -92,21 +93,77 @@ export const PendingKeepsFocus: Story = {
   },
 };
 
-export const ColorBase: Story = {
+export const SolidBase: Story = {
   args: {
+    variant: 'solid',
     color: 'base',
+  },
+  play: async ({ canvas }) => {
+    await expect(
+      getComputedStyle(canvas.getByRole('button', { name: 'コピー' }))
+        .backgroundColor,
+    ).toBe(tokenColor('--color-bg-base'));
   },
 };
 
-export const ColorPrimary: Story = {
+export const SolidPrimary: Story = {
   args: {
+    variant: 'solid',
     color: 'primary',
   },
 };
 
-export const ColorSecondary: Story = {
+export const SolidSecondary: Story = {
+  args: {
+    variant: 'solid',
+    color: 'secondary',
+  },
+};
+
+/** `skeleton`（既定）は地を塗らない。`color` は `solid` の地の色を選ぶ。 */
+export const SkeletonIgnoresColor: Story = {
   args: {
     color: 'secondary',
+  },
+  play: async ({ canvas }) => {
+    await expect(
+      getComputedStyle(canvas.getByRole('button', { name: 'コピー' }))
+        .backgroundColor,
+    ).toBe('rgba(0, 0, 0, 0)');
+  },
+};
+
+/**
+ * tooltip は名前と同じ文なので、説明（`aria-describedby`）にはしない。
+ * 利用者が渡した `aria-describedby` はそのまま残る。
+ */
+export const TooltipIsNotDescription: Story = {
+  render: () => (
+    <>
+      <IconButton label="コピー">
+        <CopyIcon />
+      </IconButton>
+      <IconButton aria-describedby="copy-note" label="共有">
+        <CopyIcon />
+      </IconButton>
+      <p id="copy-note">リンクをコピーします</p>
+    </>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    const copy = canvas.getByRole('button', { name: 'コピー' });
+
+    await userEvent.tab();
+    await expect(copy).toHaveFocus();
+    await expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'コピー',
+    );
+    await expect(copy).not.toHaveAttribute('aria-describedby');
+    await expect(copy).toHaveAccessibleDescription('');
+
+    await userEvent.tab();
+    await expect(
+      canvas.getByRole('button', { name: '共有' }),
+    ).toHaveAccessibleDescription('リンクをコピーします');
   },
 };
 
@@ -148,78 +205,65 @@ export const NativeAttributes: Story = {
  * `onClick` は先に呼ぶので、押下の検証には影響しない。
  */
 const withoutNavigation =
-  (onClick: MouseEventHandler<HTMLElement> | undefined) =>
-  (event: MouseEvent<HTMLElement>) => {
+  (onClick: MouseEventHandler<HTMLAnchorElement> | undefined) =>
+  (event: MouseEvent<HTMLAnchorElement>) => {
     onClick?.(event);
     event.preventDefault();
   };
 
+const linkClick = fn();
+const linkMouseEnter = fn();
+
 /**
- * `renderItem` は既定の `<button>` に渡るのと同じ props を受け取り、tooltip の
- * 配線だけが `triggerProps` に入る。`<a>` を描画するときは `<button>` 専用の
- * `disabled` / `type` を外し、残りと `triggerProps` の両方を展開する。
+ * `href` があれば `<a>` を描く。`label` は `<a>` の名前になり、tooltip も付く。
  */
-export const RenderItemLink: Story = {
-  args: {
-    onClick: fn(),
-    onMouseEnter: fn(),
-    renderItem: ({
-      children,
-      disabled: _disabled,
-      triggerProps,
-      type: _type,
-      ...props
-    }) => (
-      <a
-        href="#render-item"
-        {...props}
-        {...triggerProps}
-        onClick={withoutNavigation(props.onClick)}
-      >
-        {children}
-      </a>
-    ),
-  },
-  play: async ({ args, canvas, userEvent }) => {
+export const Link: Story = {
+  render: () => (
+    <IconButton
+      href="#icon-link"
+      label="コピー"
+      onClick={withoutNavigation(linkClick)}
+      onMouseEnter={linkMouseEnter}
+    >
+      <CopyIcon />
+    </IconButton>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    linkClick.mockClear();
+    linkMouseEnter.mockClear();
     const link = canvas.getByRole('link', { name: 'コピー' });
+
+    await expect(link).toHaveAttribute('href', '#icon-link');
 
     await userEvent.hover(link);
 
-    // triggerProps を展開したので tooltip が開き、利用者のハンドラも連結される。
     await expect(await screen.findByRole('tooltip')).toHaveTextContent(
       'コピー',
     );
-    await expect(args.onMouseEnter).toHaveBeenCalled();
+    await expect(linkMouseEnter).toHaveBeenCalled();
 
     await userEvent.click(link);
 
-    await expect(args.onClick).toHaveBeenCalled();
+    await expect(linkClick).toHaveBeenCalled();
   },
 };
 
-export const RenderItemDisabled: Story = {
-  args: {
-    disabled: true,
-    tooltipDisabled: true,
-    onClick: fn(),
-    renderItem: ({
-      children,
-      disabled: _disabled,
-      triggerProps,
-      type: _type,
-      ...props
-    }) => (
-      <a
-        href="#render-item"
-        {...props}
-        {...triggerProps}
-        onClick={withoutNavigation(props.onClick)}
-      >
-        {children}
-      </a>
-    ),
-  },
-  play: async ({ args, canvas, userEvent }) => {
+const disabledLinkClick = fn();
+
+export const LinkDisabled: Story = {
+  render: () => (
+    <IconButton
+      disabled
+      href="#disabled-icon-link"
+      label="コピー"
+      onClick={disabledLinkClick}
+      tooltipDisabled
+    >
+      <CopyIcon />
+    </IconButton>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    disabledLinkClick.mockClear();
     const link = canvas.getByRole('link', { name: 'コピー' });
 
     await expect(link).toHaveAttribute('aria-disabled', 'true');
@@ -227,6 +271,91 @@ export const RenderItemDisabled: Story = {
 
     await userEvent.click(link);
 
-    await expect(args.onClick).not.toHaveBeenCalled();
+    await expect(disabledLinkClick).not.toHaveBeenCalled();
+    await expect(window.location.hash).not.toBe('#disabled-icon-link');
+  },
+};
+
+/**
+ * `renderAnchor` は tooltip の配線ごと `<a>` に渡る props を受け取る。
+ * 展開すれば、リンク部品にも tooltip が付く。
+ */
+export const RenderAnchor: Story = {
+  render: () => (
+    <IconButton
+      href="#render-anchor"
+      label="コピー"
+      renderAnchor={({ children, href, onClick, ...props }) => (
+        <a
+          {...props}
+          data-rendered=""
+          href={href}
+          onClick={withoutNavigation(onClick)}
+        >
+          {children}
+        </a>
+      )}
+    >
+      <CopyIcon />
+    </IconButton>
+  ),
+  play: async ({ canvas, userEvent }) => {
+    const link = canvas.getByRole('link', { name: 'コピー' });
+
+    await expect(link).toHaveAttribute('data-rendered');
+
+    await userEvent.hover(link);
+
+    await expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      'コピー',
+    );
+  },
+};
+
+const submitAction = fn(actionUntilFinished);
+
+const SubmitRender: FC = () => (
+  <form action={submitAction}>
+    <IconButton label="送信" type="submit">
+      <CopyIcon />
+    </IconButton>
+    <IconButton label="戻す" type="reset">
+      <CopyIcon />
+    </IconButton>
+    <IconButton label="ほかの操作">
+      <CopyIcon />
+    </IconButton>
+  </form>
+);
+
+/**
+ * `type="submit"` なら属するフォームの送信中に保留になる。送信ボタンでない
+ * IconButton は、同じフォームの中でも保留にならない。
+ */
+export const SubmitPending: Story = {
+  render: () => <SubmitRender />,
+  play: async ({ canvas, userEvent }) => {
+    const submit = canvas.getByRole('button', { name: '送信' });
+    const reset = canvas.getByRole('button', { name: '戻す' });
+    const other = canvas.getByRole('button', { name: 'ほかの操作' });
+
+    await expect(submit).toHaveAttribute('type', 'submit');
+    await expect(reset).toHaveAttribute('type', 'reset');
+    try {
+      await userEvent.click(submit);
+      await waitFor(() => {
+        expect(submit).toHaveAttribute('aria-busy', 'true');
+      });
+      await expect(reset).not.toHaveAttribute('aria-busy');
+      await expect(other).not.toHaveAttribute('aria-busy');
+      await expect(other).not.toHaveAttribute('aria-disabled');
+    } finally {
+      // 終わらない非同期の transition は、同じ React の後続の transition を
+      // すべて待たせる。途中で落ちても後のストーリーを巻き込まないよう片付ける
+      finishAction();
+    }
+    await waitFor(() => {
+      expect(submit).not.toHaveAttribute('aria-busy');
+    });
   },
 };

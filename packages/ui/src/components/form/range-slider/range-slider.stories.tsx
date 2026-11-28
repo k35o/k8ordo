@@ -192,6 +192,7 @@ const PriceRangeForm = () => (
       return (
         <FormControl
           label="価格"
+          labelAs="group"
           renderInput={(props) => (
             <RangeSlider
               {...props}
@@ -211,7 +212,7 @@ const PriceRangeForm = () => (
 // @k8ordo/form の formFields を広げるだけでつながる
 export const WithForm: Story = {
   render: () => <PriceRangeForm />,
-  play: async ({ canvas, userEvent }) => {
+  play: async ({ canvas, canvasElement, userEvent }) => {
     const [start, end] = canvas.getAllByRole<HTMLInputElement>('slider');
     if (start === undefined || end === undefined) {
       throw new globalThis.Error('つまみが 2 つありません');
@@ -224,10 +225,10 @@ export const WithForm: Story = {
       priceMax: '80',
     });
 
-    // FormControl の required は、グループではなく両方のつまみに届く。
-    // jest-dom の toBeRequired は range を数えないので、プロパティで見る
-    await expect([start.required, end.required]).toStrictEqual([true, true]);
-    await expect(canvas.getByRole('group')).not.toHaveAttribute('required');
+    // range は required を持てないので、必須はグループの名前の印で伝える
+    await expect(start).toHaveAccessibleName('価格 必須 最小');
+    await expect(end).toHaveAccessibleName('価格 必須 最大');
+    await expect(canvasElement.querySelector('[required]')).toBeNull();
 
     // つまみを動かすと変更ありになり、reset で値も塗りも戻る
     slide(start, 21);

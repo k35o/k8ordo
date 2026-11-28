@@ -45,7 +45,9 @@ export const isIsoDate = (value: string): boolean => toUtcDate(value) !== null;
 const parts = (value: IsoDate): [number, number, number] => {
   const date = toUtcDate(value);
   if (date === null) {
-    throw new RangeError(`YYYY-MM-DD の暦日ではありません: ${value}`);
+    throw new RangeError(
+      `@k8ordo/ui: not a YYYY-MM-DD calendar date: ${JSON.stringify(value)}`,
+    );
   }
   return [date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()];
 };
@@ -174,6 +176,14 @@ if (import.meta.vitest) {
   });
 
   describe('addDays', () => {
+    it('実在しない日付は英語の RangeError にする', () => {
+      expect(() => addDays('2023-02-30', 1)).toThrow(
+        new RangeError(
+          '@k8ordo/ui: not a YYYY-MM-DD calendar date: "2023-02-30"',
+        ),
+      );
+    });
+
     it('月と年の境目をまたぐ', () => {
       expect(addDays('2023-01-31', 1)).toBe('2023-02-01');
       expect(addDays('2023-01-01', -1)).toBe('2022-12-31');

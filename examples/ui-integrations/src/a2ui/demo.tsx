@@ -35,7 +35,7 @@ export const a2uiMessages: ProcessableMessage[] = [
           id: 'nickname',
           component: 'TextField',
           name: 'nickname',
-          placeholder: 'ニックネーム',
+          label: 'ニックネーム',
           defaultValue: { '@path': '/profile/nickname' },
         },
         {
@@ -49,6 +49,7 @@ export const a2uiMessages: ProcessableMessage[] = [
           id: 'plan',
           component: 'Select',
           name: 'plan',
+          label: 'プラン',
           options: [
             { value: 'free', label: '無料' },
             { value: 'pro', label: 'プロ' },
@@ -101,7 +102,7 @@ export function A2uiDemo() {
       <Stack align="center" direction="row" gap="sm">
         <Code>{profile}</Code>
         <Button
-          onAction={() => {
+          onClick={() => {
             setProcessor(replay());
           }}
           size="sm"

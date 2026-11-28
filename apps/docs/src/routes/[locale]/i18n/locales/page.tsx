@@ -32,6 +32,19 @@ const DEFAULT = `locales.default; // 'en-US'`;
 const DIR = `locales.definitions.ar;
 // { timeZone: 'Africa/Cairo', dir: 'rtl' }`;
 
+const ADD = `import { defineLocales } from '@k8ordo/i18n';
+import { en, registerMessages } from '@k8ordo/ui/i18n';
+import type { Messages } from '@k8ordo/ui/i18n';
+
+export const locales = defineLocales({
+  ja: { timeZone: 'Asia/Tokyo', dir: 'ltr' },
+  en: { timeZone: 'UTC', dir: 'ltr' },
+  ar: { timeZone: 'Africa/Cairo', dir: 'rtl' },
+});
+
+const ar: Messages = { ...en, close: 'إغلاق' };
+registerMessages('ar', ar);`;
+
 const ERROR = `defineLocales({ ja: { timeZone: 'Asia/Tokio', dir: 'ltr' } });
 // TypeError: defineLocales: the timeZone of "ja", "Asia/Tokio", is not a time zone`;
 
@@ -113,6 +126,28 @@ export default function I18nLocalesPage() {
             {m.i18n.navRouting()}
           </LocaleAnchor>
           <Rich>{t.see()}</Rich>
+        </p>
+      </DocSection>
+
+      <DocSection id="add" title={t.addTitle}>
+        <CodeBlock
+          code={ADD}
+          lang="ts"
+          marks={{ 8: 'add', 11: 'add', 12: 'add' }}
+          title="src/i18n.ts"
+        />
+        <p>
+          <Rich>{t.addIntro()}</Rich>
+        </p>
+        <ol>
+          {t.addSteps.map((step) => (
+            <li key={step()}>
+              <Rich>{step()}</Rich>
+            </li>
+          ))}
+        </ol>
+        <p>
+          <Rich>{t.addRest()}</Rich>
         </p>
       </DocSection>
 

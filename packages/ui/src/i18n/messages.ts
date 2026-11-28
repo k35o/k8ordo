@@ -47,10 +47,6 @@ export type Messages = {
 
   numberFieldIncrement: string;
   numberFieldDecrement: string;
-  /** NumberField の値が min を下回ったときの検証メッセージ。`{min}` が min の値に置き換わる */
-  numberFieldRangeUnderflow: string;
-  /** NumberField の値が max を上回ったときの検証メッセージ。`{max}` が max の値に置き換わる */
-  numberFieldRangeOverflow: string;
 
   /** RangeSlider の下側のつまみ。部品の名前（aria-label など）の後に続けて読まれる */
   rangeSliderStart: string;
@@ -78,6 +74,9 @@ export type Messages = {
 
   /** ListBox の未選択時に Trigger が示す値 */
   listBoxPlaceholder: string;
+
+  /** Anchor と Card が新しいタブで開くリンクに添える読み上げ専用の文言 */
+  opensInNewTab: string;
 
   /** Breadcrumb の nav ランドマーク名 */
   breadcrumb: string;

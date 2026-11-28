@@ -5,10 +5,15 @@ import type { FormFields } from '@k8ordo/form';
 import { useActionState } from 'react';
 
 import { sign } from '../lib/guestbook';
+import type { guestbookSchema } from '../lib/guestbook-schema';
 
 // fields は Server Component が formFields(schema) で導いた素の JSON。
 // zod は props を越えてこない
-export function GuestbookForm({ fields }: { fields: FormFields<'name'> }) {
+export function GuestbookForm({
+  fields,
+}: {
+  fields: FormFields<typeof guestbookSchema>;
+}) {
   const [state, formAction] = useActionState(sign, {});
   const form = useForm(fields, state);
   const name = form.field('name');

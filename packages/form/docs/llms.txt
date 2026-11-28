@@ -13,7 +13,8 @@ When installed via npm, these docs live under `node_modules/@k8ordo/form/docs/`.
 ## Guide
 
 - [Design Guide](GUIDE.md): the server/client split, writing a form end to end,
-  what the package guarantees, what it does not do yet, and how it pairs with
+  telling the person a submission worked (an inline message that works
+  without JavaScript, or a toast that needs it), what the package guarantees, what it does not do yet, and how it pairs with
   `@k8ordo/ui` without depending on it.
 
 ## Not supported
@@ -52,11 +53,22 @@ row. Rules cannot target fields inside repeated rows.
   per-field checks and `HiddenValue` for components that render no input of
   their own. The types
   of the `formFields` result (`FormFields`, `DerivedField`, `DerivedArray`,
-  `DroppedCheck`, `FieldInput`, `StringCheckboxInput`, `ValidityFlag`, `Rule`,
-  `DerivedRule`, `RuleMessage`) are exported here as
+  `DroppedCheck`, `ValidityFlag`, `Rule`, `DerivedRule`, `RuleMessage`, and
+  the input types `field()` gives per control: `NumberInput`, `CheckboxInput`,
+  `StringCheckboxInput`, `FileInput`, `CheckboxGroupInput` — whose
+  `defaultValue` is the echoed array of checked options — and `FieldInput`
+  for the rest) are
+  exported here as
   well, since the result crosses to the client as a prop, and so are
   `FormState` and the return types (`UseFormReturn`, `FieldView`, `ArrayView`,
-  `RowView`, `FormErrorView`, `AsyncCheck`).
+  `RowView`, `FormErrorView`, `AsyncCheck`). `FormFields` and `UseFormReturn`
+  take one type argument, the schema or the `defineForm` definition
+  (`fields: FormFields<typeof talkSchema>`, with the schema imported as a
+  type), and the paths and each field's `input` type follow it; `ArrayView`,
+  `RowView` and `DerivedArray` take the same plus the array's path
+  (`row: RowView<typeof orderSchema, 'items'>` in a component that draws a
+  whole row); `ObjectSchema` and `FormDefinition` are exported for code
+  generic over the form.
 - `@k8ordo/form/server` — server. `formFields(schemaOrDefinition)` derives
   serializable fields plus a `dropped` list of checks HTML cannot express
   (outside production the list is also logged once per schema with
@@ -71,14 +83,19 @@ row. Rules cannot target fields inside repeated rows.
   which, checked, submits the `value` derived from the schema's own spelling of
   `true`, the same string `@k8ordo/state` writes into a URL — so `z.coerce.number()` cannot read a
   blank field as 0 and `z.enum([…]).optional()` can be left empty. A checkbox
-  group always echoes as an array.
+  group always echoes as an array, which `field()` puts on the group's
+  `input.defaultValue`.
   `defineForm(schema, rules)` attaches cross-field rules (`sameAs`,
-  `minChecked`, `requiredWhen`) typed against the schema's paths; a rule's
+  `requiredWhen`) typed against the schema's paths, and `formFields` derives a
+  checkbox group's `.min()` / `.max()` as rules of its own, in zod's wording;
+  a rule's
   message is a string or a function called when the rule is reported
   (`formFields` calls it while deriving, so a rule crosses to the client as a
   `DerivedRule` with the text in it; `parseForm` calls it when the rule
   breaks), which keeps a localized definition at module scope. Types:
-  `ParseResult`, `FormDefinition`, `Rule`, `RuleMessage`, `FormState`, and the
+  `ParseResult`, `FormDefinition`, `ObjectSchema`, `Rule`, `RuleMessage`,
+  `FormState`, and the
   `formFields` result's `FormFields`, `DerivedField`, `DerivedArray`,
-  `DerivedRule`, `DroppedCheck`, `FieldInput`, `StringCheckboxInput`,
-  `ValidityFlag`.
+  `DerivedRule`, `DroppedCheck`, `ValidityFlag`, and the input types
+  (`FieldInput`, `NumberInput`, `CheckboxInput`, `StringCheckboxInput`,
+  `FileInput`, `CheckboxGroupInput`).

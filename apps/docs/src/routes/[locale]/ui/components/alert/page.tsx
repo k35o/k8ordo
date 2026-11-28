@@ -108,32 +108,22 @@ export default function AlertPage() {
 <Alert
   message="A new version is available."
   tone="info"
-  action={{
-    label: 'Learn more',
-    renderItem: ({ children }) => (
-      <Anchor href="https://example.com" openInNewTab>
-        {children}
-      </Anchor>
-    ),
-  }}
+  action={
+    <Anchor href="https://example.com" openInNewTab>
+      Learn more
+    </Anchor>
+  }
 />
 
-// Action button (open a modal, etc.) — style it however you like.
+// Action button (open a dialog, etc.) — style it however you like.
 <Alert
   message="Your profile setup is incomplete."
   tone="warning"
-  action={{
-    label: 'Open settings',
-    renderItem: ({ children }) => (
-      <button
-        className={styles.link}
-        type="button"
-        onClick={() => {}}
-      >
-        {children}
-      </button>
-    ),
-  }}
+  action={
+    <button className={styles.link} type="button" onClick={openSettings}>
+      Open settings
+    </button>
+  }
 />`}
           >
             <AlertActionLinkPreview />
@@ -157,14 +147,11 @@ export default function AlertPage() {
 
 // onClose can be combined with action.
 <Alert
-  action={{
-    label: 'Learn more',
-    renderItem: ({ children }) => (
-      <button className={styles.link} type="button" onClick={openHelp}>
-        {children}
-      </button>
-    ),
-  }}
+  action={
+    <button className={styles.link} type="button" onClick={openHelp}>
+      Learn more
+    </button>
+  }
   message="..."
   onClose={() => setIsVisible(false)}
   tone="warning"

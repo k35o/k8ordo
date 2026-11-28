@@ -95,6 +95,7 @@ export default defineConfig({
   plugins: [
     framework({
       mode: 'static',
+      site: 'https://example.com',
       csp: {
         'script-src': ["'self'", await colorSchemeScriptHash()],
         'object-src': ["'none'"],
@@ -139,3 +140,72 @@ browser fetches
 so a policy that restricts `connect-src`, or `default-src` in its place,
 names the API's origin there:
 `'connect-src': ["'self'", 'https://api.example.com']`.
+
+## A script of the application's that runs before the first paint
+
+A preference only the browser applies — a density kept with
+`@k8ordo/state`'s `defineLocalState`, say — reaches `<html>` before the
+first paint through an inline script in the root layout's `<head>`, which
+reads the stored value with `inlineRead()`
+([Routing](routing.md#how-a-page-is-sent) says why `<head>`). Write it the
+way `@k8ordo/color-scheme` writes its own, under either mode:
+
+- **A `'use client'` component, not a `<script>` in the layout.** The text of
+  a `<script>` a Server Component renders goes into every page's payload —
+  each `.rsc`, and the copy written into the HTML for hydration — though a
+  script that arrives with a navigation never runs. A client component's
+  payload carries only its props, and the server render and hydration both
+  build the text from its module.
+- **The nonce as a prop.** The root layout passes `nonce()` under server
+  mode. Under static mode it passes nothing, and `csp` names the hash of the
+  same text, which a module without a directive exports for both the
+  component and `vite.config.ts`.
+
+```ts
+// src/lib/density-script.ts
+import { densityState } from '../state';
+
+export const densityScript = `(() => {
+  const s = ${densityState.inlineRead()};
+  if (s && s.density === 'compact') {
+    document.documentElement.dataset.density = 'compact';
+  }
+})();`;
+```
+
+```tsx
+// src/components/density-script.tsx
+'use client';
+
+import { densityScript } from '../lib/density-script';
+
+export function DensityScript({ nonce }: { nonce?: string }) {
+  return <script nonce={nonce}>{densityScript}</script>;
+}
+```
+
+```tsx
+// src/routes/layout.tsx — server mode; under static mode, no nonce
+<head>
+  <ColorSchemeScript nonce={nonce()} />
+  <DensityScript nonce={nonce()} />
+</head>
+```
+
+```ts
+// vite.config.ts — static mode
+import { densityScript } from './src/lib/density-script';
+
+const hashOf = async (text: string): Promise<string> => {
+  const digest = await crypto.subtle.digest(
+    'SHA-256',
+    new TextEncoder().encode(text),
+  );
+  return `'sha256-${btoa(String.fromCodePoint(...new Uint8Array(digest)))}'`;
+};
+
+// csp: { 'script-src': ["'self'", await colorSchemeScriptHash(), await hashOf(densityScript)], … }
+```
+
+The script changes `<html>` before React hydrates it, so `<html>` carries
+`suppressHydrationWarning`, as it does for `@k8ordo/color-scheme`.

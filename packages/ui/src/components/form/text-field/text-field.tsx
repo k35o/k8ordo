@@ -15,7 +15,7 @@ import styles from './text-field.module.css';
 // 1 行の入力欄として描けるものを並べる。number は NumberField、password は
 // PasswordInput、file は FileField が別途あり、checkbox / radio / color 等は
 // 見た目が別物になる
-type TextInputType = Extract<
+export type TextInputType = Extract<
   HTMLInputTypeAttribute,
   | 'text'
   | 'email'
@@ -32,8 +32,8 @@ type TextInputType = Extract<
 type Props = {
   invalid?: boolean;
   ref?: Ref<HTMLInputElement>;
-  // @k8ordo/form の formFields が導く type は string なので、上の候補に絞ると
-  // 導かれた属性をそのまま広げられない。候補は補完のために残す
+  // ネイティブの type（React の HTMLInputTypeAttribute）と同じく任意の文字列を
+  // 受ける。候補は 1 行の入力欄として描けるものに絞り、補完のために並べる
   type?: TextInputType | (string & Record<never, never>);
 } & Omit<InputHTMLAttributes<HTMLInputElement>, 'className' | 'style' | 'type'>;
 

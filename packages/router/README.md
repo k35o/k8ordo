@@ -23,7 +23,7 @@ pnpm add @k8ordo/router
 
 Under `@k8ordo/framework` this package is what the framework builds on: the
 table is generated from `src/routes/`, and what an application uses of it is
-the half that needs no table — `href`, `navigateTo` and `bindParams`;
+the half that needs no table — `href` and `bindParams`;
 `usePathname`, `useMatch` and `matchPath` — plus the route files' props types,
 `PageProps` and `LayoutProps`. There it is installed as the framework's peer,
 and the application imports that half from `@k8ordo/framework`, which
@@ -77,10 +77,10 @@ export const Shell = () => (
 
 ```tsx
 // anywhere — from the pattern string alone, never importing the table
-import { href, navigateTo, useMatch, useParams } from '@k8ordo/router';
+import { href, useMatch, useParams } from '@k8ordo/router';
 
 <a href={href('/products/:id', { id })}>…</a>; // a plain <a> is a client navigation
-navigateTo('/products'); // push; the back button undoes it
+navigation.navigate(href('/products')); // the same URL, from code
 const { id } = useParams('/products/:id'); // typed from the pattern
 const inProducts = useMatch('/products/*'); // which section is showing
 ```

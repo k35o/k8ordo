@@ -141,8 +141,8 @@ export const edgesNewer = message({
 });
 
 export const edgesThrow = message({
-  ja: '`migrate`の中でエラーが起きた：何も保存されていないものとして既定値で読み、保存した値には触れません。`migrate`を直せば、次の読み込みで移行されます。',
-  en: 'An error inside `migrate`: it reads as nothing saved, with the defaults, and the saved value is left as it was. Fix `migrate`, and the next load migrates it.',
+  ja: '`migrate`の中でエラーが起きた：何も保存されていないものとして既定値で読み、エラーを知らせます。ブラウザでは`reportError`に渡すので、`window`の`error`イベントやエラー監視に届きます。サーバーの`parseCookies`は、キーを添えて`console.error`に出します。保存した値には触れず、`update()`も上書きしません。そのときの`update()`のハンドルは同じエラーでrejectし、値は次の読み込みまでメモリに残ります。サーバーで同じCookieを書く`cookie()`も、上書きせずにエラーになります。`migrate`を直せば、次の読み込みで移行されます。',
+  en: 'An error inside `migrate`: it reads as nothing saved, with the defaults, and the error is reported. In the browser it goes to `reportError`, so it reaches `window`’s `error` event and error monitoring; on the server, `parseCookies` logs it to `console.error` with the key. The saved value is left as it was, and no `update()` overwrites it: the update’s handle rejects with the same error, and the value stays in memory until the next load. A server writing the same cookie with `cookie()` gets an error instead of a value to write. Fix `migrate`, and the next load migrates it.',
 });
 
 export const edgesAdopt = message({

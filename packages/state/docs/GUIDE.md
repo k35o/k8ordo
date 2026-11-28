@@ -145,7 +145,8 @@ export const deckState = definePageState('deck', {
 const [{ hash, mode }, update] = useAppState(deckState);
 // /slides/intro#3        → hash === 3
 update({ hash: 4 }); //    → /slides/intro#4
-deckState.href('/slides/intro', { hash: 4 }); // '/slides/intro#4'
+deckState.href(href('/slides/:slug', { slug: 'intro' }), { hash: 4 });
+// '/slides/intro#4'
 ```
 
 It follows the url slot's rules: the schema must tolerate absence, a boolean
@@ -216,9 +217,14 @@ export const prefs = defineLocalState(
 - **A newer row is left alone.** A row a newer version wrote — a tab that
   loaded the next deploy first — is salvaged without `migrate` and never
   written back, so it stays the newer tab's.
-- **A throwing `migrate` loses nothing.** It reads as nothing stored: the
-  defaults show, and the row stays as it was for a fixed `migrate` to try
-  again.
+- **A throwing `migrate` loses nothing, and says so.** It reads as nothing
+  stored: the defaults show, and the error is reported — handed to
+  `reportError` in the browser, so `window`'s `error` event and error
+  monitoring see it, and logged with the key by `parseCookies` on the
+  server. The row stays as it was for a fixed `migrate` to try again: an
+  `update()` writes nothing over it and rejects its handle with the same
+  error, while the value it set stays in memory until the next load, and a
+  server's `cookie()` throws instead of returning a value to write.
 - **Adopting a version changes the row's shape.** A tab still running code
   from before reads `[version, values]` as nothing stored until it reloads.
 - **`inlineRead()` hands out only the current version.** Neither the schema
@@ -316,25 +322,17 @@ a layout: the pathname axis is the router's, and the search is read in the
 browser by `useAppState`, so such a server render shows the url slot's
 defaults and the live URL takes over one render after hydration.
 Static mode refuses the export: a file is the same whatever the search
-holds. Building links is unaffected — `href` and `search` are pure and run
-anywhere, including in a Server Component.
+holds. Building links is unaffected — `href` is pure and runs anywhere,
+including in a Server Component.
 
 `urlReader(schema)` is that reading on its own — a url schema in,
 `(input) => values` out, the codec built once — for code handed the schema
 without its definition; the framework's generated table calls it.
 
-`href` and `search` are pure: unspecified fields mean their default, and
-default values are omitted from the query, so every link is canonical and as
-short as it can be. `search` returns the query string alone (no `?`) when the
-path should stay in the caller's hands.
-
-The path `href` takes is written from the application's root, the way the
-route table is, and the link it returns carries Vite's `base` in front of it:
-under `base: '/docs/'`, `listState.href('/products', { page: 2 })` is
-`/docs/products?page=2`. Hand it a path, then — not what `@k8ordo/router`'s
-`href` returned, which carries the base already. Outside Vite (Next.js, say)
-there is no `import.meta.env` to read, nothing is added, and a `basePath` is
-the framework's own `<Link>`'s to add.
+`href` is pure: unspecified fields mean their default, and default values are
+omitted from the query, so every link is canonical and as short as it can be.
+What it is handed is the URL the router built, not a path of its own — see
+[Links on the router's URL](#links-on-the-routers-url).
 
 ## Cookie state — preferences the server renders
 
@@ -344,7 +342,10 @@ goes with every request: where the page receives the request's cookies —
 `request.cookies` in `@k8ordo/framework`'s server mode — `parseCookies` reads
 the values
 and `initialCookie` seeds the server render and the hydration render with
-them, so the default never flashes.
+them, so the default never flashes. Which preference belongs in a cookie,
+which in local state and which in neither (the language) is set out once,
+in `@k8ordo/framework`'s guide
+(`node_modules/@k8ordo/framework/docs/GUIDE.md`, "Preferences").
 
 ```tsx
 // src/routes/layout.tsx — server mode
@@ -384,10 +385,14 @@ export function Shell({ initialCookie, children }: ShellProps) {
 
 - **One cookie per definition.** The values are one cookie named
   `k8ordo-state.<key>` (`cookieName`), holding the percent-encoded JSON of the
-  declared fields. `parseCookies(cookies)` takes the request's cookies as a
-  `ReadonlyMap<string, string>` of percent-decoded values — what
-  `request.cookies` is — and salvages field by field like every other read:
-  absent, corrupt or rejected values land on their defaults.
+  declared fields. `parseCookies(cookies)` takes anything whose `get(name)`
+  returns a cookie's percent-decoded value — `request.cookies` in a page,
+  and in server mode `cookies()` in a guard, a route.ts or a Server Action
+  too — and salvages field by field like every other read: absent, corrupt
+  or rejected values land on their defaults. Next.js's `cookies()` gets a
+  `{ name, value }` object, so hand it over as
+  `density.parseCookies({ get: (name) => store.get(name)?.value })`, where
+  `store` is `await cookies()`.
 - **Seed every renderer.** Like `initialUrl`, `initialCookie` seeds only the
   `useAppState` call it is passed to: a component that renders on the server
   without it shows the defaults there. Read the cookie once, high up — a
@@ -423,11 +428,8 @@ never writes the response; in server mode the framework's
 `route.ts` and Server Actions. That is where a session cookie belongs, as
 `HttpOnly`, and this package never sees it. The same `cookies()` can also
 write a cookie state, for a form that sets a preference without JavaScript,
-say: write `cookieName` with the value `cookieValue(values)` returns — the
-values pass the schema, unspecified fields mean their default — and the
-attributes above (`Path=/`, `SameSite=Lax`, `Max-Age=34560000`), never
-`HttpOnly`, or the browser store can no longer see it. Open tabs take the new
-values in through the `change` event.
+say: `cookie(patch, current)` returns the name, the value and the options,
+to spread into `set`.
 
 ```ts
 // src/lib/actions.ts
@@ -437,18 +439,41 @@ import { cookies } from '@k8ordo/framework/server';
 import { density } from '../state';
 
 export async function compact() {
-  cookies().set(
-    density.cookieName,
-    density.cookieValue({ density: 'compact' }),
-    { httpOnly: false, maxAge: 34_560_000 },
-  );
+  cookies().set(...density.cookie({ density: 'compact' }, cookies()));
 }
 ```
 
-`cookieValue` returns the JSON unencoded: `cookies().set` percent-encodes the
-value on its way out (so does Next.js's), which is the one encoding
-`parseCookies` expects undone. Writing a `Set-Cookie` header by hand, pass
-the value through `encodeURIComponent` yourself — once.
+- **It writes what `update()` would.** `patch` goes over the values the
+  request's cookie holds — `current` is read the way `parseCookies` reads
+  it — so a field the patch leaves out keeps what the visitor saved, and the
+  result passes the schema. A field the definition does not declare throws,
+  as it does in `update()`. To go back to every default, delete the cookie:
+  `cookies().delete(density.cookieName)`.
+- **The options are the browser store's attributes.** `Path=/`,
+  `SameSite=Lax`, a `Max-Age` of 400 days, and `httpOnly: false`: an
+  `HttpOnly` cookie is one the browser store can no longer see. Open tabs
+  take the new values in through the `change` event.
+- **The value is the JSON, unencoded.** `cookies().set` percent-encodes it on
+  its way out (so does Next.js's), which is the one encoding `parseCookies`
+  expects undone. Writing a `Set-Cookie` header by hand, pass the value
+  through `encodeURIComponent` yourself — once.
+- **A cookie `migrate` cannot read is never written over.** `cookie()` throws,
+  naming the key, with `migrate`'s error as its `cause` — the refusal a
+  browser `update()` makes ([When a stored shape changes](#when-a-stored-shape-changes)).
+
+Under Next.js, hand `current` over as `parseCookies` takes it:
+
+```ts
+const store = await cookies();
+store.set(
+  ...density.cookie(
+    { density: 'compact' },
+    {
+      get: (name) => store.get(name)?.value,
+    },
+  ),
+);
+```
 
 ## Client — subscribe and update
 
@@ -509,7 +534,7 @@ const onNext = async () => {
 ```
 
 An async action — `startTransition(async …)`, `useTransition`'s included, or
-`@k8ordo/ui`'s `Button` `onAction` — can await it the same way. Under
+`@k8ordo/ui`'s `Button` `action` — can await it the same way. Under
 `@k8ordo/router` a url update issued while another page is still loading is a
 page change, and a page change never joins the action, so `finished` settles
 once that page is on screen rather than waiting for the action to end.
@@ -594,7 +619,7 @@ Two operations depend on the router; everything else works under any router:
 
 | operation                                                               | needs                                                                                               |
 | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `href` / `search` links, GET forms                                      | nothing — the router or the browser handles the click or the submission                             |
+| `href` links, GET forms                                                 | nothing — the router or the browser handles the click or the submission                             |
 | updates that change only entry, local, session, cookie or memory values | nothing — no navigation is involved                                                                 |
 | url `update()` on the client                                            | a router that intercepts the Navigation API                                                         |
 | `parseUrl` on the server                                                | a router that hands the page its search (`@k8ordo/framework` in server mode: `export const search`) |
@@ -613,6 +638,33 @@ and `finished` waits for it to be on screen. On a router that does not intercept
 forms for url changes there, which is this package's preferred grain anyway.
 There is deliberately no history-API fallback.
 
+**Turning a page keeps the position.** A navigation that keeps the pathname
+moves neither the scroll position nor the focus — a fragment in the URL does
+not scroll either — so a pager below a long list, a button calling `update()`
+or a link to `?page=2` alike, leaves the reader at the bottom of the new
+page. Move the focus to the results once `finished` settles: the scroll
+follows the focus, and keyboard and screen-reader users hear where the new
+page starts. `tabIndex={-1}` lets the heading take focus without entering
+the tab order.
+
+```tsx
+const [{ page }, update] = useAppState(listState, ['page']);
+const results = useRef<HTMLHeadingElement>(null);
+
+const turn = async (next: number) => {
+  await update({ page: next }, { history: 'push' }).finished;
+  results.current?.focus();
+};
+
+<h2 ref={results} tabIndex={-1}>
+  Results
+</h2>;
+// … the list …
+<button type="button" onClick={() => void turn(page + 1)}>
+  Next page
+</button>;
+```
+
 A page state reads the URL of the page it renders in. Under
 `@k8ordo/router` the URL commits before the next page arrives, and the page
 being left stays on screen until it does: that page keeps the values its
@@ -628,74 +680,72 @@ Keystrokes do not belong in the URL. Let the DOM or local React state hold
 the draft and call `update()` at commit points — submit, blur, pagination —
 the same division `@k8ordo/form` draws.
 
-## Typed routes
+## Links on the router's URL
 
-`href` keeps the path literal alive in the type
-(``'/products' | `/products?${string}` ``), which is what typed-route checks
-strip a query from and verify. To constrain paths app-wide, augment `Register`
-once, with the same line the `@k8ordo/router` augmentation takes:
-
-```ts
-// src/k8ordo.d.ts
-import type { routes } from './routes';
-
-declare module '@k8ordo/router' {
-  interface Register {
-    routes: typeof routes;
-  }
-}
-
-declare module '@k8ordo/state' {
-  interface Register {
-    routes: typeof routes;
-  }
-}
-```
-
-`href` then checks the path it is handed against the table's linkable
-patterns, segment by segment: a literal segment must be spelled as the pattern
-spells it, a `:param` takes any one non-empty segment — a `${string}` from a
-template literal such as `` `/${locale}/products` `` included — and a `*`
-wildcard is matched but never linked. A path no pattern matches is a type
-error, a `/:locale` table included: `'/ja/nowhere'` is refused even though
-`/:locale` takes any first segment. The error lists what would be accepted —
-the table's linkable patterns. With a table of `/`, `/members` and
-`/posts/:id`, `listState.href('/membrs')` reports:
-
-```
-Argument of type '"/membrs"' is not assignable to parameter of type '"/" | "/members" | "/posts/:id"'.
-```
-
-The check is exported as `RegisteredPath<Path>`: `Path` when accepted, and
-that union of patterns when refused. Each pattern's own spelling is a path
-the table accepts, so the union lets nothing through that the check refuses.
-It goes through `NavigablePath`
-from `@k8ordo/router` as a type only, so the router stays an optional peer and
-never loads at runtime. Under `@k8ordo/framework` this is generated for you into `.k8ordo/register.gen.ts` from
-`routes/` when the application's own `package.json` lists `@k8ordo/state` in
-`dependencies` or `devDependencies` — a transitive dependency does not count.
-Do not hand-write it in such an application: it would duplicate the generated
-declaration.
-
-A router that is not `@k8ordo/router` has no table to hand over; register its
-path union directly under `path` — `Route` from `next`, for instance:
+`href(url, values?)` puts this state on a URL the router built:
+`@k8ordo/router`'s `href()` (re-exported by `@k8ordo/framework`), a Next.js
+`Route`, or `''` for the page itself.
 
 ```ts
-// e.g. types/k8ordo-state.d.ts
-import type { Route } from 'next';
+import { href } from '@k8ordo/router';
 
-declare module '@k8ordo/state' {
-  interface Register {
-    path: Route;
-  }
-}
+listState.href(href('/products'), { q: 'lamp', page: 2 });
+// '/products?q=lamp&page=2'
+productState.href(href('/products/:id', { id }), { hash: 'reviews' });
+// '/products/42#reviews'
+listState.href('', { page: 2 });
+// '?page=2' — the page itself
 ```
 
-When both are present, `routes` wins. Every `href` in the app now rejects a
-path its router does not know, and the error lists the registered union.
-Without the augmentation the constraint is any `/`-prefixed string, and a path
-without the leading `/` is reported against `` `/${string}` ``. Augment only in an application — a shared library
-augmenting `Register` leaks the constraint to every consumer.
+- **Only its own params move.** The params of the URL handed in that this
+  definition does not declare stay, in their spelling, and this definition's
+  params follow them in their canonical form — the rule a url `update()`
+  follows (_Shared ground stays shared_).
+- **The fragment is the hash slot's.** With a `hash` slot the fragment is the
+  value's — none at the default — whatever the URL had; without one, the
+  URL's own fragment stays.
+- **Nothing is added to the path.** The pathname and a base are the router's:
+  `@k8ordo/router`'s `href()` has put Vite's `base` in front already, so the
+  result is the URL the browser needs. A router that adds no base leaves
+  spelling one to the application, as it does for every other link.
+- **The pattern is checked where the URL is built.** The router's `href()`
+  checks the pattern and its params against the route table — a rest param,
+  `href('/files/:path+', { path })`, included — before the URL reaches this
+  package, which has nothing to register. `href` is typed as the URL it was
+  given, or that URL followed by `?…` or `#…`, so a literal survives in the
+  type: under Next.js, `listState.href('/products', values)` is still
+  checked by typed routes where `<Link href>` takes it. When the URL handed
+  in already carries this definition's params or a fragment, that type is an
+  approximation: those params are rewritten, and the query goes in before
+  the fragment.
+- **The page itself is `''`.** `listState.href('', values)` is a link
+  relative to the page, `?page=2`, which replaces the page's whole search the
+  way the browser resolves it — for display, or for a link that keeps
+  nothing else of the search.
+
+## One way per URL
+
+Each thing an application does with a URL has one spelling, the same under
+`@k8ordo/router`, `@k8ordo/state` and `@k8ordo/framework`:
+
+| to                                                          | write                                                                                 |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| link to a page                                              | `href(pattern, params)`                                                               |
+| link to a page with its state                               | `def.href(href(pattern, params), values)`                                             |
+| link to the page itself with other state                    | `def.href('', values)`                                                                |
+| ask which page is showing                                   | `matchPath(pattern, pathname)` in a Server Component, `useMatch(pattern)` in a client |
+| change the page from code                                   | `navigation.navigate(href(pattern, params))`, the link's own URL                      |
+| change the state                                            | `update(values)`                                                                      |
+| move a page for good                                        | `redirect.ts`, its `to` a table pattern (`@k8ordo/framework`)                         |
+| redirect from a Server Action, a `guard.ts` or a `route.ts` | `redirect(href(pattern, params))` (`@k8ordo/framework/server`)                        |
+| show the page on screen in another locale                   | `withBase(locales.localize(pathname, locale))`                                        |
+
+The last row is the one URL built from a pathname rather than a pattern: the
+page showing may be any page. Nothing else compares or combines `pathname` and
+`href()` — `pathname` is in the table's terms and `href()` carries Vite's
+`base`. In a `[locale]` application, import `href` only from the module that
+binds the locale (`export const href = bindParams(…)`): the router's own
+`href` has the same name and type-checks too.
 
 ## Reading before hydration
 
@@ -725,6 +775,14 @@ the hydrated store be the source of truth from then on. The script changes
 `<html>` before React hydrates it, so render that element with
 `suppressHydrationWarning`.
 
+Under `@k8ordo/framework`, render the script from a small `'use client'`
+component that takes the page's nonce, rather than straight in the root
+layout, whose `<script>` text would ride every page's payload; its
+reference on Content Security Policy
+(`node_modules/@k8ordo/framework/docs/references/csp.md`, "A script of the
+application's that runs before the first paint") shows it under both
+modes.
+
 ## What it guarantees
 
 **Boundary data is input, not trusted state.** A URL param a user edited, a
@@ -738,7 +796,9 @@ on a scalar field takes the first value.
 
 **Canonical URLs.** Serialization omits every field sitting at its default, so
 the same state always produces the same, shortest URL — links, bookmarks and
-caches agree.
+caches agree. That holds for the URLs `href` and `update()` write, and only
+for those: a GET form submits every named field (below), and the page does
+not rewrite the URL it arrives at.
 
 **Back means back.** Both faces of a page state live on the history entry via
 the platform, not in a parallel store, so back/forward restore them together
@@ -770,7 +830,9 @@ takes over on hydration.
 `parseCookies(request.cookies)` returned as `initialCookie` — in
 `@k8ordo/framework`'s server mode, say — and neither render shows the
 defaults. Without a request (static mode), the cookie takes over on
-hydration.
+hydration. Either option may be `undefined`, which is the same as leaving
+it out, so a component shared by a page that has the value and one that
+does not passes its prop straight through.
 
 Everything else — entry, local, session, memory — renders its defaults on the
 server by construction: those places do not exist there.
@@ -783,7 +845,10 @@ are the same schema:
 ```tsx
 import { formFields } from '@k8ordo/form/server';
 
-const filterFields = formFields(listState.url); // one schema, both jobs
+export default function ListPage() {
+  // one schema, both jobs
+  return <FilterForm fields={formFields(listState.url)} />;
+}
 ```
 
 A `z.stringbool()` field derives a checkbox whose `value` is the same spelling
@@ -797,7 +862,25 @@ and with JavaScript the submission loads it again in place. Anywhere else
 (static mode, a page that does not declare `search`) the server render
 shows the defaults, and the submitted values appear once the page hydrates.
 
+The URL a GET form writes is not the canonical one. The browser submits every
+named field, so an empty search box arrives as `q=` and a field left at its
+default as `min=0`: the values read back are the same, but the URL is longer
+than what `href` builds for that state, and nothing rewrites it — a
+rewrite would cost a navigation on every submission. Show or share the
+canonical form with `listState.href('', values)`.
+
 ## Testing
+
+Both helpers come from `@k8ordo/state/testing`, an entry of its own, so
+nothing of them reaches an application's bundle.
+
+```ts
+import { resetStateRegistry } from '@k8ordo/state/testing';
+
+afterEach(() => {
+  resetStateRegistry();
+});
+```
 
 `resetStateRegistry()` clears the provider-less store registry between tests.
 Unmount components first — mounted hooks keep their store through closures.
@@ -823,5 +906,4 @@ moved — and adds `search` to the params the page already has, in the spelling
 given (a test runner and Storybook keep params of their own there). The
 function it returns is the cleanup: it calls `resetStateRegistry()`, which
 also drops a thinned write still waiting, then puts back the URL and the
-entry state it found. It is not part of the main entry, so nothing of it
-reaches an application's bundle.
+entry state it found.

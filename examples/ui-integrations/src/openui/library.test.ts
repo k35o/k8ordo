@@ -7,7 +7,6 @@ const CONTAINERS = [
   'Grid',
   'Card',
   'Form',
-  'Modal',
   'Dialog',
   'Drawer',
   'Popover',
@@ -46,5 +45,34 @@ describe('openui library のプロンプト上の入れ子', () => {
     expect(childrenOf(container)).toStrictEqual(
       expect.arrayContaining(CONTAINERS),
     );
+  });
+});
+
+describe('openui library の位置引数', () => {
+  it.each([
+    'TextField',
+    'Textarea',
+    'PasswordInput',
+    'NumberField',
+    'Slider',
+    'Select',
+    'Autocomplete',
+    'ListBox',
+    'DatePicker',
+    'RangeSlider',
+    'ColorPicker',
+    'Combobox',
+    'Radio',
+    'RadioCard',
+    'CheckboxGroup',
+    'CheckboxCard',
+  ])('%s は name の次に label を書く', (name) => {
+    expect(signatureOf(name)).toMatch(
+      new RegExp(`^${name}\\(name: string, label: string, `, 'u'),
+    );
+  });
+
+  it('FileField は label から書く', () => {
+    expect(signatureOf('FileField')).toMatch(/^FileField\(label: string, /u);
   });
 });

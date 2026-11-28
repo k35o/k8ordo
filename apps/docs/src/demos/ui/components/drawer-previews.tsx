@@ -41,6 +41,36 @@ export function DrawerBasicPreview() {
   );
 }
 
+export function DrawerLeftPreview() {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <>
+      <Button
+        onClick={() => {
+          setIsOpen(true);
+        }}
+      >
+        Open Filters
+      </Button>
+      <Drawer
+        description="Choose which items the list shows."
+        isOpen={isOpen}
+        onClose={() => {
+          setIsOpen(false);
+        }}
+        side="left"
+        title="Filters"
+      >
+        <nav className={styles.menu}>
+          <a className={styles.link} href={href('/:locale/ui/components')}>
+            Components
+          </a>
+        </nav>
+      </Drawer>
+    </>
+  );
+}
+
 export function DrawerCustomContentPreview() {
   const [isOpen, setIsOpen] = useState(false);
   return (

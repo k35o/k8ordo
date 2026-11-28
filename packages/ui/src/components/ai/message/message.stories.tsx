@@ -114,7 +114,7 @@ export const WithSourcesAndActions: Story = {
       </Source.List>
       <Message.Actions>
         <Message.Copy value={ANSWER} />
-        <Message.Regenerate onAction={onRegenerate} />
+        <Message.Regenerate action={onRegenerate} />
         <Message.Feedback />
       </Message.Actions>
     </Message.Root>
@@ -174,7 +174,7 @@ export const Regenerate: Story = {
     <Message.Root avatar={assistantAvatar} from="assistant">
       <Message.Content>{ANSWER}</Message.Content>
       <Message.Actions>
-        <Message.Regenerate onAction={onRegenerate} />
+        <Message.Regenerate action={onRegenerate} />
       </Message.Actions>
     </Message.Root>
   ),

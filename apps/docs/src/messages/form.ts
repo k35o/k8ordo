@@ -65,8 +65,8 @@ export const demoDescription = message({
 
 export const demoSteps = [
   message({
-    ja: '「最小値」に`-1`と入力して入力欄から離れると、zodのエラー文言が表示されます。',
-    en: 'Type `-1` into “Minimum” and leave the field. zod’s error message appears.',
+    ja: '「最小値」に`-1`と入力して入力欄から離れると、スキーマに書いたエラー文言が表示されます。',
+    en: 'Type `-1` into “Minimum” and leave the field. The error message written in the schema appears.',
   }),
   message({
     ja: 'そのまま「絞り込む」を押すと、送信が止まり、フォーカスがその入力欄に戻ります。',
@@ -88,6 +88,11 @@ export const demoLabelMin = message({
   en: 'Minimum',
 });
 
+export const demoMinInvalid = message({
+  ja: '0以上の整数を入力してください',
+  en: 'Enter a whole number, 0 or more',
+});
+
 export const demoLabelInStock = message({
   ja: '在庫ありのみ',
   en: 'In stock only',
@@ -96,6 +101,11 @@ export const demoLabelInStock = message({
 export const demoSubmit = message({
   ja: '絞り込む',
   en: 'Filter',
+});
+
+export const demoUrlTerm = message({
+  ja: '正規のURL',
+  en: 'Canonical URL',
 });
 
 export const demoUrlEmpty = message({

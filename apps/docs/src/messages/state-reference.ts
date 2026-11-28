@@ -66,13 +66,8 @@ export const pageParseUrl = message({
 });
 
 export const pageHref = message({
-  ja: 'リンクを作ります。省いたフィールドは既定値として扱い、既定値と同じフィールドはクエリに出しません。先頭にViteの`base`を付けます。',
-  en: 'Builds a link. A field left out means its default, fields at their default are left out of the query, and Vite’s `base` is prepended.',
-});
-
-export const pageSearch = message({
-  ja: 'クエリ文字列だけを、`?`を付けずに返します。',
-  en: 'Returns the query string alone, without the `?`.',
+  ja: "ルーターが作ったURL（`@k8ordo/router`の`href`の戻り値、Next.jsの`Route`、今のページなら`''`）に状態を載せます。書き換えるのはこの定義の`url`のパラメーターだけで、省いたフィールドは既定値として扱い、既定値と同じフィールドはクエリに出しません。`hash`を持つ定義はフラグメントを置き、持たない定義は渡したURLのフラグメントを残します。`base`は足しません。",
+  en: "Puts the state on a URL the router built: what `href` of `@k8ordo/router` returned, a Next.js `Route`, or `''` for the page itself. Only this definition’s `url` params are rewritten; a field left out means its default, and fields at their default are left out of the query. A definition with a `hash` slot sets the fragment, and one without keeps the URL’s own. No `base` is added.",
 });
 
 export const pageCaveats = [
@@ -205,13 +200,13 @@ export const cookieName = message({
 });
 
 export const cookieParse = message({
-  ja: 'リクエストのCookieから値を読みます。パーセントデコード済みの値の`Map`を渡します。`@k8ordo/framework`のserverモードなら`request.cookies`をそのまま渡せます。古いバージョンの値は移行して読みますが、書き戻しません。',
-  en: 'Reads the values out of a request’s cookies, given as a `Map` of percent-decoded values. In `@k8ordo/framework`’s server mode, pass `request.cookies` as it is. An older version is migrated as it is read, but never written back.',
+  ja: 'リクエストのCookieから値を読みます。Cookieの名前からパーセントデコードした値を返す`get`を持つものを渡します。`@k8ordo/framework`のserverモードなら、ページでは`request.cookies`をそのまま渡せます。`guard.ts`と`route.ts`とServer Actionでは`cookies()`を渡します。古いバージョンの値は移行して読みますが、書き戻しません。',
+  en: 'Reads the values out of a request’s cookies: pass anything whose `get` returns a cookie’s percent-decoded value by name. In `@k8ordo/framework`’s server mode, pass `request.cookies` in a page, and `cookies()` in a `guard.ts`, a `route.ts` or a Server Action. An older version is migrated as it is read, but never written back.',
 });
 
-export const cookieValue = message({
-  ja: 'サーバーが同じCookieを書くときの値。スキーマに通した値を、エンコードしていないJSONで返します。省いたフィールドは既定値になります。',
-  en: 'The value for a server writing the same cookie: the values after the schema, as unencoded JSON. A field left out means its default.',
+export const cookieWrite = message({
+  ja: 'サーバーが同じCookieを書くときの名前と値と属性。`cookies().set(...def.cookie(patch, cookies()))`のように展開して渡します。`patch`は`current`から読んだ今の値に重ねてからスキーマに通すので、省いたフィールドは保存した値のままです。値はエンコードしていないJSONで、属性はブラウザが書くときと同じものに`httpOnly: false`を足したものです。',
+  en: 'The name, value and attributes for a server writing the same cookie, spread as `cookies().set(...def.cookie(patch, cookies()))`. `patch` goes over the values read from `current` and then through the schema, so a field left out keeps its saved value. The value is unencoded JSON, and the attributes are the ones the browser writes, with `httpOnly: false`.',
 });
 
 export const cookieCaveats = [
@@ -281,8 +276,8 @@ export const appStateKeys = message({
 });
 
 export const appStateOptions = message({
-  ja: 'サーバーで読んだ値。`initialUrl`は`url`を持つページの状態にだけ、`initialCookie`はCookieの状態にだけ渡せます。',
-  en: 'What the server read. `initialUrl` is accepted only by a page state with `url`, `initialCookie` only by a cookie state.',
+  ja: 'サーバーで読んだ値。`initialUrl`は`url`を持つページの状態にだけ、`initialCookie`はCookieの状態にだけ渡せます。`undefined`を渡すと、渡さなかったときと同じです。',
+  en: 'What the server read. `initialUrl` is accepted only by a page state with `url`, `initialCookie` only by a cookie state. Passing `undefined` is the same as leaving it out.',
 });
 
 export const appStateReturns = message({
@@ -373,38 +368,8 @@ export const versioningCaveats = [
     en: 'What it returns passes the schema field by field. A field the schema rejects falls back to its default.',
   }),
   message({
-    ja: '`migrate`の中で例外が起きると、何も保存されていないものとして読みます。保存した値には触りません。',
-    en: 'A `migrate` that throws reads as nothing stored. The stored value is left as it is.',
-  }),
-] as const;
-
-export const registerSummary = message({
-  ja: '`href`に渡すパスを型で検査するために、アプリケーションが拡張するインターフェースです。',
-  en: 'The interface an application augments so that the paths `href` takes are checked by type.',
-});
-
-export const registerRoutes = message({
-  ja: '`@k8ordo/router`のルート表の型。パスは表のパターンと、セグメントごとに比べます。',
-  en: 'The type of `@k8ordo/router`’s route table. A path is matched against its patterns segment by segment.',
-});
-
-export const registerPath = message({
-  ja: '表を持たないルーターのパスのunion。`routes`があればそちらを優先します。',
-  en: 'The path union of a router with no table. `routes` wins when both are present.',
-});
-
-export const registerCaveats = [
-  message({
-    ja: '`@k8ordo/framework`では、`.k8ordo/register.gen.ts`に生成されます。',
-    en: 'Under `@k8ordo/framework`, it is generated into `.k8ordo/register.gen.ts`.',
-  }),
-  message({
-    ja: '拡張はアプリケーションの中でだけ行います。',
-    en: 'Augment it only in an application.',
-  }),
-  message({
-    ja: '検査は`RegisteredPath<Path>`としてもexportしています。受け付けるパスなら`Path`に、拒むなら`never`になります。',
-    en: 'The check is also exported as `RegisteredPath<Path>`: `Path` when accepted, `never` when refused.',
+    ja: '`migrate`の中で例外が起きると、何も保存されていないものとして読み、例外を知らせます（ブラウザでは`reportError`、`parseCookies`ではキーを添えた`console.error`）。保存した値には触らず、`update()`も上書きせずにハンドルをその例外でrejectします。サーバーの`cookie()`も上書きせずにエラーになります。',
+    en: 'A `migrate` that throws reads as nothing stored, and the error is reported (`reportError` in the browser, `console.error` with the key from `parseCookies`). The stored value is left as it is: an `update()` does not overwrite it and rejects its handle with that error, and a server’s `cookie()` throws instead of writing over it.',
   }),
 ] as const;
 

@@ -8,11 +8,5 @@ import { prefsState } from './prefs-state';
 // 同期にはできない。
 // oxlint-disable eslint/require-await, typescript/require-await
 export async function compact(): Promise<void> {
-  // ブラウザのストアが書くのと同じ名前・値・属性で書く。HttpOnly にすると
-  // ブラウザのストアから見えなくなる
-  cookies().set(
-    prefsState.cookieName,
-    prefsState.cookieValue({ density: 'compact' }),
-    { httpOnly: false, maxAge: 400 * 24 * 60 * 60 },
-  );
+  cookies().set(...prefsState.cookie({ density: 'compact' }, cookies()));
 }

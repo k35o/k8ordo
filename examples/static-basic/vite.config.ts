@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [
     framework({
       mode: 'static',
-      // origin が分かれば sitemap.xml も書ける
+      // site は配信元の origin。request.url の origin と sitemap.xml の URL になる
       site: 'https://example.test',
       // どの応答にも付く。vite dev・vite preview・serve が送り、ビルドは
       // Netlify と Cloudflare が読む _headers に書く

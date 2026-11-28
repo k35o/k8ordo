@@ -8,7 +8,6 @@ import { PropsTable } from '../../../../../components/props-table';
 import { Rich } from '../../../../../components/rich';
 import { STORYBOOK_URL } from '../../../../../constants';
 import { inheritsOf, propsOf } from '../../../../../data/component-props';
-import { ButtonAsLinkPreview } from '../../../../../demos/ui/components/button-previews';
 import * as m from '../../../../../messages';
 
 import page from '../../../../../styles/page.module.css';
@@ -146,20 +145,19 @@ export default function ButtonPage() {
 
         <div className={page.stack}>
           <Heading level="h3">
-            <Rich>{m.components.button.renderItemTitle()}</Rich>
+            <Rich>{m.components.button.linkTitle()}</Rich>
           </Heading>
+          <p>
+            <Rich>{m.components.button.linkDescription()}</Rich>
+          </p>
           <ComponentPreview
-            code={`<Button
-  renderItem={({ children, disabled: _disabled, type: _type, ...props }) => (
-    <a href="https://example.com" {...props}>
-      {children}
-    </a>
-  )}
->
+            code={`<Button href="https://example.com" variant="outline">
   Visit
 </Button>`}
           >
-            <ButtonAsLinkPreview />
+            <Button href="https://example.com" variant="outline">
+              Visit
+            </Button>
           </ComponentPreview>
         </div>
       </section>

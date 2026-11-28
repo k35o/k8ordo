@@ -121,7 +121,7 @@ describe('parseForm', () => {
     // Forgetting to spread the field props would otherwise submit nothing,
     // silently. It has to be loud.
     expect(() => parseForm(schema, formDataOf([['blogId', '3']]))).toThrow(
-      /送信されていません: title/u,
+      /^parseForm: .*: title\./u,
     );
   });
 
@@ -327,7 +327,7 @@ describe('parseForm', () => {
   it('refuses a number no submission could satisfy instead of always failing', () => {
     expect(() =>
       parseForm(z.object({ n: z.number() }), formDataOf([['n', '5']])),
-    ).toThrow(/z\.coerce\.number\(\)/u);
+    ).toThrow(/^parseForm: 'n': .*z\.coerce\.number\(\)/u);
   });
 
   it('reads an unfilled file input as nothing entered, not as an empty file', () => {
@@ -355,6 +355,26 @@ describe('parseForm', () => {
     expect((avatar as File).name).toBe('avatar.png');
     // A file is not a value a no-JS retry can restore, so it is never echoed.
     expect(picked.state.values).toStrictEqual({});
+  });
+
+  it('never echoes the file name a non-multipart form posts under a file field', () => {
+    const upload = z.object({
+      title: z.string(),
+      avatar: z.file(),
+      attachments: z.array(z.object({ file: z.file() })),
+    });
+
+    const result = parseForm(
+      upload,
+      formDataOf([
+        ['title', 'k8o'],
+        ['avatar', 'avatar.png'],
+        ['attachments[0].file', 'slides.pdf'],
+      ]),
+    );
+
+    expect(result.success).toBe(false);
+    expect(result.state.values).toStrictEqual({ title: 'k8o' });
   });
 
   it('routes an object-level issue to formError, not to a field', () => {

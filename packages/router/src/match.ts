@@ -1,5 +1,3 @@
-'use client';
-
 import { usePathname } from './location';
 import { normalizePathname, readParams } from './paths';
 import type { ParamsOf } from './paths';
@@ -29,7 +27,10 @@ export type MatchOptions = {
  * Whether a pathname is the one a pattern names, and with which params. Pure
  * and table-free — the pattern is checked against `Register`, the pathname
  * is whatever the caller holds — which is why it works where no table is
- * mounted, under the framework included.
+ * mounted, under the framework included, and in a Server Component: a
+ * framework layout marks its current link with `matchPath(p, pathname)`.
+ * Compare patterns this way, never `pathname === href(p)`: `pathname` is in
+ * the table's terms and `href` carries Vite's `base`.
  */
 export const matchPath = <P extends MatchablePattern>(
   pattern: P,

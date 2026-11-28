@@ -19,6 +19,7 @@
 /* 地の色だけのフォーカスは高コントラストでは見分けにくいので、そのときだけ線に
    色を付ける。透明の線は強制カラーでは塗られて見える */
 .item {
+  display: block;
   width: 100%;
   padding-inline: calc(var(--spacing) * 2);
   padding-block: calc(var(--spacing) * 1);

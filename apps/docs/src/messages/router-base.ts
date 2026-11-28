@@ -26,8 +26,8 @@ export const linksTitle = message({
 });
 
 export const linksPrefix = message({
-  ja: '`href`と`navigateTo`は、作るURLの先頭にベースパスを付けます。そのため、`href`の戻り値の型はルート表のパスでなく`string`です。',
-  en: '`href` and `navigateTo` put the base path in front of the URL they build. So `href` returns a `string`, not a path in the route table.',
+  ja: '`href`は、作るURLの先頭にベースパスを付けます。そのため、戻り値の型はルート表のパスでなく`string`です。コードから移るときも、このURLを`navigation.navigate()`に渡します。',
+  en: '`href` puts the base path in front of the URL it builds. So it returns a `string`, not a path in the route table. A navigation from code hands the same URL to `navigation.navigate()`.',
 });
 
 export const frameworkBefore = message({
@@ -40,12 +40,12 @@ export const frameworkAfter = message({
   en: '.',
 });
 
-export const statePitfall = message({
-  ja: '`href`が返したURLを`@k8ordo/state`の`href`に渡すと、ベースパスが2重に付きます。詳しくは`@k8ordo/state`の',
-  en: 'Passing the URL `href` returned to `@k8ordo/state`’s `href` adds the base path twice. See ',
+export const stateLink = message({
+  ja: '`@k8ordo/state`の`href`には、`href`が返したURLをそのまま渡します。状態を載せるだけで、ベースパスは足しません。詳しくは`@k8ordo/state`の',
+  en: 'Hand the URL `href` returned to `@k8ordo/state`’s `href` as it is: that puts the state on it and adds no base path. See ',
 });
 
-export const statePitfallAfter = message({
+export const stateLinkAfter = message({
   ja: 'を見てください。',
   en: ' in the `@k8ordo/state` guide.',
 });

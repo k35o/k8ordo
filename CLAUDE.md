@@ -8,7 +8,7 @@ k8ordo is the monorepo for the `@k8ordo/*` packages. Vite+ (`vp`) is the unified
 
 The family's own framework is primary, not a support tool, even though it is delivered as Vite plugins. Vite+ is assumed infrastructure here — the layer everything already stands on — so a plugin that defines what an application _is_ (its route grammar, its execution boundaries, how it is built and served) is the foundation an app builds on, not an addon to someone else's ecosystem. The test is who the artifact serves: `@k8ordo/framework` serves k8ordo applications, and an eslint config serves eslint.
 
-The same test draws the line in `@k8ordo/ui`'s generative UI. The catalog (`@k8ordo/ui/catalog`, `@k8ordo/ui/catalog/render`) is a description of this library — what each component is, the props a model may write, which prop holds a field's value, and how each is drawn — so it is primary: it serves an application that already uses `@k8ordo/ui` and wants an LLM to compose _these_ components. The glue from that catalog to a format (json-render, OpenUI, A2UI) or to the AI SDK plugs into someone else's ecosystem, so `@k8ordo/ui` publishes none of it and depends on none of those packages. `examples/ui-integrations` keeps a working copy of each glue under CI, for an application to copy and own; a new format is a new file there, never a change to the catalog.
+The same test draws the line in `@k8ordo/ui`'s generative UI. The catalog (`@k8ordo/ui/catalog`, `@k8ordo/ui/catalog/render`) is a description of this library — what each component is, the props a model may write, which prop holds a field's value, and how each is drawn — so it is primary: it serves an application that already uses `@k8ordo/ui` and wants an LLM to compose _these_ components. The glue from that catalog to a format (json-render, OpenUI, A2UI), to the AI SDK, or to MCP Apps (a server whose App draws with `@k8ordo/ui`, and a chat that hosts Apps) plugs into someone else's ecosystem, so `@k8ordo/ui` publishes none of it and depends on none of those packages. `examples/ui-integrations` keeps a working copy of each glue under CI, for an application to copy and own; a new format is a new file there, never a change to the catalog.
 
 `packages/framework-engine` is the one directory here that is not a member: a private workspace package `@k8ordo/framework` bundles at pack time, never published.
 
@@ -16,7 +16,7 @@ Every package here shares the same discipline:
 
 - **React 19 and RSC are assumed.** No framework-agnostic core and no adapter layer for other frameworks — we would never use one, so building it would be an indirection nobody pays for.
 - **Anything at Baseline _newly available_ is fair game, and nothing else is carried.** Newly available, not widely available: a feature is usable the moment all four core browsers ship it, without waiting the further 30 months. No polyfills, no fallbacks, no legacy branches. This is not a decision to drop old browsers — a library built out of the newest features never ran on them in the first place. `pnpm check:no-polyfills` enforces the dependency half of this in CI; the rest is on the author, since checking Baseline usage itself (JS _and_ CSS) would take a linter of its own.
-- **Identifiers name what the package owns, never the scope.** The scope already says `k8ordo`, so `UIProvider`, not `OrdoProvider`.
+- **Identifiers name what the package owns, never the scope.** The scope already says `k8ordo`, so `ToastProvider`, not `OrdoToastProvider`.
 
 ## Adding a package
 
@@ -39,10 +39,12 @@ English, because an AI coding assistant consumes it directly:
 - `packages/*/docs/**` — shipped inside every npm package and read out of `node_modules/@k8ordo/<name>/docs/`
 - `.claude/skills/**`
 - Any string a generator writes into those files (see `packages/ui/scripts/generate-component-docs.ts`)
+- Any text a published package emits at run time for the developer — a thrown error, a `console` warning, a string inside a value it returns. An agent reads it in a stack trace or a failing test, next to docs that are English already. This does not cover the localized copy a component shows the person using the page (`@k8ordo/ui`'s dictionaries, zod's locale messages): that follows the page's locale.
 
 Japanese is fine elsewhere: commit messages, PR and issue text, code comments,
-tooling output meant for a developer, and the documentation site's own copy
-(which is bilingual with Japanese as the default locale).
+output of the repository's own tooling (scripts, generators, CI), and the
+documentation site's own copy (which is bilingual with Japanese as the default
+locale).
 
 ## Commands
 
@@ -57,7 +59,7 @@ pnpm check              # lint/format check (pnpm check:write to auto-fix)
 
 - Run `pnpm build` before `pnpm check` / `pnpm typecheck` on a fresh checkout or worktree: docs/examples resolve `@k8ordo/*` types from each package's `dist/`, so without it type-aware lint reports bogus `no-unsafe-*` errors (and parallel checks can die with exit 137). CI builds in the install action. The framework applications (`apps/docs`, `examples/static-basic`, `examples/server-basic`) also type-check and type-aware-lint against their generated `.k8ordo/`, which a build of that application writes — `pnpm build` writes the docs one and `pnpm build:examples` the examples', so run them before a typecheck or check there; CI's `types` and `lint` jobs build all three first. `pnpm exec k8ordo generate` in an application's directory writes it alone, building nothing. Without the table `PageProps` falls back to string params, and lint misreads a needed `String()` as redundant.
 - Browser tests run in Chromium, Firefox, and WebKit — `pnpm test` runs all three, so install them once with `pnpm exec playwright install chromium firefox webkit`. `TEST_BROWSER=<engine>` narrows a run to one; CI runs one engine per job the same way, and splits WebKit's package tests over two jobs with `--shard` (WebKit keeps every test file's iframe until the run ends, and one job's worth runs out of memory). Every browser-mode `vite.config.ts` and every test that launches Playwright itself reads that variable, so a new one does too. VRT is the exception: it captures in Chromium only.
-- Use `type`, not `interface` — except `Register` (router, state, i18n, and the generated `.k8ordo/register.gen.ts`), which exists to be merged.
+- Use `type`, not `interface` — except `Register` (router, i18n, and the generated `.k8ordo/register.gen.ts`), which exists to be merged.
 - No `@ts-ignore` — use `@ts-expect-error` with an explanation.
 - No skipped tests (`test.skip`, `describe.skip`).
 - The pre-commit hook (`vp staged`) runs `vp check --fix` and auto-stages the fixes.

@@ -90,7 +90,7 @@ export type Props = PageProps<'/membrs'>;
 describe('a rest param in the registered table', () => {
   it('reaches a page, a route.ts and useMatch as an array, and a link takes one', async () => {
     const output = await diagnosticsOf(`
-import { defineRoutes, href, matchPath, navigateTo } from '@k8ordo/router';
+import { defineRoutes, href, matchPath } from '@k8ordo/router';
 import type { PageProps, RouteContext } from '@k8ordo/router';
 
 const Page = () => null;
@@ -102,7 +102,7 @@ declare module '@k8ordo/router' {
 
 const segments: readonly string[] = ['a', 'b'];
 href('/files/:path+', { path: segments });
-navigateTo('/files/:path+', { path: ['a', 1] }, { history: 'replace' });
+href('/files/:path+', { path: ['a', 1] });
 export const page: readonly string[] = ({} as PageProps<'/files/:path+'>).params.path;
 export const route: readonly string[] = ({} as RouteContext<'/files/:path+'>).params.path;
 export const matched: readonly string[] | undefined = matchPath('/files/:path+', '/files/a')?.path;
@@ -116,6 +116,29 @@ export const one: string = ({} as PageProps<'/files/:path+'>).params.path;
     );
     expect(output).toContain(
       `app.ts(20,14): error TS2322: Type 'readonly string[]' is not assignable to type 'string'.`,
+    );
+  }, 60_000);
+});
+
+describe('LayoutProps', () => {
+  it('takes the pattern of a layout with no page of its own, where PageProps does not', async () => {
+    const output = await diagnosticsOf(`
+import { defineRoutes } from '@k8ordo/router';
+import type { LayoutProps, PageProps } from '@k8ordo/router';
+
+const Page = () => null;
+const routes = defineRoutes({ '/blog/:slug/comments': Page });
+
+declare module '@k8ordo/router' {
+  interface Register { routes: typeof routes }
+}
+
+export const slug: string = ({} as LayoutProps<'/blog/:slug'>).params.slug;
+export type Props = PageProps<'/blog/:slug'>;
+`);
+    expect(output.split('\n')).toHaveLength(1);
+    expect(output).toContain(
+      `Type '"/blog/:slug"' does not satisfy the constraint '"/blog/:slug/comments"'`,
     );
   }, 60_000);
 });

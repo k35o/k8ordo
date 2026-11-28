@@ -54,10 +54,9 @@ export const talkSchema = z.object({
 // src/routes/talks/new/page.tsx — Server Component
 import { formFields } from '@k8ordo/form/server';
 
-const talkFields = formFields(talkSchema); // derived once, plain data
-
 export default function Page() {
-  return <TalkForm action={createTalk} fields={talkFields} />;
+  // derived in the render, so its messages follow the request; plain data
+  return <TalkForm action={createTalk} fields={formFields(talkSchema)} />;
 }
 ```
 
@@ -65,6 +64,14 @@ export default function Page() {
 // src/components/talk-form.tsx
 'use client';
 import { useForm } from '@k8ordo/form';
+import type { FormFields, FormState } from '@k8ordo/form';
+
+import type { talkSchema } from '../lib/schema'; // type-only: zod stays out
+
+type TalkFormProps = {
+  action: (state: FormState, formData: FormData) => Promise<FormState>;
+  fields: FormFields<typeof talkSchema>; // what formFields(talkSchema) returns
+};
 
 export const TalkForm = ({ action, fields }: TalkFormProps) => {
   const [state, formAction] = useActionState(action, {});

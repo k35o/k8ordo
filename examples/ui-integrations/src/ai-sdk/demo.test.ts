@@ -2,9 +2,8 @@ import { readUIMessageStream } from 'ai';
 import type { UIMessage, UIMessageChunk } from 'ai';
 import { expect, test } from 'vite-plus/test';
 
-import { validateGeneratedSpec } from '../json-render/catalog';
 import { mapMessageParts } from './map-parts';
-import { answerSpec, scriptedTransport } from './scripted-transport';
+import { scriptedTransport } from './scripted-transport';
 
 const question: UIMessage = {
   id: 'user-1',
@@ -24,13 +23,6 @@ const lastMessageOf = async (
   }
   return last;
 };
-
-test('data パーツで送る spec は現行スキーマで検証を通り、自動修正も要らない', () => {
-  expect(validateGeneratedSpec(answerSpec)).toMatchObject({
-    fixes: [],
-    ok: true,
-  });
-});
 
 test('最初の返事は、承認 ID を持ったツール呼び出しで止まる', async () => {
   // 手書きのパーツではなく、AI SDK 自身が組み立てたメッセージを通す

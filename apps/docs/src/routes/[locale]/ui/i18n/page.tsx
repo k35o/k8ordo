@@ -1,6 +1,7 @@
 import { Code } from '@k8ordo/ui';
-import { en, ja, messageUsage } from '@k8ordo/ui/i18n';
+import { en, ja } from '@k8ordo/ui/i18n';
 import type { Messages } from '@k8ordo/ui/i18n';
+import generated from '@k8ordo/ui/props.json';
 
 import { Pitfall } from '../../../../components/callout';
 import { CodeBlock } from '../../../../components/code-block';
@@ -21,14 +22,24 @@ type MessageRow = {
   enValue: string;
 };
 
-const MESSAGE_ROWS: readonly MessageRow[] =
-  // Object.keys は string[] を返すため、辞書の添字に使えるよう絞り込む
-  (Object.keys(messageUsage) as Array<keyof Messages>).map((key) => ({
-    key,
-    usedBy: messageUsage[key].join(' / '),
-    jaValue: ja[key],
-    enValue: en[key],
-  }));
+const isMessageKey = (key: string): key is keyof Messages =>
+  Object.hasOwn(en, key);
+
+const MESSAGE_ROWS: readonly MessageRow[] = generated.messages.map(
+  ({ key, usedBy }) => {
+    if (!isMessageKey(key)) {
+      throw new Error(
+        `"${key}" in @k8ordo/ui/props.json is not a key of Messages. Run \`pnpm --filter @k8ordo/ui generate:props\`.`,
+      );
+    }
+    return {
+      key,
+      usedBy: usedBy.join(' / '),
+      jaValue: ja[key],
+      enValue: en[key],
+    };
+  },
+);
 
 const LOCALES = `import { defineLocales } from '@k8ordo/i18n';
 
