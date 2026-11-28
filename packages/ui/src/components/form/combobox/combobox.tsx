@@ -347,7 +347,7 @@ export const Combobox: FC<Props> = ({
         id={id}
         onBlur={(event) => {
           // 打ちかけで離れたら選んだ候補の表示名に戻す。空にして離れたら選択を外す
-          if (text !== null && text.trim() === '') {
+          if (text?.trim() === '') {
             setCurrent('');
             setPicked(null);
           }
