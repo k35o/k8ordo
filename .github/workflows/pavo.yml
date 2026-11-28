@@ -16,7 +16,7 @@ permissions:
 jobs:
   pavo:
     if: ${{ github.event_name != 'issue_comment' || startsWith(github.event.comment.body, '/pavo') }}
-    uses: k35o/pavo/.github/workflows/review.yml@a6a2b937f90c02670ed4628882d4c4ebc92ab207 # main
+    uses: k35o/pavo/.github/workflows/review.yml@3e4127e076c5675e1d00e19b174b4498f9396263 # main
     with:
       instructions: default,react,typescript
       extra_prompt: |
