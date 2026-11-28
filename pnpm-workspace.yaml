@@ -58,12 +58,12 @@ catalog:
   typescript: 7.0.2
   # vite-plus 0.3.1 以降の `vp pack` / `vp dev` は、実行するパッケージが vite を
   # 宣言していると、それが同じ版の @voidzero-dev/vite-plus-core でなければ落ちる。
-  # 本家 vite ではなく core の別名を置き、版は vite-plus と常に揃える。
+  # 本家 vite ではなく core の別名を置き、版は vite-plus の dependencies.vite と常に揃える。
   # 宣言を消して vite-plus 任せにしないのは、消すと plugin-react や vitest の
   # peer に pnpm が本家 vite を自動で入れ、vitest の実体が割れて
   # expect.element の型が消えるため。
-  vite: npm:@voidzero-dev/vite-plus-core@1.6.0
-  vite-plus: 1.6.0
+  vite: npm:@voidzero-dev/vite-plus-core@8.3.8000
+  vite-plus: 1.7.0
   vitest: 5.1.1
   vitest-browser-react: 2.3.0
   zod: 4.6.7
@@ -95,19 +95,12 @@ overrides:
   '@vitest/ui': 'catalog:'
   '@vitest/utils': 'catalog:'
 
-# catalog の vite は vite-plus-core の別名なので、版は vite-plus のもの (1.x) に
-# なり、vite を peer に持つパッケージ (vitest・plugin-react・@k8ordo/framework など)
-# の範囲をどれも満たさない。中身は vite-plus が同梱する vite で、別名の版で互換を
-# 確かめても意味がないため、vite の peer だけ版を問わない (Vite+ の移行ツールが
-# 書くのと同じ設定)。
 peerDependencyRules:
-  allowAny:
-    - vite
-  # storybook (10.6.3 時点の最新でも) の vite-plus の peer は ^0.1.15 || ^0.2.0 のまま。
-  # ここの Storybook (VRT・Chromatic) は 1.4 で動いているので 1.4 だけ足す。
+  # storybook (10.6.8 時点の最新でも) の vite-plus の peer は ^0.1.15 || ^0.2.0 のまま。
+  # ここの Storybook (VRT・Chromatic) は 1.7 で動いているので 1.7 だけ足す。
   # vite-plus を上げて警告が戻ったら、その版で Storybook が動くか確かめてから広げる。
   allowedVersions:
-    storybook>vite-plus: '1.4'
+    storybook>vite-plus: '1.7'
 
 minimumReleaseAgeExclude:
   # examples/ui-integrations だけが使う。A2UI 1.0 に対応した版がまだ 7 日を経ていない
