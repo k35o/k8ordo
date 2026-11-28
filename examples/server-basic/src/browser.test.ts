@@ -93,6 +93,7 @@ describe.each(browserTypes)('the built application in $name', ({ type }) => {
       .waitFor({ timeout: 5000 });
     expect(new URL(page.url()).pathname).toBe('/products');
     expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
+    await page.close();
   }, 30_000);
 
   it('keeps the cookie a Server Action set, so the guard lets a client navigation through', async () => {
