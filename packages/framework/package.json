@@ -89,7 +89,6 @@
     "@types/compressible": "2.0.3",
     "@types/fresh": "0.5.3",
     "@types/mime-types": "3.0.1",
-    "@types/range-parser": "1.2.7",
     "@types/react": "catalog:",
     "@vercel/functions": "3.11.3",
     "oxc-transform-react": "catalog:",

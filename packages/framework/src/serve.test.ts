@@ -414,6 +414,15 @@ describe('serve', () => {
     expect(response.headers.get('content-range')).toBe('bytes */10');
   });
 
+  it('answers ranges that touch as the one range they make', async () => {
+    const response = await fetch(`${server.url}/clip.mp4`, {
+      headers: { range: 'bytes=2-3,4-5' },
+    });
+    expect(response.status).toBe(206);
+    expect(response.headers.get('content-range')).toBe('bytes 2-5/10');
+    expect(await response.text()).toBe('2345');
+  });
+
   it.each([
     [
       'names another version of the file',
@@ -421,6 +430,8 @@ describe('serve', () => {
     ],
     ['asks for several ranges at once', { range: 'bytes=0-1,5-6' }],
     ['cannot be read', { range: 'bytes=five-' }],
+    ['has a part that cannot be read', { range: 'bytes=2-5,five-' }],
+    ['ends before it starts', { range: 'bytes=5-2' }],
   ])('sends the whole file when the range %s', async (_case, headers) => {
     const response = await fetch(`${server.url}/clip.mp4`, { headers });
     expect(response.status).toBe(200);

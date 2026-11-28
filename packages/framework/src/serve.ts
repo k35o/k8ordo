@@ -18,7 +18,7 @@ import { pathToFileURL } from 'node:url';
 import { withoutBase } from '@k8ordo/router';
 import fresh from 'fresh';
 import { contentType } from 'mime-types';
-import parseRange from 'range-parser';
+import { combineRanges, parse as parseRange } from 'range-parser';
 
 import {
   ENCODINGS,
@@ -168,6 +168,9 @@ const digest = async (file: string): Promise<string> => {
 
 type ByteRange = { readonly start: number; readonly end: number };
 
+const UNREADABLE = 1;
+const PAST_THE_END = 2;
+
 /**
  * The part of a file a GET asked for: the whole, one byte range, or a range
  * that starts past the end. Only the single range a media element asks for
@@ -183,12 +186,13 @@ const rangeOf = (
   const { range, 'if-range': ifRange } = headers;
   if (range === undefined) return 'whole';
   if (ifRange !== undefined && ifRange !== etag) return 'whole';
-  const ranges = parseRange(size, range, { combine: true });
-  if (ranges === -1) return 'unsatisfiable';
-  if (ranges === -2 || ranges.type !== 'bytes' || ranges.length !== 1) {
-    return 'whole';
+  const { code, type, ranges } = parseRange(size, range);
+  if (type !== 'bytes' || (code & UNREADABLE) !== 0) return 'whole';
+  const [only, ...more] = combineRanges(ranges);
+  if (only === undefined) {
+    return code === PAST_THE_END ? 'unsatisfiable' : 'whole';
   }
-  return ranges[0] ?? 'whole';
+  return more.length === 0 ? only : 'whole';
 };
 
 /**
