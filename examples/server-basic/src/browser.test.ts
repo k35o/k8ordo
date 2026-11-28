@@ -68,6 +68,9 @@ const refusedBy = async (page: Page): Promise<() => Promise<string[]>> => {
 describe.each(browserTypes)('the built application in $name', ({ type }) => {
   beforeAll(async () => {
     browser = await type.launch();
+    // Playwright は Firefox をウィンドウ無しで起動し、立ち上げの残りは最初に
+    // 開くページが払う。それがどれかのテストの持ち時間に入らないよう、ここで開いて閉じる
+    await (await browser.newPage()).close();
   });
 
   afterAll(async () => {
