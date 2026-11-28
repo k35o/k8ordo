@@ -15,8 +15,8 @@
   "dependencies": {
     "@a2ui/react": "0.16.1",
     "@a2ui/web_core": "0.16.1",
-    "@ai-sdk/mcp": "2.0.101",
-    "@ai-sdk/react": "4.0.180",
+    "@ai-sdk/mcp": "2.0.102",
+    "@ai-sdk/react": "4.0.183",
     "@json-render/core": "catalog:",
     "@json-render/react": "catalog:",
     "@k8ordo/ui": "workspace:^",
@@ -31,8 +31,8 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@ai-sdk/anthropic": "4.0.106",
-    "@anthropic-ai/sdk": "1.10.0",
+    "@ai-sdk/anthropic": "4.0.107",
+    "@anthropic-ai/sdk": "1.12.0",
     "@modelcontextprotocol/node": "2.1.2",
     "@modelcontextprotocol/server": "2.4.0",
     "@types/node": "catalog:",
