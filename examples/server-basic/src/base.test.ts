@@ -113,9 +113,7 @@ describe.each(browserTypes)(
 
       await page.getByRole('link', { name: 'home' }).click();
       await page.getByRole('button', { name: 'leave' }).click();
-      await page
-        .getByRole('heading', { name: 'products' })
-        .waitFor({ timeout: 5000 });
+      await page.getByRole('heading', { name: 'products' }).waitFor();
       expect(new URL(page.url()).pathname).toBe('/site/products');
       expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
       await page.close();

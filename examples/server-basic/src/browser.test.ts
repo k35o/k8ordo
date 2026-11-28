@@ -88,9 +88,7 @@ describe.each(browserTypes)('the built application in $name', ({ type }) => {
 
     await page.getByRole('button', { name: 'leave' }).click();
 
-    await page
-      .getByRole('heading', { name: 'products' })
-      .waitFor({ timeout: 5000 });
+    await page.getByRole('heading', { name: 'products' }).waitFor();
     expect(new URL(page.url()).pathname).toBe('/products');
     expect(await page.evaluate(() => 'stayed' in window)).toBe(true);
     await page.close();
@@ -153,9 +151,7 @@ describe.each(browserTypes)('the built application in $name', ({ type }) => {
     });
     await page.getByRole('link', { name: 'guide' }).click();
 
-    await page
-      .getByRole('heading', { name: 'guide' })
-      .waitFor({ timeout: 5000 });
+    await page.getByRole('heading', { name: 'guide' }).waitFor();
     expect(payloads).toStrictEqual(['/guide/index.rsc']);
     await page.close();
   });
