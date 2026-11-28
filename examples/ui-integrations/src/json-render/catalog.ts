@@ -8,11 +8,13 @@ import type { Spec, UIElement } from '@json-render/core';
 import { schema } from '@json-render/react/schema';
 import { catalog as k8ordo, catalogPropIssues } from '@k8ordo/ui/catalog';
 import type {
-  CatalogEntry,
+  AnyCatalogEntry,
   CatalogName,
   CatalogProps,
 } from '@k8ordo/ui/catalog';
 import { z } from 'zod';
+
+import { withoutNulls } from '../catalog-props';
 
 type JsonRenderComponent<N extends CatalogName> = {
   props: (typeof k8ordo)[N]['props'];
@@ -23,9 +25,7 @@ type JsonRenderComponent<N extends CatalogName> = {
 
 // json-render は値を `$bindState` で状態に結ぶ。どの prop が結べるかは
 // モデルが説明文から読むので、ここで書き足す
-const describe = (
-  entry: Pick<CatalogEntry, 'description'> & { value?: { prop: string } },
-): string =>
+const describe = (entry: AnyCatalogEntry): string =>
   entry.value === undefined
     ? entry.description
     : `${entry.description} ${entry.value.prop} can be bound to state with $bindState.`;
@@ -137,7 +137,7 @@ export const validateGeneratedSpec = (
       message: issue.message,
     })),
     ...Object.entries(spec.elements).flatMap(([elementKey, element]) =>
-      catalogPropIssues(element.type, element.props, {
+      catalogPropIssues(element.type, withoutNulls(element.props), {
         unresolved: Object.entries(element.props)
           .filter(([, value]) => isExpression(value))
           .map(([key]) => key),

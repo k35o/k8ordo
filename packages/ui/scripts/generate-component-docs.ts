@@ -1,18 +1,21 @@
 /**
  * Writes the generated parts of `docs/references/components.md` (where each
  * component section sits, its `Props:` block, the icon list, the `Messages`
- * key list) and the README's component list, from
- * `docs/props.generated.json` and `src/i18n/usage.ts`. The prose and the
- * examples stay hand-written, because they carry judgement the types do not.
- * `ai-chat.md` is deliberately left out: its props bullets group controllable
- * props and describe pass-through behavior, which the generated form would
- * flatten away.
+ * key list), the README's component list, and the list of the generative-UI
+ * catalog's entries in `docs/references/generative-ui.md`, from
+ * `docs/props.generated.json`, `src/i18n/usage.ts`, and `src/catalog`. The
+ * prose and the examples stay hand-written, because they carry judgement the
+ * types do not. `ai-chat.md` is deliberately left out: its props bullets group
+ * controllable props and describe pass-through behavior, which the generated
+ * form would flatten away.
  *
- *   node scripts/generate-component-docs.ts            # rewrite both files
- *   node scripts/generate-component-docs.ts --check    # fail if either is stale
+ *   node scripts/generate-component-docs.ts            # rewrite the three files
+ *   node scripts/generate-component-docs.ts --check    # fail if any is stale
  */
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
+
+import { runnerImport } from 'vite-plus';
 
 import type { Messages } from '../src/i18n/messages.ts';
 import { messageUsage } from '../src/i18n/usage.ts';
@@ -28,6 +31,12 @@ const AI_CHAT_PATH = fileURLToPath(
   new URL('../docs/references/ai-chat.md', import.meta.url),
 );
 const README_PATH = fileURLToPath(new URL('../README.md', import.meta.url));
+const GENERATIVE_UI_PATH = fileURLToPath(
+  new URL('../docs/references/generative-ui.md', import.meta.url),
+);
+const CATALOG_PATH = fileURLToPath(
+  new URL('../src/catalog/index.ts', import.meta.url),
+);
 
 const CATEGORIES = new Map([
   ['buttons', 'Buttons'],
@@ -225,6 +234,48 @@ const renderReadmeCategories = (): string =>
     })
     .join('\n');
 
+// src/catalog imports its siblings without an extension, which Node's own
+// loader does not resolve, so the catalog is loaded through Vite's.
+const { module: catalogModule } = await runnerImport<{
+  catalog: Record<string, unknown>;
+}>(CATALOG_PATH, { configFile: false, logLevel: 'silent' });
+
+const CATALOG_ONLY = 'Catalog only';
+
+const groupOf = (name: string): string => {
+  const category = categoryOfTopLevel.get(name);
+  return (
+    (category === undefined ? undefined : CATEGORIES.get(category)) ??
+    CATALOG_ONLY
+  );
+};
+
+const renderCatalogEntries = (): string => {
+  const groups = new Map<string, string[]>();
+  for (const name of Object.keys(catalogModule.catalog)) {
+    groups.set(groupOf(name), [...(groups.get(groupOf(name)) ?? []), name]);
+  }
+  return [...CATEGORIES.values(), CATALOG_ONLY]
+    .flatMap((title) => {
+      const names = groups.get(title) ?? [];
+      return names.length === 0
+        ? []
+        : [
+            wrap(
+              [
+                `- **${title}**:`,
+                ...names.map(
+                  (name, index) =>
+                    `\`${name}\`${index === names.length - 1 ? '' : ','}`,
+                ),
+              ],
+              '  ',
+            ),
+          ];
+    })
+    .join('');
+};
+
 const output = (
   [
     ['icons', renderIcons()],
@@ -242,6 +293,14 @@ const readmeOutput = fillGenerated(
   readmeSource,
   'component-categories',
   renderReadmeCategories(),
+);
+
+const generativeUiSource = await readFile(GENERATIVE_UI_PATH, 'utf8');
+const generativeUiOutput = fillGenerated(
+  'generative-ui.md',
+  generativeUiSource,
+  'catalog-entries',
+  renderCatalogEntries(),
 );
 
 // Stops before anything is written: the block would be filled in correctly but
@@ -264,9 +323,15 @@ if (process.argv.includes('--check')) {
   if (readmeOutput !== readmeSource) {
     problems.push('README.md is stale. Run `pnpm generate:props`.');
   }
+  if (generativeUiOutput !== generativeUiSource) {
+    problems.push(
+      'docs/references/generative-ui.md is stale. Run `pnpm generate:props`.',
+    );
+  }
 } else {
   await writeFile(DOC_PATH, output);
   await writeFile(README_PATH, readmeOutput);
+  await writeFile(GENERATIVE_UI_PATH, generativeUiOutput);
   console.warn(`Rewrote props for ${rewritten.size} components.`);
 }
 
@@ -364,5 +429,7 @@ if (problems.length > 0) {
   process.exit(1);
 }
 if (process.argv.includes('--check')) {
-  console.warn('docs/references/components.md and README.md are in sync.');
+  console.warn(
+    'docs/references/components.md, generative-ui.md, and README.md are in sync.',
+  );
 }

@@ -21,12 +21,14 @@ it('データモデルの値で入力欄が描画される', async () => {
     .element(screen.getByRole('heading', { name: 'A2UI のプロフィール' }))
     .toBeInTheDocument();
   await expect
-    .element(screen.getByPlaceholder('ニックネーム'))
+    .element(screen.getByLabelText('ニックネーム'))
     .toHaveValue('k8o');
   await expect
     .element(screen.getByRole('switch', { name: '通知を受け取る' }))
     .toBeChecked();
-  await expect.element(screen.getByRole('combobox')).toHaveValue('pro');
+  await expect
+    .element(screen.getByRole('combobox', { name: 'プラン' }))
+    .toHaveValue('pro');
   expect(consoleError).not.toHaveBeenCalled();
 });
 
@@ -37,7 +39,7 @@ it('入力した値がデータモデルに書き込まれる', async () => {
     </ToastProvider>,
   );
 
-  const nickname = screen.getByPlaceholder('ニックネーム');
+  const nickname = screen.getByLabelText('ニックネーム');
   await nickname.fill('ordo');
   await screen.getByText('通知を受け取る').click();
 

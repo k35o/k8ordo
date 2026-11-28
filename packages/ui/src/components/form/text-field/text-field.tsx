@@ -15,7 +15,7 @@ import styles from './text-field.module.css';
 // 1 行の入力欄として描けるものを並べる。number は NumberField、password は
 // PasswordInput、file は FileField が別途あり、checkbox / radio / color 等は
 // 見た目が別物になる
-type TextInputType = Extract<
+export type TextInputType = Extract<
   HTMLInputTypeAttribute,
   | 'text'
   | 'email'

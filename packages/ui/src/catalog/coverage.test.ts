@@ -15,16 +15,15 @@ import { catalog } from './index';
 vi.mock('server-only', () => ({}));
 
 const RENAMED_IN_CATALOG: ReadonlyMap<string, string> = new Map([
-  ['AlertIcon', 'StatusIcon'],
+  ['AlertIcon', 'Icon'],
+  ['ChevronIcon', 'Icon'],
   ['ToastProvider', 'Toast'],
   ['useToast', 'Toast'],
 ]);
 
-// 公開の部品の名前ではない項目と、それを描く部品。side で Dialog と Drawer を描き分ける
+// 公開の部品の名前ではない項目と、それを描く部品
 const COMPOSED_IN_CATALOG: ReadonlyMap<string, readonly string[]> = new Map([
-  ['DateField', ['TextField']],
   ['DropdownMenuItem', ['DropdownMenu']],
-  ['Modal', ['Dialog', 'Drawer']],
 ]);
 
 const CHAT =
@@ -64,6 +63,10 @@ const LEFT_OUT: ReadonlyMap<string, string> = new Map([
   [
     'BaseIcon',
     'アイコンを自作するための土台で、自分の絵を持たない。spec は name で絵を選ぶので、選ぶものが無い',
+  ],
+  [
+    'FormControl',
+    'catalog の入力欄はどれも自分の label と helpText を持ち、描くときに FormControl で包む。枠だけの項目を置くと、同じ欄を 2 通りに書けてしまう',
   ],
   [
     'TableOfContents',
@@ -147,13 +150,6 @@ const section = (markdown: string, heading: string): string => {
 const namesIn = (text: string): string[] =>
   [...text.matchAll(/`(?<name>\w+)`/gu)].map((m) => m.groups?.name ?? '');
 
-const SUPPORTED_LIST = /^Components in the catalog:\n\n(?<list>(?:- .+\n)+)/mu;
-
-const readmeSupportedNames = (): string[] =>
-  namesIn(
-    SUPPORTED_LIST.exec(readDoc('README.md'))?.groups?.list ?? '',
-  ).toSorted();
-
 describe('カタログと公開している部品の対応', () => {
   it('公開している部品はどれもカタログに載るか、理由付きで除外されている', () => {
     expect(unaccounted()).toStrictEqual([]);
@@ -178,11 +174,5 @@ describe('カタログと公開している部品の対応', () => {
     expect(
       [...LEFT_OUT.keys()].filter((name) => !namedInDocs.includes(name)),
     ).toStrictEqual([]);
-  });
-});
-
-describe('README の生成 UI 対応部品一覧', () => {
-  it('カタログの全項目を挙げる', () => {
-    expect(readmeSupportedNames()).toStrictEqual(catalogNames.toSorted());
   });
 });

@@ -28,8 +28,8 @@ describe('validateGeneratedSpec', () => {
   it('新しい API のキーだけで構成された spec を受け入れる', () => {
     const result = validateGeneratedSpec(
       specWithTarget({
-        type: 'Modal',
-        props: { triggerLabel: '開く', title: '設定', side: 'center' },
+        type: 'Dialog',
+        props: { triggerLabel: '開く', title: '設定', side: 'bottom' },
         children: [],
       }),
     );
@@ -46,6 +46,18 @@ describe('validateGeneratedSpec', () => {
           label: '規約に同意する',
           defaultChecked: { $bindState: '/form/agree' },
         },
+        children: [],
+      }),
+    );
+
+    expect(result).toMatchObject({ ok: true });
+  });
+
+  it('null の prop は、描くときと同じく書かなかったものとして受け入れる', () => {
+    const result = validateGeneratedSpec(
+      specWithTarget({
+        type: 'Button',
+        props: { label: '保存', href: null },
         children: [],
       }),
     );
@@ -139,7 +151,7 @@ describe('validateGeneratedSpec', () => {
   it('スキーマに無いキーを未知のプロパティとして報告する', () => {
     const result = validateGeneratedSpec(
       specWithTarget({
-        type: 'Modal',
+        type: 'Dialog',
         // 旧 API。zod は未知キーを黙って落とすため、検出しないと既定の
         // side で描画されてしまう。
         props: { triggerLabel: '開く', title: '設定', type: 'bottom' },

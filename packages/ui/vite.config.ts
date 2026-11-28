@@ -303,7 +303,24 @@ export default defineConfig({
       {
         extends: true,
         test: {
+          name: { label: 'catalog', color: 'green' },
+          include: ['src/catalog/**/*.browser.test.tsx'],
+          browser: {
+            enabled: true,
+            instances: browsers.map((browser) => ({ browser })),
+            provider: playwright({
+              contextOptions: { reducedMotion: 'reduce', locale: 'en-US' },
+            }),
+            headless: true,
+            screenshotFailures: false,
+          },
+        },
+      },
+      {
+        extends: true,
+        test: {
           name: { label: 'helpers', color: 'blue' },
+          exclude: ['src/catalog/**/*.browser.test.tsx'],
           include: [
             'src/helpers/**/*.test.{ts,tsx}',
             'src/internal/**/*.test.ts',

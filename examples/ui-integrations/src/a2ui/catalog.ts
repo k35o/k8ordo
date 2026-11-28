@@ -1,5 +1,9 @@
-import { catalog as k8ordo, catalogRules } from '@k8ordo/ui/catalog';
-import type { CatalogName } from '@k8ordo/ui/catalog';
+import {
+  catalog as k8ordo,
+  catalogNames,
+  catalogRules,
+} from '@k8ordo/ui/catalog';
+import type { AnyCatalogEntry, CatalogName } from '@k8ordo/ui/catalog';
 import { z } from 'zod';
 
 /** The A2UI catalog ID of `@k8ordo/ui`. A2UI needs it to be unique, not to resolve. */
@@ -34,13 +38,7 @@ const dynamicTypeOf = (field: JsonSchema | undefined): string => {
 };
 
 const componentOf = (name: CatalogName) => {
-  const entry = k8ordo[name] as {
-    description: string;
-    props: z.ZodObject;
-    children?: true;
-    value?: { prop: string };
-    events?: Readonly<Record<string, string>>;
-  };
+  const entry: AnyCatalogEntry = k8ordo[name];
   const json = z.toJSONSchema(entry.props, { io: 'input' }) as JsonSchema;
   const properties: Record<string, unknown> = {
     component: { const: name },
@@ -81,8 +79,6 @@ const componentOf = (name: CatalogName) => {
   };
 };
 
-const NAMES = Object.keys(k8ordo) as CatalogName[];
-
 /**
  * The A2UI 1.0 catalog document of `@k8ordo/ui`, built from
  * `@k8ordo/ui/catalog`. Send it to the agent (in the system prompt, or as an
@@ -103,12 +99,12 @@ export const catalogDocument = {
     ...catalogRules,
   ].join('\n'),
   components: Object.fromEntries(
-    NAMES.map((name) => [name, componentOf(name)]),
+    catalogNames.map((name) => [name, componentOf(name)]),
   ),
   functions: {},
   $defs: {
     anyComponent: {
-      oneOf: NAMES.map((name) => ({ $ref: `#/components/${name}` })),
+      oneOf: catalogNames.map((name) => ({ $ref: `#/components/${name}` })),
     },
   },
 };

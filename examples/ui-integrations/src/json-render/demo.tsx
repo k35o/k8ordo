@@ -22,7 +22,7 @@ export const jsonRenderSpec = {
     overlays: {
       type: 'Stack',
       props: { direction: 'row', gap: 'sm' },
-      children: ['tip', 'dropdown', 'toast', 'modalBtn', 'popBtn'],
+      children: ['tip', 'dropdown', 'toast', 'dialogBtn', 'popBtn'],
     },
     tip: {
       type: 'Tooltip',
@@ -53,14 +53,14 @@ export const jsonRenderSpec = {
       },
       children: [],
     },
-    modalBtn: {
-      type: 'Modal',
-      props: { triggerLabel: 'モーダルを開く', title: '確認' },
-      children: ['modalBody'],
+    dialogBtn: {
+      type: 'Dialog',
+      props: { triggerLabel: 'ダイアログを開く', title: '確認' },
+      children: ['dialogBody'],
     },
-    modalBody: {
+    dialogBody: {
       type: 'Alert',
-      props: { tone: 'info', message: 'モーダルの中身も生成 UI で記述' },
+      props: { tone: 'info', message: 'ダイアログの中身も生成 UI で記述' },
       children: [],
     },
     popBtn: {
@@ -171,12 +171,18 @@ export const jsonRenderSpec = {
     },
     slider: {
       type: 'Slider',
-      props: { name: 'volume', defaultValue: 40, min: 0, max: 100 },
+      props: {
+        name: 'volume',
+        label: '音量',
+        defaultValue: 40,
+        min: 0,
+        max: 100,
+      },
       children: [],
     },
     qty: {
       type: 'NumberField',
-      props: { name: 'qty', defaultValue: 3, min: 0, max: 10 },
+      props: { name: 'qty', label: '数量', defaultValue: 3, min: 0, max: 10 },
       children: [],
     },
     pager: {
@@ -198,6 +204,7 @@ export const jsonRenderSpec = {
       type: 'Select',
       props: {
         name: 'plan',
+        label: 'プラン',
         options: [
           { value: 'free', label: 'Free' },
           { value: 'pro', label: 'Pro' },
@@ -283,7 +290,7 @@ export const jsonRenderSpec = {
     },
     nickname: {
       type: 'TextField',
-      props: { name: 'nickname', placeholder: 'ニックネーム' },
+      props: { name: 'nickname', label: 'ニックネーム' },
       children: [],
     },
     agree: {

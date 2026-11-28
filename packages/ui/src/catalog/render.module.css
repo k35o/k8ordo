@@ -12,19 +12,6 @@
   padding: calc(var(--spacing) * 8);
 }
 
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: calc(var(--spacing) * 1);
-}
-
-.fieldLabel {
-  color: var(--color-fg-base);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  line-height: var(--line-height-sm);
-}
-
 .keys {
   display: inline-flex;
   align-items: center;

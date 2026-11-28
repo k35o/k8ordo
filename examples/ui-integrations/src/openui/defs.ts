@@ -1,5 +1,5 @@
-import { catalog } from '@k8ordo/ui/catalog';
-import type { CatalogName } from '@k8ordo/ui/catalog';
+import { catalog, catalogNames } from '@k8ordo/ui/catalog';
+import type { AnyCatalogEntry, CatalogName } from '@k8ordo/ui/catalog';
 import { action, createLibrary, defineComponent } from '@openuidev/lang-core';
 import type { DefinedComponent, Library } from '@openuidev/lang-core';
 import { z } from 'zod';
@@ -7,16 +7,11 @@ import { z } from 'zod';
 // OpenUI は値を `name` で form の状態に結ぶ。モデルは説明文からそれを読むので、
 // 値を持つ部品にだけ書き足す
 const describe = (name: CatalogName): string => {
-  const { description, value } = catalog[name] as {
-    description: string;
-    value?: unknown;
-  };
+  const { description, value }: AnyCatalogEntry = catalog[name];
   return value === undefined
     ? description
     : `${description} Bound to form state by name.`;
 };
-
-const NAMES = Object.keys(catalog) as CatalogName[];
 
 /**
  * Builds the OpenUI library of `@k8ordo/ui` from the catalog, with the
@@ -39,16 +34,12 @@ export const buildLibrary = <C>(
       z.union(defined.map((component) => component.ref) as [Ref, ...Ref[]]),
     );
 
-  for (const name of NAMES) {
+  for (const name of catalogNames) {
     const {
       props,
       children: hasChildren,
       events = {},
-    } = catalog[name] as {
-      props: z.ZodObject;
-      children?: true;
-      events?: Readonly<Record<string, string>>;
-    };
+    }: AnyCatalogEntry = catalog[name];
     const actions = Object.fromEntries(
       Object.entries(events).map(([event, description]) => [
         event,

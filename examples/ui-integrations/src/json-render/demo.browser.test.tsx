@@ -21,12 +21,14 @@ it('spec のフォームがエラー無しで描画される', async () => {
   );
 
   await expect
-    .element(screen.getByPlaceholder('ニックネーム'))
+    .element(screen.getByRole('textbox', { name: 'ニックネーム' }))
     .toBeInTheDocument();
   await expect
     .element(screen.getByRole('checkbox', { name: '規約に同意する' }))
     .toBeInTheDocument();
-  await expect.element(screen.getByRole('combobox')).toHaveValue('pro');
+  await expect
+    .element(screen.getByRole('combobox', { name: 'プラン' }))
+    .toHaveValue('pro');
 
   expect(consoleError).not.toHaveBeenCalled();
 });
@@ -38,7 +40,7 @@ it('描画されたフィールドが状態を保持する', async () => {
     </ToastProvider>,
   );
 
-  const nickname = screen.getByPlaceholder('ニックネーム');
+  const nickname = screen.getByRole('textbox', { name: 'ニックネーム' });
   await nickname.fill('k8o');
 
   await expect.element(nickname).toHaveValue('k8o');

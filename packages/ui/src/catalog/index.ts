@@ -17,9 +17,17 @@ export type CatalogValue<P, V> = {
 export type CatalogEntry<P extends z.ZodObject = z.ZodObject, V = never> = {
   /** What the component is, for the model. English, whatever the app's locale. */
   description: string;
-  /** The props a model may write. The key order is part of the contract (see `schemas.ts`). */
+  /**
+   * The props a model may write. The key order is part of the contract (see `schemas.ts`).
+   *
+   * Some entries also check props against each other (a `Table` row against
+   * its columns, a date `TextField`'s `defaultValue` against its `type`). zod keeps such a check only on this schema, and JSON Schema
+   * leaves it out: derive a schema from it with `.safeExtend()` (`.omit()`,
+   * `.pick()`, and `.partial()` throw), and apply the checks with a zod parse
+   * or `catalogPropIssues`.
+   */
   props: P;
-  /** Present when the component lays out children of its own (Stack, Card, Modal…). */
+  /** Present when the component lays out children of its own (Stack, Card, Dialog…). */
   children?: true;
   /** Present when the component is a field whose value a format can bind to its state. */
   value?: CatalogValue<z.infer<P>, V>;
@@ -158,15 +166,6 @@ export const catalog = {
     props: s.emptyStateProps,
   }),
   Icon: entry({ description: 'Icon, chosen by name.', props: s.iconProps }),
-  ChevronIcon: entry({
-    description: 'Arrow icon. direction sets which way it points.',
-    props: s.chevronIconProps,
-  }),
-  StatusIcon: entry({
-    description:
-      'Icon for a status (success/info/warning/error). It is decorative; to show a message, use Alert.',
-    props: s.statusIconProps,
-  }),
   Alert: entry({
     description:
       'Alert that reports a status. message is a string or an array of strings.',
@@ -213,19 +212,15 @@ export const catalog = {
       'Tree of nodes that open and close, such as files and folders, navigable with the arrow keys. List every node flat; a child names its parent by parentId.',
     props: s.treeProps,
   }),
-  Modal: entry({
-    description: 'Modal dialog that opens from a button labeled triggerLabel.',
-    props: s.modalProps,
-    children: true,
-  }),
   Dialog: entry({
     description:
-      'Centered dialog that opens from a button labeled triggerLabel.',
+      'Dialog over the page that a button labeled triggerLabel opens, headed by title with a close button. side puts it in the center (the default) or along the bottom edge.',
     props: s.dialogProps,
     children: true,
   }),
   Drawer: entry({
-    description: 'Side drawer that opens from a button labeled triggerLabel.',
+    description:
+      'Panel along the left or right edge of the page (side, right by default) that a button labeled triggerLabel opens, headed by title with a close button.',
     props: s.drawerProps,
     children: true,
   }),
@@ -255,7 +250,8 @@ export const catalog = {
     props: s.toastProps,
   }),
   TextField: entry({
-    description: 'Single-line text input.',
+    description:
+      'Single-line text input. type picks the kind of value: an email address, a URL, a date, a time, and so on. A password is a PasswordInput, and a number a NumberField.',
     props: s.textFieldProps,
     value: {
       prop: 'defaultValue',
@@ -302,15 +298,6 @@ export const catalog = {
       prop: 'defaultValue',
       initial: (props): readonly [number, number] =>
         props.defaultValue ?? [props.min ?? 0, props.max ?? 100],
-    },
-  }),
-  DateField: entry({
-    description:
-      'Date input with a visible label. Dates are YYYY-MM-DD strings.',
-    props: s.dateFieldProps,
-    value: {
-      prop: 'defaultValue',
-      initial: (props) => props.defaultValue ?? '',
     },
   }),
   DatePicker: entry({
@@ -389,7 +376,8 @@ export const catalog = {
     },
   }),
   ListBox: entry({
-    description: 'Single-choice list in a popup.',
+    description:
+      'Button showing the chosen option that opens a list in a popup for picking one; label names the button.',
     props: s.listBoxProps,
     value: { prop: 'defaultValue', initial: firstOption },
   }),
@@ -413,15 +401,6 @@ export const catalog = {
     description:
       'File picker field. With dropzone, files can also be dropped onto it.',
     props: s.fileFieldProps,
-  }),
-  FormControl: entry({
-    description:
-      'Field with a label and help or error text (text/textarea/password).',
-    props: s.formControlProps,
-    value: {
-      prop: 'defaultValue',
-      initial: (props) => props.defaultValue ?? '',
-    },
   }),
 };
 
@@ -450,24 +429,85 @@ export type CatalogValueOf<N extends CatalogName> =
     : never;
 
 /**
+ * An entry of `catalog` with the types of its component erased, for a glue
+ * that maps over the catalog and so knows a component's name only at run
+ * time. Every entry is assignable to it, with no cast.
+ *
+ * @example
+ * const entry: AnyCatalogEntry = catalog[name];
+ * const initial = entry.value?.initial(props);
+ */
+export type AnyCatalogEntry = {
+  description: string;
+  props: z.ZodObject;
+  children?: true;
+  value?: {
+    prop: string;
+    // メソッドで書くと引数が双変になり、props の型が項目ごとに違う initial を
+    // どれもそのまま代入できる。関数型のプロパティで書くと 1 つも代入できない
+    // oxlint-disable-next-line typescript/method-signature-style -- 上のとおり
+    initial(props: Record<string, unknown>): unknown;
+  };
+  events?: Readonly<Record<string, string>>;
+};
+
+/**
  * Cross-cutting constraints a model most often breaks, for the format's
  * system prompt (json-render's `customRules`, OpenUI's `additionalRules`).
  */
 export const catalogRules: readonly string[] = [
-  'Every row in rows of a Table must have exactly as many cells as there are columns.',
-  'An href must be an absolute URL starting with https:// or http://, or a path starting with /.',
+  'Every row in rows of a Table or DataTable must have exactly as many cells as there are columns.',
+  'An href must be an absolute URL starting with https:// or http://, or a path starting with a single /.',
   'The content of Tabs and Accordion must be plain text; components cannot be nested inside it.',
 ];
 
-const isCatalogName = (type: string): type is CatalogName =>
-  Object.hasOwn(catalog, type);
+/** Tells whether `name` names an entry of `catalog`, and types it as one. */
+export const isCatalogName = (name: string): name is CatalogName =>
+  Object.hasOwn(catalog, name);
+
+/** The name of every entry of `catalog`, in its order. */
+export const catalogNames: readonly CatalogName[] =
+  Object.keys(catalog).filter(isCatalogName);
+
+const unknownProps = (
+  at: string,
+  given: readonly string[],
+  allowed: readonly string[],
+): string[] =>
+  given
+    .filter((key) => !allowed.includes(key))
+    .map(
+      (key) =>
+        `${at}: Unknown prop "${key}". Allowed props: ${allowed.join(', ')}.`,
+    );
+
+// zod の unrecognized_keys の issue は許すキーを持たないので、issue の位置まで
+// スキーマをたどり、そこにあるオブジェクトのキーを読む
+const keysAt = (schema: unknown, path: readonly PropertyKey[]): string[] => {
+  if (schema instanceof z.ZodOptional) {
+    return keysAt(schema.unwrap(), path);
+  }
+  const [key, ...rest] = path;
+  if (schema instanceof z.ZodArray && typeof key === 'number') {
+    return keysAt(schema.element, rest);
+  }
+  if (schema instanceof z.ZodObject) {
+    if (key === undefined) {
+      return Object.keys(schema.shape);
+    }
+    return typeof key === 'string' ? keysAt(schema.shape[key], rest) : [];
+  }
+  return [];
+};
 
 /** Options of `catalogPropIssues`. */
 export type CatalogPropIssuesOptions = {
   /**
    * Props whose value the format resolves later, such as one a json-render
    * spec binds with `{ "$bindState": "/form/name" }`. Their names are still
-   * checked; their values are not, and a required one may be among them.
+   * checked; their values are not, and a required one may be among them. A
+   * check across props that needs one of them, such as a `Table` row against
+   * the columns, is not made.
    */
   unresolved?: readonly string[];
 };
@@ -479,7 +519,20 @@ export type CatalogPropIssuesOptions = {
  *
  * Unknown props are reported as well: zod drops a key the schema does not
  * know instead of failing, so a prop the model invented would otherwise pass
- * and render as if it were not there.
+ * and render as if it were not there. An unknown key inside an object nested
+ * in the props (a `Table` column, an `Accordion` item, an option) is reported
+ * the same way, under the path of that object
+ * (`Table.columns.0: Unknown prop "width". Allowed props: label, align.`).
+ * The schema refuses such a key, so a zod parse of the props fails on it too.
+ *
+ * Props are also checked against each other, each issue under the path it is
+ * at and along with the other issues, once the props a check reads are valid:
+ * every row of a `Table` or `DataTable` against the columns
+ * (`Table.rows.2: …`), the `defaultValue` of a `TextField` with a date or
+ * time `type` against that kind's input format (`TextField.defaultValue: …`),
+ * and the `defaultValue` of `Select`, `Radio`, `RadioCard`, `ListBox`,
+ * `CheckboxGroup`, and `CheckboxCard` against the values of the options
+ * (`CheckboxGroup.defaultValue.1: …`).
  *
  * @example
  * catalogPropIssues('Button', { label: 'OK', colour: 'primary' });
@@ -499,16 +552,10 @@ export const catalogPropIssues = (
   const unresolved = (options.unresolved ?? []).filter((key) =>
     Object.hasOwn(full.shape, key),
   );
-  const schema =
-    unresolved.length === 0
-      ? full
-      : z.object(
-          Object.fromEntries(
-            Object.entries(full.shape).filter(
-              ([key]) => !unresolved.includes(key),
-            ),
-          ),
-        );
+  // z.object で組み直すと、prop をまたぐ検査（Table の行と列など）まで落ちる
+  const schema = full.safeExtend(
+    Object.fromEntries(unresolved.map((key) => [key, z.unknown().optional()])),
+  );
   const values =
     typeof props === 'object' && props !== null
       ? Object.fromEntries(
@@ -518,20 +565,15 @@ export const catalogPropIssues = (
   const parsed = schema.safeParse(values);
   const issues = parsed.success
     ? []
-    : parsed.error.issues.map((issue) => {
-        const path = issue.path.join('.');
-        return `${type}${path === '' ? '' : `.${path}`}: ${issue.message}`;
+    : parsed.error.issues.flatMap((issue) => {
+        const at = `${type}${issue.path.map((key) => `.${String(key)}`).join('')}`;
+        return issue.code === 'unrecognized_keys'
+          ? unknownProps(at, issue.keys, keysAt(full, issue.path))
+          : [`${at}: ${issue.message}`];
       });
 
-  const allowed = Object.keys(full.shape);
   const given =
     typeof props === 'object' && props !== null ? Object.keys(props) : [];
-  for (const key of given) {
-    if (!allowed.includes(key)) {
-      issues.push(
-        `${type}: Unknown prop "${key}". Allowed props: ${allowed.join(', ')}.`,
-      );
-    }
-  }
+  issues.push(...unknownProps(type, given, Object.keys(full.shape)));
   return issues;
 };

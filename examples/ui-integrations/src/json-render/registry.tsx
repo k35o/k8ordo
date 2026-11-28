@@ -8,24 +8,16 @@ import {
   useBoundProp,
 } from '@json-render/react';
 import type { BaseComponentProps } from '@json-render/react';
-import { catalog as k8ordo } from '@k8ordo/ui/catalog';
-import type { CatalogName } from '@k8ordo/ui/catalog';
-import { renderers } from '@k8ordo/ui/catalog/render';
+import { catalog as k8ordo, catalogNames } from '@k8ordo/ui/catalog';
+import type { AnyCatalogEntry, CatalogName } from '@k8ordo/ui/catalog';
+import { rendererOf } from '@k8ordo/ui/catalog/render';
 import { Children, useEffect, useMemo, useRef, useState } from 'react';
 import type { FC, ReactNode } from 'react';
 
+import { parseCatalogProps, Unparsed } from '../catalog-props';
 import { componentsCatalog, TO_ASSISTANT } from './catalog';
 
-// 部品ごとの型は catalog が持つので、ここでは名前で引いた 1 つの形として扱う
 type Handler = () => void;
-type AnyRenderer = (args: {
-  props: Record<string, unknown>;
-  children: readonly ReactNode[];
-  value?: unknown;
-  setValue?: (next: unknown) => void;
-  on?: Record<string, Handler>;
-}) => ReactNode;
-type AnyValue = { prop: string; initial: (props: unknown) => unknown };
 type ComponentFn = (context: BaseComponentProps) => ReactNode;
 
 const childrenOf = (children: ReactNode): ReactNode[] =>
@@ -44,40 +36,64 @@ const handlersOf = (
   );
 
 const componentOf = (name: CatalogName): ComponentFn => {
-  const render = renderers[name] as AnyRenderer;
-  const { value, events = {} } = k8ordo[name] as {
-    value?: AnyValue;
-    events?: Readonly<Record<string, string>>;
-  };
+  const render = rendererOf(name);
+  const { value, events = {} }: AnyCatalogEntry = k8ordo[name];
   const eventNames = Object.keys(events);
   if (value === undefined) {
-    return ({ props, children, on }) =>
-      render({
-        props,
-        children: childrenOf(children),
-        on: handlersOf(eventNames, on),
-      });
+    const Element: ComponentFn = ({ props, children, on }) => {
+      const parsed = parseCatalogProps(name, props);
+      return parsed.success ? (
+        render({
+          props: parsed.props,
+          children: childrenOf(children),
+          on: handlersOf(eventNames, on),
+        })
+      ) : (
+        <Unparsed issues={parsed.issues} />
+      );
+    };
+    return Element;
   }
-  const Field: ComponentFn = ({ props, children, bindings, on }) => {
-    const path = bindings?.[value.prop];
-    const isBound = path !== undefined && path !== '';
-    const [bound, setBound] = useBoundProp<unknown>(props[value.prop], path);
-    const [local, setLocal] = useState(() => value.initial(props));
+  const Field: FC<{
+    own: Record<string, unknown>;
+    path: string | undefined;
+    written: unknown;
+    children: ReactNode;
+    on: BaseComponentProps['on'];
+  }> = ({ own, path, written, children, on }) => {
+    const [bound, setBound] = useBoundProp<unknown>(written, path);
+    const [local, setLocal] = useState(() => value.initial(own));
     return render({
-      props,
+      props: own,
       children: childrenOf(children),
-      value: isBound ? (bound ?? value.initial(props)) : local,
-      setValue: isBound ? setBound : setLocal,
+      value: path === undefined ? local : (bound ?? value.initial(own)),
+      setValue: path === undefined ? setLocal : setBound,
       on: handlersOf(eventNames, on),
     });
   };
-  return Field;
+  const FieldElement: ComponentFn = ({ props, children, bindings, on }) => {
+    const binding = bindings?.[value.prop];
+    const path = binding === '' ? undefined : binding;
+    const parsed = parseCatalogProps(
+      name,
+      props,
+      path === undefined ? undefined : value.prop,
+    );
+    return parsed.success ? (
+      <Field on={on} own={parsed.props} path={path} written={props[value.prop]}>
+        {children}
+      </Field>
+    ) : (
+      <Unparsed issues={parsed.issues} />
+    );
+  };
+  return FieldElement;
 };
 
 /** The json-render registry that draws every component of the catalog with `@k8ordo/ui`. */
 export const { registry } = defineRegistry(componentsCatalog, {
   components: Object.fromEntries(
-    Object.keys(k8ordo).map((name) => [name, componentOf(name as CatalogName)]),
+    catalogNames.map((name) => [name, componentOf(name)]),
   ) as Record<CatalogName, ComponentFn>,
 });
 

@@ -46,8 +46,13 @@ export const renderTitle = message({
 });
 
 export const renderDescription = message({
-  ja: '`renderers`は`catalog`と同じ名前で、コンポーネントの描き方を持ちます。形式が解決したpropsと、形式が描いた子を渡します。',
-  en: '`renderers` has the same names as `catalog` and draws each component. Pass the props the format resolved and the children it drew.',
+  ja: '`renderers`は`catalog`と同じ名前で、コンポーネントの描き方を持ちます。スキーマに合うpropsと、形式が描いた子を渡します。',
+  en: '`renderers` has the same names as `catalog` and draws each component. Pass props that fit the schema and the children the format drew.',
+});
+
+export const renderNull = message({
+  ja: 'propsに`null`は入れません。OpenUI Langのように省いた値を`null`で書く形式もあるので、つなぎは`null`のキーを取り除きます。そのうえで項目のスキーマで確かめ、確かめた値を渡します。スキーマに合わない要素は描きません。`Table`の列のように、propsの中のオブジェクトに知らないキーがある要素も描きません。propsそのものに知らないキーがあれば、そのキーを取り除いて描きます。',
+  en: 'The props hold no `null`. Some formats, such as OpenUI Lang, write an omitted value as `null`, so the glue drops those keys. It then parses the rest with the entry’s schema and passes what the parse returns. An element that does not fit is not drawn. Neither is an element with an unknown key inside an object in its props, such as a `Table` column. An unknown prop at the top is dropped, and the element is drawn without it.',
 });
 
 export const renderValue = message({
@@ -55,9 +60,19 @@ export const renderValue = message({
   en: 'A field also takes its value and a function that sets it. Where the value lives is up to the glue.',
 });
 
+export const renderLabel = message({
+  ja: '入力欄は`label`を必須で持ち、`FormControl`で描きます。`label`は欄を指す`<label>`になり、ラジオボタンのようなグループではグループの名前になります。任意の`helpText`は欄の下に出て、欄の説明になります。`Checkbox`と`Switch`は`FormControl`を使わず、`label`と`helpText`を自分で描きます。',
+  en: 'A field takes a required `label` and is drawn through `FormControl`. The label is a `<label>` that points at the field, or the name of a group such as radio buttons. An optional `helpText` appears under the field and describes it. `Checkbox` and `Switch` skip `FormControl` and draw their `label` and `helpText` themselves.',
+});
+
 export const renderEvents = message({
   ja: '`events`を持つコンポーネントには、モデルが結び付けた操作の関数を`on`で渡します。結び付いていない`Card`は、押せる形になりません。',
   en: 'A component with `events` also takes `on`, the function of each event the model bound. A `Card` with nothing bound is not pressable.',
+});
+
+export const renderToast = message({
+  ja: '描いたUIは、アプリの`ToastProvider`の中に置きます。`Toast`は、そのプロバイダの領域にトーストを出します。プロバイダの外で描くと、`useToast must be used within a ToastProvider`のエラーになります。',
+  en: 'Draw the generated UI inside the application’s `ToastProvider`. `Toast` opens its toast in that provider’s region. Drawn outside one, it fails with `useToast must be used within a ToastProvider`.',
 });
 
 export const glueTitle = message({
@@ -78,6 +93,11 @@ export const glueBinding = message({
 export const glueEvents = message({
   ja: '利用者の操作は、形式の操作に結び付けます。A2UIなら`press`の`event`、json-renderなら`on.press`、OpenUIなら`press`の引数です。',
   en: 'Each event is bound to the format’s own action: an `event` in `press` in A2UI, `on.press` in json-render, and the `press` argument in OpenUI.',
+});
+
+export const glueAnyTypes = message({
+  ja: 'つなぎは部品の名前を実行時にしか知らないので、部品ごとの型を使えません。`catalog`の項目は、型を消した`AnyCatalogEntry`として読めます。描画の関数は`rendererOf(name)`で引くと、型を消した`AnyRenderer`が返ります。どちらもキャストなしで書けます。',
+  en: 'The glue knows a component’s name only at run time, so each component’s own types are of no use there. Read an entry of `catalog` as an `AnyCatalogEntry`, and look its renderer up with `rendererOf(name)`, which returns an `AnyRenderer`. Both have the types erased, so the glue needs no cast.',
 });
 
 export const glueExample = message({
@@ -106,8 +126,13 @@ export const validateDescription = message({
 });
 
 export const validateUnknown = message({
-  ja: 'zodは知らないキーを、エラーにせず取り除きます。そのため、スキーマにないpropも誤りとして返します。',
-  en: 'zod drops a key it does not know instead of failing, so a prop missing from the schema is reported as an issue too.',
+  ja: 'zodは知らないキーを、エラーにせず取り除きます。そのため、スキーマにないpropも誤りとして返します。`Table`の列のようにpropsの中に置くオブジェクトは、知らないキーを受け付けません。その誤りは`Table.columns.1`のように、オブジェクトの位置を付けて返します。',
+  en: 'zod drops a key it does not know instead of failing, so a prop missing from the schema is reported as an issue too. An object inside the props, such as a `Table` column, refuses a key it does not know. That issue comes back with the object’s position, as `Table.columns.1`.',
+});
+
+export const validateAcross = message({
+  ja: 'propどうしの関係も確かめ、ほかの誤りと一緒に返します。`Table`と`DataTable`にセルの数が列の数と違う行があれば、`Table.rows.1`のように行の位置を付けて返します。日付や時刻の`type`を持つ`TextField`では、`defaultValue`がその種類の書式に合うかを確かめます。`Select`や`Radio`のように選択肢を持つ入力欄では、`defaultValue`が`options`のどれかの`value`かを確かめます。',
+  en: 'Props are checked against each other too, and those issues come back with the rest. A row of a `Table` or `DataTable` whose number of cells differs from the number of columns comes back with its position, as `Table.rows.1`. A `TextField` with a date or time `type` must have a `defaultValue` in that kind’s format. On a field with `options`, such as `Select` or `Radio`, the `defaultValue` must be the `value` of one of them.',
 });
 
 export const validateRepair = message({

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { toTree } from './renderers';
+import { toTree } from './to-tree';
 
 describe('toTree（生成 UI の Tree の平らな一覧を木に組む）', () => {
   it('parentId で子を親の下に入れ、一覧の順を保つ', () => {

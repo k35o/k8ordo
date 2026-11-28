@@ -2,7 +2,7 @@
 '@k8ordo/form': major
 ---
 
-チェックボックスの集まり（`z.array(z.enum([…]))`）で送信に失敗したとき、チェックされていた値を`input.defaultValue`に配列で載せるようにしました。型は`CheckboxGroupInput`（`defaultValue?: string[]`）です。`@k8ordo/ui`の`CheckboxGroup.Root`、`CheckboxCard`、`Autocomplete`や`<select multiple>`は、`input`を展開するだけで値が戻ります。繰り返し行の中の集まりも同じです。`DerivedField`には、集まりの欄であることと配列の件数の範囲を示す`group`が付きます。
+チェックボックスの集まり（`z.array(z.enum([…]))`）で送信に失敗したとき、チェックされていた値を`input.defaultValue`に配列で載せるようにしました。型は`CheckboxGroupInput`（`defaultValue?: string[]`）です。`@k8ordo/ui`の`CheckboxGroup`、`CheckboxCard`、`Autocomplete`や`<select multiple>`は、`input`を展開するだけで値が戻ります。繰り返し行の中の集まりも同じです。`DerivedField`には、集まりの欄であることと配列の件数の範囲を示す`group`が付きます。
 
 これまでは`input`に`name`しか入っておらず、`state.values`を`Array.isArray`で絞り込んで`defaultValue`に手で渡す必要がありました。`<select>`やラジオでは展開するだけで値が戻るのに、集まりだけが`state.values`の生の形を知っている必要がありました。
 

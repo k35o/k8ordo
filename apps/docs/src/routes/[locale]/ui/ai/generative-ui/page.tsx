@@ -15,8 +15,8 @@ const EXAMPLE_URL =
 
 const CATALOG = `import { catalog } from '@k8ordo/ui/catalog';
 
-catalog.TextField.description; // 'Single-line text input.'
-catalog.TextField.props; // z.object({ name, placeholder, defaultValue, … })
+catalog.TextField.description; // 'Single-line text input. type picks …'
+catalog.TextField.props; // z.object({ name, label, placeholder, … })
 catalog.TextField.value; // { prop: 'defaultValue', initial: (props) => … }
 catalog.Button.events; // { press: 'The user pressed the button.' }
 catalog.Stack.children; // true`;
@@ -29,8 +29,7 @@ export function Title(field: {
   setValue: (next: string) => void;
 }) {
   return renderers.TextField({
-    props: { name: 'title' },
-    children: [],
+    props: { name: 'title', label: 'Title' },
     ...field,
   });
 }`;
@@ -130,10 +129,19 @@ export default function GenerativeUi() {
           <Rich>{t.renderDescription()}</Rich>
         </p>
         <p className={page.mute}>
+          <Rich>{t.renderNull()}</Rich>
+        </p>
+        <p className={page.mute}>
           <Rich>{t.renderValue()}</Rich>
         </p>
         <p className={page.mute}>
+          <Rich>{t.renderLabel()}</Rich>
+        </p>
+        <p className={page.mute}>
           <Rich>{t.renderEvents()}</Rich>
+        </p>
+        <p className={page.mute}>
+          <Rich>{t.renderToast()}</Rich>
         </p>
       </section>
 
@@ -157,6 +165,9 @@ export default function GenerativeUi() {
         </p>
         <p className={page.mute}>
           <Rich>{t.glueEvents()}</Rich>
+        </p>
+        <p className={page.mute}>
+          <Rich>{t.glueAnyTypes()}</Rich>
         </p>
         <p className={page.mute}>
           <Rich>{t.glueExample()}</Rich>
@@ -183,6 +194,9 @@ export default function GenerativeUi() {
         </p>
         <p className={page.mute}>
           <Rich>{t.validateUnknown()}</Rich>
+        </p>
+        <p className={page.mute}>
+          <Rich>{t.validateAcross()}</Rich>
         </p>
         <p className={page.mute}>
           <Rich>{t.validateRepair()}</Rich>

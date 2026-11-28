@@ -1,8 +1,8 @@
 'use client';
 
-import { catalog } from '@k8ordo/ui/catalog';
-import type { CatalogName } from '@k8ordo/ui/catalog';
-import { renderers } from '@k8ordo/ui/catalog/render';
+import { catalog, catalogNames } from '@k8ordo/ui/catalog';
+import type { AnyCatalogEntry, CatalogName } from '@k8ordo/ui/catalog';
+import { rendererOf } from '@k8ordo/ui/catalog/render';
 import {
   useFormName,
   useStateField,
@@ -10,21 +10,13 @@ import {
 } from '@openuidev/react-lang';
 import type { ActionPlan, ComponentRenderer } from '@openuidev/react-lang';
 import { Fragment } from 'react';
-import type { ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
 
+import { parseCatalogProps, Unparsed } from '../catalog-props';
 import { buildLibrary } from './defs';
 
-// 部品ごとの型は catalog が持つので、ここでは名前で引いた 1 つの形として扱う
 type Handler = () => void | Promise<void>;
 type Field = { value: unknown; setValue: (next: unknown) => void };
-type AnyRenderer = (args: {
-  props: Record<string, unknown>;
-  children: readonly ReactNode[];
-  value?: unknown;
-  setValue?: (next: unknown) => void;
-  on?: Record<string, Handler>;
-}) => ReactNode;
-type AnyValue = { initial: (props: unknown) => unknown };
 type OpenUIProps = Record<string, unknown> & {
   name?: string;
   children?: ReadonlyArray<{ typeName: string }>;
@@ -34,11 +26,8 @@ const noField = (): Field | undefined => undefined;
 const noHandlers = (): Record<string, Handler> => ({});
 
 const componentOf = (name: CatalogName): ComponentRenderer<OpenUIProps> => {
-  const render = renderers[name] as AnyRenderer;
-  const { value, events = {} } = catalog[name] as {
-    value?: AnyValue;
-    events?: Readonly<Record<string, string>>;
-  };
+  const render = rendererOf(name);
+  const { value, events = {} }: AnyCatalogEntry = catalog[name];
   const eventNames = Object.keys(events);
 
   const useField =
@@ -71,23 +60,37 @@ const componentOf = (name: CatalogName): ComponentRenderer<OpenUIProps> => {
           );
         };
 
+  const Drawn: FC<{
+    own: OpenUIProps;
+    written: OpenUIProps;
+    children: readonly ReactNode[];
+  }> = ({ own, written, children }) => {
+    const field = useField(own);
+    const on = useHandlers(written);
+    return render({ props: own, children, ...field, on });
+  };
+
   const Component: ComponentRenderer<OpenUIProps> = ({ props, renderNode }) => {
-    const field = useField(props);
-    const on = useHandlers(props);
     const { children = [], ...rest } = props;
-    return render({
-      props: Object.fromEntries(
+    const parsed = parseCatalogProps(
+      name,
+      Object.fromEntries(
         Object.entries(rest).filter(([key]) => !eventNames.includes(key)),
       ),
-      children: children.map((child, index) => (
-        // oxlint-disable-next-line react/no-array-index-key -- 位置で決まる静的な子の並び
-        <Fragment key={`${child.typeName}-${index}`}>
-          {renderNode(child)}
-        </Fragment>
-      )),
-      ...field,
-      on,
-    });
+    );
+    if (!parsed.success) {
+      return <Unparsed issues={parsed.issues} />;
+    }
+    return (
+      <Drawn own={parsed.props} written={props}>
+        {children.map((child, index) => (
+          // oxlint-disable-next-line react/no-array-index-key -- 位置で決まる静的な子の並び
+          <Fragment key={`${child.typeName}-${index}`}>
+            {renderNode(child)}
+          </Fragment>
+        ))}
+      </Drawn>
+    );
   };
   return Component;
 };
@@ -97,10 +100,5 @@ const componentOf = (name: CatalogName): ComponentRenderer<OpenUIProps> => {
  * For the system prompt alone, without React, use `./prompt`.
  */
 export const library = buildLibrary<ComponentRenderer<OpenUIProps>>(
-  Object.fromEntries(
-    Object.keys(catalog).map((name) => [
-      name,
-      componentOf(name as CatalogName),
-    ]),
-  ),
+  Object.fromEntries(catalogNames.map((name) => [name, componentOf(name)])),
 );

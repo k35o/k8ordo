@@ -25,7 +25,7 @@ it('press に書いた @ToAssistant は、フォームの状態を付けて届�
     ].join('\n'),
   );
 
-  await screen.getByPlaceholder('ニックネーム').fill('ordo');
+  await screen.getByLabelText('ニックネーム').fill('ordo');
   await screen.getByRole('button', { name: '保存' }).click();
 
   await expect.poll(() => onAction.mock.calls.length).toBe(1);
@@ -64,16 +64,99 @@ it('action の無い Card は押せない', async () => {
   expect(screen.getByRole('button').elements()).toHaveLength(0);
 });
 
-it('FormControl に入れた値も、フォームの状態に乗って届く', async () => {
+it('href を null で埋めて action を書いた Card は、リンクでなくボタンになる', async () => {
+  const { screen } = await mount(
+    [
+      'root = Card(null, null, null, null, [title], @ToAssistant("開いた"))',
+      'title = Heading("プラン", "h3")',
+    ].join('\n'),
+  );
+
+  await expect.element(screen.getByRole('button')).toBeInTheDocument();
+  expect(screen.container.querySelectorAll('a')).toHaveLength(0);
+});
+
+it('入れ子の項目で null にした href は、無いものとして描く', async () => {
+  const { screen } = await mount(
+    'root = Breadcrumb(null, [{label: "ホーム", href: null}, {label: "設定"}])',
+  );
+
+  await expect.element(screen.getByText('ホーム')).toBeInTheDocument();
+  expect(screen.container.querySelectorAll('a')).toHaveLength(0);
+});
+
+it('スキーマに合わない要素は、ほかを描いたまま何も描かない', async () => {
+  const consoleError = vi.spyOn(console, 'error');
+  const { screen } = await mount(
+    [
+      'root = Stack("column", "md", null, null, null, [title, tools])',
+      'title = Heading("編集", "h3")',
+      'tools = Toolbar("書式", [null])',
+    ].join('\n'),
+  );
+
+  await expect
+    .element(screen.getByRole('heading', { name: '編集' }))
+    .toBeInTheDocument();
+  expect(screen.getByRole('toolbar').elements()).toHaveLength(0);
+  expect(consoleError).not.toHaveBeenCalled();
+});
+
+it('// で始まる href の Anchor は、別のサイトへのリンクとして描かない', async () => {
+  const { screen } = await mount(
+    [
+      'root = Stack("column", "md", null, null, null, [title, link])',
+      'title = Heading("リンク", "h3")',
+      'link = Anchor("x", "//evil.example")',
+    ].join('\n'),
+  );
+
+  await expect
+    .element(screen.getByRole('heading', { name: 'リンク' }))
+    .toBeInTheDocument();
+  expect(screen.container.querySelectorAll('a')).toHaveLength(0);
+});
+
+it('列の数と違う行のある Table は描かない', async () => {
+  const { screen } = await mount(
+    [
+      'root = Stack("column", "md", null, null, null, [title, prices])',
+      'title = Heading("料金", "h3")',
+      'prices = Table(null, [{label: "プラン"}, {label: "料金"}], [["Free", "¥0"], ["Pro"]])',
+    ].join('\n'),
+  );
+
+  await expect
+    .element(screen.getByRole('heading', { name: '料金' }))
+    .toBeInTheDocument();
+  expect(screen.getByRole('table').elements()).toHaveLength(0);
+});
+
+it('列に知らないキーを書いた Table は描かない', async () => {
+  const { screen } = await mount(
+    [
+      'root = Stack("column", "md", null, null, null, [title, prices])',
+      'title = Heading("料金", "h3")',
+      'prices = Table(null, [{label: "プラン"}, {label: "料金", width: 120}], [["Free", "¥0"]])',
+    ].join('\n'),
+  );
+
+  await expect
+    .element(screen.getByRole('heading', { name: '料金' }))
+    .toBeInTheDocument();
+  expect(screen.getByRole('table').elements()).toHaveLength(0);
+});
+
+it('Form の中の欄の値も、フォームの状態に乗って届く', async () => {
   const { screen, onAction } = await mount(
     [
       'root = Form([name, send])',
-      'name = FormControl("お名前", "text", "name", "山田 太郎")',
+      'name = TextField("name", "お名前", "山田 太郎")',
       'send = Button("送信")',
     ].join('\n'),
   );
 
-  await screen.getByPlaceholder('山田 太郎').fill('テスト 花子');
+  await screen.getByLabelText('お名前').fill('テスト 花子');
   await screen.getByRole('button', { name: '送信' }).click();
 
   await expect.poll(() => onAction.mock.calls.length).toBe(1);

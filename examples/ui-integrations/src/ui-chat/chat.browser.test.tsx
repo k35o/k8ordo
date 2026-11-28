@@ -12,7 +12,7 @@ const nickname = {
   id: 'nickname',
   component: 'TextField',
   name: 'nickname',
-  placeholder: 'ニックネーム',
+  label: 'ニックネーム',
   defaultValue: { '@path': '/nickname' },
 };
 
@@ -140,7 +140,7 @@ it('ツールの入力が届いた分から、画面を描く', async () => {
   );
 
   await expect
-    .element(screen.getByPlaceholder('ニックネーム'))
+    .element(screen.getByLabelText('ニックネーム'))
     .toBeInTheDocument();
   expect(screen.getByRole('button', { name: '保存' }).elements()).toHaveLength(
     0,
@@ -167,7 +167,7 @@ it('押した操作を、操作の文で利用者の発言にし、操作と画�
   const bodies = serve([showForm(), step(answer('受け取りました。'))]);
   const screen = await mount();
 
-  await screen.getByPlaceholder('ニックネーム').fill('ordo');
+  await screen.getByLabelText('ニックネーム').fill('ordo');
   await screen.getByRole('button', { name: '保存' }).click();
 
   await expect
@@ -231,15 +231,15 @@ it('返事の update_ui で、押された画面をその場で変え、入力�
   ]);
   const screen = await mount();
 
-  await screen.getByPlaceholder('ニックネーム').fill('ordo');
+  await screen.getByLabelText('ニックネーム').fill('ordo');
   await screen.getByRole('button', { name: '保存' }).click();
 
   await expect
     .element(screen.getByText('保存しました', { exact: true }))
     .toBeInTheDocument();
-  expect(screen.getByPlaceholder('ニックネーム').elements()).toHaveLength(1);
+  expect(screen.getByLabelText('ニックネーム').elements()).toHaveLength(1);
   await expect
-    .element(screen.getByPlaceholder('ニックネーム'))
+    .element(screen.getByLabelText('ニックネーム'))
     .toHaveValue('ordo');
 });
 
@@ -260,7 +260,7 @@ it('サーバーが退けた画面は、描きかけの分も消す', async () =
     },
   );
   await expect
-    .element(screen.getByPlaceholder('ニックネーム'))
+    .element(screen.getByLabelText('ニックネーム'))
     .toBeInTheDocument();
 
   reply.push(
@@ -281,7 +281,7 @@ it('サーバーが退けた画面は、描きかけの分も消す', async () =
   reply.close();
 
   await expect
-    .element(screen.getByPlaceholder('ニックネーム'))
+    .element(screen.getByLabelText('ニックネーム'))
     .not.toBeInTheDocument();
 });
 
@@ -289,7 +289,7 @@ it('押さずに入力した値も、次の発言に添えて送る', async () =
   const bodies = serve([showForm()]);
   const screen = await mount();
 
-  await screen.getByPlaceholder('ニックネーム').fill('ordo');
+  await screen.getByLabelText('ニックネーム').fill('ordo');
   await screen
     .getByPlaceholder('例: 会員登録のフォームを出して')
     .fill('入力した値は？');

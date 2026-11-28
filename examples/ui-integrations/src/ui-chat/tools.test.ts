@@ -11,6 +11,7 @@ const form: ScreenInput = {
       id: 'nickname',
       component: 'TextField',
       name: 'nickname',
+      label: 'ニックネーム',
       defaultValue: { '@path': '/nickname' },
     },
     {
