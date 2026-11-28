@@ -1,5 +1,116 @@
 # @k8ordo/framework
 
+## 4.0.0
+
+### Major Changes
+
+- `framework()`の`routesDir`をなくし、ルートのファイルは常に`src/routes/`に置くようにしました。`src/i18n.ts`の場所も、`src/components/`と`src/lib/`の置き場の決まりも`src/`の下で決め打ちで、`routesDir`だけを動かすと`src/i18n.ts`との位置関係が崩れていました。
+
+  あわせて、`framework()`はそのモードが受け取らないキーを、受け取るキーを挙げて断るようにしました。`mode: 'static'`なら`mode`、`reactCompiler`、`headers`、`site`、`csp`、`mode: 'server'`なら`mode`、`reactCompiler`、`headers`です。型の検査を通らない`vite.config.js`では、`sites`や`reactcompiler`と書き違えたキーが黙って無視されていました。これまで3.0.0で消した`paths`だけを名指しで断っていましたが、その専用のエラーもこの規則にまとめました。
+
+  移行: `routesDir`を渡しているアプリは、ルートのファイルを`src/routes/`に移してから`routesDir`を消してください。エラーは`framework() takes no routesDir — under mode: 'static' it takes mode, reactCompiler, headers, site, csp`の形です。
+
+- `paths.ts`が返す値と受け取る上のパラメータを、リンクの`href()`と同じ型にしました。`Paths<'/products/:id'>`は、ページの`paramsSchema`が`id`を数値に変えるなら数値の配列を返す型になり、スキーマが無ければ文字列、数値、bigint、真偽値のどれでも返せます。ビルドは値を`href()`と同じく`String()`で綴ってからURLのためにエスケープします。上のディレクトリのパラメータは、上のディレクトリのレイアウトが読んだ形で渡ります。上の`paths.ts`が返した値をこの綴りにしてから、その`paths.ts`のディレクトリより上にあるレイアウトの`paramsSchema`で外側から順に読み直したもので、型もそのスキーマの出力どおりです。どのスキーマも読まないパラメータは文字列です。隣り合うルートグループの2つの`paths.ts`が同じパターンで上のレイアウトが違うときは、どちらが受け取るものも受けられる型になります。隣のページのスキーマと、同じディレクトリのレイアウトのスキーマは、まだ値の無いそのディレクトリのパラメータを読むことがあるので使いません。`[locale]/layout.tsx`のスキーマがロケールを読むなら`locale`はそのロケールで、`[year]`のレイアウトが`z.coerce.number()`で読むなら、`[year]`にページが無く上の`paths.ts`が`'2024'`を返しても、`year`は数値の`2024`で届きます。そのスキーマが上の値を拒んだときは、その値の下の`paths.ts`を呼ばず、ビルドは`the paths.ts files stand where a params schema refuses the values above them, so they were not asked: …`で止まります。
+
+  これまでは値を空でない文字列に限り、上のパラメータも文字列で渡していました。同じidをリンクでは`product.id`、`paths.ts`では`String(product.id)`と2通りに書くことになり、ロケールを取る関数に`locale`を渡すにはキャストが要りました。
+
+  移行: 数値のスキーマを持つページの`paths.ts`で`String(product.id)`のように文字列にしている箇所は、`product.id`のまま返してください。文字列を返したままだと型エラーになります。上のパラメータを`Number(year)`のように読み直している箇所は、上のレイアウトのスキーマが読んだ値がそのまま届くので要りません。ページのスキーマでだけ読んでいるパラメータを読んだ形で受け取りたいときは、そのスキーマを上のディレクトリの`layout.tsx`に移します。値の検査は「空でない文字列、数値、bigint、真偽値」に変わり、エラー文は`… has to return an array of the values of :id, each a non-empty string, a number, a bigint or a boolean`です。
+
+- `redirect.ts`のdefault exportの型`RedirectTarget`を、`@k8ordo/framework/server`から`@k8ordo/framework`に移しました。`redirect.ts`はstaticモードでも使うファイルなのに、その型がstaticモードの断る`/server`から出ていて、`import type`で書いたときだけ通り、`import { type RedirectTarget }`と書くとビルドが止まっていました。同じくどちらのモードでも使う`paths.ts`の型`Paths`はルートから出ているので、置き場をそろえました。`/server`からは消えます。
+
+  移行: `import type { RedirectTarget } from '@k8ordo/framework/server'`を`import type { RedirectTarget } from '@k8ordo/framework'`に書き換えてください。
+
+- serverモードで、ページとレイアウトが受け取る`request.cookies`を、同じリクエストの中で`guard.ts`とServer Actionが`cookies()`で書いた後の値にしました。これまでは届いた`Cookie`ヘッダーから作っていたので、Server Actionの答えとして描き直したページは、actionが書く前の値を描いていました。JavaScriptの無いフォームで設定を変えると、その答えのページは古い設定のまま届き、`<html data-density>`のような属性も古いままでした。
+
+  これまでの「actionのあとに描き直したページの`request.cookies`には、actionが書いた値は入らない」という説明は撤回します。届いたままのヘッダーは、今までどおり`request.headers.get('cookie')`で読めます。
+
+  移行: actionが書く前の値を`request.cookies`から読んでいたページは、`request.headers.get('cookie')`を読むか、actionの戻り値で前の値を渡してください。
+
+- `mode: 'static'`では`site`を必須にしました。`site`はサイトを配信するoriginで、パスを含めません（`https://example.com`）。ビルドはページと`route.ts`をすべてこのoriginで頼むので、`route.ts`が受け取る`request.url`のoriginも、ビルドが書く`sitemap.xml`のURLもこの値になります。値はURLとして読むので、`https://Example.com`や`https://example.com:443`、`https://例え.jp`もそのoriginとして受け取ります。無いとき、またはhttp:かhttps:のURLでない値や、パス・クエリ・フラグメント・ユーザー名を含む値のときは、設定を読んだ時点で`mode: 'static' needs site, the origin the site is served from, like 'https://example.com' — …`のエラーになり、何が違うかを挙げます。
+
+  これまで`site`が無いビルドは、`http://k8ordo.localhost`というフレームワークの番兵のoriginでページを頼んでいました。RSSやOG画像のように`new URL(request.url).origin`から絶対URLを組む`route.ts`には、この番兵が黙って書き込まれていました。また、リクエストは`new URL(site).origin`、`sitemap.xml`は`site`の文字列のままを使っていたので、パスを含む`site`を渡すと2つが食い違っていました。
+
+  移行: staticモードの`framework()`に`site`を足してください。`sitemap.xml`を`route.ts`で書いているアプリも、ビルドはそちらを使うので出力は変わりません。
+
+- `navigateTo`をなくしました。コードからページを移るときは、`href`で作ったURLをNavigation APIの`navigation.navigate()`に渡します。リンクの`<a href>`と同じURLなので、ルーターも同じように扱い、`{ committed, finished }`も同じものが返ります。型の検査とViteの`base`は`href`がすでに受け持っていて、`navigateTo`はそれを`navigation.navigate()`に渡すだけでした。それなのに、paramとオプションがどちらも素のオブジェクトなので、パターンの文字列で見分ける分岐を抱え、すべてのparamを束ねたパターンでは`navigateTo('/:locale', undefined, { history: 'replace' })`と`undefined`の席を書かせていました。
+
+  `bindParams`は、束ねた`href`そのものを返すようになりました。`NavigateToOptions`と`BoundLinks`の型もなくなり、`@k8ordo/framework`からの再exportも消えました。
+
+  移行するには、次のように書き換えます。
+
+  - `navigateTo('/products/:id', { id })`は`navigation.navigate(href('/products/:id', { id }))`にします。
+  - `navigateTo('/products', { history: 'replace' })`は`navigation.navigate(href('/products'), { history: 'replace' })`にします。
+  - `export const { href, navigateTo } = bindParams(…)`は`export const href = bindParams(…)`にします。
+
+  `navigateTo`は既定で`push`でしたが、`navigation.navigate()`の既定の`'auto'`は、別のURLなら`push`、今と同じURLなら`replace`です。リンクのクリックと同じ振る舞いで、今のページを選び直しても同じエントリが2つ積まれることはありません。
+
+  この変更は、2026-09-03に決めた「ページを変えるのは`navigateTo`、状態を変えるのは`update`」を「ページを変えるのは`navigation.navigate(href(…))`、状態を変えるのは`update()`」に置き換えます。
+
+- `definePageState`の`href`の第1引数を、ルーターが作ったURLにしました。`@k8ordo/router`（`@k8ordo/framework`）の`href()`が返したURL、Next.jsの`Route`、今のページを指す`''`のどれかを渡します。`href`はそのURLのクエリのうち、この定義の`url`のパラメーターだけを既定値を省いた形で書き直し、ほかのパラメーターは綴りを変えずに残します。`hash`を持つ定義はフラグメントを`values.hash`の値にし（既定値なら外します）、持たない定義は渡したURLのフラグメントを残します。`base`は足しません。
+
+  これまでは、表のパスを受け取ってViteの`base`を足す`href(path)`と、`?`の無いクエリだけを返す`search()`の2通りがありました。`[locale]`のアプリでは、ロケールやidを手で綴るか、`search()`の結果を自分でつなぐことになり、`hash`を持つ定義にはフラグメントを組む手段がありませんでした。ルーターの`href()`が返したURLを渡すと`base`が2重に付くので、渡すなと案内するしかありませんでした。いまは`listState.href(href('/:locale/products'), { page: 2 })`、`productState.href(href('/:locale/products/:id', { id }), { hash: 'reviews' })`の1通りです。パターンの型検査はルーターの`href()`が受け持つので、`Register`、`RegisteredPath`、`search()`をなくしました。`@k8ordo/framework`が生成する`.k8ordo/register.gen.ts`も、`@k8ordo/state`の`Register`を拡張しなくなりました。
+
+  移行するには、次のように書き換えます。
+
+  - `listState.href('/products', values)`は`listState.href(href('/products'), values)`にします。`href`は`@k8ordo/router`か`@k8ordo/framework`から読みます。Viteの`base`はルーターの`href()`が付けます。Next.jsでは`Route`のパスをそのまま渡せます。
+  - `listState.search(values)`は`listState.href('', values)`にします。返り値は`?`付きの`'?page=2'`（既定値だけなら`''`）です。
+  - `` `${deckState.href(path, values)}#${fragment}` ``のようにフラグメントを手でつないでいた箇所は、`hash`の値を`values`に入れて`deckState.href(href(…), { …values, hash })`にします。
+  - `declare module '@k8ordo/state' { interface Register { … } }`と`RegisteredPath`の利用は消します。
+
+### Minor Changes
+
+- ブラウザで動くJavaScriptとCSSを、Baseline newly availableの機能にすべて対応したブラウザ向けにビルドするようにしました。版は`baseline-browser-mapping`から、browserslistの`baseline newly available`と同じ方法で求めます。
+
+  これまではViteの既定（Chrome 111、Safari 16.4など）のままで、Lightning CSSが`light-dark()`と`:dir()`を書き換えていました。`light-dark()`はカスタムプロパティを宣言した場所で解決される形になり、`<html>`より下に付けた`.dark`の中が暗くなりませんでした。`@k8ordo/ui`の色のトークンも`light-dark()`で書いているので、同じことが起きていました。`:dir(rtl)`は`:lang()`のセレクタになり、`dir`に従いませんでした。
+
+  `build.target`と`build.cssTarget`と`css.lightningcss.targets`は、アプリが書いていればその値を使います。サーバーで動く`rsc`と`ssr`のコードは、Viteの既定のままです。
+
+- `guard.ts`と`route.ts`で`redirect()`と`notFound()`を使えるようにしました。`redirect(url)`はそのURLへの`303`で応答し、それまでにguardやroute.tsが書いたcookieとヘッダーも応答に付きます。`notFound()`は、いちばん近い`not-found.tsx`を404で返します。guardの下のページも、POSTで届いたServer Actionも実行されません。
+
+  これまで`redirect()`を受けるのはServer Actionだけで、guardやroute.tsで呼ぶと500の`internal error`になっていました。そのため認証のguardでよく書くログインへのリダイレクトは、`new Response(null, { status: 303, headers: { location: href('/login') } })`と手で組む必要があり、actionとは別の書き方を覚えることになっていました。guardの`notFound()`も500でした。
+
+  ページの描画中に`redirect()`を呼ぶと、`redirect() ends what answers the request, and a page is a render — …`のエラーを投げるようにしました。これまでは`redirect to …`という名前の無いエラーとして`error.tsx`に出ていました。
+
+  guardのリダイレクトは`redirect(href('/login'))`と書き、`Response`は`401`や`403`のようにリダイレクトでない応答に使います。ステータスが`303`なのは、guardがPOSTで届いたServer Actionより先に動き、JavaScriptの無いフォームの送信をGETでログインのページへ移すためです。
+
+- `routes/`に`[...name]`のディレクトリを置けるようにしました。`files/[...path]/`は`/files`より下の区間を1つ以上すべて受け取り、パターンは`/files/:path+`です。これまでは区間の数が決まらないURLを受けるルートを書けず、`not-found.tsx`で受けるしかありませんでした。値は区間ごとにデコードした配列で、`page.tsx`、`layout.tsx`、`route.ts`、`guard.ts`の`params`に渡ります。`paramsSchema`にも配列が渡るので、配列のスキーマで検証できます。`redirect.ts`の行き先に`:path+`と書くと、受け取った区間をURLの綴りのまま移します。同じ階層では固定の区間、`[name]`、`[...name]`の順に試し、`not-found.tsx`はその後です。`[...name]`は必ず最後のディレクトリで、下にディレクトリ（グループも）を置くと、また同じ階層に2つ並べると、ビルドが名指しして止まります。`not-found.tsx`、`fallback.tsx`、`paths.ts`も置けません。区間が無くても当たる`[[...name]]`の形はありません。使えるのはserverモードだけです。staticモードは、区間の数がリクエストごとに違って書き出すパスを決められないので、ビルドの最初と`vite dev`のコンパイル時に、`[...name]`のディレクトリを名指しして`this application wants mode: 'server'`で止めます。
+
+- サーバーでも、`src/i18n.ts`をどのルートのファイルより先に読むようにしました。Server Componentを描くRSCの環境と、Client ComponentをHTMLにするSSRの環境の両方で、レイアウトやページが評価される前に`src/i18n.ts`が評価されます。ブラウザでは、これまでも何かを描く前に読んでいました。
+
+  これまでサーバーでは、ルートのファイルがどこかで`src/i18n.ts`をimportしたときにしか、ロケールの集合が登録されませんでした。`[locale]`の外の`route.ts`のように、集合をimportしないモジュールだけで文言を呼ぶと、集合を知らないまま文言が読まれていました。いまは、集合を定義した`src/i18n.ts`があれば、どのモジュールから呼んでも集合が登録されています。
+
+- `vercel()`に`maxDuration`と`regions`を足しました。serverモードで書き出す関数の設定（`.vc-config.json`）にそのまま入ります。これまで関数の設定は固定で、実行時間の上限はプランの既定、リージョンはプロジェクトの設定に任せるしかなく、`route.ts`から長い応答をストリームで返すアプリは上限を伸ばせませんでした。`maxDuration`は秒数か`'max'`（プランの上限）です。関数は1つなので、どのルートにも同じ値が効きます。staticモードには関数が無いので、渡すとビルドが止まります。
+
+- 応答を返したあとも続く処理のために、`@k8ordo/framework/server` に `waitUntil(promise)` を足しました。渡した promise が決着するまで、ホストはプロセスや関数を止めません。Vercel の関数は応答が終わると止められるので、利用者が切断したあとも生成を最後まで読んで保存する、といった処理には、ホストに「まだ終わっていない」と伝える手段が要ります。
+
+  - `waitUntil()` は guard.ts・route.ts・Server Action のほか、ページの描画の中や、route.ts が返したストリームの中からも呼べます。渡した promise が reject しても未処理の rejection にはならず、ハンドラが `k8ordo: waitUntil() of <メソッド> <パス> failed` の形で 1 度だけログに出します。`mode: 'static'` では `/server` のほかの値と同じく断ります。
+  - ビルドされたハンドラ（`dist/rsc/index.js`）は、第 2 引数でホストの `waitUntil` を受け取ります（型は `/server` の `HandlerContext`）。ハンドラを自分で呼ぶランタイムは `handler(request, ctx)` のように渡せます。渡さなければ、ハンドラが promise を持つだけです。
+  - `serve()` の `close()` は、サーバーを閉じたあと、`waitUntil()` に渡された promise がすべて決着するまで解決しません。`node dist/server.js` は SIGTERM で止める前に処理を終えます。
+  - `vercel()` は、アプリが `waitUntil` を import しているとき、アプリが入れた `@vercel/functions` の `waitUntil` を関数に束ねてハンドラに渡します。`@vercel/functions` は optional な peer で、入っていなければ import しているファイルを挙げてビルドを止めます。`waitUntil` を使わないアプリの出力は変わりません。
+
+### Patch Changes
+
+- CSPのリファレンスに、アプリ自身の「最初の描画の前に動くスクリプト」の書き方を足しました。`@k8ordo/state`の`inlineRead()`で値を読むスクリプトは、ルートレイアウトに`<script>`で直接書くと、本文がすべてのページのペイロードに入ります。serverモードでnonceのポリシーを敷くと拒まれ、staticモードではハッシュが要ります。`@k8ordo/color-scheme`の`ColorSchemeScript`と同じく、nonceをpropsで受け取る小さな`'use client'`のコンポーネントにし、serverモードでは`nonce()`を渡し、staticモードでは同じ本文のハッシュを`csp`に書く形を示しました。
+
+  `@k8ordo/state`のガイドの「Reading before hydration」からは、この項へ1文で案内します。
+
+- 同梱のドキュメントの食い違いを直しました。GUIDEのオプションの節に、両モードで使える`headers`を足しました。llms.txtの冒頭は「`mode`を変えて`site`と`csp`を外すだけで、ほかは何も変わらない」と書いていましたが、GUIDEと同じく、serverモードへ移るときとstaticモードへ移るときに何を外し何を足すかを書きました。ビルドしたハンドラ（`dist/rsc/index.js`）の型も、第2引数の`HandlerContext`を含めて書きました。GUIDEには、リクエストに答えるものをビルドしたハンドラか`serve({ port: 0 })`でテストする方法を書いた「Testing」の節を足しました。
+
+- クライアント側の遷移でペイロードを取りに来たリクエストでも、`guard.ts`が受け取る`request.url`をページのURLにしました。これまでは届いたままのペイロードのURL（`/en/account/index.rsc`）を渡していたので、`new URL(request.url).pathname`で判断するguardや、ログインのあとの戻り先を組むguardが、文書の要求とクライアント側の遷移とで別のURLを見ていました。`base`とクエリはそのまま残ります。
+
+- `@k8ordo/framework`のガイドに「Preferences」の節を足し、訪問者の設定をどこに置くかを3つの規則にまとめました。見た目だけを変える設定は`defineLocalState`に置き、`inlineRead()`のインラインスクリプトで描く前に当てます。サーバーが値で応答を変える設定は、serverモードで`defineCookieState`に置き、`parseCookies`で読み、`cookie(patch, current)`か`update()`で書きます。言語の選択は素のCookieに置き、`negotiateRequest`の`chosen`に渡します。`@k8ordo/state`の例で密度をCookieに置いているのは、JavaScriptの無いフォームで変え、それを受けるServer ActionがCookieにしか書けないからだと、2つ目の規則に書きました。
+
+  これまでは、`@k8ordo/color-scheme`のガイドが表示の設定をlocalStorageに置くよう勧め、`@k8ordo/state`のガイドとexampleは密度をCookieに置いていて、どちらを選ぶかの基準がありませんでした。`@k8ordo/state`、`@k8ordo/color-scheme`、`@k8ordo/i18n`のガイドからは、この節へ1文で案内します。docsサイトでは、frameworkの`request`のページに同じ節を足し、stateのCookieとcolor-schemeの保存先のページから案内します。
+
+  `request`を読む例（`references/guards.md`）は、素の`theme`のCookieから`data-theme`を、`Accept-Language`から`<html lang>`を書いていて、この規則と`getLocale()`で`lang`を書く決まりの両方に反していました。Cookieの状態を`parseCookies(request.cookies)`で読んで`initialCookie`に渡し、ヘッダーは`Sec-GPC`を読む例に書き換えました。
+
+- ルート表の生成が、読めなかったものを空として扱わないようにしました。`src/routes/`が無いと、これまでは空の表のまま生成とビルドが通り、すべてのURLが404になるだけでした。今は`the route files live in src/routes/, and … does not exist`のエラーで止まります。読めないルートファイルを「何もexportしないファイル」として扱って`paramsSchema`や`search`を黙って抜かすこと、JSONとして読めない`package.json`を「依存に何も無い」として扱って`@k8ordo/i18n`の`Register`の生成や、`search`をexportするページの`@k8ordo/state`への依存の確認を黙って省くこともやめ、どちらもエラーにします。
+
+- staticモードで、`fallback.tsx`の殻がリテラルのディレクトリに隠れるときのエラーを直しました。`ja/posts/[id]/page.tsx`が`[locale]/posts/[id]/`（`fallback.tsx`あり、`[locale]/paths.ts`が`ja`を返す）より先に宣言されると、これまでは「`fallback.tsx`の無いページ」というエラーになり、本当の原因を言っていませんでした。今は殻が先に宣言されたパターン（`ja/posts/[id]/page.tsx`）の答えるURLにも答えてしまうことを名指します。
+
+- Updated dependencies:
+  - @k8ordo/router@4.0.0
+
 ## 3.0.0
 
 ### Major Changes

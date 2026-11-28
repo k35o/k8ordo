@@ -1,6 +1,6 @@
 {
   "name": "@k8ordo/ui",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "k8o's React UI library, with a format-neutral catalog of its components for LLM-driven, on-brand generative UI",
   "keywords": [
     "ai",

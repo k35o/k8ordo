@@ -1,5 +1,73 @@
 # @k8ordo/form
 
+## 4.0.0
+
+### Major Changes
+
+- チェックボックスの集まり（`z.array(z.enum([…]))`）で送信に失敗したとき、チェックされていた値を`input.defaultValue`に配列で載せるようにしました。型は`CheckboxGroupInput`（`defaultValue?: string[]`）です。`@k8ordo/ui`の`CheckboxGroup`、`CheckboxCard`、`Autocomplete`や`<select multiple>`は、`input`を展開するだけで値が戻ります。繰り返し行の中の集まりも同じです。`DerivedField`には、集まりの欄であることと配列の件数の範囲を示す`group`が付きます。
+
+  これまでは`input`に`name`しか入っておらず、`state.values`を`Array.isArray`で絞り込んで`defaultValue`に手で渡す必要がありました。`<select>`やラジオでは展開するだけで値が戻るのに、集まりだけが`state.values`の生の形を知っている必要がありました。
+
+  あわせて、`row.field(key)`をキーごとに型付けしました。キーは1行分の中のパスで、`form.field()`のパスと同じく、書き間違えるとビルドのエラーになります。`input`の型もキーごとに入力欄の種類で決まり、行の中の集まりは`CheckboxGroupInput`、数の欄は`NumberInput`です。そのため`ArrayView`、`RowView`、`DerivedArray`は、`FormFields`と同じくスキーマか定義の型を取り、2つ目の型引数に配列のパスを取ります。`RowView<typeof orderSchema, 'items'>`のように書き、型引数を省いた`RowView`は型のエラーになります。
+
+  移行するときは次のようにします。
+
+  - `defaultValue={Array.isArray(state.values?.tags) ? state.values.tags : []}`のような手渡しを消し、`{...tags.input}`だけにします。
+  - 手で書くチェックボックスには`input`を展開しないでください。配列が各ボックスの`defaultValue`に載ります。`name={tags.input.name}`と`defaultChecked={tags.input.defaultValue?.includes(option)}`を渡します。
+  - `row.field()`のキーの書き間違いは、ビルドのエラーとして見つかるので直します。行の1つの欄を子のコンポーネントに渡すときは、`row.field(key)`が返す`FieldView`を渡します。
+  - 行全体を受け取る子のコンポーネントは、`row: RowView`を`row: RowView<typeof orderSchema, 'items'>`のように、スキーマか定義の型と配列のパスで書きます。`ArrayView`と`DerivedArray`も同じく`ArrayView<typeof orderSchema, 'items'>`、`DerivedArray<typeof orderSchema, 'items'>`と書きます。
+
+- `FormFields`と`UseFormReturn`の型引数を、スキーマか`defineForm`の定義の1つにしました。Client Componentのpropsは`fields: FormFields<typeof talkSchema>`と書きます。`formFields(talkSchema)`が返す型と同じで、`form.field()`に渡せるパスと各欄の`input`の型はスキーマから決まります。スキーマは`import type`で読めば、zodはバンドルに入りません。定義を渡したときも`FormFields<typeof signup>`と書けます。
+
+  これまでは`FormFields<'title' | 'eventUrl', never>`のように、パスの集まりを位置引数で手書きしていました。スキーマの写しなので欄を足すたびに直す必要があり、3つ目の型引数（`z.stringbool()`の欄）を書き忘れると`input.value`が型から消え、2つ目を省くと`array()`のパスの誤りが通っていました。
+
+  移行するときは、手書きの型引数をスキーマか定義の型に置き換えます。
+
+  - `FormFields<'title' | 'eventUrl', never>` → `FormFields<typeof talkSchema>`
+  - `UseFormReturn<'title', never>` → `UseFormReturn<typeof talkSchema>`
+  - 1つの欄だけを描く子のコンポーネントは、`form.field('title')`が返す`FieldView`を受け取ります。
+  - フォームを包む汎用のコードは、`<Source extends ObjectSchema | FormDefinition>`を型引数にして`FormFields<Source>`と`UseFormReturn<Source>`を使います。`ObjectSchema`と`FormDefinition`は、`@k8ordo/form`と`@k8ordo/form/server`のどちらからも型をimportできます。
+
+- チェックボックスの集まり（`z.array(z.enum([…]))`）で選べる個数を、スキーマの`.min()`と`.max()`から導くようにし、`minChecked`をなくしました。`formFields`は配列の`.min()`と`.max()`を、ブラウザで確かめるルール（`DerivedRule`の`minChecked`と`maxChecked`）にします。文言はzodのもので、`formFields`を呼ぶたびに取るので、ロケールにも従います。サーバーではこれまでどおりスキーマが確かめます。`.min()`が1つ以上を求める集まりは、`form.field()`の`required`が`true`になり、ラベルに必須の印を付けられます。`input.required`は付きません。チェックボックスに付けると、そのボックスを必須にする意味になるためです。
+
+  これまでは`.min()`を`dropped`に入れて捨て、ブラウザでも確かめるには`minChecked(field, n, message)`で同じ数をもう一度書く必要がありました。同じ制限が2か所に分かれ、文言も2通りになりました。`.max()`には対になるルールが無く、ブラウザでは確かめられませんでした。
+
+  繰り返し行の中の集まりは、行ごとの名前を指すルールが無いので、個数はサーバーだけで確かめ、`dropped`に載せます。zodから個数の文言が取れない制限（`abort`付きの`.refine()`を先に重ねたときなど）も、理由と一緒に`dropped`に載せます。`.max()`が選択肢の数以上のときは、超えようがないのでルールを作りません。
+
+  移行するときは、`minChecked('tags', 2, '2つ以上選んでください')`を消し、スキーマに`z.array(z.enum([…])).min(2, '2つ以上選んでください')`と書きます。`@k8ordo/form/server`から`minChecked`はimportできなくなりました。
+
+- `form.field()`が返す`input`の型を、スキーマから導く入力欄の種類で分けました。`z.coerce.number()`は`NumberInput`（`type: 'number'`、数の`min`と`max`、必ずある`step`）、`z.boolean()`は`CheckboxInput`、`z.stringbool()`は`StringCheckboxInput`（`value: string`）、`z.file()`は`FileInput`（`defaultValue`なし）です。文字列、`z.enum()`、`.nullable()`や`z.union()`、`.pipe()`を通した欄は、これまでどおり`FieldInput`です。`NumberInput`、`CheckboxInput`、`FileInput`は両方の入口から型をimportできます。
+
+  これまではどの欄も同じ`FieldInput`で、ファイルの欄にも文字列の`defaultValue`が、チェックボックスにも`min`や`maxLength`が型の上で付いていました。受け取る側はそれに合わせて型を広げるしかありませんでした。`parseForm`は、ファイルの欄の名前で文字列が送られてきても（GETのフォームやmultipartでないPOST）、`state.values`に入れなくなりました。
+
+  `StringCheckboxInput`の`value`は省略できない`string`になり、`FieldInput`を土台にしなくなりました。`input`を`FieldInput`と注釈していた変数や引数は、欄の種類の型か`FieldView`の型引数に合わせてください。
+
+- `formFields`が、ネイティブの要素が受け取る属性だけを出すようにしました。ただの文字列の欄（`z.string()`、`z.uuid()`などテキストの入力欄になる書式、`.nullable()`やunionの欄、制約を読めない欄）には`type`を付けません。`type="text"`はブラウザの既定なので、付けなくても同じテキストの入力欄になります。`FieldInput`の`min`と`max`は`number`にしました。`formFields`が書くのはもともと数だけです。
+
+  これまでは`type: 'text'`を書いていたので、`type`の無い`<textarea>`や独自の入力欄は、受け取って捨てるための`type`を持つ必要がありました。`min`と`max`も型の上では文字列になりえて、数の部品が文字列を受けるように広げていました。
+
+  `input.type`を`'text'`と比べていたコードは、`type`が無い欄もテキストの入力欄として扱ってください。
+
+### Patch Changes
+
+- `formFields`、`parseForm`、`useForm`が投げる例外、`console.warn`の文、`dropped[].reason`の文を英語にしました。例外と`console.warn`の文の頭には、呼び出したAPIの名前を付けました（`formFields: 'n': form values arrive as strings, …`）。これまではformだけが日本語で、`[@k8ordo/form]`を頭に付けていました。ほかの`@k8ordo/*`パッケージは英語で書いており、英語のドキュメントを読むエージェントや日本語を読まない利用者は、エラーと`dropped`の理由だけを別の言葉で受け取っていました。
+
+  型は変わりません。例外の文や`dropped[].reason`の文字列と比べているテストや表示は、新しい文に合わせてください。
+
+- ガイドとREADMEの例で、`formFields`を呼ぶ場所を、ページのServer Componentの描画の中の1通りにしました。これまでの最初の例はモジュールのトップレベルで呼び、「1回だけ導く」と書いていました。文言は`formFields`を呼んだときに決まるので、トップレベルで呼ぶと、どのリクエストにも最初に読み込んだときのロケールの文言が出ます。二言語のアプリでは間違った言語のまま、エラーにもなりませんでした。
+
+  `@k8ordo/state`のガイドのGETフォームの例と、`@k8ordo/i18n`のガイドの`@k8ordo/form`の項も同じ書き方にそろえました。モジュールのトップレベルで呼んでいるアプリは、ページの描画の中で`fields={formFields(schema)}`のように呼んでください。
+
+- ガイドに、送信がうまくいったことを知らせる方法の節を足しました。JavaScriptが無くても送れる形を保つなら、Server Actionをそのまま`useActionState`に渡し、`FormState & { accepted?: true }`のように成功の印を足した状態を返して、ページの中に文言を出します。トーストはJavaScriptが前提で、actionをクライアントの関数で包むので、JavaScriptが無いと送れなくなります。検証を通ったあとの失敗は`{ ...parsed.state, formError }`で返すと、送った値と`token`が残り、フォーカスもフォーム全体の文言へ移ります。
+
+  これまでガイドの例は`redirect`だけで、成功を知らせる形が書かれていませんでした。トーストを出すためにactionを包むと、気づかないうちにJavaScriptの無い送信を失っていました。
+
+- ガイドの`@k8ordo/ui`と組む節に、`z.stringbool()`の欄を`Checkbox`や`Switch`に展開したときの`value`の行き先を書きました。`input.value`はそのまま`Checkbox`と`Switch`の`value`になり、チェックしたボックスはスキーマの`true`の文字列を送ります。表の行には`z.stringbool()`がありましたが、`value`がどこへ渡るかは書かれていませんでした。
+
+- 文言を書いていない検証に出るzodの既定の文言を、リクエストのロケールに合わせる書き方を、`@k8ordo/i18n`のガイドの`@k8ordo/form`の項に足しました。zodの設定はプロセスに1つなので、`z.config(z.locales.en())`のように固定すると、二言語のアプリでもどのリクエストにも同じ言語の文言が出ていました。`src/lib/zod-locale.ts`に、`satisfies Variants<…>`で型を付けたロケールごとの表と、`locales.getLocale()`で引く`z.config({ localeError })`を書き、スキーマを書くモジュールの先頭でimportします。ロケールを足して表に書き忘れると型エラーになります。`src/i18n.ts`はブラウザでも読み込まれるので、そこには置きません。
+
+  `@k8ordo/form`のガイドからは、この項へ1文で案内します。
+
 ## 3.0.0
 
 ## 2.3.1

@@ -1,5 +1,70 @@
 # @k8ordo/state
 
+## 4.0.0
+
+### Major Changes
+
+- `defineCookieState`の`cookieValue`をなくし、サーバーから同じCookieを書く`cookie(patch, current)`にしました。返り値は名前と値と属性の組で、`@k8ordo/framework`では`cookies().set(...density.cookie({ density: 'compact' }, cookies()))`と展開して書きます。`patch`は、`current`から`parseCookies`と同じ読み方で読んだ今の値に重ねてからスキーマに通すので、渡さなかったフィールドは訪問者が保存した値のままです。ブラウザの`update()`と同じ書き込みです。属性は、ブラウザのストアと同じ定数から作った`{ path: '/', sameSite: 'lax', maxAge: 34_560_000, httpOnly: false }`です。`migrate`が読めなかったCookieは上書きせず、`migrate`のエラーを`cause`にしたエラーになります。
+
+  これまでの`cookieValue(values)`は、渡さなかったフィールドを既定値で埋めていました。フィールドが2つ以上ある定義では、1つだけを変えるServer Actionが、ほかのフィールドに保存された値を黙って既定値に戻していました。属性は返さなかったので、`{ httpOnly: false, maxAge: 34_560_000 }`を手で写す必要もありました。frameworkの`cookies().set`は既定で`HttpOnly`を付けるので、写し忘れるとブラウザのストアからCookieが見えなくなり、型でも実行時にも何も起きませんでした。
+
+  移行するには、次のように書き換えます。
+
+  - `cookies().set(density.cookieName, density.cookieValue(values), { httpOnly: false, maxAge: 34_560_000 })`は、`cookies().set(...density.cookie(values, cookies()))`にします。
+  - Next.jsでは、`const store = await cookies()`のあとで`store.set(...density.cookie(values, { get: (name) => store.get(name)?.value }))`と書きます。
+  - すべてのフィールドを既定値に戻すために`cookieValue()`や`cookieValue({})`を書いていた箇所は、`cookies().delete(density.cookieName)`でCookieを消します。
+  - テストで値だけが要る箇所は、`density.cookie(values, new Map())[1]`にします。空の`Map`は何も保存していない訪問者です。
+
+- `definePageState`の`href`の第1引数を、ルーターが作ったURLにしました。`@k8ordo/router`（`@k8ordo/framework`）の`href()`が返したURL、Next.jsの`Route`、今のページを指す`''`のどれかを渡します。`href`はそのURLのクエリのうち、この定義の`url`のパラメーターだけを既定値を省いた形で書き直し、ほかのパラメーターは綴りを変えずに残します。`hash`を持つ定義はフラグメントを`values.hash`の値にし（既定値なら外します）、持たない定義は渡したURLのフラグメントを残します。`base`は足しません。
+
+  これまでは、表のパスを受け取ってViteの`base`を足す`href(path)`と、`?`の無いクエリだけを返す`search()`の2通りがありました。`[locale]`のアプリでは、ロケールやidを手で綴るか、`search()`の結果を自分でつなぐことになり、`hash`を持つ定義にはフラグメントを組む手段がありませんでした。ルーターの`href()`が返したURLを渡すと`base`が2重に付くので、渡すなと案内するしかありませんでした。いまは`listState.href(href('/:locale/products'), { page: 2 })`、`productState.href(href('/:locale/products/:id', { id }), { hash: 'reviews' })`の1通りです。パターンの型検査はルーターの`href()`が受け持つので、`Register`、`RegisteredPath`、`search()`をなくしました。`@k8ordo/framework`が生成する`.k8ordo/register.gen.ts`も、`@k8ordo/state`の`Register`を拡張しなくなりました。
+
+  移行するには、次のように書き換えます。
+
+  - `listState.href('/products', values)`は`listState.href(href('/products'), values)`にします。`href`は`@k8ordo/router`か`@k8ordo/framework`から読みます。Viteの`base`はルーターの`href()`が付けます。Next.jsでは`Route`のパスをそのまま渡せます。
+  - `listState.search(values)`は`listState.href('', values)`にします。返り値は`?`付きの`'?page=2'`（既定値だけなら`''`）です。
+  - `` `${deckState.href(path, values)}#${fragment}` ``のようにフラグメントを手でつないでいた箇所は、`hash`の値を`values`に入れて`deckState.href(href(…), { …values, hash })`にします。
+  - `declare module '@k8ordo/state' { interface Register { … } }`と`RegisteredPath`の利用は消します。
+
+- `resetStateRegistry`を、本体の`@k8ordo/state`からテスト用の入り口`@k8ordo/state/testing`に移しました。テストでしか使わない関数が、アプリがimportする本体から出ていて、同じテスト用の`mountPageUrl`とは別の入り口に分かれていました。`mountPageUrl`の後始末も`resetStateRegistry`を呼ぶので、2つを同じ入り口にそろえました。
+
+  移行するには、`import { resetStateRegistry } from '@k8ordo/state'`を`import { resetStateRegistry } from '@k8ordo/state/testing'`に書き換えます。Storybookの`preview`で呼んでいる場合も同じです。
+
+### Minor Changes
+
+- `defineCookieState`の`parseCookies`が、`ReadonlyMap`に限らず、Cookieの名前からパーセントデコードした値を返す`get`を持つものを受け取るようにしました。`@k8ordo/framework`のserverモードでは、ページの`request.cookies`に加えて、`guard.ts`と`route.ts`とServer Actionの`cookies()`をそのまま渡せます。Next.jsの`cookies()`は`get`が`{ name, value }`を返すので、`parseCookies({ get: (name) => store.get(name)?.value })`と書きます。
+
+  これまでは`ReadonlyMap`しか受け取らず、guardやServer Actionで同じCookieの状態を読むには、`cookies()`から`Map`を自分で作る必要がありました。
+
+### Patch Changes
+
+- ガイドとREADMEの例で、`formFields`を呼ぶ場所を、ページのServer Componentの描画の中の1通りにしました。これまでの最初の例はモジュールのトップレベルで呼び、「1回だけ導く」と書いていました。文言は`formFields`を呼んだときに決まるので、トップレベルで呼ぶと、どのリクエストにも最初に読み込んだときのロケールの文言が出ます。二言語のアプリでは間違った言語のまま、エラーにもなりませんでした。
+
+  `@k8ordo/state`のガイドのGETフォームの例と、`@k8ordo/i18n`のガイドの`@k8ordo/form`の項も同じ書き方にそろえました。モジュールのトップレベルで呼んでいるアプリは、ページの描画の中で`fields={formFields(schema)}`のように呼んでください。
+
+- CSPのリファレンスに、アプリ自身の「最初の描画の前に動くスクリプト」の書き方を足しました。`@k8ordo/state`の`inlineRead()`で値を読むスクリプトは、ルートレイアウトに`<script>`で直接書くと、本文がすべてのページのペイロードに入ります。serverモードでnonceのポリシーを敷くと拒まれ、staticモードではハッシュが要ります。`@k8ordo/color-scheme`の`ColorSchemeScript`と同じく、nonceをpropsで受け取る小さな`'use client'`のコンポーネントにし、serverモードでは`nonce()`を渡し、staticモードでは同じ本文のハッシュを`csp`に書く形を示しました。
+
+  `@k8ordo/state`のガイドの「Reading before hydration」からは、この項へ1文で案内します。
+
+- `@k8ordo/framework`のガイドに「Preferences」の節を足し、訪問者の設定をどこに置くかを3つの規則にまとめました。見た目だけを変える設定は`defineLocalState`に置き、`inlineRead()`のインラインスクリプトで描く前に当てます。サーバーが値で応答を変える設定は、serverモードで`defineCookieState`に置き、`parseCookies`で読み、`cookie(patch, current)`か`update()`で書きます。言語の選択は素のCookieに置き、`negotiateRequest`の`chosen`に渡します。`@k8ordo/state`の例で密度をCookieに置いているのは、JavaScriptの無いフォームで変え、それを受けるServer ActionがCookieにしか書けないからだと、2つ目の規則に書きました。
+
+  これまでは、`@k8ordo/color-scheme`のガイドが表示の設定をlocalStorageに置くよう勧め、`@k8ordo/state`のガイドとexampleは密度をCookieに置いていて、どちらを選ぶかの基準がありませんでした。`@k8ordo/state`、`@k8ordo/color-scheme`、`@k8ordo/i18n`のガイドからは、この節へ1文で案内します。docsサイトでは、frameworkの`request`のページに同じ節を足し、stateのCookieとcolor-schemeの保存先のページから案内します。
+
+  `request`を読む例（`references/guards.md`）は、素の`theme`のCookieから`data-theme`を、`Accept-Language`から`<html lang>`を書いていて、この規則と`getLocale()`で`lang`を書く決まりの両方に反していました。Cookieの状態を`parseCookies(request.cookies)`で読んで`initialCookie`に渡し、ヘッダーは`Sec-GPC`を読む例に書き換えました。
+
+- `useAppState`の`initialUrl`と`initialCookie`に`undefined`を渡せるようにしました。`undefined`は渡さなかったときと同じで、サーバーとブラウザで共用する部品が受け取ったpropsをそのまま渡せます。
+
+  これまでは型が`undefined`を受けず、`exactOptionalPropertyTypes`を有効にしたプロジェクトでは、値が無いときにオプションごと三項演算子で分ける必要がありました。実行時の扱いは変わりません。
+
+- `defineLocalState`と`defineCookieState`の`migrate`が例外を投げたとき、その例外を知らせ、保存した値を`update()`で上書きしないようにしました。
+
+  これまでは例外をどこにも出さずに既定値で読んでいたので、`migrate`に誤りがあると、全員の設定が既定値に戻ったように見えるだけでした。いまはブラウザのストアが同じ値につき1度`reportError`に渡すので、`window`の`error`イベントやエラー監視に届きます。サーバーの`parseCookies`は、キーを添えて`console.error`に出します。
+
+  また、`migrate`が読めなかった行も、最初の`update()`が「既定値＋変えた値」で上書きしていました。ガイドの「行はそのまま残り、直した`migrate`がやり直せる」という約束に反していました。いまはその行を読んだ書き込みは何も書かず、`update()`のハンドルを同じ例外でrejectします。変えた値は、別のタブからの知らせでその行を読み直しても既定値に戻らず、次の読み込みまでメモリに残ります。localStorageとCookieのどちらも同じです。
+
+- Updated dependencies:
+  - @k8ordo/router@4.0.0
+
 ## 3.0.0
 
 ### Minor Changes

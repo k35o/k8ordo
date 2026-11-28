@@ -1,5 +1,17 @@
 # docs
 
+## 0.0.14
+
+### Patch Changes
+
+- Updated dependencies:
+  - @k8ordo/color-scheme@4.0.0
+  - @k8ordo/form@4.0.0
+  - @k8ordo/i18n@4.0.0
+  - @k8ordo/router@4.0.0
+  - @k8ordo/state@4.0.0
+  - @k8ordo/ui@4.0.0
+
 ## 0.0.13
 
 ### Patch Changes

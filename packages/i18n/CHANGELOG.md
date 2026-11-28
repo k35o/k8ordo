@@ -1,5 +1,67 @@
 # @k8ordo/i18n
 
+## 4.0.0
+
+### Major Changes
+
+- `localize(pathname, locale)`が、先頭の区間が集合のロケールならそれを置き換えるようにしました。`localize('/ja/ui', 'en')`は`/en/ui`です。先頭がロケールでなければ、これまでどおり区間を付けます（`/ui`は`/en/ui`、`/fr/ui`は`/en/fr/ui`）。
+
+  これまでは区間がすでにあるかを確かめず、`localize('/ja/ui', 'en')`は`/ja/en/ui`というどのページにも当たらないURLになっていました。言語の切り替えでは、`usePathname()`の値を`delocalize`に通してから渡す必要がありました。いまは`withBase(locales.localize(usePathname(), locale))`で、今のページの別の言語へのURLになります。
+
+  移行するには、`locales.localize(locales.delocalize(pathname).pathname, locale)`を`locales.localize(pathname, locale)`にします。前の書き方も同じ結果になるので、そのままでも動きます。ロケールの区間が2つ並ぶURLを意図して作っていたコードは、文字列を自分で組み立ててください。
+
+- ロケールの集合が定義されていないところで文言を呼ぶと、`message: no locale set is defined here`のエラーになるようにしました。これまでは最初に書いた文を返していました。集合が無いとURLの区間がロケールかどうかも既定のロケールも決まらないので、`/en/…`でも`defineLocales`の`default`でもない言語を、エラーにならないまま描いていました。
+
+  `@k8ordo/framework`のアプリでは、`src/i18n.ts`がブラウザでもサーバーでも、どのルートのファイルより先に読まれるので、何も変えなくてかまいません。`currentLocale()`は今までどおり、集合が無ければ`null`を返します。
+
+  移行するには、次のように書き換えます。
+
+  - アプリのコンポーネントや文言を呼ぶVitestのテストは、`setupFiles`に挙げたファイルの先頭で`import './src/i18n';`のように集合を定義するモジュールを読み込みます。
+  - Storybookは、`.storybook/preview.tsx`の先頭で同じモジュールを読み込みます。
+  - `@k8ordo/framework`の外のアプリは、集合を定義するモジュールを、サーバーとブラウザの両方で文言より先に読み込みます。ブラウザでは、ルートが描くClient Componentからimportします。
+
+- `negotiateRequest`の`cookie`オプションをなくし、訪問者が前に選んだ言語の値を受け取る`chosen`にしました。`@k8ordo/framework`のguardでは`locales.negotiateRequest(request, { chosen: cookies().get('locale') })`と書きます。`chosen`は`Accept-Language`より先に使われ、`null`と`undefined`は選択が無いものとして扱います。1つ目の引数は`headers`を持つものなら何でもよく、`Request`のほか、ページが受け取る`request`も渡せます。
+
+  これまでは`cookie`にCookieの名前を渡すと、`@k8ordo/i18n`が`Cookie`ヘッダーから生の値を読んでいました。値がタグそのままのCookieしか読めず、`@k8ordo/state`の`defineCookieState`のようにJSONで書くCookieや、ログインした訪問者のプロフィールの言語は渡せませんでした。いまは選択をどこに置くかをアプリが決め、`@k8ordo/i18n`はCookieを読みません。
+
+  移行するには、次のように書き換えます。
+
+  - `locales.negotiateRequest(request, { cookie: 'locale' })`は、`locales.negotiateRequest(request, { chosen: cookies().get('locale') })`にします。`cookies()`は`@k8ordo/framework/server`から読みます。framework以外のサーバーでは、自分でCookieを読んで値を渡します。
+  - 言語の切り替えで`cookieStore.set`するCookieは、これまでどおりで変わりません。
+  - `NegotiateRequestOptions`の`cookie`を参照している型は`chosen`にします。
+
+### Minor Changes
+
+- `locales.negotiate`が、リストの`null`と`undefined`を読み飛ばすようにしました。BCP 47ではないタグと同じ扱いです。ブラウザで、Cookieに覚えた選択を`navigator.languages`の前に並べるときは、`locales.negotiate([saved?.value, ...navigator.languages])`と書けます。
+
+  これまでは各要素に`toLowerCase()`を呼んでいたので、`undefined`が混ざるとエラーになりました。選択がまだ無いときに備えて、`[...(saved?.value === undefined ? [] : [saved.value]), ...navigator.languages]`のように条件つきで展開する必要がありました。
+
+### Patch Changes
+
+- ガイドとREADMEの例で、`formFields`を呼ぶ場所を、ページのServer Componentの描画の中の1通りにしました。これまでの最初の例はモジュールのトップレベルで呼び、「1回だけ導く」と書いていました。文言は`formFields`を呼んだときに決まるので、トップレベルで呼ぶと、どのリクエストにも最初に読み込んだときのロケールの文言が出ます。二言語のアプリでは間違った言語のまま、エラーにもなりませんでした。
+
+  `@k8ordo/state`のガイドのGETフォームの例と、`@k8ordo/i18n`のガイドの`@k8ordo/form`の項も同じ書き方にそろえました。モジュールのトップレベルで呼んでいるアプリは、ページの描画の中で`fields={formFields(schema)}`のように呼んでください。
+
+- `@k8ordo/framework`のガイドに「Preferences」の節を足し、訪問者の設定をどこに置くかを3つの規則にまとめました。見た目だけを変える設定は`defineLocalState`に置き、`inlineRead()`のインラインスクリプトで描く前に当てます。サーバーが値で応答を変える設定は、serverモードで`defineCookieState`に置き、`parseCookies`で読み、`cookie(patch, current)`か`update()`で書きます。言語の選択は素のCookieに置き、`negotiateRequest`の`chosen`に渡します。`@k8ordo/state`の例で密度をCookieに置いているのは、JavaScriptの無いフォームで変え、それを受けるServer ActionがCookieにしか書けないからだと、2つ目の規則に書きました。
+
+  これまでは、`@k8ordo/color-scheme`のガイドが表示の設定をlocalStorageに置くよう勧め、`@k8ordo/state`のガイドとexampleは密度をCookieに置いていて、どちらを選ぶかの基準がありませんでした。`@k8ordo/state`、`@k8ordo/color-scheme`、`@k8ordo/i18n`のガイドからは、この節へ1文で案内します。docsサイトでは、frameworkの`request`のページに同じ節を足し、stateのCookieとcolor-schemeの保存先のページから案内します。
+
+  `request`を読む例（`references/guards.md`）は、素の`theme`のCookieから`data-theme`を、`Accept-Language`から`<html lang>`を書いていて、この規則と`getLocale()`で`lang`を書く決まりの両方に反していました。Cookieの状態を`parseCookies(request.cookies)`で読んで`initialCookie`に渡し、ヘッダーは`Sec-GPC`を読む例に書き換えました。
+
+- ガイドに「Adding a locale」の節を足し、ロケールを足すときに書き足す場所を1か所にまとめました。`src/i18n.ts`の集合に足す、そのロケールの文を持たない`message()`が型エラーになる、`@k8ordo/ui`が同梱しないロケールなら`registerMessages`に`Messages`型の辞書を渡す（`en`を展開すれば、訳していないキーは英語のまま）、zodの既定の文言の表があればそれも足す、の4つです。`[locale]`のスキーマ、言語の選択、`localize`、静的ビルドの`paths.ts`、`<html lang dir>`は集合から読むので、書き足すものはありません。docsサイトの`/i18n/locales`にも同じ節を足しました。
+
+- ガイドのserverモードの`/`の例を、`redirect(href('/:locale', { locale }))`で書くようにしました。`@k8ordo/framework`の`guard.ts`は`redirect()`を受けるようになったので、`Location`を手で付けた`307`の`Response`を組む書き方と、`withBase`で`base`を付け直す説明をなくしました。URLはリンクと同じく`href`が作り、Viteの`base`も付きます。
+
+- 文言を書いていない検証に出るzodの既定の文言を、リクエストのロケールに合わせる書き方を、`@k8ordo/i18n`のガイドの`@k8ordo/form`の項に足しました。zodの設定はプロセスに1つなので、`z.config(z.locales.en())`のように固定すると、二言語のアプリでもどのリクエストにも同じ言語の文言が出ていました。`src/lib/zod-locale.ts`に、`satisfies Variants<…>`で型を付けたロケールごとの表と、`locales.getLocale()`で引く`z.config({ localeError })`を書き、スキーマを書くモジュールの先頭でimportします。ロケールを足して表に書き忘れると型エラーになります。`src/i18n.ts`はブラウザでも読み込まれるので、そこには置きません。
+
+  `@k8ordo/form`のガイドからは、この項へ1文で案内します。
+
+- ガイドで、ルートレイアウトの`<html lang dir>`を`locales.getLocale()`から書く1通りにしました。これまでは`locales.delocalize(pathname).locale ?? locales.default`で書き、`getLocale()`も同じ結果になると説明していました。`not-found.tsx`を`[locale]`より上に置いたアプリの404では、`delocalize`はURLのロケールを、文言は既定のロケールを読むので、`<html lang>`と本文の言語が食い違っていました。`getLocale()`は文言と同じロケールを返します。
+
+  静的なホストの`404.html`については、`not-found.tsx`が描くClient Componentのeffectで、`lang`と`dir`を`getLocale()`から書き直す例を足しました。ルートレイアウトはServer Componentなので、ブラウザでは描き直されません。
+
+  `delocalize(pathname)`で`<html lang>`を書いているアプリは、`const locale = locales.getLocale();`に置き換えられます。ルートレイアウトが`pathname`をほかに使わなければ、受け取らなくてかまいません。
+
 ## 3.0.0
 
 ### Major Changes
